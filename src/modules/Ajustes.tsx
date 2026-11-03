@@ -2,9 +2,9 @@ import { useRef, useState, type ChangeEvent } from 'react';
 import { useStore } from '../store';
 import { remove } from '../actions';
 import { emptyData, normalize } from '../data';
-import type { Category } from '../types';
+import type { Category, Theme } from '../types';
 import { formatDMY, toISO, todayISO } from '../utils';
-import { CategoryBadge, Icon, IconButton, PageHeader } from '../ui';
+import { CategoryBadge, Icon, IconButton, PageHeader, Segmented } from '../ui';
 import { CategorySheet } from './financas/CategorySheet';
 
 export function Ajustes() {
@@ -53,7 +53,7 @@ export function Ajustes() {
 
   function clearAll() {
     if (confirm('Apagar TODOS os dados deste aparelho? Isso não pode ser desfeito. Exporte um backup antes, se quiser.')) {
-      replace(normalize(emptyData()));
+      replace({ ...normalize(emptyData()), settings: { ...normalize(emptyData()).settings, theme: data.settings.theme } });
       setMessage({ tone: 'green', text: 'Todos os dados foram apagados.' });
     }
   }
@@ -70,13 +70,32 @@ export function Ajustes() {
 
   return (
     <>
-      <PageHeader title="Ajustes" subtitle="Categorias, backup e dados" />
+      <PageHeader title="Configurações" subtitle="Aparência, categorias, backup e dados" />
 
       {message && (
         <div className={`alert ${message.tone}`} role="status">
           {message.text}
         </div>
       )}
+
+      <section className="card">
+        <div className="card-head">
+          <h2>Aparência</h2>
+        </div>
+        <Segmented<Theme>
+          label="Tema"
+          value={data.settings.theme}
+          onChange={(theme) => update((d) => ({ ...d, settings: { ...d.settings, theme } }))}
+          options={[
+            { value: 'dark', label: 'Escuro' },
+            { value: 'light', label: 'Claro' },
+            { value: 'system', label: 'Automático' },
+          ]}
+        />
+        <p className="muted small" style={{ marginTop: 10 }}>
+          {data.settings.theme === 'system' ? 'Segue o tema do celular ou computador.' : 'Vale para todas as telas do app.'}
+        </p>
+      </section>
 
       <section className="card">
         <div className="card-head">

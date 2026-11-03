@@ -1,5 +1,6 @@
 import { useEffect, useState, type ComponentType } from 'react';
 import { useStore } from './store';
+import type { Theme } from './types';
 import { go, useRoute, type Route } from './router';
 import { Icon, Sheet, type IconName } from './ui';
 import { NAV_GROUPS, SETTINGS_ITEM, type NavItem } from './nav';
@@ -24,17 +25,21 @@ interface Section {
   view: ComponentType<ViewProps>;
   /** Ação do botão "+" nesta tela. */
   fab?: string;
+  /** Título na barra superior (padrão: label). */
+  title?: string;
+  /** Ação da lupa na barra superior (padrão: busca em tudo). */
+  search?: string;
 }
 
 export const SECTIONS: Section[] = [
-  { path: 'inicio', label: 'Início', icon: 'home', view: Dashboard, fab: 'rapido' },
+  { path: 'inicio', label: 'Início', icon: 'home', view: Dashboard, fab: 'rapido', title: 'Central Pessoal' },
   { path: 'financas', label: 'Finanças', icon: 'wallet', view: Financas, fab: 'financas/nova' },
-  { path: 'diario', label: 'Diário', icon: 'journal', view: Diario, fab: 'diario/nova' },
+  { path: 'diario', label: 'Diário', icon: 'journal', view: Diario, fab: 'diario/nova', title: 'Meu diário', search: 'diario/buscar' },
   { path: 'agenda', label: 'Agenda', icon: 'calendar', view: Agenda, fab: 'rapido' },
   { path: 'mais', label: 'Mais', icon: 'grid', view: Mais },
   { path: 'nucleo', label: 'Núcleo pessoal', icon: 'target', view: Habitos },
   { path: 'arquivo', label: 'Arquivo geral', icon: 'archive', view: Notas, fab: 'arquivo/nova' },
-  { path: 'ajustes', label: 'Ajustes', icon: 'sliders', view: Ajustes },
+  { path: 'ajustes', label: 'Configurações', icon: 'settings', view: Ajustes },
 ];
 
 const TABS = ['inicio', 'financas', 'diario', 'agenda', 'mais'];
@@ -98,8 +103,32 @@ function NavMenu({ current, onNavigate }: { current: string; onNavigate?: () => 
   );
 }
 
+const THEME_COLOR = { dark: '#000000', light: '#f4f5f7' };
+
+/** Aplica o tema escolhido em Ajustes (e guarda uma cópia para abrir já no tema certo). */
+function useTheme(theme: Theme) {
+  useEffect(() => {
+    const root = document.documentElement;
+    root.dataset.theme = theme;
+    try {
+      localStorage.setItem('central-pessoal:theme', theme);
+    } catch {
+      /* ignora */
+    }
+    const media = window.matchMedia('(prefers-color-scheme: light)');
+    const paint = () => {
+      const effective = theme === 'system' ? (media.matches ? 'light' : 'dark') : theme;
+      document.querySelector('meta[name="theme-color"]')?.setAttribute('content', THEME_COLOR[effective]);
+    };
+    paint();
+    media.addEventListener('change', paint);
+    return () => media.removeEventListener('change', paint);
+  }, [theme]);
+}
+
 export function App() {
-  const { saveError } = useStore();
+  const { data, saveError } = useStore();
+  useTheme(data.settings.theme);
   const route = useRoute();
   const section = SECTIONS.find((s) => s.path === route.path) ?? SECTIONS[0];
   const View = section.view;
@@ -117,7 +146,7 @@ export function App() {
   }, [drawer]);
 
   useEffect(() => {
-    document.title = section.path === 'inicio' ? 'Central Pessoal' : `${section.label} · Central Pessoal`;
+    document.title = section.path === 'inicio' ? 'Central Pessoal' : `${section.title ?? section.label} · Central Pessoal`;
   }, [section]);
 
   function fab() {
@@ -131,10 +160,8 @@ export function App() {
         <button type="button" className="icon-btn" onClick={() => setDrawer(true)} aria-label="Abrir menu">
           <Icon name="menu" />
         </button>
-        <a className="topbar-title" href="#/inicio">
-          Central Pessoal
-        </a>
-        <button type="button" className="icon-btn" onClick={() => setSearch(true)} aria-label="Buscar em tudo">
+        <h1 className="topbar-title">{section.title ?? section.label}</h1>
+        <button type="button" className="icon-btn" onClick={() => (section.search ? go(section.search) : setSearch(true))} aria-label={section.search ? 'Buscar no diário' : 'Buscar em tudo'}>
           <Icon name="search" />
         </button>
       </header>

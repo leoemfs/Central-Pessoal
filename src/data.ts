@@ -29,7 +29,7 @@ export function emptyData(): AppData {
     series: [],
     cards: [],
     categories: [],
-    settings: { seededCategories: false, lastBackupAt: null },
+    settings: { theme: 'dark', seededCategories: false, lastBackupAt: null },
     deleted: {},
     legacy: {},
   };
@@ -66,6 +66,8 @@ export function normalize(raw: unknown): AppData {
     cards: list(r.cards),
     categories: list(r.categories),
     settings: {
+      // Só a versão 2 tem tema escolhido pelo usuário; o protótipo começa no escuro.
+      theme: r.version === 2 && (settings.theme === 'light' || settings.theme === 'system') ? settings.theme : 'dark',
       seededCategories: settings.seededCategories === true,
       lastBackupAt: typeof settings.lastBackupAt === 'string' ? settings.lastBackupAt : null,
     },

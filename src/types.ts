@@ -124,7 +124,10 @@ export interface ExpenseSeries {
   createdAt: string;
 }
 
+export type Theme = 'dark' | 'light' | 'system';
+
 export interface Settings {
+  theme: Theme;
   seededCategories: boolean;
   lastBackupAt: string | null;
 }

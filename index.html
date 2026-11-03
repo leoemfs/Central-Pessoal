@@ -9,6 +9,9 @@
     <link rel="apple-touch-icon" href="./icon-192.png" />
     <link rel="manifest" href="./manifest.webmanifest" />
     <title>Central Pessoal</title>
+    <script>
+      try { document.documentElement.dataset.theme = localStorage.getItem('central-pessoal:theme') || 'dark'; } catch (e) { document.documentElement.dataset.theme = 'dark'; }
+    </script>
   </head>
   <body>
     <div id="root"></div>

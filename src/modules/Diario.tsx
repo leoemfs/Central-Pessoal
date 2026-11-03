@@ -41,7 +41,14 @@ export function Diario({ route }: ViewProps) {
   const [query, setQuery] = useState('');
   const [open, setOpen] = useState<Set<string> | null>(null);
 
-  useSubAction(route, 'diario', { nova: () => setEditing('new') });
+  useSubAction(route, 'diario', {
+    nova: () => setEditing('new'),
+    buscar: () => {
+      setSearching(true);
+      setQuery('');
+      setOpen(null);
+    },
+  });
 
   const sorted = useMemo(() => [...data.journal].sort((a, b) => b.createdAt.localeCompare(a.createdAt)), [data.journal]);
   const q = query.trim().toLowerCase();
@@ -68,7 +75,7 @@ export function Diario({ route }: ViewProps) {
 
   return (
     <>
-      <header className="page-header">
+      <header className="page-header desktop-only">
         <h1>Meu diário</h1>
         <IconButton
           icon={searching ? 'x' : 'search'}
@@ -85,6 +92,19 @@ export function Diario({ route }: ViewProps) {
         <label className="search">
           <Icon name="search" size={18} />
           <input autoFocus placeholder="Buscar em todos os registros" value={query} onChange={(e) => setQuery(e.target.value)} aria-label="Buscar no diário" />
+          <button
+            type="button"
+            className="icon-btn"
+            aria-label="Fechar busca"
+            onClick={(e) => {
+              e.preventDefault();
+              setSearching(false);
+              setQuery('');
+              setOpen(null);
+            }}
+          >
+            <Icon name="x" size={18} />
+          </button>
         </label>
       ) : (
         <div className="feed-head">

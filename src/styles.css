@@ -25,11 +25,73 @@
   --radius: 20px;
   --radius-md: 14px;
   --radius-sm: 10px;
+  --bar-bg: rgb(0 0 0 / 0.9);
+  --tabbar-bg: rgb(28 28 30 / 0.94);
+  --on-green: #04130a;
+  --shadow: none;
   --sidebar-w: 248px;
   --tabbar-h: 64px;
   font-family: Roboto, Inter, system-ui, -apple-system, 'Segoe UI', sans-serif;
   font-size: 16px;
   line-height: 1.45;
+}
+
+/* Tema claro: mesmos cards, mesmo layout e mesmo verde — só fundo e texto mudam. */
+:root[data-theme='light'] {
+  color-scheme: light;
+  --bg: #f4f5f7;
+  --surface: #ffffff;
+  --raised: #f0f1f4;
+  --raised-2: #e4e6ea;
+  --border: #e2e4e8;
+  --border-strong: #cdd1d7;
+  --text: #111316;
+  --muted: #5b6270;
+  --faint: #8a919c;
+  --green: #22c55e;
+  --green-text: #15803d;
+  --green-soft: rgb(34 197 94 / 0.14);
+  --orange: #f97316;
+  --orange-text: #c2410c;
+  --orange-soft: rgb(249 115 22 / 0.13);
+  --red: #ef4444;
+  --red-text: #b91c1c;
+  --red-soft: rgb(239 68 68 / 0.12);
+  --blue: #3b82f6;
+  --blue-text: #1d4ed8;
+  --blue-soft: rgb(59 130 246 / 0.12);
+  --bar-bg: rgb(255 255 255 / 0.92);
+  --tabbar-bg: rgb(255 255 255 / 0.96);
+  --shadow: 0 1px 2px rgb(16 24 40 / 0.05), 0 1px 3px rgb(16 24 40 / 0.07);
+}
+@media (prefers-color-scheme: light) {
+  :root[data-theme='system'] {
+    color-scheme: light;
+    --bg: #f4f5f7;
+    --surface: #ffffff;
+    --raised: #f0f1f4;
+    --raised-2: #e4e6ea;
+    --border: #e2e4e8;
+    --border-strong: #cdd1d7;
+    --text: #111316;
+    --muted: #5b6270;
+    --faint: #8a919c;
+    --green: #22c55e;
+    --green-text: #15803d;
+    --green-soft: rgb(34 197 94 / 0.14);
+    --orange: #f97316;
+    --orange-text: #c2410c;
+    --orange-soft: rgb(249 115 22 / 0.13);
+    --red: #ef4444;
+    --red-text: #b91c1c;
+    --red-soft: rgb(239 68 68 / 0.12);
+    --blue: #3b82f6;
+    --blue-text: #1d4ed8;
+    --blue-soft: rgb(59 130 246 / 0.12);
+    --bar-bg: rgb(255 255 255 / 0.92);
+    --tabbar-bg: rgb(255 255 255 / 0.96);
+    --shadow: 0 1px 2px rgb(16 24 40 / 0.05), 0 1px 3px rgb(16 24 40 / 0.07);
+  }
 }
 
 *,
@@ -134,7 +196,7 @@ button {
   display: flex;
   height: calc(var(--tabbar-h) + env(safe-area-inset-bottom));
   padding: 6px 6px env(safe-area-inset-bottom);
-  background: rgb(10 10 11 / 0.92);
+  background: var(--tabbar-bg);
   backdrop-filter: blur(12px);
   border-top: 1px solid var(--border);
 }
@@ -168,7 +230,7 @@ button {
   display: grid;
   place-items: center;
   background: var(--green);
-  color: #04130a;
+  color: var(--on-green);
   box-shadow: 0 8px 24px rgb(34 197 94 / 0.3);
 }
 .fab:active {
@@ -315,6 +377,7 @@ button {
   border-radius: var(--radius);
   padding: 18px;
   min-width: 0;
+  box-shadow: var(--shadow);
 }
 .card.raised {
   background: var(--raised);
@@ -452,7 +515,7 @@ button {
 .btn.primary {
   background: var(--green);
   border-color: var(--green);
-  color: #04130a;
+  color: var(--on-green);
 }
 .btn.primary:hover {
   filter: brightness(1.08);
@@ -577,7 +640,7 @@ select.input {
 }
 input[type='date'].input,
 input[type='time'].input {
-  color-scheme: dark;
+  color-scheme: inherit;
 }
 .input.money {
   font-variant-numeric: tabular-nums;
@@ -912,7 +975,7 @@ button.row {
   border-radius: 8px;
   border: 2px solid var(--border-strong);
   background: transparent;
-  color: #04130a;
+  color: var(--on-green);
   padding: 0;
 }
 .check.on {
@@ -1628,7 +1691,7 @@ button.row {
 }
 .cal-day.today .cal-num {
   background: var(--green);
-  color: #04130a;
+  color: var(--on-green);
 }
 .cal-marks {
   display: flex;
@@ -1859,7 +1922,7 @@ button.row {
   gap: 6px;
   height: 56px;
   padding: 0 8px;
-  background: rgb(0 0 0 / 0.9);
+  background: var(--bar-bg);
   backdrop-filter: blur(12px);
   border-bottom: 1px solid var(--border);
 }
@@ -1980,7 +2043,8 @@ button.row {
     padding: 6px;
     border-radius: 22px;
     border: 1px solid var(--border);
-    background: rgb(28 28 30 / 0.94);
+    background: var(--tabbar-bg);
+    box-shadow: var(--shadow);
   }
   .fab {
     bottom: calc(var(--tabbar-h) + 24px + env(safe-area-inset-bottom));
@@ -2063,4 +2127,38 @@ button.row {
 .split-bar span {
   flex-basis: 0;
   min-width: 4px;
+}
+
+/* ---------- v0.4: título da aba na barra superior ---------- */
+
+.topbar-title {
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+@media (max-width: 899px) {
+  /* O título da página já aparece na barra superior: libera espaço no conteúdo. */
+  .page-header:not(.hero) h1,
+  .desktop-only {
+    display: none;
+  }
+  .page-header:not(.hero) .page-title:not(:has(p)) {
+    display: none;
+  }
+  .page-header:not(.hero) .page-actions {
+    width: 100%;
+  }
+  .page-header:not(.hero) .month-nav {
+    width: 100%;
+    justify-content: space-between;
+  }
+}
+.search .icon-btn {
+  width: 34px;
+  height: 34px;
+  margin-right: -8px;
+}
+.entry.open {
+  box-shadow: var(--shadow);
 }
