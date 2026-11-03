@@ -1,8 +1,9 @@
 import { useEffect, useState, type ComponentType } from 'react';
 import { useStore } from './store';
 import type { Theme } from './types';
-import { go, useRoute, type Route } from './router';
-import { Icon, Sheet, type IconName } from './ui';
+import { go, goReplace, useRoute, type Route } from './router';
+import { Icon, Sheet, useBackToClose, type IconName } from './ui';
+import { formatLongDate, todayISO } from './utils';
 import { NAV_GROUPS, SETTINGS_ITEM, type NavItem } from './nav';
 import { SearchSheet } from './Search';
 import { Dashboard } from './modules/Dashboard';
@@ -32,12 +33,12 @@ interface Section {
 }
 
 export const SECTIONS: Section[] = [
-  { path: 'inicio', label: 'Início', icon: 'home', view: Dashboard, fab: 'rapido', title: 'Central Pessoal' },
+  { path: 'inicio', label: 'Início', icon: 'home', view: Dashboard, fab: 'rapido' },
   { path: 'financas', label: 'Finanças', icon: 'wallet', view: Financas, fab: 'financas/nova' },
   { path: 'diario', label: 'Diário', icon: 'journal', view: Diario, fab: 'diario/nova', title: 'Meu diário', search: 'diario/buscar' },
-  { path: 'agenda', label: 'Agenda', icon: 'calendar', view: Agenda, fab: 'rapido' },
+  { path: 'agenda', label: 'Agenda', icon: 'calendar', view: Agenda, fab: 'agenda/novo' },
   { path: 'mais', label: 'Mais', icon: 'grid', view: Mais },
-  { path: 'nucleo', label: 'Núcleo pessoal', icon: 'target', view: Habitos },
+  { path: 'nucleo', label: 'Núcleo pessoal', icon: 'target', view: Habitos, fab: 'nucleo/novo' },
   { path: 'arquivo', label: 'Arquivo geral', icon: 'archive', view: Notas, fab: 'arquivo/nova' },
   { path: 'ajustes', label: 'Configurações', icon: 'settings', view: Ajustes },
 ];
@@ -71,7 +72,18 @@ function NavLink({ s, active }: { s: Section; active: boolean }) {
 function NavMenu({ current, onNavigate }: { current: string; onNavigate?: () => void }) {
   const item = (it: NavItem) =>
     it.to ? (
-      <a href={`#/${it.to}`} className={it.section === current ? 'active' : ''} aria-current={it.section === current ? 'page' : undefined} onClick={onNavigate}>
+      <a
+        href={`#/${it.to}`}
+        className={it.section === current ? 'active' : ''}
+        aria-current={it.section === current ? 'page' : undefined}
+        onClick={(e) => {
+          if (!onNavigate) return;
+          // Navega antes de fechar o menu, para o "voltar" não desfazer a navegação.
+          e.preventDefault();
+          go(it.to!);
+          onNavigate();
+        }}
+      >
         <Icon name={it.icon} />
         <span>{it.label}</span>
       </a>
@@ -101,6 +113,43 @@ function NavMenu({ current, onNavigate }: { current: string; onNavigate?: () => 
       </div>
     </div>
   );
+}
+
+function Drawer({ current, onClose }: { current: string; onClose: () => void }) {
+  useBackToClose(onClose);
+  return (
+    <div className="drawer-backdrop" onMouseDown={(e) => e.target === e.currentTarget && onClose()}>
+      <nav className="drawer" aria-label="Menu">
+        <div className="drawer-head">
+          <strong>Central Pessoal</strong>
+          <button type="button" className="icon-btn" onClick={onClose} aria-label="Fechar menu">
+            <Icon name="x" />
+          </button>
+        </div>
+        <NavMenu current={current} onNavigate={onClose} />
+      </nav>
+    </div>
+  );
+}
+
+/** Barra superior que some ao rolar para baixo e volta ao rolar para cima. */
+function useHideOnScroll(resetKey: string): boolean {
+  const [hidden, setHidden] = useState(false);
+  useEffect(() => setHidden(false), [resetKey]);
+  useEffect(() => {
+    let last = window.scrollY;
+    const onScroll = () => {
+      const y = window.scrollY;
+      const delta = y - last;
+      if (y < 64) setHidden(false);
+      else if (delta > 8) setHidden(true);
+      else if (delta < -8) setHidden(false);
+      if (Math.abs(delta) > 8) last = y;
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
+  return hidden;
 }
 
 const THEME_COLOR = { dark: '#000000', light: '#f4f5f7' };
@@ -135,6 +184,7 @@ export function App() {
   const [quickOpen, setQuickOpen] = useState(false);
   const [drawer, setDrawer] = useState(false);
   const [search, setSearch] = useState(false);
+  const barHidden = useHideOnScroll(`${section.path}:${route.n}`);
   const tabActive = TABS.includes(section.path) ? section.path : 'mais';
   const byPath = (p: string) => SECTIONS.find((s) => s.path === p)!;
 
@@ -151,17 +201,17 @@ export function App() {
 
   function fab() {
     if (section.fab === 'rapido') setQuickOpen(true);
-    else if (section.fab) go(section.fab);
+    else if (section.fab) goReplace(section.fab);
   }
 
   return (
     <div className="shell">
-      <header className="topbar">
+      <header className={`topbar${barHidden ? ' hidden' : ''}`}>
         <button type="button" className="icon-btn" onClick={() => setDrawer(true)} aria-label="Abrir menu">
           <Icon name="menu" />
         </button>
-        <h1 className="topbar-title">{section.title ?? section.label}</h1>
-        <button type="button" className="icon-btn" onClick={() => (section.search ? go(section.search) : setSearch(true))} aria-label={section.search ? 'Buscar no diário' : 'Buscar em tudo'}>
+        <h1 className="topbar-title">{section.path === 'inicio' ? formatLongDate(todayISO()) : (section.title ?? section.label)}</h1>
+        <button type="button" className="icon-btn" onClick={() => (section.search ? goReplace(section.search) : setSearch(true))} aria-label={section.search ? 'Buscar no diário' : 'Buscar em tudo'}>
           <Icon name="search" />
         </button>
       </header>
@@ -177,19 +227,7 @@ export function App() {
         <NavMenu current={section.path} />
       </nav>
 
-      {drawer && (
-        <div className="drawer-backdrop" onMouseDown={(e) => e.target === e.currentTarget && setDrawer(false)}>
-          <nav className="drawer" aria-label="Menu">
-            <div className="drawer-head">
-              <strong>Central Pessoal</strong>
-              <button type="button" className="icon-btn" onClick={() => setDrawer(false)} aria-label="Fechar menu">
-                <Icon name="x" />
-              </button>
-            </div>
-            <NavMenu current={section.path} onNavigate={() => setDrawer(false)} />
-          </nav>
-        </div>
-      )}
+      {drawer && <Drawer current={section.path} onClose={() => setDrawer(false)} />}
       {search && <SearchSheet onClose={() => setSearch(false)} />}
 
       <main className="main">

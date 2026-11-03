@@ -5,7 +5,7 @@ import { useSubAction } from '../router';
 import { remove, upsert } from '../actions';
 import type { JournalEntry } from '../types';
 import { addMonths, formatDate, formatDateTime, formatDMY, formatMonth, monthKey, nowTime, pad, relativeDay, toISO, todayISO, uid } from '../utils';
-import { Chips, Empty, Field, Icon, IconButton, Pill, Sheet } from '../ui';
+import { Chips, Empty, Field, Icon, IconButton, MonthNav, PageHeader, Pill, Segmented, Sheet } from '../ui';
 
 export const JOURNAL_TAGS = ['Pessoal', 'Trabalho', 'Família', 'Saúde', 'Estudos', 'Viagem'];
 
@@ -40,6 +40,7 @@ export function Diario({ route }: ViewProps) {
   const [searching, setSearching] = useState(false);
   const [query, setQuery] = useState('');
   const [open, setOpen] = useState<Set<string> | null>(null);
+  const [order, setOrder] = useState<'recentes' | 'antigos'>('recentes');
 
   useSubAction(route, 'diario', {
     nova: () => setEditing('new'),
@@ -55,6 +56,7 @@ export function Diario({ route }: ViewProps) {
   const visible = searching && q
     ? sorted.filter((e) => [e.title, e.summary, e.content, e.tag].some((t) => t.toLowerCase().includes(q)))
     : sorted.filter((e) => monthKey(localDate(e.createdAt)) === month);
+  if (!(searching && q) && order === 'antigos') visible.reverse();
 
   // Por padrão, o registro mais recente da lista aparece aberto.
   const openSet = open ?? new Set(visible[0] ? [visible[0].id] : []);
@@ -75,18 +77,17 @@ export function Diario({ route }: ViewProps) {
 
   return (
     <>
-      <header className="page-header desktop-only">
-        <h1>Meu diário</h1>
-        <IconButton
-          icon={searching ? 'x' : 'search'}
-          label={searching ? 'Fechar busca' : 'Buscar no diário'}
-          onClick={() => {
-            setSearching((s) => !s);
-            setQuery('');
-            setOpen(null);
-          }}
-        />
-      </header>
+      <PageHeader
+        title="Meu diário"
+        actions={
+          <>
+            {!searching && <MonthNav label={formatMonth(month)} onPrev={() => changeMonth(addMonths(month, -1))} onNext={() => changeMonth(addMonths(month, 1))} onLabel={() => setHistory(true)} />}
+            <span className="desktop-only">
+              <IconButton icon="search" label="Buscar no diário" onClick={() => { setSearching(true); setQuery(''); setOpen(null); }} />
+            </span>
+          </>
+        }
+      />
 
       {searching ? (
         <label className="search">
@@ -107,18 +108,18 @@ export function Diario({ route }: ViewProps) {
           </button>
         </label>
       ) : (
-        <div className="feed-head">
-          <div className="month-nav">
-            <IconButton icon="left" label="Mês anterior" onClick={() => changeMonth(addMonths(month, -1))} />
-            <button type="button" className="link-like" onClick={() => setHistory(true)} aria-label="Abrir histórico">
-              <h2>{formatMonth(month).replace(' de ', ' ')}</h2>
-            </button>
-            <IconButton icon="right" label="Próximo mês" onClick={() => changeMonth(addMonths(month, 1))} />
-          </div>
-          <span className="count-badge">
-            {visible.length} {visible.length === 1 ? 'registro' : 'registros'}
-          </span>
-        </div>
+        <Segmented
+          label="Ordem"
+          value={order}
+          onChange={(o) => {
+            setOrder(o);
+            setOpen(null);
+          }}
+          options={[
+            { value: 'recentes', label: 'Mais recentes' },
+            { value: 'antigos', label: 'Mais antigos' },
+          ]}
+        />
       )}
 
       <div className="feed">
@@ -154,13 +155,7 @@ export function Diario({ route }: ViewProps) {
           );
         })}
 
-        {!searching && (
-          <button type="button" className="new-entry" onClick={() => setEditing('new')}>
-            <Icon name="plusCircle" size={36} />
-            <strong>Nova atualização</strong>
-            <span className="muted">Registrar um acontecimento, pensamento ou experiência.</span>
-          </button>
-        )}
+        {!searching && visible.length === 0 && <Empty>Nenhum registro em {formatMonth(month).toLowerCase()}. Toque em + para escrever.</Empty>}
       </div>
 
       {editing && <EntryForm entry={editing === 'new' ? undefined : editing} onClose={() => setEditing(null)} onSaved={(e) => { changeMonth(monthKey(localDate(e.createdAt))); setOpen(new Set([e.id])); setSearching(false); }} />}

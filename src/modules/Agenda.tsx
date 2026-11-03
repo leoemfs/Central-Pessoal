@@ -71,6 +71,7 @@ export function Agenda({ route }: ViewProps) {
 
   useSubAction(route, 'agenda', {
     tarefas: () => setTab('tarefas'),
+    novo: () => (tab === 'tarefas' ? setTaskForm('new') : setEventForm('new')),
     'nova-tarefa': () => {
       setTab('tarefas');
       setTaskForm('new');
@@ -111,16 +112,13 @@ export function Agenda({ route }: ViewProps) {
     <>
       <PageHeader
         title="Agenda"
-        actions={tab === 'calendario' ? <MonthNav label={formatMonth(month)} onPrev={() => setMonth(addMonths(month, -1))} onNext={() => setMonth(addMonths(month, 1))} onLabel={() => pick(today)} /> : undefined}
+        actions={<MonthNav label={formatMonth(month)} onPrev={() => setMonth(addMonths(month, -1))} onNext={() => setMonth(addMonths(month, 1))} onLabel={() => pick(today)} />}
       />
       <Segmented label="Visão" value={tab} onChange={setTab} options={[{ value: 'calendario', label: 'Calendário' }, { value: 'tarefas', label: 'Tarefas' }]} />
 
       {tab === 'tarefas' ? (
         <>
           <TasksPanel onEdit={(t) => setTaskForm(t)} />
-          <button type="button" className="btn primary block" onClick={() => setTaskForm('new')}>
-            <Icon name="plus" /> Nova tarefa
-          </button>
         </>
       ) : (
         <div className="grid-2">

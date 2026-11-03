@@ -67,7 +67,7 @@ export function Dashboard() {
           <h1>
             {greeting()}! <span aria-hidden="true">{greetingEmoji()}</span>
           </h1>
-          <p className="muted">{formatLongDate(today)}</p>
+          <p className="muted desktop-only">{formatLongDate(today)}</p>
         </div>
       </header>
 

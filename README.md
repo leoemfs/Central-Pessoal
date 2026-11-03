@@ -18,7 +18,7 @@ O usuário registra; o app organiza, calcula e mostra o que importa no Início.
 | **Agenda** | Calendário com compromissos, prazos de tarefas e vencimentos de contas; aba de tarefas. |
 | **Mais** | Núcleo pessoal (hábitos), Arquivo geral (anotações) e Configurações (tema claro/escuro/automático, categorias, backup e dados). |
 
-**Navegação:** barra superior com o nome da aba atual e a 🔍 (no Diário, busca no diário); atalhos inferiores (Início, Finanças, Diário, Agenda, Mais); menu ☰ com todos os módulos agrupados (Geral, Organização pessoal, Financeiro, Bem-estar, Planejamento); 🔍 **busca em tudo** (diário, despesas, agenda e anotações); botão **+** para registrar rápido. Lembretes, Metas, Relatórios, Saúde, Estudos, Foco e Banco de ideias aparecem como "em breve".
+**Navegação:** barra superior com o nome da aba atual (no Início, a data) e a 🔍 (no Diário, busca no diário), que some ao rolar para baixo e volta ao rolar para cima; atalhos inferiores (Início, Finanças, Diário, Agenda, Mais); menu ☰ com todos os módulos agrupados (Geral, Organização pessoal, Financeiro, Bem-estar, Planejamento); 🔍 **busca em tudo** (diário, despesas, agenda e anotações); botão **+** que adiciona na aba aberta (no Início, pergunta o quê); o **voltar** do celular fecha a janela ou o menu aberto antes de sair da página. Lembretes, Metas, Relatórios, Saúde, Estudos, Foco e Banco de ideias aparecem como "em breve".
 
 ## Regras financeiras
 

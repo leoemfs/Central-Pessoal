@@ -3,10 +3,10 @@ import type { ViewProps } from '../../App';
 import { useStore } from '../../store';
 import { useSubAction } from '../../router';
 import {
-  billStatus, cardUsed, categoryTotals, FIXA_AHEAD, getInvoice, installmentLabel, invoiceMonthFor, materialize, monthBills, summarize, type Bill,
+  billStatus, cardUsed, categoryTotals, FIXA_AHEAD, getInvoice, installmentLabel, materialize, monthBills, summarize, type Bill,
 } from '../../finance';
 import { addMonths, formatDMY, formatMoney, formatMonth, monthKey, todayISO } from '../../utils';
-import { CategoryBadge, Empty, Icon, MonthNav, PageHeader, Pill, Progress, Segmented } from '../../ui';
+import { CategoryBadge, Empty, MonthNav, PageHeader, Pill, Progress, Segmented } from '../../ui';
 import { CardForm } from './CardForm';
 import { ExpenseDetail } from './ExpenseDetail';
 import { ExpenseForm } from './ExpenseForm';
@@ -28,7 +28,7 @@ export function Financas({ route }: ViewProps) {
   const [cardForm, setCardForm] = useState(false);
 
   useSubAction(route, 'financas', {
-    nova: () => setFormOpen(true),
+    nova: () => (tab === 'cartoes' ? setCardForm(true) : setFormOpen(true)),
     cartoes: () => setTab('cartoes'),
   });
 
@@ -49,7 +49,7 @@ export function Financas({ route }: ViewProps) {
 
   return (
     <>
-      <PageHeader title="Finanças" actions={tab === 'mes' ? <MonthNav label={formatMonth(month)} onPrev={() => setMonth(addMonths(month, -1))} onNext={() => setMonth(addMonths(month, 1))} onLabel={() => setMonth(monthKey(today))} /> : undefined} />
+      <PageHeader title="Finanças" actions={<MonthNav label={formatMonth(month)} onPrev={() => setMonth(addMonths(month, -1))} onNext={() => setMonth(addMonths(month, 1))} onLabel={() => setMonth(monthKey(today))} />} />
       <Segmented label="Visão" value={tab} onChange={setTab} options={[{ value: 'mes', label: 'Mês' }, { value: 'cartoes', label: 'Cartões' }]} />
 
       {tab === 'mes' ? (
@@ -84,10 +84,7 @@ export function Financas({ route }: ViewProps) {
             </div>
             {bills.length === 0 ? (
               <div className="empty">
-                <p>Nenhuma despesa em {formatMonth(month).toLowerCase()}.</p>
-                <button type="button" className="btn primary" style={{ marginTop: 12 }} onClick={() => setFormOpen(true)}>
-                  <Icon name="plus" /> Nova despesa
-                </button>
+                <p>Nenhuma despesa em {formatMonth(month).toLowerCase()}. Toque em + para lançar.</p>
               </div>
             ) : (
               <ul className="list">
@@ -136,12 +133,13 @@ export function Financas({ route }: ViewProps) {
         <>
           {data.cards.length === 0 ? (
             <section className="card">
-              <Empty>Nenhum cartão cadastrado. Cadastre um para que as compras caiam sozinhas na fatura certa.</Empty>
+              <Empty>Nenhum cartão cadastrado. Toque em + para cadastrar e as compras caem sozinhas na fatura certa.</Empty>
             </section>
           ) : (
             <div className="cards-list">
               {data.cards.map((card) => {
-                const current = invoiceMonthFor(card, today);
+                // Fatura que vence no mês escolhido acima (a mesma que aparece na aba Mês).
+                const current = month;
                 const inv = getInvoice(data, card, current, today);
                 const used = cardUsed(data, card);
                 return (
@@ -151,7 +149,7 @@ export function Financas({ route }: ViewProps) {
                     </CreditCardVisual>
                     <div className="card-stats">
                       <div>
-                        <span className="muted">Fatura atual</span>
+                        <span className="muted">Fatura de {formatMonth(month).split(' ')[0].toLowerCase()}</span>
                         <strong>{formatMoney(inv.total)}</strong>
                       </div>
                       <div>
@@ -169,9 +167,6 @@ export function Financas({ route }: ViewProps) {
               })}
             </div>
           )}
-          <button type="button" className="btn primary block" onClick={() => setCardForm(true)}>
-            <Icon name="plus" /> Cadastrar cartão
-          </button>
         </>
       )}
 

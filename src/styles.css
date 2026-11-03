@@ -28,6 +28,7 @@
   --bar-bg: rgb(0 0 0 / 0.9);
   --tabbar-bg: rgb(28 28 30 / 0.94);
   --on-green: #04130a;
+  --raised-border: transparent;
   --shadow: none;
   --sidebar-w: 248px;
   --tabbar-h: 64px;
@@ -43,8 +44,9 @@
   --surface: #ffffff;
   --raised: #f0f1f4;
   --raised-2: #e4e6ea;
-  --border: #e2e4e8;
-  --border-strong: #cdd1d7;
+  --border: #d3d7dd;
+  --border-strong: #bfc5cd;
+  --raised-border: #d3d7dd;
   --text: #111316;
   --muted: #5b6270;
   --faint: #8a919c;
@@ -71,8 +73,9 @@
     --surface: #ffffff;
     --raised: #f0f1f4;
     --raised-2: #e4e6ea;
-    --border: #e2e4e8;
-    --border-strong: #cdd1d7;
+    --border: #d3d7dd;
+    --border-strong: #bfc5cd;
+    --raised-border: #d3d7dd;
     --text: #111316;
     --muted: #5b6270;
     --faint: #8a919c;
@@ -381,7 +384,7 @@ button {
 }
 .card.raised {
   background: var(--raised);
-  border-color: transparent;
+  border-color: var(--raised-border);
 }
 .card-head {
   display: flex;
@@ -1330,7 +1333,7 @@ button.row {
 }
 .entry.open {
   background: var(--raised);
-  border-color: transparent;
+  border-color: var(--raised-border);
 }
 .entry-top {
   display: flex;
@@ -2161,4 +2164,22 @@ button.row {
 }
 .entry.open {
   box-shadow: var(--shadow);
+}
+
+/* ---------- v0.5 ---------- */
+
+.topbar {
+  transition: transform 0.22s ease;
+  will-change: transform;
+}
+.topbar.hidden {
+  transform: translateY(-100%);
+}
+.page-actions .desktop-only {
+  display: inline-flex;
+}
+@media (max-width: 899px) {
+  .page-actions .desktop-only {
+    display: none;
+  }
 }

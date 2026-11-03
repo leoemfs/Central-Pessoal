@@ -60,11 +60,6 @@ export function Notas({ route }: ViewProps) {
       <PageHeader
         title="Arquivo geral"
         subtitle={`${data.notes.length} anotação(ões)`}
-        actions={
-          <button type="button" className="btn primary small" onClick={create}>
-            <Icon name="plus" size={18} /> Nova anotação
-          </button>
-        }
       />
 
       <div className={`notes${selected ? ' has-selection' : ''}`}>

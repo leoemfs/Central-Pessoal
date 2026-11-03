@@ -188,6 +188,52 @@ export function MoneyInput({ cents, onChange, large, label, autoFocus }: { cents
   );
 }
 
+// ---------- Botão "voltar" do celular fecha janelas e menus ----------
+
+interface Overlay {
+  id: string;
+  close: () => void;
+  closedByBack: boolean;
+}
+const overlays: Overlay[] = [];
+let ignorePops = 0;
+
+if (typeof window !== 'undefined') {
+  window.addEventListener('popstate', () => {
+    if (ignorePops > 0) {
+      ignorePops--;
+      return;
+    }
+    const top = overlays[overlays.length - 1];
+    if (top) {
+      top.closedByBack = true;
+      top.close();
+    }
+  });
+}
+
+/**
+ * Enquanto o componente está aberto, o "voltar" do celular (ou do navegador) fecha só ele,
+ * em vez de sair da página. Fechado pelo X ou ao salvar, remove a entrada extra do histórico.
+ */
+export function useBackToClose(onClose: () => void) {
+  const close = useRef(onClose);
+  close.current = onClose;
+  useEffect(() => {
+    const entry: Overlay = { id: Math.random().toString(36).slice(2), close: () => close.current(), closedByBack: false };
+    history.pushState({ overlay: entry.id }, '');
+    overlays.push(entry);
+    return () => {
+      overlays.splice(overlays.indexOf(entry), 1);
+      // Se ainda estamos na entrada desta janela (não houve navegação no meio), volta uma posição.
+      if (!entry.closedByBack && (history.state as { overlay?: string } | null)?.overlay === entry.id) {
+        ignorePops++;
+        history.back();
+      }
+    };
+  }, []);
+}
+
 // ---------- Sheet (janela de formulário / detalhes) ----------
 
 const openSheets: symbol[] = [];
@@ -196,6 +242,7 @@ export function Sheet({ title, badge, onClose, children, footer, size }: { title
   const close = useRef(onClose);
   close.current = onClose;
   const [me] = useState(() => Symbol('sheet'));
+  useBackToClose(onClose);
 
   useEffect(() => {
     openSheets.push(me);

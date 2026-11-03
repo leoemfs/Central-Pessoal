@@ -31,6 +31,11 @@ export function go(to: string) {
   window.location.hash = `/${to}`;
 }
 
+/** Como `go`, mas sem criar entrada no histórico (ações na própria página, como o botão +). */
+export function goReplace(to: string) {
+  window.location.replace(`#/${to}`);
+}
+
 /** Executa uma ação pedida pelo endereço (ex.: #/financas/nova) e limpa o endereço. */
 export function useSubAction(route: Route, base: string, actions: Record<string, () => void>) {
   useEffect(() => {

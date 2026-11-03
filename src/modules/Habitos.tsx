@@ -1,9 +1,11 @@
 import { useState, type FormEvent } from 'react';
+import type { ViewProps } from '../App';
+import { useSubAction } from '../router';
 import { useStore } from '../store';
 import { remove, toggleHabit, upsert } from '../actions';
 import type { Habit } from '../types';
 import { addDays, daysInMonth, fromISO, monthKey, streak, todayISO, uid, WEEKDAYS } from '../utils';
-import { Card, Empty, Icon, IconButton, PageHeader } from '../ui';
+import { Card, Empty, Field, Icon, IconButton, PageHeader, Sheet } from '../ui';
 
 export const HABIT_COLORS = ['#22c55e', '#3b82f6', '#8b5cf6', '#f97316', '#ef4444', '#ec4899', '#eab308', '#06b6d4'];
 
@@ -12,11 +14,20 @@ function lastDays(n: number): string[] {
   return Array.from({ length: n }, (_, i) => addDays(t, i - (n - 1)));
 }
 
-export function Habitos() {
+export function Habitos({ route }: ViewProps) {
   const { data, update } = useStore();
   const [name, setName] = useState('');
   const [color, setColor] = useState(HABIT_COLORS[0]);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [formOpen, setFormOpen] = useState(false);
+  useSubAction(route, 'nucleo', {
+    novo: () => {
+      setEditingId(null);
+      setName('');
+      setColor(HABIT_COLORS[data.habits.length % HABIT_COLORS.length]);
+      setFormOpen(true);
+    },
+  });
   const days = lastDays(7);
   const today = todayISO();
   const month = monthKey(today);
@@ -37,18 +48,18 @@ export function Habitos() {
       createdAt: prev?.createdAt ?? new Date().toISOString(),
     };
     update(upsert('habits', habit));
-    setName('');
-    setEditingId(null);
-    setColor(HABIT_COLORS[(data.habits.length + 1) % HABIT_COLORS.length]);
+    cancel();
   }
 
   function edit(h: Habit) {
     setEditingId(h.id);
     setName(h.name);
     setColor(h.color);
+    setFormOpen(true);
   }
 
   function cancel() {
+    setFormOpen(false);
     setEditingId(null);
     setName('');
   }
@@ -67,40 +78,10 @@ export function Habitos() {
         subtitle={data.habits.length ? `${doneToday} de ${data.habits.length} feitos hoje · ${daysInMonth(month)} dias neste mês` : 'Hábitos, rituais e autocuidado'}
       />
 
-      <Card title={editingId ? 'Editar hábito' : 'Novo hábito'}>
-        <form className="form" onSubmit={submit}>
-          <input className="input" placeholder="Ex.: Beber 2 L de água, meditar, skincare…" value={name} onChange={(e) => setName(e.target.value)} aria-label="Nome do hábito" required />
-          <div className="swatches" role="radiogroup" aria-label="Cor">
-            {HABIT_COLORS.map((c) => (
-              <button
-                key={c}
-                type="button"
-                role="radio"
-                aria-checked={color === c}
-                aria-label={`Cor ${c}`}
-                className={`swatch${color === c ? ' on' : ''}`}
-                style={{ background: c }}
-                onClick={() => setColor(c)}
-              />
-            ))}
-          </div>
-          <div className="btn-row">
-            {editingId && (
-              <button type="button" className="btn" onClick={cancel}>
-                Cancelar
-              </button>
-            )}
-            <button type="submit" className="btn primary">
-              <Icon name={editingId ? 'check' : 'plus'} size={18} />
-              {editingId ? 'Salvar' : 'Adicionar'}
-            </button>
-          </div>
-        </form>
-      </Card>
 
       {data.habits.length === 0 ? (
         <Card>
-          <Empty>Nenhum hábito ainda. Crie um acima e marque os dias em que cumprir.</Empty>
+          <Empty>Nenhum hábito ainda. Toque em + para criar e marque os dias em que cumprir.</Empty>
         </Card>
       ) : (
         <div className="habits">
@@ -146,6 +127,33 @@ export function Habitos() {
             );
           })}
         </div>
+      )}
+      {formOpen && (
+        <Sheet
+          title={editingId ? 'Editar hábito' : 'Novo hábito'}
+          onClose={cancel}
+          footer={
+            <button type="submit" form="habit-form" className="btn primary block" disabled={!name.trim()}>
+              {editingId ? 'Salvar hábito' : 'Criar hábito'}
+            </button>
+          }
+        >
+          <form id="habit-form" className="form" onSubmit={submit}>
+            <Field label="Nome">
+              <input className="input" placeholder="Ex.: Beber 2 L de água, meditar, skincare…" value={name} onChange={(e) => setName(e.target.value)} autoFocus={!editingId} />
+            </Field>
+            <div className="field">
+              <span className="field-label">Cor</span>
+              <div className="swatches" role="radiogroup" aria-label="Cor">
+                {HABIT_COLORS.map((c) => (
+                  <button key={c} type="button" role="radio" aria-checked={color === c} aria-label={`Cor ${c}`} className={`swatch${color === c ? ' on' : ''}`} style={{ background: c }} onClick={() => setColor(c)}>
+                    {color === c && <Icon name="check" size={18} />}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </form>
+        </Sheet>
       )}
     </>
   );
