@@ -1,52 +1,29 @@
 import { createContext, useCallback, useContext, useEffect, useRef, useState, type ReactNode } from 'react';
-import type { AppData, Theme } from './types';
+import type { AppData } from './types';
+import { normalize } from './data';
+import { FIXA_AHEAD, materialize } from './finance';
+import { dbGet, dbSet, requestPersistence } from './db';
+import { addMonths, monthKey, todayISO } from './utils';
 
-const STORAGE_KEY = 'central-pessoal:v1';
+const KEY = 'data';
+const LEGACY_LOCALSTORAGE_KEY = 'central-pessoal:v1';
+const channel = typeof BroadcastChannel !== 'undefined' ? new BroadcastChannel('central-pessoal') : null;
 
-export function emptyData(): AppData {
-  return {
-    version: 1,
-    tasks: [],
-    transactions: [],
-    habits: [],
-    notes: [],
-    events: [],
-    settings: { theme: 'system' },
-  };
-}
+/** Gera as contas fixas que já deveriam existir (ex.: virou o mês com o app aberto). */
+const catchUp = (d: AppData) => materialize(d, addMonths(monthKey(todayISO()), FIXA_AHEAD));
 
-function isRecord(x: unknown): x is Record<string, unknown> {
-  return typeof x === 'object' && x !== null && !Array.isArray(x);
-}
-
-function list<T>(x: unknown): T[] {
-  return Array.isArray(x) ? (x.filter((i) => isRecord(i) && typeof i.id === 'string') as T[]) : [];
-}
-
-/** Garante que dados vindos do armazenamento ou de um backup tenham o formato esperado. */
-export function normalize(raw: unknown): AppData {
-  const d = isRecord(raw) ? raw : {};
-  const base = emptyData();
-  const settings = isRecord(d.settings) ? d.settings : {};
-  const theme: Theme = settings.theme === 'light' || settings.theme === 'dark' ? settings.theme : 'system';
-  return {
-    ...base,
-    tasks: list(d.tasks),
-    transactions: list(d.transactions),
-    habits: list(d.habits),
-    notes: list(d.notes),
-    events: list(d.events),
-    settings: { theme },
-  };
-}
-
-function load(): AppData {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    return raw ? normalize(JSON.parse(raw)) : emptyData();
-  } catch {
-    return emptyData();
+async function loadData(): Promise<AppData> {
+  let raw = await dbGet<unknown>(KEY);
+  if (raw === undefined) {
+    // Primeira vez nesta versão: traz os dados do protótipo (localStorage), se houver.
+    try {
+      const old = localStorage.getItem(LEGACY_LOCALSTORAGE_KEY);
+      if (old) raw = JSON.parse(old);
+    } catch {
+      /* ignora */
+    }
   }
+  return catchUp(normalize(raw));
 }
 
 type Updater = (d: AppData) => AppData;
@@ -56,46 +33,82 @@ interface Store {
   update: (fn: Updater) => void;
   replace: (d: AppData) => void;
   saveError: boolean;
+  persisted: boolean;
 }
 
 const StoreContext = createContext<Store | null>(null);
 
 export function DataProvider({ children }: { children: ReactNode }) {
-  const [data, setData] = useState<AppData>(load);
+  const [data, setData] = useState<AppData | null>(null);
   const [saveError, setSaveError] = useState(false);
-  const lastSaved = useRef<string | null>(null);
+  const [persisted, setPersisted] = useState(false);
+  const fromOtherTab = useRef(false);
+  const pending = useRef<AppData | null>(null);
+  const timer = useRef<number | undefined>(undefined);
 
   useEffect(() => {
-    const json = JSON.stringify(data);
-    if (json === lastSaved.current) return;
-    try {
-      localStorage.setItem(STORAGE_KEY, json);
-      lastSaved.current = json;
-      setSaveError(false);
-    } catch {
-      setSaveError(true);
-    }
-  }, [data]);
-
-  // Mantém abas diferentes do navegador sincronizadas.
-  useEffect(() => {
-    const onStorage = (e: StorageEvent) => {
-      if (e.key !== STORAGE_KEY || e.newValue === null || e.newValue === lastSaved.current) return;
-      try {
-        lastSaved.current = e.newValue;
-        setData(normalize(JSON.parse(e.newValue)));
-      } catch {
-        /* ignora valor corrompido */
-      }
-    };
-    window.addEventListener('storage', onStorage);
-    return () => window.removeEventListener('storage', onStorage);
+    loadData().then(setData);
+    requestPersistence().then(setPersisted);
   }, []);
 
-  const update = useCallback((fn: Updater) => setData(fn), []);
-  const replace = useCallback((d: AppData) => setData(d), []);
+  const flush = useCallback(() => {
+    window.clearTimeout(timer.current);
+    const d = pending.current;
+    if (!d) return;
+    pending.current = null;
+    dbSet(KEY, d)
+      .then(() => {
+        setSaveError(false);
+        channel?.postMessage('saved');
+      })
+      .catch(() => setSaveError(true));
+  }, []);
 
-  return <StoreContext.Provider value={{ data, update, replace, saveError }}>{children}</StoreContext.Provider>;
+  // Salva com um pequeno atraso para agrupar alterações seguidas (ex.: digitação numa nota).
+  useEffect(() => {
+    if (!data) return;
+    if (fromOtherTab.current) {
+      fromOtherTab.current = false;
+      return;
+    }
+    pending.current = data;
+    window.clearTimeout(timer.current);
+    timer.current = window.setTimeout(flush, 250);
+  }, [data, flush]);
+
+  useEffect(() => {
+    const onHide = () => document.visibilityState === 'hidden' && flush();
+    const onShow = () => document.visibilityState === 'visible' && setData((d) => (d ? catchUp(d) : d));
+    document.addEventListener('visibilitychange', onHide);
+    document.addEventListener('visibilitychange', onShow);
+    window.addEventListener('pagehide', flush);
+    // Outra aba salvou: recarrega.
+    const onMessage = () =>
+      dbGet<unknown>(KEY).then((raw) => {
+        if (raw === undefined) return;
+        fromOtherTab.current = true;
+        setData(normalize(raw));
+      });
+    channel?.addEventListener('message', onMessage);
+    return () => {
+      document.removeEventListener('visibilitychange', onHide);
+      document.removeEventListener('visibilitychange', onShow);
+      window.removeEventListener('pagehide', flush);
+      channel?.removeEventListener('message', onMessage);
+    };
+  }, [flush]);
+
+  const update = useCallback((fn: Updater) => setData((d) => (d ? fn(d) : d)), []);
+  const replace = useCallback((d: AppData) => setData(catchUp(d)), []);
+
+  if (!data) {
+    return (
+      <div className="splash" aria-busy="true">
+        <img src="./icon.svg" alt="" width={56} height={56} />
+      </div>
+    );
+  }
+  return <StoreContext.Provider value={{ data, update, replace, saveError, persisted }}>{children}</StoreContext.Provider>;
 }
 
 export function useStore(): Store {

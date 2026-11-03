@@ -1,65 +1,89 @@
-import { useMemo, useState, type FormEvent } from 'react';
+import { useMemo, useState } from 'react';
+import type { ViewProps } from '../App';
 import { useStore } from '../store';
+import { useSubAction } from '../router';
 import { remove, toggleTask, upsert } from '../actions';
+import { billStatus, getInvoice, invoiceMonths } from '../finance';
 import type { CalendarEvent, Task } from '../types';
-import { addDays, addMonths, daysInMonth, formatLongDate, formatMonth, fromISO, monthKey, relativeDay, todayISO, uid, WEEKDAYS } from '../utils';
-import { Card, Empty, Icon, IconButton, MonthNav, PageHeader } from '../ui';
-import { TaskItem } from './Tarefas';
+import { addDays, addMonths, daysInMonth, formatLongDate, formatMoney, formatMonth, fromISO, monthKey, relativeDay, todayISO, uid, WEEKDAYS } from '../utils';
+import { Empty, Field, Icon, MonthNav, PageHeader, Pill, Segmented, Sheet } from '../ui';
+import { TaskForm, TaskItem, TasksPanel } from './Tarefas';
 
 export function sortEvents(a: CalendarEvent, b: CalendarEvent): number {
   return a.date.localeCompare(b.date) || (a.time || '00:00').localeCompare(b.time || '00:00');
 }
 
-export function EventItem({ ev, showDate, onEdit, onDelete }: { ev: CalendarEvent; showDate?: boolean; onEdit?: () => void; onDelete?: () => void }) {
-  return (
-    <li className="row">
+export function EventItem({ ev, showDate, onClick }: { ev: CalendarEvent; showDate?: boolean; onClick?: () => void }) {
+  const body = (
+    <>
       <span className="event-time">{ev.time || 'Dia todo'}</span>
       <div className="row-body">
         <span className="row-title">{ev.title}</span>
         <span className="row-meta">
-          {showDate && <span className="chip">{relativeDay(ev.date)}</span>}
+          {showDate && <Pill>{relativeDay(ev.date)}</Pill>}
           {ev.location && (
-            <span className="muted with-icon">
+            <span>
               <Icon name="mapPin" size={13} /> {ev.location}
             </span>
           )}
-          {ev.description && <span className="row-notes">{ev.description}</span>}
         </span>
       </div>
-      {(onEdit || onDelete) && (
-        <div className="row-actions">
-          {onEdit && <IconButton icon="edit" label="Editar" onClick={onEdit} />}
-          {onDelete && <IconButton icon="trash" label="Excluir" tone="danger" onClick={onDelete} />}
-        </div>
-      )}
-    </li>
+    </>
   );
+  return <li>{onClick ? <button type="button" className="row" onClick={onClick}>{body}</button> : <div className="row">{body}</div>}</li>;
 }
 
-interface Draft {
+interface DayBill {
+  key: string;
   title: string;
+  amount: number;
+  paid: boolean;
   date: string;
-  time: string;
-  location: string;
-  description: string;
 }
 
-export function Agenda() {
+/** Vencimentos (contas fora do cartão e faturas) por dia. */
+function useBillsByDay(): Map<string, DayBill[]> {
+  const { data } = useStore();
+  return useMemo(() => {
+    const m = new Map<string, DayBill[]>();
+    const add = (b: DayBill) => m.set(b.date, [...(m.get(b.date) ?? []), b]);
+    for (const e of data.expenses) if (!e.cardId) add({ key: e.id, title: e.description, amount: e.amount, paid: e.paidAt !== null, date: e.dueDate });
+    for (const card of data.cards)
+      for (const month of invoiceMonths(data, card.id)) {
+        const inv = getInvoice(data, card, month);
+        add({ key: `${card.id}:${month}`, title: `Fatura ${card.name}`, amount: inv.total, paid: inv.paidAt !== null, date: inv.dueDate });
+      }
+    return m;
+  }, [data]);
+}
+
+type Tab = 'calendario' | 'tarefas';
+
+export function Agenda({ route }: ViewProps) {
   const { data, update } = useStore();
   const today = todayISO();
+  const [tab, setTab] = useState<Tab>('calendario');
   const [month, setMonth] = useState(monthKey(today));
   const [selected, setSelected] = useState(today);
-  const [editingId, setEditingId] = useState<string | null>(null);
-  const emptyDraft = (date: string): Draft => ({ title: '', date, time: '', location: '', description: '' });
-  const [draft, setDraft] = useState<Draft>(() => emptyDraft(today));
+  const [eventForm, setEventForm] = useState<CalendarEvent | 'new' | null>(null);
+  const [taskForm, setTaskForm] = useState<Task | 'new' | null>(null);
+  const billsByDay = useBillsByDay();
+
+  useSubAction(route, 'agenda', {
+    tarefas: () => setTab('tarefas'),
+    'nova-tarefa': () => {
+      setTab('tarefas');
+      setTaskForm('new');
+    },
+    'novo-compromisso': () => setEventForm('new'),
+  });
 
   const eventsByDay = useMemo(() => {
     const m = new Map<string, CalendarEvent[]>();
     for (const e of data.events) m.set(e.date, [...(m.get(e.date) ?? []), e]);
-    for (const list of m.values()) list.sort(sortEvents);
+    for (const l of m.values()) l.sort(sortEvents);
     return m;
   }, [data.events]);
-
   const tasksByDay = useMemo(() => {
     const m = new Map<string, Task[]>();
     for (const t of data.tasks) if (t.due) m.set(t.due, [...(m.get(t.due) ?? []), t]);
@@ -70,158 +94,180 @@ export function Agenda() {
     const first = `${month}-01`;
     const offset = fromISO(first).getDay();
     const count = Math.ceil((offset + daysInMonth(month)) / 7) * 7;
-    const start = addDays(first, -offset);
-    return Array.from({ length: count }, (_, i) => addDays(start, i));
+    return Array.from({ length: count }, (_, i) => addDays(first, i - offset));
   }, [month]);
-
-  const upcoming = useMemo(() => data.events.filter((e) => e.date >= today).sort(sortEvents).slice(0, 6), [data.events, today]);
-
-  const dayEvents = eventsByDay.get(selected) ?? [];
-  const dayTasks = tasksByDay.get(selected) ?? [];
 
   function pick(day: string) {
     setSelected(day);
     if (monthKey(day) !== month) setMonth(monthKey(day));
-    if (!editingId) setDraft((d) => ({ ...d, date: day }));
   }
 
-  function submit(e: FormEvent) {
-    e.preventDefault();
-    const title = draft.title.trim();
-    if (!title) return;
-    const ev: CalendarEvent = {
-      id: editingId ?? uid(),
-      title,
-      date: draft.date || selected,
-      time: draft.time,
-      location: draft.location.trim(),
-      description: draft.description.trim(),
-    };
-    update(upsert('events', ev));
-    setEditingId(null);
-    setSelected(ev.date);
-    setMonth(monthKey(ev.date));
-    setDraft(emptyDraft(ev.date));
-  }
-
-  function edit(ev: CalendarEvent) {
-    setEditingId(ev.id);
-    setDraft({ title: ev.title, date: ev.date, time: ev.time, location: ev.location, description: ev.description });
-  }
-
-  function cancel() {
-    setEditingId(null);
-    setDraft(emptyDraft(selected));
-  }
-
-  function del(ev: CalendarEvent) {
-    if (confirm(`Excluir o evento "${ev.title}"?`)) {
-      update(remove('events', ev.id));
-      if (editingId === ev.id) cancel();
-    }
-  }
-
-  function goToday() {
-    setMonth(monthKey(today));
-    pick(today);
-  }
+  const dayEvents = eventsByDay.get(selected) ?? [];
+  const dayTasks = tasksByDay.get(selected) ?? [];
+  const dayBills = billsByDay.get(selected) ?? [];
+  const upcoming = data.events.filter((e) => e.date > selected).sort(sortEvents).slice(0, 5);
 
   return (
     <>
-      <PageHeader title="Agenda" subtitle="Eventos e prazos de tarefas" actions={<MonthNav label={formatMonth(month)} onPrev={() => setMonth(addMonths(month, -1))} onNext={() => setMonth(addMonths(month, 1))} onToday={goToday} />} />
+      <PageHeader
+        title="Agenda"
+        actions={tab === 'calendario' ? <MonthNav label={formatMonth(month)} onPrev={() => setMonth(addMonths(month, -1))} onNext={() => setMonth(addMonths(month, 1))} onLabel={() => pick(today)} /> : undefined}
+      />
+      <Segmented label="Visão" value={tab} onChange={setTab} options={[{ value: 'calendario', label: 'Calendário' }, { value: 'tarefas', label: 'Tarefas' }]} />
 
-      <div className="grid-agenda">
-        <Card className="calendar-card">
-          <div className="calendar" role="grid" aria-label={formatMonth(month)}>
-            {WEEKDAYS.map((w) => (
-              <div key={w} className="cal-weekday" role="columnheader">
-                {w}
-              </div>
-            ))}
-            {cells.map((d) => {
-              const evs = eventsByDay.get(d) ?? [];
-              const tks = (tasksByDay.get(d) ?? []).filter((t) => !t.done);
-              const classes = ['cal-day', monthKey(d) !== month && 'outside', d === today && 'today', d === selected && 'selected'].filter(Boolean).join(' ');
-              return (
-                <button key={d} type="button" role="gridcell" className={classes} onClick={() => pick(d)} aria-selected={d === selected} aria-label={`${formatLongDate(d)}: ${evs.length} evento(s), ${tks.length} tarefa(s)`}>
-                  <span className="cal-num">{fromISO(d).getDate()}</span>
-                  <span className="cal-marks">
-                    {evs.slice(0, 2).map((e) => (
-                      <span key={e.id} className="cal-event">
-                        {e.title}
-                      </span>
-                    ))}
-                    {evs.length > 2 && <span className="cal-more">+{evs.length - 2}</span>}
-                    {tks.length > 0 && <span className="cal-task-dot" title={`${tks.length} tarefa(s)`} />}
-                  </span>
-                </button>
-              );
-            })}
-          </div>
-          <p className="muted small legend">
-            <span className="cal-event sample">Evento</span>
-            <span className="cal-task-dot" /> Tarefa com prazo
-          </p>
-        </Card>
-
-        <div className="stack">
-          <Card title={relativeDay(selected) === 'Hoje' ? `Hoje · ${formatLongDate(selected)}` : formatLongDate(selected)}>
-            {dayEvents.length === 0 && dayTasks.length === 0 ? (
-              <Empty>Nada marcado para este dia.</Empty>
-            ) : (
-              <ul className="list">
-                {dayEvents.map((ev) => (
-                  <EventItem key={ev.id} ev={ev} onEdit={() => edit(ev)} onDelete={() => del(ev)} />
-                ))}
-                {dayTasks.map((t) => (
-                  <TaskItem key={t.id} task={t} onToggle={() => update(toggleTask(t.id))} />
-                ))}
-              </ul>
-            )}
-          </Card>
-
-          <Card title={editingId ? 'Editar evento' : 'Novo evento'}>
-            <form className="form" onSubmit={submit}>
-              <input className="input" placeholder="Título do evento" value={draft.title} onChange={(e) => setDraft({ ...draft, title: e.target.value })} aria-label="Título do evento" required />
-              <div className="form-row">
-                <label className="field">
-                  <span>Data</span>
-                  <input type="date" className="input" value={draft.date} onChange={(e) => setDraft({ ...draft, date: e.target.value })} required />
-                </label>
-                <label className="field">
-                  <span>Horário</span>
-                  <input type="time" className="input" value={draft.time} onChange={(e) => setDraft({ ...draft, time: e.target.value })} />
-                </label>
-              </div>
-              <input className="input" placeholder="Local (opcional)" value={draft.location} onChange={(e) => setDraft({ ...draft, location: e.target.value })} aria-label="Local" />
-              <textarea className="input" rows={2} placeholder="Descrição (opcional)" value={draft.description} onChange={(e) => setDraft({ ...draft, description: e.target.value })} aria-label="Descrição" />
-              <div className="form-actions">
-                {editingId && (
-                  <button type="button" className="btn ghost" onClick={cancel}>
-                    Cancelar
+      {tab === 'tarefas' ? (
+        <>
+          <TasksPanel onEdit={(t) => setTaskForm(t)} />
+          <button type="button" className="btn primary block" onClick={() => setTaskForm('new')}>
+            <Icon name="plus" /> Nova tarefa
+          </button>
+        </>
+      ) : (
+        <div className="grid-2">
+          <section className="card">
+            <div className="calendar" role="grid" aria-label={formatMonth(month)}>
+              {WEEKDAYS.map((w) => (
+                <div key={w} className="cal-weekday" role="columnheader">
+                  {w}
+                </div>
+              ))}
+              {cells.map((d) => {
+                const ev = (eventsByDay.get(d) ?? []).length;
+                const tk = (tasksByDay.get(d) ?? []).filter((t) => !t.done).length;
+                const bl = (billsByDay.get(d) ?? []).filter((b) => !b.paid).length;
+                const cls = ['cal-day', monthKey(d) !== month && 'outside', d === today && 'today', d === selected && 'selected'].filter(Boolean).join(' ');
+                return (
+                  <button key={d} type="button" role="gridcell" className={cls} aria-selected={d === selected} onClick={() => pick(d)} aria-label={`${formatLongDate(d)}: ${ev} compromisso(s), ${tk} tarefa(s), ${bl} conta(s)`}>
+                    <span className="cal-num">{fromISO(d).getDate()}</span>
+                    <span className="cal-marks">
+                      {ev > 0 && <span className="mark-event" />}
+                      {tk > 0 && <span className="mark-task" />}
+                      {bl > 0 && <span className="mark-bill" />}
+                    </span>
                   </button>
-                )}
-                <button type="submit" className="btn primary">
-                  <Icon name={editingId ? 'check' : 'plus'} size={18} />
-                  {editingId ? 'Salvar' : 'Adicionar'}
+                );
+              })}
+            </div>
+            <div className="legend">
+              <span><i className="mark-event" /> Compromisso</span>
+              <span><i className="mark-task" /> Tarefa</span>
+              <span><i className="mark-bill" /> Conta a pagar</span>
+            </div>
+          </section>
+
+          <div className="stack">
+            <section className="card">
+              <div className="card-head">
+                <h2>{relativeDay(selected) === 'Hoje' ? `Hoje · ${formatLongDate(selected)}` : formatLongDate(selected)}</h2>
+              </div>
+              {dayEvents.length + dayTasks.length + dayBills.length === 0 ? (
+                <Empty>Nada marcado para este dia.</Empty>
+              ) : (
+                <ul className="list">
+                  {dayEvents.map((e) => (
+                    <EventItem key={e.id} ev={e} onClick={() => setEventForm(e)} />
+                  ))}
+                  {dayTasks.map((t) => (
+                    <TaskItem key={t.id} task={t} onToggle={() => update(toggleTask(t.id))} onEdit={() => setTaskForm(t)} />
+                  ))}
+                  {dayBills.map((b) => (
+                    <li key={b.key}>
+                      <a className="row" href="#/financas" style={{ textDecoration: 'none' }}>
+                        <span className="event-time orange">
+                          <Icon name="wallet" size={18} />
+                        </span>
+                        <div className="row-body">
+                          <span className="row-title">{b.title}</span>
+                          <span className="row-meta">{formatMoney(b.amount)}</span>
+                        </div>
+                        {b.paid ? <Pill tone="green">Pago</Pill> : billStatus({ paidAt: null, dueDate: b.date }) === 'vencida' ? <Pill tone="red">Vencida</Pill> : <Pill tone="orange">A pagar</Pill>}
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              )}
+              <div className="btn-row" style={{ marginTop: 12 }}>
+                <button type="button" className="btn soft small" onClick={() => setEventForm('new')}>
+                  <Icon name="plus" size={16} /> Compromisso
+                </button>
+                <button type="button" className="btn soft small" onClick={() => setTaskForm('new')}>
+                  <Icon name="plus" size={16} /> Tarefa
                 </button>
               </div>
-            </form>
-          </Card>
+            </section>
 
-          <Card title="Próximos eventos">
-            {upcoming.length === 0 ? (
-              <Empty>Nenhum evento futuro.</Empty>
-            ) : (
-              <ul className="list">
-                {upcoming.map((ev) => (
-                  <EventItem key={ev.id} ev={ev} showDate onEdit={() => { pick(ev.date); edit(ev); }} />
-                ))}
-              </ul>
+            {upcoming.length > 0 && (
+              <section className="card">
+                <div className="card-head">
+                  <h2>Próximos compromissos</h2>
+                </div>
+                <ul className="list">
+                  {upcoming.map((e) => (
+                    <EventItem key={e.id} ev={e} showDate onClick={() => { pick(e.date); setEventForm(e); }} />
+                  ))}
+                </ul>
+              </section>
             )}
-          </Card>
+          </div>
         </div>
-      </div>
+      )}
+
+      {eventForm && <EventForm event={eventForm === 'new' ? undefined : eventForm} defaultDate={selected} onClose={() => setEventForm(null)} onSaved={pick} />}
+      {taskForm && <TaskForm task={taskForm === 'new' ? undefined : taskForm} defaultDue={tab === 'calendario' ? selected : undefined} onClose={() => setTaskForm(null)} />}
     </>
   );
 }
+
+function EventForm({ event, defaultDate, onClose, onSaved }: { event?: CalendarEvent; defaultDate: string; onClose: () => void; onSaved: (date: string) => void }) {
+  const { update } = useStore();
+  const [title, setTitle] = useState(event?.title ?? '');
+  const [date, setDate] = useState(event?.date ?? defaultDate);
+  const [time, setTime] = useState(event?.time ?? '');
+  const [location, setLocation] = useState(event?.location ?? '');
+  const [description, setDescription] = useState(event?.description ?? '');
+
+  function save() {
+    if (!title.trim() || !date) return;
+    update(upsert('events', { id: event?.id ?? uid(), title: title.trim(), date, time, location: location.trim(), description: description.trim() }));
+    onSaved(date);
+    onClose();
+  }
+
+  return (
+    <Sheet
+      title={event ? 'Editar compromisso' : 'Novo compromisso'}
+      onClose={onClose}
+      footer={
+        <div className="btn-row">
+          {event && (
+            <button type="button" className="btn danger" onClick={() => { if (confirm(`Excluir "${event.title}"?`)) { update(remove('events', event.id)); onClose(); } }}>
+              <Icon name="trash" size={18} /> Excluir
+            </button>
+          )}
+          <button type="button" className="btn primary" disabled={!title.trim()} onClick={save}>
+            Salvar compromisso
+          </button>
+        </div>
+      }
+    >
+      <Field label="Título">
+        <input className="input" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Ex.: Dentista" autoFocus={!event} />
+      </Field>
+      <div className="form-row">
+        <Field label="Data">
+          <input type="date" className="input" value={date} onChange={(e) => setDate(e.target.value)} />
+        </Field>
+        <Field label="Horário" hint="Vazio = dia todo">
+          <input type="time" className="input" value={time} onChange={(e) => setTime(e.target.value)} />
+        </Field>
+      </div>
+      <Field label="Local (opcional)">
+        <input className="input" value={location} onChange={(e) => setLocation(e.target.value)} />
+      </Field>
+      <Field label="Descrição (opcional)">
+        <textarea className="input" rows={3} value={description} onChange={(e) => setDescription(e.target.value)} />
+      </Field>
+    </Sheet>
+  );
+}
+

@@ -5,7 +5,7 @@ import type { Habit } from '../types';
 import { addDays, daysInMonth, fromISO, monthKey, streak, todayISO, uid, WEEKDAYS } from '../utils';
 import { Card, Empty, Icon, IconButton, PageHeader } from '../ui';
 
-export const HABIT_COLORS = ['#4f46e5', '#0891b2', '#16a34a', '#d97706', '#dc2626', '#db2777', '#7c3aed', '#475569'];
+export const HABIT_COLORS = ['#22c55e', '#3b82f6', '#8b5cf6', '#f97316', '#ef4444', '#ec4899', '#eab308', '#06b6d4'];
 
 function lastDays(n: number): string[] {
   const t = todayISO();
@@ -63,13 +63,13 @@ export function Habitos() {
   return (
     <>
       <PageHeader
-        title="Hábitos"
-        subtitle={data.habits.length ? `${doneToday} de ${data.habits.length} feitos hoje · ${daysInMonth(month)} dias neste mês` : 'Construa rotinas, um dia de cada vez'}
+        title="Núcleo pessoal"
+        subtitle={data.habits.length ? `${doneToday} de ${data.habits.length} feitos hoje · ${daysInMonth(month)} dias neste mês` : 'Hábitos, rituais e autocuidado'}
       />
 
       <Card title={editingId ? 'Editar hábito' : 'Novo hábito'}>
         <form className="form" onSubmit={submit}>
-          <input className="input" placeholder="ex.: Beber 2 L de água" value={name} onChange={(e) => setName(e.target.value)} aria-label="Nome do hábito" required />
+          <input className="input" placeholder="Ex.: Beber 2 L de água, meditar, skincare…" value={name} onChange={(e) => setName(e.target.value)} aria-label="Nome do hábito" required />
           <div className="swatches" role="radiogroup" aria-label="Cor">
             {HABIT_COLORS.map((c) => (
               <button
@@ -84,9 +84,9 @@ export function Habitos() {
               />
             ))}
           </div>
-          <div className="form-actions">
+          <div className="btn-row">
             {editingId && (
-              <button type="button" className="btn ghost" onClick={cancel}>
+              <button type="button" className="btn" onClick={cancel}>
                 Cancelar
               </button>
             )}
@@ -112,7 +112,7 @@ export function Habitos() {
                 <div className="habit-head">
                   <span className="dot" style={{ background: h.color }} aria-hidden="true" />
                   <strong className="habit-name">{h.name}</strong>
-                  <span className="chip" title="Sequência atual">
+                  <span className="pill" title="Sequência atual">
                     <Icon name="flame" size={13} /> {s} {s === 1 ? 'dia' : 'dias'}
                   </span>
                   <div className="row-actions">
