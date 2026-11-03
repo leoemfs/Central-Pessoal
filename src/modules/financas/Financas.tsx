@@ -103,8 +103,10 @@ export function Financas({ route }: ViewProps) {
           {cats.length > 0 && (
             <section className="card">
               <div className="card-head">
-                <h2>Por categoria</h2>
+                <h2>Distribuição de despesas</h2>
+                <span className="muted small">{formatMoney(catTotal)}</span>
               </div>
+              <SplitBar parts={cats.map((c) => ({ id: c.categoryId, label: categoryOf(c.categoryId).name, color: categoryOf(c.categoryId).color, amount: c.amount }))} total={catTotal} />
               <ul className="bars">
                 {cats.map((c) => {
                   const cat = categoryOf(c.categoryId);
@@ -210,5 +212,25 @@ export function BillRow({ bill, today, onClick, categoryOf }: { bill: Bill; toda
         <BillStatusPill bill={bill} today={today} />
       </div>
     </button>
+  );
+}
+
+const MAX_SEGMENTS = 5;
+
+/**
+ * Barra segmentada (parte do todo, num relance). Sem texto: a lista logo abaixo traz nome e valor de cada parte.
+ * Mais de 5 partes: o restante vira "Outros", em cinza neutro.
+ */
+function SplitBar({ parts, total }: { parts: { id: string; label: string; color: string; amount: number }[]; total: number }) {
+  if (total <= 0) return null;
+  const shown = parts.slice(0, parts.length > MAX_SEGMENTS + 1 ? MAX_SEGMENTS : parts.length);
+  const rest = parts.slice(shown.length);
+  const segs = rest.length ? [...shown, { id: 'outros', label: `Outros (${rest.length})`, color: '#52525b', amount: rest.reduce((a, b) => a + b.amount, 0) }] : shown;
+  return (
+    <div className="split-bar" role="img" aria-label={segs.map((p) => `${p.label}: ${Math.round((p.amount / total) * 100)}%`).join(', ')}>
+      {segs.map((p) => (
+        <span key={p.id} style={{ flexGrow: p.amount, background: p.color }} title={`${p.label}: ${formatMoney(p.amount)} (${Math.round((p.amount / total) * 100)}%)`} />
+      ))}
+    </div>
   );
 }

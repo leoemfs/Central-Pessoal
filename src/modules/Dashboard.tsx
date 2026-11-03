@@ -2,8 +2,8 @@ import { useMemo } from 'react';
 import { useStore } from '../store';
 import { toggleHabit, toggleTask } from '../actions';
 import { monthBills, openBills, summarize } from '../finance';
-import { addDays, formatDateTime, formatLongDate, formatMoney, formatMonth, greeting, monthKey, streak, todayISO } from '../utils';
-import { Empty, Icon, Pill, Progress } from '../ui';
+import { addDays, formatDateTime, formatLongDate, formatMoney, formatMonth, greeting, monthKey, relativeDay, streak, toISO, todayISO } from '../utils';
+import { Empty, Icon, Pill, Progress, type IconName } from '../ui';
 import { sortTasks, TaskItem } from './Tarefas';
 import { EventItem, sortEvents } from './Agenda';
 import { entrySummary, entryTitle } from './Diario';
@@ -18,6 +18,20 @@ function SeeAll({ href, label = 'Ver tudo' }: { href: string; label?: string }) 
   );
 }
 
+const QUICK: { to: string; label: string; icon: IconName }[] = [
+  { to: 'financas/nova', label: 'Nova despesa', icon: 'plusCircle' },
+  { to: 'diario/nova', label: 'Escrever diário', icon: 'notePen' },
+  { to: 'agenda/novo-compromisso', label: 'Compromisso', icon: 'calendarPlus' },
+  { to: 'agenda/nova-tarefa', label: 'Nova tarefa', icon: 'listPlus' },
+];
+
+function greetingEmoji(): string {
+  const h = new Date().getHours();
+  return h >= 5 && h < 12 ? '☀️' : h >= 12 && h < 18 ? '🌤️' : '🌙';
+}
+
+const plural = (n: number, one: string, many: string) => `${n} ${n === 1 ? one : many}`;
+
 export function Dashboard() {
   const { data, update } = useStore();
   const categoryOf = useCategoryOf();
@@ -31,6 +45,16 @@ export function Dashboard() {
   const events = useMemo(() => data.events.filter((e) => e.date >= today).sort(sortEvents).slice(0, 4), [data.events, today]);
   const journal = useMemo(() => [...data.journal].sort((a, b) => b.createdAt.localeCompare(a.createdAt)).slice(0, 2), [data.journal]);
   const habitsDone = data.habits.filter((h) => h.checks.includes(today)).length;
+  const eventsToday = data.events.filter((e) => e.date === today).length;
+  const pendingTasks = data.tasks.filter((t) => !t.done).length;
+  const lastEntry = journal[0];
+  const lastEntryLabel = lastEntry ? relativeDay(toISO(new Date(lastEntry.createdAt))).toLowerCase() : null;
+  const day: { to: string; icon: IconName; title: string; text: string }[] = [
+    { to: 'agenda', icon: 'calendar', title: 'Agenda', text: eventsToday ? `${plural(eventsToday, 'compromisso', 'compromissos')} hoje` : 'Nenhum compromisso hoje' },
+    { to: 'financas', icon: 'wallet', title: 'Finanças', text: dueSoon.length ? `${plural(dueSoon.length, 'conta próxima', 'contas próximas')} do vencimento` : 'Nenhuma conta vencendo nos próximos dias' },
+    { to: 'diario', icon: 'book', title: 'Diário', text: lastEntryLabel ? `Último registro: ${lastEntryLabel}` : 'Nenhum registro ainda' },
+    { to: 'agenda/tarefas', icon: 'tasks', title: 'Tarefas', text: pendingTasks ? plural(pendingTasks, 'tarefa pendente', 'tarefas pendentes') : 'Nenhuma tarefa pendente' },
+  ];
 
   const backupDays = data.settings.lastBackupAt ? Math.floor((Date.now() - new Date(data.settings.lastBackupAt).getTime()) / 864e5) : null;
   const hasData = data.expenses.length + data.journal.length + data.tasks.length + data.events.length > 0;
@@ -40,10 +64,45 @@ export function Dashboard() {
     <>
       <header className="page-header hero">
         <div className="page-title">
-          <h1>{greeting()}!</h1>
+          <h1>
+            {greeting()}! <span aria-hidden="true">{greetingEmoji()}</span>
+          </h1>
           <p className="muted">{formatLongDate(today)}</p>
         </div>
       </header>
+
+      <section className="card raised">
+        <div className="card-head">
+          <h2>Seu dia</h2>
+        </div>
+        <ul className="day-list">
+          {day.map((d) => (
+            <li key={d.title}>
+              <a href={`#/${d.to}`}>
+                <Icon name={d.icon} size={22} />
+                <span>
+                  <strong>{d.title}</strong>
+                  <span className="muted">{d.text}</span>
+                </span>
+              </a>
+            </li>
+          ))}
+        </ul>
+      </section>
+
+      <section className="card">
+        <div className="card-head">
+          <h2>Acesso rápido</h2>
+        </div>
+        <div className="quick-grid">
+          {QUICK.map((q) => (
+            <a key={q.to} href={`#/${q.to}`}>
+              <Icon name={q.icon} size={26} />
+              <span>{q.label}</span>
+            </a>
+          ))}
+        </div>
+      </section>
 
       {needsBackup && (
         <a className="alert orange" href="#/ajustes" style={{ textDecoration: 'none' }}>

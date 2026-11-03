@@ -11,12 +11,14 @@ O usuário registra; o app organiza, calcula e mostra o que importa no Início.
 
 | Módulo | O que faz |
 | --- | --- |
-| **Início** | Resumo do mês (total, já pago, em aberto), contas a vencer nos próximos 7 dias, compromissos, tarefas, últimos registros do diário e hábitos do dia. |
+| **Início** | "Seu dia" (agenda, contas, diário e tarefas), acesso rápido, resumo do mês (total, já pago, em aberto), contas a vencer nos próximos 7 dias, compromissos, tarefas, últimos registros do diário e hábitos do dia. |
 | **Finanças** | Despesas **avulsas**, **contas fixas** (todo mês, sem fim) e **parceladas** (01/12, 02/12…). Pagamento com data e valor reais. Editar ou excluir **somente esta / esta e as próximas / todas**. Categorias com ícone e cor, criadas sem sair do formulário. |
 | **Cartões** | Cadastro com fechamento, vencimento, limite e cor. Cada compra cai sozinha na fatura certa. Faturas com total, situação e pagamento; limite disponível. |
 | **Diário** | Feed privado: o registro mais novo no topo, os anteriores recolhidos, data e hora automáticas, etiqueta opcional, busca e histórico por ano e mês. |
 | **Agenda** | Calendário com compromissos, prazos de tarefas e vencimentos de contas; aba de tarefas. |
-| **Mais** | Núcleo pessoal (hábitos), Arquivo geral (anotações) e Ajustes (categorias, backup e dados). Estudos, Objetivos, Foco e Banco de ideias estão marcados como "em breve". |
+| **Mais** | Núcleo pessoal (hábitos), Arquivo geral (anotações) e Ajustes (categorias, backup e dados). |
+
+**Navegação:** atalhos inferiores (Início, Finanças, Diário, Agenda, Mais); menu ☰ com todos os módulos agrupados (Geral, Organização pessoal, Financeiro, Bem-estar, Planejamento); 🔍 **busca em tudo** (diário, despesas, agenda e anotações); botão **+** para registrar rápido. Lembretes, Metas, Relatórios, Saúde, Estudos, Foco e Banco de ideias aparecem como "em breve".
 
 ## Regras financeiras
 
@@ -65,6 +67,8 @@ src/
   store.tsx          estado global e salvamento automático
   router.ts          navegação por #endereço
   ui.tsx             ícones e componentes (janelas, campo de valor, status…)
+  nav.ts             menu agrupado de módulos
+  Search.tsx         busca em todos os módulos
   App.tsx            barra inferior, barra lateral e botão +
   modules/
     Dashboard.tsx    Início
