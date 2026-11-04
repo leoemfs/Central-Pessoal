@@ -2492,3 +2492,109 @@ button.row {
   display: block;
   margin-top: 2px;
 }
+
+/* ---------- Jornada (bloqueio e prévia) ---------- */
+
+.pixels {
+  display: grid;
+}
+.pixel-num {
+  font-family: ui-monospace, 'SF Mono', 'Roboto Mono', Menlo, Consolas, monospace;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  color: var(--green-text);
+  font-size: 2rem;
+  line-height: 1.2;
+}
+.pixel-num.small-num {
+  font-size: 1.1rem;
+}
+.pixel-num.tiny-num {
+  font-size: 0.8rem;
+  flex: none;
+}
+.journey-locked {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  text-align: center;
+}
+.journey-locked h2 {
+  font-size: 1.2rem;
+}
+.journey-locked .progress {
+  width: 100%;
+}
+.journey-scene {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 120px;
+  border-radius: var(--radius-md);
+  background: var(--raised-2);
+}
+.journey-scene.night {
+  height: 150px;
+  background: #0b1020;
+  border-bottom: 18px solid #14532d;
+  box-sizing: border-box;
+  align-items: end;
+}
+.journey-count {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+}
+.journey-hero {
+  padding: 0;
+  overflow: hidden;
+}
+.journey-hero .journey-scene {
+  border-radius: 0;
+}
+.journey-info {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.xp-bar {
+  height: 12px;
+  margin-top: 6px;
+  padding: 2px;
+  border: 2px solid var(--border-strong);
+  background: var(--raised-2);
+  box-sizing: border-box;
+}
+.xp-bar > div {
+  height: 100%;
+  background: var(--green);
+}
+.value.gold {
+  color: #eab308;
+}
+.usage-strip {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 6px;
+}
+.usage-day {
+  aspect-ratio: 1;
+  border-radius: 8px;
+  background: var(--raised);
+  display: grid;
+  place-items: center;
+  color: var(--faint);
+}
+.usage-day small {
+  font-size: 0.7rem;
+  font-weight: 600;
+}
+.usage-day.on {
+  background: var(--green);
+  color: var(--on-green);
+}
+.usage-day.today {
+  box-shadow: inset 0 0 0 2px var(--green);
+}

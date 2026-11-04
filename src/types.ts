@@ -156,6 +156,12 @@ export interface Settings {
   theme: Theme;
   seededCategories: boolean;
   lastBackupAt: string | null;
+  /** Dias (AAAA-MM-DD) em que houve algum registro no app. */
+  activeDays: string[];
+  /** Data em que a Jornada foi desbloqueada. */
+  journeyUnlockedAt: string | null;
+  /** Resposta depois de desbloquear: quer a Jornada ou não por agora. */
+  journeyChoice: 'quero' | 'depois' | null;
 }
 
 export interface AppData {

@@ -5,6 +5,7 @@ const LINKS: { path: string; hint: string }[] = [
   { path: 'nucleo', hint: 'Hábitos, rituais e autocuidado' },
   { path: 'arquivo', hint: 'Anotações e informações importantes' },
   { path: 'revisao', hint: 'Resumo da semana e reflexão' },
+  { path: 'jornada', hint: 'Desbloqueia com 14 dias de uso' },
   { path: 'ajustes', hint: 'Categorias, backup e dados' },
 ];
 

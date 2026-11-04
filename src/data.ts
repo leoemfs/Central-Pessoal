@@ -29,7 +29,7 @@ export function emptyData(): AppData {
     series: [],
     cards: [],
     categories: [],
-    settings: { theme: 'dark', seededCategories: false, lastBackupAt: null },
+    settings: { theme: 'dark', seededCategories: false, lastBackupAt: null, activeDays: [], journeyUnlockedAt: null, journeyChoice: null },
     deleted: {},
     legacy: {},
   };
@@ -44,6 +44,7 @@ export function seedCategories(d: AppData): AppData {
 }
 
 type Rec = Record<string, unknown>;
+const strings = (x: unknown): string[] => (Array.isArray(x) ? x.filter((i): i is string => typeof i === 'string') : []);
 const isRec = (x: unknown): x is Rec => typeof x === 'object' && x !== null && !Array.isArray(x);
 function list<T>(x: unknown): T[] {
   return Array.isArray(x) ? (x.filter((i) => isRec(i) && typeof i.id === 'string') as T[]) : [];
@@ -70,6 +71,9 @@ export function normalize(raw: unknown): AppData {
       theme: r.version === 2 && (settings.theme === 'light' || settings.theme === 'system') ? settings.theme : 'dark',
       seededCategories: settings.seededCategories === true,
       lastBackupAt: typeof settings.lastBackupAt === 'string' ? settings.lastBackupAt : null,
+      activeDays: strings(settings.activeDays),
+      journeyUnlockedAt: typeof settings.journeyUnlockedAt === 'string' ? settings.journeyUnlockedAt : null,
+      journeyChoice: settings.journeyChoice === 'quero' || settings.journeyChoice === 'depois' ? settings.journeyChoice : null,
     },
     deleted: isRec(r.deleted) ? (r.deleted as Record<string, string>) : {},
     legacy: isRec(r.legacy) ? r.legacy : {},
@@ -126,7 +130,6 @@ function migrateV1Transactions(d: AppData, txs: unknown[]): AppData {
 
 const KINDS: HabitKind[] = ['ritual', 'construir', 'abandonar'];
 const PERIODS: DayPeriod[] = ['manha', 'tarde', 'noite', 'livre'];
-const strings = (x: unknown): string[] => (Array.isArray(x) ? x.filter((i): i is string => typeof i === 'string') : []);
 
 /** Completa hábitos antigos (só nome, cor e dias marcados) com os campos novos. */
 export function normalizeHabit(h: Record<string, unknown>): Habit {

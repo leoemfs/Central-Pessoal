@@ -2,6 +2,7 @@ import { createContext, useCallback, useContext, useEffect, useRef, useState, ty
 import type { AppData } from './types';
 import { normalize } from './data';
 import { FIXA_AHEAD, materialize } from './finance';
+import { checkUnlock, markActive } from './journey';
 import { dbGet, dbSet, requestPersistence } from './db';
 import { addMonths, monthKey, todayISO } from './utils';
 
@@ -10,7 +11,7 @@ const LEGACY_LOCALSTORAGE_KEY = 'central-pessoal:v1';
 const channel = typeof BroadcastChannel !== 'undefined' ? new BroadcastChannel('central-pessoal') : null;
 
 /** Gera as contas fixas que já deveriam existir (ex.: virou o mês com o app aberto). */
-const catchUp = (d: AppData) => materialize(d, addMonths(monthKey(todayISO()), FIXA_AHEAD));
+const catchUp = (d: AppData) => checkUnlock(materialize(d, addMonths(monthKey(todayISO()), FIXA_AHEAD)));
 
 async function loadData(): Promise<AppData> {
   let raw = await dbGet<unknown>(KEY);
@@ -98,7 +99,16 @@ export function DataProvider({ children }: { children: ReactNode }) {
     };
   }, [flush]);
 
-  const update = useCallback((fn: Updater) => setData((d) => (d ? fn(d) : d)), []);
+  // Toda alteração feita pela pessoa conta o dia como "dia de uso" (para desbloquear a Jornada).
+  const update = useCallback(
+    (fn: Updater) =>
+      setData((d) => {
+        if (!d) return d;
+        const next = fn(d);
+        return next === d ? d : checkUnlock(markActive(next));
+      }),
+    [],
+  );
   const replace = useCallback((d: AppData) => setData(catchUp(d)), []);
 
   if (!data) {

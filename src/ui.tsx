@@ -23,6 +23,8 @@ const P: Record<string, ReactNode> = {
   notePen: <><path d="M14 3H6v18h6" /><path d="M9 8h6M9 12h4" /><path d="m14 20 6.5-6.5-2-2L12 18v2z" /></>,
   heartPulse: <><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z" /><path d="M5 12h3l1.5-2.5 2.5 5 1.5-2.5H19" /></>,
   sun: <><circle cx="12" cy="12" r="4" /><path d="M12 2.5v2M12 19.5v2M4.6 4.6 6 6M18 18l1.4 1.4M2.5 12h2M19.5 12h2M4.6 19.4 6 18M18 6l1.4-1.4" /></>,
+  lock: <><rect x="5" y="11" width="14" height="10" rx="2" /><path d="M8 11V8a4 4 0 0 1 8 0v3" /></>,
+  sword: <><path d="M14.5 4H20v5.5L9.5 20 4 14.5z" /><path d="m7 13 4 4M4.5 19.5l2-2" /></>,
   plus: <path d="M12 5v14M5 12h14" />,
   plusCircle: <><circle cx="12" cy="12" r="9" /><path d="M12 8v8M8 12h8" /></>,
   trash: <><path d="M4 7h16M10 11v6M14 11v6" /><path d="M6 7l1 13h10l1-13M9 7V4h6v3" /></>,
@@ -315,6 +317,17 @@ export function Progress({ pct, tone = 'green' }: { pct: number; tone?: 'green' 
   return (
     <div className="progress" role="progressbar" aria-valuenow={Math.round(pct)} aria-valuemin={0} aria-valuemax={100}>
       <div className={tone} style={{ width: `${Math.min(100, Math.max(0, pct))}%` }} />
+    </div>
+  );
+}
+
+/** Desenho em pixel art a partir de linhas de caracteres (cada caractere = um pixel da paleta). */
+export function Pixels({ rows, pal, size = 6 }: { rows: string[]; pal: Record<string, string>; size?: number }) {
+  return (
+    <div className="pixels" aria-hidden="true" style={{ gridTemplateColumns: `repeat(${rows[0].length}, ${size}px)`, gridAutoRows: `${size}px` }}>
+      {rows.join('').split('').map((ch, i) => (
+        <span key={i} style={{ background: pal[ch] ?? 'transparent' }} />
+      ))}
     </div>
   );
 }

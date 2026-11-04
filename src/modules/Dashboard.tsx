@@ -2,6 +2,7 @@ import { useMemo } from 'react';
 import { useStore } from '../store';
 import { toggleTask } from '../actions';
 import { cleanDays, habitsOfDay, habitStreak } from '../habits';
+import { UNLOCK_DAYS, unlockProgress } from '../journey';
 import { HabitCheck, qtyText, RiskPill } from './Habitos';
 import { monthBills, openBills, summarize } from '../finance';
 import { addDays, formatDateTime, formatLongDate, formatMoney, formatMonth, greeting, monthKey, relativeDay, toISO, todayISO } from '../utils';
@@ -46,6 +47,7 @@ export function Dashboard() {
   const otherPending = data.tasks.filter((t) => !t.done).length - tasks.length;
   const events = useMemo(() => data.events.filter((e) => e.date >= today).sort(sortEvents).slice(0, 4), [data.events, today]);
   const journal = useMemo(() => [...data.journal].sort((a, b) => b.createdAt.localeCompare(a.createdAt)).slice(0, 2), [data.journal]);
+  const journey = unlockProgress(data, today);
   const nucleo = habitsOfDay(data.habits, today);
   const routine = [...nucleo.rituals, ...nucleo.building];
   const routineDone = routine.filter((h) => h.checks.includes(today)).length;
@@ -58,6 +60,12 @@ export function Dashboard() {
     { to: 'financas', icon: 'wallet', title: 'Finanças', text: dueSoon.length ? `${plural(dueSoon.length, 'conta próxima', 'contas próximas')} do vencimento` : 'Nenhuma conta vencendo nos próximos dias' },
     { to: 'diario', icon: 'book', title: 'Diário', text: lastEntryLabel ? `Último registro: ${lastEntryLabel}` : 'Nenhum registro ainda' },
     { to: 'agenda/tarefas', icon: 'tasks', title: 'Tarefas', text: pendingTasks ? plural(pendingTasks, 'tarefa pendente', 'tarefas pendentes') : 'Nenhuma tarefa pendente' },
+    {
+      to: 'jornada',
+      icon: journey.unlocked ? 'sword' : 'lock',
+      title: 'Jornada',
+      text: journey.unlocked ? 'Desbloqueada — veja seu nível' : `${journey.active} de ${UNLOCK_DAYS} dias de uso para desbloquear`,
+    },
     { to: 'nucleo', icon: 'target', title: 'Núcleo pessoal', text: routine.length ? `${routineDone} de ${routine.length} rituais e hábitos feitos` : 'Nada programado para hoje' },
   ];
 

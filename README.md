@@ -18,6 +18,7 @@ O usuário registra; o app organiza, calcula e mostra o que importa no Início.
 | **Agenda** | Calendário com pontos para compromissos, tarefas e contas. Ao tocar num dia, abre tudo daquele dia: compromissos, tarefas, contas que vencem, compras no cartão, pagamentos feitos, rituais/hábitos (marcáveis) e registros do diário. Aba de tarefas. |
 | **Núcleo pessoal** | **Rituais** (rotinas fixas, por dias da semana, período e horário, com gatilho "depois de…"), **hábitos a construir** (progresso até virar ritual — meta padrão de 66 dias) e **hábitos a abandonar** (dias sem, recorde e recaídas). Metas com quantidade (ex.: 2.000 ml, com anel de progresso e +incremento), aviso de **"não falhe duas vezes"**, sequência que não quebra em dias fora da rotina, consistência de 30 dias e mapa das últimas 12 semanas. |
 | **Revisão semanal** | Semana de segunda a domingo: rotina (% feito e o que precisa de atenção), gastos e onde mais gastou, contas da semana seguinte, agenda, diário — e uma reflexão (o que funcionou, o que não, o que ajustar) salva no diário. Aparece no Início aos domingos e segundas. |
+| **Jornada** | **Bloqueada até 14 dias de uso dentro de 3 semanas** (um dia conta quando você registra algo; faltar não zera). Ao desbloquear, mostra o XP, o nível e o ouro que você teria ganhado com os seus dados reais — e pergunta se a Jornada completa vale a pena ou fica para depois. Especificação completa em [docs/futuro/modulo-rpg.md](docs/futuro/modulo-rpg.md). |
 | **Mais** | Núcleo pessoal (hábitos), Arquivo geral (anotações) e Configurações (tema claro/escuro/automático, categorias, backup e dados). |
 
 **Navegação:** barra superior com o nome da aba atual (no Início, a data) e a 🔍 (no Diário, busca no diário), que some ao rolar para baixo e volta ao rolar para cima; atalhos inferiores (Início, Finanças, Diário, Agenda, Mais); menu ☰ com todos os módulos agrupados (Geral, Organização pessoal, Financeiro, Bem-estar, Planejamento); 🔍 **busca em tudo** (diário, despesas, agenda e anotações); botão **+** que adiciona na aba aberta (no Início, pergunta o quê); o **voltar** do celular fecha a janela ou o menu aberto antes de sair da página. Lembretes, Metas, Relatórios, Saúde, Estudos, Foco e Banco de ideias aparecem como "em breve".
@@ -68,6 +69,8 @@ src/
   habits.test.ts     testes do Núcleo
   review.ts          revisão semanal (junta todos os módulos)
   review.test.ts     testes da revisão
+  journey.ts         desbloqueio da Jornada e XP/nível/ouro a partir dos dados
+  journey.test.ts    testes da Jornada
   data.ts            formato dos dados, categorias padrão e migração
   db.ts              IndexedDB
   store.tsx          estado global e salvamento automático

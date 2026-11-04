@@ -48,6 +48,7 @@ export const NAV_GROUPS: { title: string; items: NavItem[] }[] = [
     title: 'Planejamento',
     items: [
       { label: 'Revisão semanal', icon: 'calendarCheck', to: 'revisao', section: 'revisao' },
+      { label: 'Jornada', icon: 'sword', to: 'jornada', section: 'jornada' },
       { label: 'Estudos e trabalho', icon: 'briefcase' },
       { label: 'Foco', icon: 'timer' },
       { label: 'Banco de ideias', icon: 'bulb' },
