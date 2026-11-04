@@ -702,3 +702,36 @@ Uma campanha fixa não serve para todo mundo. Por exemplo, "14 dias sem refriger
 - **Falas personalizadas:** usam as respostas, como "Você disse 4 vezes por semana de academia…" ou "Sssó um pouquinho de doce…".
 - **Itens exclusivos das regiões novas:** Armadura da arena e Lanterna da calma.
 - **Refazer a entrevista** em Configurações da Jornada: as regiões já vencidas ficam, e só as próximas mudam.
+
+---
+
+## Anexo E — Onde a Jornada aparece (sem poluir o app)
+
+*Acrescentado em novembro de 2026. Testado na "Prévia da Jornada" (seta no topo da Jornada → Início do app).*
+
+**Regra:** fora da Jornada, o app continua sóbrio. A camada de jogo fica **num cartão só, no Início**, e o resto acontece dentro da Jornada.
+
+### E.1. No app principal
+- **Início:** um cartão compacto, depois de "Seu dia":
+  - o rosto do avatar;
+  - "Jornada · nome · nível N";
+  - uma barra fina de XP;
+  - **uma linha de status**, que mostra só a coisa mais importante, nesta ordem:
+    1. novidades desde a última visita ("Novidades: +80 XP · 3 golpes no Ogro"), com um ponto verde;
+    2. chefe em luta ("Ogro do Sofá: 12/35 de vida");
+    3. baús esperando;
+    4. quanto falta para o próximo nível.
+- **Tocar no cartão** abre a Jornada em tela cheia, com navegação própria (Jornada, Campanha, Arsenal, Baús, Ficha). A seta no topo volta ao app.
+- **Nenhum elemento de jogo no resto do app:** marcar hábito, pagar conta, escrever no diário e guardar na caixinha funcionam como hoje. Não aparece "+XP", ouro, janela de nível nem chefe.
+- **Caixinhas:** são um recurso de Finanças, com saldo, meta e barra. O pote de moedas aparece só dentro da Jornada.
+- **Configurações:** "Mostrar a Jornada no Início" e "Desligar a Jornada".
+
+### E.2. Ao entrar na Jornada: "Desde a sua última visita"
+- Ao sair da Jornada, o app guarda um retrato do momento: XP, ouro, cristais, atributos, vida do chefe e baús.
+- Ao voltar, um resumo animado mostra a diferença:
+  - XP, ouro e cristais contando;
+  - os atributos que subiram;
+  - **os golpes no chefe**, com a barra de vida caindo golpe por golpe;
+  - os baús novos;
+  - os dias que passaram.
+- **Depois do resumo** vêm, em ordem, os acontecimentos que ficaram guardados: subidas de nível, títulos, chefe que apareceu, vitória, marcos de caixinha. Assim a recompensa fica toda junta, e o resumo vira o motivo para abrir a Jornada.
