@@ -655,3 +655,50 @@ interface CampaignState {
 ```
 
 Os contadores dos objetivos (rituais, contas no prazo, dias limpos, revisões etc.) são **calculados a partir dos dados**, contando desde `chapterStart`. A vida do chefe também: missões cumpridas entre `boss.start` e hoje. Assim, desmarcar algo marcado por engano corrige tudo sozinho.
+
+---
+
+## Anexo D — Entrevista e campanha personalizada
+
+*Acrescentado em novembro de 2026. Testada na "Prévia da Jornada".*
+
+Uma campanha fixa não serve para todo mundo. Por exemplo, "14 dias sem refrigerante" é fácil demais para quem não toma refrigerante. Por isso, logo depois de criar o avatar, a **Mestra Lume faz uma entrevista curta** (cerca de 1 minuto, quase tudo com um toque) e monta a campanha com as respostas.
+
+### D.1. Perguntas
+1. **O que você mais quer melhorar agora?** Até 3, em ordem de prioridade:
+   - Corpo e saúde
+   - Rotina e organização
+   - Mente e estudo
+   - Dinheiro
+   - Largar um hábito
+   - Bem-estar
+2. **Uma pergunta de detalhe por área escolhida:**
+   - corpo: atividade (academia, corrida, caminhada, natação) e quantas vezes por semana (2 a 5);
+   - rotina: o ritual (arrumar a cama, acordar no mesmo horário, organizar a casa, planejar o dia);
+   - mente: o quê (ler, idioma, curso) e quanto por dia (10, 20 ou 30 min);
+   - dinheiro: o maior desafio (contas atrasando, gastar demais, não saber quanto entra) e se quer juntar para algo (viagem, reserva, carro, outro). Se quiser, também a meta e quanto dá para guardar. Isso cria uma **caixinha** (ver `caixinhas.md`);
+   - largar: qual hábito (redes sociais à noite, doce, cigarro, refrigerante ou outro, escrito pela pessoa);
+   - bem-estar: meditar, respirar, gratidões ou terapia semanal.
+3. **Melhor horário** para os rituais: manhã, tarde ou noite.
+4. **Ritmo:** tranquilo, equilibrado ou desafiador. Multiplica o tamanho dos objetivos (0,7 / 1 / 1,3) e a vida dos chefes (60% / 80% / 95% das missões).
+5. **Resumo:** as regiões da campanha, as missões do dia que serão criadas e a caixinha. Tem "Voltar" para mudar qualquer resposta.
+
+### D.2. Como a campanha se monta
+- **Sempre no começo:** Vila do Começo, o tutorial.
+- **Sempre no final:** Montanha da Disciplina (revisão semanal) e Castelo do Caos.
+- **No meio:** uma região por área escolhida, **na ordem das prioridades**. São duas regiões novas mais as que já existiam:
+
+| Área | Região | Chefe | Objetivos (ritmo equilibrado) |
+|---|---|---|---|
+| Rotina | Floresta da Rotina | Lobo da Preguiça | 7 dias seguidos · 20 rituais |
+| Corpo | **Arena de Ferro** (nova, com o Tork) | **Ogro do Sofá** | treinos = 2 semanas na frequência escolhida |
+| Mente | Torre do Saber | Guardião do Esquecimento | estudar em 10 dias · 7 registros no diário |
+| Dinheiro | Mercado de Ouro | Goblin dos Juros | com caixinha: criar e guardar 4 vezes; e conforme o desafio: contas no prazo, anotar gastos em 10 dias ou cadastrar o salário |
+| Largar | Pântano das Tentações | Serpente do Vício (cita o hábito da pessoa) | 14 dias sem o hábito |
+| Bem-estar | **Jardim da Calma** (nova) | **Sombra da Ansiedade** | a prática escolhida em 10 dias (ou 3 sessões semanais) · 5 registros no diário |
+
+- **Poucas áreas:** com só 1 área, a Floresta da Rotina entra para a campanha ter pelo menos 3 regiões antes da Montanha.
+- **Hábitos que faltam:** se a pessoa escolhe algo que ainda não tem cadastrado, a entrevista cria o hábito no Núcleo, com o nome, a frequência e o horário respondidos. A campanha só lê dados reais.
+- **Falas personalizadas:** usam as respostas, como "Você disse 4 vezes por semana de academia…" ou "Sssó um pouquinho de doce…".
+- **Itens exclusivos das regiões novas:** Armadura da arena e Lanterna da calma.
+- **Refazer a entrevista** em Configurações da Jornada: as regiões já vencidas ficam, e só as próximas mudam.
