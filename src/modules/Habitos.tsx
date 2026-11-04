@@ -470,7 +470,7 @@ function HabitDetail({ id, onClose, onEdit }: { id: string; onClose: () => void;
                 </dd>
               </div>
             )}
-            {h.attrs.length > 0 && (
+            {data.settings.journeyUnlockedAt && h.attrs.length > 0 && (
               <div>
                 <dt>Treina</dt>
                 <dd>{h.attrs.map((c) => ATTRIBUTES.find((a) => a.code === c)?.name ?? c).join(', ')}</dd>
@@ -533,8 +533,11 @@ function HabitForm({ kind: initialKind, habit, onClose }: { kind: HabitKind; hab
   const [target, setTarget] = useState(habit?.target ?? DEFAULT_TARGET);
   const [startDate, setStartDate] = useState(habit?.startDate ?? todayISO());
   const [color, setColor] = useState(habit?.color ?? HABIT_COLORS[data.habits.length % HABIT_COLORS.length]);
+  // Atributos são da Jornada: ficam escondidos até ela desbloquear, mas
+  // continuam sendo sugeridos pelo nome e salvos, para já existir histórico.
+  const journeyOpen = Boolean(data.settings.journeyUnlockedAt);
   const [attrs, setAttrs] = useState<string[]>(habit?.attrs ?? []);
-  const [attrsTouched, setAttrsTouched] = useState(Boolean(habit));
+  const [attrsTouched, setAttrsTouched] = useState(journeyOpen && Boolean(habit));
   const [hasGoal, setHasGoal] = useState(habit ? habit.goal !== null : false);
   const [goal, setGoal] = useState(habit?.goal ? fmtQty(habit.goal) : '');
   const [unit, setUnit] = useState(habit?.unit ?? '');
@@ -618,33 +621,35 @@ function HabitForm({ kind: initialKind, habit, onClose }: { kind: HabitKind; hab
         />
       </Field>
 
-      <div className="field">
-        <span className="field-label">Treina quais atributos?</span>
-        <div className="attr-grid" role="group" aria-label="Atributos">
-          {ATTRIBUTES.map((a) => {
-            const on = attrs.includes(a.code);
-            return (
-              <button
-                key={a.code}
-                type="button"
-                aria-pressed={on}
-                className={`attr-chip${on ? ' on' : ''}`}
-                style={on ? { borderColor: a.color } : undefined}
-                onClick={() => {
-                  setAttrsTouched(true);
-                  setAttrs((cur) => (cur.includes(a.code) ? cur.filter((x) => x !== a.code) : [...cur, a.code]));
-                }}
-              >
-                <span className="attr-code" style={{ color: a.color }}>
-                  {a.code}
-                </span>
-                {a.name}
-              </button>
-            );
-          })}
+      {journeyOpen && (
+        <div className="field">
+          <span className="field-label">Treina quais atributos?</span>
+          <div className="attr-grid" role="group" aria-label="Atributos">
+            {ATTRIBUTES.map((a) => {
+              const on = attrs.includes(a.code);
+              return (
+                <button
+                  key={a.code}
+                  type="button"
+                  aria-pressed={on}
+                  className={`attr-chip${on ? ' on' : ''}`}
+                  style={on ? { borderColor: a.color } : undefined}
+                  onClick={() => {
+                    setAttrsTouched(true);
+                    setAttrs((cur) => (cur.includes(a.code) ? cur.filter((x) => x !== a.code) : [...cur, a.code]));
+                  }}
+                >
+                  <span className="attr-code" style={{ color: a.color }}>
+                    {a.code}
+                  </span>
+                  {a.name}
+                </button>
+              );
+            })}
+          </div>
+          <span className="field-hint">{attrsTouched ? 'Usados pela Jornada para evoluir o seu personagem.' : 'Sugeridos pelo nome — toque para trocar.'}</span>
         </div>
-        <span className="field-hint">{attrsTouched ? 'Usados pela Jornada para evoluir o seu personagem.' : 'Sugeridos pelo nome — toque para trocar.'}</span>
-      </div>
+      )}
 
       {quit ? (
         <Field label="Sem desde" hint="O contador de dias começa aqui.">

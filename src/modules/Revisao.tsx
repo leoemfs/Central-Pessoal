@@ -119,7 +119,7 @@ export function Revisao() {
                   </li>
                 );
               })}
-              {r.attributes.length > 0 && (
+              {data.settings.journeyUnlockedAt && r.attributes.length > 0 && (
                 <li className="attr-week">
                   <span className="muted small">Atributos treinados</span>
                   <span className="attr-week-list">
