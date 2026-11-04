@@ -1,171 +1,277 @@
 import { useMemo } from 'react';
 import { useStore } from '../store';
-import { toggleHabit, toggleTask } from '../actions';
-import { formatLongDate, formatMoney, formatMonth, greeting, monthKey, streak, todayISO } from '../utils';
-import { Card, Empty, Icon } from '../ui';
+import { toggleTask } from '../actions';
+import { cleanDays, habitsOfDay, habitStreak } from '../habits';
+import { UNLOCK_DAYS, unlockProgress } from '../journey';
+import { HabitCheck, qtyText, RiskPill } from './Habitos';
+import { monthBills, openBills, summarize } from '../finance';
+import { addDays, formatDateTime, formatLongDate, formatMoney, formatMonth, greeting, monthKey, relativeDay, toISO, todayISO } from '../utils';
+import { Empty, Icon, Pill, Progress, type IconName } from '../ui';
 import { sortTasks, TaskItem } from './Tarefas';
-import { monthTotals } from './Financas';
 import { EventItem, sortEvents } from './Agenda';
+import { entrySummary, entryTitle } from './Diario';
+import { BillRow } from './financas/Financas';
+import { useCategoryOf } from './financas/shared';
 
-function SeeAll({ href }: { href: string }) {
+function SeeAll({ href, label = 'Ver tudo' }: { href: string; label?: string }) {
   return (
     <a className="link" href={href}>
-      Ver tudo
+      {label}
     </a>
   );
 }
 
+const QUICK: { to: string; label: string; icon: IconName }[] = [
+  { to: 'financas/nova', label: 'Nova despesa', icon: 'plusCircle' },
+  { to: 'diario/nova', label: 'Escrever diário', icon: 'notePen' },
+  { to: 'agenda/novo-compromisso', label: 'Compromisso', icon: 'calendarPlus' },
+  { to: 'agenda/nova-tarefa', label: 'Nova tarefa', icon: 'listPlus' },
+];
+
+function greetingEmoji(): string {
+  const h = new Date().getHours();
+  return h >= 5 && h < 12 ? '☀️' : h >= 12 && h < 18 ? '🌤️' : '🌙';
+}
+
+const plural = (n: number, one: string, many: string) => `${n} ${n === 1 ? one : many}`;
+
 export function Dashboard() {
   const { data, update } = useStore();
+  const categoryOf = useCategoryOf();
   const today = todayISO();
   const month = monthKey(today);
 
-  const dueTasks = useMemo(() => data.tasks.filter((t) => !t.done && t.due !== null && t.due <= today).sort(sortTasks), [data.tasks, today]);
-  const otherPending = data.tasks.filter((t) => !t.done).length - dueTasks.length;
-  const todayEvents = useMemo(() => data.events.filter((e) => e.date === today).sort(sortEvents), [data.events, today]);
-  const nextEvents = useMemo(() => data.events.filter((e) => e.date > today).sort(sortEvents).slice(0, 3), [data.events, today]);
-  const totals = useMemo(() => monthTotals(data.transactions, month), [data.transactions, month]);
-  const pinned = useMemo(() => data.notes.filter((n) => n.pinned).sort((a, b) => b.updatedAt.localeCompare(a.updatedAt)).slice(0, 4), [data.notes]);
-  const habitsDone = data.habits.filter((h) => h.checks.includes(today)).length;
+  const summary = useMemo(() => summarize(monthBills(data, month, today)), [data, month, today]);
+  const dueSoon = useMemo(() => openBills(data, addDays(today, 7), today), [data, today]);
+  const tasks = useMemo(() => data.tasks.filter((t) => !t.done && t.due !== null && t.due <= addDays(today, 1)).sort(sortTasks), [data.tasks, today]);
+  const otherPending = data.tasks.filter((t) => !t.done).length - tasks.length;
+  const events = useMemo(() => data.events.filter((e) => e.date >= today).sort(sortEvents).slice(0, 4), [data.events, today]);
+  const journal = useMemo(() => [...data.journal].sort((a, b) => b.createdAt.localeCompare(a.createdAt)).slice(0, 2), [data.journal]);
+  const journey = unlockProgress(data, today);
+  const nucleo = habitsOfDay(data.habits, today);
+  const routine = [...nucleo.rituals, ...nucleo.building];
+  const routineDone = routine.filter((h) => h.checks.includes(today)).length;
+  const eventsToday = data.events.filter((e) => e.date === today).length;
+  const pendingTasks = data.tasks.filter((t) => !t.done).length;
+  const lastEntry = journal[0];
+  const lastEntryLabel = lastEntry ? relativeDay(toISO(new Date(lastEntry.createdAt))).toLowerCase() : null;
+  const day: { to: string; icon: IconName; title: string; text: string }[] = [
+    { to: 'agenda', icon: 'calendar', title: 'Agenda', text: eventsToday ? `${plural(eventsToday, 'compromisso', 'compromissos')} hoje` : 'Nenhum compromisso hoje' },
+    { to: 'financas', icon: 'wallet', title: 'Finanças', text: dueSoon.length ? `${plural(dueSoon.length, 'conta próxima', 'contas próximas')} do vencimento` : 'Nenhuma conta vencendo nos próximos dias' },
+    { to: 'diario', icon: 'book', title: 'Diário', text: lastEntryLabel ? `Último registro: ${lastEntryLabel}` : 'Nenhum registro ainda' },
+    { to: 'agenda/tarefas', icon: 'tasks', title: 'Tarefas', text: pendingTasks ? plural(pendingTasks, 'tarefa pendente', 'tarefas pendentes') : 'Nenhuma tarefa pendente' },
+    {
+      to: 'jornada',
+      icon: journey.unlocked ? 'sword' : 'lock',
+      title: 'Jornada',
+      text: journey.unlocked ? 'Desbloqueada — veja seu nível' : `${journey.active} de ${UNLOCK_DAYS} dias de uso para desbloquear`,
+    },
+    { to: 'nucleo', icon: 'target', title: 'Núcleo pessoal', text: routine.length ? `${routineDone} de ${routine.length} rituais e hábitos feitos` : 'Nada programado para hoje' },
+  ];
 
-  const isEmpty = data.tasks.length + data.events.length + data.transactions.length + data.habits.length + data.notes.length === 0;
+  const backupDays = data.settings.lastBackupAt ? Math.floor((Date.now() - new Date(data.settings.lastBackupAt).getTime()) / 864e5) : null;
+  const hasData = data.expenses.length + data.journal.length + data.tasks.length + data.events.length > 0;
+  const needsBackup = hasData && (backupDays === null || backupDays > 30);
 
   return (
     <>
       <header className="page-header hero">
-        <div>
-          <h1>{greeting()}!</h1>
-          <p className="muted">{formatLongDate(today)}</p>
+        <div className="page-title">
+          <h1>
+            {greeting()}! <span aria-hidden="true">{greetingEmoji()}</span>
+          </h1>
+          <p className="muted desktop-only">{formatLongDate(today)}</p>
         </div>
       </header>
 
-      {isEmpty && (
-        <Card className="welcome">
-          <h2>Bem-vindo à sua Central Pessoal</h2>
-          <p className="muted">Tudo fica salvo apenas neste aparelho, no seu navegador. Comece por onde quiser:</p>
-          <div className="quick-links">
-            <a className="btn" href="#/tarefas"><Icon name="tasks" size={18} /> Criar tarefa</a>
-            <a className="btn" href="#/financas"><Icon name="wallet" size={18} /> Lançar gasto</a>
-            <a className="btn" href="#/habitos"><Icon name="target" size={18} /> Criar hábito</a>
-            <a className="btn" href="#/notas"><Icon name="note" size={18} /> Escrever nota</a>
-            <a className="btn" href="#/agenda"><Icon name="calendar" size={18} /> Marcar evento</a>
-          </div>
-        </Card>
+      <section className="card raised">
+        <div className="card-head">
+          <h2>Seu dia</h2>
+        </div>
+        <ul className="day-list">
+          {day.map((d) => (
+            <li key={d.title}>
+              <a href={`#/${d.to}`}>
+                <Icon name={d.icon} size={22} />
+                <span>
+                  <strong>{d.title}</strong>
+                  <span className="muted">{d.text}</span>
+                </span>
+              </a>
+            </li>
+          ))}
+        </ul>
+      </section>
+
+      <section className="card">
+        <div className="card-head">
+          <h2>Acesso rápido</h2>
+        </div>
+        <div className="quick-grid">
+          {QUICK.map((q) => (
+            <a key={q.to} href={`#/${q.to}`}>
+              <Icon name={q.icon} size={26} />
+              <span>{q.label}</span>
+            </a>
+          ))}
+        </div>
+      </section>
+
+      {(new Date().getDay() === 0 || new Date().getDay() === 1) && (
+        <a className="card review-cta" href="#/revisao">
+          <Icon name="calendarCheck" size={26} />
+          <span>
+            <strong>Hora da revisão semanal</strong>
+            <span className="muted small">Veja como foi a semana em todas as áreas e anote o que ajustar.</span>
+          </span>
+          <Icon name="right" size={18} />
+        </a>
       )}
 
-      <div className="stats">
-        <a className="stat" href="#/tarefas">
-          <span className="stat-label">Tarefas para hoje</span>
-          <span className="stat-value">{dueTasks.length}</span>
+      {needsBackup && (
+        <a className="alert orange" href="#/ajustes" style={{ textDecoration: 'none' }}>
+          {backupDays === null ? 'Você ainda não fez um backup.' : `Último backup há ${backupDays} dias.`} Seus dados ficam só neste aparelho — toque para exportar.
         </a>
-        <a className="stat" href="#/habitos">
-          <span className="stat-label">Hábitos hoje</span>
-          <span className="stat-value">
-            {habitsDone}/{data.habits.length}
-          </span>
-        </a>
-        <a className="stat" href="#/financas">
-          <span className="stat-label">Saldo de {formatMonth(month).split(' ')[0].toLowerCase()}</span>
-          <span className={`stat-value ${totals.balance >= 0 ? 'positive' : 'negative'}`}>{formatMoney(totals.balance)}</span>
-        </a>
-        <a className="stat" href="#/agenda">
-          <span className="stat-label">Eventos hoje</span>
-          <span className="stat-value">{todayEvents.length}</span>
-        </a>
-      </div>
+      )}
 
       <div className="grid-2">
-        <Card title="Tarefas de hoje e atrasadas" action={<SeeAll href="#/tarefas" />}>
-          {dueTasks.length === 0 ? (
-            <Empty>{otherPending > 0 ? `Nada vencendo hoje. Você tem ${otherPending} outra(s) pendente(s).` : 'Tudo em dia!'}</Empty>
-          ) : (
-            <ul className="list">
-              {dueTasks.slice(0, 8).map((t) => (
-                <TaskItem key={t.id} task={t} onToggle={() => update(toggleTask(t.id))} />
-              ))}
-            </ul>
-          )}
-        </Card>
+        <div className="stack">
+          <section className="card">
+            <div className="card-head">
+              <h2>{formatMonth(month)}</h2>
+              <SeeAll href="#/financas" label="Finanças" />
+            </div>
+            <div className="summary">
+              <div className="summary-box">
+                <span className="label">Total do mês</span>
+                <span className="value">{formatMoney(summary.total)}</span>
+              </div>
+              <div className="summary-box">
+                <span className="label">Já pago</span>
+                <span className="value green">{formatMoney(summary.paid)}</span>
+              </div>
+              <div className="summary-box full">
+                <span className="label">Em aberto</span>
+                <span className={`value ${summary.open > 0 ? 'orange' : ''}`}>{formatMoney(summary.open)}</span>
+                <Progress pct={summary.pct} />
+              </div>
+            </div>
+          </section>
 
-        <Card title="Agenda" action={<SeeAll href="#/agenda" />}>
-          {todayEvents.length === 0 && nextEvents.length === 0 ? (
-            <Empty>Nenhum evento marcado.</Empty>
-          ) : (
-            <ul className="list">
-              {todayEvents.map((e) => (
-                <EventItem key={e.id} ev={e} />
-              ))}
-              {todayEvents.length === 0 && <li className="list-note muted small">Nada hoje. Próximos:</li>}
-              {nextEvents.map((e) => (
-                <EventItem key={e.id} ev={e} showDate />
-              ))}
-            </ul>
-          )}
-        </Card>
+          <section className="card">
+            <div className="card-head">
+              <h2>Contas a vencer</h2>
+              <span className="muted small">próximos 7 dias</span>
+            </div>
+            {dueSoon.length === 0 ? (
+              <Empty>Nenhuma conta vencendo. 🎉</Empty>
+            ) : (
+              <ul className="list">
+                {dueSoon.slice(0, 6).map((b) => (
+                  <li key={b.key}>
+                    <BillRow bill={b} today={today} categoryOf={categoryOf} onClick={() => (location.hash = '/financas')} />
+                  </li>
+                ))}
+              </ul>
+            )}
+          </section>
 
-        <Card title="Hábitos de hoje" action={<SeeAll href="#/habitos" />}>
-          {data.habits.length === 0 ? (
-            <Empty>Nenhum hábito cadastrado.</Empty>
-          ) : (
-            <ul className="list">
-              {data.habits.map((h) => {
-                const on = h.checks.includes(today);
-                const s = streak(h.checks);
-                return (
+          <section className="card">
+            <div className="card-head">
+              <h2>Meu diário</h2>
+              <SeeAll href="#/diario" />
+            </div>
+            {journal.length === 0 ? (
+              <Empty>Nenhum registro ainda.</Empty>
+            ) : (
+              journal.map((e) => (
+                <a key={e.id} className="dash-entry" href="#/diario">
+                  <span className="row-title">{entryTitle(e)}</span>
+                  <span className="row-meta">{formatDateTime(e.createdAt)}</span>
+                  {entrySummary(e) && <p className="muted small" style={{ marginTop: 4 }}>{entrySummary(e)}</p>}
+                </a>
+              ))
+            )}
+            <a className="btn soft block" href="#/diario/nova" style={{ marginTop: 12 }}>
+              <Icon name="plusCircle" size={18} /> <span className="green">Nova atualização</span>
+            </a>
+          </section>
+        </div>
+
+        <div className="stack">
+          <section className="card">
+            <div className="card-head">
+              <h2>Compromissos</h2>
+              <SeeAll href="#/agenda" />
+            </div>
+            {events.length === 0 ? (
+              <Empty>Nenhum compromisso marcado.</Empty>
+            ) : (
+              <ul className="list">
+                {events.map((e) => (
+                  <EventItem key={e.id} ev={e} showDate />
+                ))}
+              </ul>
+            )}
+          </section>
+
+          <section className="card">
+            <div className="card-head">
+              <h2>Tarefas</h2>
+              <SeeAll href="#/agenda/tarefas" />
+            </div>
+            {tasks.length === 0 ? (
+              <Empty>{otherPending > 0 ? `Nada para hoje. ${otherPending} pendente(s) sem urgência.` : 'Tudo em dia!'}</Empty>
+            ) : (
+              <ul className="list">
+                {tasks.slice(0, 6).map((t) => (
+                  <TaskItem key={t.id} task={t} onToggle={() => update(toggleTask(t.id))} />
+                ))}
+              </ul>
+            )}
+          </section>
+
+          {(routine.length > 0 || nucleo.quitting.length > 0) && (
+            <section className="card">
+              <div className="card-head">
+                <h2>Núcleo de hoje</h2>
+                <a className="link" href="#/nucleo">
+                  Ver tudo
+                </a>
+              </div>
+              <ul className="list">
+                {routine.map((h) => (
                   <li key={h.id} className="row">
-                    <button
-                      type="button"
-                      className={`check${on ? ' on' : ''}`}
-                      style={on ? { background: h.color, borderColor: h.color } : { borderColor: h.color }}
-                      onClick={() => update(toggleHabit(h.id))}
-                      aria-pressed={on}
-                      aria-label={`Marcar "${h.name}" hoje`}
-                    >
-                      {on && <Icon name="check" size={14} />}
-                    </button>
+                    <HabitCheck h={h} day={today} label={`Marcar "${h.name}" hoje`} />
                     <div className="row-body">
                       <span className="row-title">{h.name}</span>
+                      <span className="row-meta">
+                        {h.kind === 'ritual' ? 'Ritual' : 'Construindo'}
+                        {h.time ? ` · ${h.time}` : ''}
+                        {qtyText(h, today) ? ` · ${qtyText(h, today)}` : ''}
+                      </span>
                     </div>
-                    <span className="chip">
-                      <Icon name="flame" size={13} /> {s}
+                    <RiskPill h={h} today={today} />
+                    <span className="pill">
+                      <Icon name="flame" size={13} /> {habitStreak(h, today)}
                     </span>
                   </li>
-                );
-              })}
-            </ul>
+                ))}
+                {nucleo.quitting.map((h) => (
+                  <li key={h.id} className="row">
+                    <span className="dot" style={{ background: h.color }} />
+                    <div className="row-body">
+                      <span className="row-title">{h.name}</span>
+                      <span className="row-meta">Abandonando</span>
+                    </div>
+                    <Pill tone="green">{cleanDays(h, today)} dias sem</Pill>
+                  </li>
+                ))}
+              </ul>
+            </section>
           )}
-        </Card>
-
-        <Card title={`Finanças · ${formatMonth(month)}`} action={<SeeAll href="#/financas" />}>
-          <dl className="kv">
-            <div>
-              <dt>Receitas</dt>
-              <dd className="positive">{formatMoney(totals.income)}</dd>
-            </div>
-            <div>
-              <dt>Despesas</dt>
-              <dd className="negative">{formatMoney(totals.expense)}</dd>
-            </div>
-            <div>
-              <dt>Saldo</dt>
-              <dd className={totals.balance >= 0 ? 'positive' : 'negative'}>{formatMoney(totals.balance)}</dd>
-            </div>
-          </dl>
-        </Card>
+        </div>
       </div>
-
-      {pinned.length > 0 && (
-        <Card title="Notas fixadas" action={<SeeAll href="#/notas" />}>
-          <div className="pinned">
-            {pinned.map((n) => (
-              <a key={n.id} className="pinned-note" href="#/notas">
-                <strong>{n.title.trim() || 'Sem título'}</strong>
-                <span className="note-preview">{n.content.slice(0, 160)}</span>
-              </a>
-            ))}
-          </div>
-        </Card>
-      )}
     </>
   );
 }

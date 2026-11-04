@@ -1,5 +1,5 @@
 // Service worker simples: permite abrir o app offline depois da primeira visita.
-const CACHE = 'central-pessoal-v1';
+const CACHE = 'central-pessoal-v2';
 const SHELL = ['./', './index.html', './manifest.webmanifest', './icon.svg', './icon-192.png'];
 
 self.addEventListener('install', (event) => {

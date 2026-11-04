@@ -17,15 +17,14 @@ export function remove(key: Collection, id: string) {
   return (d: AppData): AppData => ({
     ...d,
     [key]: (d[key] as { id: string }[]).filter((x) => x.id !== id),
+    deleted: { ...d.deleted, [id]: new Date().toISOString() },
   });
 }
 
 export function toggleTask(id: string) {
   return (d: AppData): AppData => ({
     ...d,
-    tasks: d.tasks.map((t) =>
-      t.id === id ? { ...t, done: !t.done, doneAt: t.done ? null : new Date().toISOString() } : t,
-    ),
+    tasks: d.tasks.map((t) => (t.id === id ? { ...t, done: !t.done, doneAt: t.done ? null : new Date().toISOString() } : t)),
   });
 }
 

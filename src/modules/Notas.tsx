@@ -1,4 +1,6 @@
 import { useMemo, useState } from 'react';
+import type { ViewProps } from '../App';
+import { useSubAction } from '../router';
 import { useStore } from '../store';
 import { remove, upsert } from '../actions';
 import type { Note } from '../types';
@@ -11,7 +13,7 @@ function formatUpdated(iso: string): string {
 
 const isBlank = (n: Note) => !n.title.trim() && !n.content.trim();
 
-export function Notas() {
+export function Notas({ route }: ViewProps) {
   const { data, update } = useStore();
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [query, setQuery] = useState('');
@@ -24,6 +26,7 @@ export function Notas() {
   }, [data.notes, query]);
 
   const selected = data.notes.find((n) => n.id === selectedId) ?? null;
+  useSubAction(route, 'arquivo', { nova: () => create() });
 
   /** Troca a nota aberta, descartando a anterior se ela ficou vazia. */
   function select(id: string | null) {
@@ -55,13 +58,8 @@ export function Notas() {
   return (
     <>
       <PageHeader
-        title="Notas"
-        subtitle={`${data.notes.length} nota(s)`}
-        actions={
-          <button type="button" className="btn primary" onClick={create}>
-            <Icon name="plus" size={18} /> Nova nota
-          </button>
-        }
+        title="Arquivo geral"
+        subtitle={`${data.notes.length} anotação(ões)`}
       />
 
       <div className={`notes${selected ? ' has-selection' : ''}`}>

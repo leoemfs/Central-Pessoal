@@ -5,7 +5,7 @@ export function uid(): string {
   return Date.now().toString(36) + Math.random().toString(36).slice(2, 10);
 }
 
-const pad = (n: number) => String(n).padStart(2, '0');
+export const pad = (n: number) => String(n).padStart(2, '0');
 
 /** Data local (não UTC) no formato AAAA-MM-DD. */
 export function toISO(d: Date): string {
@@ -104,3 +104,30 @@ export function streak(checks: string[]): number {
   }
   return n;
 }
+
+/** Dia do mês limitado ao tamanho do mês (ex.: dia 31 em fevereiro → 28/29). */
+export function clampDay(month: string, day: number): string {
+  return `${month}-${pad(Math.min(Math.max(day, 1), daysInMonth(month)))}`;
+}
+
+export function dayOf(s: string): number {
+  return Number(s.slice(8, 10));
+}
+
+/** "03/11/2026" */
+export function formatDMY(s: string): string {
+  return `${s.slice(8, 10)}/${s.slice(5, 7)}/${s.slice(0, 4)}`;
+}
+
+/** "03/11/2026 · 17:30" a partir de um ISO completo. */
+export function formatDateTime(iso: string): string {
+  const d = new Date(iso);
+  return `${formatDMY(toISO(d))} · ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+
+export function nowTime(): string {
+  const d = new Date();
+  return `${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+
+export const sum = (xs: number[]) => Math.round(xs.reduce((a, b) => a + b, 0) * 100) / 100;

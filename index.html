@@ -3,12 +3,15 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-    <meta name="description" content="Tarefas, finanças, hábitos, notas e agenda em um só lugar." />
-    <meta name="theme-color" content="#4f46e5" />
+    <meta name="description" content="Finanças, diário, agenda e organização pessoal em um só lugar." />
+    <meta name="theme-color" content="#000000" />
     <link rel="icon" type="image/svg+xml" href="./icon.svg" />
     <link rel="apple-touch-icon" href="./icon-192.png" />
     <link rel="manifest" href="./manifest.webmanifest" />
     <title>Central Pessoal</title>
+    <script>
+      try { document.documentElement.dataset.theme = localStorage.getItem('central-pessoal:theme') || 'dark'; } catch (e) { document.documentElement.dataset.theme = 'dark'; }
+    </script>
   </head>
   <body>
     <div id="root"></div>
