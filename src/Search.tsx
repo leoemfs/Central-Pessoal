@@ -51,6 +51,14 @@ export function SearchSheet({ onClose }: { onClose: () => void }) {
           .map((e) => ({ key: e.id, icon: 'wallet', title: e.description, meta: `${formatMoney(e.amount)} · ${formatDMY(e.dueDate)}`, to: 'financas' })),
       },
       {
+        title: 'Receitas',
+        hits: data.incomes
+          .filter((i) => has(i.description))
+          .sort((a, b) => b.date.localeCompare(a.date))
+          .filter((i, idx, arr) => !i.seriesId || arr.findIndex((x) => x.seriesId === i.seriesId) === idx)
+          .map((i) => ({ key: i.id, icon: 'coins' as IconName, title: i.description, meta: `+ ${formatMoney(i.amount)} · ${formatDMY(i.date)}`, to: 'financas/receitas' })),
+      },
+      {
         title: 'Agenda',
         hits: [
           ...data.events.filter((e) => has(e.title, e.location, e.description)).map((e) => ({ key: e.id, icon: 'calendar' as IconName, title: e.title, meta: formatDMY(e.date), to: 'agenda' })),
@@ -58,7 +66,7 @@ export function SearchSheet({ onClose }: { onClose: () => void }) {
         ],
       },
       {
-        title: 'Arquivo geral',
+        title: 'Notas',
         hits: data.notes.filter((n) => has(n.title, n.content)).map((n) => ({ key: n.id, icon: 'note', title: n.title || 'Sem título', meta: n.content.slice(0, 60), to: 'arquivo' })),
       },
     ];

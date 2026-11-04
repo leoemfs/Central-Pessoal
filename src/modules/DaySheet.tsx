@@ -15,6 +15,7 @@ import { ExpenseDetail } from './financas/ExpenseDetail';
 import { ExpenseForm } from './financas/ExpenseForm';
 import { InvoiceSheet } from './financas/InvoiceSheet';
 import { BillStatusPill, CreditCardVisual, useCategoryOf } from './financas/shared';
+import { IncomeDetail, IncomeRow } from './financas/Receitas';
 
 function Section({ icon, title, extra, children }: { icon: IconName; title: string; extra?: ReactNode; children: ReactNode }) {
   return (
@@ -54,6 +55,7 @@ export function DaySheet({
   const [expenseId, setExpenseId] = useState<string | null>(null);
   const [invoice, setInvoice] = useState<{ cardId: string; month: string } | null>(null);
   const [newExpense, setNewExpense] = useState(false);
+  const [incomeId, setIncomeId] = useState<string | null>(null);
 
   // Agenda
   const events = data.events.filter((e) => e.date === day).sort(sortEvents);
@@ -70,7 +72,8 @@ export function DaySheet({
   const paidExpenses = data.expenses.filter((e) => !e.cardId && e.paidAt === day && e.dueDate !== day);
   const paidInvoices = invoices.filter((i) => i.paidAt === day && i.dueDate !== day);
   const dueTotal = sum([...dueExpenses.map((e) => e.amount), ...dueInvoices.map((i) => i.total)]);
-  const hasMoney = dueExpenses.length + dueInvoices.length + purchases.length + paidExpenses.length + paidInvoices.length > 0;
+  const incomesDay = data.incomes.filter((i) => i.date === day || i.receivedAt === day);
+  const hasMoney = dueExpenses.length + dueInvoices.length + purchases.length + paidExpenses.length + paidInvoices.length + incomesDay.length > 0;
 
   // Núcleo pessoal
   const nucleo = habitsOfDay(data.habits, day);
@@ -197,6 +200,18 @@ export function DaySheet({
                 </ul>
               </>
             )}
+            {incomesDay.length > 0 && (
+              <>
+                <p className="day-sub">Receitas</p>
+                <ul className="list">
+                  {incomesDay.map((i) => (
+                    <li key={i.id}>
+                      <IncomeRow income={i} today={today} onClick={() => setIncomeId(i.id)} />
+                    </li>
+                  ))}
+                </ul>
+              </>
+            )}
             {(paidExpenses.length > 0 || paidInvoices.length > 0) && (
               <>
                 <p className="day-sub">Pagamentos feitos</p>
@@ -268,6 +283,7 @@ export function DaySheet({
       {expenseId && <ExpenseDetail id={expenseId} onClose={() => setExpenseId(null)} onOpenInvoice={(cardId, month) => { setExpenseId(null); setInvoice({ cardId, month }); }} />}
       {invoice && <InvoiceSheet cardId={invoice.cardId} month={invoice.month} onClose={() => setInvoice(null)} />}
       {newExpense && <ExpenseForm initialDate={day} onClose={() => setNewExpense(false)} />}
+      {incomeId && <IncomeDetail id={incomeId} onClose={() => setIncomeId(null)} />}
     </>
   );
 }

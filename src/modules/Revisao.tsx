@@ -76,7 +76,7 @@ export function Revisao() {
           <div className="summary-box">
             <span className="label">Gastos</span>
             <span className="value">{formatMoney(r.spent)}</span>
-            <span className="muted small">{formatMoney(r.paid)} pagos</span>
+            <span className="muted small">{formatMoney(r.paid)} pagos · {formatMoney(r.received)} entrou</span>
           </div>
           <div className="summary-box">
             <span className="label">Tarefas</span>
@@ -119,6 +119,21 @@ export function Revisao() {
                   </li>
                 );
               })}
+              {data.settings.journeyUnlockedAt && r.attributes.length > 0 && (
+                <li className="attr-week">
+                  <span className="muted small">Atributos treinados</span>
+                  <span className="attr-week-list">
+                    {r.attributes.map((a) => (
+                      <span key={a.code} className="pill">
+                        <span className="attr-code" style={{ color: a.color }}>
+                          {a.code}
+                        </span>{' '}
+                        +{a.points}
+                      </span>
+                    ))}
+                  </span>
+                </li>
+              )}
               {r.quitting.map(({ habit: h, slips }) => (
                 <li key={h.id} className="toggle-row">
                   <span>Sem {h.name.charAt(0).toLowerCase() + h.name.slice(1)}</span>

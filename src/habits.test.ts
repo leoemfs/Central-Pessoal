@@ -97,3 +97,22 @@ test('nunca falhe duas vezes: alerta só quando o último dia programado falhou 
   assert.equal(atRiskToday(fri, '2026-11-09'), false);
   assert.equal(atRiskToday(make({ kind: 'ritual', createdAt: '2026-11-04T08:00:00' }), TODAY), false, 'criado hoje');
 });
+
+test('atributos: sugeridos pelo nome e somados por período', async () => {
+  const { suggestAttributes, attributeTotals } = await import('./habits.ts');
+  assert.deepEqual(suggestAttributes('Correr 3 km'), ['FOR', 'AGI', 'RES']);
+  assert.deepEqual(suggestAttributes('Ler 10 páginas'), ['INT']);
+  assert.deepEqual(suggestAttributes('Beber 2 L de água'), ['RES']);
+  assert.deepEqual(suggestAttributes('Meditação guiada'), ['SAB']);
+  assert.deepEqual(suggestAttributes('Tocar violão'), []);
+  // Hábitos antigos (sem o campo) ganham a sugestão; com o campo, respeita a escolha.
+  assert.deepEqual(make({ name: 'Ler um livro' }).attrs, ['INT']);
+  assert.deepEqual(normalizeHabit({ id: 'x', name: 'Ler', attrs: ['SAB'] }).attrs, ['SAB']);
+  const list = [
+    make({ id: 'a', name: 'Ler', attrs: ['INT'], checks: ['2026-11-02', '2026-11-03', '2026-10-01'] }),
+    make({ id: 'b', name: 'Correr', attrs: ['FOR', 'AGI'], checks: ['2026-11-03'] }),
+    make({ id: 'c', name: 'Refri', kind: 'abandonar', attrs: ['RES'], startDate: '2026-11-01', slips: ['2026-11-03'] }),
+  ];
+  const t = attributeTotals(list, '2026-11-02', '2026-11-04');
+  assert.deepEqual(t.map((x) => `${x.code}:${x.points}`), ['INT:2', 'RES:2', 'FOR:1', 'AGI:1']);
+});

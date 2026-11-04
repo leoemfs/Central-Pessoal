@@ -41,7 +41,7 @@ export const SECTIONS: Section[] = [
   { path: 'agenda', label: 'Agenda', icon: 'calendar', view: Agenda, fab: 'agenda/novo' },
   { path: 'mais', label: 'Mais', icon: 'grid', view: Mais },
   { path: 'nucleo', label: 'Núcleo pessoal', icon: 'target', view: Habitos, fab: 'nucleo/novo' },
-  { path: 'arquivo', label: 'Arquivo geral', icon: 'archive', view: Notas, fab: 'arquivo/nova' },
+  { path: 'arquivo', label: 'Notas', icon: 'note', view: Notas, fab: 'arquivo/nova' },
   { path: 'ajustes', label: 'Configurações', icon: 'settings', view: Ajustes },
   { path: 'revisao', label: 'Revisão semanal', icon: 'calendarCheck', view: Revisao },
   { path: 'jornada', label: 'Jornada', icon: 'sword', view: Jornada },
@@ -57,10 +57,11 @@ export const COMING_SOON: { label: string; icon: IconName; hint: string }[] = [
 
 const QUICK: { to: string; label: string; icon: IconName; hint: string }[] = [
   { to: 'financas/nova', label: 'Despesa', icon: 'wallet', hint: 'Conta, compra ou parcela' },
+  { to: 'financas/nova-receita', label: 'Receita', icon: 'coins', hint: 'Salário, freelance, bônus…' },
   { to: 'diario/nova', label: 'Atualização no diário', icon: 'journal', hint: 'Acontecimento ou pensamento' },
   { to: 'agenda/nova-tarefa', label: 'Tarefa', icon: 'tasks', hint: 'Algo para fazer' },
   { to: 'agenda/novo-compromisso', label: 'Compromisso', icon: 'calendar', hint: 'Evento com data e hora' },
-  { to: 'arquivo/nova', label: 'Anotação', icon: 'note', hint: 'Guardar uma informação' },
+  { to: 'arquivo/nova', label: 'Nota', icon: 'note', hint: 'Guardar uma informação' },
 ];
 
 function NavLink({ s, active }: { s: Section; active: boolean }) {
@@ -249,7 +250,7 @@ export function App() {
         </button>
       )}
 
-      <nav className="tabbar" aria-label="Atalhos">
+      <nav className={`tabbar${barHidden ? ' hidden' : ''}`} aria-label="Atalhos">
         {TABS.map((p) => (
           <NavLink key={p} s={byPath(p)} active={tabActive === p} />
         ))}

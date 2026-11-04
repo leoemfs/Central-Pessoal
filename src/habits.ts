@@ -103,6 +103,51 @@ export function habitsOfDay(habits: Habit[], day: string) {
   };
 }
 
+// ---------- Atributos (para a Jornada) ----------
+
+export interface Attribute {
+  code: string;
+  name: string;
+  color: string;
+  /** Pedaços de palavras (sem acento) que sugerem este atributo pelo nome do hábito. */
+  words: string[];
+}
+
+export const ATTRIBUTES: Attribute[] = [
+  { code: 'FOR', name: 'Força', color: '#f87171', words: ['academia', 'muscul', 'treino', 'flexao', 'forca', 'peso', 'crossfit', 'correr', 'corrida'] },
+  { code: 'AGI', name: 'Agilidade', color: '#38bdf8', words: ['correr', 'corrida', 'caminh', 'bike', 'pedal', 'alongar', 'alongamento', 'yoga', 'danca', 'futebol', 'nadar', 'natacao'] },
+  { code: 'INT', name: 'Inteligência', color: '#a78bfa', words: ['ler', 'leitura', 'estud', 'curso', 'ingles', 'idioma', 'livro', 'aprender', 'pagina', 'aula'] },
+  { code: 'RES', name: 'Resistência', color: '#60a5fa', words: ['agua', 'dormir', 'sono', 'fruta', 'salada', 'vitamina', 'nadar', 'correr', 'refrigerante', 'acucar', 'alimenta'] },
+  { code: 'SAB', name: 'Sabedoria', color: '#e879f9', words: ['meditar', 'meditacao', 'diario', 'orar', 'oracao', 'gratidao', 'refletir', 'respirar', 'terapia'] },
+  { code: 'DIS', name: 'Disciplina', color: '#4ade80', words: ['arrumar', 'cama', 'organizar', 'conta', 'acordar', 'planejar', 'fio dental', 'limpar', 'celular', 'rede social', 'fumar', 'cigarro'] },
+];
+
+const plain = (s: string) => s.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+
+/** Sugere atributos pelo nome (ex.: "Correr 3 km" → FOR, AGI, RES). */
+export function suggestAttributes(name: string): string[] {
+  const n = plain(name);
+  return ATTRIBUTES.filter((a) => a.words.some((w) => n.includes(w))).map((a) => a.code);
+}
+
+/** Dias cumpridos por atributo num período (hábitos a abandonar contam os dias sem recaída). */
+export function attributeTotals(habits: Habit[], from: string, to: string): { code: string; name: string; color: string; points: number }[] {
+  const pts = new Map<string, number>();
+  for (const h of habits) {
+    if (!h.attrs.length) continue;
+    let n = 0;
+    if (h.kind === 'abandonar') {
+      for (let d = from > h.startDate ? from : h.startDate; d <= to; d = addDays(d, 1)) if (!h.slips.includes(d)) n++;
+    } else {
+      n = new Set(h.checks.filter((c) => c >= from && c <= to)).size;
+    }
+    for (const a of h.attrs) pts.set(a, (pts.get(a) ?? 0) + n);
+  }
+  return ATTRIBUTES.map((a) => ({ code: a.code, name: a.name, color: a.color, points: pts.get(a.code) ?? 0 }))
+    .filter((a) => a.points > 0)
+    .sort((a, b) => b.points - a.points);
+}
+
 // ---------- Metas com quantidade ----------
 
 export const isQuantity = (h: Habit) => h.goal !== null && h.goal > 0;

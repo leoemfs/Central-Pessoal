@@ -2598,3 +2598,187 @@ button.row {
 .usage-day.today {
   box-shadow: inset 0 0 0 2px var(--green);
 }
+
+/* ---------- v0.9 ---------- */
+
+/* A barra de abas também some ao rolar para baixo (o botão + continua no lugar). */
+.tabbar {
+  transition: transform 0.22s ease;
+}
+.tabbar.hidden {
+  transform: translateY(calc(100% + 24px));
+}
+@media (min-width: 900px) {
+  .tabbar.hidden {
+    transform: none;
+  }
+}
+
+.collapse-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 0;
+  border: none;
+  background: transparent;
+  text-align: left;
+}
+.collapse-head h2 {
+  flex: 1;
+  font-size: 1.05rem;
+  font-weight: 700;
+}
+.collapse-head .icon {
+  color: var(--muted);
+}
+
+/* Receitas: balanço do mês */
+.balance {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+.balance-rows {
+  margin: 6px 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.balance-rows > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 0.9rem;
+}
+.balance-rows dt {
+  color: var(--muted);
+}
+.balance-rows dd {
+  margin: 0;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+.balance-rows .total {
+  border-top: 1px solid var(--border-strong);
+  padding-top: 6px;
+}
+.balance-rows .total dd {
+  font-size: 1.05rem;
+  font-weight: 800;
+}
+.balance-line {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 6px 12px;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+  font-size: 0.9rem;
+  color: var(--muted);
+  text-decoration: none;
+}
+.balance-line strong {
+  font-variant-numeric: tabular-nums;
+}
+@media (max-width: 380px) {
+  .balance {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* Atributos */
+.attr-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+.attr-chip {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 0 12px;
+  border-radius: 12px;
+  border: 2px solid var(--border);
+  background: transparent;
+  color: var(--muted);
+  font-weight: 600;
+  font-size: 0.9rem;
+  text-align: left;
+}
+.attr-chip.on {
+  background: var(--raised);
+  color: var(--text);
+}
+.attr-code {
+  font-family: ui-monospace, 'SF Mono', 'Roboto Mono', Menlo, Consolas, monospace;
+  font-weight: 800;
+  font-size: 0.75rem;
+  letter-spacing: 0.04em;
+}
+.attr-week {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.attr-week-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+/* Valores: quebra só entre "R$" e o número, nunca no meio */
+.summary-box .value,
+.stat-value,
+.amount {
+  overflow-wrap: normal;
+  word-break: keep-all;
+}
+.summary-box:not(.full) .value {
+  font-size: 1.3rem;
+}
+
+.balance-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-variant-numeric: tabular-nums;
+}
+.balance-table th,
+.balance-table td {
+  padding: 7px 0;
+  text-align: right;
+  white-space: nowrap;
+  font-size: 0.9rem;
+}
+.balance-table thead th {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--muted);
+  padding-top: 0;
+}
+.balance-table tbody th {
+  text-align: left;
+  font-weight: 500;
+  color: var(--muted);
+  padding-right: 8px;
+}
+.balance-table td {
+  font-weight: 600;
+  padding-left: 10px;
+}
+.balance-table .total th,
+.balance-table .total td {
+  border-top: 1px solid var(--border-strong);
+  font-size: 1rem;
+  font-weight: 800;
+}
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}

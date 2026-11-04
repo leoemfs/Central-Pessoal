@@ -1,5 +1,6 @@
-import type { AppData, Category, DayPeriod, Expense, Habit, HabitKind } from './types.ts';
+import type { AppData, Category, DayPeriod, Expense, Habit, HabitKind, Income } from './types.ts';
 import { toISO, uid } from './utils.ts';
+import { suggestAttributes } from './habits.ts';
 
 export const COLORS = ['#22c55e', '#3b82f6', '#8b5cf6', '#f97316', '#ef4444', '#94a3b8', '#eab308', '#ec4899', '#06b6d4'];
 /** As 6 cores do cartão, como na referência visual. */
@@ -17,6 +18,15 @@ export const DEFAULT_CATEGORIES: Omit<Category, 'id'>[] = [
   { name: 'Outros', icon: 'tag', color: '#94a3b8' },
 ];
 
+export const DEFAULT_INCOME_SOURCES: Omit<Category, 'id'>[] = [
+  { name: 'Salário', icon: 'briefcase', color: '#22c55e' },
+  { name: 'Freelance', icon: 'bolt', color: '#3b82f6' },
+  { name: 'Bônus', icon: 'gift', color: '#eab308' },
+  { name: 'Vale-alimentação', icon: 'utensils', color: '#f97316' },
+  { name: 'Investimentos', icon: 'coins', color: '#8b5cf6' },
+  { name: 'Outros', icon: 'tag', color: '#94a3b8' },
+];
+
 export function emptyData(): AppData {
   return {
     version: 2,
@@ -29,18 +39,29 @@ export function emptyData(): AppData {
     series: [],
     cards: [],
     categories: [],
-    settings: { theme: 'dark', seededCategories: false, lastBackupAt: null, activeDays: [], journeyUnlockedAt: null, journeyChoice: null },
+    incomes: [],
+    incomeSeries: [],
+    incomeSources: [],
+    settings: { theme: 'dark', seededCategories: false, seededIncomeSources: false, lastBackupAt: null, activeDays: [], journeyUnlockedAt: null, journeyChoice: null },
     deleted: {},
     legacy: {},
   };
 }
 
-/** Cria as categorias padrão uma única vez (se o usuário apagar, não voltam). */
+/** Cria as categorias e fontes de receita padrão uma única vez (se o usuário apagar, não voltam). */
 export function seedCategories(d: AppData): AppData {
-  if (d.settings.seededCategories) return d;
-  const existing = new Set(d.categories.map((c) => c.name.toLowerCase()));
-  const added = DEFAULT_CATEGORIES.filter((c) => !existing.has(c.name.toLowerCase())).map((c) => ({ ...c, id: uid() }));
-  return { ...d, categories: [...d.categories, ...added], settings: { ...d.settings, seededCategories: true } };
+  let next = d;
+  if (!next.settings.seededCategories) {
+    const existing = new Set(next.categories.map((c) => c.name.toLowerCase()));
+    const added = DEFAULT_CATEGORIES.filter((c) => !existing.has(c.name.toLowerCase())).map((c) => ({ ...c, id: uid() }));
+    next = { ...next, categories: [...next.categories, ...added], settings: { ...next.settings, seededCategories: true } };
+  }
+  if (!next.settings.seededIncomeSources) {
+    const existing = new Set(next.incomeSources.map((c) => c.name.toLowerCase()));
+    const added = DEFAULT_INCOME_SOURCES.filter((c) => !existing.has(c.name.toLowerCase())).map((c) => ({ ...c, id: uid() }));
+    next = { ...next, incomeSources: [...next.incomeSources, ...added], settings: { ...next.settings, seededIncomeSources: true } };
+  }
+  return next;
 }
 
 type Rec = Record<string, unknown>;
@@ -66,10 +87,14 @@ export function normalize(raw: unknown): AppData {
     series: list(r.series),
     cards: list(r.cards),
     categories: list(r.categories),
+    incomes: list(r.incomes),
+    incomeSeries: list(r.incomeSeries),
+    incomeSources: list(r.incomeSources),
     settings: {
       // Só a versão 2 tem tema escolhido pelo usuário; o protótipo começa no escuro.
       theme: r.version === 2 && (settings.theme === 'light' || settings.theme === 'system') ? settings.theme : 'dark',
       seededCategories: settings.seededCategories === true,
+      seededIncomeSources: settings.seededIncomeSources === true,
       lastBackupAt: typeof settings.lastBackupAt === 'string' ? settings.lastBackupAt : null,
       activeDays: strings(settings.activeDays),
       journeyUnlockedAt: typeof settings.journeyUnlockedAt === 'string' ? settings.journeyUnlockedAt : null,
@@ -80,7 +105,7 @@ export function normalize(raw: unknown): AppData {
   };
   d = seedCategories(d);
   if (r.version !== 2 && Array.isArray(r.transactions)) d = migrateV1Transactions(d, r.transactions);
-  return d;
+  return migrateLegacyIncomes(d);
 }
 
 /** Protótipo v1: despesas viram despesas avulsas já pagas; receitas ficam guardadas para quando houver tela. */
@@ -152,6 +177,41 @@ export function normalizeHabit(h: Record<string, unknown>): Habit {
     unit: typeof h.unit === 'string' ? h.unit : '',
     step: typeof h.step === 'number' && h.step > 0 ? h.step : 1,
     amounts: isRec(h.amounts) ? Object.fromEntries(Object.entries(h.amounts).filter((e): e is [string, number] => typeof e[1] === 'number')) : {},
+    // Hábitos de antes desta versão ganham os atributos sugeridos pelo nome.
+    attrs: Array.isArray(h.attrs) ? strings(h.attrs) : suggestAttributes(typeof h.name === 'string' ? h.name : ''),
     createdAt,
   };
+}
+
+/** Receitas do protótipo (guardadas em `legacy.receitas`) viram receitas recebidas na data. */
+export function migrateLegacyIncomes(d: AppData): AppData {
+  const old = d.legacy.receitas;
+  if (!Array.isArray(old) || old.length === 0) return d;
+  const sources = [...d.incomeSources];
+  const incomes: Income[] = [];
+  for (const t of old) {
+    if (!isRec(t) || typeof t.amount !== 'number' || typeof t.date !== 'string') continue;
+    const name = typeof t.category === 'string' && t.category.trim() ? t.category.trim() : 'Outros';
+    let src = sources.find((c) => c.name.toLowerCase() === name.toLowerCase());
+    if (!src) {
+      src = { id: uid(), name, icon: 'tag', color: '#94a3b8' };
+      sources.push(src);
+    }
+    const stamp = new Date().toISOString();
+    incomes.push({
+      id: typeof t.id === 'string' ? t.id : uid(),
+      seriesId: null,
+      installment: null,
+      description: typeof t.description === 'string' && t.description ? t.description : name,
+      sourceId: src.id,
+      amount: t.amount,
+      date: t.date,
+      receivedAt: t.date,
+      createdAt: stamp,
+      updatedAt: stamp,
+    });
+  }
+  const legacy = { ...d.legacy };
+  delete legacy.receitas;
+  return { ...d, incomeSources: sources, incomes: [...d.incomes, ...incomes], legacy };
 }

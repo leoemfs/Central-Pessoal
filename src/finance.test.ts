@@ -154,7 +154,7 @@ test('resumo do mês: fatura entra como uma conta; pago e em aberto', () => {
   assert.equal(getInvoice(d, card, '2026-11', '2026-11-10').status, 'fechada');
 });
 
-test('migração do protótipo v1: despesas viram avulsas pagas e receitas são preservadas', () => {
+test('migração do protótipo v1: despesas viram avulsas pagas e receitas viram receitas', () => {
   const d = normalize({
     version: 1,
     tasks: [{ id: 't', title: 'a' }],
@@ -168,6 +168,6 @@ test('migração do protótipo v1: despesas viram avulsas pagas e receitas são 
   assert.equal(d.expenses.length, 2);
   assert.equal(d.expenses[0].paidAt, '2026-11-01');
   assert.ok(d.categories.some((c) => c.name === 'Pet'));
-  assert.equal((d.legacy.receitas as unknown[]).length, 1);
+  assert.equal(d.incomes.length, 1, 'a receita do protótipo vira uma receita recebida');
   assert.equal(normalize(d).expenses.length, 2, 'normalizar de novo não duplica');
 });
