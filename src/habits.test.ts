@@ -114,5 +114,5 @@ test('atributos: sugeridos pelo nome e somados por período', async () => {
     make({ id: 'c', name: 'Refri', kind: 'abandonar', attrs: ['RES'], startDate: '2026-11-01', slips: ['2026-11-03'] }),
   ];
   const t = attributeTotals(list, '2026-11-02', '2026-11-04');
-  assert.deepEqual(t.map((x) => `${x.code}:${x.points}`), ['INT:2', 'RES:2', 'FOR:1', 'AGI:1']);
+  assert.deepEqual(t.map((x) => `${x.code}:${x.points}`), ['INT:6', 'RES:6', 'FOR:2', 'AGI:2']);
 });

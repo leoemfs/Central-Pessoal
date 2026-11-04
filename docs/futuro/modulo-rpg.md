@@ -446,3 +446,150 @@ Não iniciar o desenvolvimento completo antes da consolidação da estrutura pri
 **Sobre o tom (sério × casual):** uma forma de não precisar escolher é deixar a Jornada **opcional**, ativada em Configurações e desligada por padrão. O app continua sóbrio para quem quer só organização, e quem gosta de gamificação liga a camada RPG. Isso também facilita testar a aceitação antes de mudar a identidade do produto.
 
 **Pontos a decidir antes de começar:** origem dos sprites em pixel art (feitos à mão, gerados ou um pacote com licença comercial, o que importa caso o app seja vendido); a curva de níveis; e se a dificuldade (simples, intermediário, difícil) será um campo novo nos rituais e hábitos.
+
+---
+
+## Anexo B — Jornada v2 e v3: regras e artes já decididas
+
+*Acrescentado em novembro de 2026. Junta o que foi decidido nas prévias v2 (avatar, baús, céu, atributos) e v3 (arsenal, pets, moradas, tela cheia, títulos, forja mística e classes). O objetivo é que, quando a Jornada desbloquear, as regras e a maior parte das artes já estejam prontas.*
+
+**Prévias visuais:** quadro "Prévia — Jornada RPG" (linhas v2 e v3). As artes da v3 foram desenhadas como dados (linhas de texto + paleta de cores), então podem ser copiadas para o app sem redesenhar.
+
+### B.1. O que já existe no app (v0.9)
+
+- Desbloqueio após **14 dias de uso dentro de 21** (`journey.ts`), com XP, nível e ouro calculados a partir dos dados reais.
+- **Atributos** nos rituais e hábitos (FOR, AGI, INT, RES, SAB, DIS), sugeridos pelo nome e **guardados em silêncio** até o desbloqueio (`habits.ts`: `suggestAttributes`, `attributeTotals`).
+- Tudo o que está abaixo ainda **não** foi programado.
+
+### B.2. Avatar e equipamentos
+
+- Avatar em pixel art 16×24, **mulher ou homem**, com pele e cabelo escolhidos na criação.
+- **Espaços de equipamento:** elmo, roupa/armadura, botas, arma (espada **ou** cajado), artefato, pet e morada. Um segundo espaço de artefato abre no **nível 20**.
+- Os equipamentos são **camadas** desenhadas por cima do corpo (elmo e ombreiras), ou **trocas de cor** (roupa e botas), ou peças na mão (arma). Isso permite qualquer combinação sem desenhar cada uma.
+- **Raridades:** comum (cinza), raro (azul), épico (roxo) e místico (dourado).
+
+| Espaço | Comum | Raro | Épico | Místico |
+|---|---|---|---|---|
+| Elmo | Capuz de couro | Elmo de ferro | Chapéu de mago | Coroa de cristal |
+| Roupa | Túnica de aprendiz (inicial), Gibão de couro | Cota de malha, Manto arcano | Armadura de placas | Armadura de cristal |
+| Botas | Sapatos simples (inicial), Botas de couro | Botas de ferro | — | Botas aladas |
+| Espada | Espada de madeira (inicial) | Espada de ferro | Lâmina rubi | Espada da aurora |
+| Cajado | Cajado de galho | Cajado de cristal | — | Cajado estelar |
+| Artefato | — | Pena do vento, Bracelete do titã, Grimório, Amuleto da gota, Lanterna da sabedoria, Ampulheta | — | Coração de cristal, Olho do oráculo, Pena da fênix, Estrela polar |
+
+### B.3. Como cada item é obtido
+
+- **Comum e raro:** loja, com ouro. Preços de referência: comum 120–200 ouro; raro 500–700 ouro. Com a tabela de recompensas atual, um dia ativo rende cerca de 50 ouro, ou seja, um item raro custa de 2 a 3 semanas de rotina.
+- **Épico:** baús (prata, dourado e cristal) **ou** um atributo alto (ex.: Chapéu de mago com INT 50, Armadura de placas com FOR 80). O que vier primeiro.
+- **Místico:** só na **Forja mística** (B.5). Não se compra.
+- Os 6 artefatos raros dão **+10% de XP** nos hábitos do atributo correspondente (Pena → AGI, Bracelete → FOR, Grimório → INT, Gota → RES, Lanterna → SAB, Ampulheta → DIS). Também podem sair em baús, ou ser liberados com o atributo em 40.
+
+### B.4. Baús e cristais
+
+| Baú | Como ganha | Conteúdo |
+|---|---|---|
+| Bronze | 7 dias seguidos de rituais ou hábitos | ouro + item comum |
+| Prata | 30 dias de consistência · revisão semanal com 80% da rotina | ouro + item raro |
+| Dourado | a cada 5 níveis · mês com todas as contas em dia | item raro ou épico garantido |
+| Cristal | hábito a abandonar: 7, 14, 30 e 60 dias sem | o melhor conteúdo: garante épico + **1 a 3 cristais** |
+
+**Cristais** (◆) são a moeda da Forja mística. Fontes: baús de cristal, **1 por título conquistado** e alguns efeitos de artefatos. Abandonar um hábito ruim é o caminho mais forte para os itens místicos, porque é o mais difícil.
+
+### B.5. Forja mística (itens que exigem aprimorar os atributos)
+
+Os pontos de atributo **nunca diminuem** e vêm de:
+- **hábitos cumpridos:** +3 por dia quando o hábito treina um só atributo, ou +2 em cada um quando treina mais de um. Num hábito a abandonar, conta cada dia sem;
+- **Disciplina:** também +2 por conta paga no prazo e +3 por revisão semanal;
+- **Sabedoria:** também +1 por dia com registro no diário.
+
+Com um hábito por dia num atributo, ele sobe cerca de 60 a 90 pontos por mês.
+
+| Item místico | Requisitos | Cristais | Efeito |
+|---|---|---|---|
+| Coroa de cristal (elmo) | DIS 100 | 3 | +1 cristal por mês com todas as contas pagas no prazo |
+| Botas aladas | AGI 100 | 3 | +10% de XP em caminhadas; o pet acompanha mais rápido |
+| Armadura de cristal | RES 150 | 5 | 1× por semana, um dia perdido não quebra a sequência **da Jornada** |
+| Espada da aurora | FOR 150 + DIS 60 | 5 | Subir de nível dá um baú raro extra |
+| Cajado estelar | INT 150 + SAB 60 | 5 | Estudo/leitura registrados dão +1 ouro extra |
+| Coração de cristal | RES 100 + DIS 100 | 4 | Recaída não zera o progresso do baú de cristal |
+| Olho do oráculo | SAB 100 + INT 100 | 4 | Cada revisão semanal dá +1 cristal |
+| Pena da fênix | AGI 80 + 30 dias sem recaída num hábito a abandonar | 4 | Depois de uma recaída, os 7 dias seguintes valem XP em dobro |
+| Estrela polar | todos os atributos em 60 | 6 | +10% de XP e ouro em tudo; o céu noturno ganha uma constelação |
+
+**Regras da forja:**
+- O item aparece com 🔒 e barras de progresso de cada requisito. Quando todos os requisitos estão cumpridos e há cristais suficientes, o cartão brilha ("Pronto para forjar").
+- Forjar gasta os cristais; os atributos **não** são gastos.
+- Os efeitos valem só dentro da Jornada. **Nunca alteram os dados reais** (sequência, consistência, finanças).
+
+### B.6. Títulos
+
+O título escolhido aparece embaixo do nome, na cena e na tela cheia. Cada título conquistado vale **1 cristal**. Os títulos têm forma feminina e masculina, conforme o avatar.
+
+| Título | Como conquistar |
+|---|---|
+| Aprendiz | Começar a Jornada |
+| Guardiã(o) das Contas | 3 meses com todas as contas pagas no prazo |
+| Tesoureira(o) | 3 meses seguidos com sobra positiva (receitas − despesas) |
+| Madrugador(a) | 30 dias de rituais da manhã cumpridos |
+| Inquebrável | Sequência de 30 dias num hábito |
+| Mestra(e) do Tempo | 12 revisões semanais feitas |
+| Cronista | 100 registros no diário |
+| Fênix | 30 dias limpo depois de uma recaída |
+| Titã · Ventania · Erudita(o) · Muralha · Sábia(o) · Inabalável | Força · Agilidade · Inteligência · Resistência · Sabedoria · Disciplina em 100 |
+| Lendária(o) | Todos os atributos em 100 |
+
+### B.7. Classes
+
+- A classe vem do **atributo mais alto** e muda sozinha se a rotina mudar: FOR → Guerreira(o), AGI → Andarilha(o), INT → Maga(o), RES → Guardiã(o), SAB → Druida, DIS → Paladina(o).
+- **Classe híbrida** quando os dois mais altos ficam a menos de 10% um do outro: FOR+DIS Cavaleira(o), INT+SAB Arquimaga(o), AGI+FOR Bárbara(o), RES+DIS Sentinela, AGI+SAB Xamã, INT+DIS Alquimista.
+- Empate exato: vale o atributo que subiu mais nos últimos 30 dias.
+
+### B.8. Pets e moradas
+
+- **Pets:** Gatinho e Cãozinho (nível 3, escolhe um), Cavalinho (nível 12 + AGI 50). O pet passeia na cena e fica feliz nos dias com registro; **nunca fica triste nem some**. Para o futuro: raposa, coruja e um dragãozinho místico.
+- **Moradas** (fundo da cena): Barraca de viajante (início), Casinha (nível 5), Casa de pedra (nível 15 + 600 ouro), Torre do mago (nível 25 + INT 100), Castelinho (nível 30 + 2.000 ouro), Castelo (nível 50 + todos os atributos em 100).
+- Todas as moradas têm versão de dia, tarde e noite (janelas acesas à noite).
+
+### B.9. Céu, estrelas e chuva
+
+- O céu segue o **relógio do celular**: manhã (até 16h), tarde (16h–18h30), noite (depois disso).
+- **Estrelas:** à noite aparece **uma estrela por dia com registro nos últimos 30 dias** (no máximo 30). A rotina "acende" o céu.
+- **Estrela cadente** na noite em que você sobe de nível ou ganha um título.
+- **Chuva às vezes:** cerca de 1 dia a cada 5, numa faixa de horário. O sorteio usa a data, então o dia de chuva é o mesmo sempre que você abre o app. Depois da chuva, aparece um arco-íris por 1 hora. Em Configurações: "Clima: às vezes chove / sempre limpo".
+- Futuro opcional: usar o clima real da cidade. Precisa de internet e de permissão de localização, então fica desligado por padrão.
+
+### B.10. Tela cheia do avatar
+
+- Tocar no cartão do avatar abre a **cena em tela cheia**: céu, morada, árvore, pet passeando, artefato flutuando com brilho da cor do atributo e o avatar grande, "respirando".
+- No topo: nome, nível, **título em uso** e classe. À noite, a contagem de estrelas.
+- Embaixo: os 7 espaços de equipamento; tocar num deles troca o item (só entre os que você já tem).
+- O botão **voltar** do celular fecha a tela cheia, como já acontece com as janelas do app.
+
+### B.11. Dados a guardar (o resto é calculado)
+
+XP, ouro ganho, nível e atributos continuam **calculados a partir dos dados** (como hoje em `journey.ts`). Só precisa ser guardado o que é escolha ou gasto do usuário:
+
+```ts
+interface JourneyState {
+  avatar: { gender: 'f' | 'm'; skin: 'clara' | 'media' | 'escura'; hair: string };
+  owned: string[];                 // ids dos itens, pets e moradas que você tem
+  equipped: { elmo?: string; armadura: string; botas: string; arma?: string; artefato?: string; artefato2?: string; pet?: string; morada: string };
+  goldSpent: number;               // ouro disponível = ouro ganho (calculado) − goldSpent
+  crystalsSpent: number;           // cristais disponíveis = cristais ganhos (calculado) − crystalsSpent
+  title: string | null;            // título em uso
+  openedChests: string[];          // chaves determinísticas, ex.: "cristal:<habitId>:30"
+  weather: 'aleatorio' | 'limpo';
+}
+```
+
+### B.12. Ordem de implementação
+
+1. `src/jornada/items.ts`: catálogo de itens, pets, moradas, raridades e as artes (linhas + paletas), copiado das prévias. Testes: todo item tem arte válida e 16 colunas.
+2. `src/jornada/rules.ts`: classes, títulos, requisitos da forja, cristais e baús calculados a partir de `AppData`. Testes no mesmo padrão de `journey.test.ts`.
+3. `src/jornada/sky.ts`: horário → céu, estrelas por dias de uso e chuva determinística por data. Testes.
+4. Componente `<PixelSprite>` (SVG gerado das linhas, como nas prévias) e a cena.
+5. Telas: Jornada, tela cheia, Arsenal com provador, Títulos/Forja/Classes. Ficam visíveis **só depois do desbloqueio**.
+
+**Status (v0.10):** os passos 1 a 3 estão **feitos**, em `src/jornada/` (`art.ts`, `artData.ts`, `catalog.ts`, `rules.ts`, `sky.ts`), com testes em `src/jornada.test.ts`. É lógica pura e invisível: nenhuma tela usa ainda, e nada muda no app em uso. Faltam os passos 4 e 5 (telas), que só aparecem depois do desbloqueio.
+
+**Ainda não programado (depende das telas e de registrar quando cada item foi equipado):** os efeitos dos místicos que mexem com o tempo — escudo semanal da Armadura de cristal, XP em dobro depois da recaída (Pena da fênix), cristal por revisão (Olho do oráculo), cristal por mês em dia (Coroa), baú extra por nível (Espada da aurora) e ouro extra por estudo (Cajado estelar). Os bônus de +10% dos artefatos já estão em `equipmentBonus`.
