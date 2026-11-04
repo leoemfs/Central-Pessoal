@@ -49,6 +49,14 @@ export interface Habit {
   slips: string[];
   /** Abandonar: desde quando está sem (AAAA-MM-DD). */
   startDate: string;
+  /** Meta diária com quantidade (ex.: 2000 ml). null = só marcar feito. */
+  goal: number | null;
+  /** Unidade da meta (ml, páginas, minutos…). */
+  unit: string;
+  /** Quanto soma cada toque no "+". */
+  step: number;
+  /** Quantidade registrada por dia (AAAA-MM-DD → valor). */
+  amounts: Record<string, number>;
   createdAt: string;
 }
 

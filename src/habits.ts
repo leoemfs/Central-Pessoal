@@ -103,15 +103,67 @@ export function habitsOfDay(habits: Habit[], day: string) {
   };
 }
 
+// ---------- Metas com quantidade ----------
+
+export const isQuantity = (h: Habit) => h.goal !== null && h.goal > 0;
+export const amountOn = (h: Habit, day: string) => h.amounts[day] ?? 0;
+
+/** "1.250" / "2" — números no formato brasileiro, sem casas desnecessárias. */
+export const fmtQty = (n: number) => n.toLocaleString('pt-BR', { maximumFractionDigits: 2 });
+
+// ---------- Nunca falhe duas vezes ----------
+
+/** Último dia programado antes de `day` (até 14 dias para trás), dentro do período do hábito. */
+export function lastScheduledBefore(h: Habit, day: string): string | null {
+  const start = startOf(h);
+  for (let i = 1; i <= 14; i++) {
+    const d = addDays(day, -i);
+    if (d < start) return null;
+    if (isScheduled(h, d)) return d;
+  }
+  return null;
+}
+
+/**
+ * Falhou no último dia programado e hoje ainda não fez: hoje é o dia de "não falhar duas vezes".
+ * Uma falha é normal; duas seguidas é o começo de um novo padrão.
+ */
+export function atRiskToday(h: Habit, today: string = todayISO()): boolean {
+  if (!isScheduled(h, today) || h.checks.includes(today)) return false;
+  const prev = lastScheduledBefore(h, today);
+  return prev !== null && !h.checks.includes(prev);
+}
+
 // ---------- Atualizações ----------
 
-export function toggleCheck(id: string, day: string) {
+/** Registra a quantidade do dia; o dia conta como feito quando atinge a meta. */
+export function setAmount(id: string, day: string, value: number) {
   return (d: AppData): AppData => ({
     ...d,
-    habits: d.habits.map((h) =>
-      h.id !== id ? h : { ...h, checks: h.checks.includes(day) ? h.checks.filter((c) => c !== day) : [...h.checks, day].sort() },
-    ),
+    habits: d.habits.map((h) => {
+      if (h.id !== id || h.goal === null) return h;
+      const v = Math.max(0, Math.round(value * 100) / 100);
+      const amounts = { ...h.amounts };
+      if (v > 0) amounts[day] = v;
+      else delete amounts[day];
+      const reached = v >= h.goal;
+      const checks = reached ? (h.checks.includes(day) ? h.checks : [...h.checks, day].sort()) : h.checks.filter((c) => c !== day);
+      return { ...h, amounts, checks };
+    }),
   });
+}
+
+export function toggleCheck(id: string, day: string) {
+  return (d: AppData): AppData => {
+    const h = d.habits.find((x) => x.id === id);
+    if (h && h.goal !== null) return setAmount(id, day, h.checks.includes(day) ? 0 : h.goal)(d);
+    return {
+      ...d,
+      habits: d.habits.map((x) =>
+        x.id !== id ? x : { ...x, checks: x.checks.includes(day) ? x.checks.filter((c) => c !== day) : [...x.checks, day].sort() },
+      ),
+    };
+  };
 }
 
 export function toggleSlip(id: string, day: string) {

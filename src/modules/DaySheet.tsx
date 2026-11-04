@@ -9,7 +9,7 @@ import { formatLongDate, formatMoney, relativeDay, sum, todayISO, toISO } from '
 import { CategoryBadge, Icon, Pill, Sheet, type IconName } from '../ui';
 import { EventItem, sortEvents } from './Agenda';
 import { TaskItem } from './Tarefas';
-import { HabitCheck } from './Habitos';
+import { HabitCheck, qtyText } from './Habitos';
 import { entrySummary, entryTitle } from './Diario';
 import { ExpenseDetail } from './financas/ExpenseDetail';
 import { ExpenseForm } from './financas/ExpenseForm';
@@ -220,6 +220,7 @@ export function DaySheet({
                     <span className="row-meta">
                       {h.kind === 'ritual' ? 'Ritual' : 'Hábito em construção'}
                       {h.time ? ` · ${h.time}` : ''}
+                      {past && qtyText(h, day) ? ` · ${qtyText(h, day)}` : ''}
                     </span>
                   </div>
                   {!past && <Pill>Planejado</Pill>}

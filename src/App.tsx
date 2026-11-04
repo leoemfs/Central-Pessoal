@@ -14,6 +14,7 @@ import { Mais } from './modules/Mais';
 import { Habitos } from './modules/Habitos';
 import { Notas } from './modules/Notas';
 import { Ajustes } from './modules/Ajustes';
+import { Revisao } from './modules/Revisao';
 
 export interface ViewProps {
   route: Route;
@@ -41,6 +42,7 @@ export const SECTIONS: Section[] = [
   { path: 'nucleo', label: 'Núcleo pessoal', icon: 'target', view: Habitos, fab: 'nucleo/novo' },
   { path: 'arquivo', label: 'Arquivo geral', icon: 'archive', view: Notas, fab: 'arquivo/nova' },
   { path: 'ajustes', label: 'Configurações', icon: 'settings', view: Ajustes },
+  { path: 'revisao', label: 'Revisão semanal', icon: 'calendarCheck', view: Revisao },
 ];
 
 const TABS = ['inicio', 'financas', 'diario', 'agenda', 'mais'];

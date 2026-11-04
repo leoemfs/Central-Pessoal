@@ -2,7 +2,7 @@ import { useMemo } from 'react';
 import { useStore } from '../store';
 import { toggleTask } from '../actions';
 import { cleanDays, habitsOfDay, habitStreak } from '../habits';
-import { HabitCheck } from './Habitos';
+import { HabitCheck, qtyText, RiskPill } from './Habitos';
 import { monthBills, openBills, summarize } from '../finance';
 import { addDays, formatDateTime, formatLongDate, formatMoney, formatMonth, greeting, monthKey, relativeDay, toISO, todayISO } from '../utils';
 import { Empty, Icon, Pill, Progress, type IconName } from '../ui';
@@ -108,6 +108,17 @@ export function Dashboard() {
           ))}
         </div>
       </section>
+
+      {(new Date().getDay() === 0 || new Date().getDay() === 1) && (
+        <a className="card review-cta" href="#/revisao">
+          <Icon name="calendarCheck" size={26} />
+          <span>
+            <strong>Hora da revisão semanal</strong>
+            <span className="muted small">Veja como foi a semana em todas as áreas e anote o que ajustar.</span>
+          </span>
+          <Icon name="right" size={18} />
+        </a>
+      )}
 
       {needsBackup && (
         <a className="alert orange" href="#/ajustes" style={{ textDecoration: 'none' }}>
@@ -229,8 +240,10 @@ export function Dashboard() {
                       <span className="row-meta">
                         {h.kind === 'ritual' ? 'Ritual' : 'Construindo'}
                         {h.time ? ` · ${h.time}` : ''}
+                        {qtyText(h, today) ? ` · ${qtyText(h, today)}` : ''}
                       </span>
                     </div>
+                    <RiskPill h={h} today={today} />
                     <span className="pill">
                       <Icon name="flame" size={13} /> {habitStreak(h, today)}
                     </span>

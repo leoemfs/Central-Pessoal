@@ -7,7 +7,7 @@ import type { JournalEntry } from '../types';
 import { addMonths, formatDate, formatDateTime, formatDMY, formatMonth, monthKey, nowTime, pad, relativeDay, toISO, todayISO, uid } from '../utils';
 import { Chips, Empty, Field, Icon, IconButton, MonthNav, PageHeader, Pill, Segmented, Sheet } from '../ui';
 
-export const JOURNAL_TAGS = ['Pessoal', 'Trabalho', 'Família', 'Saúde', 'Estudos', 'Viagem'];
+export const JOURNAL_TAGS = ['Pessoal', 'Trabalho', 'Família', 'Saúde', 'Estudos', 'Viagem', 'Revisão'];
 
 const localDate = (iso: string) => toISO(new Date(iso));
 const localTime = (iso: string) => {

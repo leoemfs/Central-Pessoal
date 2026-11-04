@@ -145,6 +145,10 @@ export function normalizeHabit(h: Record<string, unknown>): Habit {
     target: typeof h.target === 'number' && h.target > 0 ? h.target : 66,
     slips: strings(h.slips),
     startDate: typeof h.startDate === 'string' ? h.startDate : toISO(new Date(createdAt)),
+    goal: typeof h.goal === 'number' && h.goal > 0 ? h.goal : null,
+    unit: typeof h.unit === 'string' ? h.unit : '',
+    step: typeof h.step === 'number' && h.step > 0 ? h.step : 1,
+    amounts: isRec(h.amounts) ? Object.fromEntries(Object.entries(h.amounts).filter((e): e is [string, number] => typeof e[1] === 'number')) : {},
     createdAt,
   };
 }

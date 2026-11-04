@@ -66,3 +66,34 @@ test('itens do Núcleo de um dia, ordenados pelo horário', () => {
   assert.deepEqual(day.building.map((h) => h.name), ['Academia']);
   assert.equal(day.quitting.length, 0, 'ainda não começou');
 });
+
+test('meta com quantidade: conta como feito ao atingir a meta', async () => {
+  const { setAmount, toggleCheck, amountOn } = await import('./habits.ts');
+  const { emptyData } = await import('./data.ts');
+  const water = make({ id: 'w', kind: 'ritual', goal: 2000, unit: 'ml', step: 250 });
+  let d = { ...emptyData(), habits: [water] };
+  d = setAmount('w', TODAY, 1250)(d);
+  assert.equal(amountOn(d.habits[0], TODAY), 1250);
+  assert.equal(d.habits[0].checks.includes(TODAY), false, 'parcial ainda não conta');
+  d = setAmount('w', TODAY, 2000)(d);
+  assert.equal(d.habits[0].checks.includes(TODAY), true);
+  d = setAmount('w', TODAY, 1500)(d);
+  assert.equal(d.habits[0].checks.includes(TODAY), false, 'voltou abaixo da meta');
+  d = toggleCheck('w', TODAY)(d);
+  assert.equal(amountOn(d.habits[0], TODAY), 2000, 'marcar feito completa a meta');
+  d = toggleCheck('w', TODAY)(d);
+  assert.equal(amountOn(d.habits[0], TODAY), 0);
+});
+
+test('nunca falhe duas vezes: alerta só quando o último dia programado falhou e hoje está pendente', async () => {
+  const { atRiskToday } = await import('./habits.ts');
+  // Dias úteis; hoje é quarta (04/11). Último programado antes: terça 03/11.
+  const base = make({ kind: 'ritual', days: [1, 2, 3, 4, 5], checks: ['2026-11-02'] });
+  assert.equal(atRiskToday(base, TODAY), true);
+  assert.equal(atRiskToday({ ...base, checks: [...base.checks, '2026-11-03'] }, TODAY), false, 'ontem feito');
+  assert.equal(atRiskToday({ ...base, checks: [...base.checks, TODAY] }, TODAY), false, 'hoje já feito');
+  // Segunda (09/11): o último dia programado é sexta (06/11); fim de semana não conta.
+  const fri = { ...base, checks: ['2026-11-06'] };
+  assert.equal(atRiskToday(fri, '2026-11-09'), false);
+  assert.equal(atRiskToday(make({ kind: 'ritual', createdAt: '2026-11-04T08:00:00' }), TODAY), false, 'criado hoje');
+});
