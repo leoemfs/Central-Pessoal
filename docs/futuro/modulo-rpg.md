@@ -593,3 +593,65 @@ interface JourneyState {
 **Status (v0.10):** os passos 1 a 3 estão **feitos**, em `src/jornada/` (`art.ts`, `artData.ts`, `catalog.ts`, `rules.ts`, `sky.ts`), com testes em `src/jornada.test.ts`. É lógica pura e invisível: nenhuma tela usa ainda, e nada muda no app em uso. Faltam os passos 4 e 5 (telas), que só aparecem depois do desbloqueio.
 
 **Ainda não programado (depende das telas e de registrar quando cada item foi equipado):** os efeitos dos místicos que mexem com o tempo — escudo semanal da Armadura de cristal, XP em dobro depois da recaída (Pena da fênix), cristal por revisão (Olho do oráculo), cristal por mês em dia (Coroa), baú extra por nível (Espada da aurora) e ouro extra por estudo (Cajado estelar). Os bônus de +10% dos artefatos já estão em `equipmentBonus`.
+
+---
+
+## Anexo C — Modo campanha
+
+*Acrescentado em novembro de 2026. Prévia jogável na "Prévia da Jornada" (aba Campanha).*
+
+A campanha dá um **rumo** à Jornada: uma história com começo, meio e fim que avança com a rotina real. **Ela não cria tarefas de jogo.** Os objetivos só leem o que a pessoa já faz no app (hábitos, contas, diário, revisões).
+
+### C.1. Estrutura
+
+Um mapa em pixel art com 7 regiões que se abrem uma por vez. Cada região é um capítulo ligado a uma parte do app:
+
+| # | Região | Tema no app | Objetivos | Chefe | Recompensas |
+|---|---|---|---|---|---|
+| 1 | Vila do Começo | Conhecer o app (tutorial) | Marcar um ritual · escrever no diário · pagar uma conta no prazo · completar todas as missões de um dia · vestir um item | — | Título Viajante · baú de prata |
+| 2 | Floresta da Rotina | Rituais e hábitos | 7 dias seguidos com algum ritual ou hábito · 25 rituais/hábitos | Lobo da Preguiça | Manto da floresta · título Caçador(a) de Lobos · baú dourado |
+| 3 | Mercado de Ouro | Finanças | 3 contas pagas no prazo · cadastrar o salário em Receitas | Goblin dos Juros | Bracelete do mercador (+5% de ouro) · Mestre(a) do Mercado · baú dourado |
+| 4 | Pântano das Tentações | Hábitos a abandonar | 14 dias sem o hábito | Serpente do Vício | Botas do pântano · Domador(a) de Serpentes · baú de cristal |
+| 5 | Torre do Saber | Leitura, estudo e diário | Ler em 10 dias diferentes · 7 registros no diário | Guardião do Esquecimento | Cajado do saber (+10% de XP em leitura) · Guardiã(o) do Saber · baú dourado |
+| 6 | Montanha da Disciplina | Revisão semanal | 2 revisões semanais | Gigante da Desordem | Armadura da montanha · Escalador(a) · baú dourado |
+| 7 | Castelo do Caos | Tudo junto | 14 dias com 5 ou mais missões | **Senhor do Caos** (2 semanas) | Lâmina da ordem (mística) · morada Castelo · Senhor(a) da Ordem · baú de cristal |
+
+- Os contadores dos objetivos começam do zero quando o capítulo abre.
+- Os itens da campanha são **exclusivos**: não saem em baús nem na loja, e aparecem no Arsenal como "recompensa do capítulo N".
+- Cada título de capítulo vale 1 cristal, como os outros títulos.
+
+### C.2. Chefes
+
+- O chefe aparece quando os objetivos do capítulo terminam.
+- **Vida** = 80% das missões previstas para os próximos 7 dias (14 no Senhor do Caos). Assim a dificuldade acompanha a rotina de cada pessoa, seja ela de 3 ou de 15 hábitos.
+- **Cada missão cumprida tira 1 de vida.** Desmarcar devolve 1. O que já tinha sido feito no dia antes de ele aparecer não conta.
+- **Sem castigo:** se o prazo acabar, o chefe foge e volta com a vida cheia numa nova semana. Nada é perdido.
+- Na tela da Jornada, durante a luta, um cartão mostra o chefe, a barra de vida e os dias restantes. Cada golpe faz o chefe piscar e mostra "−1 HP".
+
+### C.3. História e personagens
+
+- Três personagens fixos, com retrato em pixel art e falas curtas (de 2 a 3 por capítulo), no estilo de caixa de diálogo de RPG:
+  - **Mestra Lume**, a guia;
+  - **Nina, a mercadora**, no Mercado de Ouro;
+  - **Tork, o ferreiro**, na Montanha da Disciplina.
+- As falas se adaptam ao gênero do avatar ("Bem-vinda/Bem-vindo").
+- Ordem das falas: apresentação ao abrir o capítulo, provocação do chefe ao aparecer, despedida ao vencer, e logo depois a apresentação do capítulo seguinte. Dá para ouvir de novo pelo mapa.
+
+### C.4. Depois do Castelo
+
+A campanha dura cerca de 3 meses no ritmo normal. Depois vêm as **temporadas**: uma região nova por estação, com chefe e item próprios. Isso evita o "zerei, acabou".
+
+### C.5. Dados a guardar
+
+```ts
+interface CampaignState {
+  chapter: number;                 // capítulo atual (0–6)
+  stage: 'objetivos' | 'chefe' | 'fim';
+  chapterStart: string;            // dia em que o capítulo abriu (os contadores contam a partir daqui)
+  boss: { hp: number; max: number; start: string; days: number } | null;
+  cleared: number[];               // capítulos concluídos
+  introSeen: number[];             // falas de abertura já mostradas
+}
+```
+
+Os contadores dos objetivos (rituais, contas no prazo, dias limpos, revisões etc.) são **calculados a partir dos dados**, contando desde `chapterStart`. A vida do chefe também: missões cumpridas entre `boss.start` e hoje. Assim, desmarcar algo marcado por engano corrige tudo sozinho.
