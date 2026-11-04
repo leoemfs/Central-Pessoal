@@ -593,3 +593,112 @@ interface JourneyState {
 **Status (v0.10):** os passos 1 a 3 estão **feitos**, em `src/jornada/` (`art.ts`, `artData.ts`, `catalog.ts`, `rules.ts`, `sky.ts`), com testes em `src/jornada.test.ts`. É lógica pura e invisível: nenhuma tela usa ainda, e nada muda no app em uso. Faltam os passos 4 e 5 (telas), que só aparecem depois do desbloqueio.
 
 **Ainda não programado (depende das telas e de registrar quando cada item foi equipado):** os efeitos dos místicos que mexem com o tempo — escudo semanal da Armadura de cristal, XP em dobro depois da recaída (Pena da fênix), cristal por revisão (Olho do oráculo), cristal por mês em dia (Coroa), baú extra por nível (Espada da aurora) e ouro extra por estudo (Cajado estelar). Os bônus de +10% dos artefatos já estão em `equipmentBonus`.
+
+---
+
+## Anexo C — Modo campanha
+
+*Acrescentado em novembro de 2026. Prévia jogável na "Prévia da Jornada" (aba Campanha).*
+
+A campanha dá um **rumo** à Jornada: uma história com começo, meio e fim que avança com a rotina real. **Ela não cria tarefas de jogo.** Os objetivos só leem o que a pessoa já faz no app (hábitos, contas, diário, revisões).
+
+### C.1. Estrutura
+
+Um mapa em pixel art com 7 regiões que se abrem uma por vez. Cada região é um capítulo ligado a uma parte do app:
+
+| # | Região | Tema no app | Objetivos | Chefe | Recompensas |
+|---|---|---|---|---|---|
+| 1 | Vila do Começo | Conhecer o app (tutorial) | Marcar um ritual · escrever no diário · pagar uma conta no prazo · completar todas as missões de um dia · vestir um item | — | Título Viajante · baú de prata |
+| 2 | Floresta da Rotina | Rituais e hábitos | 7 dias seguidos com algum ritual ou hábito · 25 rituais/hábitos | Lobo da Preguiça | Manto da floresta · título Caçador(a) de Lobos · baú dourado |
+| 3 | Mercado de Ouro | Finanças | 3 contas pagas no prazo · cadastrar o salário em Receitas | Goblin dos Juros | Bracelete do mercador (+5% de ouro) · Mestre(a) do Mercado · baú dourado |
+| 4 | Pântano das Tentações | Hábitos a abandonar | 14 dias sem o hábito | Serpente do Vício | Botas do pântano · Domador(a) de Serpentes · baú de cristal |
+| 5 | Torre do Saber | Leitura, estudo e diário | Ler em 10 dias diferentes · 7 registros no diário | Guardião do Esquecimento | Cajado do saber (+10% de XP em leitura) · Guardiã(o) do Saber · baú dourado |
+| 6 | Montanha da Disciplina | Revisão semanal | 2 revisões semanais | Gigante da Desordem | Armadura da montanha · Escalador(a) · baú dourado |
+| 7 | Castelo do Caos | Tudo junto | 14 dias com 5 ou mais missões | **Senhor do Caos** (2 semanas) | Lâmina da ordem (mística) · morada Castelo · Senhor(a) da Ordem · baú de cristal |
+
+- Os contadores dos objetivos começam do zero quando o capítulo abre.
+- Os itens da campanha são **exclusivos**: não saem em baús nem na loja, e aparecem no Arsenal como "recompensa do capítulo N".
+- Cada título de capítulo vale 1 cristal, como os outros títulos.
+
+### C.2. Chefes
+
+- O chefe aparece quando os objetivos do capítulo terminam.
+- **Vida** = 80% das missões previstas para os próximos 7 dias (14 no Senhor do Caos). Assim a dificuldade acompanha a rotina de cada pessoa, seja ela de 3 ou de 15 hábitos.
+- **Cada missão cumprida tira 1 de vida.** Desmarcar devolve 1. O que já tinha sido feito no dia antes de ele aparecer não conta.
+- **Sem castigo:** se o prazo acabar, o chefe foge e volta com a vida cheia numa nova semana. Nada é perdido.
+- Na tela da Jornada, durante a luta, um cartão mostra o chefe, a barra de vida e os dias restantes. Cada golpe faz o chefe piscar e mostra "−1 HP".
+
+### C.3. História e personagens
+
+- Três personagens fixos, com retrato em pixel art e falas curtas (de 2 a 3 por capítulo), no estilo de caixa de diálogo de RPG:
+  - **Mestra Lume**, a guia;
+  - **Nina, a mercadora**, no Mercado de Ouro;
+  - **Tork, o ferreiro**, na Montanha da Disciplina.
+- As falas se adaptam ao gênero do avatar ("Bem-vinda/Bem-vindo").
+- Ordem das falas: apresentação ao abrir o capítulo, provocação do chefe ao aparecer, despedida ao vencer, e logo depois a apresentação do capítulo seguinte. Dá para ouvir de novo pelo mapa.
+
+### C.4. Depois do Castelo
+
+A campanha dura cerca de 3 meses no ritmo normal. Depois vêm as **temporadas**: uma região nova por estação, com chefe e item próprios. Isso evita o "zerei, acabou".
+
+### C.5. Dados a guardar
+
+```ts
+interface CampaignState {
+  chapter: number;                 // capítulo atual (0–6)
+  stage: 'objetivos' | 'chefe' | 'fim';
+  chapterStart: string;            // dia em que o capítulo abriu (os contadores contam a partir daqui)
+  boss: { hp: number; max: number; start: string; days: number } | null;
+  cleared: number[];               // capítulos concluídos
+  introSeen: number[];             // falas de abertura já mostradas
+}
+```
+
+Os contadores dos objetivos (rituais, contas no prazo, dias limpos, revisões etc.) são **calculados a partir dos dados**, contando desde `chapterStart`. A vida do chefe também: missões cumpridas entre `boss.start` e hoje. Assim, desmarcar algo marcado por engano corrige tudo sozinho.
+
+---
+
+## Anexo D — Entrevista e campanha personalizada
+
+*Acrescentado em novembro de 2026. Testada na "Prévia da Jornada".*
+
+Uma campanha fixa não serve para todo mundo. Por exemplo, "14 dias sem refrigerante" é fácil demais para quem não toma refrigerante. Por isso, logo depois de criar o avatar, a **Mestra Lume faz uma entrevista curta** (cerca de 1 minuto, quase tudo com um toque) e monta a campanha com as respostas.
+
+### D.1. Perguntas
+1. **O que você mais quer melhorar agora?** Até 3, em ordem de prioridade:
+   - Corpo e saúde
+   - Rotina e organização
+   - Mente e estudo
+   - Dinheiro
+   - Largar um hábito
+   - Bem-estar
+2. **Uma pergunta de detalhe por área escolhida:**
+   - corpo: atividade (academia, corrida, caminhada, natação) e quantas vezes por semana (2 a 5);
+   - rotina: o ritual (arrumar a cama, acordar no mesmo horário, organizar a casa, planejar o dia);
+   - mente: o quê (ler, idioma, curso) e quanto por dia (10, 20 ou 30 min);
+   - dinheiro: o maior desafio (contas atrasando, gastar demais, não saber quanto entra) e se quer juntar para algo (viagem, reserva, carro, outro). Se quiser, também a meta e quanto dá para guardar. Isso cria uma **caixinha** (ver `caixinhas.md`);
+   - largar: qual hábito (redes sociais à noite, doce, cigarro, refrigerante ou outro, escrito pela pessoa);
+   - bem-estar: meditar, respirar, gratidões ou terapia semanal.
+3. **Melhor horário** para os rituais: manhã, tarde ou noite.
+4. **Ritmo:** tranquilo, equilibrado ou desafiador. Multiplica o tamanho dos objetivos (0,7 / 1 / 1,3) e a vida dos chefes (60% / 80% / 95% das missões).
+5. **Resumo:** as regiões da campanha, as missões do dia que serão criadas e a caixinha. Tem "Voltar" para mudar qualquer resposta.
+
+### D.2. Como a campanha se monta
+- **Sempre no começo:** Vila do Começo, o tutorial.
+- **Sempre no final:** Montanha da Disciplina (revisão semanal) e Castelo do Caos.
+- **No meio:** uma região por área escolhida, **na ordem das prioridades**. São duas regiões novas mais as que já existiam:
+
+| Área | Região | Chefe | Objetivos (ritmo equilibrado) |
+|---|---|---|---|
+| Rotina | Floresta da Rotina | Lobo da Preguiça | 7 dias seguidos · 20 rituais |
+| Corpo | **Arena de Ferro** (nova, com o Tork) | **Ogro do Sofá** | treinos = 2 semanas na frequência escolhida |
+| Mente | Torre do Saber | Guardião do Esquecimento | estudar em 10 dias · 7 registros no diário |
+| Dinheiro | Mercado de Ouro | Goblin dos Juros | com caixinha: criar e guardar 4 vezes; e conforme o desafio: contas no prazo, anotar gastos em 10 dias ou cadastrar o salário |
+| Largar | Pântano das Tentações | Serpente do Vício (cita o hábito da pessoa) | 14 dias sem o hábito |
+| Bem-estar | **Jardim da Calma** (nova) | **Sombra da Ansiedade** | a prática escolhida em 10 dias (ou 3 sessões semanais) · 5 registros no diário |
+
+- **Poucas áreas:** com só 1 área, a Floresta da Rotina entra para a campanha ter pelo menos 3 regiões antes da Montanha.
+- **Hábitos que faltam:** se a pessoa escolhe algo que ainda não tem cadastrado, a entrevista cria o hábito no Núcleo, com o nome, a frequência e o horário respondidos. A campanha só lê dados reais.
+- **Falas personalizadas:** usam as respostas, como "Você disse 4 vezes por semana de academia…" ou "Sssó um pouquinho de doce…".
+- **Itens exclusivos das regiões novas:** Armadura da arena e Lanterna da calma.
+- **Refazer a entrevista** em Configurações da Jornada: as regiões já vencidas ficam, e só as próximas mudam.
