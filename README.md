@@ -86,4 +86,10 @@ src/
     Ajustes.tsx, Mais.tsx
 ```
 
+## Implementações futuras
+
+Documentos de funcionalidades planejadas, ainda **sem desenvolvimento**:
+
+- [Módulo RPG — Gamificação da Vida Pessoal](docs/futuro/modulo-rpg.md): Jornada com personagem em pixel art, XP, níveis, Gold, loja, inventário e conquistas, consumindo os dados dos módulos existentes. Decisão pendente sobre o tom do app.
+
 Feito com React, TypeScript e Vite.
