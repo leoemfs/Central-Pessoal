@@ -22,6 +22,8 @@ import {
   openChest,
   pendingChests,
   titleProgress,
+  visitGift,
+  visitStats,
   wallet,
   type ShopContext,
 } from './jornada/rules.ts';
@@ -272,4 +274,31 @@ test('céu: uma estrela por dia de uso nos últimos 30 dias', () => {
   assert.equal(skyAt(new Date(2026, 10, 25, 10), days(TODAY, 10)).stars, 0, 'de dia não tem estrela');
   assert.deepEqual(starPositions(5), starPositions(5));
   assert.ok(starPositions(30).every((s) => s.x >= 2 && s.x <= 98 && s.y >= 4 && s.y <= 74));
+});
+
+// ---------- Visitas ----------
+
+test('visitas: abrir o app conta, com uma folga por semana', () => {
+  // 2026-11-23 é segunda-feira. Uma semana inteira de visitas.
+  const week = days('2026-11-29', 7);
+  assert.deepEqual(visitStats(week, '2026-11-29'), { streak: 7, best: 7, total: 7, visitedToday: true });
+  // Faltou um dia (a folga da semana): a sequência continua, só não conta o dia que faltou.
+  const oneMiss = week.filter((d) => d !== '2026-11-25');
+  assert.equal(visitStats(oneMiss, '2026-11-29').streak, 6);
+  // Faltou dois dias na mesma semana: recomeça, mas o recorde fica.
+  const twoMiss = oneMiss.filter((d) => d !== '2026-11-27');
+  const st = visitStats([...days('2026-11-22', 10), ...twoMiss], '2026-11-29');
+  assert.equal(st.streak, 2);
+  assert.equal(st.best, 13, '13 a 24 seguidos, a folga no dia 25 e mais o dia 26');
+  // Hoje ainda sem visita não quebra.
+  assert.equal(visitStats(days('2026-11-28', 5), '2026-11-29').streak, 5);
+  assert.equal(visitStats([], TODAY).streak, 0);
+});
+
+test('presente do dia: ouro crescente, baú no 7º dia e marcos', () => {
+  assert.deepEqual([1, 2, 3, 4, 5, 6].map((n) => visitGift(n).gold), [10, 15, 20, 25, 30, 40]);
+  assert.equal(visitGift(7).chest, 'bronze');
+  assert.equal(visitGift(8).gold, 10, 'a tira recomeça');
+  assert.equal(visitGift(14).milestone?.chest, 'prata');
+  assert.equal(visitGift(30).milestone?.title, 'assidua');
 });

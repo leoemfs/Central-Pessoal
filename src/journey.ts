@@ -18,6 +18,13 @@ export function markActive(d: AppData, today: string = todayISO()): AppData {
   return { ...d, settings: { ...d.settings, activeDays } };
 }
 
+/** Registra que o app foi aberto hoje (guarda só os últimos 400 dias). Não depende de registrar nada. */
+export function markVisit(d: AppData, today: string = todayISO()): AppData {
+  if (d.settings.visitDays.includes(today)) return d;
+  const visitDays = [...d.settings.visitDays, today].sort().slice(-400);
+  return { ...d, settings: { ...d.settings, visitDays } };
+}
+
 export function unlockProgress(d: AppData, today: string = todayISO()) {
   const set = new Set(d.settings.activeDays);
   const days = Array.from({ length: UNLOCK_WINDOW }, (_, i) => addDays(today, i - (UNLOCK_WINDOW - 1)));

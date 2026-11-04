@@ -735,3 +735,87 @@ Uma campanha fixa não serve para todo mundo. Por exemplo, "14 dias sem refriger
   - os baús novos;
   - os dias que passaram.
 - **Depois do resumo** vêm, em ordem, os acontecimentos que ficaram guardados: subidas de nível, títulos, chefe que apareceu, vitória, marcos de caixinha. Assim a recompensa fica toda junta, e o resumo vira o motivo para abrir a Jornada.
+
+---
+
+## Anexo F — Visitas, dois modos do app, pets e Codex
+
+*Acrescentado em novembro de 2026. Testado na "Prévia da Jornada".*
+
+### F.1. Os dois modos do app
+- **Modo Jornada desligado:** é o app básico, com tudo o que foi definido desde o início (Finanças com receitas, cartões e caixinhas; Núcleo; Diário; Agenda; Notas; Revisão semanal). Não aparece XP, atributo, pixel art, cartão nem presente.
+- **Modo Jornada ligado:** a experiência imersiva. No app principal continua só o cartão no Início (Anexo E).
+- **Como escolher:** no desbloqueio ("Quero a Jornada" ou "Agora não") e a qualquer momento em **Configurações › Modo Jornada**.
+- **Desligar não apaga nada.** Visitas, atributos e registros continuam guardados em silêncio, e a Jornada volta inteira se religada.
+
+### F.2. Sequência de visitas: abrir o app já conta
+É um terceiro contador, separado dos outros dois:
+- **Visitas:** basta abrir o app, mesmo sem registrar nada.
+- **Dias com registro:** acendem as estrelas do céu.
+- **Sequência de cada hábito:** rende os baús de rotina.
+
+**No app (já programado, v0.11):** a lista `settings.visitDays` guarda os dias em que o app foi aberto (os últimos 400). A regra fica em `visitStats` (`src/jornada/rules.ts`).
+
+**Regras:**
+- **Uma folga por semana** (segunda a domingo): um dia sem abrir não quebra a sequência se for o único daquela semana.
+- **Hoje ainda sem visita** não quebra a sequência.
+- **O recorde e o total nunca diminuem.**
+
+**Presente do dia, numa tira de 7 dias:**
+- dias 1 a 6: 10, 15, 20, 25, 30 e 40 de ouro;
+- dia 7: baú de bronze. Depois a tira recomeça.
+
+**Marcos:**
+- 7 dias: comemoração;
+- 14 dias: baú de prata;
+- 30 dias: baú dourado e o título **Assídua/Assíduo**;
+- 100 dias: título **Centenária/Centenário**;
+- 365 dias: título **Lenda da Constância**.
+
+**Mais detalhes:**
+- **Presentes acumulam:** os dias em que você abriu o app sem entrar na Jornada ficam esperando. A linha do cartão no Início avisa ("3 presentes esperando").
+- **Recaída:** num dia com recaída registrada, o presente vem com a mensagem *"Recaída acontece. Você voltou no mesmo dia, e isso é o que conta."* O botão "Tive uma recaída" fica na linha do hábito a abandonar: zera o contador daquele hábito e não tira nada da Jornada.
+- **Na Jornada:** uma chama no topo com o número de dias seguidos e o cartão "Presente do dia", com a tira e a animação de abrir.
+
+### F.3. Pets
+- **No começo,** a escolha continua simples: gato ou cão. O outro chega no nível 7.
+- **Editar o pet** (Arsenal › Pets, ou pelo Codex): **nome**, que aparece na cena e nos balões, e **cor/pelagem**, de 2 a 6 opções por pet. Pelagens raras são prêmios de sequência de visitas (30, 100 e 365 dias).
+- **Os outros pets chegam por conquistas,** ligadas a cada parte do app. Cada um chega com a animação "Novo companheiro!":
+
+| Raridade | Pet | Como conquistar |
+|---|---|---|
+| Raro | Coelho | 150 missões cumpridas |
+| Raro | Coruja | 80 registros no diário |
+| Raro | Beija-flor | 20 tarefas e compromissos da Agenda |
+| Raro | Esquilo | uma caixinha chegar a 50% |
+| Raro | Tartaruga | 30 dias seguidos de rotina |
+| Raro | Raposa | 30 dias seguidos abrindo o app |
+| Raro | Cavalinho | nível 12 e Agilidade 50 |
+| Épico | Lobo filhote | vencer o Lobo da Preguiça (ou nível 15) |
+| Épico | Sapinho do pântano | vencer a Serpente do Vício (ou 60 dias de visitas) |
+| Épico | Golem de pedra | vencer o Gigante da Desordem |
+| Épico | Fênix filhote | 30 dias limpo depois de uma recaída |
+| Místico | Dragãozinho | vencer o Senhor do Caos (ou nível 50) |
+| Místico | Grifo | 365 dias abrindo o app |
+| Místico | Unicórnio | todos os atributos em 100 |
+
+- **Pets que voam** (coruja, beija-flor, fênix, dragão) passeiam no céu da cena.
+- **Regiões fora da campanha:** os pets ligados a elas têm um caminho alternativo, para nenhum ficar impossível.
+
+### F.4. Armas e acessórios
+- **Arcos:** arco curto (comum), arco longo de teixo (raro), arco élfico (épico, Agilidade 80) e **arco do vento** (místico). A personagem segura o arco e leva uma **aljava com flechas nas costas**, com a cor das flechas acompanhando o arco.
+- **Acessórios em espaços próprios,** no lugar do "artefato" genérico:
+  - **Colar:** amuleto da gota, coração de cristal, colar de pérola, colar de dente de lobo. Aparece no peito do avatar.
+  - **Anel:** anel de ferro, anel do foco, braceletes e o **anel da aurora** (místico). O segundo anel abre no nível 10.
+  - **Item mágico:** grimório, **grimório das estrelas** (místico), lanterna, ampulheta, penas, olho do oráculo e estrela polar. Flutua ao lado da personagem.
+
+### F.5. Codex
+- **Onde fica:** no Arsenal, em duas abas: **"Vestir e comprar"** e **"Codex"**.
+- **O que mostra:** tudo o que existe (itens, pets e moradas), por categoria, com o contador de cada uma ("Pets 7/16").
+- **O que você tem** aparece colorido, com uma frase curta de história.
+- **O que falta** aparece em **silhueta, com a dica de como conquistar**.
+- **Marcos de descoberta:**
+  - 25%: baú de prata;
+  - 50%: baú dourado;
+  - 75%: baú de cristal;
+  - 100%: título **Lenda do Codex**.

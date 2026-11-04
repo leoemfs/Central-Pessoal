@@ -13,7 +13,7 @@ import { attributeTotals, diffDays, isScheduled, startOf } from '../habits.ts';
 import { journeyStats } from '../journey.ts';
 import { monthBills } from '../finance.ts';
 import { monthBalance } from '../incomes.ts';
-import { defaultReviewWeek, weekReview } from '../review.ts';
+import { defaultReviewWeek, weekReview, weekStart } from '../review.ts';
 import { addDays, addMonths, monthKey, pad, sum, toISO, todayISO } from '../utils.ts';
 import { ATTR_CODES, HOMES, ITEMS, PETS, STARTER_ITEMS, itemById, type AttrCode, type Attrs, type Home, type Item, type Rarity, type Slot } from './catalog.ts';
 
@@ -508,3 +508,47 @@ export function equipmentBonus(state: JourneyState) {
 
 /** Atributos ganhos nos últimos 30 dias (desempate de classe). */
 export const recentAttributes = (d: AppData, today: string = todayISO()) => attributes(d, today, addDays(today, -29));
+
+// ---------- Visitas: abrir o app já conta ----------
+
+/** Ouro dos dias 1 a 6 da tira de presentes; o 7º dia é um baú de bronze, e a tira recomeça. */
+export const VISIT_GIFTS = [10, 15, 20, 25, 30, 40];
+/** Marcos de dias seguidos de visita. */
+export const VISIT_MILESTONES: Record<number, { chest?: ChestKind; title?: string }> = {
+  7: { chest: 'bronze' },
+  14: { chest: 'prata' },
+  30: { chest: 'dourado', title: 'assidua' },
+  100: { title: 'centenaria' },
+  365: { title: 'anual' },
+};
+
+/**
+ * Sequência de visitas com uma folga por semana (segunda a domingo): um dia sem abrir o app não
+ * quebra a sequência se for o único daquela semana. Hoje ainda sem visita também não quebra.
+ * O recorde e o total nunca diminuem.
+ */
+export function visitStats(visitDays: string[], today: string = todayISO()) {
+  const set = new Set(visitDays.filter((d) => d <= today));
+  const sorted = [...set].sort();
+  if (!sorted.length) return { streak: 0, best: 0, total: 0, visitedToday: false };
+  let streak = 0;
+  let best = 0;
+  let folgaWeek: string | null = null;
+  for (let d = sorted[0], guard = 0; d <= today && guard < 4000; d = addDays(d, 1), guard++) {
+    if (set.has(d)) {
+      streak++;
+      best = Math.max(best, streak);
+    } else if (d !== today) {
+      const wk = weekStart(d);
+      if (streak > 0 && folgaWeek !== wk) folgaWeek = wk;
+      else streak = 0;
+    }
+  }
+  return { streak, best, total: set.size, visitedToday: set.has(today) };
+}
+
+/** Presente do n-ésimo dia seguido de visita (n ≥ 1). */
+export function visitGift(n: number): { gold: number; chest: ChestKind | null; milestone: (typeof VISIT_MILESTONES)[number] | null } {
+  const pos = ((n - 1) % 7) + 1;
+  return { gold: pos === 7 ? 0 : VISIT_GIFTS[pos - 1], chest: pos === 7 ? 'bronze' : null, milestone: VISIT_MILESTONES[n] ?? null };
+}

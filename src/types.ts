@@ -195,6 +195,8 @@ export interface Settings {
   lastBackupAt: string | null;
   /** Dias (AAAA-MM-DD) em que houve algum registro no app. */
   activeDays: string[];
+  /** Dias (AAAA-MM-DD) em que o app foi aberto, mesmo sem registrar nada (sequência de visitas da Jornada). */
+  visitDays: string[];
   /** Data em que a Jornada foi desbloqueada. */
   journeyUnlockedAt: string | null;
   /** Resposta depois de desbloquear: quer a Jornada ou não por agora. */

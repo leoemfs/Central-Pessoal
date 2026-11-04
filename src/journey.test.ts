@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { emptyData, normalizeHabit } from './data.ts';
-import { checkUnlock, journeyStats, levelFromXp, markActive, unlockProgress } from './journey.ts';
+import { checkUnlock, journeyStats, levelFromXp, markActive, markVisit, unlockProgress } from './journey.ts';
 import { addDays } from './utils.ts';
 import type { AppData } from './types.ts';
 
@@ -64,4 +64,13 @@ test('XP retroativo vem dos dados reais e nunca de gastos', () => {
   assert.equal(s.xp, 30 + 90 + 15 + 10 + 40);
   assert.equal(s.missions, 3 + 3 + 1 + 1 + 1);
   assert.equal(s.level, 2);
+});
+
+test('registra a visita do dia uma vez, mesmo sem registrar nada', () => {
+  let d = markVisit(emptyData(), TODAY);
+  assert.deepEqual(d.settings.visitDays, [TODAY]);
+  assert.equal(markVisit(d, TODAY), d);
+  d = markVisit(d, '2026-11-26');
+  assert.deepEqual(d.settings.visitDays, [TODAY, '2026-11-26']);
+  assert.deepEqual(d.settings.activeDays, [], 'visitar não conta como dia de uso');
 });
