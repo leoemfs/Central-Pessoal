@@ -1,5 +1,5 @@
-import type { AppData, Category, Expense } from './types.ts';
-import { uid } from './utils.ts';
+import type { AppData, Category, DayPeriod, Expense, Habit, HabitKind } from './types.ts';
+import { toISO, uid } from './utils.ts';
 
 export const COLORS = ['#22c55e', '#3b82f6', '#8b5cf6', '#f97316', '#ef4444', '#94a3b8', '#eab308', '#ec4899', '#06b6d4'];
 /** As 6 cores do cartão, como na referência visual. */
@@ -58,7 +58,7 @@ export function normalize(raw: unknown): AppData {
     ...base,
     tasks: list(r.tasks),
     events: list(r.events),
-    habits: list(r.habits),
+    habits: list<Record<string, unknown>>(r.habits).map(normalizeHabit),
     notes: list(r.notes),
     journal: list(r.journal),
     expenses: list(r.expenses),
@@ -121,5 +121,30 @@ function migrateV1Transactions(d: AppData, txs: unknown[]): AppData {
     categories,
     expenses: [...d.expenses, ...expenses],
     legacy: receitas.length ? { ...d.legacy, receitas } : d.legacy,
+  };
+}
+
+const KINDS: HabitKind[] = ['ritual', 'construir', 'abandonar'];
+const PERIODS: DayPeriod[] = ['manha', 'tarde', 'noite', 'livre'];
+const strings = (x: unknown): string[] => (Array.isArray(x) ? x.filter((i): i is string => typeof i === 'string') : []);
+
+/** Completa hábitos antigos (só nome, cor e dias marcados) com os campos novos. */
+export function normalizeHabit(h: Record<string, unknown>): Habit {
+  const createdAt = typeof h.createdAt === 'string' ? h.createdAt : new Date().toISOString();
+  const days = Array.isArray(h.days) ? h.days.filter((d): d is number => Number.isInteger(d) && d >= 0 && d <= 6) : [];
+  return {
+    id: h.id as string,
+    name: typeof h.name === 'string' ? h.name : 'Sem nome',
+    color: typeof h.color === 'string' ? h.color : '#22c55e',
+    kind: KINDS.includes(h.kind as HabitKind) ? (h.kind as HabitKind) : 'construir',
+    checks: strings(h.checks),
+    days: Array.isArray(h.days) ? days : [0, 1, 2, 3, 4, 5, 6],
+    period: PERIODS.includes(h.period as DayPeriod) ? (h.period as DayPeriod) : 'livre',
+    time: typeof h.time === 'string' ? h.time : '',
+    cue: typeof h.cue === 'string' ? h.cue : '',
+    target: typeof h.target === 'number' && h.target > 0 ? h.target : 66,
+    slips: strings(h.slips),
+    startDate: typeof h.startDate === 'string' ? h.startDate : toISO(new Date(createdAt)),
+    createdAt,
   };
 }

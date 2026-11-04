@@ -22,7 +22,7 @@ const METHODS: PaymentMethod[] = ['pix', 'debito', 'dinheiro', 'boleto', 'cartao
 /** Formas de pagamento em que normalmente a despesa já nasce paga. */
 const PAID_ON_THE_SPOT: PaymentMethod[] = ['pix', 'debito', 'dinheiro'];
 
-export function ExpenseForm({ editing, onClose }: { editing?: Expense; onClose: () => void }) {
+export function ExpenseForm({ editing, initialDate, onClose }: { editing?: Expense; initialDate?: string; onClose: () => void }) {
   const { data, update } = useStore();
   const categoryOf = useCategoryOf();
   const inSeries = Boolean(editing?.seriesId);
@@ -33,7 +33,7 @@ export function ExpenseForm({ editing, onClose }: { editing?: Expense; onClose: 
   const [amountMode, setAmountMode] = useState<'parcela' | 'total'>('parcela');
   const [method, setMethod] = useState<PaymentMethod>(editing?.method ?? 'pix');
   const [cardId, setCardId] = useState<string | null>(editing?.cardId ?? data.cards[0]?.id ?? null);
-  const [date, setDate] = useState(editing ? (editing.purchaseDate ?? editing.dueDate) : todayISO());
+  const [date, setDate] = useState(editing ? (editing.purchaseDate ?? editing.dueDate) : (initialDate ?? todayISO()));
   const [description, setDescription] = useState(editing?.description ?? '');
   const [categoryId, setCategoryId] = useState<string | null>(editing?.categoryId ?? null);
   const [paidNow, setPaidNow] = useState(true);

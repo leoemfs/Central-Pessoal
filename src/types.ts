@@ -25,12 +25,30 @@ export interface CalendarEvent {
   description: string;
 }
 
+/** ritual = rotina já incorporada · construir = hábito novo · abandonar = hábito a deixar. */
+export type HabitKind = 'ritual' | 'construir' | 'abandonar';
+export type DayPeriod = 'manha' | 'tarde' | 'noite' | 'livre';
+
 export interface Habit {
   id: string;
   name: string;
   color: string;
-  /** Dias (AAAA-MM-DD) cumpridos. */
+  kind: HabitKind;
+  /** Dias (AAAA-MM-DD) cumpridos (ritual/construir). */
   checks: string[];
+  /** Dias da semana programados: 0 = domingo … 6 = sábado. */
+  days: number[];
+  period: DayPeriod;
+  /** Horário fixo (HH:MM), opcional — ex.: dormir às 23:00. */
+  time: string;
+  /** Gatilho: "Depois de …" (empilhamento de hábitos). */
+  cue: string;
+  /** Construir: dias cumpridos para considerar que virou ritual. */
+  target: number;
+  /** Abandonar: dias em que houve recaída. */
+  slips: string[];
+  /** Abandonar: desde quando está sem (AAAA-MM-DD). */
+  startDate: string;
   createdAt: string;
 }
 

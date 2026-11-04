@@ -2,12 +2,13 @@ import { useMemo, useState } from 'react';
 import type { ViewProps } from '../App';
 import { useStore } from '../store';
 import { useSubAction } from '../router';
-import { remove, toggleTask, upsert } from '../actions';
-import { billStatus, getInvoice, invoiceMonths } from '../finance';
+import { remove, upsert } from '../actions';
+import { getInvoice, invoiceMonths } from '../finance';
 import type { CalendarEvent, Task } from '../types';
-import { addDays, addMonths, daysInMonth, formatLongDate, formatMoney, formatMonth, fromISO, monthKey, relativeDay, todayISO, uid, WEEKDAYS } from '../utils';
+import { addDays, addMonths, daysInMonth, formatLongDate, formatMonth, fromISO, monthKey, relativeDay, todayISO, uid, WEEKDAYS } from '../utils';
 import { Empty, Field, Icon, MonthNav, PageHeader, Pill, Segmented, Sheet } from '../ui';
-import { TaskForm, TaskItem, TasksPanel } from './Tarefas';
+import { TaskForm, TasksPanel } from './Tarefas';
+import { DaySheet } from './DaySheet';
 
 export function sortEvents(a: CalendarEvent, b: CalendarEvent): number {
   return a.date.localeCompare(b.date) || (a.time || '00:00').localeCompare(b.time || '00:00');
@@ -60,11 +61,12 @@ function useBillsByDay(): Map<string, DayBill[]> {
 type Tab = 'calendario' | 'tarefas';
 
 export function Agenda({ route }: ViewProps) {
-  const { data, update } = useStore();
+  const { data } = useStore();
   const today = todayISO();
   const [tab, setTab] = useState<Tab>('calendario');
   const [month, setMonth] = useState(monthKey(today));
   const [selected, setSelected] = useState(today);
+  const [dayOpen, setDayOpen] = useState(false);
   const [eventForm, setEventForm] = useState<CalendarEvent | 'new' | null>(null);
   const [taskForm, setTaskForm] = useState<Task | 'new' | null>(null);
   const billsByDay = useBillsByDay();
@@ -103,10 +105,7 @@ export function Agenda({ route }: ViewProps) {
     if (monthKey(day) !== month) setMonth(monthKey(day));
   }
 
-  const dayEvents = eventsByDay.get(selected) ?? [];
-  const dayTasks = tasksByDay.get(selected) ?? [];
-  const dayBills = billsByDay.get(selected) ?? [];
-  const upcoming = data.events.filter((e) => e.date > selected).sort(sortEvents).slice(0, 5);
+  const upcoming = data.events.filter((e) => e.date >= today).sort(sortEvents).slice(0, 5);
 
   return (
     <>
@@ -135,7 +134,7 @@ export function Agenda({ route }: ViewProps) {
                 const bl = (billsByDay.get(d) ?? []).filter((b) => !b.paid).length;
                 const cls = ['cal-day', monthKey(d) !== month && 'outside', d === today && 'today', d === selected && 'selected'].filter(Boolean).join(' ');
                 return (
-                  <button key={d} type="button" role="gridcell" className={cls} aria-selected={d === selected} onClick={() => pick(d)} aria-label={`${formatLongDate(d)}: ${ev} compromisso(s), ${tk} tarefa(s), ${bl} conta(s)`}>
+                  <button key={d} type="button" role="gridcell" className={cls} aria-selected={d === selected} onClick={() => { pick(d); setDayOpen(true); }} aria-label={`${formatLongDate(d)}: ${ev} compromisso(s), ${tk} tarefa(s), ${bl} conta(s)`}>
                     <span className="cal-num">{fromISO(d).getDate()}</span>
                     <span className="cal-marks">
                       {ev > 0 && <span className="mark-event" />}
@@ -151,65 +150,38 @@ export function Agenda({ route }: ViewProps) {
               <span><i className="mark-task" /> Tarefa</span>
               <span><i className="mark-bill" /> Conta a pagar</span>
             </div>
+            <p className="muted small" style={{ marginTop: 6 }}>Toque num dia para ver tudo o que acontece nele.</p>
           </section>
 
           <div className="stack">
             <section className="card">
               <div className="card-head">
-                <h2>{relativeDay(selected) === 'Hoje' ? `Hoje · ${formatLongDate(selected)}` : formatLongDate(selected)}</h2>
+                <h2>Próximos compromissos</h2>
               </div>
-              {dayEvents.length + dayTasks.length + dayBills.length === 0 ? (
-                <Empty>Nada marcado para este dia.</Empty>
+              {upcoming.length === 0 ? (
+                <Empty>Nenhum compromisso marcado.</Empty>
               ) : (
-                <ul className="list">
-                  {dayEvents.map((e) => (
-                    <EventItem key={e.id} ev={e} onClick={() => setEventForm(e)} />
-                  ))}
-                  {dayTasks.map((t) => (
-                    <TaskItem key={t.id} task={t} onToggle={() => update(toggleTask(t.id))} onEdit={() => setTaskForm(t)} />
-                  ))}
-                  {dayBills.map((b) => (
-                    <li key={b.key}>
-                      <a className="row" href="#/financas" style={{ textDecoration: 'none' }}>
-                        <span className="event-time orange">
-                          <Icon name="wallet" size={18} />
-                        </span>
-                        <div className="row-body">
-                          <span className="row-title">{b.title}</span>
-                          <span className="row-meta">{formatMoney(b.amount)}</span>
-                        </div>
-                        {b.paid ? <Pill tone="green">Pago</Pill> : billStatus({ paidAt: null, dueDate: b.date }) === 'vencida' ? <Pill tone="red">Vencida</Pill> : <Pill tone="orange">A pagar</Pill>}
-                      </a>
-                    </li>
-                  ))}
-                </ul>
-              )}
-              <div className="btn-row" style={{ marginTop: 12 }}>
-                <button type="button" className="btn soft small" onClick={() => setEventForm('new')}>
-                  <Icon name="plus" size={16} /> Compromisso
-                </button>
-                <button type="button" className="btn soft small" onClick={() => setTaskForm('new')}>
-                  <Icon name="plus" size={16} /> Tarefa
-                </button>
-              </div>
-            </section>
-
-            {upcoming.length > 0 && (
-              <section className="card">
-                <div className="card-head">
-                  <h2>Próximos compromissos</h2>
-                </div>
                 <ul className="list">
                   {upcoming.map((e) => (
                     <EventItem key={e.id} ev={e} showDate onClick={() => { pick(e.date); setEventForm(e); }} />
                   ))}
                 </ul>
-              </section>
-            )}
+              )}
+            </section>
           </div>
         </div>
       )}
 
+      {dayOpen && (
+        <DaySheet
+          day={selected}
+          onClose={() => setDayOpen(false)}
+          onAddEvent={() => setEventForm('new')}
+          onAddTask={() => setTaskForm('new')}
+          onEditEvent={(e) => setEventForm(e)}
+          onEditTask={(t) => setTaskForm(t)}
+        />
+      )}
       {eventForm && <EventForm event={eventForm === 'new' ? undefined : eventForm} defaultDate={selected} onClose={() => setEventForm(null)} onSaved={pick} />}
       {taskForm && <TaskForm task={taskForm === 'new' ? undefined : taskForm} defaultDue={tab === 'calendario' ? selected : undefined} onClose={() => setTaskForm(null)} />}
     </>

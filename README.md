@@ -15,7 +15,8 @@ O usuário registra; o app organiza, calcula e mostra o que importa no Início.
 | **Finanças** | Despesas **avulsas**, **contas fixas** (todo mês, sem fim) e **parceladas** (01/12, 02/12…). Pagamento com data e valor reais. Editar ou excluir **somente esta / esta e as próximas / todas**. Categorias com ícone e cor, criadas sem sair do formulário. |
 | **Cartões** | Cadastro com fechamento, vencimento, limite e cor. Cada compra cai sozinha na fatura certa. Faturas com total, situação e pagamento; limite disponível. |
 | **Diário** | Feed privado: o registro mais novo no topo, os anteriores recolhidos, data e hora automáticas, etiqueta opcional, busca e histórico por ano e mês. |
-| **Agenda** | Calendário com compromissos, prazos de tarefas e vencimentos de contas; aba de tarefas. |
+| **Agenda** | Calendário com pontos para compromissos, tarefas e contas. Ao tocar num dia, abre tudo daquele dia: compromissos, tarefas, contas que vencem, compras no cartão, pagamentos feitos, rituais/hábitos (marcáveis) e registros do diário. Aba de tarefas. |
+| **Núcleo pessoal** | **Rituais** (rotinas fixas, por dias da semana, período e horário, com gatilho "depois de…"), **hábitos a construir** (progresso até virar ritual — meta padrão de 66 dias) e **hábitos a abandonar** (dias sem, recorde e recaídas). Sequência que não quebra em dias fora da rotina, consistência de 30 dias e mapa das últimas 12 semanas. |
 | **Mais** | Núcleo pessoal (hábitos), Arquivo geral (anotações) e Configurações (tema claro/escuro/automático, categorias, backup e dados). |
 
 **Navegação:** barra superior com o nome da aba atual (no Início, a data) e a 🔍 (no Diário, busca no diário), que some ao rolar para baixo e volta ao rolar para cima; atalhos inferiores (Início, Finanças, Diário, Agenda, Mais); menu ☰ com todos os módulos agrupados (Geral, Organização pessoal, Financeiro, Bem-estar, Planejamento); 🔍 **busca em tudo** (diário, despesas, agenda e anotações); botão **+** que adiciona na aba aberta (no Início, pergunta o quê); o **voltar** do celular fecha a janela ou o menu aberto antes de sair da página. Lembretes, Metas, Relatórios, Saúde, Estudos, Foco e Banco de ideias aparecem como "em breve".
@@ -62,6 +63,8 @@ O endereço fica `https://<usuario>.github.io/Central-Pessoal/`. Para instalar n
 src/
   finance.ts         regras financeiras (faturas, parcelas, séries, resumo)
   finance.test.ts    testes das regras
+  habits.ts          regras do Núcleo pessoal (sequência, consistência, dias sem)
+  habits.test.ts     testes do Núcleo
   data.ts            formato dos dados, categorias padrão e migração
   db.ts              IndexedDB
   store.tsx          estado global e salvamento automático

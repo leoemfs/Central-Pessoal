@@ -1,8 +1,10 @@
 import { useMemo } from 'react';
 import { useStore } from '../store';
-import { toggleHabit, toggleTask } from '../actions';
+import { toggleTask } from '../actions';
+import { cleanDays, habitsOfDay, habitStreak } from '../habits';
+import { HabitCheck } from './Habitos';
 import { monthBills, openBills, summarize } from '../finance';
-import { addDays, formatDateTime, formatLongDate, formatMoney, formatMonth, greeting, monthKey, relativeDay, streak, toISO, todayISO } from '../utils';
+import { addDays, formatDateTime, formatLongDate, formatMoney, formatMonth, greeting, monthKey, relativeDay, toISO, todayISO } from '../utils';
 import { Empty, Icon, Pill, Progress, type IconName } from '../ui';
 import { sortTasks, TaskItem } from './Tarefas';
 import { EventItem, sortEvents } from './Agenda';
@@ -44,7 +46,9 @@ export function Dashboard() {
   const otherPending = data.tasks.filter((t) => !t.done).length - tasks.length;
   const events = useMemo(() => data.events.filter((e) => e.date >= today).sort(sortEvents).slice(0, 4), [data.events, today]);
   const journal = useMemo(() => [...data.journal].sort((a, b) => b.createdAt.localeCompare(a.createdAt)).slice(0, 2), [data.journal]);
-  const habitsDone = data.habits.filter((h) => h.checks.includes(today)).length;
+  const nucleo = habitsOfDay(data.habits, today);
+  const routine = [...nucleo.rituals, ...nucleo.building];
+  const routineDone = routine.filter((h) => h.checks.includes(today)).length;
   const eventsToday = data.events.filter((e) => e.date === today).length;
   const pendingTasks = data.tasks.filter((t) => !t.done).length;
   const lastEntry = journal[0];
@@ -54,6 +58,7 @@ export function Dashboard() {
     { to: 'financas', icon: 'wallet', title: 'Finanças', text: dueSoon.length ? `${plural(dueSoon.length, 'conta próxima', 'contas próximas')} do vencimento` : 'Nenhuma conta vencendo nos próximos dias' },
     { to: 'diario', icon: 'book', title: 'Diário', text: lastEntryLabel ? `Último registro: ${lastEntryLabel}` : 'Nenhum registro ainda' },
     { to: 'agenda/tarefas', icon: 'tasks', title: 'Tarefas', text: pendingTasks ? plural(pendingTasks, 'tarefa pendente', 'tarefas pendentes') : 'Nenhuma tarefa pendente' },
+    { to: 'nucleo', icon: 'target', title: 'Núcleo pessoal', text: routine.length ? `${routineDone} de ${routine.length} rituais e hábitos feitos` : 'Nada programado para hoje' },
   ];
 
   const backupDays = data.settings.lastBackupAt ? Math.floor((Date.now() - new Date(data.settings.lastBackupAt).getTime()) / 864e5) : null;
@@ -207,38 +212,40 @@ export function Dashboard() {
             )}
           </section>
 
-          {data.habits.length > 0 && (
+          {(routine.length > 0 || nucleo.quitting.length > 0) && (
             <section className="card">
               <div className="card-head">
-                <h2>Hábitos de hoje</h2>
-                <Pill tone={habitsDone === data.habits.length ? 'green' : 'gray'}>
-                  {habitsDone}/{data.habits.length}
-                </Pill>
+                <h2>Núcleo de hoje</h2>
+                <a className="link" href="#/nucleo">
+                  Ver tudo
+                </a>
               </div>
               <ul className="list">
-                {data.habits.map((h) => {
-                  const on = h.checks.includes(today);
-                  return (
-                    <li key={h.id} className="row">
-                      <button
-                        type="button"
-                        className={`check${on ? ' on' : ''}`}
-                        style={on ? { background: h.color, borderColor: h.color } : { borderColor: h.color }}
-                        onClick={() => update(toggleHabit(h.id))}
-                        aria-pressed={on}
-                        aria-label={`Marcar "${h.name}" hoje`}
-                      >
-                        {on && <Icon name="check" size={14} />}
-                      </button>
-                      <div className="row-body">
-                        <span className="row-title">{h.name}</span>
-                      </div>
-                      <span className="pill">
-                        <Icon name="flame" size={13} /> {streak(h.checks)}
+                {routine.map((h) => (
+                  <li key={h.id} className="row">
+                    <HabitCheck h={h} day={today} label={`Marcar "${h.name}" hoje`} />
+                    <div className="row-body">
+                      <span className="row-title">{h.name}</span>
+                      <span className="row-meta">
+                        {h.kind === 'ritual' ? 'Ritual' : 'Construindo'}
+                        {h.time ? ` · ${h.time}` : ''}
                       </span>
-                    </li>
-                  );
-                })}
+                    </div>
+                    <span className="pill">
+                      <Icon name="flame" size={13} /> {habitStreak(h, today)}
+                    </span>
+                  </li>
+                ))}
+                {nucleo.quitting.map((h) => (
+                  <li key={h.id} className="row">
+                    <span className="dot" style={{ background: h.color }} />
+                    <div className="row-body">
+                      <span className="row-title">{h.name}</span>
+                      <span className="row-meta">Abandonando</span>
+                    </div>
+                    <Pill tone="green">{cleanDays(h, today)} dias sem</Pill>
+                  </li>
+                ))}
               </ul>
             </section>
           )}
