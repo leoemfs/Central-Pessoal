@@ -96,6 +96,8 @@ src/
 
 Documentos de funcionalidades planejadas, ainda **sem desenvolvimento**:
 
-- [Módulo RPG — Gamificação da Vida Pessoal](docs/futuro/modulo-rpg.md): Jornada com personagem em pixel art, XP, níveis, Gold, loja, inventário e conquistas, consumindo os dados dos módulos existentes. Decisão pendente sobre o tom do app.
+- [Módulo RPG — Gamificação da Vida Pessoal](docs/futuro/modulo-rpg.md): Jornada com personagem em pixel art, XP, níveis, ouro, loja, inventário e conquistas, consumindo os dados dos módulos existentes. O Anexo B reúne as regras já decididas: equipamentos, baús e cristais, forja mística por atributos, títulos, classes, pets, moradas, céu com estrelas e chuva, e a tela cheia do avatar.
+- [Listas](docs/futuro/modulo-listas.md): listas de compras, listas gerais e receitas de cozinha, reutilizáveis e ligadas a Finanças e Preços.
+- [Comparação de preços](docs/futuro/modulo-precos.md): anotar preços no mercado e comparar por mercado, marca e unidade (R$/kg, R$/L), com o histórico de cada produto. No futuro, leitura de código de barras e de etiquetas.
 
 Feito com React, TypeScript e Vite.
