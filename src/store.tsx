@@ -2,7 +2,7 @@ import { createContext, useCallback, useContext, useEffect, useRef, useState, ty
 import type { AppData } from './types';
 import { normalize } from './data';
 import { FIXA_AHEAD, materialize } from './finance';
-import { checkUnlock, markActive } from './journey';
+import { checkUnlock, markActive, markVisit } from './journey';
 import { INCOME_AHEAD, materializeIncomes } from './incomes';
 import { dbGet, dbSet, requestPersistence } from './db';
 import { addMonths, monthKey, todayISO } from './utils';
@@ -11,9 +11,9 @@ const KEY = 'data';
 const LEGACY_LOCALSTORAGE_KEY = 'central-pessoal:v1';
 const channel = typeof BroadcastChannel !== 'undefined' ? new BroadcastChannel('central-pessoal') : null;
 
-/** Gera as contas fixas que já deveriam existir (ex.: virou o mês com o app aberto). */
+/** Gera as contas fixas que já deveriam existir (ex.: virou o mês com o app aberto) e registra a visita do dia. */
 const catchUp = (d: AppData) =>
-  checkUnlock(materializeIncomes(materialize(d, addMonths(monthKey(todayISO()), FIXA_AHEAD)), addMonths(monthKey(todayISO()), INCOME_AHEAD)));
+  markVisit(checkUnlock(materializeIncomes(materialize(d, addMonths(monthKey(todayISO()), FIXA_AHEAD)), addMonths(monthKey(todayISO()), INCOME_AHEAD))));
 
 async function loadData(): Promise<AppData> {
   let raw = await dbGet<unknown>(KEY);

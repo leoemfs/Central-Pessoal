@@ -42,7 +42,7 @@ export function emptyData(): AppData {
     incomes: [],
     incomeSeries: [],
     incomeSources: [],
-    settings: { theme: 'dark', seededCategories: false, seededIncomeSources: false, lastBackupAt: null, activeDays: [], journeyUnlockedAt: null, journeyChoice: null },
+    settings: { theme: 'dark', seededCategories: false, seededIncomeSources: false, lastBackupAt: null, activeDays: [], visitDays: [], journeyUnlockedAt: null, journeyChoice: null },
     deleted: {},
     legacy: {},
   };
@@ -97,6 +97,7 @@ export function normalize(raw: unknown): AppData {
       seededIncomeSources: settings.seededIncomeSources === true,
       lastBackupAt: typeof settings.lastBackupAt === 'string' ? settings.lastBackupAt : null,
       activeDays: strings(settings.activeDays),
+      visitDays: strings(settings.visitDays),
       journeyUnlockedAt: typeof settings.journeyUnlockedAt === 'string' ? settings.journeyUnlockedAt : null,
       journeyChoice: settings.journeyChoice === 'quero' || settings.journeyChoice === 'depois' ? settings.journeyChoice : null,
     },
