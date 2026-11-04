@@ -3,7 +3,7 @@
  */
 import type { AppData, Expense, Habit, JournalEntry } from './types.ts';
 import { getInvoice, invoiceMonths, openBills, type Bill } from './finance.ts';
-import { isScheduled } from './habits.ts';
+import { attributeTotals, isScheduled } from './habits.ts';
 import { addDays, fromISO, sum, toISO, todayISO } from './utils.ts';
 
 /** Segunda-feira da semana de `day`. */
@@ -31,8 +31,12 @@ export interface WeekReview {
   routineDone: number;
   routineScheduled: number;
   quitting: { habit: Habit; slips: number }[];
+  /** Pontos de atributo treinados na semana. */
+  attributes: { code: string; name: string; color: string; points: number }[];
   spent: number;
   paid: number;
+  /** Receitas que entraram na semana. */
+  received: number;
   byCategory: { categoryId: string; amount: number }[];
   nextBills: Bill[];
   overdue: Bill[];
@@ -85,8 +89,10 @@ export function weekReview(d: AppData, start: string, today: string = todayISO()
     routineDone: sum(routine.map((r) => r.done)),
     routineScheduled: sum(routine.map((r) => r.scheduled)),
     quitting,
+    attributes: attributeTotals(d.habits, start, last),
     spent: sum(spentItems.map((i) => i.amount)),
     paid,
+    received: sum(d.incomes.filter((i) => inRange(i.receivedAt, start, end)).map((i) => i.amount)),
     byCategory: [...cat.entries()].map(([categoryId, amount]) => ({ categoryId, amount: Math.round(amount * 100) / 100 })).sort((a, b) => b.amount - a.amount),
     nextBills: upcoming.filter((b) => b.dueDate > end),
     overdue: upcoming.filter((b) => b.dueDate < today),

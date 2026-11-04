@@ -57,6 +57,8 @@ export interface Habit {
   step: number;
   /** Quantidade registrada por dia (AAAA-MM-DD → valor). */
   amounts: Record<string, number>;
+  /** Atributos que este hábito treina (FOR, AGI, INT, RES, SAB, DIS) — usados pela Jornada. */
+  attrs: string[];
   createdAt: string;
 }
 
@@ -152,9 +154,44 @@ export interface ExpenseSeries {
 
 export type Theme = 'dark' | 'light' | 'system';
 
+// ---------- Receitas ----------
+
+export interface Income {
+  id: string;
+  /** Receita recorrente (ex.: salário mensal): id da série. */
+  seriesId: string | null;
+  /** Posição na série (1, 2, 3…). */
+  installment: number | null;
+  description: string;
+  /** Fonte (ex.: Salário, Freelance) — lista `incomeSources`. */
+  sourceId: string;
+  amount: number;
+  /** Data prevista da entrada (AAAA-MM-DD). */
+  date: string;
+  /** Data em que o dinheiro entrou; null = ainda previsto. */
+  receivedAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+/** Modelo de uma receita mensal; as ocorrências são `Income`. */
+export interface IncomeSeries {
+  id: string;
+  description: string;
+  sourceId: string;
+  /** Valor previsto de cada mês. */
+  amount: number;
+  startDate: string;
+  /** null enquanto ativa; ao encerrar, quantas ocorrências existem. */
+  count: number | null;
+  generated: number;
+  createdAt: string;
+}
+
 export interface Settings {
   theme: Theme;
   seededCategories: boolean;
+  seededIncomeSources: boolean;
   lastBackupAt: string | null;
   /** Dias (AAAA-MM-DD) em que houve algum registro no app. */
   activeDays: string[];
@@ -175,6 +212,9 @@ export interface AppData {
   series: ExpenseSeries[];
   cards: CreditCard[];
   categories: Category[];
+  incomes: Income[];
+  incomeSeries: IncomeSeries[];
+  incomeSources: Category[];
   settings: Settings;
   /** Itens excluídos (id → data), para uma futura sincronização entre aparelhos. */
   deleted: Record<string, string>;
@@ -182,4 +222,4 @@ export interface AppData {
   legacy: Record<string, unknown>;
 }
 
-export type Collection = 'tasks' | 'events' | 'habits' | 'notes' | 'journal' | 'categories' | 'cards';
+export type Collection = 'tasks' | 'events' | 'habits' | 'notes' | 'journal' | 'categories' | 'cards' | 'incomeSources';

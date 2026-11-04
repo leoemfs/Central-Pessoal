@@ -58,8 +58,8 @@ export function Notas({ route }: ViewProps) {
   return (
     <>
       <PageHeader
-        title="Arquivo geral"
-        subtitle={`${data.notes.length} anotação(ões)`}
+        title="Notas"
+        subtitle={`${data.notes.length} nota(s)`}
       />
 
       <div className={`notes${selected ? ' has-selection' : ''}`}>

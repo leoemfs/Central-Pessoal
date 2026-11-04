@@ -5,6 +5,7 @@ import { cleanDays, habitsOfDay, habitStreak } from '../habits';
 import { UNLOCK_DAYS, unlockProgress } from '../journey';
 import { HabitCheck, qtyText, RiskPill } from './Habitos';
 import { monthBills, openBills, summarize } from '../finance';
+import { monthBalance } from '../incomes';
 import { addDays, formatDateTime, formatLongDate, formatMoney, formatMonth, greeting, monthKey, relativeDay, toISO, todayISO } from '../utils';
 import { Empty, Icon, Pill, Progress, type IconName } from '../ui';
 import { sortTasks, TaskItem } from './Tarefas';
@@ -21,12 +22,6 @@ function SeeAll({ href, label = 'Ver tudo' }: { href: string; label?: string }) 
   );
 }
 
-const QUICK: { to: string; label: string; icon: IconName }[] = [
-  { to: 'financas/nova', label: 'Nova despesa', icon: 'plusCircle' },
-  { to: 'diario/nova', label: 'Escrever diário', icon: 'notePen' },
-  { to: 'agenda/novo-compromisso', label: 'Compromisso', icon: 'calendarPlus' },
-  { to: 'agenda/nova-tarefa', label: 'Nova tarefa', icon: 'listPlus' },
-];
 
 function greetingEmoji(): string {
   const h = new Date().getHours();
@@ -42,6 +37,7 @@ export function Dashboard() {
   const month = monthKey(today);
 
   const summary = useMemo(() => summarize(monthBills(data, month, today)), [data, month, today]);
+  const balance = useMemo(() => monthBalance(data, month, today), [data, month, today]);
   const dueSoon = useMemo(() => openBills(data, addDays(today, 7), today), [data, today]);
   const tasks = useMemo(() => data.tasks.filter((t) => !t.done && t.due !== null && t.due <= addDays(today, 1)).sort(sortTasks), [data.tasks, today]);
   const otherPending = data.tasks.filter((t) => !t.done).length - tasks.length;
@@ -103,19 +99,6 @@ export function Dashboard() {
         </ul>
       </section>
 
-      <section className="card">
-        <div className="card-head">
-          <h2>Acesso rápido</h2>
-        </div>
-        <div className="quick-grid">
-          {QUICK.map((q) => (
-            <a key={q.to} href={`#/${q.to}`}>
-              <Icon name={q.icon} size={26} />
-              <span>{q.label}</span>
-            </a>
-          ))}
-        </div>
-      </section>
 
       {(new Date().getDay() === 0 || new Date().getDay() === 1) && (
         <a className="card review-cta" href="#/revisao">
@@ -156,6 +139,16 @@ export function Dashboard() {
                 <Progress pct={summary.pct} />
               </div>
             </div>
+            {balance.incomeTotal > 0 && (
+              <a className="balance-line" href="#/financas/receitas">
+                <span>
+                  Receitas <strong className="green">{formatMoney(balance.incomeTotal)}</strong>
+                </span>
+                <span>
+                  Sobra prevista <strong className={balance.planned >= 0 ? 'green' : 'red'}>{formatMoney(balance.planned)}</strong>
+                </span>
+              </a>
+            )}
           </section>
 
           <section className="card">

@@ -11,9 +11,17 @@ export function Ajustes() {
   const { data, update, replace, persisted } = useStore();
   const fileRef = useRef<HTMLInputElement>(null);
   const [message, setMessage] = useState<{ tone: 'green' | 'red'; text: string } | null>(null);
-  const [catSheet, setCatSheet] = useState<Category | 'new' | null>(null);
+  const [catSheet, setCatSheet] = useState<{ collection: 'categories' | 'incomeSources'; item: Category | null } | null>(null);
 
   const usage = (id: string) => data.expenses.filter((e) => e.categoryId === id).length + data.series.filter((s) => s.categoryId === id).length;
+
+  const sourceUsage = (id: string) => data.incomes.filter((i) => i.sourceId === id).length + data.incomeSeries.filter((s) => s.sourceId === id).length;
+
+  function deleteSource(c: Category) {
+    const n = sourceUsage(c.id);
+    if (n > 0) return setMessage({ tone: 'red', text: `"${c.name}" está em uso por ${n} receita(s). Altere essas receitas antes de excluir.` });
+    if (confirm(`Excluir a fonte "${c.name}"?`)) update(remove('incomeSources', c.id));
+  }
 
   function deleteCategory(c: Category) {
     const n = usage(c.id);
@@ -97,29 +105,22 @@ export function Ajustes() {
         </p>
       </section>
 
-      <section className="card">
-        <div className="card-head">
-          <h2>Categorias de despesa</h2>
-          <button type="button" className="link" onClick={() => setCatSheet('new')}>
-            + Nova
-          </button>
-        </div>
-        <ul className="list">
-          {data.categories.map((c) => (
-            <li key={c.id} className="row">
-              <CategoryBadge icon={c.icon} color={c.color} size={36} />
-              <div className="row-body">
-                <span className="row-title">{c.name}</span>
-                <span className="row-meta">{usage(c.id)} lançamento(s)</span>
-              </div>
-              <div className="row-actions">
-                <IconButton icon="edit" label={`Editar ${c.name}`} onClick={() => setCatSheet(c)} />
-                <IconButton icon="trash" label={`Excluir ${c.name}`} tone="danger" onClick={() => deleteCategory(c)} />
-              </div>
-            </li>
-          ))}
-        </ul>
-      </section>
+      <CategoryGroup
+        title="Categorias de despesa"
+        items={data.categories}
+        usage={usage}
+        onNew={() => setCatSheet({ collection: 'categories', item: null })}
+        onEdit={(c) => setCatSheet({ collection: 'categories', item: c })}
+        onDelete={deleteCategory}
+      />
+      <CategoryGroup
+        title="Fontes de receita"
+        items={data.incomeSources}
+        usage={sourceUsage}
+        onNew={() => setCatSheet({ collection: 'incomeSources', item: null })}
+        onEdit={(c) => setCatSheet({ collection: 'incomeSources', item: c })}
+        onDelete={deleteSource}
+      />
 
       <section className="card">
         <div className="card-head">
@@ -166,7 +167,57 @@ export function Ajustes() {
 
       <p className="muted small center">Central Pessoal · seus dados não saem do seu aparelho</p>
 
-      {catSheet && <CategorySheet initial={catSheet === 'new' ? undefined : catSheet} onClose={() => setCatSheet(null)} />}
+      {catSheet && <CategorySheet collection={catSheet.collection} initial={catSheet.item ?? undefined} onClose={() => setCatSheet(null)} />}
     </>
+  );
+}
+
+/** Lista de categorias que abre e fecha, para não empurrar o resto da tela. */
+function CategoryGroup({
+  title,
+  items,
+  usage,
+  onNew,
+  onEdit,
+  onDelete,
+}: {
+  title: string;
+  items: Category[];
+  usage: (id: string) => number;
+  onNew: () => void;
+  onEdit: (c: Category) => void;
+  onDelete: (c: Category) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  return (
+    <section className="card">
+      <button type="button" className="collapse-head" aria-expanded={open} onClick={() => setOpen((o) => !o)}>
+        <h2>{title}</h2>
+        <span className="muted small">{items.length}</span>
+        <Icon name={open ? 'up' : 'down'} size={18} />
+      </button>
+      {open && (
+        <>
+          <ul className="list" style={{ marginTop: 8 }}>
+            {items.map((c) => (
+              <li key={c.id} className="row">
+                <CategoryBadge icon={c.icon} color={c.color} size={36} />
+                <div className="row-body">
+                  <span className="row-title">{c.name}</span>
+                  <span className="row-meta">{usage(c.id)} lançamento(s)</span>
+                </div>
+                <div className="row-actions">
+                  <IconButton icon="edit" label={`Editar ${c.name}`} onClick={() => onEdit(c)} />
+                  <IconButton icon="trash" label={`Excluir ${c.name}`} tone="danger" onClick={() => onDelete(c)} />
+                </div>
+              </li>
+            ))}
+          </ul>
+          <button type="button" className="btn soft small block" style={{ marginTop: 8 }} onClick={onNew}>
+            <Icon name="plus" size={16} /> Nova
+          </button>
+        </>
+      )}
+    </section>
   );
 }

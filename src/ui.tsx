@@ -83,7 +83,7 @@ export type IconName = keyof typeof P;
 /** Ícones disponíveis ao criar uma categoria. */
 export const CATEGORY_ICONS: IconName[] = [
   'home', 'utensils', 'car', 'heart', 'book', 'smile', 'play', 'bag', 'bolt', 'gift',
-  'paw', 'dumbbell', 'plane', 'phone', 'shirt', 'briefcase', 'card', 'tag',
+  'paw', 'dumbbell', 'plane', 'phone', 'shirt', 'briefcase', 'card', 'coins', 'tag',
 ];
 
 export function Icon({ name, size = 20 }: { name: IconName; size?: number }) {

@@ -11,9 +11,10 @@ import { CardForm } from './CardForm';
 import { ExpenseDetail } from './ExpenseDetail';
 import { ExpenseForm } from './ExpenseForm';
 import { InvoiceSheet } from './InvoiceSheet';
+import { IncomeForm, ReceitasTab } from './Receitas';
 import { BillStatusPill, CreditCardVisual, InvoiceStatusPill, useCategoryOf } from './shared';
 
-type Tab = 'mes' | 'cartoes';
+type Tab = 'mes' | 'receitas' | 'cartoes';
 const pctFmt = (n: number) => `${n.toLocaleString('pt-BR', { maximumFractionDigits: 2 })}%`;
 
 export function Financas({ route }: ViewProps) {
@@ -26,10 +27,16 @@ export function Financas({ route }: ViewProps) {
   const [detailId, setDetailId] = useState<string | null>(null);
   const [invoice, setInvoice] = useState<{ cardId: string; month: string } | null>(null);
   const [cardForm, setCardForm] = useState(false);
+  const [incomeForm, setIncomeForm] = useState(false);
 
   useSubAction(route, 'financas', {
-    nova: () => (tab === 'cartoes' ? setCardForm(true) : setFormOpen(true)),
+    nova: () => (tab === 'cartoes' ? setCardForm(true) : tab === 'receitas' ? setIncomeForm(true) : setFormOpen(true)),
     cartoes: () => setTab('cartoes'),
+    receitas: () => setTab('receitas'),
+    'nova-receita': () => {
+      setTab('receitas');
+      setIncomeForm(true);
+    },
   });
 
   // Ao navegar para meses futuros, gera as contas fixas desses meses.
@@ -50,9 +57,11 @@ export function Financas({ route }: ViewProps) {
   return (
     <>
       <PageHeader title="Finanças" actions={<MonthNav label={formatMonth(month)} onPrev={() => setMonth(addMonths(month, -1))} onNext={() => setMonth(addMonths(month, 1))} onLabel={() => setMonth(monthKey(today))} />} />
-      <Segmented label="Visão" value={tab} onChange={setTab} options={[{ value: 'mes', label: 'Mês' }, { value: 'cartoes', label: 'Cartões' }]} />
+      <Segmented label="Visão" value={tab} onChange={setTab} options={[{ value: 'mes', label: 'Despesas' }, { value: 'receitas', label: 'Receitas' }, { value: 'cartoes', label: 'Cartões' }]} />
 
-      {tab === 'mes' ? (
+      {tab === 'receitas' ? (
+        <ReceitasTab month={month} />
+      ) : tab === 'mes' ? (
         <>
           <section className="card" aria-label="Resumo do mês">
             <div className="summary">
@@ -183,6 +192,7 @@ export function Financas({ route }: ViewProps) {
       )}
       {invoice && <InvoiceSheet cardId={invoice.cardId} month={invoice.month} onClose={() => setInvoice(null)} />}
       {cardForm && <CardForm onClose={() => setCardForm(false)} />}
+      {incomeForm && <IncomeForm initialDate={month === monthKey(today) ? undefined : `${month}-01`} onClose={() => setIncomeForm(false)} />}
     </>
   );
 }

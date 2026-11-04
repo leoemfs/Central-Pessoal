@@ -4,8 +4,8 @@ import { useStore } from '../store';
 import { useSubAction } from '../router';
 import { remove, upsert } from '../actions';
 import {
-  amountOn, atRiskToday, bestClean, cleanDays, consistency, DEFAULT_TARGET, fmtQty, graduate, habitsOfDay, habitStreak, isQuantity,
-  isScheduled, KIND_INFO, PERIODS, progressToRitual, setAmount, startOf, toggleCheck, toggleSlip,
+  amountOn, ATTRIBUTES, atRiskToday, bestClean, cleanDays, consistency, DEFAULT_TARGET, fmtQty, graduate, habitsOfDay, habitStreak, isQuantity,
+  isScheduled, KIND_INFO, PERIODS, progressToRitual, setAmount, startOf, suggestAttributes, toggleCheck, toggleSlip,
 } from '../habits';
 import type { DayPeriod, Habit, HabitKind } from '../types';
 import { addDays, formatDMY, fromISO, todayISO, uid, WEEKDAYS } from '../utils';
@@ -470,6 +470,12 @@ function HabitDetail({ id, onClose, onEdit }: { id: string; onClose: () => void;
                 </dd>
               </div>
             )}
+            {h.attrs.length > 0 && (
+              <div>
+                <dt>Treina</dt>
+                <dd>{h.attrs.map((c) => ATTRIBUTES.find((a) => a.code === c)?.name ?? c).join(', ')}</dd>
+              </div>
+            )}
             {h.cue && (
               <div>
                 <dt>Gatilho</dt>
@@ -527,6 +533,8 @@ function HabitForm({ kind: initialKind, habit, onClose }: { kind: HabitKind; hab
   const [target, setTarget] = useState(habit?.target ?? DEFAULT_TARGET);
   const [startDate, setStartDate] = useState(habit?.startDate ?? todayISO());
   const [color, setColor] = useState(habit?.color ?? HABIT_COLORS[data.habits.length % HABIT_COLORS.length]);
+  const [attrs, setAttrs] = useState<string[]>(habit?.attrs ?? []);
+  const [attrsTouched, setAttrsTouched] = useState(Boolean(habit));
   const [hasGoal, setHasGoal] = useState(habit ? habit.goal !== null : false);
   const [goal, setGoal] = useState(habit?.goal ? fmtQty(habit.goal) : '');
   const [unit, setUnit] = useState(habit?.unit ?? '');
@@ -562,6 +570,7 @@ function HabitForm({ kind: initialKind, habit, onClose }: { kind: HabitKind; hab
       unit: goalN !== null ? unit.trim() : '',
       step: stepN,
       amounts: habit?.amounts ?? {},
+      attrs,
       createdAt: habit?.createdAt ?? new Date().toISOString(),
     };
     update(upsert('habits', h));
@@ -597,8 +606,45 @@ function HabitForm({ kind: initialKind, habit, onClose }: { kind: HabitKind; hab
         </div>
       )}
       <Field label="Nome">
-        <input className="input" value={name} onChange={(e) => setName(e.target.value)} placeholder={placeholder} autoFocus={!habit} />
+        <input
+          className="input"
+          value={name}
+          onChange={(e) => {
+            setName(e.target.value);
+            if (!attrsTouched) setAttrs(suggestAttributes(e.target.value));
+          }}
+          placeholder={placeholder}
+          autoFocus={!habit}
+        />
       </Field>
+
+      <div className="field">
+        <span className="field-label">Treina quais atributos?</span>
+        <div className="attr-grid" role="group" aria-label="Atributos">
+          {ATTRIBUTES.map((a) => {
+            const on = attrs.includes(a.code);
+            return (
+              <button
+                key={a.code}
+                type="button"
+                aria-pressed={on}
+                className={`attr-chip${on ? ' on' : ''}`}
+                style={on ? { borderColor: a.color } : undefined}
+                onClick={() => {
+                  setAttrsTouched(true);
+                  setAttrs((cur) => (cur.includes(a.code) ? cur.filter((x) => x !== a.code) : [...cur, a.code]));
+                }}
+              >
+                <span className="attr-code" style={{ color: a.color }}>
+                  {a.code}
+                </span>
+                {a.name}
+              </button>
+            );
+          })}
+        </div>
+        <span className="field-hint">{attrsTouched ? 'Usados pela Jornada para evoluir o seu personagem.' : 'Sugeridos pelo nome — toque para trocar.'}</span>
+      </div>
 
       {quit ? (
         <Field label="Sem desde" hint="O contador de dias começa aqui.">

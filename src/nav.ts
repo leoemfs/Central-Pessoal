@@ -23,7 +23,7 @@ export const NAV_GROUPS: { title: string; items: NavItem[] }[] = [
     title: 'Organização pessoal',
     items: [
       { label: 'Diário', icon: 'journal', to: 'diario', section: 'diario' },
-      { label: 'Arquivo geral', icon: 'archive', to: 'arquivo', section: 'arquivo' },
+      { label: 'Notas', icon: 'note', to: 'arquivo', section: 'arquivo' },
       { label: 'Lembretes', icon: 'bell' },
       { label: 'Metas e objetivos', icon: 'target' },
     ],
