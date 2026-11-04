@@ -141,7 +141,9 @@ export function attributeTotals(habits: Habit[], from: string, to: string): { co
     } else {
       n = new Set(h.checks.filter((c) => c >= from && c <= to)).size;
     }
-    for (const a of h.attrs) pts.set(a, (pts.get(a) ?? 0) + n);
+    // +3 quando o hábito treina um só atributo; +2 em cada quando treina mais de um.
+    const each = h.attrs.length === 1 ? 3 : 2;
+    for (const a of h.attrs) pts.set(a, (pts.get(a) ?? 0) + n * each);
   }
   return ATTRIBUTES.map((a) => ({ code: a.code, name: a.name, color: a.color, points: pts.get(a.code) ?? 0 }))
     .filter((a) => a.points > 0)

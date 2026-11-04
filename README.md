@@ -72,6 +72,9 @@ src/
   review.test.ts     testes da revisão
   journey.ts         desbloqueio da Jornada e XP/nível/ouro a partir dos dados
   journey.test.ts    testes da Jornada
+  jornada/           Jornada completa, ainda sem telas: artes em pixel art (art, artData, catalog),
+                     regras de atributos, classes, títulos, baús, loja e forja (rules) e céu (sky)
+  jornada.test.ts    testes dessas regras e das artes
   incomes.ts         receitas, recorrência e balanço do mês
   incomes.test.ts    testes das receitas
   data.ts            formato dos dados, categorias padrão e migração

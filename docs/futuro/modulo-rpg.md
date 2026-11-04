@@ -497,7 +497,12 @@ Não iniciar o desenvolvimento completo antes da consolidação da estrutura pri
 
 ### B.5. Forja mística (itens que exigem aprimorar os atributos)
 
-Os pontos de atributo vêm dos hábitos cumpridos (+3 quando o hábito treina um só atributo, +2 em cada um quando treina mais de um) e **nunca diminuem**. Com um hábito por dia num atributo, ele sobe cerca de 60 a 90 pontos por mês.
+Os pontos de atributo **nunca diminuem** e vêm de:
+- **hábitos cumpridos:** +3 por dia quando o hábito treina um só atributo, ou +2 em cada um quando treina mais de um. Num hábito a abandonar, conta cada dia sem;
+- **Disciplina:** também +2 por conta paga no prazo e +3 por revisão semanal;
+- **Sabedoria:** também +1 por dia com registro no diário.
+
+Com um hábito por dia num atributo, ele sobe cerca de 60 a 90 pontos por mês.
 
 | Item místico | Requisitos | Cristais | Efeito |
 |---|---|---|---|
@@ -577,7 +582,7 @@ interface JourneyState {
 }
 ```
 
-### B.12. Ordem sugerida de implementação (pode começar antes do desbloqueio)
+### B.12. Ordem de implementação
 
 1. `src/jornada/items.ts`: catálogo de itens, pets, moradas, raridades e as artes (linhas + paletas), copiado das prévias. Testes: todo item tem arte válida e 16 colunas.
 2. `src/jornada/rules.ts`: classes, títulos, requisitos da forja, cristais e baús calculados a partir de `AppData`. Testes no mesmo padrão de `journey.test.ts`.
@@ -585,4 +590,6 @@ interface JourneyState {
 4. Componente `<PixelSprite>` (SVG gerado das linhas, como nas prévias) e a cena.
 5. Telas: Jornada, tela cheia, Arsenal com provador, Títulos/Forja/Classes. Ficam visíveis **só depois do desbloqueio**.
 
-Os passos 1 a 3 são lógica pura, testável e invisível para o usuário. Por isso podem ser feitos agora, sem mudar nada no app que está em uso.
+**Status (v0.10):** os passos 1 a 3 estão **feitos**, em `src/jornada/` (`art.ts`, `artData.ts`, `catalog.ts`, `rules.ts`, `sky.ts`), com testes em `src/jornada.test.ts`. É lógica pura e invisível: nenhuma tela usa ainda, e nada muda no app em uso. Faltam os passos 4 e 5 (telas), que só aparecem depois do desbloqueio.
+
+**Ainda não programado (depende das telas e de registrar quando cada item foi equipado):** os efeitos dos místicos que mexem com o tempo — escudo semanal da Armadura de cristal, XP em dobro depois da recaída (Pena da fênix), cristal por revisão (Olho do oráculo), cristal por mês em dia (Coroa), baú extra por nível (Espada da aurora) e ouro extra por estudo (Cajado estelar). Os bônus de +10% dos artefatos já estão em `equipmentBonus`.
