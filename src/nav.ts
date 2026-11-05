@@ -15,6 +15,7 @@ export const NAV_GROUPS: { title: string; items: NavItem[] }[] = [
     title: 'Geral',
     items: [
       { label: 'Página inicial', icon: 'home', to: 'inicio', section: 'inicio' },
+      { label: 'Você', icon: 'smile', to: 'voce', section: 'voce' },
       { label: 'Calendário', icon: 'calendar', to: 'agenda', section: 'agenda' },
       { label: 'Tarefas', icon: 'tasks', to: 'agenda/tarefas' },
     ],
@@ -40,7 +41,9 @@ export const NAV_GROUPS: { title: string; items: NavItem[] }[] = [
   {
     title: 'Bem-estar',
     items: [
-      { label: 'Hábitos', icon: 'flame', to: 'nucleo', section: 'nucleo' },
+      { label: 'Núcleo pessoal', icon: 'flame', to: 'nucleo', section: 'nucleo' },
+      { label: 'Meditar e respirar', icon: 'heart', to: 'nucleo/mente' },
+      { label: 'Treinos e alongamentos', icon: 'dumbbell', to: 'nucleo/corpo' },
       { label: 'Saúde', icon: 'heartPulse' },
     ],
   },

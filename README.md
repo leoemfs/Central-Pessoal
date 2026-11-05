@@ -17,10 +17,11 @@ O usuário registra; o app organiza, calcula e mostra o que importa no Início.
 | **Cartões** | Cadastro com fechamento, vencimento, limite e cor. Cada compra cai sozinha na fatura certa. Faturas com total, situação e pagamento; limite disponível. |
 | **Diário** | Feed privado: o registro mais novo no topo, os anteriores recolhidos, data e hora automáticas, etiqueta opcional, busca e histórico por ano e mês. |
 | **Agenda** | Calendário com pontos para compromissos, tarefas e contas. Ao tocar num dia, abre tudo daquele dia: compromissos, tarefas, contas que vencem, compras no cartão, pagamentos feitos, rituais/hábitos (marcáveis) e registros do diário. Aba de tarefas. |
-| **Núcleo pessoal** | **Rituais** (rotinas fixas, por dias da semana, período e horário, com gatilho "depois de…"), **hábitos a construir** (progresso até virar ritual — meta padrão de 66 dias) e **hábitos a abandonar** (dias sem, recorde e recaídas). **Atributos** que cada hábito treina (Força, Agilidade, Inteligência, Resistência, Sabedoria, Disciplina), sugeridos pelo nome e somados na revisão semanal — só aparecem quando a Jornada desbloqueia, mas já são guardados desde o início. Metas com quantidade (ex.: 2.000 ml, com anel de progresso e +incremento), aviso de **"não falhe duas vezes"**, sequência que não quebra em dias fora da rotina, consistência de 30 dias e mapa das últimas 12 semanas. |
+| **Você** | Na **primeira abertura**, a entrevista "Vamos nos conhecer?": 7 perguntas rápidas (nome e horários, dia a dia, o que quer melhorar em ordem de prioridade, metas, dinheiro, hábitos a largar, limitações e preferências). Dá para pular tudo, pular uma pergunta ou parar no meio; quem pula vê só um cartão discreto no Início. A página **Você** guarda o perfil (só no aparelho) e mostra **sugestões** de hábitos, trocas, práticas e compromissos, sempre dizendo o porquê; aceitar cria o hábito ou o compromisso com um toque. Especificação em [docs/futuro/modulo-voce.md](docs/futuro/modulo-voce.md). |
+| **Núcleo pessoal** | Abas **Rituais · Hábitos · Mente · Corpo**. **Mente**: meditação livre (3 a 20 min) e guiada, respiração 4-7-8, em caixa e coerência, e "Três coisas boas" que vão para o Diário. **Corpo**: fichas de treino com descanso automático e a carga da última vez, alongamentos guiados e cronômetro de caminhada e corrida. Hábitos **ligados a uma prática** ganham o botão "Iniciar" e são marcados sozinhos ao concluir. **Rituais** (rotinas fixas, por dias da semana, período e horário, com gatilho "depois de…"), **hábitos a construir** (progresso até virar ritual — meta padrão de 66 dias) e **hábitos a abandonar** (dias sem, recorde e recaídas). **Atributos** que cada hábito treina (Força, Agilidade, Inteligência, Resistência, Sabedoria, Disciplina), sugeridos pelo nome e somados na revisão semanal — só aparecem quando a Jornada desbloqueia, mas já são guardados desde o início. Metas com quantidade (ex.: 2.000 ml, com anel de progresso e +incremento), aviso de **"não falhe duas vezes"**, sequência que não quebra em dias fora da rotina, consistência de 30 dias e mapa das últimas 12 semanas. |
 | **Revisão semanal** | Semana de segunda a domingo: rotina (% feito e o que precisa de atenção), gastos e onde mais gastou, contas da semana seguinte, agenda, diário — e uma reflexão (o que funcionou, o que não, o que ajustar) salva no diário. Aparece no Início aos domingos e segundas. |
 | **Jornada** | **Bloqueada até 14 dias de uso dentro de 3 semanas** (um dia conta quando você registra algo; faltar não zera). O app também registra, em silêncio, os dias em que foi aberto (base da sequência de visitas). Ao desbloquear, mostra o XP, o nível e o ouro que você teria ganhado com os seus dados reais — e pergunta se a Jornada completa vale a pena ou fica para depois. Especificação completa em [docs/futuro/modulo-rpg.md](docs/futuro/modulo-rpg.md). |
-| **Mais** | Núcleo pessoal (hábitos), Notas e Configurações (tema claro/escuro/automático, categorias, backup e dados). |
+| **Mais** | Você, Núcleo pessoal, Notas e Configurações (tema claro/escuro/automático, categorias, backup e dados). |
 
 **Navegação:** barras superior e inferior que somem ao rolar para baixo e voltam ao rolar para cima (a superior mostra o nome da aba; no Início, a data); 🔍 no topo (no Diário, busca no diário); atalhos inferiores (Início, Finanças, Diário, Agenda, Mais); menu ☰ com todos os módulos agrupados (Geral, Organização pessoal, Financeiro, Bem-estar, Planejamento); 🔍 **busca em tudo** (diário, despesas, agenda e anotações); botão **+** que adiciona na aba aberta (no Início, pergunta o quê); o **voltar** do celular fecha a janela ou o menu aberto antes de sair da página. Lembretes, Metas, Relatórios, Saúde, Estudos, Foco e Banco de ideias aparecem como "em breve".
 
@@ -68,6 +69,10 @@ src/
   finance.test.ts    testes das regras
   habits.ts          regras do Núcleo pessoal (sequência, consistência, dias sem)
   habits.test.ts     testes do Núcleo
+  profile.ts         Você: perfil e motor de sugestões
+  profile.test.ts    testes das sugestões
+  practices.ts       Núcleo › Mente e Corpo: catálogo e registro das práticas
+  practices.test.ts  testes das práticas
   review.ts          revisão semanal (junta todos os módulos)
   review.test.ts     testes da revisão
   journey.ts         desbloqueio da Jornada e XP/nível/ouro a partir dos dados
@@ -91,6 +96,8 @@ src/
     Diario.tsx       Diário
     Agenda.tsx       Agenda (+ Tarefas.tsx)
     Habitos.tsx      Núcleo pessoal
+    Praticas.tsx     Mente e Corpo: meditação, respiração, treinos, alongamentos
+    Voce.tsx         Você e a entrevista da primeira abertura
     Notas.tsx        Arquivo geral
     Ajustes.tsx, Mais.tsx
 ```
@@ -100,8 +107,8 @@ src/
 Documentos de funcionalidades planejadas, ainda **sem desenvolvimento**:
 
 - [Módulo RPG — Gamificação da Vida Pessoal](docs/futuro/modulo-rpg.md): Jornada com personagem em pixel art, XP, níveis, ouro, loja, inventário e conquistas, consumindo os dados dos módulos existentes. O Anexo B reúne as regras já decididas: equipamentos, baús e cristais, forja mística por atributos, títulos, classes, pets, moradas, céu com estrelas e chuva, e a tela cheia do avatar. O Anexo F traz a sequência de visitas com presente do dia, os dois modos do app (com e sem Jornada), os pets com nome, cor e conquistas, arcos e acessórios, e o Codex. O Anexo E define que, no app principal, a Jornada é só um cartão no Início, com as recompensas mostradas ao entrar ("Desde a sua última visita"). O Anexo D descreve a entrevista que personaliza a campanha. O Anexo C descreve o modo campanha: 7 regiões num mapa, objetivos ligados aos módulos do app e chefes semanais que perdem vida a cada missão cumprida.
-- [Você](docs/futuro/modulo-voce.md): perfil com rotina, áreas a melhorar (em ordem de prioridade), metas de curto e longo prazo, hábitos a largar e limitações. Um motor de regras transforma essas respostas em sugestões de hábitos, trocas, práticas, compromissos e caixinhas, sempre dizendo o porquê. Funciona sem a Jornada; com ela, a entrevista já começa preenchida.
-- [Núcleo: Mente e Corpo](docs/futuro/nucleo-mente-corpo.md): o Núcleo ganha as abas Mente (meditação livre e guiada, respiração, gratidão) e Corpo (fichas de treino com descanso e carga anterior, alongamentos guiados, caminhada e corrida). Hábitos ligados a uma prática são marcados sozinhos.
+- [Você](docs/futuro/modulo-voce.md) (**feito na v0.12**, menos as caixinhas): perfil com rotina, áreas a melhorar (em ordem de prioridade), metas de curto e longo prazo, hábitos a largar e limitações. Um motor de regras transforma essas respostas em sugestões de hábitos, trocas, práticas, compromissos e caixinhas, sempre dizendo o porquê. Funciona sem a Jornada; com ela, a entrevista já começa preenchida.
+- [Núcleo: Mente e Corpo](docs/futuro/nucleo-mente-corpo.md) (**feito na v0.12**): o Núcleo ganha as abas Mente (meditação livre e guiada, respiração, gratidão) e Corpo (fichas de treino com descanso e carga anterior, alongamentos guiados, caminhada e corrida). Hábitos ligados a uma prática são marcados sozinhos.
 - [Saúde](docs/futuro/modulo-saude.md): módulo separado para acompanhar água, sono, remédios, consultas e exames, peso e medidas.
 - [Caixinhas](docs/futuro/caixinhas.md): metas de dinheiro guardado em Finanças, com plano ("R$ 100 toda semana"), guardar e tirar com motivo. Na Jornada, recompensa o hábito de guardar e comemora quando o dinheiro é usado para o objetivo.
 - [Listas](docs/futuro/modulo-listas.md): listas de compras, listas gerais e receitas de cozinha, reutilizáveis e ligadas a Finanças e Preços.

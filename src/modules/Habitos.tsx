@@ -1,4 +1,4 @@
-import { useState, type CSSProperties } from 'react';
+import { useEffect, useRef, useState, type CSSProperties } from 'react';
 import type { ViewProps } from '../App';
 import { useStore } from '../store';
 import { useSubAction } from '../router';
@@ -10,6 +10,10 @@ import {
 import type { DayPeriod, Habit, HabitKind } from '../types';
 import { addDays, formatDMY, fromISO, todayISO, uid, WEEKDAYS } from '../utils';
 import { Chips, Empty, Field, Icon, PageHeader, Pill, Progress, Segmented, Sheet, Toggle, type IconName } from '../ui';
+import { LINK_OPTIONS, linkLabel, recommended } from '../practices';
+import { suggestions } from '../profile';
+import { BodyTab, MindTab, PracticeScreen, practiceFromLink, type Practice } from './Praticas';
+import { SuggestionCard } from './Voce';
 
 export const HABIT_COLORS = ['#22c55e', '#3b82f6', '#8b5cf6', '#f97316', '#ef4444', '#ec4899', '#eab308', '#06b6d4'];
 const KIND_ICON: Record<HabitKind, IconName> = { ritual: 'repeat', construir: 'flag', abandonar: 'x' };
@@ -111,7 +115,17 @@ function QuantityAdjust({ h, day }: { h: Habit; day: string }) {
   );
 }
 
-type Tab = 'rituais' | 'habitos';
+type Tab = 'rituais' | 'habitos' | 'mente' | 'corpo';
+
+/** Botão "Iniciar" de um hábito ligado a uma prática. */
+export function StartButton({ h, onStart }: { h: Habit; onStart: (link: string) => void }) {
+  if (!h.link) return null;
+  return (
+    <button type="button" className="btn small" onClick={() => onStart(h.link)} aria-label={`Iniciar ${linkLabel(h.link).toLowerCase()}: ${h.name}`}>
+      <Icon name="right" size={14} /> Iniciar
+    </button>
+  );
+}
 
 export function Habitos({ route }: ViewProps) {
   const { data, update } = useStore();
@@ -119,10 +133,33 @@ export function Habitos({ route }: ViewProps) {
   const [tab, setTab] = useState<Tab>('rituais');
   const [form, setForm] = useState<{ kind: HabitKind; habit?: Habit } | null>(null);
   const [detailId, setDetailId] = useState<string | null>(null);
+  const [practice, setPractice] = useState<Practice | null>(null);
+  const gratRef = useRef<HTMLInputElement>(null);
 
   useSubAction(route, 'nucleo', {
     novo: () => setForm({ kind: tab === 'rituais' ? 'ritual' : 'construir' }),
+    mente: () => setTab('mente'),
+    corpo: () => setTab('corpo'),
   });
+
+  function start(link: string) {
+    const p = practiceFromLink(link, recommended(data.profile));
+    if (p === 'gratidao') {
+      setTab('mente');
+      window.setTimeout(() => {
+        document.getElementById('gratidao')?.scrollIntoView({ block: 'center' });
+        gratRef.current?.focus();
+      }, 120);
+    } else if (p) setPractice(p);
+  }
+  // Vindo do Início: #/nucleo/pratica/alongamento:lombar
+  useEffect(() => {
+    if (!route.sub.startsWith('pratica/')) return;
+    history.replaceState(null, '', '#/nucleo');
+    start(decodeURIComponent(route.sub.slice(8)));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [route.n]);
+  const habitSugs = suggestions(data).filter((s) => s.act.type === 'habit').slice(0, 2);
 
   const day = habitsOfDay(data.habits, today);
   const rituals = data.habits.filter((h) => h.kind === 'ritual');
@@ -135,9 +172,23 @@ export function Habitos({ route }: ViewProps) {
   return (
     <>
       <PageHeader title="Núcleo pessoal" />
-      <Segmented label="Seção" value={tab} onChange={setTab} options={[{ value: 'rituais', label: 'Rituais' }, { value: 'habitos', label: 'Hábitos' }]} />
+      <Segmented
+        label="Seção"
+        value={tab}
+        onChange={setTab}
+        options={[
+          { value: 'rituais', label: 'Rituais' },
+          { value: 'habitos', label: 'Hábitos' },
+          { value: 'mente', label: 'Mente' },
+          { value: 'corpo', label: 'Corpo' },
+        ]}
+      />
 
-      {tab === 'rituais' ? (
+      {tab === 'mente' ? (
+        <MindTab open={setPractice} gratRef={gratRef} />
+      ) : tab === 'corpo' ? (
+        <BodyTab open={setPractice} />
+      ) : tab === 'rituais' ? (
         rituals.length === 0 ? (
           <section className="card">
             <Empty>Rituais são as rotinas que já fazem parte do seu dia — usar fio dental, dormir às 23h. Toque em + para criar o primeiro.</Empty>
@@ -181,9 +232,13 @@ export function Habitos({ route }: ViewProps) {
                             <RiskPill h={h} today={today} />
                           </span>
                         </button>
-                        <span className="pill" title="Sequência">
-                          <Icon name="flame" size={13} /> {habitStreak(h, today)}
-                        </span>
+                        {h.link && !h.checks.includes(today) ? (
+                          <StartButton h={h} onStart={start} />
+                        ) : (
+                          <span className="pill" title="Sequência">
+                            <Icon name="flame" size={13} /> {habitStreak(h, today)}
+                          </span>
+                        )}
                       </li>
                     ))}
                   </ul>
@@ -218,6 +273,21 @@ export function Habitos({ route }: ViewProps) {
         )
       ) : (
         <>
+          {habitSugs.length > 0 && (
+            <section className="card">
+              <div className="card-head">
+                <h2>Sugeridos para você</h2>
+                <a className="link" href="#/voce/sugestoes">
+                  Ver todos
+                </a>
+              </div>
+              <div className="sug-list">
+                {habitSugs.map((s) => (
+                  <SuggestionCard key={s.id} s={s} />
+                ))}
+              </div>
+            </section>
+          )}
           <div className="section-head">
             <h2 className="section-title">Construindo</h2>
             <button type="button" className="link" onClick={() => setForm({ kind: 'construir' })}>
@@ -231,7 +301,7 @@ export function Habitos({ route }: ViewProps) {
           ) : (
             <div className="habits">
               {building.map((h) => (
-                <BuildCard key={h.id} h={h} today={today} onOpen={() => setDetailId(h.id)} onGraduate={() => update(graduate(h.id))} />
+                <BuildCard key={h.id} h={h} today={today} onOpen={() => setDetailId(h.id)} onGraduate={() => update(graduate(h.id))} onStart={start} />
               ))}
             </div>
           )}
@@ -257,6 +327,7 @@ export function Habitos({ route }: ViewProps) {
       )}
 
       {form && <HabitForm kind={form.kind} habit={form.habit} onClose={() => setForm(null)} />}
+      {practice && <PracticeScreen p={practice} onClose={() => setPractice(null)} />}
       {detailId && <HabitDetail id={detailId} onClose={() => setDetailId(null)} onEdit={(h) => setForm({ kind: h.kind, habit: h })} />}
     </>
   );
@@ -266,7 +337,7 @@ function lastDays(today: string, n: number): string[] {
   return Array.from({ length: n }, (_, i) => addDays(today, i - (n - 1)));
 }
 
-function BuildCard({ h, today, onOpen, onGraduate }: { h: Habit; today: string; onOpen: () => void; onGraduate: () => void }) {
+function BuildCard({ h, today, onOpen, onGraduate, onStart }: { h: Habit; today: string; onOpen: () => void; onGraduate: () => void; onStart: (link: string) => void }) {
   const { update } = useStore();
   const prog = progressToRitual(h);
   return (
@@ -279,6 +350,7 @@ function BuildCard({ h, today, onOpen, onGraduate }: { h: Habit; today: string; 
           {qtyText(h, today) && <span className="muted small tabular">Hoje: {qtyText(h, today)}</span>}
         </button>
         <RiskPill h={h} today={today} />
+        {isScheduled(h, today) && !h.checks.includes(today) && <StartButton h={h} onStart={onStart} />}
         {isScheduled(h, today) && <HabitCheck h={h} day={today} />}
         <span className="pill" title="Sequência">
           <Icon name="flame" size={13} /> {habitStreak(h, today)}
@@ -476,6 +548,12 @@ function HabitDetail({ id, onClose, onEdit }: { id: string; onClose: () => void;
                 <dd>{h.attrs.map((c) => ATTRIBUTES.find((a) => a.code === c)?.name ?? c).join(', ')}</dd>
               </div>
             )}
+            {h.link && (
+              <div>
+                <dt>Ligado a</dt>
+                <dd>{linkLabel(h.link)} (marca sozinho ao concluir)</dd>
+              </div>
+            )}
             {h.cue && (
               <div>
                 <dt>Gatilho</dt>
@@ -542,6 +620,7 @@ function HabitForm({ kind: initialKind, habit, onClose }: { kind: HabitKind; hab
   const [goal, setGoal] = useState(habit?.goal ? fmtQty(habit.goal) : '');
   const [unit, setUnit] = useState(habit?.unit ?? '');
   const [step, setStep] = useState(habit?.goal ? fmtQty(habit.step) : '');
+  const [link, setLink] = useState(habit?.link ?? '');
   const [error, setError] = useState('');
   const quit = kind === 'abandonar';
 
@@ -574,6 +653,7 @@ function HabitForm({ kind: initialKind, habit, onClose }: { kind: HabitKind; hab
       step: stepN,
       amounts: habit?.amounts ?? {},
       attrs,
+      link: quit ? '' : link,
       createdAt: habit?.createdAt ?? new Date().toISOString(),
     };
     update(upsert('habits', h));
@@ -701,6 +781,11 @@ function HabitForm({ kind: initialKind, habit, onClose }: { kind: HabitKind; hab
               </div>
             </>
           )}
+          <div className="field">
+            <span className="field-label">Ligado a uma prática (opcional)</span>
+            <Chips label="Prática ligada" value={link.split(':')[0]} onChange={(v) => setLink(v === link.split(':')[0] ? link : v)} options={LINK_OPTIONS} />
+            <span className="field-hint">Ao concluir a prática no Núcleo (Mente ou Corpo), este hábito é marcado sozinho.</span>
+          </div>
           <div className="field">
             <span className="field-label">Período</span>
             <Chips label="Período" value={period} onChange={setPeriod} options={PERIODS.map((p) => ({ value: p.id, label: p.label }))} />

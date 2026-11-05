@@ -59,6 +59,11 @@ export interface Habit {
   amounts: Record<string, number>;
   /** Atributos que este hábito treina (FOR, AGI, INT, RES, SAB, DIS) — usados pela Jornada. */
   attrs: string[];
+  /**
+   * Prática do Núcleo ligada a este hábito (ex.: "meditacao", "alongamento:lombar", "treino").
+   * Ao concluir a prática, o hábito é marcado sozinho. Vazio = sem ligação.
+   */
+  link: string;
   createdAt: string;
 }
 
@@ -203,6 +208,78 @@ export interface Settings {
   journeyChoice: 'quero' | 'depois' | null;
 }
 
+// ---------- Você (perfil) ----------
+
+export interface Goal {
+  id: string;
+  text: string;
+  /** Prazo em texto livre (ex.: "até março"). */
+  when: string;
+  doneAt: string | null;
+}
+
+export type MoneyChallenge = '' | 'atraso' | 'gasto' | 'naosei' | 'ok';
+
+/** Estado da entrevista da primeira abertura. */
+export interface Onboarding {
+  /** novo = ainda não viu · pulou = pulou ou parou no meio · feito = respondeu até o fim. */
+  state: 'novo' | 'pulou' | 'feito';
+  /** Pergunta em que parou (para continuar). */
+  step: number;
+  /** "Agora não" no cartão do Início: escondido até esta data (AAAA-MM-DD). */
+  askHiddenUntil: string | null;
+  askDismissals: number;
+}
+
+/** O que a pessoa conta sobre si. Base das sugestões (e da entrevista da Jornada). */
+export interface Profile {
+  name: string;
+  /** HH:MM */
+  wake: string;
+  sleep: string;
+  day: string[];
+  /** Minutos livres por dia. */
+  free: number;
+  likes: string[];
+  /** Áreas a melhorar, em ordem de prioridade. */
+  areas: string[];
+  shortGoals: Goal[];
+  longGoals: Goal[];
+  quits: string[];
+  /** Respondeu "nenhum" (diferente de não ter respondido). */
+  noQuit: boolean;
+  limits: string[];
+  noLimit: boolean;
+  notes: string;
+  money: { challenge: MoneyChallenge; saveFor: string; amount: number | null };
+  onboarding: Onboarding;
+  /** Sugestões dispensadas ("Agora não") e aceitas: não aparecem de novo. */
+  dismissed: string[];
+  accepted: string[];
+  updatedAt: string;
+}
+
+// ---------- Práticas do Núcleo (Mente e Corpo) ----------
+
+export type PracticeType = 'meditacao' | 'respiracao' | 'alongamento' | 'treino' | 'caminhada';
+
+export interface PracticeSession {
+  id: string;
+  /** AAAA-MM-DD */
+  date: string;
+  type: PracticeType;
+  /** Qual prática (ex.: "dormir", "478", "lombar", "A"). */
+  sub: string;
+  title: string;
+  minutes: number;
+  km: number | null;
+  sets: number | null;
+  /** Treino: carga × repetições somadas, em kg. */
+  volume: number | null;
+  feel: 'calmo' | 'igual' | 'agitado' | null;
+  createdAt: string;
+}
+
 export interface AppData {
   version: 2;
   tasks: Task[];
@@ -218,6 +295,10 @@ export interface AppData {
   incomeSeries: IncomeSeries[];
   incomeSources: Category[];
   settings: Settings;
+  profile: Profile;
+  sessions: PracticeSession[];
+  /** Última carga usada em cada exercício (nome → kg). */
+  lastLoads: Record<string, number>;
   /** Itens excluídos (id → data), para uma futura sincronização entre aparelhos. */
   deleted: Record<string, string>;
   /** Dados da versão anterior que ainda não têm tela (ex.: receitas). */

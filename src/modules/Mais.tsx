@@ -2,7 +2,8 @@ import { COMING_SOON, SECTIONS } from '../App';
 import { Icon, PageHeader } from '../ui';
 
 const LINKS: { path: string; hint: string }[] = [
-  { path: 'nucleo', hint: 'Hábitos, rituais e autocuidado' },
+  { path: 'voce', hint: 'Perfil, metas e sugestões para você' },
+  { path: 'nucleo', hint: 'Hábitos, meditação, respiração e treinos' },
   { path: 'arquivo', hint: 'Anotações rápidas e informações importantes' },
   { path: 'revisao', hint: 'Resumo da semana e reflexão' },
   { path: 'jornada', hint: 'Desbloqueia com 14 dias de uso' },

@@ -1,6 +1,7 @@
-import type { AppData, Category, DayPeriod, Expense, Habit, HabitKind, Income } from './types.ts';
+import type { AppData, Category, DayPeriod, Expense, Habit, HabitKind, Income, PracticeSession } from './types.ts';
 import { toISO, uid } from './utils.ts';
 import { suggestAttributes } from './habits.ts';
+import { emptyProfile, normalizeProfile } from './profile.ts';
 
 export const COLORS = ['#22c55e', '#3b82f6', '#8b5cf6', '#f97316', '#ef4444', '#94a3b8', '#eab308', '#ec4899', '#06b6d4'];
 /** As 6 cores do cartão, como na referência visual. */
@@ -43,6 +44,9 @@ export function emptyData(): AppData {
     incomeSeries: [],
     incomeSources: [],
     settings: { theme: 'dark', seededCategories: false, seededIncomeSources: false, lastBackupAt: null, activeDays: [], visitDays: [], journeyUnlockedAt: null, journeyChoice: null },
+    profile: emptyProfile('novo'),
+    sessions: [],
+    lastLoads: {},
     deleted: {},
     legacy: {},
   };
@@ -101,6 +105,10 @@ export function normalize(raw: unknown): AppData {
       journeyUnlockedAt: typeof settings.journeyUnlockedAt === 'string' ? settings.journeyUnlockedAt : null,
       journeyChoice: settings.journeyChoice === 'quero' || settings.journeyChoice === 'depois' ? settings.journeyChoice : null,
     },
+    // Quem já tinha dados (atualização ou backup) não vê a entrevista de surpresa.
+    profile: normalizeProfile(r.profile, Object.keys(r).length > 0),
+    sessions: list<PracticeSession>(r.sessions).filter((x) => typeof x.date === 'string' && typeof x.type === 'string' && typeof x.minutes === 'number'),
+    lastLoads: isRec(r.lastLoads) ? Object.fromEntries(Object.entries(r.lastLoads).filter((e): e is [string, number] => typeof e[1] === 'number')) : {},
     deleted: isRec(r.deleted) ? (r.deleted as Record<string, string>) : {},
     legacy: isRec(r.legacy) ? r.legacy : {},
   };
@@ -180,6 +188,7 @@ export function normalizeHabit(h: Record<string, unknown>): Habit {
     amounts: isRec(h.amounts) ? Object.fromEntries(Object.entries(h.amounts).filter((e): e is [string, number] => typeof e[1] === 'number')) : {},
     // Hábitos de antes desta versão ganham os atributos sugeridos pelo nome.
     attrs: Array.isArray(h.attrs) ? strings(h.attrs) : suggestAttributes(typeof h.name === 'string' ? h.name : ''),
+    link: typeof h.link === 'string' ? h.link : '',
     createdAt,
   };
 }
