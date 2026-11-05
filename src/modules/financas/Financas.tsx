@@ -12,9 +12,10 @@ import { ExpenseDetail } from './ExpenseDetail';
 import { ExpenseForm } from './ExpenseForm';
 import { InvoiceSheet } from './InvoiceSheet';
 import { IncomeForm, ReceitasTab } from './Receitas';
+import { CaixinhasTab } from './Caixinhas';
 import { BillStatusPill, CreditCardVisual, InvoiceStatusPill, useCategoryOf } from './shared';
 
-type Tab = 'mes' | 'receitas' | 'cartoes';
+type Tab = 'mes' | 'receitas' | 'cartoes' | 'caixinhas';
 const pctFmt = (n: number) => `${n.toLocaleString('pt-BR', { maximumFractionDigits: 2 })}%`;
 
 export function Financas({ route }: ViewProps) {
@@ -28,10 +29,12 @@ export function Financas({ route }: ViewProps) {
   const [invoice, setInvoice] = useState<{ cardId: string; month: string } | null>(null);
   const [cardForm, setCardForm] = useState(false);
   const [incomeForm, setIncomeForm] = useState(false);
+  const [boxForm, setBoxForm] = useState(false);
 
   useSubAction(route, 'financas', {
-    nova: () => (tab === 'cartoes' ? setCardForm(true) : tab === 'receitas' ? setIncomeForm(true) : setFormOpen(true)),
+    nova: () => (tab === 'cartoes' ? setCardForm(true) : tab === 'receitas' ? setIncomeForm(true) : tab === 'caixinhas' ? setBoxForm(true) : setFormOpen(true)),
     cartoes: () => setTab('cartoes'),
+    caixinhas: () => setTab('caixinhas'),
     receitas: () => setTab('receitas'),
     'nova-receita': () => {
       setTab('receitas');
@@ -57,9 +60,11 @@ export function Financas({ route }: ViewProps) {
   return (
     <>
       <PageHeader title="Finanças" actions={<MonthNav label={formatMonth(month)} onPrev={() => setMonth(addMonths(month, -1))} onNext={() => setMonth(addMonths(month, 1))} onLabel={() => setMonth(monthKey(today))} />} />
-      <Segmented label="Visão" value={tab} onChange={setTab} options={[{ value: 'mes', label: 'Despesas' }, { value: 'receitas', label: 'Receitas' }, { value: 'cartoes', label: 'Cartões' }]} />
+      <Segmented label="Visão" value={tab} onChange={setTab} options={[{ value: 'mes', label: 'Despesas' }, { value: 'receitas', label: 'Receitas' }, { value: 'cartoes', label: 'Cartões' }, { value: 'caixinhas', label: 'Caixinhas' }]} />
 
-      {tab === 'receitas' ? (
+      {tab === 'caixinhas' ? (
+        <CaixinhasTab month={month} newOpen={boxForm} onNewClose={() => setBoxForm(false)} />
+      ) : tab === 'receitas' ? (
         <ReceitasTab month={month} />
       ) : tab === 'mes' ? (
         <>

@@ -14,6 +14,7 @@ O usuário registra; o app organiza, calcula e mostra o que importa no Início.
 | **Início** | "Seu dia" (agenda, contas, diário, tarefas, Núcleo e Jornada), resumo do mês com receitas e sobra prevista (total, já pago, em aberto), contas a vencer nos próximos 7 dias, compromissos, tarefas, últimos registros do diário e hábitos do dia. |
 | **Finanças** | Despesas **avulsas**, **contas fixas** (todo mês, sem fim) e **parceladas** (01/12, 02/12…). Pagamento com data e valor reais. Editar ou excluir **somente esta / esta e as próximas / todas**. Categorias com ícone e cor, criadas sem sair do formulário. |
 | **Receitas** | Aba própria em Finanças (**Despesas · Receitas · Cartões**): salário, freelance, bônus, vale-alimentação etc., avulsas ou **mensais**, previstas ou recebidas (com data e valor reais). **Balanço do mês**: previsto (entradas − despesas) e até agora (o que entrou − o que foi pago). Fontes de receita personalizáveis. |
+| **Caixinhas** | Aba própria em Finanças (**Despesas · Receitas · Cartões · Caixinhas**): metas de dinheiro guardado (viagem, reserva…), com meta opcional, prazo e **plano** ("R$ 100 toda semana" ou todo mês). Guardar e tirar com data; ao tirar, o motivo (**realizei o objetivo**, emergência, outro). Barra de progresso, quanto falta e em quanto tempo, avisos nos marcos de 25/50/75/100%, caixinhas realizadas no histórico. "Dia de guardar" no Início e as linhas **Caixinhas** e **Livre para usar** no balanço do mês. O app não mexe no dinheiro: só anota. |
 | **Cartões** | Cadastro com fechamento, vencimento, limite e cor. Cada compra cai sozinha na fatura certa. Faturas com total, situação e pagamento; limite disponível. |
 | **Diário** | Feed privado: o registro mais novo no topo, os anteriores recolhidos, data e hora automáticas, etiqueta opcional, busca e histórico por ano e mês. |
 | **Agenda** | Calendário com pontos para compromissos, tarefas e contas. Ao tocar num dia, abre tudo daquele dia: compromissos, tarefas, contas que vencem, compras no cartão, pagamentos feitos, rituais/hábitos (marcáveis) e registros do diário. Aba de tarefas. |
@@ -73,6 +74,8 @@ src/
   profile.test.ts    testes das sugestões
   practices.ts       Núcleo › Mente e Corpo: catálogo e registro das práticas
   practices.test.ts  testes das práticas
+  boxes.ts           Caixinhas: saldo, plano, marcos e balanço
+  boxes.test.ts      testes das caixinhas
   review.ts          revisão semanal (junta todos os módulos)
   review.test.ts     testes da revisão
   journey.ts         desbloqueio da Jornada e XP/nível/ouro a partir dos dados
@@ -107,10 +110,10 @@ src/
 Documentos de funcionalidades planejadas, ainda **sem desenvolvimento**:
 
 - [Módulo RPG — Gamificação da Vida Pessoal](docs/futuro/modulo-rpg.md): Jornada com personagem em pixel art, XP, níveis, ouro, loja, inventário e conquistas, consumindo os dados dos módulos existentes. O Anexo B reúne as regras já decididas: equipamentos, baús e cristais, forja mística por atributos, títulos, classes, pets, moradas, céu com estrelas e chuva, e a tela cheia do avatar. O Anexo F traz a sequência de visitas com presente do dia, os dois modos do app (com e sem Jornada), os pets com nome, cor e conquistas, arcos e acessórios, e o Codex. O Anexo E define que, no app principal, a Jornada é só um cartão no Início, com as recompensas mostradas ao entrar ("Desde a sua última visita"). O Anexo D descreve a entrevista que personaliza a campanha. O Anexo C descreve o modo campanha: 7 regiões num mapa, objetivos ligados aos módulos do app e chefes semanais que perdem vida a cada missão cumprida.
-- [Você](docs/futuro/modulo-voce.md) (**feito na v0.12**, menos as caixinhas): perfil com rotina, áreas a melhorar (em ordem de prioridade), metas de curto e longo prazo, hábitos a largar e limitações. Um motor de regras transforma essas respostas em sugestões de hábitos, trocas, práticas, compromissos e caixinhas, sempre dizendo o porquê. Funciona sem a Jornada; com ela, a entrevista já começa preenchida.
+- [Você](docs/futuro/modulo-voce.md) (**feito na v0.12**; sugestões de caixinha na v0.13): perfil com rotina, áreas a melhorar (em ordem de prioridade), metas de curto e longo prazo, hábitos a largar e limitações. Um motor de regras transforma essas respostas em sugestões de hábitos, trocas, práticas, compromissos e caixinhas, sempre dizendo o porquê. Funciona sem a Jornada; com ela, a entrevista já começa preenchida.
 - [Núcleo: Mente e Corpo](docs/futuro/nucleo-mente-corpo.md) (**feito na v0.12**): o Núcleo ganha as abas Mente (meditação livre e guiada, respiração, gratidão) e Corpo (fichas de treino com descanso e carga anterior, alongamentos guiados, caminhada e corrida). Hábitos ligados a uma prática são marcados sozinhos.
 - [Saúde](docs/futuro/modulo-saude.md): módulo separado para acompanhar água, sono, remédios, consultas e exames, peso e medidas.
-- [Caixinhas](docs/futuro/caixinhas.md): metas de dinheiro guardado em Finanças, com plano ("R$ 100 toda semana"), guardar e tirar com motivo. Na Jornada, recompensa o hábito de guardar e comemora quando o dinheiro é usado para o objetivo.
+- [Caixinhas](docs/futuro/caixinhas.md) (**feito na v0.13**, menos a parte da Jornada): metas de dinheiro guardado em Finanças, com plano ("R$ 100 toda semana"), guardar e tirar com motivo. Na Jornada, recompensa o hábito de guardar e comemora quando o dinheiro é usado para o objetivo.
 - [Listas](docs/futuro/modulo-listas.md): listas de compras, listas gerais e receitas de cozinha, reutilizáveis e ligadas a Finanças e Preços.
 - [Comparação de preços](docs/futuro/modulo-precos.md): anotar preços no mercado e comparar por mercado, marca e unidade (R$/kg, R$/L), com o histórico de cada produto. No futuro, leitura de código de barras e de etiquetas.
 

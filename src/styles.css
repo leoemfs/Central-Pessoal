@@ -3402,3 +3402,54 @@ h2.left {
     transition: none;
   }
 }
+
+/* ---------- Caixinhas ---------- */
+.box-card {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+  text-align: left;
+  color: var(--text);
+  cursor: pointer;
+  font: inherit;
+}
+.box-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.box-head strong {
+  flex: 1;
+  min-width: 0;
+}
+.box-amount {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.box-amount .value,
+.box-big {
+  font-size: 1.5rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.medal {
+  flex: none;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: var(--green-soft);
+  color: var(--green-text);
+}
+.segmented button {
+  min-width: 0;
+}
+/* Quatro abas no celular: menos espaço lateral para caber "Caixinhas". */
+.segmented:has(> :nth-child(4)) button {
+  padding-inline: 4px;
+  font-size: 0.88rem;
+}
