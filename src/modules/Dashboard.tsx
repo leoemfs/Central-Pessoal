@@ -12,7 +12,6 @@ import { sortTasks, TaskItem } from './Tarefas';
 import { AskCard, ForYou, Interview } from './Voce';
 import { WeekPractice } from './Praticas';
 import { SaveToday } from './financas/Caixinhas';
-import { completeness } from '../profile';
 import { EventItem, sortEvents } from './Agenda';
 import { entrySummary, entryTitle } from './Diario';
 import { BillRow } from './financas/Financas';
@@ -84,11 +83,6 @@ export function Dashboard() {
             {p.name ? `, ${p.name}` : ''}! <span aria-hidden="true">{greetingEmoji()}</span>
           </h1>
           <p className="muted desktop-only">{formatLongDate(today)}</p>
-        </div>
-        <div className="page-actions">
-          <a className="avatar-btn" href="#/voce" aria-label={`Você: perfil ${completeness(p)}% preenchido`} title="Você">
-            {p.name ? p.name.charAt(0).toUpperCase() : <Icon name="smile" size={20} />}
-          </a>
         </div>
       </header>
 
