@@ -206,11 +206,11 @@ export function updateList(id: string, patch: Partial<UserList>) {
 }
 
 /** Concluir a compra do mercado: vira uma despesa paga hoje e, se quiser, a lista fica pronta para a próxima. */
-export function finishShopping(listId: string, o: { total: number; storeName: string; categoryId: string | null; reset: boolean }, today: string = todayISO()) {
+export function finishShopping(listId: string, o: { total: number; storeName: string; categoryId: string | null; reset: boolean; voucherId?: string | null }, today: string = todayISO()) {
   return (d: AppData): AppData => {
     let next = d;
     if (o.categoryId && o.total > 0) {
-      next = addExpense(next, { kind: 'avulsa', description: `Mercado · ${o.storeName}`, categoryId: o.categoryId, method: 'pix', cardId: null, date: today, amounts: [o.total], paidAt: today }, today);
+      next = addExpense(next, { kind: 'avulsa', description: `Mercado · ${o.storeName}`, categoryId: o.categoryId, method: o.voucherId ? 'vale' : 'pix', cardId: null, date: today, amounts: [o.total], paidAt: today, voucherId: o.voucherId ?? null }, today);
     }
     return o.reset ? uncheckAll(listId)(next) : next;
   };

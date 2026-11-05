@@ -6,11 +6,14 @@ import type { CreditCard } from '../../types';
 import { uid } from '../../utils';
 import { Field, Icon, MoneyInput, Sheet } from '../../ui';
 import { CreditCardVisual } from './shared';
+import { CardTypeSwitch, VoucherForm } from './Vale';
+import type { VoucherCard } from '../../types';
 
 const DAYS = Array.from({ length: 31 }, (_, i) => i + 1);
 
-export function CardForm({ initial, onClose, onSaved }: { initial?: CreditCard; onClose: () => void; onSaved?: (c: CreditCard) => void }) {
+export function CardForm({ initial, onClose, onSaved, startAs = 'credito', onSavedVoucher }: { initial?: CreditCard; onClose: () => void; onSaved?: (c: CreditCard) => void; startAs?: 'credito' | 'vale'; onSavedVoucher?: (v: VoucherCard) => void }) {
   const { update } = useStore();
+  const [type, setType] = useState<'credito' | 'vale'>(initial ? 'credito' : startAs);
   const [name, setName] = useState(initial?.name ?? '');
   const [closingDay, setClosingDay] = useState(initial?.closingDay ?? 10);
   const [dueDay, setDueDay] = useState(initial?.dueDay ?? 17);
@@ -44,9 +47,11 @@ export function CardForm({ initial, onClose, onSaved }: { initial?: CreditCard; 
     onClose();
   }
 
+  if (type === 'vale') return <VoucherForm onClose={onClose} onSaved={onSavedVoucher} onType={() => setType('credito')} />;
+
   return (
     <Sheet
-      title={initial ? 'Editar cartão' : 'Cadastrar cartão de crédito'}
+      title={initial ? 'Editar cartão' : 'Cadastrar cartão'}
       onClose={onClose}
       footer={
         <button type="button" className="btn primary block pill-shape" onClick={save}>
@@ -54,6 +59,7 @@ export function CardForm({ initial, onClose, onSaved }: { initial?: CreditCard; 
         </button>
       }
     >
+      {!initial && <CardTypeSwitch value="credito" onChange={setType} />}
       <div className="card-form-head">
         <CreditCardVisual name={name} color={color} mini />
         <Field label="Nome do cartão" hint="Ex.: PicPay, Santander, Renner…">

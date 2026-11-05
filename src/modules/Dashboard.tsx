@@ -15,6 +15,7 @@ import { SaveToday } from './financas/Caixinhas';
 import { MoodCard } from './Humor';
 import { BudgetAlerts } from './financas/Orcamento';
 import { PinnedLists } from './Listas';
+import { VoucherAlerts } from './financas/Vale';
 import { EventItem, sortEvents } from './Agenda';
 import { entrySummary, entryTitle } from './Diario';
 import { BillRow } from './financas/Financas';
@@ -112,6 +113,7 @@ export function Dashboard() {
       </section>
 
       <BudgetAlerts />
+      <VoucherAlerts />
       <SaveToday />
       <PinnedLists />
       <ForYou />

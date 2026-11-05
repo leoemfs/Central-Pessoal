@@ -76,7 +76,7 @@ export function ExpenseDetail({ id, onClose, onOpenInvoice }: { id: string; onCl
           </div>
           <div>
             <dt>Pago com</dt>
-            <dd>{card ? card.name : PAYMENT_LABEL[e.method]}</dd>
+            <dd>{card ? card.name : e.voucherId ? `Vale · ${data.vouchers.find((v) => v.id === e.voucherId)?.name ?? ''}` : PAYMENT_LABEL[e.method]}</dd>
           </div>
           <div>
             <dt>Situação</dt>

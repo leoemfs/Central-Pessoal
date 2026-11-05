@@ -5,6 +5,8 @@
 > - o produto mostra o menor preço por unidade, a tabela marcas × mercados (preços com mais de 60 dias aparecem esmaecidos), a comparação entre marcas e a evolução do preço;
 > - ainda não há: cesta comparada por mercado (fora da lista), categorias editáveis de produtos, código de barras e nota fiscal;
 > - código: `src/lists.ts` e `src/modules/Listas.tsx`.
+>
+> **Próxima versão:** `precos-v2.md` traz o que o primeiro uso real pediu: tipos de loja, lista que puxa os produtos de Preços e estimativa com faixa de preço sem prender a lista a uma loja.
 
 Anotar preços no mercado de forma rápida e, com o tempo, ter uma base própria de preços que mostra **onde está mais barato**, **qual marca compensa** e **como o preço mudou**, sempre comparando **por unidade** (R$/kg, R$/L, R$/un).
 

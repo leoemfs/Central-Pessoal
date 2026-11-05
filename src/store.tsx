@@ -4,6 +4,7 @@ import { normalize } from './data';
 import { FIXA_AHEAD, materialize } from './finance';
 import { checkUnlock, markActive, markVisit } from './journey';
 import { INCOME_AHEAD, materializeIncomes } from './incomes';
+import { materializeVouchers } from './vouchers';
 import { dbGet, dbSet, requestPersistence } from './db';
 import { addMonths, monthKey, todayISO } from './utils';
 
@@ -13,7 +14,7 @@ const channel = typeof BroadcastChannel !== 'undefined' ? new BroadcastChannel('
 
 /** Gera as contas fixas que já deveriam existir (ex.: virou o mês com o app aberto) e registra a visita do dia. */
 const catchUp = (d: AppData) =>
-  markVisit(checkUnlock(materializeIncomes(materialize(d, addMonths(monthKey(todayISO()), FIXA_AHEAD)), addMonths(monthKey(todayISO()), INCOME_AHEAD))));
+  markVisit(checkUnlock(materializeVouchers(materializeIncomes(materialize(d, addMonths(monthKey(todayISO()), FIXA_AHEAD)), addMonths(monthKey(todayISO()), INCOME_AHEAD)))));
 
 async function loadData(): Promise<AppData> {
   let raw = await dbGet<unknown>(KEY);
