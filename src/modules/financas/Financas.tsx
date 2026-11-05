@@ -68,14 +68,6 @@ export function Financas({ route }: ViewProps) {
         <ReceitasTab month={month} />
       ) : tab === 'mes' ? (
         <>
-          <div className="btn-row fin-links">
-            <a className="btn" href="#/orcamento">
-              <Icon name="target" size={18} /> Orçamento
-            </a>
-            <a className="btn" href="#/relatorios">
-              <Icon name="pie" size={18} /> Relatórios
-            </a>
-          </div>
           <section className="card" aria-label="Resumo do mês">
             <div className="summary">
               <div className="summary-box">
@@ -98,6 +90,14 @@ export function Financas({ route }: ViewProps) {
               </div>
             </div>
           </section>
+          <div className="btn-row fin-links">
+            <a className="btn" href="#/orcamento">
+              <Icon name="target" size={18} /> Orçamento
+            </a>
+            <a className="btn" href="#/relatorios">
+              <Icon name="pie" size={18} /> Relatórios
+            </a>
+          </div>
 
           <section className="card">
             <div className="card-head">
