@@ -125,7 +125,11 @@ Documentos de funcionalidades planejadas, ainda **sem desenvolvimento**:
 - [Listas](docs/futuro/modulo-listas.md) (**feito na v0.14**): listas de compras, listas gerais e receitas de cozinha, reutilizáveis e ligadas a Finanças e Preços.
 - [Comparação de preços](docs/futuro/modulo-precos.md) (**feito na v0.14**, menos código de barras e nota fiscal): anotar preços no mercado e comparar por mercado, marca e unidade (R$/kg, R$/L), com o histórico de cada produto. No futuro, leitura de código de barras e de etiquetas.
 - [Preços 2.0](docs/futuro/precos-v2.md): tipos de loja (mercado, departamento, roupas…), lista que puxa os produtos cadastrados em Preços enquanto você digita, estimativa por loja com faixa de preço para os itens que não têm preço ali (sem prender a lista a uma loja), "quanto custou aqui?" ao marcar o item na compra, e editar ou juntar produtos.
+- [Módulos personalizáveis](docs/futuro/modulos-personalizaveis.md): mostrar ou ocultar módulos (sem apagar nada), escolher os 3 atalhos do meio da barra de baixo e os cartões do Início, para o app não sufocar quem está começando.
+- [Hábitos: pausar e arquivar](docs/futuro/habitos-pausar-arquivar.md): pausar até uma data sem quebrar a sequência, e arquivar mantendo o histórico, em vez de excluir.
 - [Notificações](docs/futuro/notificacoes.md): avisos de contas, faturas, rituais no horário, compromissos, dia de guardar e revisão semanal, com horário de silêncio e sem culpa. Ficam para o app Android (notificações locais, sem servidor).
 - [App Android](docs/futuro/app-android.md): empacotar o mesmo app com Capacitor, sem reescrever. Ganha notificações locais, tela ligada nas práticas, vibração, backup em arquivo, câmera e, depois, widget.
+
+A ordem combinada para construir o que está anotado fica em [docs/futuro/ROADMAP.md](docs/futuro/ROADMAP.md).
 
 Feito com React, TypeScript e Vite.
