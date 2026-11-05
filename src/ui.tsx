@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type ReactNode } from 'react';
+import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
 import { formatMoney } from './utils';
 
@@ -275,6 +275,90 @@ export function Sheet({ title, badge, onClose, children, footer, size }: { title
       </div>
     </div>,
     document.body,
+  );
+}
+
+// ---------- Tela cheia (práticas e entrevista) ----------
+
+export function Fullscreen({ onClose, label, className = '', children }: { onClose: () => void; label: string; className?: string; children: ReactNode }) {
+  const close = useRef(onClose);
+  close.current = onClose;
+  useBackToClose(onClose);
+  useEffect(() => {
+    document.body.classList.add('sheet-open');
+    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && !document.querySelector('.sheet-backdrop') && close.current();
+    window.addEventListener('keydown', onKey);
+    return () => {
+      if (!document.querySelector('.sheet-backdrop')) document.body.classList.remove('sheet-open');
+      window.removeEventListener('keydown', onKey);
+    };
+  }, []);
+  return createPortal(
+    <div className={`fullscreen ${className}`} role="dialog" aria-modal="true" aria-label={label}>
+      {children}
+    </div>,
+    document.body,
+  );
+}
+
+// ---------- Avisos rápidos ----------
+
+type ToastMsg = { id: number; title: string; text?: string };
+let toastSeq = 0;
+const toastListeners = new Set<(t: ToastMsg) => void>();
+
+/** Mostra um aviso curto na parte de baixo da tela. */
+export function notify(title: string, text?: string) {
+  const t = { id: ++toastSeq, title, text };
+  toastListeners.forEach((fn) => fn(t));
+}
+
+export function Toasts() {
+  const [list, setList] = useState<ToastMsg[]>([]);
+  useEffect(() => {
+    const on = (t: ToastMsg) => {
+      setList((cur) => [...cur.slice(-1), t]);
+      window.setTimeout(() => setList((cur) => cur.filter((x) => x.id !== t.id)), 3200);
+    };
+    toastListeners.add(on);
+    return () => void toastListeners.delete(on);
+  }, []);
+  return createPortal(
+    <div className="toasts" aria-live="polite">
+      {list.map((t) => (
+        <div key={t.id} className="toast">
+          <strong>{t.title}</strong>
+          {t.text && <span className="muted small">{t.text}</span>}
+        </div>
+      ))}
+    </div>,
+    document.body,
+  );
+}
+
+/** Chips de múltipla escolha, com aria-pressed (e a ordem do toque, com `numbered`). */
+export function MultiChips({ options, value, onToggle, label, numbered }: { options: [string, string][]; value: string[]; onToggle: (v: string) => void; label: string; numbered?: boolean }) {
+  return (
+    <div className="chips" role="group" aria-label={label}>
+      {options.map(([v, l]) => {
+        const i = value.indexOf(v);
+        return (
+          <button key={v} type="button" aria-pressed={i !== -1} className={`chip-btn${i !== -1 ? ' on' : ''}`} onClick={() => onToggle(v)}>
+            {numbered && i !== -1 ? `${i + 1}. ` : ''}
+            {l}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+/** Anel de porcentagem (perfil completo). */
+export function Ring({ pct, size = 64 }: { pct: number; size?: number }) {
+  return (
+    <span className="ring" style={{ width: size, height: size, ['--p' as string]: pct } as CSSProperties} role="img" aria-label={`${pct}% preenchido`}>
+      <span>{pct}%</span>
+    </span>
   );
 }
 

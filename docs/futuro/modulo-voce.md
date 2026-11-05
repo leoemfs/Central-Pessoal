@@ -1,6 +1,10 @@
 # Você (perfil e sugestões)
 
-> **Status: IDEIA PARA IMPLEMENTAÇÃO FUTURA.** Testada na "Prévia do app" (sem a Jornada). Sem desenvolvimento no app.
+> **Status: IMPLEMENTADO na v0.12** (entrevista, página Você e sugestões). Diferenças em relação a este texto:
+> - as sugestões de **caixinha** ainda não aparecem, porque as Caixinhas não existem em Finanças (ver `caixinhas.md`). A resposta "Quero juntar para…" já fica guardada e mostra o prazo em Você;
+> - sugestões de Agenda criam os próximos compromissos (a Agenda ainda não tem repetição); as rotinas semanais, como "Revisar os gastos todo domingo", viram hábitos;
+> - "Mostrar de novo as dispensadas" fica no fim da lista de sugestões, em Você, e não em Configurações.
+> - código: `src/profile.ts` (regras, com testes em `profile.test.ts`) e `src/modules/Voce.tsx` (telas).
 
 Uma página onde a pessoa conta quem é, o que quer e o que atrapalha. O app usa essas respostas para **sugerir hábitos, trocas de hábito, práticas, compromissos na Agenda e caixinhas**. Funciona **sem a Jornada**. Com a Jornada ligada, a entrevista da Mestra Lume já começa com estas respostas (ver `modulo-rpg.md`, Anexo D).
 
@@ -52,7 +56,7 @@ Na primeira vez que o app abre, aparece **"Vamos nos conhecer?"**: 7 perguntas r
   - "Pôr na Agenda" cria os compromissos;
   - "Criar caixinha" cria a caixinha com a meta (ver `caixinhas.md`);
   - "Anotado", para as dicas.
-- **"Agora não"** esconde a sugestão para sempre. Em Configurações haverá "Mostrar sugestões dispensadas".
+- **"Agora não"** esconde a sugestão para sempre. No fim da lista, "Mostrar de novo as dispensadas" traz todas de volta.
 - **Não repete:** some quando o hábito já existe, quando os compromissos já estão na Agenda ou quando a caixinha já foi criada.
 - **Ordem:** pela prioridade das áreas escolhidas; depois, pela ordem padrão.
 - **Pouco tempo livre** (10 min ou "Pouco tempo") encurta as sugestões: meditar 3 min, treino de 10 min.

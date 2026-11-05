@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { useStore } from '../store';
 import { toggleTask } from '../actions';
 import { cleanDays, habitsOfDay, habitStreak } from '../habits';
@@ -9,6 +9,9 @@ import { monthBalance } from '../incomes';
 import { addDays, formatDateTime, formatLongDate, formatMoney, formatMonth, greeting, monthKey, relativeDay, toISO, todayISO } from '../utils';
 import { Empty, Icon, Pill, Progress, type IconName } from '../ui';
 import { sortTasks, TaskItem } from './Tarefas';
+import { AskCard, ForYou, Interview } from './Voce';
+import { WeekPractice } from './Praticas';
+import { completeness } from '../profile';
 import { EventItem, sortEvents } from './Agenda';
 import { entrySummary, entryTitle } from './Diario';
 import { BillRow } from './financas/Financas';
@@ -32,6 +35,8 @@ const plural = (n: number, one: string, many: string) => `${n} ${n === 1 ? one :
 
 export function Dashboard() {
   const { data, update } = useStore();
+  const [interview, setInterview] = useState(false);
+  const p = data.profile;
   const categoryOf = useCategoryOf();
   const today = todayISO();
   const month = monthKey(today);
@@ -74,11 +79,19 @@ export function Dashboard() {
       <header className="page-header hero">
         <div className="page-title">
           <h1>
-            {greeting()}! <span aria-hidden="true">{greetingEmoji()}</span>
+            {greeting()}
+            {p.name ? `, ${p.name}` : ''}! <span aria-hidden="true">{greetingEmoji()}</span>
           </h1>
           <p className="muted desktop-only">{formatLongDate(today)}</p>
         </div>
+        <div className="page-actions">
+          <a className="avatar-btn" href="#/voce" aria-label={`Você: perfil ${completeness(p)}% preenchido`} title="Você">
+            {p.name ? p.name.charAt(0).toUpperCase() : <Icon name="smile" size={20} />}
+          </a>
+        </div>
       </header>
+
+      <AskCard onAnswer={() => setInterview(true)} />
 
       <section className="card raised">
         <div className="card-head">
@@ -98,6 +111,8 @@ export function Dashboard() {
           ))}
         </ul>
       </section>
+
+      <ForYou />
 
 
       {(new Date().getDay() === 0 || new Date().getDay() === 1) && (
@@ -245,9 +260,15 @@ export function Dashboard() {
                       </span>
                     </div>
                     <RiskPill h={h} today={today} />
-                    <span className="pill">
-                      <Icon name="flame" size={13} /> {habitStreak(h, today)}
-                    </span>
+                    {h.link && !h.checks.includes(today) ? (
+                      <a className="btn small" href={`#/nucleo/pratica/${encodeURIComponent(h.link)}`} aria-label={`Iniciar: ${h.name}`}>
+                        <Icon name="right" size={14} /> Iniciar
+                      </a>
+                    ) : (
+                      <span className="pill">
+                        <Icon name="flame" size={13} /> {habitStreak(h, today)}
+                      </span>
+                    )}
                   </li>
                 ))}
                 {nucleo.quitting.map((h) => (
@@ -263,8 +284,10 @@ export function Dashboard() {
               </ul>
             </section>
           )}
+          <WeekPractice />
         </div>
       </div>
+      {interview && <Interview start={p.onboarding.step} onClose={() => setInterview(false)} />}
     </>
   );
 }

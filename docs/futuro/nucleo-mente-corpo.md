@@ -1,6 +1,12 @@
 # Núcleo pessoal: Mente e Corpo
 
-> **Status: IDEIA PARA IMPLEMENTAÇÃO FUTURA.** Testada na "Prévia do app" (sem a Jornada). Sem desenvolvimento no app.
+> **Status: IMPLEMENTADO na v0.12.** Diferenças em relação a este texto:
+> - o Núcleo tem 4 abas: **Rituais · Hábitos · Mente · Corpo** (Rotina = as duas primeiras);
+> - o sino se liga e desliga no próprio botão de sino da prática, e não em Configurações;
+> - criar e editar fichas de treino ficam para uma próxima versão (por enquanto, A, B, C e Em casa);
+> - os minutos e treinos da semana aparecem no Início ("Autocuidado da semana"), mas ainda não na Revisão semanal;
+> - nada de XP por prática ainda: os hábitos ligados é que contam para os atributos.
+> - código: `src/practices.ts` (catálogo e regras, com testes em `practices.test.ts`) e `src/modules/Praticas.tsx` (telas).
 
 O Núcleo pessoal ganha práticas de autocuidado **dentro do app**, para a pessoa não precisar de outros apps para meditar, respirar, alongar ou seguir a ficha da academia. Tudo funciona sem internet.
 
@@ -11,7 +17,7 @@ O Núcleo passa a ter 3 abas:
 
 ## Regra geral das práticas
 - **Tela cheia e calma,** com um só foco. O "X" no canto encerra a qualquer momento.
-- **Sino suave** no começo, nas trocas e no fim (som gerado no aparelho, sem arquivo). Em Configurações, dá para desligar.
+- **Sino suave** no começo, nas trocas e no fim (som gerado no aparelho, sem arquivo). O botão de sino, no canto da tela, liga e desliga.
 - **No fim:** resumo, "Como você está agora?" (Mais calmo · Igual · Ainda agitado) e "Concluir".
 - **Encerrar antes também conta:** "Cada minuto conta." Nada de culpa.
 - **Hábitos ligados marcam sozinhos.** Um hábito pode ter um `link` com uma prática (ex.: "Meditar 5 min" → meditação). Ao concluir, ele é marcado como feito no dia, e a tela mostra "Marcado no Núcleo: Meditar 5 min". Na lista, esses hábitos têm o botão "Iniciar".

@@ -2,7 +2,7 @@ import { useEffect, useState, type ComponentType } from 'react';
 import { useStore } from './store';
 import type { Theme } from './types';
 import { go, goReplace, useRoute, type Route } from './router';
-import { Icon, Sheet, useBackToClose, type IconName } from './ui';
+import { Icon, Sheet, Toasts, useBackToClose, type IconName } from './ui';
 import { formatLongDate, todayISO } from './utils';
 import { NAV_GROUPS, SETTINGS_ITEM, type NavItem } from './nav';
 import { SearchSheet } from './Search';
@@ -16,6 +16,7 @@ import { Notas } from './modules/Notas';
 import { Ajustes } from './modules/Ajustes';
 import { Revisao } from './modules/Revisao';
 import { Jornada } from './modules/Jornada';
+import { FirstRun, Voce } from './modules/Voce';
 
 export interface ViewProps {
   route: Route;
@@ -45,10 +46,12 @@ export const SECTIONS: Section[] = [
   { path: 'ajustes', label: 'Configurações', icon: 'settings', view: Ajustes },
   { path: 'revisao', label: 'Revisão semanal', icon: 'calendarCheck', view: Revisao },
   { path: 'jornada', label: 'Jornada', icon: 'sword', view: Jornada },
+  { path: 'voce', label: 'Você', icon: 'smile', view: Voce },
 ];
 
 const TABS = ['inicio', 'financas', 'diario', 'agenda', 'mais'];
 export const COMING_SOON: { label: string; icon: IconName; hint: string }[] = [
+  { label: 'Saúde', icon: 'heartPulse', hint: 'Água, sono, remédios, consultas e peso' },
   { label: 'Estudos e trabalho', icon: 'briefcase', hint: 'Cursos, projetos e atividades' },
   { label: 'Objetivos', icon: 'flag', hint: 'Metas e acompanhamento' },
   { label: 'Foco', icon: 'timer', hint: 'Temporizador e sessões' },
@@ -255,6 +258,9 @@ export function App() {
           <NavLink key={p} s={byPath(p)} active={tabActive === p} />
         ))}
       </nav>
+
+      <FirstRun />
+      <Toasts />
 
       {quickOpen && (
         <Sheet title="Registrar" onClose={() => setQuickOpen(false)}>
