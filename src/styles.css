@@ -2841,19 +2841,6 @@ button.row {
   color: var(--muted);
   font-size: 0.85rem;
 }
-.avatar-btn {
-  width: 44px;
-  height: 44px;
-  border-radius: 50%;
-  display: grid;
-  place-items: center;
-  background: var(--green-soft);
-  color: var(--green-text);
-  font-weight: 700;
-  font-size: 1.1rem;
-  text-decoration: none;
-  border: 1px solid var(--green);
-}
 .sug-list {
   display: flex;
   flex-direction: column;
