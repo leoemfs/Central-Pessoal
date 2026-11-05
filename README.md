@@ -116,5 +116,7 @@ Documentos de funcionalidades planejadas, ainda **sem desenvolvimento**:
 - [Caixinhas](docs/futuro/caixinhas.md) (**feito na v0.13**, menos a parte da Jornada): metas de dinheiro guardado em Finanças, com plano ("R$ 100 toda semana"), guardar e tirar com motivo. Na Jornada, recompensa o hábito de guardar e comemora quando o dinheiro é usado para o objetivo.
 - [Listas](docs/futuro/modulo-listas.md): listas de compras, listas gerais e receitas de cozinha, reutilizáveis e ligadas a Finanças e Preços.
 - [Comparação de preços](docs/futuro/modulo-precos.md): anotar preços no mercado e comparar por mercado, marca e unidade (R$/kg, R$/L), com o histórico de cada produto. No futuro, leitura de código de barras e de etiquetas.
+- [Notificações](docs/futuro/notificacoes.md): avisos de contas, faturas, rituais no horário, compromissos, dia de guardar e revisão semanal, com horário de silêncio e sem culpa. Ficam para o app Android (notificações locais, sem servidor).
+- [App Android](docs/futuro/app-android.md): empacotar o mesmo app com Capacitor, sem reescrever. Ganha notificações locais, tela ligada nas práticas, vibração, backup em arquivo, câmera e, depois, widget.
 
 Feito com React, TypeScript e Vite.
