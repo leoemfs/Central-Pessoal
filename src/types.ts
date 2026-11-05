@@ -208,6 +208,95 @@ export interface Settings {
   journeyChoice: 'quero' | 'depois' | null;
 }
 
+// ---------- Humor do dia ----------
+
+export interface MoodEntry {
+  /** 1 = mal … 5 = ótimo */
+  v: 1 | 2 | 3 | 4 | 5;
+  /** O que pesou ou ajudou (Trabalho, Sono, Exercício…). */
+  tags: string[];
+  note: string;
+  /** Registro do Diário criado pela anotação do humor. */
+  journalId: string | null;
+}
+
+// ---------- Listas e Preços ----------
+
+/** Como as listas de uma categoria funcionam. */
+export type ListKind = 'mercado' | 'compras' | 'receita' | 'checklist';
+
+export interface ListCategory {
+  id: string;
+  name: string;
+  icon: string;
+  color: string;
+  kind: ListKind;
+}
+
+export interface ListItem {
+  id: string;
+  text: string;
+  /** Quantidade (mercado e receita). */
+  qty: number | null;
+  unit: string;
+  /** Corredor do mercado (Hortifrúti, Limpeza…). */
+  aisle: string;
+  /** Produto de Preços (mercado). */
+  productId: string | null;
+  /** Valor previsto do item (listas de compras). */
+  price: number | null;
+  store: string;
+  done: boolean;
+  /** Já virou despesa em Finanças. */
+  launched: boolean;
+}
+
+export interface UserList {
+  id: string;
+  name: string;
+  categoryId: string;
+  pinned: boolean;
+  items: ListItem[];
+  /** Receita: porções atuais e da receita original, tempo, etiquetas e passos. */
+  serves: number;
+  baseServes: number;
+  minutes: number | null;
+  tags: string[];
+  steps: string[];
+  createdAt: string;
+}
+
+/** Produto genérico (Arroz branco). A comparação é por unidade: R$/kg, R$/L ou R$/un. */
+export interface Product {
+  id: string;
+  name: string;
+  aisle: string;
+  unit: 'kg' | 'L' | 'un';
+}
+
+/** Marca + tamanho (Camil 5 kg). */
+export interface ProductVariant {
+  id: string;
+  productId: string;
+  brand: string;
+  size: number;
+  sizeUnit: 'g' | 'kg' | 'ml' | 'L' | 'un';
+}
+
+export interface Store {
+  id: string;
+  name: string;
+}
+
+export interface PriceEntry {
+  id: string;
+  variantId: string;
+  storeId: string;
+  price: number;
+  date: string;
+  promo: boolean;
+}
+
 // ---------- Caixinhas (dinheiro guardado) ----------
 
 export interface BoxMove {
@@ -327,6 +416,16 @@ export interface AppData {
   settings: Settings;
   profile: Profile;
   boxes: SavingsBox[];
+  /** Humor de cada dia (AAAA-MM-DD). */
+  moods: Record<string, MoodEntry>;
+  /** Orçamento por mês de cada categoria de despesa (id → R$). */
+  budgets: Record<string, number>;
+  listCategories: ListCategory[];
+  lists: UserList[];
+  products: Product[];
+  variants: ProductVariant[];
+  stores: Store[];
+  prices: PriceEntry[];
   sessions: PracticeSession[];
   /** Última carga usada em cada exercício (nome → kg). */
   lastLoads: Record<string, number>;
@@ -336,4 +435,4 @@ export interface AppData {
   legacy: Record<string, unknown>;
 }
 
-export type Collection = 'tasks' | 'events' | 'habits' | 'notes' | 'journal' | 'categories' | 'cards' | 'incomeSources' | 'boxes';
+export type Collection = 'tasks' | 'events' | 'habits' | 'notes' | 'journal' | 'categories' | 'cards' | 'incomeSources' | 'boxes' | 'lists' | 'listCategories' | 'stores';

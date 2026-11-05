@@ -1,6 +1,11 @@
 # Módulo Listas
 
-> **Status: IDEIA PARA IMPLEMENTAÇÃO FUTURA.** Sem desenvolvimento.
+> **Status: IMPLEMENTADO na v0.14.** Diferenças em relação a este texto:
+> - as listas ficam em **categorias personalizáveis** (prontas: Mercado, Receitas, Roupas, Casa, Viagem). Cada categoria escolhe como funciona: **mercado** (corredores + preços), **compras** (valor de cada item, total e "Lançar em Finanças"), **receita** (ingredientes, porções e preparo) ou **checklist**. A categoria só troca de jeito enquanto estiver vazia, e só é excluída vazia;
+> - "Concluir compra" pergunta o mercado, o total e a categoria da despesa, e pode desmarcar tudo para a próxima;
+> - listas podem ser **fixadas no Início**;
+> - ainda não há: foto na receita, "repetir lista do mês passado", tarefa com lista anexada e busca nas listas;
+> - código: `src/lists.ts` (regras, com testes em `lists.test.ts`) e `src/modules/Listas.tsx`.
 
 Um lugar para listas que se usam e reusam: compras, listas gerais (mala de viagem, filmes, presentes) e receitas de cozinha.
 

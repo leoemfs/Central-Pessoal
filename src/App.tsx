@@ -17,6 +17,8 @@ import { Ajustes } from './modules/Ajustes';
 import { Revisao } from './modules/Revisao';
 import { Jornada } from './modules/Jornada';
 import { FirstRun, Voce } from './modules/Voce';
+import { Orcamento, Relatorios } from './modules/financas/Orcamento';
+import { Listas } from './modules/Listas';
 
 export interface ViewProps {
   route: Route;
@@ -47,6 +49,9 @@ export const SECTIONS: Section[] = [
   { path: 'revisao', label: 'Revisão semanal', icon: 'calendarCheck', view: Revisao },
   { path: 'jornada', label: 'Jornada', icon: 'sword', view: Jornada },
   { path: 'voce', label: 'Você', icon: 'smile', view: Voce },
+  { path: 'orcamento', label: 'Orçamento', icon: 'target', view: Orcamento },
+  { path: 'relatorios', label: 'Relatórios', icon: 'pie', view: Relatorios },
+  { path: 'listas', label: 'Listas', icon: 'cart', view: Listas, fab: 'listas/nova' },
 ];
 
 const TABS = ['inicio', 'financas', 'diario', 'agenda', 'mais'];

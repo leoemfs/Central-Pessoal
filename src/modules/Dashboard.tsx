@@ -12,6 +12,9 @@ import { sortTasks, TaskItem } from './Tarefas';
 import { AskCard, ForYou, Interview } from './Voce';
 import { WeekPractice } from './Praticas';
 import { SaveToday } from './financas/Caixinhas';
+import { MoodCard } from './Humor';
+import { BudgetAlerts } from './financas/Orcamento';
+import { PinnedLists } from './Listas';
 import { EventItem, sortEvents } from './Agenda';
 import { entrySummary, entryTitle } from './Diario';
 import { BillRow } from './financas/Financas';
@@ -86,6 +89,7 @@ export function Dashboard() {
         </div>
       </header>
 
+      <MoodCard />
       <AskCard onAnswer={() => setInterview(true)} />
 
       <section className="card raised">
@@ -107,7 +111,9 @@ export function Dashboard() {
         </ul>
       </section>
 
+      <BudgetAlerts />
       <SaveToday />
+      <PinnedLists />
       <ForYou />
 
 

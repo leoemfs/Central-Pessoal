@@ -1,6 +1,10 @@
 # Módulo Comparação de preços
 
-> **Status: IDEIA PARA IMPLEMENTAÇÃO FUTURA.** Sem desenvolvimento.
+> **Status: IMPLEMENTADO na v0.14** (dentro de Listas, na aba Preços). Diferenças em relação a este texto:
+> - "Anotar preço" sugere o produto enquanto você digita, mostra o último preço daquele mercado e avisa quando está mais de 5% acima do menor registro (ou quando é o menor já anotado);
+> - o produto mostra o menor preço por unidade, a tabela marcas × mercados (preços com mais de 60 dias aparecem esmaecidos), a comparação entre marcas e a evolução do preço;
+> - ainda não há: cesta comparada por mercado (fora da lista), categorias editáveis de produtos, código de barras e nota fiscal;
+> - código: `src/lists.ts` e `src/modules/Listas.tsx`.
 
 Anotar preços no mercado de forma rápida e, com o tempo, ter uma base própria de preços que mostra **onde está mais barato**, **qual marca compensa** e **como o preço mudou**, sempre comparando **por unidade** (R$/kg, R$/L, R$/un).
 

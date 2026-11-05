@@ -6,7 +6,7 @@ import {
   billStatus, cardUsed, categoryTotals, FIXA_AHEAD, getInvoice, installmentLabel, materialize, monthBills, summarize, type Bill,
 } from '../../finance';
 import { addMonths, formatDMY, formatMoney, formatMonth, monthKey, todayISO } from '../../utils';
-import { CategoryBadge, Empty, MonthNav, PageHeader, Pill, Progress, Segmented } from '../../ui';
+import { CategoryBadge, Empty, Icon, MonthNav, PageHeader, Pill, Progress, Segmented } from '../../ui';
 import { CardForm } from './CardForm';
 import { ExpenseDetail } from './ExpenseDetail';
 import { ExpenseForm } from './ExpenseForm';
@@ -68,6 +68,14 @@ export function Financas({ route }: ViewProps) {
         <ReceitasTab month={month} />
       ) : tab === 'mes' ? (
         <>
+          <div className="btn-row fin-links">
+            <a className="btn" href="#/orcamento">
+              <Icon name="target" size={18} /> Orçamento
+            </a>
+            <a className="btn" href="#/relatorios">
+              <Icon name="pie" size={18} /> Relatórios
+            </a>
+          </div>
           <section className="card" aria-label="Resumo do mês">
             <div className="summary">
               <div className="summary-box">
