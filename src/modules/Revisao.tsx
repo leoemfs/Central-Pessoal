@@ -1,3 +1,4 @@
+import { MoodWeek } from './Humor';
 import { useMemo, useState } from 'react';
 import { useStore } from '../store';
 import { upsert } from '../actions';
@@ -90,6 +91,8 @@ export function Revisao() {
           </div>
         </div>
       </section>
+
+      <MoodWeek start={start} />
 
       <div className="grid-2">
         <section className="card">

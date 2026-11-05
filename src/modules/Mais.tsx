@@ -4,7 +4,10 @@ import { Icon, PageHeader } from '../ui';
 const LINKS: { path: string; hint: string }[] = [
   { path: 'voce', hint: 'Perfil, metas e sugestões para você' },
   { path: 'nucleo', hint: 'Hábitos, meditação, respiração e treinos' },
+  { path: 'listas', hint: 'Mercado com preços, compras, receitas e checklists' },
   { path: 'arquivo', hint: 'Anotações rápidas e informações importantes' },
+  { path: 'orcamento', hint: 'Limite por categoria e o ritmo do mês' },
+  { path: 'relatorios', hint: 'Para onde vai o dinheiro, mês a mês' },
   { path: 'revisao', hint: 'Resumo da semana e reflexão' },
   { path: 'jornada', hint: 'Desbloqueia com 14 dias de uso' },
   { path: 'ajustes', hint: 'Categorias, backup e dados' },

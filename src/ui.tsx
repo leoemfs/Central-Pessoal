@@ -75,6 +75,12 @@ const P: Record<string, ReactNode> = {
   flag: <path d="M5 21V4M5 4h11l-2 4 2 4H5" />,
   timer: <><circle cx="12" cy="13" r="8" /><path d="M12 9v4l2.5 2M10 2h4" /></>,
   bulb: <path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.2 1 2.1h5c0-.9.4-1.6 1-2.1A6 6 0 0 0 12 3z" />,
+  cart: <><circle cx="9" cy="20" r="1.4" /><circle cx="17" cy="20" r="1.4" /><path d="M3 4h2l2.4 11h10.2L20 8H6.2" /></>,
+  pot: <path d="M4 10h16v6a4 4 0 0 1-4 4H8a4 4 0 0 1-4-4zM2 10h2M20 10h2M9 6c0-1 1-1 1-2M14 6c0-1 1-1 1-2" />,
+  store: <path d="M4 9 5.5 4h13L20 9M4 9v11h16V9M4 9h16M9 20v-6h6v6" />,
+  trendUp: <path d="M7 17 17 7M9 7h8v8" />,
+  trendDown: <path d="M7 7l10 10M17 9v8H9" />,
+  bars: <path d="M4 20V10M10 20V4M16 20v-7M22 20H2" />,
   archive: <><rect x="3" y="4" width="18" height="5" rx="1" /><path d="M5 9v11h14V9M10 13h4" /></>,
 };
 
@@ -317,7 +323,7 @@ export function Toasts() {
   const [list, setList] = useState<ToastMsg[]>([]);
   useEffect(() => {
     const on = (t: ToastMsg) => {
-      setList((cur) => [...cur.slice(-1), t]);
+      setList([t]);
       window.setTimeout(() => setList((cur) => cur.filter((x) => x.id !== t.id)), 3200);
     };
     toastListeners.add(on);
@@ -397,7 +403,7 @@ export function Segmented<T extends string>({ options, value, onChange, label }:
   );
 }
 
-export function Progress({ pct, tone = 'green' }: { pct: number; tone?: 'green' | 'orange' }) {
+export function Progress({ pct, tone = 'green' }: { pct: number; tone?: 'green' | 'orange' | 'red' }) {
   return (
     <div className="progress" role="progressbar" aria-valuenow={Math.round(pct)} aria-valuemin={0} aria-valuemax={100}>
       <div className={tone} style={{ width: `${Math.min(100, Math.max(0, pct))}%` }} />

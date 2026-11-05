@@ -3,6 +3,8 @@ import { toISO, uid } from './utils.ts';
 import { suggestAttributes } from './habits.ts';
 import { emptyProfile, normalizeProfile } from './profile.ts';
 import { normalizeBox } from './boxes.ts';
+import { normalizeMoods } from './mood.ts';
+import { DEFAULT_LIST_CATEGORIES, normalizeListData } from './lists.ts';
 
 export const COLORS = ['#22c55e', '#3b82f6', '#8b5cf6', '#f97316', '#ef4444', '#94a3b8', '#eab308', '#ec4899', '#06b6d4'];
 /** As 6 cores do cartão, como na referência visual. */
@@ -47,6 +49,14 @@ export function emptyData(): AppData {
     settings: { theme: 'dark', seededCategories: false, seededIncomeSources: false, lastBackupAt: null, activeDays: [], visitDays: [], journeyUnlockedAt: null, journeyChoice: null },
     profile: emptyProfile('novo'),
     boxes: [],
+    moods: {},
+    budgets: {},
+    listCategories: DEFAULT_LIST_CATEGORIES.map((c) => ({ ...c })),
+    lists: [],
+    products: [],
+    variants: [],
+    stores: [],
+    prices: [],
     sessions: [],
     lastLoads: {},
     deleted: {},
@@ -110,6 +120,9 @@ export function normalize(raw: unknown): AppData {
     // Quem já tinha dados (atualização ou backup) não vê a entrevista de surpresa.
     profile: normalizeProfile(r.profile, Object.keys(r).length > 0),
     boxes: list<Record<string, unknown>>(r.boxes).map(normalizeBox),
+    moods: normalizeMoods(r.moods),
+    budgets: isRec(r.budgets) ? Object.fromEntries(Object.entries(r.budgets).filter((e): e is [string, number] => typeof e[1] === 'number' && e[1] > 0)) : {},
+    ...normalizeListData(r),
     sessions: list<PracticeSession>(r.sessions).filter((x) => typeof x.date === 'string' && typeof x.type === 'string' && typeof x.minutes === 'number'),
     lastLoads: isRec(r.lastLoads) ? Object.fromEntries(Object.entries(r.lastLoads).filter((e): e is [string, number] => typeof e[1] === 'number')) : {},
     deleted: isRec(r.deleted) ? (r.deleted as Record<string, string>) : {},

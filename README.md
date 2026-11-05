@@ -15,6 +15,11 @@ O usuário registra; o app organiza, calcula e mostra o que importa no Início.
 | **Finanças** | Despesas **avulsas**, **contas fixas** (todo mês, sem fim) e **parceladas** (01/12, 02/12…). Pagamento com data e valor reais. Editar ou excluir **somente esta / esta e as próximas / todas**. Categorias com ícone e cor, criadas sem sair do formulário. |
 | **Receitas** | Aba própria em Finanças (**Despesas · Receitas · Cartões**): salário, freelance, bônus, vale-alimentação etc., avulsas ou **mensais**, previstas ou recebidas (com data e valor reais). **Balanço do mês**: previsto (entradas − despesas) e até agora (o que entrou − o que foi pago). Fontes de receita personalizáveis. |
 | **Caixinhas** | Aba própria em Finanças (**Despesas · Receitas · Cartões · Caixinhas**): metas de dinheiro guardado (viagem, reserva…), com meta opcional, prazo e **plano** ("R$ 100 toda semana" ou todo mês). Guardar e tirar com data; ao tirar, o motivo (**realizei o objetivo**, emergência, outro). Barra de progresso, quanto falta e em quanto tempo, avisos nos marcos de 25/50/75/100%, caixinhas realizadas no histórico. "Dia de guardar" no Início e as linhas **Caixinhas** e **Livre para usar** no balanço do mês. O app não mexe no dinheiro: só anota. |
+| **Orçamento** | Limite por mês em cada categoria de despesa: quanto já foi, quanto sobra por dia e a cor da barra (verde, laranja aos 80%, vermelho ao passar). Contas fixas contam inteiras e não disparam aviso aos 80%. Do dia 10 em diante, mostra a previsão de fechamento do mês. "Usar a média dos últimos 3 meses" preenche os limites. O Início avisa as categorias em alerta. |
+| **Relatórios** | Gastos do mês por categoria (barra dividida e lista), comparação com o mês anterior, os últimos 6 meses em colunas e "o que chama atenção" (categoria acima da média, contas fixas por ano, maior categoria). |
+| **Listas** | Listas por **categoria personalizável** (Mercado, Receitas, Roupas, Casa, Viagem e as que você criar), cada uma com seu jeito: **mercado** (itens por corredor, quanto sai em cada mercado, melhor preço de cada item e "Concluir compra", que lança a despesa), **compras** (valor de cada item, total e "Lançar em Finanças"), **receita** (porções que recalculam as quantidades, preparo e "mandar para a lista de mercado") e **checklist**. Listas fixadas aparecem no Início. |
+| **Preços** | Aba de Listas: anote preços no mercado (produto, marca, tamanho e preço) com sugestão enquanto digita e aviso de preço alto. Compara por unidade (R$/kg, R$/L, R$/un) e mostra o mais barato, a tabela marcas × mercados e como o preço mudou. |
+| **Humor do dia** | No Início, um toque: 😞 a 😄. Se quiser, o que pesou ou ajudou e uma anotação, que vira registro no Diário (etiqueta Humor). A Revisão semanal mostra o humor da semana e o que o app percebe (dias com treino × sem treino, etiquetas dos dias bons e difíceis). |
 | **Cartões** | Cadastro com fechamento, vencimento, limite e cor. Cada compra cai sozinha na fatura certa. Faturas com total, situação e pagamento; limite disponível. |
 | **Diário** | Feed privado: o registro mais novo no topo, os anteriores recolhidos, data e hora automáticas, etiqueta opcional, busca e histórico por ano e mês. |
 | **Agenda** | Calendário com pontos para compromissos, tarefas e contas. Ao tocar num dia, abre tudo daquele dia: compromissos, tarefas, contas que vencem, compras no cartão, pagamentos feitos, rituais/hábitos (marcáveis) e registros do diário. Aba de tarefas. |
@@ -24,7 +29,7 @@ O usuário registra; o app organiza, calcula e mostra o que importa no Início.
 | **Jornada** | **Bloqueada até 14 dias de uso dentro de 3 semanas** (um dia conta quando você registra algo; faltar não zera). O app também registra, em silêncio, os dias em que foi aberto (base da sequência de visitas). Ao desbloquear, mostra o XP, o nível e o ouro que você teria ganhado com os seus dados reais — e pergunta se a Jornada completa vale a pena ou fica para depois. Especificação completa em [docs/futuro/modulo-rpg.md](docs/futuro/modulo-rpg.md). |
 | **Mais** | Você, Núcleo pessoal, Notas e Configurações (tema claro/escuro/automático, categorias, backup e dados). |
 
-**Navegação:** barras superior e inferior que somem ao rolar para baixo e voltam ao rolar para cima (a superior mostra o nome da aba; no Início, a data); 🔍 no topo (no Diário, busca no diário); atalhos inferiores (Início, Finanças, Diário, Agenda, Mais); menu ☰ com todos os módulos agrupados (Geral, Organização pessoal, Financeiro, Bem-estar, Planejamento); 🔍 **busca em tudo** (diário, despesas, agenda e anotações); botão **+** que adiciona na aba aberta (no Início, pergunta o quê); o **voltar** do celular fecha a janela ou o menu aberto antes de sair da página. Lembretes, Metas, Relatórios, Saúde, Estudos, Foco e Banco de ideias aparecem como "em breve".
+**Navegação:** barras superior e inferior que somem ao rolar para baixo e voltam ao rolar para cima (a superior mostra o nome da aba; no Início, a data); 🔍 no topo (no Diário, busca no diário); atalhos inferiores (Início, Finanças, Diário, Agenda, Mais); menu ☰ com todos os módulos agrupados (Geral, Organização pessoal, Financeiro, Bem-estar, Planejamento); 🔍 **busca em tudo** (diário, despesas, agenda e anotações); botão **+** que adiciona na aba aberta (no Início, pergunta o quê); o **voltar** do celular fecha a janela ou o menu aberto antes de sair da página. Lembretes, Metas, Saúde, Estudos, Foco e Banco de ideias aparecem como "em breve".
 
 ## Regras financeiras
 
@@ -75,6 +80,9 @@ src/
   practices.ts       Núcleo › Mente e Corpo: catálogo e registro das práticas
   practices.test.ts  testes das práticas
   boxes.ts           Caixinhas: saldo, plano, marcos e balanço
+  budget.ts          Orçamento por categoria e relatórios
+  lists.ts           Listas por categoria e Preços
+  mood.ts            Humor do dia
   boxes.test.ts      testes das caixinhas
   review.ts          revisão semanal (junta todos os módulos)
   review.test.ts     testes da revisão
@@ -114,8 +122,8 @@ Documentos de funcionalidades planejadas, ainda **sem desenvolvimento**:
 - [Núcleo: Mente e Corpo](docs/futuro/nucleo-mente-corpo.md) (**feito na v0.12**): o Núcleo ganha as abas Mente (meditação livre e guiada, respiração, gratidão) e Corpo (fichas de treino com descanso e carga anterior, alongamentos guiados, caminhada e corrida). Hábitos ligados a uma prática são marcados sozinhos.
 - [Saúde](docs/futuro/modulo-saude.md): módulo separado para acompanhar água, sono, remédios, consultas e exames, peso e medidas.
 - [Caixinhas](docs/futuro/caixinhas.md) (**feito na v0.13**, menos a parte da Jornada): metas de dinheiro guardado em Finanças, com plano ("R$ 100 toda semana"), guardar e tirar com motivo. Na Jornada, recompensa o hábito de guardar e comemora quando o dinheiro é usado para o objetivo.
-- [Listas](docs/futuro/modulo-listas.md): listas de compras, listas gerais e receitas de cozinha, reutilizáveis e ligadas a Finanças e Preços.
-- [Comparação de preços](docs/futuro/modulo-precos.md): anotar preços no mercado e comparar por mercado, marca e unidade (R$/kg, R$/L), com o histórico de cada produto. No futuro, leitura de código de barras e de etiquetas.
+- [Listas](docs/futuro/modulo-listas.md) (**feito na v0.14**): listas de compras, listas gerais e receitas de cozinha, reutilizáveis e ligadas a Finanças e Preços.
+- [Comparação de preços](docs/futuro/modulo-precos.md) (**feito na v0.14**, menos código de barras e nota fiscal): anotar preços no mercado e comparar por mercado, marca e unidade (R$/kg, R$/L), com o histórico de cada produto. No futuro, leitura de código de barras e de etiquetas.
 - [Notificações](docs/futuro/notificacoes.md): avisos de contas, faturas, rituais no horário, compromissos, dia de guardar e revisão semanal, com horário de silêncio e sem culpa. Ficam para o app Android (notificações locais, sem servidor).
 - [App Android](docs/futuro/app-android.md): empacotar o mesmo app com Capacitor, sem reescrever. Ganha notificações locais, tela ligada nas práticas, vibração, backup em arquivo, câmera e, depois, widget.
 

@@ -25,6 +25,7 @@ export const NAV_GROUPS: { title: string; items: NavItem[] }[] = [
     items: [
       { label: 'Diário', icon: 'journal', to: 'diario', section: 'diario' },
       { label: 'Notas', icon: 'note', to: 'arquivo', section: 'arquivo' },
+      { label: 'Listas', icon: 'cart', to: 'listas', section: 'listas' },
       { label: 'Lembretes', icon: 'bell' },
       { label: 'Metas e objetivos', icon: 'target' },
     ],
@@ -34,8 +35,9 @@ export const NAV_GROUPS: { title: string; items: NavItem[] }[] = [
     items: [
       { label: 'Visão geral', icon: 'wallet', to: 'financas', section: 'financas' },
       { label: 'Cartões', icon: 'card', to: 'financas/cartoes' },
+      { label: 'Orçamento', icon: 'target', to: 'orcamento', section: 'orcamento' },
+      { label: 'Relatórios', icon: 'pie', to: 'relatorios', section: 'relatorios' },
       { label: 'Categorias', icon: 'tag', to: 'ajustes' },
-      { label: 'Relatórios', icon: 'pie' },
     ],
   },
   {
