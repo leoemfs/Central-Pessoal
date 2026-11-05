@@ -21,7 +21,7 @@ function Why({ text }: { text: string }) {
   );
 }
 
-const KIND_TONE: Record<Suggestion['kind'], PillTone> = { Hábito: 'green', Ritual: 'green', Prática: 'blue', Troca: 'orange', Abandonar: 'orange', Agenda: 'blue', Dica: 'gray' };
+const KIND_TONE: Record<Suggestion['kind'], PillTone> = { Hábito: 'green', Ritual: 'green', Prática: 'blue', Troca: 'orange', Abandonar: 'orange', Agenda: 'blue', Caixinha: 'orange', Dica: 'gray' };
 
 export function SuggestionCard({ s }: { s: Suggestion }) {
   const { update } = useStore();
@@ -33,7 +33,13 @@ export function SuggestionCard({ s }: { s: Suggestion }) {
       if (msg) notify(...msg);
     }, 200);
   };
-  const label = s.act.type === 'habit' ? 'Adicionar ao Núcleo' : s.act.type === 'events' ? 'Pôr na Agenda' : 'Entendi';
+  const a = s.act;
+  const label = a.type === 'habit' ? 'Adicionar ao Núcleo' : a.type === 'events' ? 'Pôr na Agenda' : a.type === 'box' ? 'Criar caixinha' : 'Entendi';
+  const done: [string, string] | undefined =
+    a.type === 'habit' ? ['Adicionado ao Núcleo', a.habit.name]
+    : a.type === 'events' ? ['Adicionado à Agenda', `${a.events.length} ${a.events.length === 1 ? 'compromisso' : 'compromissos'}`]
+    : a.type === 'box' ? ['Caixinha criada em Finanças', `${a.box.name} · plano de R$ ${a.box.planAmount} por semana`]
+    : undefined;
   return (
     <div className={`sug${leaving ? ' out' : ''}`}>
       <div className="sug-head">
@@ -51,9 +57,7 @@ export function SuggestionCard({ s }: { s: Suggestion }) {
           type="button"
           className="btn primary small"
           onClick={() =>
-            s.act.type === 'none'
-              ? after(dismissSuggestion(s.id))
-              : after(acceptSuggestion(s), s.act.type === 'habit' ? ['Adicionado ao Núcleo', s.act.habit.name] : ['Adicionado à Agenda', `${s.act.events.length} ${s.act.events.length === 1 ? 'compromisso' : 'compromissos'}`])
+            a.type === 'none' ? after(dismissSuggestion(s.id)) : after(acceptSuggestion(s), done)
           }
         >
           {label}

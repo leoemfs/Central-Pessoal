@@ -1,7 +1,7 @@
 # Você (perfil e sugestões)
 
 > **Status: IMPLEMENTADO na v0.12** (entrevista, página Você e sugestões). Diferenças em relação a este texto:
-> - as sugestões de **caixinha** ainda não aparecem, porque as Caixinhas não existem em Finanças (ver `caixinhas.md`). A resposta "Quero juntar para…" já fica guardada e mostra o prazo em Você;
+> - as sugestões de **caixinha** chegaram na v0.13 ("Criar caixinha" cria a caixinha em Finanças com o plano de R$ 100 por semana);
 > - sugestões de Agenda criam os próximos compromissos (a Agenda ainda não tem repetição); as rotinas semanais, como "Revisar os gastos todo domingo", viram hábitos;
 > - "Mostrar de novo as dispensadas" fica no fim da lista de sugestões, em Você, e não em Configurações.
 > - código: `src/profile.ts` (regras, com testes em `profile.test.ts`) e `src/modules/Voce.tsx` (telas).

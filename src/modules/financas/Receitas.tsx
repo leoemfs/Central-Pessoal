@@ -8,6 +8,7 @@ import type { Category, Income } from '../../types';
 import { formatDMY, formatMoney, formatMonth, todayISO } from '../../utils';
 import { CategoryBadge, Field, Icon, MoneyInput, Pill, Progress, Sheet, Toggle } from '../../ui';
 import { CategorySheet } from './CategorySheet';
+import { plannedInMonth, savedInMonth } from '../../boxes';
 import { PaySheet } from './PaySheet';
 
 const NO_SOURCE: Category = { id: '', name: 'Sem fonte', icon: 'tag', color: '#94a3b8' };
@@ -55,6 +56,8 @@ export function ReceitasTab({ month }: { month: string }) {
   const list = monthIncomes(data, month);
   const s = incomeSummary(list);
   const bal = monthBalance(data, month, today);
+  const boxSaved = savedInMonth(data.boxes, month);
+  const boxPlanned = plannedInMonth(data.boxes, month);
   const bySource = sourceTotals(data, month);
 
   return (
@@ -107,10 +110,25 @@ export function ReceitasTab({ month }: { month: string }) {
               <td className={bal.planned >= 0 ? 'green' : 'red'}>{formatMoney(bal.planned)}</td>
               <td className={bal.current >= 0 ? 'green' : 'red'}>{formatMoney(bal.current)}</td>
             </tr>
+            {(boxPlanned > 0 || boxSaved !== 0) && (
+              <>
+                <tr>
+                  <th scope="row">Caixinhas</th>
+                  <td>{`−\u00a0${formatMoney(boxPlanned)}`}</td>
+                  <td>{`${boxSaved < 0 ? '+' : '−'}\u00a0${formatMoney(Math.abs(boxSaved))}`}</td>
+                </tr>
+                <tr className="total">
+                  <th scope="row">Livre para usar</th>
+                  <td className={bal.planned - boxPlanned >= 0 ? 'green' : 'red'}>{formatMoney(bal.planned - boxPlanned)}</td>
+                  <td className={bal.current - boxSaved >= 0 ? 'green' : 'red'}>{formatMoney(bal.current - boxSaved)}</td>
+                </tr>
+              </>
+            )}
           </tbody>
         </table>
         <p className="muted small" style={{ marginTop: 8 }}>
           Previsto: tudo o que deve entrar menos tudo o que vence no mês. Até agora: o que já entrou menos o que já foi pago.
+          {(boxPlanned > 0 || boxSaved !== 0) && ' Caixinhas: o que os planos pedem no mês e o que você guardou de fato. Guardar não é gasto, mas sai do que está livre.'}
         </p>
       </section>
 

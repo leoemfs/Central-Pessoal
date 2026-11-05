@@ -11,6 +11,7 @@ import { Empty, Icon, Pill, Progress, type IconName } from '../ui';
 import { sortTasks, TaskItem } from './Tarefas';
 import { AskCard, ForYou, Interview } from './Voce';
 import { WeekPractice } from './Praticas';
+import { SaveToday } from './financas/Caixinhas';
 import { completeness } from '../profile';
 import { EventItem, sortEvents } from './Agenda';
 import { entrySummary, entryTitle } from './Diario';
@@ -112,6 +113,7 @@ export function Dashboard() {
         </ul>
       </section>
 
+      <SaveToday />
       <ForYou />
 
 

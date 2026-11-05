@@ -5,6 +5,7 @@
 import type { AppData, CalendarEvent, DayPeriod, Goal, Habit, MoneyChallenge, Onboarding, Profile } from './types.ts';
 import { addDays, fromISO, todayISO, uid } from './utils.ts';
 import { suggestAttributes } from './habits.ts';
+import { BOX_COLORS, newBox } from './boxes.ts';
 
 type Opt = [value: string, label: string];
 
@@ -112,7 +113,7 @@ export function parseMoneyText(t: string): number {
 
 // ---------- Sugestões ----------
 
-export type SuggestionKind = 'Hábito' | 'Prática' | 'Ritual' | 'Troca' | 'Abandonar' | 'Agenda' | 'Dica';
+export type SuggestionKind = 'Hábito' | 'Prática' | 'Ritual' | 'Troca' | 'Abandonar' | 'Agenda' | 'Caixinha' | 'Dica';
 
 export interface HabitSpec {
   name: string;
@@ -135,6 +136,7 @@ export interface Suggestion {
   act:
     | { type: 'habit'; habit: HabitSpec }
     | { type: 'events'; events: { title: string; date: string; time: string }[] }
+    | { type: 'box'; box: { name: string; target: number | null; planAmount: number } }
     | { type: 'none' };
 }
 
@@ -172,7 +174,7 @@ function nextFirstOfMonth(today: string): string {
  * Lê o perfil (e o que já existe no app) e devolve as sugestões, da área mais importante para a menos.
  * Some o que foi dispensado ou aceito, e o que já existe com o mesmo nome ou a mesma prática ligada.
  */
-export function suggestions(d: Pick<AppData, 'profile' | 'habits'>, today: string = todayISO()): Suggestion[] {
+export function suggestions(d: Pick<AppData, 'profile' | 'habits' | 'boxes'>, today: string = todayISO()): Suggestion[] {
   const p = d.profile;
   const out: Suggestion[] = [];
   const add = (s: Suggestion) => out.push(s);
@@ -210,6 +212,19 @@ export function suggestions(d: Pick<AppData, 'profile' | 'habits'>, today: strin
   if (tight || p.money.challenge === 'gasto') add({ id: 's-domingo', kind: 'Ritual', area: 'dinheiro', icon: 'wallet', title: 'Revisar os gastos todo domingo (10 min)', why: p.money.challenge === 'gasto' ? 'Você contou que **gasta mais do que devia**. Olhar os gastos uma vez por semana ajuda a frear antes do fim do mês.' : 'Você marcou **orçamento apertado**. Olhar os gastos uma vez por semana evita surpresas no fim do mês.', act: habit('Revisar os gastos da semana', [0], '18:00') });
   if (p.money.challenge === 'atraso') add({ id: 's-contas', kind: 'Agenda', area: 'dinheiro', icon: 'calendar', title: 'Conferir as contas do mês no dia 1º', why: 'Você contou que **contas atrasam**. Ver de uma vez o que vence no mês evita juros e multa. Cadastre as contas fixas em Finanças para o app avisar antes.', act: { type: 'events', events: [{ title: 'Conferir as contas que vencem no mês', date: nextFirstOfMonth(today), time: '09:00' }] } });
   if (p.money.challenge === 'naosei') add({ id: 's-anotar', kind: 'Hábito', area: 'dinheiro', icon: 'coins', title: 'Anotar os gastos do dia, por 2 semanas', why: 'Você contou que **não sabe quanto entra e sai**. Duas semanas anotando em Finanças já mostram para onde o dinheiro vai.', act: habit('Anotar os gastos do dia', ALL, shiftTime(p.sleep, -90)) });
+  // Caixinhas: metas de dinheiro e "quero juntar para…"
+  const boxNames = new Set(d.boxes.map((b) => plain(b.name)));
+  const moneyGoal = area('dinheiro') ? [...p.shortGoals, ...p.longGoals].find((g) => /r\$|juntar|guardar|poupar|viag/i.test(g.text)) : undefined;
+  if (moneyGoal && !boxNames.has(plain(moneyGoal.text))) {
+    const target = parseMoneyText(moneyGoal.text) || null;
+    add({ id: `s-caixa-${moneyGoal.id}`, kind: 'Caixinha', area: 'dinheiro', icon: 'coins', title: `Criar a caixinha "${moneyGoal.text}"`, why: `É uma das suas **metas**. Com uma caixinha e um plano de R$ 100 por semana, dá para ver quanto falta${target ? ` (uns ${Math.max(1, Math.round(target / 100 / 4.33))} meses)` : ''}.`, act: { type: 'box', box: { name: moneyGoal.text, target, planAmount: 100 } } });
+  }
+  const save = p.money.saveFor;
+  if (save && save !== 'nada') {
+    const name = labelOf(SAVE, save);
+    const target = p.money.amount;
+    if (!boxNames.has(plain(name))) add({ id: 's-caixa-juntar', kind: 'Caixinha', area: 'dinheiro', icon: 'coins', title: `Criar a caixinha "${name}"`, why: `Você quer juntar dinheiro para **${name.toLowerCase()}**. ${target ? `Guardando R$ 100 por semana, você chega a R$ ${target.toLocaleString('pt-BR')} em uns ${Math.max(1, Math.ceil(target / 100 / 4.33))} meses.` : 'Com um plano semanal, dá para ver quanto falta. A meta você define quando quiser.'}`, act: { type: 'box', box: { name, target, planAmount: 100 } } });
+  }
   // Largar hábitos: trocas
   const QUIT: Record<string, Suggestion[]> = {
     redes: [
@@ -259,6 +274,10 @@ export function acceptSuggestion(s: Suggestion, today: string = todayISO()) {
   return (d: AppData): AppData => {
     let next: AppData = { ...d, profile: { ...d.profile, accepted: [...d.profile.accepted, s.id] } };
     if (s.act.type === 'habit') next = { ...next, habits: [...next.habits, habitFromSpec(s.act.habit, SUG_COLORS[d.habits.length % SUG_COLORS.length], today)] };
+    if (s.act.type === 'box') {
+      const b = s.act.box;
+      next = { ...next, boxes: [...next.boxes, newBox({ name: b.name, target: b.target, color: BOX_COLORS[d.boxes.length % BOX_COLORS.length], plan: { amount: b.planAmount, every: 'semana', startDate: today } })] };
+    }
     if (s.act.type === 'events') {
       const evs: CalendarEvent[] = s.act.events.map((e) => ({ id: uid(), title: e.title, date: e.date, time: e.time, location: '', description: 'Sugerido em Você.' }));
       next = { ...next, events: [...next.events, ...evs] };

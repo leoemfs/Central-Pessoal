@@ -208,6 +208,36 @@ export interface Settings {
   journeyChoice: 'quero' | 'depois' | null;
 }
 
+// ---------- Caixinhas (dinheiro guardado) ----------
+
+export interface BoxMove {
+  id: string;
+  /** AAAA-MM-DD */
+  date: string;
+  amount: number;
+  /** plano = guardou na data combinada · extra = fora do plano · retirada = tirou. */
+  kind: 'plano' | 'extra' | 'retirada';
+  /** Só nas retiradas. */
+  reason: 'realizei' | 'emergencia' | 'outro' | null;
+  note: string;
+}
+
+/** Meta de dinheiro guardado. O app não move dinheiro: só registra o que a pessoa guardou no banco. */
+export interface SavingsBox {
+  id: string;
+  name: string;
+  color: string;
+  /** Meta em R$ (null = sem meta). */
+  target: number | null;
+  deadline: string | null;
+  plan: { amount: number; every: 'semana' | 'mes'; startDate: string } | null;
+  moves: BoxMove[];
+  /** Marcos já comemorados (25, 50, 75, 100): cada um só uma vez. */
+  marks: number[];
+  realizedAt: string | null;
+  createdAt: string;
+}
+
 // ---------- Você (perfil) ----------
 
 export interface Goal {
@@ -296,6 +326,7 @@ export interface AppData {
   incomeSources: Category[];
   settings: Settings;
   profile: Profile;
+  boxes: SavingsBox[];
   sessions: PracticeSession[];
   /** Última carga usada em cada exercício (nome → kg). */
   lastLoads: Record<string, number>;
@@ -305,4 +336,4 @@ export interface AppData {
   legacy: Record<string, unknown>;
 }
 
-export type Collection = 'tasks' | 'events' | 'habits' | 'notes' | 'journal' | 'categories' | 'cards' | 'incomeSources';
+export type Collection = 'tasks' | 'events' | 'habits' | 'notes' | 'journal' | 'categories' | 'cards' | 'incomeSources' | 'boxes';
