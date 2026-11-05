@@ -617,12 +617,14 @@ function FinishSheet({ l, onClose }: { l: UserList; onClose: () => void }) {
   const [launch, setLaunch] = useState(true);
   const [reset, setReset] = useState(true);
   const [cat, setCat] = useState<string | null>(findCat(data.categories, ['mercado', 'aliment', 'supermerc']));
+  const [pay, setPay] = useState(data.vouchers[0]?.id ?? '');
   const done = l.items.filter((i) => i.done).length;
   function save() {
     const v = parseNum(total) ?? 0;
     const name = data.stores.find((s) => s.id === store)?.name ?? (newStore.trim() || 'Mercado');
-    update(finishShopping(l.id, { total: v, storeName: name, categoryId: launch ? cat : null, reset }));
-    notify('Compra concluída', launch && v ? `${formatMoney(v)} lançado em Finanças.` : 'Lista pronta para a próxima.');
+    const voucherId = launch && pay ? pay : null;
+    update(finishShopping(l.id, { total: v, storeName: name, categoryId: launch ? cat : null, reset, voucherId }));
+    notify('Compra concluída', launch && v ? `${formatMoney(v)} lançado em Finanças${voucherId ? ` · pago com ${data.vouchers.find((x) => x.id === voucherId)?.name}` : ''}.` : 'Lista pronta para a próxima.');
     onClose();
   }
   return (
@@ -654,6 +656,12 @@ function FinishSheet({ l, onClose }: { l: UserList; onClose: () => void }) {
         <Toggle checked={launch} onChange={setLaunch} label="Lançar em Finanças" />
       </div>
       {launch && <ExpenseCategoryChips value={cat} onChange={setCat} />}
+      {launch && data.vouchers.length > 0 && (
+        <div className="field">
+          <span className="field-label">Pago com</span>
+          <Chips label="Pago com" value={pay} onChange={setPay} options={[...data.vouchers.map((x) => ({ value: x.id, label: x.name })), { value: '', label: 'Outro (Pix, débito…)' }]} />
+        </div>
+      )}
       <div className="toggle-row">
         <div>
           <strong>Desmarcar tudo</strong>

@@ -13,6 +13,8 @@ import { ExpenseForm } from './ExpenseForm';
 import { InvoiceSheet } from './InvoiceSheet';
 import { IncomeForm, ReceitasTab } from './Receitas';
 import { CaixinhasTab } from './Caixinhas';
+import { VoucherDetail, VoucherForm, VoucherTile } from './Vale';
+import type { VoucherCard } from '../../types';
 import { BillStatusPill, CreditCardVisual, InvoiceStatusPill, useCategoryOf } from './shared';
 
 type Tab = 'mes' | 'receitas' | 'cartoes' | 'caixinhas';
@@ -30,6 +32,8 @@ export function Financas({ route }: ViewProps) {
   const [cardForm, setCardForm] = useState(false);
   const [incomeForm, setIncomeForm] = useState(false);
   const [boxForm, setBoxForm] = useState(false);
+  const [voucher, setVoucher] = useState<string | null>(null);
+  const [voucherEdit, setVoucherEdit] = useState<VoucherCard | null>(null);
 
   useSubAction(route, 'financas', {
     nova: () => (tab === 'cartoes' ? setCardForm(true) : tab === 'receitas' ? setIncomeForm(true) : tab === 'caixinhas' ? setBoxForm(true) : setFormOpen(true)),
@@ -153,9 +157,9 @@ export function Financas({ route }: ViewProps) {
         </>
       ) : (
         <>
-          {data.cards.length === 0 ? (
+          {data.cards.length === 0 && data.vouchers.length === 0 ? (
             <section className="card">
-              <Empty>Nenhum cartão cadastrado. Toque em + para cadastrar e as compras caem sozinhas na fatura certa.</Empty>
+              <Empty>Nenhum cartão cadastrado. Toque em + para cadastrar um cartão de crédito (as compras caem sozinhas na fatura certa) ou um vale, como VR e VA (com saldo e recarga).</Empty>
             </section>
           ) : (
             <div className="cards-list">
@@ -187,6 +191,9 @@ export function Financas({ route }: ViewProps) {
                   </button>
                 );
               })}
+              {data.vouchers.map((v) => (
+                <VoucherTile key={v.id} v={v} onOpen={() => setVoucher(v.id)} />
+              ))}
             </div>
           )}
         </>
@@ -205,6 +212,17 @@ export function Financas({ route }: ViewProps) {
       )}
       {invoice && <InvoiceSheet cardId={invoice.cardId} month={invoice.month} onClose={() => setInvoice(null)} />}
       {cardForm && <CardForm onClose={() => setCardForm(false)} />}
+      {voucher && (
+        <VoucherDetail
+          id={voucher}
+          onClose={() => setVoucher(null)}
+          onEdit={(v) => {
+            setVoucher(null);
+            setVoucherEdit(v);
+          }}
+        />
+      )}
+      {voucherEdit && <VoucherForm initial={voucherEdit} onClose={() => setVoucherEdit(null)} />}
       {incomeForm && <IncomeForm initialDate={month === monthKey(today) ? undefined : `${month}-01`} onClose={() => setIncomeForm(false)} />}
     </>
   );

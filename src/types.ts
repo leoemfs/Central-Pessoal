@@ -89,7 +89,7 @@ export interface JournalEntry {
 
 // ---------- Finanças ----------
 
-export type PaymentMethod = 'pix' | 'debito' | 'dinheiro' | 'boleto' | 'cartao';
+export type PaymentMethod = 'pix' | 'debito' | 'dinheiro' | 'boleto' | 'cartao' | 'vale';
 
 /** avulsa = uma vez · fixa = todo mês, sem fim · parcelada = N vezes. */
 export type ExpenseKind = 'avulsa' | 'fixa' | 'parcelada';
@@ -110,6 +110,21 @@ export interface CreditCard {
   color: string;
   /** Faturas pagas: mês da fatura (AAAA-MM) → data do pagamento. */
   paidInvoices: Record<string, string>;
+  createdAt: string;
+}
+
+/** Cartão de benefício (VR, VA): tem saldo e recarga, sem fatura. */
+export interface VoucherCard {
+  id: string;
+  name: string;
+  color: string;
+  /** Recarga mensal: valor e dia em que cai. null = sem recarga automática. */
+  recharge: { amount: number; day: number } | null;
+  /** Saldo no dia do cadastro (ou do último ajuste). */
+  startBalance: number;
+  startDate: string;
+  /** Meses (AAAA-MM) cuja recarga já foi lançada — para não lançar de novo se a receita for apagada. */
+  recharged: string[];
   createdAt: string;
 }
 
@@ -136,6 +151,8 @@ export interface Expense {
   paidAt: string | null;
   createdAt: string;
   updatedAt: string;
+  /** Pago com vale (VR/VA): id do cartão de benefício. */
+  voucherId?: string | null;
 }
 
 /** Modelo de uma conta fixa ou compra parcelada; as ocorrências são `Expense`. */
@@ -177,6 +194,8 @@ export interface Income {
   receivedAt: string | null;
   createdAt: string;
   updatedAt: string;
+  /** Recarga de vale (VR/VA): id do cartão de benefício. */
+  voucherId?: string | null;
 }
 
 /** Modelo de uma receita mensal; as ocorrências são `Income`. */
@@ -409,6 +428,8 @@ export interface AppData {
   expenses: Expense[];
   series: ExpenseSeries[];
   cards: CreditCard[];
+  /** Vales (VR, VA). */
+  vouchers: VoucherCard[];
   categories: Category[];
   incomes: Income[];
   incomeSeries: IncomeSeries[];
@@ -435,4 +456,4 @@ export interface AppData {
   legacy: Record<string, unknown>;
 }
 
-export type Collection = 'tasks' | 'events' | 'habits' | 'notes' | 'journal' | 'categories' | 'cards' | 'incomeSources' | 'boxes' | 'lists' | 'listCategories' | 'stores';
+export type Collection = 'tasks' | 'events' | 'habits' | 'notes' | 'journal' | 'categories' | 'cards' | 'incomeSources' | 'boxes' | 'lists' | 'listCategories' | 'stores' | 'vouchers';

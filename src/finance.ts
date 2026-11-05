@@ -11,6 +11,7 @@ export const PAYMENT_LABEL: Record<PaymentMethod, string> = {
   dinheiro: 'Dinheiro',
   boleto: 'Boleto',
   cartao: 'Cartão de crédito',
+  vale: 'Vale (VR/VA)',
 };
 
 export const KIND_LABEL: Record<ExpenseKind, string> = {
@@ -122,6 +123,8 @@ export interface ExpenseInput {
   amounts: number[];
   /** Só para avulsa fora do cartão: data em que já foi paga. */
   paidAt: string | null;
+  /** Pago com vale (VR/VA). A despesa já nasce paga. */
+  voucherId?: string | null;
 }
 
 export function addExpense(d: AppData, input: ExpenseInput, today: string = todayISO()): AppData {
@@ -140,7 +143,10 @@ export function addExpense(d: AppData, input: ExpenseInput, today: string = toda
 
   if (input.kind === 'avulsa') {
     const e = buildOccurrence(template, 0, input.amounts[0], card, stamp);
-    return { ...d, expenses: [...d.expenses, { ...e, paidAt: card ? null : input.paidAt }] };
+    const voucher = method === 'vale' && input.voucherId ? input.voucherId : null;
+    // No vale, a compra já está paga (desconta do saldo na hora).
+    const paidAt = card ? null : voucher ? (input.paidAt ?? (input.date > today ? today : input.date)) : input.paidAt;
+    return { ...d, expenses: [...d.expenses, { ...e, paidAt, voucherId: voucher }] };
   }
 
   const series: ExpenseSeries = {
@@ -251,6 +257,7 @@ export interface ExpensePatch {
   date: string;
   method: PaymentMethod;
   cardId: string | null;
+  voucherId?: string | null;
 }
 
 function scopeTargets(d: AppData, e: Expense, scope: Scope): Expense[] {
@@ -274,7 +281,8 @@ export function editExpense(d: AppData, id: string, patch: ExpensePatch, scope: 
         next = { ...next, method: 'cartao', cardId: card.id, purchaseDate: patch.date, invoiceMonth, dueDate: invoiceDueDate(card, invoiceMonth), paidAt: null };
       } else {
         const method = patch.method === 'cartao' ? 'pix' : patch.method;
-        next = { ...next, method, cardId: null, purchaseDate: null, invoiceMonth: null, dueDate: patch.date };
+        const voucherId = method === 'vale' ? (patch.voucherId ?? null) : null;
+        next = { ...next, method, cardId: null, purchaseDate: null, invoiceMonth: null, dueDate: patch.date, voucherId, paidAt: voucherId ? (next.paidAt ?? patch.date) : next.paidAt };
       }
     } else if (!e.cardId) {
       next.dueDate = patch.date;
