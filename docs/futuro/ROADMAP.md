@@ -5,6 +5,7 @@
 
 | # | Item | Documento | Tamanho | Situação |
 |---|---|---|---|---|
+| 0 | **Correção:** compra no cartão novo some da fatura (limite cai, fatura mostra R$ 0,00) | `correcao-fatura-cartao.md` | pequeno | a fazer (primeiro) |
 | 1 | Hábitos: **pausar e arquivar** | `habitos-pausar-arquivar.md` | pequeno | a fazer |
 | 2 | **Módulos personalizáveis**: mostrar/ocultar, escolher a barra de baixo, cartões do Início | `modulos-personalizaveis.md` | médio | a fazer |
 | 3 | Preços 2.0, parte 1: **a lista puxa os produtos de Preços** (sugestões enquanto digita) e **estimativa com faixa de preço** sem prender a lista a uma loja | `precos-v2.md` (itens 2 e 3) | médio | a fazer |
