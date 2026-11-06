@@ -32,6 +32,7 @@ Escolher um módulo não pode virar obrigação. Junto com "Mostrar", o módulo 
   - **Nunca conta como falta:** sem sequência quebrada, sem "você não escreveu ontem". A Revisão da semana mostra "Você escreveu 3 vezes (sua meta era 3)" em tom de conquista, nunca de cobrança.
   - O humor do dia com nota e as "Três coisas boas" também contam como registro no Diário.
 - **Padrão:** quem já usa o app fica com **"Quando der"**, que é exatamente o comportamento de hoje.
+- **Na Jornada:** as missões do Diário seguem esse ritmo ("quando der" = escrever 1 vez na semana, valendo menos pontos). Detalhes em `modulo-rpg.md`, 5.4.
 
 ### Outros módulos (mais adiante, mesma ideia)
 - **Hábitos e rituais:** a frequência já é escolhida em cada hábito (dias da semana ou X vezes por semana). Não precisa de nada novo.

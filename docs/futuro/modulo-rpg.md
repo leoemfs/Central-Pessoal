@@ -184,6 +184,27 @@ Exemplos:
 
 Essas atividades poderão oferecer recompensas maiores e conquistas exclusivas.
 
+### 5.4. Missões no ritmo da pessoa
+
+As missões seguem o **ritmo que a pessoa escolheu** para cada módulo (ver `modulos-personalizaveis.md`, "Ritmo de cada módulo"). Ninguém recebe a missão "escreva todos os dias" só porque ligou o Diário.
+
+| Ritmo escolhido no Diário | Missão da semana | Bônus da missão |
+|---|---|---|
+| Todo dia | Escrever 7 dias nesta semana | 70 XP |
+| 5 vezes na semana | Escrever 5 vezes | 50 XP |
+| 3 vezes na semana | Escrever 3 vezes | 30 XP |
+| Dias certos (ex.: ter, qui, dom) | Escrever nesses 3 dias | 30 XP |
+| Quando der | Escrever 1 vez nesta semana | 10 XP |
+
+- **Tudo equivalente:** cada registro vale o mesmo XP para todo mundo, e o bônus da missão é **10 XP por vez combinada**. Quem combina mais ganha mais, mas quem combina pouco não fica para trás por cumprir o que prometeu.
+- **Cumprir a própria meta é o que conta:** a conquista de constância ("4 semanas cumprindo o combinado") vale igual para quem escreve 1 ou 7 vezes.
+- **Passar da meta:** cada registro a mais ainda dá o XP normal do registro, sem bônus extra (para não virar pressão).
+- **Não cumpriu:** a missão só some no fim da semana, sem perder nada (regra da seção 6).
+- **A missão se ajusta com a pessoa:**
+  - 2 semanas seguidas sem cumprir → o app sugere, com carinho, uma meta menor ("Que tal 2 vezes por semana?");
+  - 3 semanas seguidas cumprindo → oferece subir a meta, com mais pontos. A pessoa sempre decide.
+- **Mesma regra nos outros módulos:** hábitos usam a frequência de cada hábito; Humor, Revisão e Caixinhas usam o ritmo escolhido. Módulo oculto não gera missão.
+
 ## 6. Regras de recompensa
 
 O sistema deverá possuir regras próprias para distribuição de XP e Gold.
