@@ -7,7 +7,7 @@
 |---|---|---|---|---|
 | 0 | **Correção:** perguntar em qual fatura a compra entra; compra no cartão novo some da fatura (limite cai, fatura mostra R$ 0,00) | `correcao-fatura-cartao.md` | pequeno | a fazer (primeiro) |
 | 1 | Hábitos: **pausar e arquivar** | `habitos-pausar-arquivar.md` | pequeno | a fazer |
-| 2 | **Módulos personalizáveis**: mostrar/ocultar, escolher a barra de baixo, cartões do Início | `modulos-personalizaveis.md` | médio | a fazer |
+| 2 | **Módulos personalizáveis**: mostrar/ocultar, escolher a barra de baixo, cartões do Início e **ritmo de cada módulo** (Diário: todo dia, X vezes na semana, dias certos ou quando der) | `modulos-personalizaveis.md` | médio | a fazer |
 | 3 | Preços 2.0, parte 1: **a lista puxa os produtos de Preços** (sugestões enquanto digita) e **estimativa com faixa de preço** sem prender a lista a uma loja | `precos-v2.md` (itens 2 e 3) | médio | a fazer |
 | 4 | Preços 2.0, parte 2: **"quanto custou aqui?"** ao marcar o item na compra e histórico de compras | `precos-v2.md` (item 4) | médio | a fazer |
 | 5 | Preços 2.0, parte 3: **tipos de loja** e filtro; editar, excluir e juntar produtos, marcas e lojas | `precos-v2.md` (itens 1 e 4) | médio | a fazer |
