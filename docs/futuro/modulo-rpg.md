@@ -219,6 +219,8 @@ Requisitos:
 
 **Regra importante:** não deverá existir perda automática de XP por deixar de cumprir hábitos.
 
+Tabela de XP, ouro e atributos por módulo: `jornada-recompensas.md`.
+
 O objetivo é incentivar a consistência, não criar punições ou transformar o aplicativo em uma fonte adicional de pressão.
 
 O sistema poderá registrar períodos de inatividade, mas sem retirar conquistas ou progressos já obtidos.
