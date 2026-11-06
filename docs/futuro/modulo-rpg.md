@@ -489,9 +489,9 @@ Não iniciar o desenvolvimento completo antes da consolidação da estrutura pri
 - Avatar em pixel art 16×24, **mulher ou homem**, com pele e cabelo escolhidos na criação.
 - **Espaços de equipamento:** elmo, roupa/armadura, botas, arma (espada **ou** cajado), artefato, pet e morada. Um segundo espaço de artefato abre no **nível 20**.
 - Os equipamentos são **camadas** desenhadas por cima do corpo (elmo e ombreiras), ou **trocas de cor** (roupa e botas), ou peças na mão (arma). Isso permite qualquer combinação sem desenhar cada uma.
-- **Raridades:** comum (cinza), raro (azul), épico (roxo) e lendário (dourado; antes chamado "místico"). Formas de liberar e Codex por coleções: `jornada-raridades.md`.
+- **Raridades:** comum (cinza), raro (azul), épico (roxo), lendário (laranja) e místico (dourado, só da Forja). Bônus por raridade, formas de liberar e Codex por coleções: `jornada-raridades.md`.
 
-| Espaço | Comum | Raro | Épico | Lendário |
+| Espaço | Comum | Raro | Épico | Místico |
 |---|---|---|---|---|
 | Elmo | Capuz de couro | Elmo de ferro | Chapéu de mago | Coroa de cristal |
 | Roupa | Túnica de aprendiz (inicial), Gibão de couro | Cota de malha, Manto arcano | Armadura de placas | Armadura de cristal |
@@ -504,8 +504,8 @@ Não iniciar o desenvolvimento completo antes da consolidação da estrutura pri
 
 - **Comum e raro:** loja, com ouro. Preços de referência: comum 120–200 ouro; raro 500–700 ouro. Com a tabela de recompensas atual, um dia ativo rende cerca de 50 ouro, ou seja, um item raro custa de 2 a 3 semanas de rotina.
 - **Épico:** baús (prata, dourado e cristal) **ou** um atributo alto (ex.: Chapéu de mago com INT 50, Armadura de placas com FOR 80). O que vier primeiro.
-- **Lendário:** só na **Forja mística** (B.5). Não se compra.
-- Os 6 artefatos raros dão **+10% de XP** nos hábitos do atributo correspondente (Pena → AGI, Bracelete → FOR, Grimório → INT, Gota → RES, Lanterna → SAB, Ampulheta → DIS). Também podem sair em baús, ou ser liberados com o atributo em 40.
+- **Místico:** só na **Forja mística** (B.5). Não se compra.
+- Os 6 artefatos de atributo passam a ser **épicos** (os bônus começam no épico) e dão **+10% de XP** nos hábitos do atributo correspondente (Pena → AGI, Bracelete → FOR, Grimório → INT, Gota → RES, Lanterna → SAB, Ampulheta → DIS). Saem em baús, ou são liberados com o atributo em 60.
 
 ### B.4. Baús e cristais
 
@@ -516,7 +516,7 @@ Não iniciar o desenvolvimento completo antes da consolidação da estrutura pri
 | Dourado | a cada 5 níveis · mês com todas as contas em dia | item raro ou épico garantido |
 | Cristal | hábito a abandonar: 7, 14, 30 e 60 dias sem | o melhor conteúdo: garante épico + **1 a 3 cristais** |
 
-**Cristais** (◆) são a moeda da Forja mística. Fontes: baús de cristal, **1 por título conquistado** e alguns efeitos de artefatos. Abandonar um hábito ruim é o caminho mais forte para os itens lendários, porque é o mais difícil.
+**Cristais** (◆) são a moeda da Forja mística. Fontes: baús de cristal, **1 por título conquistado** e alguns efeitos de artefatos. Abandonar um hábito ruim é o caminho mais forte para os itens místicos, porque é o mais difícil.
 
 ### B.5. Forja mística (itens que exigem aprimorar os atributos)
 
@@ -527,7 +527,7 @@ Os pontos de atributo **nunca diminuem** e vêm de:
 
 Com um hábito por dia num atributo, ele sobe cerca de 60 a 90 pontos por mês.
 
-| Item lendário | Requisitos | Cristais | Efeito |
+| Item místico | Requisitos | Cristais | Efeito |
 |---|---|---|---|
 | Coroa de cristal (elmo) | DIS 100 | 3 | +1 cristal por mês com todas as contas pagas no prazo |
 | Botas aladas | AGI 100 | 3 | +10% de XP em caminhadas; o pet acompanha mais rápido |
@@ -615,7 +615,7 @@ interface JourneyState {
 
 **Status (v0.10):** os passos 1 a 3 estão **feitos**, em `src/jornada/` (`art.ts`, `artData.ts`, `catalog.ts`, `rules.ts`, `sky.ts`), com testes em `src/jornada.test.ts`. É lógica pura e invisível: nenhuma tela usa ainda, e nada muda no app em uso. Faltam os passos 4 e 5 (telas), que só aparecem depois do desbloqueio.
 
-**Ainda não programado (depende das telas e de registrar quando cada item foi equipado):** os efeitos dos lendários que mexem com o tempo — escudo semanal da Armadura de cristal, XP em dobro depois da recaída (Pena da fênix), cristal por revisão (Olho do oráculo), cristal por mês em dia (Coroa), baú extra por nível (Espada da aurora) e ouro extra por estudo (Cajado estelar). Os bônus de +10% dos artefatos já estão em `equipmentBonus`.
+**Ainda não programado (depende das telas e de registrar quando cada item foi equipado):** os efeitos dos místicos que mexem com o tempo — escudo semanal da Armadura de cristal, XP em dobro depois da recaída (Pena da fênix), cristal por revisão (Olho do oráculo), cristal por mês em dia (Coroa), baú extra por nível (Espada da aurora) e ouro extra por estudo (Cajado estelar). Os bônus de +10% dos artefatos já estão em `equipmentBonus`.
 
 ---
 
@@ -637,7 +637,7 @@ Um mapa em pixel art com 7 regiões que se abrem uma por vez. Cada região é um
 | 4 | Pântano das Tentações | Hábitos a abandonar | 14 dias sem o hábito | Serpente do Vício | Botas do pântano · Domador(a) de Serpentes · baú de cristal |
 | 5 | Torre do Saber | Leitura, estudo e diário | Ler em 10 dias diferentes · 7 registros no diário | Guardião do Esquecimento | Cajado do saber (+10% de XP em leitura) · Guardiã(o) do Saber · baú dourado |
 | 6 | Montanha da Disciplina | Revisão semanal | 2 revisões semanais | Gigante da Desordem | Armadura da montanha · Escalador(a) · baú dourado |
-| 7 | Castelo do Caos | Tudo junto | 14 dias com 5 ou mais missões | **Senhor do Caos** (2 semanas) | Lâmina da ordem (mística) · morada Castelo · Senhor(a) da Ordem · baú de cristal |
+| 7 | Castelo do Caos | Tudo junto | 14 dias com 5 ou mais missões | **Senhor do Caos** (2 semanas) | Lâmina da ordem (lendária) · morada Castelo · Senhor(a) da Ordem · baú de cristal |
 
 - Os contadores dos objetivos começam do zero quando o capítulo abre.
 - Os itens da campanha são **exclusivos**: não saem em baús nem na loja, e aparecem no Arsenal como "recompensa do capítulo N".
@@ -826,11 +826,11 @@ Uma campanha fixa não serve para todo mundo. Por exemplo, "14 dias sem refriger
 - **Regiões fora da campanha:** os pets ligados a elas têm um caminho alternativo, para nenhum ficar impossível.
 
 ### F.4. Armas e acessórios
-- **Arcos:** arco curto (comum), arco longo de teixo (raro), arco élfico (épico, Agilidade 80) e **arco do vento** (lendário). A personagem segura o arco e leva uma **aljava com flechas nas costas**, com a cor das flechas acompanhando o arco.
+- **Arcos:** arco curto (comum), arco longo de teixo (raro), arco élfico (épico, Agilidade 80) e **arco do vento** (místico, da Forja). A personagem segura o arco e leva uma **aljava com flechas nas costas**, com a cor das flechas acompanhando o arco.
 - **Acessórios em espaços próprios,** no lugar do "artefato" genérico:
   - **Colar:** amuleto da gota, coração de cristal, colar de pérola, colar de dente de lobo. Aparece no peito do avatar.
-  - **Anel:** anel de ferro, anel do foco, braceletes e o **anel da aurora** (lendário). O segundo anel abre no nível 10.
-  - **Item mágico:** grimório, **grimório das estrelas** (lendário), lanterna, ampulheta, penas, olho do oráculo e estrela polar. Flutua ao lado da personagem.
+  - **Anel:** anel de ferro, anel do foco, braceletes e o **anel da aurora** (místico, da Forja). O segundo anel abre no nível 10.
+  - **Item mágico:** grimório, **grimório das estrelas** (místico, da Forja), lanterna, ampulheta, penas, olho do oráculo e estrela polar. Flutua ao lado da personagem.
 
 ### F.5. Codex
 - **Onde fica:** no Arsenal, em duas abas: **"Vestir e comprar"** e **"Codex"**.
