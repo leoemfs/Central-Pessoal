@@ -489,9 +489,9 @@ Não iniciar o desenvolvimento completo antes da consolidação da estrutura pri
 - Avatar em pixel art 16×24, **mulher ou homem**, com pele e cabelo escolhidos na criação.
 - **Espaços de equipamento:** elmo, roupa/armadura, botas, arma (espada **ou** cajado), artefato, pet e morada. Um segundo espaço de artefato abre no **nível 20**.
 - Os equipamentos são **camadas** desenhadas por cima do corpo (elmo e ombreiras), ou **trocas de cor** (roupa e botas), ou peças na mão (arma). Isso permite qualquer combinação sem desenhar cada uma.
-- **Raridades:** comum (cinza), raro (azul), épico (roxo) e místico (dourado).
+- **Raridades:** comum (cinza), raro (azul), épico (roxo) e lendário (dourado; antes chamado "místico"). Formas de liberar e Codex por coleções: `jornada-raridades.md`.
 
-| Espaço | Comum | Raro | Épico | Místico |
+| Espaço | Comum | Raro | Épico | Lendário |
 |---|---|---|---|---|
 | Elmo | Capuz de couro | Elmo de ferro | Chapéu de mago | Coroa de cristal |
 | Roupa | Túnica de aprendiz (inicial), Gibão de couro | Cota de malha, Manto arcano | Armadura de placas | Armadura de cristal |
@@ -504,7 +504,7 @@ Não iniciar o desenvolvimento completo antes da consolidação da estrutura pri
 
 - **Comum e raro:** loja, com ouro. Preços de referência: comum 120–200 ouro; raro 500–700 ouro. Com a tabela de recompensas atual, um dia ativo rende cerca de 50 ouro, ou seja, um item raro custa de 2 a 3 semanas de rotina.
 - **Épico:** baús (prata, dourado e cristal) **ou** um atributo alto (ex.: Chapéu de mago com INT 50, Armadura de placas com FOR 80). O que vier primeiro.
-- **Místico:** só na **Forja mística** (B.5). Não se compra.
+- **Lendário:** só na **Forja mística** (B.5). Não se compra.
 - Os 6 artefatos raros dão **+10% de XP** nos hábitos do atributo correspondente (Pena → AGI, Bracelete → FOR, Grimório → INT, Gota → RES, Lanterna → SAB, Ampulheta → DIS). Também podem sair em baús, ou ser liberados com o atributo em 40.
 
 ### B.4. Baús e cristais
@@ -516,7 +516,7 @@ Não iniciar o desenvolvimento completo antes da consolidação da estrutura pri
 | Dourado | a cada 5 níveis · mês com todas as contas em dia | item raro ou épico garantido |
 | Cristal | hábito a abandonar: 7, 14, 30 e 60 dias sem | o melhor conteúdo: garante épico + **1 a 3 cristais** |
 
-**Cristais** (◆) são a moeda da Forja mística. Fontes: baús de cristal, **1 por título conquistado** e alguns efeitos de artefatos. Abandonar um hábito ruim é o caminho mais forte para os itens místicos, porque é o mais difícil.
+**Cristais** (◆) são a moeda da Forja mística. Fontes: baús de cristal, **1 por título conquistado** e alguns efeitos de artefatos. Abandonar um hábito ruim é o caminho mais forte para os itens lendários, porque é o mais difícil.
 
 ### B.5. Forja mística (itens que exigem aprimorar os atributos)
 
@@ -527,7 +527,7 @@ Os pontos de atributo **nunca diminuem** e vêm de:
 
 Com um hábito por dia num atributo, ele sobe cerca de 60 a 90 pontos por mês.
 
-| Item místico | Requisitos | Cristais | Efeito |
+| Item lendário | Requisitos | Cristais | Efeito |
 |---|---|---|---|
 | Coroa de cristal (elmo) | DIS 100 | 3 | +1 cristal por mês com todas as contas pagas no prazo |
 | Botas aladas | AGI 100 | 3 | +10% de XP em caminhadas; o pet acompanha mais rápido |
@@ -569,7 +569,7 @@ O título escolhido aparece embaixo do nome, na cena e na tela cheia. Cada títu
 
 ### B.8. Pets e moradas
 
-- **Pets:** Gatinho e Cãozinho (nível 3, escolhe um), Cavalinho (nível 12 + AGI 50). O pet passeia na cena e fica feliz nos dias com registro; **nunca fica triste nem some**. Para o futuro: raposa, coruja e um dragãozinho místico.
+- **Pets:** Gatinho e Cãozinho (nível 3, escolhe um), Cavalinho (nível 12 + AGI 50). O pet passeia na cena e fica feliz nos dias com registro; **nunca fica triste nem some**. Para o futuro: raposa, coruja e um dragãozinho lendário.
 - **Moradas** (fundo da cena): Barraca de viajante (início), Casinha (nível 5), Casa de pedra (nível 15 + 600 ouro), Torre do mago (nível 25 + INT 100), Castelinho (nível 30 + 2.000 ouro), Castelo (nível 50 + todos os atributos em 100).
 - Todas as moradas têm versão de dia, tarde e noite (janelas acesas à noite).
 
@@ -615,7 +615,7 @@ interface JourneyState {
 
 **Status (v0.10):** os passos 1 a 3 estão **feitos**, em `src/jornada/` (`art.ts`, `artData.ts`, `catalog.ts`, `rules.ts`, `sky.ts`), com testes em `src/jornada.test.ts`. É lógica pura e invisível: nenhuma tela usa ainda, e nada muda no app em uso. Faltam os passos 4 e 5 (telas), que só aparecem depois do desbloqueio.
 
-**Ainda não programado (depende das telas e de registrar quando cada item foi equipado):** os efeitos dos místicos que mexem com o tempo — escudo semanal da Armadura de cristal, XP em dobro depois da recaída (Pena da fênix), cristal por revisão (Olho do oráculo), cristal por mês em dia (Coroa), baú extra por nível (Espada da aurora) e ouro extra por estudo (Cajado estelar). Os bônus de +10% dos artefatos já estão em `equipmentBonus`.
+**Ainda não programado (depende das telas e de registrar quando cada item foi equipado):** os efeitos dos lendários que mexem com o tempo — escudo semanal da Armadura de cristal, XP em dobro depois da recaída (Pena da fênix), cristal por revisão (Olho do oráculo), cristal por mês em dia (Coroa), baú extra por nível (Espada da aurora) e ouro extra por estudo (Cajado estelar). Os bônus de +10% dos artefatos já estão em `equipmentBonus`.
 
 ---
 
@@ -818,19 +818,19 @@ Uma campanha fixa não serve para todo mundo. Por exemplo, "14 dias sem refriger
 | Épico | Sapinho do pântano | vencer a Serpente do Vício (ou 60 dias de visitas) |
 | Épico | Golem de pedra | vencer o Gigante da Desordem |
 | Épico | Fênix filhote | 30 dias limpo depois de uma recaída |
-| Místico | Dragãozinho | vencer o Senhor do Caos (ou nível 50) |
-| Místico | Grifo | 365 dias abrindo o app |
-| Místico | Unicórnio | todos os atributos em 100 |
+| Lendário | Dragãozinho | vencer o Senhor do Caos (ou nível 50) |
+| Lendário | Grifo | 365 dias abrindo o app |
+| Lendário | Unicórnio | todos os atributos em 100 |
 
 - **Pets que voam** (coruja, beija-flor, fênix, dragão) passeiam no céu da cena.
 - **Regiões fora da campanha:** os pets ligados a elas têm um caminho alternativo, para nenhum ficar impossível.
 
 ### F.4. Armas e acessórios
-- **Arcos:** arco curto (comum), arco longo de teixo (raro), arco élfico (épico, Agilidade 80) e **arco do vento** (místico). A personagem segura o arco e leva uma **aljava com flechas nas costas**, com a cor das flechas acompanhando o arco.
+- **Arcos:** arco curto (comum), arco longo de teixo (raro), arco élfico (épico, Agilidade 80) e **arco do vento** (lendário). A personagem segura o arco e leva uma **aljava com flechas nas costas**, com a cor das flechas acompanhando o arco.
 - **Acessórios em espaços próprios,** no lugar do "artefato" genérico:
   - **Colar:** amuleto da gota, coração de cristal, colar de pérola, colar de dente de lobo. Aparece no peito do avatar.
-  - **Anel:** anel de ferro, anel do foco, braceletes e o **anel da aurora** (místico). O segundo anel abre no nível 10.
-  - **Item mágico:** grimório, **grimório das estrelas** (místico), lanterna, ampulheta, penas, olho do oráculo e estrela polar. Flutua ao lado da personagem.
+  - **Anel:** anel de ferro, anel do foco, braceletes e o **anel da aurora** (lendário). O segundo anel abre no nível 10.
+  - **Item mágico:** grimório, **grimório das estrelas** (lendário), lanterna, ampulheta, penas, olho do oráculo e estrela polar. Flutua ao lado da personagem.
 
 ### F.5. Codex
 - **Onde fica:** no Arsenal, em duas abas: **"Vestir e comprar"** e **"Codex"**.
