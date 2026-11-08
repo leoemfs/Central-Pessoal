@@ -51,7 +51,7 @@
 | N6 | Módulo Estudos e Carreira: Biblioteca (áreas, trilhas, tópicos de referência), Ciclos pessoais, Meus notebooks, Fontes, Mapas mentais e Roadmaps | NOVO | G | média | pronto (v0.21), em teste por 3 dias | `futuro/modulo-estudos.md` |
 | N7 | Estudos × Jornada: XP, ouro e INT por tópico, ciclo e constância; selos, Coruja e missões | NOVO | M | baixa | especificado (só documento) | `futuro/estudos-jornada.md` |
 | N8 | Estudos: cronograma de estudos com calendário dentro do módulo, sincronizado com a Agenda do app | NOVO | M | média | ideia | `futuro/modulo-estudos.md` |
-| N9 | Estudos e Carreira em duas abas (Estudos · Carreira), cada uma com seus atalhos na barra de baixo; Carreira com projetos, apresentações e acompanhamento da carreira atual e da que está em construção. Se a barra mudando com a aba ficar ruim, viram dois módulos independentes | NOVO | G | média | ideia | `futuro/modulo-estudos.md` |
+| N9 | Módulo Carreira independente de Estudos, com barra própria: projetos, apresentações e acompanhamento da carreira atual e da que está em construção (decidido: dois módulos, desenvolvidos um de cada vez) | NOVO | G | média | ideia | `futuro/modulo-estudos.md` |
 
 **Depende de outra coisa:** N3 fica melhor junto com N4 (notificações de verdade no Android). N2 e N5 dependem de decisões e integrações.
 
