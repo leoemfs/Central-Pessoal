@@ -1,11 +1,27 @@
-import { useState } from 'react';
+import { useState, type ReactNode } from 'react';
 import type { ViewProps } from '../App';
-import { useSubAction } from '../router';
+import { go, useSubAction } from '../router';
 import { useStore } from '../store';
-import type { AppData, JobApp, JobStage } from '../types';
-import { formatDate, relativeDay, todayISO, uid } from '../utils';
-import { Chips, Empty, Field, Icon, notify, PageHeader, Pill, Sheet } from '../ui';
+import type { AppData, CareerChange, CareerChangeKind, JobApp, JobStage, Meeting } from '../types';
+import { addDays, formatDate, formatMoney, relativeDay, todayISO, uid } from '../utils';
+import { Chips, Empty, Field, Icon, MoneyInput, notify, PageHeader, Pill, Sheet, Toggle } from '../ui';
 import {
+  applySalaryToFinance,
+  CHANGE_LABEL,
+  currentWork,
+  isBlankMeeting,
+  meetingEvent,
+  meetingKindLabel,
+  MEETING_KINDS_UI,
+  meetingTitle,
+  newMeeting,
+  nextMeeting,
+  openTodos,
+  REPEAT_OPTIONS,
+  salaryChanges,
+  salaryIncomeFrom,
+  splitMeetings,
+  tenure,
   advance,
   closedJobs,
   closeJob,
@@ -26,8 +42,8 @@ import {
 
 /**
  * Carreira (N8). Endereços:
- * #/carreira (casa: próximos passos e resumo) · #/vagas (lista com etapas) · #/vagas/nova · #/metas (em breve).
- * Trabalho atual, Currículo e Metas chegam nas próximas partes (N8.2 a N8.4).
+ * #/carreira (casa: trabalho atual, reuniões, próximos passos) · #/carreira/menu · #/carreira/reuniao · #/carreira/mudanca
+ * #/vagas (lista com etapas) · #/vagas/nova · #/metas (em breve). Currículo e Metas chegam na N8.3 e N8.4.
  */
 
 const STAGE_TONE: Record<JobStage, 'gray' | 'blue' | 'orange' | 'green'> = { interesse: 'gray', enviei: 'blue', entrevista: 'orange', proposta: 'green' };
@@ -75,21 +91,144 @@ function JobCard({ j, onOpen }: { j: JobApp; onOpen: () => void }) {
   );
 }
 
-/** Casa do módulo: o que fazer agora nas vagas e o que vem nas próximas versões. */
-export function CarreiraPage() {
+/** Casa do módulo: trabalho atual, reuniões e os próximos passos das vagas. */
+export function CarreiraPage({ route }: ViewProps) {
   const { data } = useStore();
   const [openId, setOpenId] = useState<string | null>(null);
-  const jobs = data.career.jobs;
+  const [meetingId, setMeetingId] = useState<string | null>(null);
+  const [changeOpen, setChangeOpen] = useState(false);
+  const [menu, setMenu] = useState(false);
+  const [showSalary, setShowSalary] = useState(false);
+  const { update } = useStore();
   const today = todayISO();
+
+  function createMeeting() {
+    const m = newMeeting(uid(), today);
+    update(saveMeeting(m));
+    setMeetingId(m.id);
+  }
+  useSubAction(route, 'carreira', { menu: () => setMenu(true), reuniao: createMeeting, mudanca: () => setChangeOpen(true) });
+
+  const jobs = data.career.jobs;
   const open = openJobs(jobs);
   const pending = open.filter((j) => j.nextDate || waitingDays(j, today)).slice(0, 3);
-  const counts = stageCounts(jobs);
+  const work = currentWork(data.career.changes);
+  const history = salaryChanges(data.career.changes).reverse();
+  const { upcoming, past } = splitMeetings(data.career.meetings, today);
+  const todos = openTodos(data.career.meetings);
+  const money = (n: number) => (showSalary ? formatMoney(n) : 'R$ ••••');
+
   return (
     <>
       <PageHeader title="Carreira" subtitle="Onde você está, para onde quer ir e as vagas no caminho." />
+
       <section className="card">
         <div className="card-head">
-          <h2>Próximos passos</h2>
+          <h2>Trabalho atual</h2>
+          {work?.since && <Pill tone="green">Há {tenure(work.since, today)}</Pill>}
+        </div>
+        {work ? (
+          <div className="stack">
+            <div>
+              <div className="career-role">{work.role || 'Cargo não informado'}</div>
+              <div className="muted small">
+                {work.company || 'Empresa não informada'}
+                {work.roleSince ? ` · neste cargo desde ${formatDate(work.roleSince, { month: 'short', year: 'numeric' })}` : ''}
+              </div>
+            </div>
+            <button type="button" className="career-salary" onClick={() => setShowSalary(!showSalary)} aria-label={showSalary ? 'Esconder salário' : 'Mostrar salário'}>
+              <span className="muted small">Salário mensal · toque para {showSalary ? 'esconder' : 'mostrar'}</span>
+              <b>{work.salary ? money(work.salary) : 'Não informado'}</b>
+            </button>
+          </div>
+        ) : (
+          <Empty>Registre seu cargo atual para acompanhar promoções, aumentos e tempo de casa.</Empty>
+        )}
+        <div className="btn-row" style={{ marginTop: 12 }}>
+          <button type="button" className="btn primary" onClick={() => setChangeOpen(true)}>
+            {work ? 'Registrar mudança' : 'Registrar cargo atual'}
+          </button>
+        </div>
+      </section>
+
+      <section className="card">
+        <div className="card-head">
+          <h2>Reuniões</h2>
+          <button type="button" className="link" onClick={createMeeting}>
+            + Nova
+          </button>
+        </div>
+        {upcoming.length === 0 && past.length === 0 ? (
+          <Empty>Guarde pautas, anotações e combinados das reuniões, 1:1 e apresentações. As que repetem (ex.: a cada 2 semanas) já marcam a próxima.</Empty>
+        ) : (
+          <ul className="list">
+            {upcoming.map((m) => (
+              <MeetingRow key={m.id} m={m} onOpen={() => setMeetingId(m.id)} />
+            ))}
+            {past.slice(0, 4).map((m) => (
+              <MeetingRow key={m.id} m={m} past onOpen={() => setMeetingId(m.id)} />
+            ))}
+          </ul>
+        )}
+      </section>
+
+      {todos.length > 0 && (
+        <section className="card">
+          <div className="card-head">
+            <h2>Combinados em aberto</h2>
+            <span className="muted small">{todos.length}</span>
+          </div>
+          <ul className="list">
+            {todos.slice(0, 6).map(({ meeting, todo }) => (
+              <li key={todo.id} className="row">
+                <button type="button" className="career-check" aria-label="Marcar como feito" onClick={() => update(saveMeeting({ ...meeting, todos: meeting.todos.map((t) => (t.id === todo.id ? { ...t, done: true } : t)) }))} />
+                <button type="button" className="row-body career-plain" onClick={() => setMeetingId(meeting.id)}>
+                  <span>{todo.text || 'Sem texto'}</span>
+                  <span className="muted small">
+                    {meetingTitle(meeting)} · {formatDate(meeting.date)}
+                  </span>
+                </button>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+
+      {history.length > 0 && (
+        <section className="card">
+          <div className="card-head">
+            <h2>Cargos e salários</h2>
+          </div>
+          <ul className="list">
+            {history.map(({ change: c, pct }) => (
+              <li key={c.id} className="row">
+                <span className="row-body">
+                  <span className="row-title">
+                    {CHANGE_LABEL[c.kind]}
+                    {c.role ? ` · ${c.role}` : ''}
+                  </span>
+                  <span className="muted small">
+                    {formatDate(c.date, { month: 'short', year: 'numeric' })}
+                    {c.company ? ` · ${c.company}` : ''}
+                    {c.note ? ` · ${c.note}` : ''}
+                  </span>
+                </span>
+                <span className="career-amount">
+                  {c.salary > 0 && <b className="tabular">{money(c.salary)}</b>}
+                  {pct !== null && <span className={`small ${pct >= 0 ? 'career-up' : 'career-down'}`}>{pct >= 0 ? `+${pct}%` : `${pct}%`}</span>}
+                </span>
+                <button type="button" className="icon-btn" aria-label="Excluir registro" onClick={() => confirm('Excluir este registro do histórico?') && update(removeChange(c.id))}>
+                  <Icon name="trash" size={16} />
+                </button>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+
+      <section className="card">
+        <div className="card-head">
+          <h2>Vagas: próximos passos</h2>
           <a className="link" href="#/vagas">
             Ver vagas
           </a>
@@ -101,28 +240,15 @@ export function CarreiraPage() {
             ))}
           </div>
         ) : (
-          <Empty>{open.length ? 'Nenhum passo com data. Abra uma vaga e marque o próximo passo.' : 'Nenhuma vaga ainda. Toque no + para guardar a primeira.'}</Empty>
+          <Empty>{open.length ? `${open.length} vaga(s) em andamento, nenhuma com passo marcado.` : 'Nenhuma vaga em andamento.'}</Empty>
         )}
       </section>
-      <section className="card">
-        <div className="card-head">
-          <h2>Vagas em andamento</h2>
-          <span className="muted small">{open.length}</span>
-        </div>
-        <Funnel counts={counts} value={null} onPick={(s) => (window.location.hash = `/vagas/etapa-${s}`)} />
-      </section>
+
       <section className="card">
         <div className="card-head">
           <h2>Chegando em breve</h2>
         </div>
         <ul className="list">
-          <li className="row">
-            <Icon name="briefcase" />
-            <span className="row-body">
-              <span className="row-title">Trabalho atual</span>
-              <span className="muted small">Cargo, salários e aumentos, feedbacks e 1:1</span>
-            </span>
-          </li>
           <li className="row">
             <Icon name="star" />
             <span className="row-body">
@@ -139,8 +265,264 @@ export function CarreiraPage() {
           </li>
         </ul>
       </section>
+
+      {menu && (
+        <Sheet title="Criar em Carreira" onClose={() => setMenu(false)}>
+          <div className="quick-list">
+            <button type="button" className="tile" onClick={() => { setMenu(false); go('vagas/nova'); }}>
+              <span className="tile-icon"><Icon name="send" /></span>
+              <span className="tile-text"><strong>Nova vaga</strong><span className="muted">Empresa, cargo, etapa e próximo passo</span></span>
+              <Icon name="right" size={18} />
+            </button>
+            <button type="button" className="tile" onClick={() => { setMenu(false); createMeeting(); }}>
+              <span className="tile-icon"><Icon name="calendar" /></span>
+              <span className="tile-text"><strong>Nova reunião</strong><span className="muted">Reunião, 1:1, apresentação, feedback ou avaliação</span></span>
+              <Icon name="right" size={18} />
+            </button>
+            <button type="button" className="tile" onClick={() => { setMenu(false); setChangeOpen(true); }}>
+              <span className="tile-icon"><Icon name="briefcase" /></span>
+              <span className="tile-text"><strong>Mudança de cargo ou salário</strong><span className="muted">Entrada, promoção, aumento ou novo emprego</span></span>
+              <Icon name="right" size={18} />
+            </button>
+          </div>
+        </Sheet>
+      )}
+      {changeOpen && <ChangeSheet onClose={() => setChangeOpen(false)} />}
+      {meetingId && <MeetingSheet id={meetingId} onClose={() => setMeetingId(null)} onOpen={setMeetingId} />}
       {openId && <JobSheet id={openId} onClose={() => setOpenId(null)} />}
     </>
+  );
+}
+
+function saveMeeting(m: Meeting) {
+  return (d: AppData): AppData => {
+    const ms = d.career.meetings.some((x) => x.id === m.id) ? d.career.meetings.map((x) => (x.id === m.id ? m : x)) : [m, ...d.career.meetings];
+    return { ...d, career: { ...d.career, meetings: ms } };
+  };
+}
+function removeMeeting(id: string) {
+  return (d: AppData): AppData => ({ ...d, career: { ...d.career, meetings: d.career.meetings.filter((m) => m.id !== id) }, deleted: { ...d.deleted, [id]: new Date().toISOString() } });
+}
+function removeChange(id: string) {
+  return (d: AppData): AppData => ({ ...d, career: { ...d.career, changes: d.career.changes.filter((c) => c.id !== id) }, deleted: { ...d.deleted, [id]: new Date().toISOString() } });
+}
+
+function MeetingRow({ m, past, onOpen }: { m: Meeting; past?: boolean; onOpen: () => void }) {
+  const open = m.todos.filter((t) => !t.done).length;
+  return (
+    <li>
+      <button type="button" className={`row career-plain${past ? ' career-past' : ''}`} onClick={onOpen}>
+        <Icon name={m.kind === 'apresentacao' ? 'bars' : m.kind === 'umum' ? 'user' : 'calendar'} />
+        <span className="row-body">
+          <span className="row-title">{meetingTitle(m)}</span>
+          <span className="muted small">
+            {relativeDay(m.date)}
+            {m.time ? `, ${m.time}` : ''}
+            {m.repeatDays ? ` · ${REPEAT_OPTIONS.find((r) => r.days === m.repeatDays)?.label.toLowerCase() ?? `a cada ${m.repeatDays} dias`}` : ''}
+            {open ? ` · ${open} combinado(s)` : ''}
+          </span>
+        </span>
+        <Pill tone={m.kind === 'apresentacao' ? 'orange' : m.kind === 'umum' ? 'blue' : 'gray'}>{meetingKindLabel(m.kind)}</Pill>
+      </button>
+    </li>
+  );
+}
+
+/** Registrar entrada, promoção, aumento ou novo emprego. Pergunta antes de mexer em Finanças. */
+function ChangeSheet({ onClose }: { onClose: () => void }) {
+  const { data, update } = useStore();
+  const work = currentWork(data.career.changes);
+  const [kind, setKind] = useState<CareerChangeKind>(work ? 'aumento' : 'entrada');
+  const [date, setDate] = useState(todayISO());
+  const [role, setRole] = useState(work?.role ?? '');
+  const [company, setCompany] = useState(work?.company ?? '');
+  const [cents, setCents] = useState(Math.round((work?.salary ?? 0) * 100));
+  const [note, setNote] = useState('');
+  const [toFinance, setToFinance] = useState(true);
+  const salary = cents / 100;
+  const salaryChanged = salary > 0 && salary !== (work?.salary ?? 0);
+  const income = salaryChanged ? salaryIncomeFrom(data, date) : null;
+  const pct = work?.salary && salaryChanged ? Math.round(((salary - work.salary) / work.salary) * 100) : null;
+
+  function save() {
+    const c: CareerChange = { id: uid(), date, kind, role: role.trim(), company: company.trim(), salary, note: note.trim() };
+    update((d) => {
+      const next = { ...d, career: { ...d.career, changes: [...d.career.changes, c] } };
+      return income && toFinance ? applySalaryToFinance(next, salary, date) : next;
+    });
+    notify('Registrado', income && toFinance ? 'Receita de salário atualizada em Finanças.' : CHANGE_LABEL[kind]);
+    onClose();
+  }
+
+  return (
+    <Sheet
+      title={work ? 'Registrar mudança' : 'Cargo atual'}
+      onClose={onClose}
+      footer={
+        <button type="button" className="btn primary block" onClick={save} disabled={!role.trim() && !company.trim() && !salary}>
+          Salvar
+        </button>
+      }
+    >
+      <div className="stack">
+        <Group label="O que mudou">
+          <Chips label="O que mudou" options={(Object.keys(CHANGE_LABEL) as CareerChangeKind[]).map((k) => ({ value: k, label: CHANGE_LABEL[k] }))} value={kind} onChange={setKind} />
+        </Group>
+        <Field label="A partir de">
+          <input className="input" type="date" value={date} onChange={(e) => setDate(e.target.value || todayISO())} />
+        </Field>
+        <Field label="Cargo">
+          <input className="input" value={role} onChange={(e) => setRole(e.target.value)} placeholder="Ex.: Analista de Contratos" />
+        </Field>
+        <Field label="Empresa">
+          <input className="input" value={company} onChange={(e) => setCompany(e.target.value)} placeholder="Onde você trabalha" />
+        </Field>
+        <Field label="Salário mensal" hint={pct !== null ? `${pct >= 0 ? '+' : ''}${pct}% sobre o anterior` : 'Opcional. Fica escondido na tela até você tocar.'}>
+          <MoneyInput cents={cents} onChange={setCents} label="Salário mensal" />
+        </Field>
+        <Field label="Observação">
+          <input className="input" value={note} onChange={(e) => setNote(e.target.value)} placeholder="Ex.: dissídio + mérito" />
+        </Field>
+        {income && (
+          <div className="job-ask">
+            <Toggle checked={toFinance} onChange={setToFinance} label={`Atualizar também a receita "${income.description}" em Finanças a partir de ${formatDate(income.date)}`} />
+          </div>
+        )}
+      </div>
+    </Sheet>
+  );
+}
+
+/** Ficha da reunião (salva sozinha). Reunião vazia some ao fechar. */
+function MeetingSheet({ id, onClose, onOpen }: { id: string; onClose: () => void; onOpen: (id: string) => void }) {
+  const { data, update } = useStore();
+  const [todo, setTodo] = useState('');
+  const m = data.career.meetings.find((x) => x.id === id);
+  if (!m) return null;
+  const set = (patch: Partial<Meeting>) => update(saveMeeting({ ...m, ...patch }));
+  const event = m.eventId ? data.events.find((e) => e.id === m.eventId) : undefined;
+  const synced = event && event.date === m.date && event.time === m.time && event.title === meetingTitle(m);
+
+  function close() {
+    if (m && isBlankMeeting(m)) update(removeMeeting(m.id));
+    onClose();
+  }
+  function addTodo() {
+    if (!m || !todo.trim()) return;
+    set({ todos: [...m.todos, { id: uid(), text: todo.trim(), done: false }] });
+    setTodo('');
+  }
+  function toAgenda() {
+    if (!m) return;
+    const ev = meetingEvent(m, m.eventId ?? uid());
+    update((d) => {
+      const events = d.events.some((e) => e.id === ev.id) ? d.events.map((e) => (e.id === ev.id ? ev : e)) : [ev, ...d.events];
+      return saveMeeting({ ...m, eventId: ev.id })({ ...d, events });
+    });
+    notify(event ? 'Agenda atualizada' : 'Na Agenda', `${relativeDay(ev.date)}${ev.time ? `, ${ev.time}` : ''}`);
+  }
+  function scheduleNext() {
+    if (!m) return;
+    const n = nextMeeting(m, uid());
+    if (!n) return;
+    update((d) => saveMeeting(n)(saveMeeting({ ...m, nextCreated: true })(d)));
+    notify('Próxima marcada', `${formatDate(n.date)}${n.todos.length ? ` · ${n.todos.length} combinado(s) levados` : ''}`);
+    onOpen(n.id);
+  }
+
+  return (
+    <Sheet title={isBlankMeeting(m) ? 'Nova reunião' : meetingTitle(m)} onClose={close}>
+      <div className="stack">
+        <Group label="Tipo">
+          <Chips label="Tipo" options={MEETING_KINDS_UI.map((k) => ({ value: k.id, label: k.label }))} value={m.kind} onChange={(kind) => set({ kind })} />
+        </Group>
+        <Field label="Assunto">
+          <input className="input" value={m.title} onChange={(e) => set({ title: e.target.value })} placeholder={m.kind === 'apresentacao' ? 'Ex.: Avanços do repasse e contratos' : 'Ex.: Alinhamento da semana'} />
+        </Field>
+        <Field label="Com quem">
+          <input className="input" value={m.with} onChange={(e) => set({ with: e.target.value })} placeholder="Pessoa, equipe ou setor" />
+        </Field>
+        <div className="grid-2">
+          <Field label="Dia">
+            <input className="input" type="date" value={m.date} onChange={(e) => e.target.value && set({ date: e.target.value })} />
+          </Field>
+          <Field label="Hora (opcional)">
+            <input className="input" type="time" value={m.time} onChange={(e) => set({ time: e.target.value })} />
+          </Field>
+        </div>
+        <Group label="Repete">
+          <Chips label="Repete" options={REPEAT_OPTIONS.map((r) => ({ value: String(r.days), label: r.label }))} value={String(m.repeatDays)} onChange={(v) => set({ repeatDays: Number(v) })} />
+        </Group>
+        <div className="job-ask">
+          {synced ? (
+            <span className="muted small">
+              <Icon name="check" size={14} /> Está na Agenda.
+            </span>
+          ) : (
+            <>
+              <span>{event ? 'A reunião mudou. Atualizar na Agenda?' : 'Pôr esta reunião na Agenda?'}</span>
+              <div className="btn-row">
+                <button type="button" className="btn primary" onClick={toAgenda}>
+                  {event ? 'Atualizar na Agenda' : 'Pôr na Agenda'}
+                </button>
+              </div>
+            </>
+          )}
+        </div>
+        <Field label="Pauta e anotações">
+          <textarea className="input" rows={5} value={m.notes} onChange={(e) => set({ notes: e.target.value })} placeholder="O que levar, o que foi falado, decisões…" />
+        </Field>
+        <Field label="Link dos slides ou material" hint="Anexar o arquivo dentro do app fica para depois; por enquanto, o link (Drive, OneDrive…).">
+          <input className="input" value={m.link} onChange={(e) => set({ link: e.target.value })} placeholder="https://…" inputMode="url" />
+        </Field>
+        {m.link.trim() && (
+          <a className="link small" href={/^https?:\/\//.test(m.link.trim()) ? m.link.trim() : `https://${m.link.trim()}`} target="_blank" rel="noreferrer">
+            <Icon name="ext" size={14} /> Abrir material
+          </a>
+        )}
+        <div>
+          <p className="field-label">Combinados</p>
+          <ul className="list">
+            {m.todos.map((t) => (
+              <li key={t.id} className="row">
+                <button type="button" className={`career-check${t.done ? ' on' : ''}`} aria-label={t.done ? 'Desmarcar' : 'Marcar como feito'} onClick={() => set({ todos: m.todos.map((x) => (x.id === t.id ? { ...x, done: !x.done } : x)) })}>
+                  {t.done && <Icon name="check" size={13} />}
+                </button>
+                <span className={`row-body${t.done ? ' career-done' : ''}`}>{t.text}</span>
+                <button type="button" className="icon-btn" aria-label="Remover combinado" onClick={() => set({ todos: m.todos.filter((x) => x.id !== t.id) })}>
+                  <Icon name="x" size={14} />
+                </button>
+              </li>
+            ))}
+          </ul>
+          <div className="career-add">
+            <input className="input" value={todo} onChange={(e) => setTodo(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && addTodo()} placeholder="Novo combinado" aria-label="Novo combinado" />
+            <button type="button" className="btn soft" onClick={addTodo} disabled={!todo.trim()}>
+              Adicionar
+            </button>
+          </div>
+        </div>
+        {m.repeatDays > 0 && !m.nextCreated && (
+          <button type="button" className="btn soft" onClick={scheduleNext}>
+            Marcar a próxima ({formatDate(addDays(m.date, m.repeatDays))})
+          </button>
+        )}
+        {!isBlankMeeting(m) && (
+          <button type="button" className="btn danger" onClick={() => confirm('Excluir esta reunião? O compromisso na Agenda, se houver, continua lá.') && (update(removeMeeting(m.id)), onClose())}>
+            <Icon name="trash" size={16} /> Excluir reunião
+          </button>
+        )}
+      </div>
+    </Sheet>
+  );
+}
+
+function Group({ label, children }: { label: string; children: ReactNode }) {
+  return (
+    <div className="field" role="group" aria-label={label}>
+      <span className="field-label">{label}</span>
+      {children}
+    </div>
   );
 }
 
@@ -295,7 +677,7 @@ function JobSheet({ id, onClose }: { id: string; onClose: () => void }) {
 
         {isOpen(j) ? (
           <>
-            <Field label="Etapa">
+            <Group label="Etapa">
               <div className="job-steps" role="radiogroup" aria-label="Etapa">
                 {STAGES.map((s) => (
                   <button key={s.id} type="button" role="radio" aria-checked={j.stage === s.id} className={stageIndex(s.id) < stageIndex(j.stage) ? 'done' : j.stage === s.id ? 'cur' : ''} onClick={() => update(saveJob(setStage(j, s.id, today)))}>
@@ -304,7 +686,7 @@ function JobSheet({ id, onClose }: { id: string; onClose: () => void }) {
                   </button>
                 ))}
               </div>
-            </Field>
+            </Group>
             <div className="btn-row">
               {j.stage !== 'proposta' && (
                 <button type="button" className="btn primary" onClick={() => update(saveJob(advance(j, today)))}>

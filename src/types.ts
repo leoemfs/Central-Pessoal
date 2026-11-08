@@ -618,6 +618,43 @@ export interface JobApp {
   createdAt: string;
 }
 
+/** Mudança no trabalho: entrada, promoção, aumento, novo emprego. A mais recente é o trabalho atual. */
+export type CareerChangeKind = 'entrada' | 'promocao' | 'aumento' | 'novoemprego';
+export interface CareerChange {
+  id: string;
+  date: string;
+  kind: CareerChangeKind;
+  role: string;
+  company: string;
+  /** Salário mensal em reais (0 = não informado). */
+  salary: number;
+  note: string;
+}
+
+export type MeetingKind = 'reuniao' | 'umum' | 'apresentacao' | 'feedback' | 'avaliacao';
+export interface Meeting {
+  id: string;
+  kind: MeetingKind;
+  title: string;
+  /** Com quem (pessoa, equipe, setor). */
+  with: string;
+  date: string;
+  time: string;
+  /** Pauta e anotações. */
+  notes: string;
+  /** Combinados (o que ficou para fazer). */
+  todos: { id: string; text: string; done: boolean }[];
+  /** Link dos slides ou do material. */
+  link: string;
+  /** Repete a cada N dias (0 = não repete). */
+  repeatDays: number;
+  /** Já criou a próxima da série. */
+  nextCreated: boolean;
+  eventId: string | null;
+}
+
 export interface CareerData {
   jobs: JobApp[];
+  changes: CareerChange[];
+  meetings: Meeting[];
 }

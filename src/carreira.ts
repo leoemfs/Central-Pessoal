@@ -3,7 +3,9 @@
  * Etapas em andamento: interesse → enviei → entrevista → proposta.
  * Encerrar: contratado, não passei ou desisti (a vaga vai para "Encerradas").
  */
-import type { CalendarEvent, CareerData, JobApp, JobOutcome, JobStage } from './types';
+import type { AppData, CalendarEvent, CareerChange, CareerChangeKind, CareerData, JobApp, JobOutcome, JobStage, Meeting, MeetingKind } from './types';
+import { editIncome } from './incomes.ts';
+import { addDays } from './utils.ts';
 
 export const STAGES: { id: JobStage; label: string }[] = [
   { id: 'interesse', label: 'Interesse' },
@@ -25,17 +27,55 @@ export const stageLabel = (s: JobStage | JobOutcome) => STAGES.find((x) => x.id 
 export const stageIndex = (s: JobStage) => STAGE_IDS.indexOf(s);
 
 export function emptyCareer(): CareerData {
-  return { jobs: [] };
+  return { jobs: [], changes: [], meetings: [] };
 }
 
 const isRec = (v: unknown): v is Record<string, unknown> => typeof v === 'object' && v !== null && !Array.isArray(v);
 const str = (v: unknown) => (typeof v === 'string' ? v : '');
 const isDate = (v: unknown): v is string => typeof v === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(v);
 
+const CHANGE_KINDS: CareerChangeKind[] = ['entrada', 'promocao', 'aumento', 'novoemprego'];
+const MEETING_KINDS: MeetingKind[] = ['reuniao', 'umum', 'apresentacao', 'feedback', 'avaliacao'];
+
+function normalizeChange(c: Record<string, unknown>): CareerChange {
+  return {
+    id: c.id as string,
+    date: c.date as string,
+    kind: CHANGE_KINDS.includes(c.kind as CareerChangeKind) ? (c.kind as CareerChangeKind) : 'aumento',
+    role: str(c.role),
+    company: str(c.company),
+    salary: typeof c.salary === 'number' && c.salary > 0 ? c.salary : 0,
+    note: str(c.note),
+  };
+}
+
+function normalizeMeeting(m: Record<string, unknown>): Meeting {
+  return {
+    id: m.id as string,
+    kind: MEETING_KINDS.includes(m.kind as MeetingKind) ? (m.kind as MeetingKind) : 'reuniao',
+    title: str(m.title),
+    with: str(m.with),
+    date: m.date as string,
+    time: str(m.time),
+    notes: str(m.notes),
+    todos: (Array.isArray(m.todos) ? m.todos : []).filter(isRec).filter((t) => typeof t.id === 'string').map((t) => ({ id: t.id as string, text: str(t.text), done: t.done === true })),
+    link: str(m.link),
+    repeatDays: typeof m.repeatDays === 'number' && m.repeatDays > 0 ? Math.round(m.repeatDays) : 0,
+    nextCreated: m.nextCreated === true,
+    eventId: typeof m.eventId === 'string' ? m.eventId : null,
+  };
+}
+
+const withIdDate = (v: unknown): Record<string, unknown>[] => (Array.isArray(v) ? v : []).filter(isRec).filter((x) => typeof x.id === 'string' && isDate(x.date));
+
 export function normalizeCareer(raw: unknown): CareerData {
   const r = isRec(raw) ? raw : {};
+  const changes = withIdDate(r.changes).map(normalizeChange);
+  const meetings = withIdDate(r.meetings).map(normalizeMeeting);
   const jobs = (Array.isArray(r.jobs) ? r.jobs : []).filter(isRec).filter((j) => typeof j.id === 'string');
   return {
+    changes,
+    meetings,
     jobs: jobs.map((j): JobApp => {
       const stage = STAGE_IDS.includes(j.stage as JobStage) ? (j.stage as JobStage) : 'interesse';
       const outcome = OUTCOME_IDS.includes(j.outcome as JobOutcome) ? (j.outcome as JobOutcome) : null;
@@ -159,4 +199,120 @@ export function jobEvent(j: JobApp, id: string): CalendarEvent | null {
   const what = j.next.trim() || stageLabel(j.stage);
   const who = [j.role.trim(), j.company.trim()].filter(Boolean).join(' · ');
   return { id, title: who ? `${what} (${who})` : what, date: j.nextDate, time: j.nextTime, location: '', description: 'Criado em Carreira › Vagas.' };
+}
+
+// ---------- Trabalho atual (N8.2) ----------
+
+export const CHANGE_LABEL: Record<CareerChangeKind, string> = { entrada: 'Entrada', promocao: 'Promoção', aumento: 'Aumento', novoemprego: 'Novo emprego' };
+
+/** Mudanças da mais antiga para a mais recente. */
+export const sortedChanges = (cs: CareerChange[]) => cs.slice().sort((a, b) => a.date.localeCompare(b.date));
+
+/** Trabalho atual: cargo e empresa da última mudança que os informou; salário da última com valor; desde quando está na empresa. */
+export function currentWork(cs: CareerChange[]): { role: string; company: string; salary: number; since: string | null; roleSince: string | null } | null {
+  const list = sortedChanges(cs);
+  if (!list.length) return null;
+  let role = '';
+  let company = '';
+  let salary = 0;
+  let since: string | null = null;
+  let roleSince: string | null = null;
+  for (const c of list) {
+    if (c.kind === 'entrada' || c.kind === 'novoemprego' || (c.company.trim() && c.company.trim() !== company)) since = c.date;
+    if (c.company.trim()) company = c.company.trim();
+    if (c.role.trim() && c.role.trim() !== role) {
+      role = c.role.trim();
+      roleSince = c.date;
+    }
+    if (c.salary > 0) salary = c.salary;
+  }
+  return { role, company, salary, since: since ?? list[0].date, roleSince };
+}
+
+/** Variação do salário de cada mudança em relação ao salário anterior (em %; null sem base). */
+export function salaryChanges(cs: CareerChange[]): { change: CareerChange; pct: number | null }[] {
+  let last = 0;
+  return sortedChanges(cs).map((c) => {
+    const pct = c.salary > 0 && last > 0 ? Math.round(((c.salary - last) / last) * 100) : null;
+    if (c.salary > 0) last = c.salary;
+    return { change: c, pct };
+  });
+}
+
+/** "1 ano e 8 meses", "3 meses", "menos de 1 mês". */
+export function tenure(since: string, today: string): string {
+  const [y1, m1, d1] = since.split('-').map(Number);
+  const [y2, m2, d2] = today.split('-').map(Number);
+  let months = (y2 - y1) * 12 + (m2 - m1) - (d2 < d1 ? 1 : 0);
+  if (months < 1) return 'menos de 1 mês';
+  const y = Math.floor(months / 12);
+  months %= 12;
+  const ys = y ? `${y} ano${y > 1 ? 's' : ''}` : '';
+  const ms = months ? `${months} ${months > 1 ? 'meses' : 'mês'}` : '';
+  return [ys, ms].filter(Boolean).join(' e ');
+}
+
+/** Receita mensal de salário em Finanças: a primeira ainda não recebida, de uma série cuja fonte ou descrição é "Salário", a partir da data. */
+export function salaryIncomeFrom(d: AppData, from: string) {
+  const sal = d.incomeSources.filter((s) => /sal[aá]rio/i.test(s.name)).map((s) => s.id);
+  return d.incomes
+    .filter((i) => i.seriesId && !i.receivedAt && i.date >= from && (sal.includes(i.sourceId) || /sal[aá]rio/i.test(i.description)))
+    .sort((a, b) => a.date.localeCompare(b.date))[0] ?? null;
+}
+
+/** Atualiza o valor da receita de salário em Finanças a partir da data (esta e as próximas ainda não recebidas). */
+export function applySalaryToFinance(d: AppData, amount: number, from: string): AppData {
+  const inc = salaryIncomeFrom(d, from);
+  if (!inc || amount <= 0) return d;
+  return editIncome(d, inc.id, { description: inc.description, sourceId: inc.sourceId, amount, date: inc.date }, 'next');
+}
+
+// ---------- Reuniões ----------
+
+export const MEETING_KINDS_UI: { id: MeetingKind; label: string }[] = [
+  { id: 'reuniao', label: 'Reunião' },
+  { id: 'umum', label: '1:1' },
+  { id: 'apresentacao', label: 'Apresentação' },
+  { id: 'feedback', label: 'Feedback' },
+  { id: 'avaliacao', label: 'Avaliação' },
+];
+export const meetingKindLabel = (k: MeetingKind) => MEETING_KINDS_UI.find((x) => x.id === k)?.label ?? 'Reunião';
+
+export const REPEAT_OPTIONS: { days: number; label: string }[] = [
+  { days: 0, label: 'Não repete' },
+  { days: 7, label: 'Toda semana' },
+  { days: 14, label: 'A cada 2 semanas' },
+  { days: 28, label: 'A cada 4 semanas' },
+];
+
+export function newMeeting(id: string, date: string): Meeting {
+  return { id, kind: 'reuniao', title: '', with: '', date, time: '', notes: '', todos: [], link: '', repeatDays: 0, nextCreated: false, eventId: null };
+}
+
+export const meetingTitle = (m: Meeting) => m.title.trim() || meetingKindLabel(m.kind) + (m.with.trim() ? ` com ${m.with.trim()}` : '');
+export const isBlankMeeting = (m: Meeting) => !m.title.trim() && !m.with.trim() && !m.notes.trim() && !m.todos.length && !m.link.trim();
+
+/** Próximas (a partir de hoje, mais cedo antes) e anteriores (mais recente antes). */
+export function splitMeetings(ms: Meeting[], today: string) {
+  const key = (m: Meeting) => m.date + (m.time || '99:99');
+  return {
+    upcoming: ms.filter((m) => m.date >= today).sort((a, b) => key(a).localeCompare(key(b))),
+    past: ms.filter((m) => m.date < today).sort((a, b) => key(b).localeCompare(key(a))),
+  };
+}
+
+/** Combinados ainda abertos, de todas as reuniões. */
+export const openTodos = (ms: Meeting[]) => ms.flatMap((m) => m.todos.filter((t) => !t.done).map((t) => ({ meeting: m, todo: t })));
+
+/**
+ * Próxima reunião da série: mesma pauta-base, N dias depois, sem anotações;
+ * combinados não feitos vão junto, para cobrar na próxima.
+ */
+export function nextMeeting(m: Meeting, id: string): Meeting | null {
+  if (!m.repeatDays) return null;
+  return { ...m, id, date: addDays(m.date, m.repeatDays), notes: '', todos: m.todos.filter((t) => !t.done), nextCreated: false, eventId: null };
+}
+
+export function meetingEvent(m: Meeting, id: string): CalendarEvent {
+  return { id, title: meetingTitle(m), date: m.date, time: m.time, location: '', description: 'Criado em Carreira › Reuniões.' };
 }

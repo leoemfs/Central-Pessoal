@@ -71,9 +71,9 @@ export const SECTIONS: Section[] = [
   { path: 'estudos', label: 'Estudos', icon: 'cap', view: Estudos },
   { path: 'ciclos', label: 'Ciclos', icon: 'repeat', view: CiclosPage },
   { path: 'roadmaps', label: 'Roadmaps', icon: 'route', view: RoadmapsPage },
-  { path: 'carreira', label: 'Carreira', icon: 'briefcase', view: CarreiraPage, fab: 'vagas/nova' },
+  { path: 'carreira', label: 'Carreira', icon: 'briefcase', view: CarreiraPage, fab: 'carreira/menu' },
   { path: 'vagas', label: 'Vagas', icon: 'send', view: VagasPage, fab: 'vagas/nova' },
-  { path: 'metas', label: 'Metas', icon: 'target', view: MetasPage, fab: 'vagas/nova' },
+  { path: 'metas', label: 'Metas', icon: 'target', view: MetasPage, fab: 'carreira/menu' },
 ];
 
 export const COMING_SOON: { label: string; icon: IconName; hint: string }[] = [

@@ -1,6 +1,6 @@
 # Módulo Carreira (N8)
 
-> Situação: **N8.1 (Vagas) pronta na v0.22 (08/11)**; faltam N8.2 a N8.4, pedido do Leonardo: um módulo **próprio**, separado de Estudos.
+> Situação: **N8.1 Vagas (v0.22) e N8.2 Trabalho e Reuniões (v0.23) prontas (08/11)**; faltam N8.3 e N8.4, pedido do Leonardo: um módulo **próprio**, separado de Estudos.
 > **Prévia N8.0 (08/11):** https://claude.ai/artifact/3DxpiHU7f6merD3dk6Hqmp
 > Partes escolhidas: vagas e candidaturas, metas de carreira, currículo e conquistas, trabalho atual.
 
@@ -32,6 +32,17 @@ Um lugar para acompanhar a vida profissional: onde estou (trabalho atual), onde 
 ## Decidido
 - **Nome do módulo de Estudos:** passou a ser só **"Estudos"** (v0.22); a área Carreira continua na Biblioteca.
 - **Vagas em lista** com o contador de etapas no topo (pergunta 2), como na prévia.
+- **Salário escondido**, toque para mostrar (pergunta 3).
+- **Reuniões entram na N8.2** (pedido do Leonardo: apresenta avanços do setor de repasse e gestão de contratos de prestadores sexta sim, sexta não). Por enquanto a casa não tem abas; Trabalho fica na casa e as abas Trabalho · Currículo entram com a N8.3.
+
+## O que foi construído (v0.23, N8.2)
+- **Trabalho atual** na casa: cargo, empresa, "há X anos e Y meses", salário escondido até tocar.
+- **Registrar mudança** (entrada, promoção, aumento, novo emprego): data, cargo, empresa, salário (mostra a variação) e observação. Se existe receita mensal de Salário em Finanças, pergunta (já marcado) se atualiza o valor a partir da data, só nas ainda não recebidas.
+- **Cargos e salários**: histórico com a variação em %, e excluir registro.
+- **Reuniões**: tipo (reunião, 1:1, apresentação, feedback, avaliação), assunto, com quem, dia e hora, repetição (toda semana, a cada 2 ou 4 semanas), pauta e anotações, link dos slides, combinados com check, "Pôr na Agenda" (ou atualizar). "Marcar a próxima" cria a seguinte da série com os combinados não feitos.
+- **Combinados em aberto** de todas as reuniões na casa, com check direto.
+- Botão + na casa: nova vaga, nova reunião, mudança de cargo ou salário.
+- **Depois:** anexar os slides dentro do app (hoje só o link).
 
 ## O que foi construído (v0.22, N8.1)
 - Casa **Carreira**: próximos passos (até 3), contador por etapa (leva a Vagas já filtrada) e o que vem em breve.
@@ -44,7 +55,7 @@ Um lugar para acompanhar a vida profissional: onde estou (trabalho atual), onde 
 ## Perguntas da prévia (responder antes da N8.1)
 1. A casa abre em Trabalho ou em Currículo?
 2. ~~Vagas: lista ou colunas?~~ Lista (decidido na v0.22).
-3. Salário aberto ou escondido (toque para mostrar)?
+3. ~~Salário?~~ Escondido, toque para mostrar (decidido).
 4. Cartão "Próximo passo" no Início já ligado ou desligado no lápis?
 
 ## Tamanho e divisão
@@ -53,7 +64,7 @@ Total: **G**. Dividir em partes, uma versão cada:
 |---|---|---|
 | N8.0 | Prévia visual navegável (Artifact) para decidir telas e barra | M · feito |
 | N8.1 | Módulo base + **Vagas e candidaturas** (etapas, próximo passo, histórico) | M · feito (v0.22) |
-| N8.2 | **Trabalho atual** (cargos, salários, feedbacks e 1:1; pergunta sobre Finanças) | M |
+| N8.2 | **Trabalho atual** (cargos, salários; pergunta sobre Finanças) e **Reuniões** (1:1, apresentações, feedbacks, combinados) | M · feito (v0.23) |
 | N8.3 | **Currículo e conquistas** (+ trazer ciclos concluídos de Estudos) | M |
 | N8.4 | **Metas de carreira** (passos ligados a Estudos e Vagas) + cartão no Início | P |
 
