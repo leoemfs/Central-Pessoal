@@ -47,7 +47,7 @@
 | N3 | Notificações | NOVO | M | baixa | especificado | `futuro/notificacoes.md` |
 | N4 | App Android | NOVO | G | baixa | especificado | `futuro/app-android.md` |
 | N5 | Código de barras, base de produtos e nota fiscal | NOVO | G | baixa | ideia | `futuro/precos-v2.md` ("Mais adiante") |
-| N6 | Módulo Estudos e Carreira: Biblioteca (áreas, trilhas, tópicos de referência), Ciclos pessoais, Meus notebooks, Fontes, Mapas mentais e Roadmaps. Dividir em N6.0 (prévia) a N6.4 | NOVO | G | média | ideia (especificando; layout a definir juntos) | `futuro/modulo-estudos.md` |
+| N6 | Módulo Estudos e Carreira: Biblioteca (áreas, trilhas, tópicos de referência), Ciclos pessoais, Meus notebooks, Fontes, Mapas mentais e Roadmaps. Dividir em N6.0 (prévia) a N6.4 | NOVO | G | média | ideia (especificando; prévia N6.0 feita em 08/11, layout em avaliação) | `futuro/modulo-estudos.md` |
 
 **Depende de outra coisa:** N3 fica melhor junto com N4 (notificações de verdade no Android). N2 e N5 dependem de decisões e integrações.
 
@@ -90,6 +90,7 @@ Documentos sem código: módulos personalizáveis, pausar e arquivar, ROADMAP e 
 | Jornada (pets, Codex, acessórios, visitas) | https://claude.ai/artifact/LDdQDmTYY3j56etqqMc9Qc |
 | Jornada RPG (avatar, arsenal, forja) | https://claude.ai/artifact/62xbF4H9CfYjaz7RaX554h |
 | Navegação 2.0: barra só com ícones, favoritos e lápis (E1, E2, E3) | https://claude.ai/artifact/4hm9BrHkSWd1nEwLz5p2j7 |
+| Estudos e Carreira (N6.0): Biblioteca, trilhas, ciclos, notebooks, fontes, mapas e roadmaps | https://claude.ai/artifact/WJ3kw4zvwtdDKTiUVUB3rD |
 | Central Pessoal (prévia geral antiga) | https://claude.ai/artifact/WHbDkKXN4LArCQ8sjuQqVt |
 
 ## Regras para construir

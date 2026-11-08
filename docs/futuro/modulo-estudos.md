@@ -1,7 +1,8 @@
 # Módulo Estudos e Carreira (N6)
 
 > Situação: **ideia, especificando** (08/11). Documento original do Leonardo recebido na conversa; aqui fica o resumo e as decisões.
-> **Layout ainda não definido:** será decidido junto com o Leonardo. Nada aqui é desenho de tela.
+> **Layout ainda não definido:** será decidido junto com o Leonardo. Nome confirmado: **Estudos e Carreira** (antes pensado como "Estudos e trabalho").
+> **Prévia N6.0 (08/11):** https://claude.ai/artifact/WJ3kw4zvwtdDKTiUVUB3rD. É uma proposta para avaliar, não é o layout final.
 
 ## Para que serve
 Um espaço pessoal para organizar, explorar e desenvolver conhecimentos. **Não é** plataforma de cursos, escola nem sistema de exercícios.
