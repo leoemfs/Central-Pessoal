@@ -22,6 +22,7 @@ import { ComprasPage, Listas, PrecosPage } from './modules/Listas';
 import { HistoricoPage, ProgressoPage } from './modules/Progresso';
 import { ProximosPage } from './modules/Proximos';
 import { HumorPage } from './modules/Humor';
+import { useCardEditor } from './Cards';
 import { activeIndex, barFor, crumb, favoriteItems, type BarItem } from './moduleBar';
 
 export interface ViewProps {
@@ -255,6 +256,7 @@ export function App() {
   const barHidden = useHideOnScroll(`${section.path}:${route.n}`);
   const bar = barFor(section.path);
   const barIndex = bar ? activeIndex(bar, section.path) : null;
+  const editor = useCardEditor();
   const where = bar ? crumb(bar, barIndex) : null;
   const middle: BarItem[] = bar ? bar.items : favoriteItems(data.settings.favorites);
 
@@ -294,6 +296,11 @@ export function App() {
         <button type="button" className="icon-btn" onClick={() => (section.search ? goReplace(section.search) : setSearch(true))} aria-label={section.search ? 'Buscar no diário' : 'Buscar em tudo'}>
           <Icon name="search" />
         </button>
+        {editor.screen && (
+          <button type="button" className={`icon-btn${editor.editing ? ' on' : ''}`} onClick={editor.toggle} aria-label={editor.editing ? 'Terminar de personalizar' : 'Personalizar cartões'} aria-pressed={editor.editing}>
+            <Icon name="edit" />
+          </button>
+        )}
       </header>
 
       <nav className="sidebar" aria-label="Seções">

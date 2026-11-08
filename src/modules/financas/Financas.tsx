@@ -8,6 +8,7 @@ import {
 import { addMonths, formatDMY, formatMoney, formatMonth, monthKey, todayISO } from '../../utils';
 import { CategoryBadge, Chips, Empty, Icon, type IconName, MonthNav, PageHeader, Pill, Progress, Segmented, Sheet } from '../../ui';
 import { FinanceCategoriesSheet } from './Categorias';
+import { CardScreen } from '../../Cards';
 import { CardForm } from './CardForm';
 import { ExpenseDetail } from './ExpenseDetail';
 import { ExpenseForm } from './ExpenseForm';
@@ -94,96 +95,105 @@ export function Financas({ route }: ViewProps) {
         <ReceitasTab month={month} />
       ) : tab === 'mes' ? (
         <>
-          <section className="card" aria-label="Resumo do mês">
-            <div className="summary">
-              <div className="summary-box">
-                <span className="label">Total do mês</span>
-                <span className="value">{formatMoney(summary.total)}</span>
-              </div>
-              <button type="button" className="summary-box tappable" onClick={() => showOnly('pagas')} aria-label={`Já pago: ${formatMoney(summary.paid)}. Ver as contas pagas`}>
-                <span className="label">
-                  Já pago <Icon name="right" size={14} />
-                </span>
-                <span className="value green">{formatMoney(summary.paid)}</span>
-              </button>
-              <button type="button" className="summary-box full tappable" onClick={() => showOnly('abertas')} aria-label={`Em aberto: ${formatMoney(summary.open)}. Ver as contas em aberto`}>
-                <span className="label">
-                  Em aberto {summary.open > 0 ? <Pill tone="orange">Pendente</Pill> : summary.total > 0 ? <Pill tone="green">Tudo pago</Pill> : null}
-                </span>
-                <span className={`value ${summary.open > 0 ? 'orange' : ''}`}>{formatMoney(summary.open)}</span>
-                <Progress pct={summary.pct} />
-                <p className="summary-foot">
-                  {pctFmt(summary.pct)} pago · {pctFmt(summary.total ? 100 - summary.pct : 0)} em aberto
-                </p>
-              </button>
-            </div>
-          </section>
-
-          <section className="card bills-card" ref={listRef}>
-            <div className="card-head">
-              <h2>Contas por vencimento</h2>
-              <span className="muted small">{shownBills.length} lançamento(s)</span>
-            </div>
-            {bills.length > 0 && (
-              <Chips
-                label="Mostrar"
-                value={filter}
-                onChange={setFilter}
-                options={[
-                  { value: 'todas', label: `Todas (${bills.length})` },
-                  { value: 'pagas', label: `Pagas (${paidCount})` },
-                  { value: 'abertas', label: `Em aberto (${bills.length - paidCount})` },
-                ]}
-              />
-            )}
-            {bills.length === 0 ? (
-              <div className="empty">
-                <p>Nenhuma despesa em {formatMonth(month).toLowerCase()}. Toque em + para lançar.</p>
-              </div>
-            ) : shownBills.length === 0 ? (
-              <p className="muted small">{filter === 'pagas' ? 'Nenhuma conta paga ainda neste mês.' : 'Tudo pago neste mês.'}</p>
-            ) : (
-              <ul className="list">
-                {shownBills.map((b) => (
-                  <li key={b.key}>
-                    <BillRow bill={b} today={today} onClick={() => openBill(b)} categoryOf={categoryOf} />
-                  </li>
-                ))}
-              </ul>
-            )}
-          </section>
-
-          {cats.length > 0 && (
-            <section className="card">
-              <div className="card-head">
-                <h2>Distribuição de despesas</h2>
-                <span className="muted small">{formatMoney(catTotal)}</span>
-              </div>
-              <SplitBar parts={cats.map((c) => ({ id: c.categoryId, label: categoryOf(c.categoryId).name, color: categoryOf(c.categoryId).color, amount: c.amount }))} total={catTotal} />
-              <ul className="bars">
-                {cats.map((c) => {
-                  const cat = categoryOf(c.categoryId);
-                  const pct = catTotal ? (c.amount / catTotal) * 100 : 0;
-                  return (
-                    <li key={c.categoryId} className="bar-row">
-                      <CategoryBadge icon={cat.icon} color={cat.color} size={34} />
-                      <div className="bar-body">
-                        <div className="bar-head">
-                          <span>{cat.name}</span>
-                          <span className="muted tabular">
-                            {formatMoney(c.amount)} · {pct.toFixed(0)}%
-                          </span>
-                        </div>
-                        <div className="bar">
-                          <div style={{ width: `${pct}%`, background: cat.color }} />
-                        </div>
-                      </div>
-                    </li>
-                  );
-                })}
-              </ul>
-            </section>
-          )}
+          <CardScreen
+            screen="financas"
+            cards={[
+              { id: 'resumo', label: 'Resumo do mês', lock: 'top', node: (
+                <section className="card" aria-label="Resumo do mês">
+                  <div className="summary">
+                    <div className="summary-box">
+                      <span className="label">Total do mês</span>
+                      <span className="value">{formatMoney(summary.total)}</span>
+                    </div>
+                    <button type="button" className="summary-box tappable" onClick={() => showOnly('pagas')} aria-label={`Já pago: ${formatMoney(summary.paid)}. Ver as contas pagas`}>
+                      <span className="label">
+                        Já pago <Icon name="right" size={14} />
+                      </span>
+                      <span className="value green">{formatMoney(summary.paid)}</span>
+                    </button>
+                    <button type="button" className="summary-box full tappable" onClick={() => showOnly('abertas')} aria-label={`Em aberto: ${formatMoney(summary.open)}. Ver as contas em aberto`}>
+                      <span className="label">
+                        Em aberto {summary.open > 0 ? <Pill tone="orange">Pendente</Pill> : summary.total > 0 ? <Pill tone="green">Tudo pago</Pill> : null}
+                      </span>
+                      <span className={`value ${summary.open > 0 ? 'orange' : ''}`}>{formatMoney(summary.open)}</span>
+                      <Progress pct={summary.pct} />
+                      <p className="summary-foot">
+                        {pctFmt(summary.pct)} pago · {pctFmt(summary.total ? 100 - summary.pct : 0)} em aberto
+                      </p>
+                    </button>
+                  </div>
+                </section>
+              ) },
+              { id: 'contas', label: 'Contas por vencimento', node: (
+                <section className="card bills-card" ref={listRef}>
+                  <div className="card-head">
+                    <h2>Contas por vencimento</h2>
+                    <span className="muted small">{shownBills.length} lançamento(s)</span>
+                  </div>
+                  {bills.length > 0 && (
+                    <Chips
+                      label="Mostrar"
+                      value={filter}
+                      onChange={setFilter}
+                      options={[
+                        { value: 'todas', label: `Todas (${bills.length})` },
+                        { value: 'pagas', label: `Pagas (${paidCount})` },
+                        { value: 'abertas', label: `Em aberto (${bills.length - paidCount})` },
+                      ]}
+                    />
+                  )}
+                  {bills.length === 0 ? (
+                    <div className="empty">
+                      <p>Nenhuma despesa em {formatMonth(month).toLowerCase()}. Toque em + para lançar.</p>
+                    </div>
+                  ) : shownBills.length === 0 ? (
+                    <p className="muted small">{filter === 'pagas' ? 'Nenhuma conta paga ainda neste mês.' : 'Tudo pago neste mês.'}</p>
+                  ) : (
+                    <ul className="list">
+                      {shownBills.map((b) => (
+                        <li key={b.key}>
+                          <BillRow bill={b} today={today} onClick={() => openBill(b)} categoryOf={categoryOf} />
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </section>
+              ) },
+              { id: 'distribuicao', label: 'Distribuição de despesas', node: (
+                cats.length > 0 && (
+                  <section className="card">
+                    <div className="card-head">
+                      <h2>Distribuição de despesas</h2>
+                      <span className="muted small">{formatMoney(catTotal)}</span>
+                    </div>
+                    <SplitBar parts={cats.map((c) => ({ id: c.categoryId, label: categoryOf(c.categoryId).name, color: categoryOf(c.categoryId).color, amount: c.amount }))} total={catTotal} />
+                    <ul className="bars">
+                      {cats.map((c) => {
+                        const cat = categoryOf(c.categoryId);
+                        const pct = catTotal ? (c.amount / catTotal) * 100 : 0;
+                        return (
+                          <li key={c.categoryId} className="bar-row">
+                            <CategoryBadge icon={cat.icon} color={cat.color} size={34} />
+                            <div className="bar-body">
+                              <div className="bar-head">
+                                <span>{cat.name}</span>
+                                <span className="muted tabular">
+                                  {formatMoney(c.amount)} · {pct.toFixed(0)}%
+                                </span>
+                              </div>
+                              <div className="bar">
+                                <div style={{ width: `${pct}%`, background: cat.color }} />
+                              </div>
+                            </div>
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  </section>
+                )
+              ) },
+            ]}
+          />
         </>
       ) : (
         <>

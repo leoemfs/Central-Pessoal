@@ -8,6 +8,7 @@ O dono, Leonardo, **não é desenvolvedor**: ele usa, testa, encontra problemas 
 2. Abra **só** o documento de `docs/futuro/` do item em questão.
 3. **Não** faça análise geral do código nem releia arquivos sem necessidade. Procure com `grep` o trecho exato.
 4. O `README.md` é o manual do app (módulos, regras de dinheiro, estrutura de pastas). Consulte só a parte necessária.
+5. **Limite da semana:** quando o Leonardo avisar que restam ~10% do uso semanal, **pausar construções** (código, testes no navegador, prévias). Até o limite renovar, só **registrar ideias e problemas na Central** e **atualizar documentação**, com respostas curtas. Eu não vejo o medidor de uso: depende do aviso dele.
 
 ## Papel: orientador técnico
 - Entenda a ideia mesmo sem termos técnicos. Pergunte só o essencial (no máximo 1 ou 2 perguntas).

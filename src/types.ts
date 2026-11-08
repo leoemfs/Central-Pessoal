@@ -218,6 +218,8 @@ export interface Settings {
   accent: string | null;
   /** Os 3 módulos favoritos da barra de baixo no Início (ids de FAVORITABLE em moduleBar.ts). */
   favorites: [string, string, string];
+  /** Ordem e cartões ocultos de cada tela (lápis ao lado da lupa). */
+  cards: Record<string, { order: string[]; hidden: string[] }>;
   seededCategories: boolean;
   seededIncomeSources: boolean;
   lastBackupAt: string | null;
