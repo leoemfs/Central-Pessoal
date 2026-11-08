@@ -25,6 +25,7 @@ import { HumorPage } from './modules/Humor';
 import { Estudos } from './modules/estudos/Estudos';
 import { CiclosPage } from './modules/estudos/Ciclos';
 import { RoadmapsPage } from './modules/estudos/Roadmaps';
+import { CarreiraPage, MetasPage, VagasPage } from './modules/Carreira';
 import { useCardEditor } from './Cards';
 import { activeIndex, barFor, barItems, crumb, favoriteItems, type BarItem } from './moduleBar';
 
@@ -67,9 +68,12 @@ export const SECTIONS: Section[] = [
   { path: 'proximos', label: 'Próximos', icon: 'list', view: ProximosPage },
   { path: 'humor', label: 'Humor', icon: 'smile', view: HumorPage },
   // O + de Estudos fica dentro do próprio módulo (muda conforme a tela: notebook, mapa…).
-  { path: 'estudos', label: 'Estudos e Carreira', icon: 'cap', view: Estudos },
+  { path: 'estudos', label: 'Estudos', icon: 'cap', view: Estudos },
   { path: 'ciclos', label: 'Ciclos', icon: 'repeat', view: CiclosPage },
   { path: 'roadmaps', label: 'Roadmaps', icon: 'route', view: RoadmapsPage },
+  { path: 'carreira', label: 'Carreira', icon: 'briefcase', view: CarreiraPage, fab: 'carreira/menu' },
+  { path: 'vagas', label: 'Vagas', icon: 'send', view: VagasPage, fab: 'vagas/nova' },
+  { path: 'metas', label: 'Metas', icon: 'target', view: MetasPage, fab: 'carreira/menu' },
 ];
 
 export const COMING_SOON: { label: string; icon: IconName; hint: string }[] = [
