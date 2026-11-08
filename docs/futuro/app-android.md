@@ -4,6 +4,7 @@
 
 ## Objetivo
 **Uso pessoal (só do Leonardo):** sem Play Store; instalação direta do APK no celular.
+**Talvez:** liberar de graça no GitHub (APK na página de Releases). Se for liberar: escolher uma licença (ex.: MIT), tirar dados pessoais do repositório e, na sincronização (N8), passar pela verificação do Google para que qualquer pessoa possa entrar com a conta dela.
 
 Transformar a Central Pessoal num app Android instalável (APK e, se quiser, Play Store), **sem reescrever o app**. O mesmo código continua servindo o site.
 
