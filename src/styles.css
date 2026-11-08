@@ -4306,3 +4306,12 @@ h2.left {
     transition: none;
   }
 }
+
+/* ---------- v0.18.1: cartão do hábito com o nome na largura toda ---------- */
+.habit-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin: -6px 0 14px;
+}
