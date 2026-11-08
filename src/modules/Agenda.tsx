@@ -113,7 +113,7 @@ export function Agenda({ route }: ViewProps) {
         title="Agenda"
         actions={<MonthNav label={formatMonth(month)} onPrev={() => setMonth(addMonths(month, -1))} onNext={() => setMonth(addMonths(month, 1))} onLabel={() => pick(today)} />}
       />
-      <Segmented label="Visão" value={tab} onChange={setTab} options={[{ value: 'calendario', label: 'Calendário' }, { value: 'tarefas', label: 'Tarefas' }]} />
+      <Segmented label="Visão" sticky swipe value={tab} onChange={setTab} options={[{ value: 'calendario', label: 'Calendário' }, { value: 'tarefas', label: 'Tarefas' }]} />
 
       {tab === 'tarefas' ? (
         <>

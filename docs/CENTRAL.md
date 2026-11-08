@@ -29,10 +29,10 @@
 | E2 | Barra adaptativa: Início e Mais fixos; dentro do módulo, 3 ícones do próprio módulo (casa no centro); só ícones, um pouco maiores; topo mostra "Finanças / Orçamento"; segurar o ícone mostra o nome | EXP | M | alta | especificado | `futuro/navegacao-v2.md` |
 | E3 | Personalizar cartões (lápis ao lado da lupa): no Início e nos módulos, ocultar e reordenar cartões; cartões principais fixos (🔒); Humor sempre no topo do Início; avisos importantes nunca ocultos, só mudam de posição | EXP | M | alta | especificado | `futuro/navegacao-v2.md` |
 | E4 | Temas: escuro, claro e automático + cor de destaque (paleta com bom contraste). Padrão: escuro = preto e verde; claro = branco e azul escuro | EXP | M | média | especificado | `futuro/navegacao-v2.md` |
-| E5 | Abas internas: deslizar o dedo para trocar de aba e abas presas no topo ao rolar | EXP | P | alta | especificado | `futuro/navegacao-v2.md` |
+| E5 | Abas internas: deslizar o dedo para trocar de aba e abas presas no topo ao rolar | EXP | P | alta | pronto (v0.16) | `futuro/navegacao-v2.md` |
 | E6 | Busca por módulo: a lupa pesquisa dentro do módulo aberto (ex.: nomes de despesas em Finanças); no Início, busca geral | EXP | P | média | ideia | `futuro/navegacao-v2.md` |
-| M9 | Finanças: botão + com menu (despesa, receita, cartão, caixinha e, separado, Categorias); categorias passam a morar dentro de Finanças | MOD | P | alta | especificado | `futuro/navegacao-v2.md` |
-| M10 | Finanças: "Já pago" e "Em aberto" clicáveis, abrindo a lista filtrada | MOD | P | alta | especificado | `futuro/navegacao-v2.md` |
+| M9 | Finanças: botão + com menu (despesa, receita, cartão, caixinha e, separado, Categorias); categorias passam a morar dentro de Finanças | MOD | P | alta | pronto (v0.16) | `futuro/navegacao-v2.md` |
+| M10 | Finanças: "Já pago" e "Em aberto" clicáveis, abrindo a lista filtrada | MOD | P | alta | pronto (v0.16) | `futuro/navegacao-v2.md` |
 | M2 | Preços 2.0, parte 1: a lista puxa os produtos de Preços e estima com faixa de preço, sem prender a uma loja | MOD | M | média | especificado | `futuro/precos-v2.md` (itens 2 e 3) |
 | M3 | Preços 2.0, parte 2: "quanto custou aqui?" ao marcar o item e histórico de compras | MOD | M | média | especificado | `futuro/precos-v2.md` (item 4) |
 | M4 | Preços 2.0, parte 3: tipos de loja e filtro; editar, excluir e juntar produtos, marcas e lojas | MOD | M | média | especificado | `futuro/precos-v2.md` (itens 1 e 4) |
@@ -53,16 +53,17 @@
 - (vazia: aguardando aprovação)
 
 **Pacotes** (cada um numa sessão, porque mexem nas mesmas partes):
-- **B, Finanças:** M9 + M10 + E5 (pequeno).
+- **B, Finanças:** M9 + M10 + E5 (pequeno). **Pronto na v0.16.**
 - **A, Navegação:** E2 + E1 + E3 (médio a grande; prévia visual antes).
 - **D, Temas:** E4.
 - **Depois:** E6.
 
-**Ordem sugerida** (quando aprovar): pacote B → pacote A → M1 → pacote D → E6 → M2 → M3 → M4 → M5 → M6 → M7 → M8 → N1.
+**Ordem sugerida** (quando aprovar): pacote A → M1 → pacote D → E6 → M2 → M3 → M4 → M5 → M6 → M7 → M8 → N1.
 
 ## Feito
 | Versão | O que entrou | PR |
 |---|---|---|
+| v0.16 | Pacote B: menu do + em Finanças com Categorias (saíram de Configurações), "Já pago" e "Em aberto" clicáveis, abas presas no topo e trocar de aba deslizando (Finanças, Núcleo, Agenda, Listas) | #15 |
 | v0.15 | Vale (VR/VA) em Cartões: saldo, recarga mensal e pagar com vale | #13 |
 | v0.14 | Listas com categorias, Preços, humor do dia, orçamento por categoria e relatórios | — |
 | v0.13 | Caixinhas em Finanças | — |

@@ -3971,3 +3971,51 @@ h2.left {
   line-height: 1.2;
   overflow-wrap: anywhere;
 }
+
+/* ---------- v0.16: abas presas no topo, totais clicáveis e menu do + em Finanças ---------- */
+.segmented.tabs-sticky {
+  position: sticky;
+  top: 56px;
+  z-index: 12;
+  box-shadow: 0 -12px 0 var(--bg), 0 6px 14px -8px rgb(0 0 0 / 0.5);
+  transition: top 0.22s ease;
+}
+.bars-hidden .segmented.tabs-sticky {
+  top: 8px;
+}
+@media (min-width: 900px) {
+  .segmented.tabs-sticky,
+  .bars-hidden .segmented.tabs-sticky {
+    top: 8px;
+  }
+}
+.summary-box.tappable {
+  border: none;
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+  display: block;
+  width: 100%;
+}
+.summary-box.tappable .label {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.summary-box.tappable:active {
+  background: var(--raised-2);
+}
+.bills-card {
+  scroll-margin-top: 120px;
+}
+.add-menu-sep {
+  height: 1px;
+  background: var(--border);
+  margin: 12px 0;
+}
+@media (prefers-reduced-motion: reduce) {
+  .segmented.tabs-sticky {
+    transition: none;
+  }
+}

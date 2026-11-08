@@ -174,6 +174,8 @@ export function Habitos({ route }: ViewProps) {
       <PageHeader title="Núcleo pessoal" />
       <Segmented
         label="Seção"
+        sticky
+        swipe
         value={tab}
         onChange={setTab}
         options={[
