@@ -11,9 +11,11 @@
 |---|---|---|---|
 | Finanças | Orçamento | Finanças | Relatórios |
 | Diário | Humor | Diário | Revisão |
-| Agenda | Tarefas | Agenda | Hoje |
-| Núcleo | Mente | Núcleo | Corpo |
-| Listas | Receitas | Listas | Preços |
+| Agenda | Hoje | Agenda | Próximos |
+| Núcleo | Progresso | Núcleo | Histórico |
+| Listas | Compras | Listas | Preços |
+
+> Atualizado na v0.19 (E8): a barra não repete abas. Regra completa no `CLAUDE.md` ("Regra de navegação").
 
 - **Entre módulos:** pelo Início (favoritos), pelo Mais (todos os módulos) e pelo menu lateral ☰.
 - **Só ícones**, um pouco maiores, em toda a barra (também no Início). Os nomes não mudam.

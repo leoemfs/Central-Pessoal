@@ -248,6 +248,20 @@ export interface MoodEntry {
 /** Como as listas de uma categoria funcionam. */
 export type ListKind = 'mercado' | 'compras' | 'receita' | 'checklist';
 
+/** Uma compra concluída a partir de uma lista. */
+export interface Purchase {
+  id: string;
+  /** AAAA-MM-DD */
+  date: string;
+  listId: string;
+  listName: string;
+  /** Loja ou mercado (vazio quando não informado). */
+  store: string;
+  total: number;
+  /** Quantos itens foram comprados. */
+  items: number;
+}
+
 export interface ListCategory {
   id: string;
   name: string;
@@ -451,6 +465,8 @@ export interface AppData {
   variants: ProductVariant[];
   stores: Store[];
   prices: PriceEntry[];
+  /** Compras concluídas pelas listas (Listas › Compras). */
+  purchases: Purchase[];
   sessions: PracticeSession[];
   /** Última carga usada em cada exercício (nome → kg). */
   lastLoads: Record<string, number>;

@@ -3973,25 +3973,43 @@ h2.left {
 }
 
 /* ---------- v0.16: abas presas no topo, totais clicáveis e menu do + em Finanças ---------- */
-.segmented.tabs-sticky {
+.sticky-head {
   position: sticky;
-  /* Um respiro abaixo da barra de cima; o fundo preenche o espaço para nada aparecer por trás. */
+  /* Um respiro abaixo da barra de cima. */
   top: 66px;
   z-index: 12;
-  /* Faixa de fundo em volta das abas (largura toda), para o conteúdo não aparecer no respiro de cima. */
-  box-shadow: 0 -10px 0 16px var(--bg), 0 14px 14px -6px var(--bg);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  background: var(--bg);
   transition: transform 0.22s ease;
 }
-/* Ao rolar para baixo, some junto com a barra de cima; ao rolar para cima, volta. */
-.bars-hidden .segmented.tabs-sticky {
+/* Ao rolar para baixo, o bloco (mês/semana + abas) some junto com a barra de cima; ao rolar para cima, volta. */
+.bars-hidden .sticky-head {
   transform: translateY(calc(-100% - 90px));
 }
+/* Só quando preso: faixa de fundo em volta (largura toda), para o conteúdo não aparecer nas bordas. */
+.sticky-head.stuck {
+  box-shadow: 0 -10px 0 16px var(--bg), 0 14px 14px -6px var(--bg);
+}
 @media (min-width: 900px) {
-  .segmented.tabs-sticky {
-    top: 10px;
+  .sticky-head {
+    top: 0;
+    padding-top: 10px;
   }
-  .bars-hidden .segmented.tabs-sticky {
+  .bars-hidden .sticky-head {
     transform: none;
+  }
+}
+@media (max-width: 899px) {
+  /* Cabeçalho sem nada visível no celular (título fica na barra de cima): não ocupa espaço. */
+  .page-header:not(.hero):not(:has(.page-actions)):not(:has(.page-title p)) {
+    display: none;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .sticky-head {
+    transition: none;
   }
 }
 .summary-box.tappable {
@@ -4018,11 +4036,6 @@ h2.left {
   height: 1px;
   background: var(--border);
   margin: 12px 0;
-}
-@media (prefers-reduced-motion: reduce) {
-  .segmented.tabs-sticky {
-    transition: none;
-  }
 }
 
 /* ---------- v0.17: Cores de destaque (geradas por accentCss() em src/theme.ts; não editar à mão) ---------- */
@@ -4314,4 +4327,37 @@ h2.left {
   align-items: center;
   gap: 8px;
   margin: -6px 0 14px;
+}
+
+/* ---------- v0.19: telas de Progresso, Histórico, Próximos e Compras ---------- */
+.attr-code {
+  font-weight: 800;
+  font-size: 0.8rem;
+  letter-spacing: 0.04em;
+  width: 34px;
+}
+.attr-bar {
+  height: 8px;
+  border-radius: 99px;
+  background: var(--raised-2);
+  overflow: hidden;
+  margin-top: 6px;
+}
+.attr-bar i {
+  display: block;
+  height: 100%;
+  border-radius: 99px;
+}
+.progress-row .row-meta {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+.progress-row .progress {
+  margin-top: 8px;
+}
+a.row {
+  color: inherit;
+  text-decoration: none;
 }

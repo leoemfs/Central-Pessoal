@@ -3,6 +3,12 @@
  * - Início e Mais ficam sempre nas pontas.
  * - No Início (e em telas sem barra própria), os 3 do meio são os módulos favoritos.
  * - Dentro de um módulo, os 3 do meio são do próprio módulo, com a "casa" dele no centro.
+ *
+ * Regra de navegação (vale para o app todo):
+ * - Abas no topo: partes do mesmo conteúdo (Despesas · Receitas · Cartões · Caixinhas).
+ * - Barra de baixo: ferramentas que olham o módulo de outro jeito (planejar, analisar, atalho do dia).
+ * - Botão +: tudo o que cria algo; por último, separado, "Categorias".
+ * - Cada coisa aparece em um lugar só.
  */
 
 export interface BarItem {
@@ -12,6 +18,8 @@ export interface BarItem {
   icon: string;
   /** Endereço sem o "#/". */
   to: string;
+  /** Tela que deixa este item marcado como ativo (sem tela = atalho, como "Hoje"). */
+  section?: string;
 }
 
 export interface ModuleBar {
@@ -30,9 +38,9 @@ export const MODULE_BARS: ModuleBar[] = [
     name: 'Finanças',
     sections: ['financas', 'orcamento', 'relatorios'],
     items: [
-      { id: 'orcamento', label: 'Orçamento', icon: 'gauge', to: 'orcamento' },
-      { id: 'financas', label: 'Finanças', icon: 'wallet', to: 'financas' },
-      { id: 'relatorios', label: 'Relatórios', icon: 'pie', to: 'relatorios' },
+      { id: 'orcamento', label: 'Orçamento', icon: 'gauge', to: 'orcamento', section: 'orcamento' },
+      { id: 'financas', label: 'Finanças', icon: 'wallet', to: 'financas', section: 'financas' },
+      { id: 'relatorios', label: 'Relatórios', icon: 'pie', to: 'relatorios', section: 'relatorios' },
     ],
   },
   {
@@ -40,39 +48,39 @@ export const MODULE_BARS: ModuleBar[] = [
     name: 'Diário',
     sections: ['diario', 'humor', 'revisao'],
     items: [
-      { id: 'humor', label: 'Humor', icon: 'smile', to: 'humor' },
-      { id: 'diario', label: 'Diário', icon: 'journal', to: 'diario' },
-      { id: 'revisao', label: 'Revisão', icon: 'calendarCheck', to: 'revisao' },
+      { id: 'humor', label: 'Humor', icon: 'smile', to: 'humor', section: 'humor' },
+      { id: 'diario', label: 'Diário', icon: 'journal', to: 'diario', section: 'diario' },
+      { id: 'revisao', label: 'Revisão', icon: 'calendarCheck', to: 'revisao', section: 'revisao' },
     ],
   },
   {
     id: 'agenda',
     name: 'Agenda',
-    sections: ['agenda'],
+    sections: ['agenda', 'proximos'],
     items: [
-      { id: 'tarefas', label: 'Tarefas', icon: 'tasks', to: 'agenda/tarefas' },
-      { id: 'calendario', label: 'Agenda', icon: 'calendar', to: 'agenda/calendario' },
       { id: 'hoje', label: 'Hoje', icon: 'sun', to: 'agenda/hoje' },
+      { id: 'agenda', label: 'Agenda', icon: 'calendar', to: 'agenda', section: 'agenda' },
+      { id: 'proximos', label: 'Próximos', icon: 'list', to: 'proximos', section: 'proximos' },
     ],
   },
   {
     id: 'nucleo',
     name: 'Núcleo',
-    sections: ['nucleo'],
+    sections: ['nucleo', 'progresso', 'historico'],
     items: [
-      { id: 'mente', label: 'Mente', icon: 'heart', to: 'nucleo/mente' },
-      { id: 'rituais', label: 'Núcleo', icon: 'sprout', to: 'nucleo/rituais' },
-      { id: 'corpo', label: 'Corpo', icon: 'dumbbell', to: 'nucleo/corpo' },
+      { id: 'progresso', label: 'Progresso', icon: 'bars', to: 'progresso', section: 'progresso' },
+      { id: 'nucleo', label: 'Núcleo', icon: 'sprout', to: 'nucleo', section: 'nucleo' },
+      { id: 'historico', label: 'Histórico', icon: 'clock', to: 'historico', section: 'historico' },
     ],
   },
   {
     id: 'listas',
     name: 'Listas',
-    sections: ['listas'],
+    sections: ['listas', 'compras', 'precos'],
     items: [
-      { id: 'receitas', label: 'Receitas', icon: 'pot', to: 'listas/receitas' },
-      { id: 'listas', label: 'Listas', icon: 'cart', to: 'listas' },
-      { id: 'precos', label: 'Preços', icon: 'tag', to: 'listas/precos' },
+      { id: 'compras', label: 'Compras', icon: 'receipt', to: 'compras', section: 'compras' },
+      { id: 'listas', label: 'Listas', icon: 'cart', to: 'listas', section: 'listas' },
+      { id: 'precos', label: 'Preços', icon: 'store', to: 'precos', section: 'precos' },
     ],
   },
 ];
@@ -120,24 +128,10 @@ export function barFor(section: string): ModuleBar | null {
   return MODULE_BARS.find((b) => b.sections.includes(section)) ?? null;
 }
 
-/**
- * Qual dos 3 itens do módulo está ativo (0, 1 ou 2), a partir da tela e da aba que o módulo informou.
- * null = nenhum (ex.: "Hoje" na Agenda é um atalho, não uma aba).
- */
-export function activeIndex(bar: ModuleBar, section: string, tab: string | null): number | null {
-  switch (bar.id) {
-    case 'financas':
-    case 'diario':
-      return bar.items.findIndex((i) => i.id === section);
-    case 'agenda':
-      return tab === 'tarefas' ? 0 : 1;
-    case 'nucleo':
-      return tab === 'mente' ? 0 : tab === 'corpo' ? 2 : 1;
-    case 'listas':
-      return tab === 'receitas' ? 0 : tab === 'precos' ? 2 : 1;
-    default:
-      return null;
-  }
+/** Qual dos 3 itens do módulo está ativo (0, 1 ou 2); null = nenhum. Cada item corresponde a uma tela. */
+export function activeIndex(bar: ModuleBar, section: string): number | null {
+  const i = bar.items.findIndex((it) => it.section === section);
+  return i < 0 ? null : i;
 }
 
 /** Texto do topo: "Finanças" na casa do módulo; "Finanças / Orçamento" nas outras abas. */

@@ -2,7 +2,6 @@ import { useMemo, useState } from 'react';
 import type { ViewProps } from '../App';
 import { useStore } from '../store';
 import { useSubAction } from '../router';
-import { useReportTab } from '../barTab';
 import { remove, upsert } from '../actions';
 import { getInvoice, invoiceMonths } from '../finance';
 import type { CalendarEvent, Task } from '../types';
@@ -72,7 +71,6 @@ export function Agenda({ route }: ViewProps) {
   const [taskForm, setTaskForm] = useState<Task | 'new' | null>(null);
   const billsByDay = useBillsByDay();
 
-  useReportTab('agenda', tab);
   useSubAction(route, 'agenda', {
     tarefas: () => setTab('tarefas'),
     calendario: () => setTab('calendario'),
@@ -121,8 +119,8 @@ export function Agenda({ route }: ViewProps) {
       <PageHeader
         title="Agenda"
         actions={<MonthNav label={formatMonth(month)} onPrev={() => setMonth(addMonths(month, -1))} onNext={() => setMonth(addMonths(month, 1))} onLabel={() => pick(today)} />}
+        tabs={<Segmented label="Visão" swipe value={tab} onChange={setTab} options={[{ value: 'calendario', label: 'Calendário' }, { value: 'tarefas', label: 'Tarefas' }]} />}
       />
-      <Segmented label="Visão" sticky swipe value={tab} onChange={setTab} options={[{ value: 'calendario', label: 'Calendário' }, { value: 'tarefas', label: 'Tarefas' }]} />
 
       {tab === 'tarefas' ? (
         <>

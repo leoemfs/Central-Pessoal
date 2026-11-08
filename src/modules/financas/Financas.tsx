@@ -86,8 +86,7 @@ export function Financas({ route }: ViewProps) {
 
   return (
     <>
-      <PageHeader title="Finanças" actions={<MonthNav label={formatMonth(month)} onPrev={() => setMonth(addMonths(month, -1))} onNext={() => setMonth(addMonths(month, 1))} onLabel={() => setMonth(monthKey(today))} />} />
-      <Segmented label="Visão" sticky swipe value={tab} onChange={setTab} options={[{ value: 'mes', label: 'Despesas' }, { value: 'receitas', label: 'Receitas' }, { value: 'cartoes', label: 'Cartões' }, { value: 'caixinhas', label: 'Caixinhas' }]} />
+      <PageHeader title="Finanças" actions={<MonthNav label={formatMonth(month)} onPrev={() => setMonth(addMonths(month, -1))} onNext={() => setMonth(addMonths(month, 1))} onLabel={() => setMonth(monthKey(today))} />} tabs={<Segmented label="Visão" swipe value={tab} onChange={setTab} options={[{ value: 'mes', label: 'Despesas' }, { value: 'receitas', label: 'Receitas' }, { value: 'cartoes', label: 'Cartões' }, { value: 'caixinhas', label: 'Caixinhas' }]} />} />
 
       {tab === 'caixinhas' ? (
         <CaixinhasTab month={month} newOpen={boxForm} onNewClose={() => setBoxForm(false)} />
@@ -119,14 +118,6 @@ export function Financas({ route }: ViewProps) {
               </button>
             </div>
           </section>
-          <div className="btn-row fin-links">
-            <a className="btn" href="#/orcamento">
-              <Icon name="gauge" size={18} /> Orçamento
-            </a>
-            <a className="btn" href="#/relatorios">
-              <Icon name="pie" size={18} /> Relatórios
-            </a>
-          </div>
 
           <section className="card bills-card" ref={listRef}>
             <div className="card-head">

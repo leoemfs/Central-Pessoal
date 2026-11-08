@@ -36,18 +36,27 @@ test('cada tela cai na barra do seu módulo', () => {
 
 test('item ativo e texto do topo', () => {
   const fin = barFor('financas')!;
-  assert.equal(activeIndex(fin, 'financas', null), 1);
-  assert.equal(activeIndex(fin, 'orcamento', null), 0);
+  assert.equal(activeIndex(fin, 'financas'), 1);
+  assert.equal(activeIndex(fin, 'orcamento'), 0);
   assert.deepEqual(crumb(fin, 0), { module: 'Finanças', page: 'Orçamento' });
   assert.deepEqual(crumb(fin, 1), { module: 'Finanças', page: null });
-  const ag = barFor('agenda')!;
-  assert.equal(activeIndex(ag, 'agenda', 'tarefas'), 0);
-  assert.equal(activeIndex(ag, 'agenda', 'calendario'), 1);
-  const nu = barFor('nucleo')!;
-  assert.equal(activeIndex(nu, 'nucleo', 'habitos'), 1);
-  assert.equal(activeIndex(nu, 'nucleo', 'corpo'), 2);
-  assert.deepEqual(crumb(nu, 0), { module: 'Núcleo', page: 'Mente' });
-  const li = barFor('listas')!;
-  assert.equal(activeIndex(li, 'listas', 'precos'), 2);
-  assert.equal(activeIndex(li, 'listas', 'receitas'), 0);
+  const ag = barFor('proximos')!;
+  assert.equal(ag.id, 'agenda');
+  assert.equal(activeIndex(ag, 'agenda'), 1);
+  assert.equal(activeIndex(ag, 'proximos'), 2);
+  const nu = barFor('progresso')!;
+  assert.equal(nu.id, 'nucleo');
+  assert.deepEqual(crumb(nu, activeIndex(nu, 'historico')), { module: 'Núcleo', page: 'Histórico' });
+  const li = barFor('precos')!;
+  assert.equal(li.id, 'listas');
+  assert.equal(activeIndex(li, 'compras'), 0);
+});
+
+test('regra: cada item da barra é uma tela diferente, e nenhuma tela se repete entre módulos', () => {
+  for (const b of MODULE_BARS) {
+    const secs = b.items.map((i) => i.section).filter(Boolean);
+    assert.equal(new Set(secs).size, secs.length, b.id);
+    assert.equal(b.items[1].section, b.id === 'agenda' ? 'agenda' : b.items[1].id, `${b.id}: casa no centro`);
+    for (const s of secs) assert.ok(b.sections.includes(s!), `${b.id}: ${s} fora do módulo`);
+  }
 });

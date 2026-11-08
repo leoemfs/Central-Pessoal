@@ -61,6 +61,7 @@ export function emptyData(): AppData {
     variants: [],
     stores: [],
     prices: [],
+    purchases: [],
     sessions: [],
     lastLoads: {},
     deleted: {},
@@ -131,6 +132,9 @@ export function normalize(raw: unknown): AppData {
     budgets: isRec(r.budgets) ? Object.fromEntries(Object.entries(r.budgets).filter((e): e is [string, number] => typeof e[1] === 'number' && e[1] > 0)) : {},
     ...normalizeListData(r),
     sessions: list<PracticeSession>(r.sessions).filter((x) => typeof x.date === 'string' && typeof x.type === 'string' && typeof x.minutes === 'number'),
+    purchases: list<Record<string, unknown>>(r.purchases)
+      .filter((p) => typeof p.id === 'string' && typeof p.date === 'string' && typeof p.total === 'number')
+      .map((p) => ({ id: p.id as string, date: p.date as string, listId: String(p.listId ?? ''), listName: String(p.listName ?? ''), store: String(p.store ?? ''), total: p.total as number, items: typeof p.items === 'number' ? p.items : 0 })),
     lastLoads: isRec(r.lastLoads) ? Object.fromEntries(Object.entries(r.lastLoads).filter((e): e is [string, number] => typeof e[1] === 'number')) : {},
     deleted: isRec(r.deleted) ? (r.deleted as Record<string, string>) : {},
     legacy: isRec(r.legacy) ? r.legacy : {},

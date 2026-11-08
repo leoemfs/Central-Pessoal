@@ -24,6 +24,7 @@
 | ID | Item | Frente | Tam. | Prior. | Situação | Documento |
 |---|---|---|---|---|---|---|
 | M8 | Cartão: escolher em qual fatura a compra entra e mostrar a fatura aberta no cartão (evita a confusão de "compra sumiu") | MOD | P | média | especificado | `futuro/correcao-fatura-cartao.md` |
+| E8 | Navegação padronizada: regra abas × barra × botão +; Núcleo (Progresso · Núcleo · Histórico), Agenda (Hoje · Agenda · Próximos), Listas (Compras · Listas · Preços, sem abas); Orçamento/Relatórios sem botões repetidos em Finanças; Categorias de Listas no botão +; mês e abas num bloco que some e volta junto | EXP | M | alta | pronto (v0.19) | `futuro/navegacao-v2.md` |
 | C2 | Hábitos: nome do hábito aparecia uma letra por linha quando havia "Não falhe 2x" e "Iniciar" no cartão | COR | P | alta | pronto (v0.18) | — |
 | M1 | Hábitos: pausar e arquivar | MOD | P | alta | especificado | `futuro/habitos-pausar-arquivar.md` |
 | E1 | Favoritos e módulos: os 3 do meio da barra no Início são os favoritos (escolhidos pela pessoa); ocultar módulos; ordem no Mais; Orçamento e Relatórios saem do Mais; ritmo de cada módulo (Diário) | EXP | M | alta | parte pronta (v0.18): favoritos e Mais; falta ocultar módulos, ordem no Mais e ritmo do Diário | `futuro/modulos-personalizaveis.md`, `futuro/navegacao-v2.md` |
@@ -65,6 +66,7 @@
 ## Feito
 | Versão | O que entrou | PR |
 |---|---|---|
+| v0.19 | Navegação padronizada (E8): telas Progresso, Histórico, Próximos e Compras; Preços como tela; Categorias de Listas no +; cabeçalho mês + abas em bloco | — |
 | v0.18 | A1: barra de baixo só com ícones, favoritos do Início, barra própria em cada módulo, topo "Módulo / Aba", tela de Humor, Orçamento e Relatórios fora do Mais; abas que somem e voltam com a barra de cima | #17 |
 | v0.17 | Pacote D: Temas com cor de destaque (8 cores; padrão verde no escuro e azul no claro; cores de situação fixas) e ícones sem repetição entre módulos | #16 |
 | v0.16 | Pacote B: menu do + em Finanças com Categorias (saíram de Configurações), "Já pago" e "Em aberto" clicáveis, abas presas no topo e trocar de aba deslizando (Finanças, Núcleo, Agenda, Listas) | #15 |

@@ -3,7 +3,7 @@
  * Cada categoria escolhe como as listas dela funcionam: mercado (corredores + preços), compras (valor por item),
  * receita (ingredientes, porções e preparo) ou checklist.
  */
-import type { AppData, ListCategory, ListItem, ListKind, PriceEntry, Product, ProductVariant, Store, UserList } from './types.ts';
+import type { AppData, ListCategory, ListItem, ListKind, PriceEntry, Product, ProductVariant, Purchase, Store, UserList } from './types.ts';
 import { addExpense } from './finance.ts';
 import { todayISO, uid } from './utils.ts';
 
@@ -209,11 +209,42 @@ export function updateList(id: string, patch: Partial<UserList>) {
 export function finishShopping(listId: string, o: { total: number; storeName: string; categoryId: string | null; reset: boolean; voucherId?: string | null }, today: string = todayISO()) {
   return (d: AppData): AppData => {
     let next = d;
+    const l = d.lists.find((x) => x.id === listId);
+    const bought = l ? l.items.filter((i) => i.done).length : 0;
+    if (l && (o.total > 0 || bought > 0)) next = recordPurchase(next, { date: today, listId, listName: l.name, store: o.storeName, total: o.total, items: bought });
     if (o.categoryId && o.total > 0) {
       next = addExpense(next, { kind: 'avulsa', description: `Mercado · ${o.storeName}`, categoryId: o.categoryId, method: o.voucherId ? 'vale' : 'pix', cardId: null, date: today, amounts: [o.total], paidAt: today, voucherId: o.voucherId ?? null }, today);
     }
     return o.reset ? uncheckAll(listId)(next) : next;
   };
+}
+
+function recordPurchase(d: AppData, p: Omit<Purchase, 'id'>): AppData {
+  return { ...d, purchases: [...d.purchases, { id: uid(), ...p }] };
+}
+
+export interface PurchaseRow {
+  key: string;
+  date: string;
+  title: string;
+  store: string;
+  total: number;
+  items: number | null;
+}
+
+/**
+ * Listas › Compras: as compras concluídas, da mais recente para a mais antiga.
+ * Compras feitas antes deste histórico existir entram pelas despesas "Mercado · Loja".
+ */
+export function purchaseHistory(d: Pick<AppData, 'purchases' | 'expenses'>): PurchaseRow[] {
+  const rows: PurchaseRow[] = d.purchases.map((p) => ({ key: p.id, date: p.date, title: p.listName, store: p.store, total: p.total, items: p.items }));
+  const first = d.purchases.reduce<string | null>((m, p) => (m === null || p.date < m ? p.date : m), null);
+  for (const e of d.expenses) {
+    if (!e.description.startsWith('Mercado · ')) continue;
+    if (first !== null && e.dueDate >= first) continue;
+    rows.push({ key: `e:${e.id}`, date: e.dueDate, title: 'Compra de mercado', store: e.description.slice('Mercado · '.length), total: e.amount, items: null });
+  }
+  return rows.sort((a, b) => b.date.localeCompare(a.date) || b.key.localeCompare(a.key));
 }
 
 /** Lista de compras: cada item comprado (com valor) vira uma despesa paga hoje. */
@@ -222,7 +253,9 @@ export function launchBought(listId: string, categoryId: string, today: string =
     const l = d.lists.find((x) => x.id === listId);
     if (!l) return d;
     let next = d;
-    for (const it of l.items.filter((i) => i.done && !i.launched && (i.price ?? 0) > 0)) {
+    const toLaunch = l.items.filter((i) => i.done && !i.launched && (i.price ?? 0) > 0);
+    if (toLaunch.length) next = recordPurchase(next, { date: today, listId, listName: l.name, store: '', total: toLaunch.reduce((a, i) => a + (i.price ?? 0), 0), items: toLaunch.length });
+    for (const it of toLaunch) {
       next = addExpense(next, { kind: 'avulsa', description: it.text, categoryId, method: 'pix', cardId: null, date: today, amounts: [it.price!], paidAt: today }, today);
     }
     return patchList(listId, (x) => ({ ...x, items: x.items.map((i) => (i.done && (i.price ?? 0) > 0 ? { ...i, launched: true } : i)) }))(next);
