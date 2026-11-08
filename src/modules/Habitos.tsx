@@ -354,13 +354,18 @@ function BuildCard({ h, today, onOpen, onGraduate, onStart }: { h: Habit; today:
           {h.cue && <span className="muted small">Depois de {h.cue}</span>}
           {qtyText(h, today) && <span className="muted small tabular">Hoje: {qtyText(h, today)}</span>}
         </button>
-        <RiskPill h={h} today={today} />
-        {isScheduled(h, today) && !h.checks.includes(today) && <StartButton h={h} onStart={onStart} />}
         {isScheduled(h, today) && <HabitCheck h={h} day={today} />}
         <span className="pill" title="Sequência">
           <Icon name="flame" size={13} /> {habitStreak(h, today)}
         </span>
       </div>
+      {/* Aviso e "Iniciar" numa linha própria, para o nome do hábito ter a largura toda. */}
+      {(atRiskToday(h, today) || (h.link && isScheduled(h, today) && !h.checks.includes(today))) && (
+        <div className="habit-actions">
+          <RiskPill h={h} today={today} />
+          {isScheduled(h, today) && !h.checks.includes(today) && <StartButton h={h} onStart={onStart} />}
+        </div>
+      )}
       <div className="habit-days">
         {lastDays(today, 7).map((d) => {
           const on = h.checks.includes(d);
