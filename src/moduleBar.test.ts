@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { activeIndex, addFavorite, barFor, crumb, DEFAULT_FAVORITES, favoriteItems, MODULE_BARS, normalizeFavorites } from './moduleBar.ts';
+import { activeIndex, addFavorite, barItems, barFor, crumb, DEFAULT_FAVORITES, favoriteItems, MODULE_BARS, normalizeFavorites } from './moduleBar.ts';
 
 test('favoritos: sempre 3, válidos e sem repetir', () => {
   assert.deepEqual(normalizeFavorites(undefined), DEFAULT_FAVORITES);
@@ -59,4 +59,15 @@ test('regra: cada item da barra é uma tela diferente, e nenhuma tela se repete 
     assert.equal(b.items[1].section, b.id === 'agenda' ? 'agenda' : b.items[1].id, `${b.id}: casa no centro`);
     for (const s of secs) assert.ok(b.sections.includes(s!), `${b.id}: ${s} fora do módulo`);
   }
+});
+
+test('o módulo favorito fica na mesma posição; as ferramentas ocupam os outros espaços', () => {
+  const favs = ['financas', 'diario', 'agenda'];
+  const ids = (x: { items: { id: string }[]; home: number }) => [x.items.map((i) => i.id), x.home];
+  assert.deepEqual(ids(barItems(barFor('financas')!, favs)), [['financas', 'orcamento', 'relatorios'], 0]);
+  assert.deepEqual(ids(barItems(barFor('relatorios')!, favs)), [['financas', 'orcamento', 'relatorios'], 0]);
+  assert.deepEqual(ids(barItems(barFor('diario')!, favs)), [['humor', 'diario', 'revisao'], 1]);
+  assert.deepEqual(ids(barItems(barFor('agenda')!, favs)), [['hoje', 'proximos', 'agenda'], 2]);
+  // Não é favorito: casa no centro.
+  assert.deepEqual(ids(barItems(barFor('listas')!, favs)), [['compras', 'listas', 'precos'], 1]);
 });
