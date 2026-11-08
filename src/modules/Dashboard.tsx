@@ -71,7 +71,7 @@ export function Dashboard() {
       title: 'Jornada',
       text: journey.unlocked ? 'Desbloqueada — veja seu nível' : `${journey.active} de ${UNLOCK_DAYS} dias de uso para desbloquear`,
     },
-    { to: 'nucleo', icon: 'target', title: 'Núcleo pessoal', text: routine.length ? `${routineDone} de ${routine.length} rituais e hábitos feitos` : 'Nada programado para hoje' },
+    { to: 'nucleo', icon: 'sprout', title: 'Núcleo pessoal', text: routine.length ? `${routineDone} de ${routine.length} rituais e hábitos feitos` : 'Nada programado para hoje' },
   ];
 
   const backupDays = data.settings.lastBackupAt ? Math.floor((Date.now() - new Date(data.settings.lastBackupAt).getTime()) / 864e5) : null;

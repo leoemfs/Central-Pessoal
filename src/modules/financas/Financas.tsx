@@ -45,7 +45,7 @@ export function Financas({ route }: ViewProps) {
     { id: 'despesa', label: 'Nova despesa', hint: 'Conta, compra ou parcela', icon: 'wallet', run: () => { setTab('mes'); setFormOpen(true); } },
     { id: 'receita', label: 'Nova receita', hint: 'Salário, freelance, bônus…', icon: 'coins', run: () => { setTab('receitas'); setIncomeForm(true); } },
     { id: 'cartao', label: 'Novo cartão', hint: 'Crédito ou vale (VR/VA)', icon: 'card', run: () => { setTab('cartoes'); setCardForm(true); } },
-    { id: 'caixinha', label: 'Nova caixinha', hint: 'Guardar dinheiro para uma meta', icon: 'target', run: () => { setTab('caixinhas'); setBoxForm(true); } },
+    { id: 'caixinha', label: 'Nova caixinha', hint: 'Guardar dinheiro para uma meta', icon: 'piggy', run: () => { setTab('caixinhas'); setBoxForm(true); } },
   ];
 
   /** Toca em "Já pago" ou "Em aberto": mostra só essas contas na lista. */
@@ -121,7 +121,7 @@ export function Financas({ route }: ViewProps) {
           </section>
           <div className="btn-row fin-links">
             <a className="btn" href="#/orcamento">
-              <Icon name="target" size={18} /> Orçamento
+              <Icon name="gauge" size={18} /> Orçamento
             </a>
             <a className="btn" href="#/relatorios">
               <Icon name="pie" size={18} /> Relatórios

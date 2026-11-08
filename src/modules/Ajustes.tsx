@@ -1,14 +1,19 @@
-import { useRef, useState, type ChangeEvent } from 'react';
+import { useRef, useState, type ChangeEvent, type CSSProperties } from 'react';
 import { useStore } from '../store';
 import { emptyData, normalize } from '../data';
 import type { Theme } from '../types';
 import { formatDMY, toISO, todayISO } from '../utils';
 import { Icon, PageHeader, Segmented } from '../ui';
+import { ACCENTS, accentById } from '../theme';
 
 export function Ajustes() {
   const { data, update, replace, persisted } = useStore();
   const fileRef = useRef<HTMLInputElement>(null);
   const [message, setMessage] = useState<{ tone: 'green' | 'red'; text: string } | null>(null);
+  function setAccent(accent: string | null) {
+    update((d) => ({ ...d, settings: { ...d.settings, accent } }));
+  }
+
   function exportBackup() {
     const stamp = new Date().toISOString();
     const blob = new Blob([JSON.stringify({ ...data, settings: { ...data.settings, lastBackupAt: stamp } }, null, 2)], { type: 'application/json' });
@@ -68,7 +73,7 @@ export function Ajustes() {
 
       <section className="card">
         <div className="card-head">
-          <h2>Aparência</h2>
+          <h2>Temas</h2>
         </div>
         <Segmented<Theme>
           label="Tema"
@@ -83,6 +88,38 @@ export function Ajustes() {
         <p className="muted small" style={{ marginTop: 10 }}>
           {data.settings.theme === 'system' ? 'Segue o tema do celular ou computador.' : 'Vale para todas as telas do app.'}
         </p>
+        <div className="field" style={{ marginTop: 14 }}>
+          <span className="field-label">Cor de destaque</span>
+          <div className="swatches" role="radiogroup" aria-label="Cor de destaque">
+            <button
+              type="button"
+              role="radio"
+              aria-checked={data.settings.accent === null}
+              aria-label="Padrão (verde no escuro, azul no claro)"
+              className={`swatch accent-default${data.settings.accent === null ? ' on' : ''}`}
+              onClick={() => setAccent(null)}
+            >
+              {data.settings.accent === null && <Icon name="check" size={18} />}
+            </button>
+            {ACCENTS.map((a) => (
+              <button
+                key={a.id}
+                type="button"
+                role="radio"
+                aria-checked={data.settings.accent === a.id}
+                aria-label={a.name}
+                className={`swatch accent-swatch${data.settings.accent === a.id ? ' on' : ''}`}
+                style={{ '--sw-d': a.dark.fill, '--sw-l': a.light.fill, '--sw-on-d': a.dark.on, '--sw-on-l': a.light.on } as CSSProperties}
+                onClick={() => setAccent(a.id)}
+              >
+                {data.settings.accent === a.id && <Icon name="check" size={18} />}
+              </button>
+            ))}
+          </div>
+          <p className="muted small" style={{ marginTop: 8 }}>
+            {data.settings.accent ? `${accentById(data.settings.accent)?.name}, nos dois temas.` : 'Padrão: verde no tema escuro e azul no claro.'} Muda botões, abas e destaques. As cores de situação não mudam: pago é verde, pendente é laranja e atrasado é vermelho.
+          </p>
+        </div>
       </section>
 
       <a className="tile" href="#/financas/categorias">

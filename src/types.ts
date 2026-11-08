@@ -214,6 +214,8 @@ export interface IncomeSeries {
 
 export interface Settings {
   theme: Theme;
+  /** Cor de destaque escolhida (id de ACCENTS em theme.ts); null = padrão do tema (escuro verde, claro azul). */
+  accent: string | null;
   seededCategories: boolean;
   seededIncomeSources: boolean;
   lastBackupAt: string | null;

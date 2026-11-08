@@ -165,7 +165,7 @@ export function Orcamento() {
               notify('Orçamentos sugeridos', 'Pela média dos últimos 3 meses. Ajuste quando quiser.');
             }}
           >
-            <Icon name="bolt" size={18} /> <span className="green">Usar a média dos últimos 3 meses</span>
+            <Icon name="bolt" size={18} /> <span className="accent">Usar a média dos últimos 3 meses</span>
           </button>
         </section>
       )}
