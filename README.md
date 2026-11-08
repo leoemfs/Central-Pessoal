@@ -29,6 +29,7 @@ O usuário registra; o app organiza, calcula e mostra o que importa no Início.
 | **Jornada** | **Bloqueada até 14 dias de uso dentro de 3 semanas** (um dia conta quando você registra algo; faltar não zera). O app também registra, em silêncio, os dias em que foi aberto (base da sequência de visitas). Ao desbloquear, mostra o XP, o nível e o ouro que você teria ganhado com os seus dados reais — e pergunta se a Jornada completa vale a pena ou fica para depois. Especificação completa em [docs/futuro/modulo-rpg.md](docs/futuro/modulo-rpg.md). |
 | **Barra de baixo** | Só ícones (segurar o dedo mostra o nome). **Início** e **Mais** ficam fixos. No Início, os 3 do meio são os seus **favoritos** (padrão: Finanças, Diário e Agenda; troque em Mais › Favoritos do Início). Dentro de um módulo, os 3 do meio são do próprio módulo, com a casa dele no centro: Finanças (Orçamento · Finanças · Relatórios), Diário (Humor · Diário · Revisão), Agenda (Hoje · Agenda · Próximos), Núcleo (Progresso · Núcleo · Histórico) e Listas (Compras · Listas · Preços). O topo mostra onde você está: "Finanças / Orçamento". Regra: abas no topo = partes do mesmo conteúdo; barra = planejar, analisar ou atalho do dia; botão + = criar e, por último, Categorias; cada coisa num lugar só. |
 | **Telas da barra** | **Progresso** (Núcleo): constância de 30 dias, sequências, "dias sem" e atributos. **Histórico** (Núcleo): meditações, respirações, alongamentos, treinos e caminhadas, com totais do mês. **Próximos** (Agenda): compromissos, tarefas com prazo e contas dos próximos 30 dias, com os atrasados à parte. **Compras** (Listas): as compras concluídas pelas listas, com total e loja (as anteriores vêm das despesas "Mercado · loja"). **Preços** virou tela própria. |
+| **Personalizar cartões** | O **lápis** ao lado da lupa (no Início e em Finanças › Despesas) deixa subir, descer e ocultar cartões. O Humor (Início) e o resumo do mês (Finanças) ficam fixos no topo; os avisos importantes (Seu dia, contas a vencer, orçamento, vale, backup) nunca somem, só mudam de lugar. Os ocultos ficam no fim, com "Mostrar"; "Restaurar padrão" volta tudo. A ordem fica guardada e entra no backup. |
 | **Abas dos módulos** | O **mês (ou a semana) e as abas formam um bloco** preso logo abaixo da barra de cima: some ao rolar para baixo e volta ao rolar para cima, em todos os módulos, e dá para **deslizar o dedo para o lado** em qualquer parte da tela para trocar de aba. |
 | **Mais** | Você, Núcleo pessoal, Notas e Configurações (**Temas**: escuro, claro ou automático e **cor de destaque** entre 8 cores com bom contraste; padrão verde no escuro e azul no claro. As cores de situação não mudam: pago verde, pendente laranja, atrasado vermelho. Também backup e dados; as categorias ficam em Finanças). |
 
@@ -87,6 +88,8 @@ src/
   theme.ts           Cores de destaque (paleta, contraste e o CSS gerado)
   moduleBar.ts       Barra de baixo: favoritos e a barra de cada módulo
   upcoming.ts        Agenda › Próximos (compromissos, tarefas e contas por dia)
+  cardLayout.ts      Ordem e cartões ocultos de cada tela (lápis)
+  Cards.tsx          Tela com cartões personalizáveis e o modo de edição
   lists.ts           Listas por categoria e Preços
   mood.ts            Humor do dia
   boxes.test.ts      testes das caixinhas
