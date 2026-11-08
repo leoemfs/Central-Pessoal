@@ -15,6 +15,33 @@
 **Prioridade:** `alta` · `média` · `baixa`.
 **Situação:** `ideia` → `especificado` → `aprovado` → `construindo` → `pronto (vX)`.
 
+## Mapa dos módulos
+*O que cada módulo usa dos outros e o que entrega para eles. Serve para melhorar um módulo sem quebrar os demais.*
+
+**Como usar o mapa:**
+- Todo item da tabela que mexe em um módulo ganha, no documento dele, a linha **"Afeta:"** com os módulos ligados (pegue daqui).
+- Antes de construir, conferir as ligações do módulo; depois, testar também os módulos ligados (não só o que mudou).
+- Mudou uma ligação (nova, removida ou diferente)? Atualizar este mapa no mesmo PR.
+- Todos os dados ficam num só lugar (`src/data.ts`); campo novo sempre com valor padrão em `normalize()`.
+
+**Módulos** (9 que funcionam):
+
+| Módulo | Dados dele | Usa de outros | Entrega para outros | Regras e testes |
+|---|---|---|---|---|
+| **Finanças** (despesas, receitas, cartões, vales, caixinhas, orçamento, relatórios) | despesas, séries, categorias, receitas, fontes, cartões, vales, caixinhas, orçamentos | Listas (despesa de "Concluir compra"), Você (caixinha sugerida) | Início, Agenda (contas e compras no cartão do dia), Revisão, Busca, Jornada, Listas (categoria Mercado) | `finance.ts`, `incomes.ts`, `boxes.ts`, `budget.ts` |
+| **Agenda** (compromissos, tarefas, Próximos) | compromissos, tarefas | Finanças (contas e cartão), Núcleo (hábitos marcáveis), Diário (registros do dia), Você (compromissos sugeridos) | Início, Revisão, Busca, Jornada | `upcoming.ts` |
+| **Diário** (registros, Humor, Revisão) | registros, humor do dia | Humor, Mente ("Três coisas boas") e Revisão viram registros | Início, Agenda, Revisão, Busca, Jornada | `mood.ts`, `review.ts` |
+| **Núcleo pessoal** (rituais, hábitos, mente, corpo) | hábitos, práticas, última carga | Você (hábitos sugeridos), Mente e Corpo (marcam o hábito ligado) | Início, Agenda, Revisão, Jornada (atributos e XP), Humor (dias com treino) | `habits.ts`, `practices.ts` |
+| **Listas** (listas, Preços, Compras) | categorias de listas, listas, produtos, marcas, lojas, preços, compras | Finanças (categorias) | Finanças (despesa "Mercado · loja"), Início (listas fixadas) | `lists.ts` |
+| **Estudos e Carreira** | estudos (áreas, trilhas, ciclos, notebooks, fontes, mapas) | nada (isolado) | nada por enquanto (N7 vai ligar à Jornada) | `estudos.ts`, `estudosCatalogo.ts` |
+| **Você** | perfil | Núcleo (hábitos) e Caixinhas (para sugerir) | Núcleo (hábito), Agenda (compromissos), Finanças (caixinha), Início | `profile.ts` |
+| **Notas** | notas | nada | Busca | — |
+| **Jornada** (bloqueada) | ajustes da Jornada | Finanças, Agenda, Diário, Núcleo (dias de uso, XP, ouro) | nada por enquanto | `journey.ts`, `jornada/` |
+
+**Telas que juntam tudo** (mexeu num módulo, conferir estas): **Início** (quase todos), **Revisão semanal** (Finanças, Agenda, Diário, Núcleo, humor), **Busca** (Diário, Finanças, Agenda, Notas).
+**Partes do app todo:** barra de baixo (`moduleBar.ts`), lápis dos cartões (`cardLayout.ts`), temas (`theme.ts`), backup (`data.ts`).
+**Em breve** (sem código): Saúde, Objetivos, Foco, Banco de ideias.
+
 ## Caixa de entrada
 *Ideias e problemas ainda sem classificar. Uma linha cada, com a data.*
 
@@ -82,7 +109,7 @@
 | v0.12 | Você (entrevista e sugestões) e Núcleo Mente/Corpo | — |
 | até v0.11 | Finanças, Agenda, Diário, Núcleo, Receitas, revisão semanal, atributos e Jornada bloqueada (14 dias) | ver PRs no GitHub |
 
-Documentos sem código: módulos personalizáveis, pausar e arquivar, ROADMAP e Central (#14 e seguintes).
+Documentos sem código: Mapa dos módulos (08/11), módulos personalizáveis, pausar e arquivar, ROADMAP e Central (#14 e seguintes).
 
 **Descartado:** C1 "compra no cartão novo some da fatura" (08/11): não era problema do app, a compra estava sendo marcada na fatura errada. A parte útil virou o item M8.
 
@@ -99,5 +126,6 @@ Documentos sem código: módulos personalizáveis, pausar e arquivar, ROADMAP e 
 
 ## Regras para construir
 - Uma versão por item (v0.15.1, v0.16…), com testes das regras, teste no navegador (celular) e documentação atualizada.
+- Conferir o **Mapa dos módulos**: testar também os módulos ligados e atualizar o mapa se uma ligação mudar.
 - Nada muda para quem já usa o app sem aviso: dados antigos continuam valendo, e o que for novo começa como hoje.
 - Português simples nas telas. Visual igual ao do app: preto, verde e cartões.

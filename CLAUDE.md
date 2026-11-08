@@ -5,7 +5,7 @@ O dono, Leonardo, **não é desenvolvedor**: ele usa, testa, encontra problemas 
 
 ## Por onde começar (economia)
 1. Leia **`docs/CENTRAL.md`**: itens, situação, fila aprovada e o que já foi feito.
-2. Abra **só** o documento de `docs/futuro/` do item em questão.
+2. Abra **só** o documento de `docs/futuro/` do item em questão e confira no **Mapa dos módulos** (na Central) quais módulos ele afeta.
 3. **Não** faça análise geral do código nem releia arquivos sem necessidade. Procure com `grep` o trecho exato.
 4. O `README.md` é o manual do app (módulos, regras de dinheiro, estrutura de pastas). Consulte só a parte necessária.
 5. **Orçamento de uso por dia:** até **10% do limite semanal por dia**, mais **2% de margem** só para anotações e documentação depois de bater os 10%.
