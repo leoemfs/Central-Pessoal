@@ -15,6 +15,34 @@
 **Prioridade:** `alta` · `média` · `baixa`.
 **Situação:** `ideia` → `especificado` → `aprovado` → `construindo` → `pronto (vX)`.
 
+## Mapa dos módulos
+*O que cada módulo usa dos outros e o que entrega para eles. Serve para melhorar um módulo sem quebrar os demais.*
+
+**Como usar o mapa:**
+- Todo item da tabela que mexe em um módulo ganha, no documento dele, a linha **"Afeta:"** com os módulos ligados (pegue daqui).
+- Antes de construir, conferir as ligações do módulo; depois, testar também os módulos ligados (não só o que mudou).
+- Mudou uma ligação (nova, removida ou diferente)? Atualizar este mapa no mesmo PR.
+- Todos os dados ficam num só lugar (`src/data.ts`); campo novo sempre com valor padrão em `normalize()`.
+
+**Módulos** (10 que funcionam):
+
+| Módulo | Dados dele | Usa de outros | Entrega para outros | Regras e testes |
+|---|---|---|---|---|
+| **Finanças** (despesas, receitas, cartões, vales, caixinhas, orçamento, relatórios) | despesas, séries, categorias, receitas, fontes, cartões, vales, caixinhas, orçamentos | Listas (despesa de "Concluir compra"), Você (caixinha sugerida), Carreira (salário após aumento) | Início, Agenda (contas e compras no cartão do dia), Revisão, Busca, Jornada, Listas (categoria Mercado) | `finance.ts`, `incomes.ts`, `boxes.ts`, `budget.ts` |
+| **Agenda** (compromissos, tarefas, Próximos) | compromissos, tarefas | Finanças (contas e cartão), Núcleo (hábitos marcáveis), Diário (registros do dia), Você (compromissos sugeridos), Carreira (reuniões, passos das vagas, prazos e entregas, automático) | Início, Revisão, Busca, Jornada | `upcoming.ts` |
+| **Diário** (registros, Humor, Revisão) | registros, humor do dia | Humor, Mente ("Três coisas boas") e Revisão viram registros | Início, Agenda, Revisão, Busca, Jornada | `mood.ts`, `review.ts` |
+| **Núcleo pessoal** (rituais, hábitos, mente, corpo) | hábitos, práticas, última carga | Você (hábitos sugeridos), Mente e Corpo (marcam o hábito ligado) | Início, Agenda, Revisão, Jornada (atributos e XP), Humor (dias com treino) | `habits.ts`, `practices.ts` |
+| **Listas** (listas, Preços, Compras) | categorias de listas, listas, produtos, marcas, lojas, preços, compras | Finanças (categorias) | Finanças (despesa "Mercado · loja"), Início (listas fixadas) | `lists.ts` |
+| **Estudos** | estudos (áreas, trilhas, ciclos, notebooks, fontes, mapas) | nada (isolado) | nada por enquanto (N7 vai ligar à Jornada) | `estudos.ts`, `estudosCatalogo.ts` |
+| **Carreira** (vagas, trabalho atual, reuniões, projetos) | carreira (vagas, cargos, salários, reuniões, projetos) | nada | Agenda (tudo com data entra sozinho e se atualiza), Finanças (aumento atualiza o salário, se você quiser) | `carreira.ts` |
+| **Você** | perfil | Núcleo (hábitos) e Caixinhas (para sugerir) | Núcleo (hábito), Agenda (compromissos), Finanças (caixinha), Início | `profile.ts` |
+| **Notas** | notas | nada | Busca | — |
+| **Jornada** (bloqueada) | ajustes da Jornada | Finanças, Agenda, Diário, Núcleo (dias de uso, XP, ouro) | nada por enquanto | `journey.ts`, `jornada/` |
+
+**Telas que juntam tudo** (mexeu num módulo, conferir estas): **Início** (quase todos), **Revisão semanal** (Finanças, Agenda, Diário, Núcleo, humor), **Busca** (Diário, Finanças, Agenda, Notas).
+**Partes do app todo:** barra de baixo (`moduleBar.ts`), lápis dos cartões (`cardLayout.ts`), temas (`theme.ts`), backup (`data.ts`).
+**Em breve** (sem código): Saúde, Objetivos, Foco, Banco de ideias.
+
 ## Caixa de entrada
 *Ideias e problemas ainda sem classificar. Uma linha cada, com a data.*
 
@@ -51,6 +79,12 @@
 | N6 | Módulo Estudos e Carreira: Biblioteca (áreas, trilhas, tópicos de referência), Ciclos pessoais, Meus notebooks, Fontes, Mapas mentais e Roadmaps | NOVO | G | média | pronto (v0.21), em teste por 3 dias | `futuro/modulo-estudos.md` |
 | N8.5 | Carreira × Agenda automática: tudo que tem data em Carreira (reuniões, passos das vagas e, depois, projetos) aparece sozinho na Agenda do app e se atualiza quando muda; some se for excluído. Sem botão "Pôr na Agenda" | NOVO | P | alta | pronto (v0.24) | `futuro/modulo-carreira.md` |
 | N8.6 | Carreira: **Projetos do trabalho** (ex.: repasse, contratos de prestadores) com prazo, entregas com data, situação e ligação com as reuniões; prazos e entregas na Agenda | NOVO | M | alta | pronto (v0.24) | `futuro/modulo-carreira.md` |
+| M11 | Estudos no dia a dia: cartão "Estudando agora" no Início e "O que estudei" na Revisão semanal. Afeta: Início, Revisão | MOD | P | alta | ideia | `futuro/modulo-estudos.md` |
+| M12 | Estudos: lápis para subir, descer e ocultar cartões (como no Início e em Finanças). Afeta: só Estudos | MOD | P | média | ideia | `futuro/modulo-estudos.md`, `futuro/navegacao-v2.md` |
+| M13 | Estudos: busca dentro do módulo (tópicos, notebooks, fontes); parte do E6. Afeta: Busca | MOD | P | média | ideia | `futuro/modulo-estudos.md`, `futuro/navegacao-v2.md` |
+| M14 | Estudos: anexar PDF ou imagem no notebook (hoje só link). Afeta: backup (arquivos pesados) | MOD | M | baixa | ideia | `futuro/modulo-estudos.md` |
+| M15 | Estudos: editor de mapas mentais (arrastar e ligar ideias). Afeta: só Estudos | MOD | M | baixa | ideia | `futuro/modulo-estudos.md` |
+| N9 | Sincronizar com a conta Google (pasta escondida do Drive; site e Android com os mesmos dados). Depois do N4. *Na conversa do Android foi anotado como N8; o código certo é N9.* | NOVO | M | baixa | ideia | `futuro/app-android.md` ("Sincronização") |
 | N7 | Estudos × Jornada: XP, ouro e INT por tópico, ciclo e constância; selos, Coruja e missões | NOVO | M | baixa | especificado (só documento) | `futuro/estudos-jornada.md` |
 | N8 | Módulo Carreira (próprio, fora de Estudos): vagas e candidaturas, metas de carreira, currículo e conquistas, trabalho atual (cargos, salários, feedbacks). Dividido em N8.0 a N8.4 | NOVO | G | média | parte pronta: Vagas (v0.22), Trabalho e Reuniões (v0.23), Projetos e Agenda automática (v0.24); faltam N8.3 Currículo e N8.4 Metas | `futuro/modulo-carreira.md` |
 
@@ -67,7 +101,17 @@
 - **D, Temas:** E4 (+ E7, ícones). **Pronto na v0.17.**
 - **Depois:** E6.
 
-**Ordem sugerida** (quando aprovar): M1 → resto do E1 → lápis nos outros módulos → E6 → M2 → M3 → M4 → M5 → M6 → M7 → M8 → N1.
+**Fila única sugerida** (aguardando aprovação; junta Carreira, Estudos e o resto). Semana de 09 a 14/11: testes e anotações, e **no máximo um item por dia** se houver folga.
+1. M1 Hábitos: pausar e arquivar (P)
+2. M11 Estudos no Início e na Revisão (P)
+3. N8.3 Carreira: currículo (M)
+4. N8.4 Carreira: metas (M)
+5. Resto do E1: ocultar módulos, ordem no Mais, ritmo do Diário (M)
+6. Lápis nos outros módulos: E3 + M12 (Agenda, Núcleo, Listas, Estudos, Carreira) (M)
+7. Busca por módulo: E6 + M13 (P)
+8. M8 Cartão: escolher a fatura (P)
+9. M2 → M3 → M4 Preços 2.0 · M5 Agenda com repetição · M6 fichas de treino · M7 revisão completa
+10. N7 Estudos × Jornada · N1 Saúde · M14 anexos · M15 editor de mapas · depois N2, N3, N4, N5, N9
 
 ## Feito
 | Versão | O que entrou | PR |
@@ -88,7 +132,7 @@
 | v0.12 | Você (entrevista e sugestões) e Núcleo Mente/Corpo | — |
 | até v0.11 | Finanças, Agenda, Diário, Núcleo, Receitas, revisão semanal, atributos e Jornada bloqueada (14 dias) | ver PRs no GitHub |
 
-Documentos sem código: módulos personalizáveis, pausar e arquivar, ROADMAP e Central (#14 e seguintes).
+Documentos sem código: Mapa dos módulos (08/11), módulos personalizáveis, pausar e arquivar, ROADMAP e Central (#14 e seguintes).
 
 **Descartado:** C1 "compra no cartão novo some da fatura" (08/11): não era problema do app, a compra estava sendo marcada na fatura errada. A parte útil virou o item M8.
 
@@ -106,5 +150,6 @@ Documentos sem código: módulos personalizáveis, pausar e arquivar, ROADMAP e 
 
 ## Regras para construir
 - Uma versão por item (v0.15.1, v0.16…), com testes das regras, teste no navegador (celular) e documentação atualizada.
+- Conferir o **Mapa dos módulos**: testar também os módulos ligados e atualizar o mapa se uma ligação mudar.
 - Nada muda para quem já usa o app sem aviso: dados antigos continuam valendo, e o que for novo começa como hoje.
 - Português simples nas telas. Visual igual ao do app: preto, verde e cartões.
