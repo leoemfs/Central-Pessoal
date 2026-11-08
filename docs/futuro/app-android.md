@@ -3,6 +3,8 @@
 > **Status: IDEIA PARA IMPLEMENTAÇÃO FUTURA.** Sem desenvolvimento no app.
 
 ## Objetivo
+**Uso pessoal (só do Leonardo):** sem Play Store; instalação direta do APK no celular.
+
 Transformar a Central Pessoal num app Android instalável (APK e, se quiser, Play Store), **sem reescrever o app**. O mesmo código continua servindo o site.
 
 ## Como
@@ -26,11 +28,18 @@ Transformar a Central Pessoal num app Android instalável (APK e, se quiser, Pla
 - Continuam **só no aparelho**. O IndexedDB do app Android é separado do navegador, por isso a primeira abertura oferece **"Importar backup"** para trazer os dados do site.
 - O formato do backup é o mesmo do site (JSON, versão 2).
 
+## Sincronização (item N8, depois do N4)
+- **Conta Google:** cópia dos dados numa pasta escondida do Google Drive (só o app enxerga). Sem servidor próprio e sem custo.
+- Os dados já ficam num único pacote (o mesmo do backup), então basta enviar e receber esse pacote: baixa ao abrir e envia ao salvar.
+- Regra inicial: a mudança mais recente vence. Editar no celular e no site ao mesmo tempo, sem internet, pode perder uma das mudanças.
+- Precisa de um projeto gratuito no Google Cloud para liberar o login com Google.
+- **Conta Apple: fora.** O iCloud não funciona bem no Android, e usar a conta Apple exigiria um servidor próprio (custo e manutenção).
+
 ## Etapas sugeridas
 1. Projeto Capacitor + ícone e tela de abertura. Gerar APK de teste (instalação direta no celular).
 2. Notificações locais com as regras de `notificacoes.md` + Configurações › Notificações.
 3. Tela ligada nas práticas, vibração e backup em arquivo.
-4. Publicação na Play Store (conta de desenvolvedor do Google, taxa única) e build automático no GitHub Actions.
+4. Build automático do APK no GitHub Actions. (Play Store não é necessária: o app é de uso pessoal.)
 5. Widget e atalhos.
 
 ## Cuidados

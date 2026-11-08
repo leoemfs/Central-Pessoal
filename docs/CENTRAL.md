@@ -47,11 +47,12 @@
 | N2 | Jornada completa (pixel art): missões no ritmo da pessoa, recompensas por módulo, raridades (comum a místico), Forja e Codex por coleções | NOVO | G | baixa | especificado | `futuro/modulo-rpg.md`, `futuro/jornada-recompensas.md`, `futuro/jornada-raridades.md` |
 | N3 | Notificações | NOVO | M | baixa | especificado | `futuro/notificacoes.md` |
 | N4 | App Android | NOVO | G | baixa | especificado | `futuro/app-android.md` |
+| N8 | Sincronizar com a conta Google (pasta escondida do Drive; site e Android com os mesmos dados). Depois do N4 | NOVO | M | baixa | ideia | `futuro/app-android.md` ("Sincronização") |
 | N5 | Código de barras, base de produtos e nota fiscal | NOVO | G | baixa | ideia | `futuro/precos-v2.md` ("Mais adiante") |
 | N6 | Módulo Estudos e Carreira: Biblioteca (áreas, trilhas, tópicos de referência), Ciclos pessoais, Meus notebooks, Fontes, Mapas mentais e Roadmaps | NOVO | G | média | pronto (v0.21), em teste por 3 dias | `futuro/modulo-estudos.md` |
 | N7 | Estudos × Jornada: XP, ouro e INT por tópico, ciclo e constância; selos, Coruja e missões | NOVO | M | baixa | especificado (só documento) | `futuro/estudos-jornada.md` |
 
-**Depende de outra coisa:** N3 fica melhor junto com N4 (notificações de verdade no Android). N2 e N5 dependem de decisões e integrações.
+**Depende de outra coisa:** N3 fica melhor junto com N4 (notificações de verdade no Android). N2 e N5 dependem de decisões e integrações. N8 vem depois do N4.
 
 ## Fila aprovada
 *O que pode ser construído, na ordem. Vazia = nada para construir.*
