@@ -52,6 +52,12 @@ Um lugar para acompanhar a vida profissional: onde estou (trabalho atual), onde 
 - **Metas** na barra mostra "em breve" até a N8.4. Botão + em todas as telas: nova vaga.
 - Dados em `AppData.career` (padrão em `normalize()`; entra no backup). Regras em `src/carreira.ts` (6 testes), tela em `src/modules/Carreira.tsx`.
 
+## Agenda automática (N8.5, P) e Projetos do trabalho (N8.6, M)
+Pedido de 08/11: reuniões e projetos de carreira sincronizados com o **calendário do app** (não o Google Agenda).
+- **N8.5:** tudo que tem data em Carreira vira compromisso na Agenda **sozinho** e se atualiza quando a data, a hora ou o assunto mudam; excluir em Carreira tira da Agenda. O botão "Pôr na Agenda" sai. Na Agenda, o compromisso mostra "de Carreira" e abre a ficha de origem. Os compromissos já criados pelo botão continuam ligados.
+- **N8.6 Projetos do trabalho:** nome, área (ex.: repasse, contratos de prestadores), prazo, situação (andando, parado, concluído), **entregas** com data e check, anotações e link. Reuniões podem ser ligadas a um projeto (a apresentação de sexta mostra os projetos e entregas da quinzena). Prazos e entregas com data vão para a Agenda (regra da N8.5). Lugar: na casa de Carreira, cartão "Projetos", e no botão +.
+- Google Agenda fica para depois (precisa de login Google; anotar se pedir).
+
 ## Perguntas da prévia (responder antes da N8.1)
 1. A casa abre em Trabalho ou em Currículo?
 2. ~~Vagas: lista ou colunas?~~ Lista (decidido na v0.22).
