@@ -4488,3 +4488,19 @@ a.row {
     top: 10px;
   }
 }
+
+/* ---------- v0.20.2: tocar de novo no módulo mostra os favoritos ---------- */
+.tb-hint {
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% + 8px);
+  transform: translateX(-50%);
+  background: var(--accent);
+  color: var(--on-accent);
+  font-size: 0.78rem;
+  font-weight: 600;
+  padding: 5px 12px;
+  border-radius: 999px;
+  white-space: nowrap;
+  pointer-events: none;
+}

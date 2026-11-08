@@ -83,7 +83,7 @@ const QUICK: { to: string; label: string; icon: IconName; hint: string }[] = [
 ];
 
 /** Um ícone da barra de baixo. Só o ícone; segurar o dedo mostra o nome. */
-function TabLink({ to, label, icon, active, center }: { to: string; label: string; icon: string; active: boolean; center?: boolean }) {
+function TabLink({ to, label, icon, active, center, onTap }: { to: string; label: string; icon: string; active: boolean; center?: boolean; onTap?: () => void }) {
   const [tip, setTip] = useState(false);
   const timer = useRef<number | undefined>(undefined);
   const held = useRef(false);
@@ -115,6 +115,11 @@ function TabLink({ to, label, icon, active, center }: { to: string; label: strin
         if (held.current) {
           e.preventDefault();
           held.current = false;
+          return;
+        }
+        if (onTap) {
+          e.preventDefault();
+          onTap();
         }
       }}
     >
@@ -258,7 +263,10 @@ export function App() {
   const barIndex = bar ? activeIndex(bar, section.path) : null;
   const editor = useCardEditor();
   const where = bar ? crumb(bar, barIndex) : null;
-  const placed = bar ? barItems(bar, data.settings.favorites) : null;
+  // Tocar de novo no módulo em que você já está mostra os favoritos, para trocar de módulo sem passar pelo Início.
+  const [showFavs, setShowFavs] = useState(false);
+  useEffect(() => setShowFavs(false), [route.path, route.n]);
+  const placed = bar && !showFavs ? barItems(bar, data.settings.favorites) : null;
   const middle: BarItem[] = placed ? placed.items : favoriteItems(data.settings.favorites);
 
   useEffect(() => {
@@ -336,9 +344,18 @@ export function App() {
       <nav className={`tabbar${barHidden ? ' hidden' : ''}`} aria-label="Atalhos">
         <TabLink to="inicio" label="Início" icon="home" active={section.path === 'inicio'} />
         {middle.map((it, i) => (
-          <TabLink key={`${bar?.id ?? 'fav'}-${it.id}`} to={it.to} label={it.label} icon={it.icon} center={!!placed && i === placed.home} active={bar ? it.section === section.path : section.path === it.id} />
+          <TabLink
+            key={`${placed ? bar!.id : 'fav'}-${it.id}`}
+            to={it.to}
+            label={it.label}
+            icon={it.icon}
+            center={!!placed && i === placed.home}
+            active={placed ? it.section === section.path : section.path === it.id || (!!bar && bar.id === it.id)}
+            onTap={placed && i === placed.home && it.section === section.path ? () => setShowFavs(true) : !placed && bar && it.to === section.path ? () => setShowFavs(false) : undefined}
+          />
         ))}
         <TabLink to="mais" label="Mais" icon="grid" active={!bar && section.path !== 'inicio' && !middle.some((it) => it.id === section.path)} />
+        {showFavs && <span className="tb-hint">Escolha o módulo</span>}
       </nav>
 
       <FirstRun />
