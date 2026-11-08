@@ -132,6 +132,6 @@ Documentos de funcionalidades planejadas, ainda **sem desenvolvimento**:
 - [Notificações](docs/futuro/notificacoes.md): avisos de contas, faturas, rituais no horário, compromissos, dia de guardar e revisão semanal, com horário de silêncio e sem culpa. Ficam para o app Android (notificações locais, sem servidor).
 - [App Android](docs/futuro/app-android.md): empacotar o mesmo app com Capacitor, sem reescrever. Ganha notificações locais, tela ligada nas práticas, vibração, backup em arquivo, câmera e, depois, widget.
 
-A ordem combinada para construir o que está anotado fica em [docs/futuro/ROADMAP.md](docs/futuro/ROADMAP.md).
+Ideias, problemas, prioridades, o que está aprovado para construir e o histórico de versões ficam na [Central de melhorias](docs/CENTRAL.md). As instruções de trabalho para o Claude ficam em [CLAUDE.md](CLAUDE.md).
 
 Feito com React, TypeScript e Vite.
