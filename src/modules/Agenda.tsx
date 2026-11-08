@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react';
 import type { ViewProps } from '../App';
 import { useStore } from '../store';
 import { useSubAction } from '../router';
+import { useReportTab } from '../barTab';
 import { remove, upsert } from '../actions';
 import { getInvoice, invoiceMonths } from '../finance';
 import type { CalendarEvent, Task } from '../types';
@@ -71,8 +72,16 @@ export function Agenda({ route }: ViewProps) {
   const [taskForm, setTaskForm] = useState<Task | 'new' | null>(null);
   const billsByDay = useBillsByDay();
 
+  useReportTab('agenda', tab);
   useSubAction(route, 'agenda', {
     tarefas: () => setTab('tarefas'),
+    calendario: () => setTab('calendario'),
+    hoje: () => {
+      setTab('calendario');
+      setSelected(today);
+      setMonth(monthKey(today));
+      setDayOpen(true);
+    },
     novo: () => (tab === 'tarefas' ? setTaskForm('new') : setEventForm('new')),
     'nova-tarefa': () => {
       setTab('tarefas');

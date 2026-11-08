@@ -6,6 +6,7 @@ import { normalizeBox } from './boxes.ts';
 import { normalizeMoods } from './mood.ts';
 import { normalizeVoucher } from './vouchers.ts';
 import { normalizeAccent } from './theme.ts';
+import { DEFAULT_FAVORITES, normalizeFavorites } from './moduleBar.ts';
 import { DEFAULT_LIST_CATEGORIES, normalizeListData } from './lists.ts';
 
 export const COLORS = ['#22c55e', '#3b82f6', '#8b5cf6', '#f97316', '#ef4444', '#94a3b8', '#eab308', '#ec4899', '#06b6d4'];
@@ -49,7 +50,7 @@ export function emptyData(): AppData {
     incomes: [],
     incomeSeries: [],
     incomeSources: [],
-    settings: { theme: 'dark', accent: null, seededCategories: false, seededIncomeSources: false, lastBackupAt: null, activeDays: [], visitDays: [], journeyUnlockedAt: null, journeyChoice: null },
+    settings: { theme: 'dark', accent: null, favorites: [...DEFAULT_FAVORITES], seededCategories: false, seededIncomeSources: false, lastBackupAt: null, activeDays: [], visitDays: [], journeyUnlockedAt: null, journeyChoice: null },
     profile: emptyProfile('novo'),
     boxes: [],
     moods: {},
@@ -114,6 +115,7 @@ export function normalize(raw: unknown): AppData {
       // Só a versão 2 tem tema escolhido pelo usuário; o protótipo começa no escuro.
       theme: r.version === 2 && (settings.theme === 'light' || settings.theme === 'system') ? settings.theme : 'dark',
       accent: normalizeAccent(settings.accent),
+      favorites: normalizeFavorites(settings.favorites),
       seededCategories: settings.seededCategories === true,
       seededIncomeSources: settings.seededIncomeSources === true,
       lastBackupAt: typeof settings.lastBackupAt === 'string' ? settings.lastBackupAt : null,

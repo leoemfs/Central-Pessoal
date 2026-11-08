@@ -216,6 +216,8 @@ export interface Settings {
   theme: Theme;
   /** Cor de destaque escolhida (id de ACCENTS em theme.ts); null = padrão do tema (escuro verde, claro azul). */
   accent: string | null;
+  /** Os 3 módulos favoritos da barra de baixo no Início (ids de FAVORITABLE em moduleBar.ts). */
+  favorites: [string, string, string];
   seededCategories: boolean;
   seededIncomeSources: boolean;
   lastBackupAt: string | null;
