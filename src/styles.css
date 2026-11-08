@@ -5358,3 +5358,15 @@ a.row {
 .career-mini { margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 4px; font-size: 0.9rem; }
 .career-date { flex: 0 0 9.5rem; }
 .ev-origin { font-size: 0.72rem; }
+
+/* v0.25.1: o jeito escolhido da barra fica marcado */
+.pz-options .option-card.on {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+.pz-options .option-card.on strong::after {
+  content: '  ✓ em uso';
+  color: var(--accent-text);
+  font-size: 0.8rem;
+  font-weight: 600;
+}

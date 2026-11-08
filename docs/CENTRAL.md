@@ -120,6 +120,7 @@
 ## Feito
 | Versão | O que entrou | PR |
 |---|---|---|
+| v0.25.1 | Personalização: o jeito escolhido da barra fica marcado ("✓ em uso") e aparece um aviso ao trocar | — |
 | v0.25 | E10, E11 e E13: Personalização em Configurações (jeito da barra, favoritos, tocar de novo, esconder ao rolar) e o voltar do celular: ferramenta → casa do módulo → Início | — |
 | v0.25 | E12: tocar de novo no módulo aberto mostra os favoritos, para trocar de módulo direto | — |
 | v0.24 | N8.5 + N8.6: tudo de Carreira com data aparece sozinho na Agenda (e abre a ficha ao tocar); Projetos do trabalho com prazo, entregas e ligação com reuniões | #24 |

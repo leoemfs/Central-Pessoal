@@ -3,7 +3,7 @@ import { useStore } from '../store';
 import { emptyData, normalize } from '../data';
 import type { Theme } from '../types';
 import { formatDMY, toISO, todayISO } from '../utils';
-import { Icon, PageHeader, Segmented, Toggle, type IconName } from '../ui';
+import { Icon, notify, PageHeader, Segmented, Toggle, type IconName } from '../ui';
 import { favoriteItems } from '../moduleBar';
 import { FavoritesSheet } from './Mais';
 import { ACCENTS, accentById } from '../theme';
@@ -151,7 +151,10 @@ export function Ajustes() {
         <h3 className="pz-title">Barra de baixo dentro de um módulo</h3>
         <div className="pz-options" role="radiogroup" aria-label="Jeito da barra de baixo">
           {BAR_LAYOUTS.map((o) => (
-            <button key={o.id} type="button" role="radio" aria-checked={data.settings.barLayout === o.id} className={`option-card${data.settings.barLayout === o.id ? ' on' : ''}`} onClick={() => setSetting({ barLayout: o.id })}>
+            <button key={o.id} type="button" role="radio" aria-checked={data.settings.barLayout === o.id} className={`option-card${data.settings.barLayout === o.id ? ' on' : ''}`} onClick={() => {
+                setSetting({ barLayout: o.id });
+                notify('Barra de baixo', o.label);
+              }}>
               <strong>{o.label}</strong>
               <span className="muted small">{o.hint}</span>
               <span className="pz-demo" aria-hidden="true">
