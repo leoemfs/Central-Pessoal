@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import type { ViewProps } from '../App';
 import { useStore } from '../store';
-import { useSubAction } from '../router';
+import { go, useSubAction } from '../router';
 import { remove, upsert } from '../actions';
 import { getInvoice, invoiceMonths } from '../finance';
 import type { CalendarEvent, Task } from '../types';
@@ -22,6 +22,7 @@ export function EventItem({ ev, showDate, onClick }: { ev: CalendarEvent; showDa
         <span className="row-title">{ev.title}</span>
         <span className="row-meta">
           {showDate && <Pill>{relativeDay(ev.date)}</Pill>}
+          {ev.origin?.startsWith('carreira/') && <Pill tone="blue">Carreira</Pill>}
           {ev.location && (
             <span>
               <Icon name="mapPin" size={13} /> {ev.location}
@@ -170,7 +171,7 @@ export function Agenda({ route }: ViewProps) {
               ) : (
                 <ul className="list">
                   {upcoming.map((e) => (
-                    <EventItem key={e.id} ev={e} showDate onClick={() => { pick(e.date); setEventForm(e); }} />
+                    <EventItem key={e.id} ev={e} showDate onClick={() => (e.origin ? go(e.origin) : (pick(e.date), setEventForm(e)))} />
                   ))}
                 </ul>
               )}
@@ -185,7 +186,7 @@ export function Agenda({ route }: ViewProps) {
           onClose={() => setDayOpen(false)}
           onAddEvent={() => setEventForm('new')}
           onAddTask={() => setTaskForm('new')}
-          onEditEvent={(e) => setEventForm(e)}
+          onEditEvent={(e) => (e.origin ? go(e.origin) : setEventForm(e))}
           onEditTask={(t) => setTaskForm(t)}
         />
       )}

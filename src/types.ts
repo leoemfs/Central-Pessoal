@@ -23,6 +23,8 @@ export interface CalendarEvent {
   time: string;
   location: string;
   description: string;
+  /** Criado por outro módulo e mantido por ele (ex.: "carreira/abrir-m-<id>"): tocar abre a origem. */
+  origin?: string;
 }
 
 /** ritual = rotina já incorporada · construir = hábito novo · abandonar = hábito a deixar. */
@@ -648,13 +650,31 @@ export interface Meeting {
   link: string;
   /** Repete a cada N dias (0 = não repete). */
   repeatDays: number;
+  /** Projetos do trabalho ligados a esta reunião. */
+  projectIds: string[];
   /** Já criou a próxima da série. */
   nextCreated: boolean;
   eventId: string | null;
+}
+
+export type ProjectStatus = 'andando' | 'parado' | 'concluido';
+export interface WorkProject {
+  id: string;
+  name: string;
+  /** Área ou setor (ex.: repasse, contratos de prestadores). */
+  area: string;
+  deadline: string | null;
+  status: ProjectStatus;
+  /** Entregas: o que precisa sair, com data opcional. */
+  deliveries: { id: string; text: string; date: string | null; done: boolean }[];
+  notes: string;
+  link: string;
+  createdAt: string;
 }
 
 export interface CareerData {
   jobs: JobApp[];
   changes: CareerChange[];
   meetings: Meeting[];
+  projects: WorkProject[];
 }

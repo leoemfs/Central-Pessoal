@@ -1,16 +1,22 @@
-import { useState, type ReactNode } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import type { ViewProps } from '../App';
 import { go, useSubAction } from '../router';
 import { useStore } from '../store';
-import type { AppData, CareerChange, CareerChangeKind, JobApp, JobStage, Meeting } from '../types';
+import type { AppData, CareerChange, CareerChangeKind, JobApp, JobStage, Meeting, ProjectStatus, WorkProject } from '../types';
 import { addDays, formatDate, formatMoney, relativeDay, todayISO, uid } from '../utils';
-import { Chips, Empty, Field, Icon, MoneyInput, notify, PageHeader, Pill, Sheet, Toggle } from '../ui';
+import { Chips, Empty, Field, Icon, MoneyInput, MultiChips, notify, PageHeader, Pill, Progress, Sheet, Toggle } from '../ui';
 import {
   applySalaryToFinance,
   CHANGE_LABEL,
   currentWork,
   isBlankMeeting,
-  meetingEvent,
+  projectName,
+  projectProgress,
+  sortProjects,
+  syncCareerEvents,
+  newProject,
+  isBlankProject,
+  PROJECT_STATUS_UI,
   meetingKindLabel,
   MEETING_KINDS_UI,
   meetingTitle,
@@ -27,7 +33,6 @@ import {
   closeJob,
   isBlankJob,
   isOpen,
-  jobEvent,
   newJob,
   openJobs,
   OUTCOMES,
@@ -48,15 +53,18 @@ import {
 
 const STAGE_TONE: Record<JobStage, 'gray' | 'blue' | 'orange' | 'green'> = { interesse: 'gray', enviei: 'blue', entrevista: 'orange', proposta: 'green' };
 
+/** Toda mudança em Carreira deixa a Agenda igual (N8.5). */
+const synced = (fn: (d: AppData) => AppData) => (d: AppData) => syncCareerEvents(fn(d));
+
 function saveJob(job: JobApp) {
-  return (d: AppData): AppData => {
+  return synced((d: AppData): AppData => {
     const jobs = d.career.jobs.some((j) => j.id === job.id) ? d.career.jobs.map((j) => (j.id === job.id ? job : j)) : [job, ...d.career.jobs];
     return { ...d, career: { ...d.career, jobs } };
-  };
+  });
 }
 
 function removeJob(id: string) {
-  return (d: AppData): AppData => ({ ...d, career: { ...d.career, jobs: d.career.jobs.filter((j) => j.id !== id) }, deleted: { ...d.deleted, [id]: new Date().toISOString() } });
+  return synced((d: AppData): AppData => ({ ...d, career: { ...d.career, jobs: d.career.jobs.filter((j) => j.id !== id) }, deleted: { ...d.deleted, [id]: new Date().toISOString() } }));
 }
 
 const title = (j: JobApp) => j.role.trim() || 'Vaga sem cargo';
@@ -98,6 +106,8 @@ export function CarreiraPage({ route }: ViewProps) {
   const [meetingId, setMeetingId] = useState<string | null>(null);
   const [changeOpen, setChangeOpen] = useState(false);
   const [menu, setMenu] = useState(false);
+  const [projectId, setProjectId] = useState<string | null>(null);
+  const [showDoneProjects, setShowDoneProjects] = useState(false);
   const [showSalary, setShowSalary] = useState(false);
   const { update } = useStore();
   const today = todayISO();
@@ -107,7 +117,22 @@ export function CarreiraPage({ route }: ViewProps) {
     update(saveMeeting(m));
     setMeetingId(m.id);
   }
-  useSubAction(route, 'carreira', { menu: () => setMenu(true), reuniao: createMeeting, mudanca: () => setChangeOpen(true) });
+  function createProject() {
+    const pr = newProject(uid(), new Date().toISOString());
+    update(saveProject(pr));
+    setProjectId(pr.id);
+  }
+  useSubAction(route, 'carreira', { menu: () => setMenu(true), reuniao: createMeeting, mudanca: () => setChangeOpen(true), projeto: createProject });
+  // Vindo da Agenda: #/carreira/abrir-m-<id> (reunião), abrir-j-<id> (vaga), abrir-p-<id> (projeto).
+  useEffect(() => {
+    const m = /^abrir-([mjp])-(.+)$/.exec(route.sub);
+    if (!m) return;
+    if (m[1] === 'm') setMeetingId(m[2]);
+    else if (m[1] === 'j') setOpenId(m[2]);
+    else setProjectId(m[2]);
+    window.history.replaceState(null, '', '#/carreira');
+  }, [route.n, route.sub]);
+  const projects = sortProjects(data.career.projects);
 
   const jobs = data.career.jobs;
   const open = openJobs(jobs);
@@ -169,6 +194,75 @@ export function CarreiraPage({ route }: ViewProps) {
               <MeetingRow key={m.id} m={m} past onOpen={() => setMeetingId(m.id)} />
             ))}
           </ul>
+        )}
+      </section>
+
+      <section className="card">
+        <div className="card-head">
+          <h2>Projetos</h2>
+          <button type="button" className="link" onClick={createProject}>
+            + Novo
+          </button>
+        </div>
+        {projects.active.length ? (
+          <ul className="list">
+            {projects.active.map((pr) => {
+              const g = projectProgress(pr);
+              const st = PROJECT_STATUS_UI.find((x) => x.id === pr.status)!;
+              const late = (pr.deadline && pr.deadline < today) || (g.next?.date && g.next.date < today);
+              return (
+                <li key={pr.id}>
+                  <button type="button" className="row career-plain career-project" onClick={() => setProjectId(pr.id)}>
+                    <span className="row-body">
+                      <span className="row-title">{projectName(pr)}</span>
+                      <span className="muted small">
+                        {[pr.area.trim(), pr.deadline ? `prazo ${formatDate(pr.deadline)}` : ''].filter(Boolean).join(' · ') || 'Sem prazo'}
+                      </span>
+                      {g.total > 0 && <Progress pct={(g.done / g.total) * 100} tone={late ? 'orange' : 'green'} />}
+                      {g.next && (
+                        <span className={`small ${g.next.date && g.next.date < today ? 'career-late' : 'muted'}`}>
+                          Próxima entrega: {g.next.text || 'sem nome'}
+                          {g.next.date ? ` · ${relativeDay(g.next.date)}` : ''}
+                        </span>
+                      )}
+                    </span>
+                    <span className="career-amount">
+                      <Pill tone={st.tone}>{st.label}</Pill>
+                      {g.total > 0 && (
+                        <span className="muted small tabular">
+                          {g.done}/{g.total}
+                        </span>
+                      )}
+                    </span>
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
+        ) : (
+          <Empty>Projetos do seu setor (ex.: repasse, contratos de prestadores) com prazo e entregas. Prazos e entregas aparecem sozinhos na Agenda.</Empty>
+        )}
+        {projects.done.length > 0 && (
+          <>
+            <button type="button" className="link small" style={{ marginTop: 10 }} onClick={() => setShowDoneProjects(!showDoneProjects)}>
+              {showDoneProjects ? 'Esconder' : 'Ver'} concluídos ({projects.done.length})
+            </button>
+            {showDoneProjects && (
+              <ul className="list">
+                {projects.done.map((pr) => (
+                  <li key={pr.id}>
+                    <button type="button" className="row career-plain career-past" onClick={() => setProjectId(pr.id)}>
+                      <span className="row-body">
+                        <span className="row-title">{projectName(pr)}</span>
+                        <span className="muted small">{pr.area}</span>
+                      </span>
+                      <Pill tone="gray">Concluído</Pill>
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </>
         )}
       </section>
 
@@ -279,6 +373,11 @@ export function CarreiraPage({ route }: ViewProps) {
               <span className="tile-text"><strong>Nova reunião</strong><span className="muted">Reunião, 1:1, apresentação, feedback ou avaliação</span></span>
               <Icon name="right" size={18} />
             </button>
+            <button type="button" className="tile" onClick={() => { setMenu(false); createProject(); }}>
+              <span className="tile-icon"><Icon name="folder" /></span>
+              <span className="tile-text"><strong>Novo projeto</strong><span className="muted">Projeto do setor com prazo e entregas</span></span>
+              <Icon name="right" size={18} />
+            </button>
             <button type="button" className="tile" onClick={() => { setMenu(false); setChangeOpen(true); }}>
               <span className="tile-icon"><Icon name="briefcase" /></span>
               <span className="tile-text"><strong>Mudança de cargo ou salário</strong><span className="muted">Entrada, promoção, aumento ou novo emprego</span></span>
@@ -288,20 +387,34 @@ export function CarreiraPage({ route }: ViewProps) {
         </Sheet>
       )}
       {changeOpen && <ChangeSheet onClose={() => setChangeOpen(false)} />}
-      {meetingId && <MeetingSheet id={meetingId} onClose={() => setMeetingId(null)} onOpen={setMeetingId} />}
+      {meetingId && <MeetingSheet id={meetingId} onClose={() => setMeetingId(null)} onOpen={setMeetingId} onOpenProject={(pid) => { setMeetingId(null); setProjectId(pid); }} />}
+      {projectId && <ProjectSheet id={projectId} onClose={() => setProjectId(null)} onOpenMeeting={(mid) => { setProjectId(null); setMeetingId(mid); }} />}
       {openId && <JobSheet id={openId} onClose={() => setOpenId(null)} />}
     </>
   );
 }
 
 function saveMeeting(m: Meeting) {
-  return (d: AppData): AppData => {
+  return synced((d: AppData): AppData => {
     const ms = d.career.meetings.some((x) => x.id === m.id) ? d.career.meetings.map((x) => (x.id === m.id ? m : x)) : [m, ...d.career.meetings];
     return { ...d, career: { ...d.career, meetings: ms } };
-  };
+  });
 }
 function removeMeeting(id: string) {
-  return (d: AppData): AppData => ({ ...d, career: { ...d.career, meetings: d.career.meetings.filter((m) => m.id !== id) }, deleted: { ...d.deleted, [id]: new Date().toISOString() } });
+  return synced((d: AppData): AppData => ({ ...d, career: { ...d.career, meetings: d.career.meetings.filter((m) => m.id !== id) }, deleted: { ...d.deleted, [id]: new Date().toISOString() } }));
+}
+function saveProject(pr: WorkProject) {
+  return synced((d: AppData): AppData => {
+    const ps = d.career.projects.some((x) => x.id === pr.id) ? d.career.projects.map((x) => (x.id === pr.id ? pr : x)) : [pr, ...d.career.projects];
+    return { ...d, career: { ...d.career, projects: ps } };
+  });
+}
+function removeProject(id: string) {
+  return synced((d: AppData): AppData => ({
+    ...d,
+    career: { ...d.career, projects: d.career.projects.filter((x) => x.id !== id), meetings: d.career.meetings.map((m) => (m.projectIds.includes(id) ? { ...m, projectIds: m.projectIds.filter((x) => x !== id) } : m)) },
+    deleted: { ...d.deleted, [id]: new Date().toISOString() },
+  }));
 }
 function removeChange(id: string) {
   return (d: AppData): AppData => ({ ...d, career: { ...d.career, changes: d.career.changes.filter((c) => c.id !== id) }, deleted: { ...d.deleted, [id]: new Date().toISOString() } });
@@ -394,14 +507,14 @@ function ChangeSheet({ onClose }: { onClose: () => void }) {
 }
 
 /** Ficha da reunião (salva sozinha). Reunião vazia some ao fechar. */
-function MeetingSheet({ id, onClose, onOpen }: { id: string; onClose: () => void; onOpen: (id: string) => void }) {
+function MeetingSheet({ id, onClose, onOpen, onOpenProject }: { id: string; onClose: () => void; onOpen: (id: string) => void; onOpenProject?: (id: string) => void }) {
   const { data, update } = useStore();
+  const projects = sortProjects(data.career.projects).active;
   const [todo, setTodo] = useState('');
   const m = data.career.meetings.find((x) => x.id === id);
   if (!m) return null;
   const set = (patch: Partial<Meeting>) => update(saveMeeting({ ...m, ...patch }));
-  const event = m.eventId ? data.events.find((e) => e.id === m.eventId) : undefined;
-  const synced = event && event.date === m.date && event.time === m.time && event.title === meetingTitle(m);
+  const linked = data.career.projects.filter((x) => m.projectIds.includes(x.id));
 
   function close() {
     if (m && isBlankMeeting(m)) update(removeMeeting(m.id));
@@ -411,15 +524,6 @@ function MeetingSheet({ id, onClose, onOpen }: { id: string; onClose: () => void
     if (!m || !todo.trim()) return;
     set({ todos: [...m.todos, { id: uid(), text: todo.trim(), done: false }] });
     setTodo('');
-  }
-  function toAgenda() {
-    if (!m) return;
-    const ev = meetingEvent(m, m.eventId ?? uid());
-    update((d) => {
-      const events = d.events.some((e) => e.id === ev.id) ? d.events.map((e) => (e.id === ev.id ? ev : e)) : [ev, ...d.events];
-      return saveMeeting({ ...m, eventId: ev.id })({ ...d, events });
-    });
-    notify(event ? 'Agenda atualizada' : 'Na Agenda', `${relativeDay(ev.date)}${ev.time ? `, ${ev.time}` : ''}`);
   }
   function scheduleNext() {
     if (!m) return;
@@ -453,22 +557,40 @@ function MeetingSheet({ id, onClose, onOpen }: { id: string; onClose: () => void
         <Group label="Repete">
           <Chips label="Repete" options={REPEAT_OPTIONS.map((r) => ({ value: String(r.days), label: r.label }))} value={String(m.repeatDays)} onChange={(v) => set({ repeatDays: Number(v) })} />
         </Group>
-        <div className="job-ask">
-          {synced ? (
-            <span className="muted small">
-              <Icon name="check" size={14} /> Está na Agenda.
-            </span>
-          ) : (
-            <>
-              <span>{event ? 'A reunião mudou. Atualizar na Agenda?' : 'Pôr esta reunião na Agenda?'}</span>
-              <div className="btn-row">
-                <button type="button" className="btn primary" onClick={toAgenda}>
-                  {event ? 'Atualizar na Agenda' : 'Pôr na Agenda'}
-                </button>
-              </div>
-            </>
-          )}
-        </div>
+        <p className="muted small career-sync">
+          <Icon name="calendar" size={14} /> Aparece sozinha na Agenda e se atualiza quando você muda aqui.
+        </p>
+        {projects.length > 0 && (
+          <Group label="Projetos desta reunião">
+            <MultiChips label="Projetos" options={projects.map((x) => [x.id, projectName(x)])} value={m.projectIds} onToggle={(pid) => set({ projectIds: m.projectIds.includes(pid) ? m.projectIds.filter((x) => x !== pid) : [...m.projectIds, pid] })} />
+          </Group>
+        )}
+        {linked.map((pr) => {
+          const g = projectProgress(pr);
+          const open = pr.deliveries.filter((x) => !x.done);
+          return (
+            <div key={pr.id} className="career-linked">
+              <button type="button" className="career-plain career-linked-head" onClick={() => onOpenProject?.(pr.id)}>
+                <b>{projectName(pr)}</b>
+                <span className="muted small tabular">
+                  {g.done}/{g.total} entregas
+                </span>
+              </button>
+              {open.length ? (
+                <ul className="career-mini">
+                  {open.slice(0, 5).map((x) => (
+                    <li key={x.id}>
+                      {x.text || 'Sem nome'}
+                      {x.date ? <span className={x.date < todayISO() ? 'career-late' : 'muted'}> · {formatDate(x.date)}</span> : null}
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <span className="muted small">Nenhuma entrega em aberto.</span>
+              )}
+            </div>
+          );
+        })}
         <Field label="Pauta e anotações">
           <textarea className="input" rows={5} value={m.notes} onChange={(e) => set({ notes: e.target.value })} placeholder="O que levar, o que foi falado, decisões…" />
         </Field>
@@ -508,8 +630,103 @@ function MeetingSheet({ id, onClose, onOpen }: { id: string; onClose: () => void
           </button>
         )}
         {!isBlankMeeting(m) && (
-          <button type="button" className="btn danger" onClick={() => confirm('Excluir esta reunião? O compromisso na Agenda, se houver, continua lá.') && (update(removeMeeting(m.id)), onClose())}>
+          <button type="button" className="btn danger" onClick={() => confirm('Excluir esta reunião? Ela sai da Agenda também.') && (update(removeMeeting(m.id)), onClose())}>
             <Icon name="trash" size={16} /> Excluir reunião
+          </button>
+        )}
+      </div>
+    </Sheet>
+  );
+}
+
+/** Ficha do projeto (salva sozinha). Projeto vazio some ao fechar. */
+function ProjectSheet({ id, onClose, onOpenMeeting }: { id: string; onClose: () => void; onOpenMeeting: (id: string) => void }) {
+  const { data, update } = useStore();
+  const [text, setText] = useState('');
+  const [date, setDate] = useState('');
+  const pr = data.career.projects.find((x) => x.id === id);
+  if (!pr) return null;
+  const set = (patch: Partial<WorkProject>) => update(saveProject({ ...pr, ...patch }));
+  const meetings = splitMeetings(data.career.meetings.filter((m) => m.projectIds.includes(pr.id)), todayISO());
+  const today = todayISO();
+
+  function close() {
+    if (pr && isBlankProject(pr)) update(removeProject(pr.id));
+    onClose();
+  }
+  function addDelivery() {
+    if (!pr || !text.trim()) return;
+    set({ deliveries: [...pr.deliveries, { id: uid(), text: text.trim(), date: date || null, done: false }] });
+    setText('');
+    setDate('');
+  }
+  const sorted = pr.deliveries.slice().sort((a, b) => Number(a.done) - Number(b.done) || (a.date ?? '9999').localeCompare(b.date ?? '9999'));
+
+  return (
+    <Sheet title={isBlankProject(pr) ? 'Novo projeto' : projectName(pr)} onClose={close}>
+      <div className="stack">
+        <Field label="Nome">
+          <input className="input" value={pr.name} onChange={(e) => set({ name: e.target.value })} placeholder="Ex.: Revisão dos contratos de prestadores" autoFocus={isBlankProject(pr)} />
+        </Field>
+        <div className="grid-2">
+          <Field label="Área ou setor">
+            <input className="input" value={pr.area} onChange={(e) => set({ area: e.target.value })} placeholder="Ex.: Repasse" />
+          </Field>
+          <Field label="Prazo">
+            <input className="input" type="date" value={pr.deadline ?? ''} onChange={(e) => set({ deadline: e.target.value || null })} />
+          </Field>
+        </div>
+        <Group label="Situação">
+          <Chips label="Situação" options={PROJECT_STATUS_UI.map((x) => ({ value: x.id, label: x.label }))} value={pr.status} onChange={(status: ProjectStatus) => set({ status })} />
+        </Group>
+        <div>
+          <p className="field-label">Entregas</p>
+          <ul className="list">
+            {sorted.map((x) => (
+              <li key={x.id} className="row">
+                <button type="button" className={`career-check${x.done ? ' on' : ''}`} aria-label={x.done ? 'Desmarcar entrega' : 'Marcar entrega como feita'} onClick={() => set({ deliveries: pr.deliveries.map((y) => (y.id === x.id ? { ...y, done: !y.done } : y)) })}>
+                  {x.done && <Icon name="check" size={13} />}
+                </button>
+                <span className={`row-body${x.done ? ' career-done' : ''}`}>
+                  <span>{x.text || 'Sem nome'}</span>
+                  {x.date && <span className={`small ${!x.done && x.date < today ? 'career-late' : 'muted'}`}>{relativeDay(x.date)}</span>}
+                </span>
+                <button type="button" className="icon-btn" aria-label="Remover entrega" onClick={() => set({ deliveries: pr.deliveries.filter((y) => y.id !== x.id) })}>
+                  <Icon name="x" size={14} />
+                </button>
+              </li>
+            ))}
+          </ul>
+          <div className="career-add">
+            <input className="input" value={text} onChange={(e) => setText(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && addDelivery()} placeholder="Nova entrega" aria-label="Nova entrega" />
+            <input className="input career-date" type="date" value={date} onChange={(e) => setDate(e.target.value)} aria-label="Data da entrega" />
+          </div>
+          <button type="button" className="btn soft block" style={{ marginTop: 8 }} onClick={addDelivery} disabled={!text.trim()}>
+            Adicionar entrega
+          </button>
+        </div>
+        <p className="muted small career-sync">
+          <Icon name="calendar" size={14} /> Prazo e entregas com data aparecem sozinhos na Agenda.
+        </p>
+        <Field label="Anotações">
+          <textarea className="input" rows={4} value={pr.notes} onChange={(e) => set({ notes: e.target.value })} placeholder="Contexto, contatos, pendências…" />
+        </Field>
+        <Field label="Link (planilha, pasta, slides)">
+          <input className="input" value={pr.link} onChange={(e) => set({ link: e.target.value })} placeholder="https://…" inputMode="url" />
+        </Field>
+        {meetings.upcoming.length + meetings.past.length > 0 && (
+          <div>
+            <p className="field-label">Reuniões deste projeto</p>
+            <ul className="list">
+              {[...meetings.upcoming, ...meetings.past].map((m) => (
+                <MeetingRow key={m.id} m={m} past={m.date < today} onOpen={() => onOpenMeeting(m.id)} />
+              ))}
+            </ul>
+          </div>
+        )}
+        {!isBlankProject(pr) && (
+          <button type="button" className="btn danger" onClick={() => confirm(`Excluir o projeto "${projectName(pr)}"? Prazo e entregas saem da Agenda.`) && (update(removeProject(pr.id)), onClose())}>
+            <Icon name="trash" size={16} /> Excluir projeto
           </button>
         )}
       </div>
@@ -623,33 +840,21 @@ function JobSheet({ id, onClose }: { id: string; onClose: () => void }) {
   if (!j) return null;
   const today = todayISO();
   const set = (patch: Partial<JobApp>) => update(saveJob({ ...j, ...patch }));
-  const event = j.eventId ? data.events.find((e) => e.id === j.eventId) : undefined;
 
   function close() {
     if (j && isBlankJob(j)) update(removeJob(j.id));
     onClose();
   }
 
-  function toAgenda() {
-    if (!j) return;
-    const ev = jobEvent(j, j.eventId ?? uid());
-    if (!ev) return;
-    update((d) => {
-      const events = d.events.some((e) => e.id === ev.id) ? d.events.map((e) => (e.id === ev.id ? ev : e)) : [ev, ...d.events];
-      return saveJob({ ...j, eventId: ev.id })({ ...d, events });
-    });
-    notify(event ? 'Agenda atualizada' : 'Na Agenda', `${relativeDay(ev.date)}${ev.time ? `, ${ev.time}` : ''}`);
-  }
 
   function del() {
     if (!j) return;
-    if (confirm(`Excluir a vaga "${title(j)}"? O compromisso na Agenda, se houver, continua lá.`)) {
+    if (confirm(`Excluir a vaga "${title(j)}"? O passo sai da Agenda também.`)) {
       update(removeJob(j.id));
       onClose();
     }
   }
 
-  const synced = event && event.date === j.nextDate && event.time === j.nextTime;
   const outcome = OUTCOMES.find((o) => o.id === j.outcome);
 
   return (
@@ -725,22 +930,9 @@ function JobSheet({ id, onClose }: { id: string; onClose: () => void }) {
               </Field>
             </div>
             {j.nextDate && (
-              <div className="job-ask">
-                {synced ? (
-                  <span className="muted small">
-                    <Icon name="check" size={14} /> Está na Agenda.
-                  </span>
-                ) : (
-                  <>
-                    <span>{event ? 'A data mudou. Atualizar o compromisso na Agenda?' : 'Pôr este passo na Agenda?'}</span>
-                    <div className="btn-row">
-                      <button type="button" className="btn primary" onClick={toAgenda}>
-                        {event ? 'Atualizar na Agenda' : 'Pôr na Agenda'}
-                      </button>
-                    </div>
-                  </>
-                )}
-              </div>
+              <p className="muted small career-sync">
+                <Icon name="calendar" size={14} /> Este passo aparece sozinho na Agenda.
+              </p>
             )}
           </>
         ) : (

@@ -2,14 +2,15 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { applySalaryToFinance, currentWork, nextMeeting, newMeeting, openTodos, salaryChanges, splitMeetings, tenure } from './carreira.ts';
 import { addIncome } from './incomes.ts';
-import { advance, closeJob, closedJobs, jobEvent, newJob, normalizeCareer, openJobs, reopenJob, setStage, stageCounts, waitingDays } from './carreira.ts';
+import { newProject, projectProgress, syncCareerEvents } from './carreira.ts';
+import { advance, closeJob, closedJobs, newJob, normalizeCareer, openJobs, reopenJob, setStage, stageCounts, waitingDays } from './carreira.ts';
 import { normalize } from './data.ts';
 
 const TODAY = '2026-11-08';
 const job = (id: string, extra = {}) => ({ ...newJob(id, '2026-11-01', '2026-11-01T10:00:00Z'), company: 'Acme', role: 'Analista', ...extra });
 
 test('dados antigos e backups ganham Carreira vazia; lixo é limpo', () => {
-  assert.deepEqual(normalize({}).career, { jobs: [], changes: [], meetings: [] });
+  assert.deepEqual(normalize({}).career, { jobs: [], changes: [], meetings: [], projects: [] });
   assert.deepEqual(normalize({ career: { jobs: [] } }).career.meetings, []);
   const c = normalizeCareer({ jobs: [{ id: 'a', stage: 'xpto', outcome: 'talvez', nextDate: '12/11', history: [{ stage: 'enviei', date: '2026-11-02' }, { stage: 'nada', date: '2026-11-03' }] }, { sem: 'id' }] });
   assert.equal(c.jobs.length, 1);
@@ -60,11 +61,34 @@ test('sem resposta: enviei há 7 dias ou mais e sem próximo passo', () => {
   assert.equal(waitingDays({ ...j, nextDate: '2026-11-10' }, TODAY), null);
 });
 
-test('compromisso da Agenda só com data, com o nome da vaga', () => {
-  assert.equal(jobEvent(job('a'), 'ev'), null);
-  const ev = jobEvent(job('a', { next: 'Entrevista técnica', nextDate: '2026-11-12', nextTime: '14:00' }), 'ev');
-  assert.equal(ev?.title, 'Entrevista técnica (Analista · Acme)');
-  assert.equal(ev?.time, '14:00');
+test('Agenda automática: cria, atualiza e tira os compromissos de Carreira; mantém os outros', () => {
+  let d = normalize({});
+  d = { ...d, events: [{ id: 'meu', title: 'Dentista', date: '2026-11-10', time: '', location: '', description: '' }, { id: 'velho', title: 'Entrevista (antigo botão)', date: '2026-11-11', time: '', location: 'Sala 3', description: '' }] };
+  const m = { ...newMeeting('m1', '2026-11-13'), kind: 'apresentacao' as const, title: 'Avanços do repasse', time: '10:00' };
+  const j = { ...job('j1', { stage: 'entrevista', next: 'Entrevista técnica', nextDate: '2026-11-12', nextTime: '14:00' }), eventId: 'velho' };
+  const pr = { ...newProject('p1', 'x'), name: 'Contratos', deadline: '2026-11-30', deliveries: [{ id: 'e1', text: 'Planilha de repasse', date: '2026-11-20', done: false }, { id: 'e2', text: 'Feita', date: '2026-11-05', done: true }] };
+  d = syncCareerEvents({ ...d, career: { ...d.career, meetings: [m], jobs: [j], projects: [pr] } });
+  const t = (id: string) => d.events.find((e) => e.id === id);
+  assert.equal(d.events.length, 5);
+  assert.equal(t('car-m-m1')?.time, '10:00');
+  assert.equal(t('velho')?.title, 'Entrevista técnica (Analista · Acme)');
+  assert.equal(t('velho')?.location, 'Sala 3');
+  assert.equal(t('car-p-p1')?.title, 'Prazo: Contratos');
+  assert.equal(t('car-e-e1')?.origin, 'carreira/abrir-p-p1');
+  assert.equal(t('car-e-e2'), undefined);
+  assert.equal(syncCareerEvents(d), d);
+  // muda a hora, encerra a vaga, conclui o projeto
+  d = syncCareerEvents({ ...d, career: { ...d.career, meetings: [{ ...m, time: '11:00' }], jobs: [closeJob(j, 'desisti', TODAY)], projects: [{ ...pr, status: 'concluido' as const }] } });
+  assert.deepEqual(d.events.map((e) => e.id).sort(), ['car-m-m1', 'meu']);
+  assert.equal(t('car-m-m1')?.time, '11:00');
+});
+
+test('progresso do projeto e próxima entrega', () => {
+  const pr = { ...newProject('p', 'x'), deliveries: [{ id: 'a', text: 'A', date: null, done: false }, { id: 'b', text: 'B', date: '2026-11-20', done: false }, { id: 'c', text: 'C', date: '2026-11-01', done: true }] };
+  const g = projectProgress(pr);
+  assert.equal(g.done, 1);
+  assert.equal(g.total, 3);
+  assert.equal(g.next?.id, 'b');
 });
 
 const ch = (id: string, date: string, kind: 'entrada' | 'promocao' | 'aumento' | 'novoemprego', role: string, company: string, salary: number) => ({ id, date, kind, role, company, salary, note: '' });

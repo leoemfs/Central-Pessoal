@@ -3,7 +3,7 @@
  * Etapas em andamento: interesse → enviei → entrevista → proposta.
  * Encerrar: contratado, não passei ou desisti (a vaga vai para "Encerradas").
  */
-import type { AppData, CalendarEvent, CareerChange, CareerChangeKind, CareerData, JobApp, JobOutcome, JobStage, Meeting, MeetingKind } from './types';
+import type { AppData, CalendarEvent, CareerChange, CareerChangeKind, CareerData, JobApp, JobOutcome, JobStage, Meeting, MeetingKind, ProjectStatus, WorkProject } from './types';
 import { editIncome } from './incomes.ts';
 import { addDays } from './utils.ts';
 
@@ -27,7 +27,7 @@ export const stageLabel = (s: JobStage | JobOutcome) => STAGES.find((x) => x.id 
 export const stageIndex = (s: JobStage) => STAGE_IDS.indexOf(s);
 
 export function emptyCareer(): CareerData {
-  return { jobs: [], changes: [], meetings: [] };
+  return { jobs: [], changes: [], meetings: [], projects: [] };
 }
 
 const isRec = (v: unknown): v is Record<string, unknown> => typeof v === 'object' && v !== null && !Array.isArray(v);
@@ -61,8 +61,27 @@ function normalizeMeeting(m: Record<string, unknown>): Meeting {
     todos: (Array.isArray(m.todos) ? m.todos : []).filter(isRec).filter((t) => typeof t.id === 'string').map((t) => ({ id: t.id as string, text: str(t.text), done: t.done === true })),
     link: str(m.link),
     repeatDays: typeof m.repeatDays === 'number' && m.repeatDays > 0 ? Math.round(m.repeatDays) : 0,
+    projectIds: Array.isArray(m.projectIds) ? m.projectIds.filter((x): x is string => typeof x === 'string') : [],
     nextCreated: m.nextCreated === true,
     eventId: typeof m.eventId === 'string' ? m.eventId : null,
+  };
+}
+
+const PROJECT_STATUS: ProjectStatus[] = ['andando', 'parado', 'concluido'];
+function normalizeProject(p: Record<string, unknown>): WorkProject {
+  return {
+    id: p.id as string,
+    name: str(p.name),
+    area: str(p.area),
+    deadline: isDate(p.deadline) ? p.deadline : null,
+    status: PROJECT_STATUS.includes(p.status as ProjectStatus) ? (p.status as ProjectStatus) : 'andando',
+    deliveries: (Array.isArray(p.deliveries) ? p.deliveries : [])
+      .filter(isRec)
+      .filter((x) => typeof x.id === 'string')
+      .map((x) => ({ id: x.id as string, text: str(x.text), date: isDate(x.date) ? x.date : null, done: x.done === true })),
+    notes: str(p.notes),
+    link: str(p.link),
+    createdAt: typeof p.createdAt === 'string' ? p.createdAt : new Date().toISOString(),
   };
 }
 
@@ -72,10 +91,12 @@ export function normalizeCareer(raw: unknown): CareerData {
   const r = isRec(raw) ? raw : {};
   const changes = withIdDate(r.changes).map(normalizeChange);
   const meetings = withIdDate(r.meetings).map(normalizeMeeting);
+  const projects = (Array.isArray(r.projects) ? r.projects : []).filter(isRec).filter((p) => typeof p.id === 'string').map(normalizeProject);
   const jobs = (Array.isArray(r.jobs) ? r.jobs : []).filter(isRec).filter((j) => typeof j.id === 'string');
   return {
     changes,
     meetings,
+    projects,
     jobs: jobs.map((j): JobApp => {
       const stage = STAGE_IDS.includes(j.stage as JobStage) ? (j.stage as JobStage) : 'interesse';
       const outcome = OUTCOME_IDS.includes(j.outcome as JobOutcome) ? (j.outcome as JobOutcome) : null;
@@ -193,12 +214,11 @@ export function closedJobs(jobs: JobApp[]): JobApp[] {
   return jobs.filter((j) => !isOpen(j)).sort((a, b) => (b.closedAt ?? '').localeCompare(a.closedAt ?? ''));
 }
 
-/** Compromisso da Agenda para o próximo passo (só com data). */
-export function jobEvent(j: JobApp, id: string): CalendarEvent | null {
-  if (!j.nextDate) return null;
+/** Título do compromisso do próximo passo de uma vaga. */
+export function jobEventTitle(j: JobApp): string {
   const what = j.next.trim() || stageLabel(j.stage);
   const who = [j.role.trim(), j.company.trim()].filter(Boolean).join(' · ');
-  return { id, title: who ? `${what} (${who})` : what, date: j.nextDate, time: j.nextTime, location: '', description: 'Criado em Carreira › Vagas.' };
+  return who ? `${what} (${who})` : what;
 }
 
 // ---------- Trabalho atual (N8.2) ----------
@@ -286,7 +306,7 @@ export const REPEAT_OPTIONS: { days: number; label: string }[] = [
 ];
 
 export function newMeeting(id: string, date: string): Meeting {
-  return { id, kind: 'reuniao', title: '', with: '', date, time: '', notes: '', todos: [], link: '', repeatDays: 0, nextCreated: false, eventId: null };
+  return { id, kind: 'reuniao', title: '', with: '', date, time: '', notes: '', todos: [], link: '', repeatDays: 0, projectIds: [], nextCreated: false, eventId: null };
 }
 
 export const meetingTitle = (m: Meeting) => m.title.trim() || meetingKindLabel(m.kind) + (m.with.trim() ? ` com ${m.with.trim()}` : '');
@@ -313,6 +333,81 @@ export function nextMeeting(m: Meeting, id: string): Meeting | null {
   return { ...m, id, date: addDays(m.date, m.repeatDays), notes: '', todos: m.todos.filter((t) => !t.done), nextCreated: false, eventId: null };
 }
 
-export function meetingEvent(m: Meeting, id: string): CalendarEvent {
-  return { id, title: meetingTitle(m), date: m.date, time: m.time, location: '', description: 'Criado em Carreira › Reuniões.' };
+
+// ---------- Projetos do trabalho (N8.6) ----------
+
+export const PROJECT_STATUS_UI: { id: ProjectStatus; label: string; tone: 'green' | 'orange' | 'gray' }[] = [
+  { id: 'andando', label: 'Andando', tone: 'green' },
+  { id: 'parado', label: 'Parado', tone: 'orange' },
+  { id: 'concluido', label: 'Concluído', tone: 'gray' },
+];
+
+export function newProject(id: string, nowISO: string): WorkProject {
+  return { id, name: '', area: '', deadline: null, status: 'andando', deliveries: [], notes: '', link: '', createdAt: nowISO };
+}
+export const isBlankProject = (p: WorkProject) => !p.name.trim() && !p.area.trim() && !p.deliveries.length && !p.notes.trim();
+export const projectName = (p: WorkProject) => p.name.trim() || 'Projeto sem nome';
+
+/** Entregas feitas/total e a próxima entrega aberta (com data, a mais cedo; senão a primeira sem data). */
+export function projectProgress(p: WorkProject) {
+  const done = p.deliveries.filter((d) => d.done).length;
+  const open = p.deliveries.filter((d) => !d.done);
+  const dated = open.filter((d) => d.date).sort((a, b) => a.date!.localeCompare(b.date!));
+  return { done, total: p.deliveries.length, next: dated[0] ?? open[0] ?? null };
+}
+
+/** Em andamento primeiro (prazo mais cedo antes), depois parados; concluídos à parte. */
+export function sortProjects(ps: WorkProject[]) {
+  const rank = (p: WorkProject) => (p.status === 'andando' ? 0 : 1);
+  const active = ps.filter((p) => p.status !== 'concluido').sort((a, b) => rank(a) - rank(b) || (a.deadline ?? '9999').localeCompare(b.deadline ?? '9999'));
+  return { active, done: ps.filter((p) => p.status === 'concluido') };
+}
+
+// ---------- Agenda automática (N8.5) ----------
+
+/**
+ * Compromissos que Carreira mantém na Agenda: reuniões, próximo passo das vagas em andamento,
+ * prazo dos projetos não concluídos e entregas abertas com data.
+ * `origin` é o endereço que abre a ficha de origem.
+ */
+export function careerEvents(c: CareerData): CalendarEvent[] {
+  const out: CalendarEvent[] = [];
+  const ev = (id: string, title: string, date: string, time: string, origin: string, description: string) =>
+    out.push({ id, title, date, time, location: '', description, origin: `carreira/${origin}` });
+  for (const m of c.meetings) ev(m.eventId ?? `car-m-${m.id}`, meetingTitle(m), m.date, m.time, `abrir-m-${m.id}`, 'Reunião de Carreira');
+  for (const j of c.jobs) if (isOpen(j) && j.nextDate) ev(j.eventId ?? `car-j-${j.id}`, jobEventTitle(j), j.nextDate, j.nextTime, `abrir-j-${j.id}`, 'Vaga de Carreira');
+  for (const p of c.projects) {
+    if (p.status === 'concluido') continue;
+    if (p.deadline) ev(`car-p-${p.id}`, `Prazo: ${projectName(p)}`, p.deadline, '', `abrir-p-${p.id}`, 'Projeto de Carreira');
+    for (const d of p.deliveries) if (!d.done && d.date) ev(`car-e-${d.id}`, `Entrega: ${d.text.trim() || 'sem nome'} (${projectName(p)})`, d.date, '', `abrir-p-${p.id}`, 'Projeto de Carreira');
+  }
+  return out;
+}
+
+/**
+ * Deixa a Agenda igual a Carreira: cria e atualiza os compromissos de Carreira e tira os que não existem mais.
+ * Compromissos antigos do botão "Pôr na Agenda" (pelo eventId) passam a ser mantidos aqui.
+ * O local escrito na Agenda é preservado. Sem mudanças, devolve o mesmo objeto.
+ */
+export function syncCareerEvents(d: AppData): AppData {
+  const want = careerEvents(d.career);
+  const byId = new Map(want.map((e) => [e.id, e]));
+  let changed = false;
+  const kept = d.events.flatMap((e) => {
+    const w = byId.get(e.id);
+    if (!w) {
+      if (e.origin?.startsWith('carreira/')) {
+        changed = true;
+        return [];
+      }
+      return [e];
+    }
+    byId.delete(e.id);
+    const next = { ...w, location: e.location };
+    if (e.title === next.title && e.date === next.date && e.time === next.time && e.origin === next.origin && e.description === next.description) return [e];
+    changed = true;
+    return [next];
+  });
+  if (byId.size) changed = true;
+  return changed ? { ...d, events: [...kept, ...byId.values()] } : d;
 }

@@ -1,6 +1,6 @@
 # Módulo Carreira (N8)
 
-> Situação: **N8.1 Vagas (v0.22) e N8.2 Trabalho e Reuniões (v0.23) prontas (08/11)**; faltam N8.3 e N8.4, pedido do Leonardo: um módulo **próprio**, separado de Estudos.
+> Situação: **N8.1 Vagas (v0.22), N8.2 Trabalho e Reuniões (v0.23), N8.5 Agenda automática e N8.6 Projetos (v0.24) prontas (08/11)**; faltam N8.3 e N8.4, pedido do Leonardo: um módulo **próprio**, separado de Estudos.
 > **Prévia N8.0 (08/11):** https://claude.ai/artifact/3DxpiHU7f6merD3dk6Hqmp
 > Partes escolhidas: vagas e candidaturas, metas de carreira, currículo e conquistas, trabalho atual.
 
@@ -57,6 +57,7 @@ Pedido de 08/11: reuniões e projetos de carreira sincronizados com o **calendá
 - **N8.5:** tudo que tem data em Carreira vira compromisso na Agenda **sozinho** e se atualiza quando a data, a hora ou o assunto mudam; excluir em Carreira tira da Agenda. O botão "Pôr na Agenda" sai. Na Agenda, o compromisso mostra "de Carreira" e abre a ficha de origem. Os compromissos já criados pelo botão continuam ligados.
 - **N8.6 Projetos do trabalho:** nome, área (ex.: repasse, contratos de prestadores), prazo, situação (andando, parado, concluído), **entregas** com data e check, anotações e link. Reuniões podem ser ligadas a um projeto (a apresentação de sexta mostra os projetos e entregas da quinzena). Prazos e entregas com data vão para a Agenda (regra da N8.5). Lugar: na casa de Carreira, cartão "Projetos", e no botão +.
 - Google Agenda fica para depois (precisa de login Google; anotar se pedir).
+- **Construído (v0.24):** `syncCareerEvents` em `src/carreira.ts` roda em toda mudança de Carreira e ao abrir o app. Compromissos de Carreira têm `origin` ("carreira/abrir-m|j|p-<id>"); na Agenda aparecem com a etiqueta "Carreira" e abrem a ficha de origem. O local digitado na Agenda é mantido; o resto vem de Carreira. Entrega concluída, vaga encerrada e projeto concluído saem da Agenda.
 
 ## Perguntas da prévia (responder antes da N8.1)
 1. A casa abre em Trabalho ou em Currículo?

@@ -5284,3 +5284,11 @@ a.row {
 .career-done { text-decoration: line-through; color: var(--faint); }
 .career-add { display: flex; gap: 8px; margin-top: 8px; }
 .career-add .input { flex: 1; min-width: 0; }
+.career-sync { display: flex; align-items: center; gap: 6px; margin: 0; }
+.career-late { color: var(--orange-text); }
+.career-project .row-body { gap: 4px; }
+.career-linked { background: var(--raised); border-radius: var(--radius-md); padding: 10px 12px; display: flex; flex-direction: column; gap: 6px; }
+.career-linked-head { justify-content: space-between; align-items: center; gap: 8px; }
+.career-mini { margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 4px; font-size: 0.9rem; }
+.career-date { flex: 0 0 9.5rem; }
+.ev-origin { font-size: 0.72rem; }
