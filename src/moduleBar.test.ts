@@ -71,3 +71,12 @@ test('o módulo favorito fica na mesma posição; as ferramentas ocupam os outro
   // Não é favorito: casa no centro.
   assert.deepEqual(ids(barItems(barFor('listas')!, favs)), [['compras', 'listas', 'precos'], 1]);
 });
+
+test('jeito da barra escolhido em Personalização', () => {
+  const favs = ['financas', 'diario', 'agenda'];
+  const ids = (x: { items: { id: string }[]; home: number }) => [x.items.map((i) => i.id), x.home];
+  assert.deepEqual(ids(barItems(barFor('agenda')!, favs, 'lado')), [['agenda', 'hoje', 'proximos'], 0]);
+  assert.deepEqual(ids(barItems(barFor('diario')!, favs, 'lado')), [['diario', 'humor', 'revisao'], 0]);
+  assert.deepEqual(ids(barItems(barFor('financas')!, favs, 'centro')), [['orcamento', 'financas', 'relatorios'], 1]);
+  assert.deepEqual(ids(barItems(barFor('listas')!, favs, 'lado')), [['listas', 'compras', 'precos'], 0]);
+});

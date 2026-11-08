@@ -222,6 +222,12 @@ export interface Settings {
   favorites: [string, string, string];
   /** Ordem e cartões ocultos de cada tela (lápis ao lado da lupa). */
   cards: Record<string, { order: string[]; hidden: string[] }>;
+  /** Barra de baixo dentro do módulo: 'fixo' = o favorito fica no lugar dele; 'lado' = o módulo vai para o lado do Início; 'centro' = o módulo vai para o centro. */
+  barLayout: 'fixo' | 'lado' | 'centro';
+  /** Tocar de novo no módulo aberto mostra os favoritos. */
+  tapToFavorites: boolean;
+  /** As barras de cima e de baixo somem ao rolar a tela para baixo. */
+  hideOnScroll: boolean;
   seededCategories: boolean;
   seededIncomeSources: boolean;
   lastBackupAt: string | null;

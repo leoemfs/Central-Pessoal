@@ -157,13 +157,17 @@ export function activeIndex(bar: ModuleBar, section: string): number | null {
 }
 
 /**
- * Os 3 do meio dentro de um módulo. O módulo fica na mesma posição que tem nos favoritos
+ * Os 3 do meio dentro de um módulo. Por padrão ('fixo'), o módulo fica na mesma posição que tem nos favoritos
  * (Finanças 1º, Diário 2º, Agenda 3º), e as ferramentas dele ocupam os outros dois espaços, na ordem.
  * Módulo que não é favorito fica no centro. `home` = posição da casa do módulo.
  */
-export function barItems(bar: ModuleBar, favorites: string[]): { items: BarItem[]; home: number } {
+export type BarLayout = 'fixo' | 'lado' | 'centro';
+
+export function barItems(bar: ModuleBar, favorites: string[], layout: BarLayout = 'fixo'): { items: BarItem[]; home: number } {
   const [left, home, right] = bar.items;
-  const slot = favorites.indexOf(bar.id);
+  const fav = favorites.indexOf(bar.id);
+  // 'lado': sempre na 1ª posição do meio (ao lado do Início); 'centro': sempre no meio; 'fixo': no lugar do favorito (não favorito: centro).
+  const slot = layout === 'lado' ? 0 : layout === 'centro' ? 1 : fav;
   if (slot < 0 || slot > 2) return { items: bar.items, home: 1 };
   const tools = [left, right];
   const items = [0, 1, 2].map((i) => (i === slot ? home : tools.shift()!));
