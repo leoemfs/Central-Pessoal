@@ -15,6 +15,8 @@
 | Núcleo | Progresso | Núcleo | Histórico |
 | Listas | Compras | Listas | Preços |
 
+> **v0.20.1 (E9):** o módulo favorito não muda de posição ao entrar nele; as ferramentas ocupam os outros dois espaços, na ordem (esquerda, direita). Módulo que não é favorito fica no centro.
+
 > Atualizado na v0.19 (E8): a barra não repete abas. Regra completa no `CLAUDE.md` ("Regra de navegação").
 
 - **Entre módulos:** pelo Início (favoritos), pelo Mais (todos os módulos) e pelo menu lateral ☰.

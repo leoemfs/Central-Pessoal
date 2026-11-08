@@ -145,6 +145,20 @@ export function activeIndex(bar: ModuleBar, section: string): number | null {
   return i < 0 ? null : i;
 }
 
+/**
+ * Os 3 do meio dentro de um módulo. O módulo fica na mesma posição que tem nos favoritos
+ * (Finanças 1º, Diário 2º, Agenda 3º), e as ferramentas dele ocupam os outros dois espaços, na ordem.
+ * Módulo que não é favorito fica no centro. `home` = posição da casa do módulo.
+ */
+export function barItems(bar: ModuleBar, favorites: string[]): { items: BarItem[]; home: number } {
+  const [left, home, right] = bar.items;
+  const slot = favorites.indexOf(bar.id);
+  if (slot < 0 || slot > 2) return { items: bar.items, home: 1 };
+  const tools = [left, right];
+  const items = [0, 1, 2].map((i) => (i === slot ? home : tools.shift()!));
+  return { items, home: slot };
+}
+
 /** Texto do topo: "Finanças" na casa do módulo; "Finanças / Orçamento" nas outras abas. */
 export function crumb(bar: ModuleBar, index: number | null): { module: string; page: string | null } {
   return { module: bar.name, page: index === null || index === 1 ? null : bar.items[index].label };

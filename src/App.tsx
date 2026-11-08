@@ -26,7 +26,7 @@ import { Estudos } from './modules/estudos/Estudos';
 import { CiclosPage } from './modules/estudos/Ciclos';
 import { RoadmapsPage } from './modules/estudos/Roadmaps';
 import { useCardEditor } from './Cards';
-import { activeIndex, barFor, crumb, favoriteItems, type BarItem } from './moduleBar';
+import { activeIndex, barFor, barItems, crumb, favoriteItems, type BarItem } from './moduleBar';
 
 export interface ViewProps {
   route: Route;
@@ -264,7 +264,8 @@ export function App() {
   const barIndex = bar ? activeIndex(bar, section.path) : null;
   const editor = useCardEditor();
   const where = bar ? crumb(bar, barIndex) : null;
-  const middle: BarItem[] = bar ? bar.items : favoriteItems(data.settings.favorites);
+  const placed = bar ? barItems(bar, data.settings.favorites) : null;
+  const middle: BarItem[] = placed ? placed.items : favoriteItems(data.settings.favorites);
 
   useEffect(() => {
     if (!drawer) return;
@@ -341,7 +342,7 @@ export function App() {
       <nav className={`tabbar${barHidden ? ' hidden' : ''}`} aria-label="Atalhos">
         <TabLink to="inicio" label="Início" icon="home" active={section.path === 'inicio'} />
         {middle.map((it, i) => (
-          <TabLink key={`${bar?.id ?? 'fav'}-${it.id}`} to={it.to} label={it.label} icon={it.icon} center={!!bar && i === 1} active={bar ? barIndex === i : section.path === it.id} />
+          <TabLink key={`${bar?.id ?? 'fav'}-${it.id}`} to={it.to} label={it.label} icon={it.icon} center={!!placed && i === placed.home} active={bar ? it.section === section.path : section.path === it.id} />
         ))}
         <TabLink to="mais" label="Mais" icon="grid" active={!bar && section.path !== 'inicio' && !middle.some((it) => it.id === section.path)} />
       </nav>
