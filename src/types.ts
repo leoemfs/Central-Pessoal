@@ -438,6 +438,112 @@ export interface PracticeSession {
   createdAt: string;
 }
 
+// ---------- Estudos e Carreira ----------
+
+/** Situação de um tópico dentro de um ciclo pessoal. */
+export type StudyStatus = 'afazer' | 'andando' | 'feito';
+export type SourceKind = 'site' | 'video' | 'artigo' | 'livro' | 'pdf' | 'doc' | 'curso' | 'podcast' | 'outro';
+
+export interface StudyCycleTopic {
+  /** Id do tópico (do catálogo ou de uma trilha criada pela pessoa). */
+  id: string;
+  status: StudyStatus;
+  doneAt: string | null;
+}
+
+/** Ciclo pessoal: seleção de tópicos de uma trilha. Nunca altera a trilha. */
+export interface StudyCycle {
+  id: string;
+  name: string;
+  trackId: string;
+  topics: StudyCycleTopic[];
+  notebookId: string | null;
+  startedAt: string;
+  finishedAt: string | null;
+  createdAt: string;
+}
+
+export type StudyBlockKind = 'nota' | 'pares' | 'fontes';
+/** Um bloco dentro de um assunto do notebook: texto, pares (termo e significado) ou fontes ligadas. */
+export interface StudyBlock {
+  id: string;
+  kind: StudyBlockKind;
+  title: string;
+  text: string;
+  pairs: [string, string][];
+  sourceIds: string[];
+}
+
+export interface StudySubject {
+  id: string;
+  name: string;
+  /** Tópico da Biblioteca que deu origem (se houver). */
+  topicId: string | null;
+  blocks: StudyBlock[];
+}
+
+export interface StudyNotebook {
+  id: string;
+  name: string;
+  /** Trilha de referência (opcional). */
+  trackId: string | null;
+  subjects: StudySubject[];
+  log: { at: string; text: string }[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface StudySource {
+  id: string;
+  title: string;
+  url: string;
+  kind: SourceKind;
+  note: string;
+  notebookIds: string[];
+  createdAt: string;
+}
+
+export interface StudyMap {
+  id: string;
+  name: string;
+  center: string;
+  branches: { id: string; label: string; leaves: string[] }[];
+  notebookId: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+/** Áreas, temas e trilhas criados pela pessoa (o catálogo do app fica separado e não muda). */
+export interface StudyArea {
+  id: string;
+  name: string;
+  desc: string;
+}
+export interface StudyTheme {
+  id: string;
+  areaId: string;
+  name: string;
+}
+export interface StudyTrack {
+  id: string;
+  themeId: string;
+  name: string;
+  desc: string;
+  topics: { id: string; name: string }[];
+}
+
+export interface StudyData {
+  /** Áreas arquivadas (do catálogo ou da pessoa). Arquivar não apaga nada. */
+  archived: string[];
+  areas: StudyArea[];
+  themes: StudyTheme[];
+  tracks: StudyTrack[];
+  cycles: StudyCycle[];
+  notebooks: StudyNotebook[];
+  sources: StudySource[];
+  maps: StudyMap[];
+}
+
 export interface AppData {
   version: 2;
   tasks: Task[];
@@ -470,6 +576,8 @@ export interface AppData {
   /** Compras concluídas pelas listas (Listas › Compras). */
   purchases: Purchase[];
   sessions: PracticeSession[];
+  /** Estudos e Carreira (camada pessoal). */
+  study: StudyData;
   /** Última carga usada em cada exercício (nome → kg). */
   lastLoads: Record<string, number>;
   /** Itens excluídos (id → data), para uma futura sincronização entre aparelhos. */

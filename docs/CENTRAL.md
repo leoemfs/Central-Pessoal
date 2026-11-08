@@ -47,7 +47,8 @@
 | N3 | Notificações | NOVO | M | baixa | especificado | `futuro/notificacoes.md` |
 | N4 | App Android | NOVO | G | baixa | especificado | `futuro/app-android.md` |
 | N5 | Código de barras, base de produtos e nota fiscal | NOVO | G | baixa | ideia | `futuro/precos-v2.md` ("Mais adiante") |
-| N6 | Módulo Estudos e Carreira: Biblioteca (áreas, trilhas, tópicos de referência), Ciclos pessoais, Meus notebooks, Fontes, Mapas mentais e Roadmaps. Dividir em N6.0 (prévia) a N6.4 | NOVO | G | média | ideia (especificando; prévia N6.0 feita em 08/11, layout em avaliação) | `futuro/modulo-estudos.md` |
+| N6 | Módulo Estudos e Carreira: Biblioteca (áreas, trilhas, tópicos de referência), Ciclos pessoais, Meus notebooks, Fontes, Mapas mentais e Roadmaps | NOVO | G | média | pronto (v0.21), em teste por 3 dias | `futuro/modulo-estudos.md` |
+| N7 | Estudos × Jornada: XP, ouro e INT por tópico, ciclo e constância; selos, Coruja e missões | NOVO | M | baixa | especificado (só documento) | `futuro/estudos-jornada.md` |
 
 **Depende de outra coisa:** N3 fica melhor junto com N4 (notificações de verdade no Android). N2 e N5 dependem de decisões e integrações.
 
@@ -67,6 +68,7 @@
 ## Feito
 | Versão | O que entrou | PR |
 |---|---|---|
+| v0.21 | N6: módulo Estudos e Carreira (Biblioteca com 5 áreas e 45 trilhas, ciclos, notebooks, fontes, mapas mentais e roadmaps; barra Ciclos · Estudos · Roadmaps). Integração com a Jornada só documentada (N7) | a abrir |
 | v0.20 | A2: lápis ao lado da lupa para subir, descer e ocultar cartões no Início e em Finanças (Humor e resumo do mês fixos; avisos nunca somem) | #20 |
 | v0.19 | Navegação padronizada (E8): telas Progresso, Histórico, Próximos e Compras; Preços como tela; Categorias de Listas no +; cabeçalho mês + abas em bloco | #19 |
 | v0.18 | A1: barra de baixo só com ícones, favoritos do Início, barra própria em cada módulo, topo "Módulo / Aba", tela de Humor, Orçamento e Relatórios fora do Mais; abas que somem e voltam com a barra de cima | #17 |

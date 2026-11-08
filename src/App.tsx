@@ -22,6 +22,9 @@ import { ComprasPage, Listas, PrecosPage } from './modules/Listas';
 import { HistoricoPage, ProgressoPage } from './modules/Progresso';
 import { ProximosPage } from './modules/Proximos';
 import { HumorPage } from './modules/Humor';
+import { Estudos } from './modules/estudos/Estudos';
+import { CiclosPage } from './modules/estudos/Ciclos';
+import { RoadmapsPage } from './modules/estudos/Roadmaps';
 import { useCardEditor } from './Cards';
 import { activeIndex, barFor, crumb, favoriteItems, type BarItem } from './moduleBar';
 
@@ -63,11 +66,14 @@ export const SECTIONS: Section[] = [
   { path: 'historico', label: 'Histórico', icon: 'clock', view: HistoricoPage },
   { path: 'proximos', label: 'Próximos', icon: 'list', view: ProximosPage },
   { path: 'humor', label: 'Humor', icon: 'smile', view: HumorPage },
+  // O + de Estudos fica dentro do próprio módulo (muda conforme a tela: notebook, mapa…).
+  { path: 'estudos', label: 'Estudos e Carreira', icon: 'cap', view: Estudos },
+  { path: 'ciclos', label: 'Ciclos', icon: 'repeat', view: CiclosPage },
+  { path: 'roadmaps', label: 'Roadmaps', icon: 'route', view: RoadmapsPage },
 ];
 
 export const COMING_SOON: { label: string; icon: IconName; hint: string }[] = [
   { label: 'Saúde', icon: 'heartPulse', hint: 'Água, sono, remédios, consultas e peso' },
-  { label: 'Estudos e trabalho', icon: 'briefcase', hint: 'Cursos, projetos e atividades' },
   { label: 'Objetivos', icon: 'flag', hint: 'Metas e acompanhamento' },
   { label: 'Foco', icon: 'timer', hint: 'Temporizador e sessões' },
   { label: 'Banco de ideias', icon: 'bulb', hint: 'Guarde ideias para depois' },

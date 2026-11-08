@@ -1,8 +1,9 @@
 # Módulo Estudos e Carreira (N6)
 
-> Situação: **ideia, especificando** (08/11). Documento original do Leonardo recebido na conversa; aqui fica o resumo e as decisões.
-> **Layout ainda não definido:** será decidido junto com o Leonardo. Nome confirmado: **Estudos e Carreira** (antes pensado como "Estudos e trabalho").
-> **Prévia N6.0 (08/11):** https://claude.ai/artifact/WJ3kw4zvwtdDKTiUVUB3rD. É uma proposta para avaliar, não é o layout final.
+> Situação: **pronto na v0.21 (08/11)**, para testar por pelo menos 3 dias antes de novos ajustes. Documento original do Leonardo recebido na conversa; aqui fica o resumo e as decisões.
+> Nome: **Estudos e Carreira** (antes pensado como "Estudos e trabalho").
+> **Prévia N6.0 (08/11):** https://claude.ai/artifact/WJ3kw4zvwtdDKTiUVUB3rD. Aprovada: abas e telas, cartões Biblioteca/Notebooks/Fontes/Mapas, "Estudando agora", ciclos e o caminho de navegação descrito no topo.
+> Integração com a Jornada: só documentada, em `estudos-jornada.md`.
 
 ## Para que serve
 Um espaço pessoal para organizar, explorar e desenvolver conhecimentos. **Não é** plataforma de cursos, escola nem sistema de exercícios.
@@ -37,27 +38,43 @@ Fluxo exemplo: Biblioteca → Idiomas → Inglês → A1 → Trilha "Primeiros c
 - Ligações por ID (fonte ↔ notebook/assunto, ciclo ↔ trilha), para uma fonte servir a vários estudos.
 - Depois, pode dar XP de INT na Jornada (N2). Fora do escopo agora.
 
-## Barra de baixo (proposta pela regra de navegação, a confirmar)
+## Barra de baixo (aprovada e construída)
 - Casa no centro: **Estudos** (página principal: Biblioteca e Meus notebooks).
 - Esquerda: **Ciclos** (planejar: o que estou estudando agora).
 - Direita: **Roadmaps** (olhar a referência de outro jeito).
 - **Fontes** e **Mapas mentais**: atalhos na página principal (cada coisa num lugar só; o que vai para a barra sai dos atalhos).
 - **Botão +:** novo notebook, nova fonte, novo mapa, novo ciclo, nova área; por último, separado, **Categorias** (de fontes).
 
-Pontos abertos:
-1. Roadmaps e Biblioteca mostram as mesmas trilhas por dois caminhos. Decidir se Roadmaps é uma visão própria (barra) ou só um jeito de ver a Biblioteca.
-2. Biblioteca e Meus notebooks: duas áreas na página principal ou abas no topo?
-3. Nome curto no app (topo e barra): "Estudos"?
+Decidido:
+1. Roadmaps é uma visão própria, na barra: todas as trilhas por área, com filtro e progresso. A Biblioteca é o caminho de explorar.
+2. Biblioteca, Meus notebooks, Fontes e Mapas mentais formam o **bloco principal fixo** da página de Estudos, sempre no topo. Não há abas.
+3. Nome curto na barra: "Estudos". No topo: "Estudos e Carreira" na casa e "Estudos / Ciclos" nas outras telas.
+4. Botão + (em todas as telas de Estudos, menos na trilha, que tem a barra "Montar ciclo"): novo ciclo, notebook, fonte, mapa e trilha sua. Por último, separado, **Áreas e temas** (as "categorias" da Biblioteca). Dentro de um notebook, ele também oferece "Novo assunto" e "Anotação neste assunto".
+5. O caminho ("Biblioteca › Idiomas › Inglês › A1") aparece no alto de cada tela, e cada parte leva até ela.
+
+## O que foi construído (v0.21)
+- **Biblioteca** com 5 áreas, 27 temas, 45 trilhas e 205 tópicos: Idiomas (Inglês A1 a C1, Espanhol A1 e A2, Outros idiomas vazio), Desenvolvimento de software, Inteligência artificial, Produtividade e **Carreira** (área nova, pelo nome do módulo). Tem fontes sugeridas em várias trilhas e 6 mapas sugeridos para copiar.
+- A pessoa cria áreas, temas e trilhas suas (tópicos um por linha) e arquiva ou traz de volta áreas.
+- **Trilha:** marcar tópicos; aviso de recomendação com "Incluir"; situação de cada tópico (estudado, estudando, no ciclo); fontes sugeridas com "Guardar"; notebooks da trilha.
+- **Ciclos:** montar (nome, ordem, notebook novo, existente ou nenhum); a situação do tópico muda com um toque; finalizar, encerrar, reabrir, renomear e excluir; montar o próximo com os tópicos livres.
+- **Notebooks:** assuntos (abas que rolam para o lado e Anterior/Próximo), blocos de anotação, termos ("termo = significado") e fontes; mapas, ciclos ligados e histórico.
+- **Fontes:** cadastro (título, endereço, tipo, observação, notebooks), filtro por tipo e sugestões da Biblioteca.
+- **Mapas mentais:** desenho radial; editar a ideia central, os ramos e os detalhes; ligar a um notebook.
+- Dados em `AppData.study` (com padrão em `normalize()`; entra no backup). Catálogo em `src/estudosCatalogo.ts`, regras em `src/estudos.ts` (7 testes), telas em `src/modules/estudos/`.
+
+## Fica para depois (anotar na Central quando aparecer)
+- Editor gráfico de mapas (arrastar e ligar ideias).
+- Anexar PDF ou imagem dentro do app (hoje, só o link).
+- Lápis para personalizar os cartões de Estudos e cartão "Estudando agora" no Início.
+- Busca dentro do módulo (item E6).
+- "O que estudei" na Revisão semanal (ver `estudos-jornada.md`).
 
 ## Tamanho e divisão
 Total: **G**. Dividir em partes, uma versão cada:
 | Parte | O que entra | Tam. |
 |---|---|---|
-| N6.0 | Prévia visual navegável (`estudos_e_carreira.html`, Artifact) para decidir o layout juntos | M |
-| N6.1 | Página principal, Biblioteca (catálogo + áreas pessoais, ocultar/arquivar), trilhas e Roadmaps | M |
-| N6.2 | Ciclos: escolher tópicos, ordem, estados, progresso, ciclos seguintes | M |
-| N6.3 | Meus notebooks: assuntos, anotações, links e materiais | M |
-| N6.4 | Fontes (ligadas a notebooks) e Mapas mentais simples | M |
+| N6.0 | Prévia visual navegável (`estudos_e_carreira.html`, Artifact) para decidir o layout juntos | M · feito |
+| N6.1 a N6.4 | Página principal, Biblioteca, Roadmaps, Ciclos, Notebooks, Fontes e Mapas | construídos juntos na v0.21, a pedido do Leonardo |
 
 ## Fora do escopo
 Exercícios, provas e avaliações; integração com serviços externos; mudar o resto do app.
