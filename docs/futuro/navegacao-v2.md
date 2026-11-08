@@ -15,6 +15,8 @@
 | Núcleo | Progresso | Núcleo | Histórico |
 | Listas | Compras | Listas | Preços |
 
+> **v0.21 (E10, E11, E13):** o jeito da barra é escolhido em Configurações › Personalização (favorito no mesmo lugar, ao lado do Início ou no centro). O voltar do celular vai da ferramenta para a casa do módulo e depois para o Início; trocar de módulo pelos favoritos não empilha telas.
+
 > **v0.20.1 (E9):** o módulo favorito não muda de posição ao entrar nele; as ferramentas ocupam os outros dois espaços, na ordem (esquerda, direita). Módulo que não é favorito fica no centro.
 
 > Atualizado na v0.19 (E8): a barra não repete abas. Regra completa no `CLAUDE.md` ("Regra de navegação").

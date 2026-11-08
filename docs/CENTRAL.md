@@ -26,9 +26,10 @@
 | M8 | Cartão: escolher em qual fatura a compra entra e mostrar a fatura aberta no cartão (evita a confusão de "compra sumiu") | MOD | P | média | especificado | `futuro/correcao-fatura-cartao.md` |
 | E8 | Navegação padronizada: regra abas × barra × botão +; Núcleo (Progresso · Núcleo · Histórico), Agenda (Hoje · Agenda · Próximos), Listas (Compras · Listas · Preços, sem abas); Orçamento/Relatórios sem botões repetidos em Finanças; Categorias de Listas no botão +; mês e abas num bloco que some e volta junto | EXP | M | alta | pronto (v0.19) | `futuro/navegacao-v2.md` |
 | E9 | Barra: o módulo favorito **fica na mesma posição** ao entrar nele (Finanças 1º, Diário 2º, Agenda 3º); só os outros dois espaços viram as ferramentas do módulo, na ordem. Módulo que não é favorito entra no centro. | EXP | P | alta | pronto (v0.20.1) | `futuro/navegacao-v2.md` |
-| E10 | Barra: **escolha em Configurações** de como o módulo aparece ao entrar nele: "favorito no mesmo lugar" (v0.20.1) ou "módulo ao lado do Início" (e talvez "no centro"). Padrão a definir depois de ~3 dias de teste. Comparar na prévia "Três jeitos da barra". | EXP | P | média | ideia | `futuro/navegacao-v2.md` |
-| E11 | Botão **voltar** (do celular): numa ferramenta da barra (ex.: Finanças / Orçamento), voltar leva para a **casa do módulo** (Finanças); voltar de novo leva para o **Início**. Não percorre todo o caminho de telas já abertas. | EXP | P | alta | ideia | `futuro/navegacao-v2.md` |
+| E10 | Barra: **escolha em Configurações** de como o módulo aparece ao entrar nele: "favorito no mesmo lugar" (v0.20.1) ou "módulo ao lado do Início" (e talvez "no centro"). Padrão a definir depois de ~3 dias de teste. Comparar na prévia "Três jeitos da barra". | EXP | P | média | pronto (v0.21) | `futuro/navegacao-v2.md` |
+| E11 | Botão **voltar** (do celular): numa ferramenta da barra (ex.: Finanças / Orçamento), voltar leva para a **casa do módulo** (Finanças); voltar de novo leva para o **Início**. Não percorre todo o caminho de telas já abertas. | EXP | P | alta | pronto (v0.21) | `futuro/navegacao-v2.md` |
 | E12 | Trocar de módulo sem passar pelo Início: tocar de novo no módulo em que você está mostra os favoritos na barra | EXP | P | alta | pronto (v0.20.2) | `futuro/navegacao-v2.md` |
+| E13 | Configurações › **Personalização**: tema e cor, favoritos do Início, jeito da barra (favorito no mesmo lugar, ao lado do Início ou no centro), "tocar de novo mostra os favoritos" e "esconder as barras ao rolar" | EXP | P | alta | pronto (v0.21) | `futuro/navegacao-v2.md` |
 | C2 | Hábitos: nome do hábito aparecia uma letra por linha quando havia "Não falhe 2x" e "Iniciar" no cartão | COR | P | alta | pronto (v0.18) | — |
 | M1 | Hábitos: pausar e arquivar | MOD | P | alta | especificado | `futuro/habitos-pausar-arquivar.md` |
 | E1 | Favoritos e módulos: os 3 do meio da barra no Início são os favoritos (escolhidos pela pessoa); ocultar módulos; ordem no Mais; Orçamento e Relatórios saem do Mais; ritmo de cada módulo (Diário) | EXP | M | alta | parte pronta (v0.18): favoritos e Mais; falta ocultar módulos, ordem no Mais e ritmo do Diário | `futuro/modulos-personalizaveis.md`, `futuro/navegacao-v2.md` |
@@ -70,6 +71,7 @@
 ## Feito
 | Versão | O que entrou | PR |
 |---|---|---|
+| v0.21 | E10, E11 e E13: Personalização em Configurações (jeito da barra, favoritos, tocar de novo, esconder ao rolar) e o voltar do celular: ferramenta → casa do módulo → Início | #22 |
 | v0.20.2 | E12: tocar de novo no módulo aberto mostra os favoritos, para trocar de módulo direto | #22 |
 | v0.20.1 | E9: o módulo favorito fica na mesma posição da barra ao entrar nele; as ferramentas ocupam os outros dois espaços | #22 |
 | v0.20 | A2: lápis ao lado da lupa para subir, descer e ocultar cartões no Início e em Finanças (Humor e resumo do mês fixos; avisos nunca somem) | #20 |

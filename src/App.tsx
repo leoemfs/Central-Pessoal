@@ -195,6 +195,14 @@ function Drawer({ current, onClose }: { current: string; onClose: () => void }) 
   );
 }
 
+/** Navega guardando de qual módulo veio, para o "voltar" da ferramenta levar à casa do módulo. */
+function navTo(to: string, mode: 'push' | 'replace', fromHome: string) {
+  const url = `#/${to}`;
+  if (mode === 'push') history.pushState({ fromHome }, '', url);
+  else history.replaceState({ fromHome: (history.state as { fromHome?: string } | null)?.fromHome ?? null }, '', url);
+  window.dispatchEvent(new HashChangeEvent('hashchange'));
+}
+
 /** Barra superior que some ao rolar para baixo e volta ao rolar para cima. */
 function useHideOnScroll(resetKey: string): boolean {
   const [hidden, setHidden] = useState(false);
@@ -258,7 +266,8 @@ export function App() {
   const [quickOpen, setQuickOpen] = useState(false);
   const [drawer, setDrawer] = useState(false);
   const [search, setSearch] = useState(false);
-  const barHidden = useHideOnScroll(`${section.path}:${route.n}`);
+  const scrollHidden = useHideOnScroll(`${section.path}:${route.n}`);
+  const barHidden = data.settings.hideOnScroll && scrollHidden;
   const bar = barFor(section.path);
   const barIndex = bar ? activeIndex(bar, section.path) : null;
   const editor = useCardEditor();
@@ -266,8 +275,36 @@ export function App() {
   // Tocar de novo no módulo em que você já está mostra os favoritos, para trocar de módulo sem passar pelo Início.
   const [showFavs, setShowFavs] = useState(false);
   useEffect(() => setShowFavs(false), [route.path, route.n]);
-  const placed = bar && !showFavs ? barItems(bar, data.settings.favorites) : null;
+  const placed = bar && !showFavs ? barItems(bar, data.settings.favorites, data.settings.barLayout) : null;
   const middle: BarItem[] = placed ? placed.items : favoriteItems(data.settings.favorites);
+
+  /**
+   * O que cada ícone faz ao ser tocado, para o "voltar" do celular seguir: ferramenta → casa do módulo → Início.
+   * - Da casa do módulo para uma ferramenta: abre por cima (voltar retorna à casa).
+   * - De uma ferramenta para outra: troca no lugar.
+   * - Da ferramenta para a casa: volta, se veio da casa.
+   * - Trocar de módulo pelos favoritos (dentro de outro módulo): troca no lugar (voltar vai ao Início).
+   */
+  function tapFor(it: BarItem, i: number): (() => void) | undefined {
+    if (placed && bar) {
+      const atHome = section.path === bar.items[1].section;
+      if (i === placed.home) {
+        if (atHome) return data.settings.tapToFavorites ? () => setShowFavs(true) : undefined;
+        return () => {
+          if ((history.state as { fromHome?: string } | null)?.fromHome === bar.id) history.back();
+          else goReplace(it.to);
+        };
+      }
+      if (!it.section) return () => goReplace(it.to); // atalho (ex.: Hoje)
+      if (atHome) return () => navTo(it.to, 'push', bar.id);
+      return () => navTo(it.to, 'replace', bar.id);
+    }
+    if (showFavs && bar) {
+      if (it.to === section.path) return () => setShowFavs(false);
+      return () => goReplace(it.to);
+    }
+    return undefined;
+  }
 
   useEffect(() => {
     if (!drawer) return;
@@ -351,7 +388,7 @@ export function App() {
             icon={it.icon}
             center={!!placed && i === placed.home}
             active={placed ? it.section === section.path : section.path === it.id || (!!bar && bar.id === it.id)}
-            onTap={placed && i === placed.home && it.section === section.path ? () => setShowFavs(true) : !placed && bar && it.to === section.path ? () => setShowFavs(false) : undefined}
+            onTap={tapFor(it, i)}
           />
         ))}
         <TabLink to="mais" label="Mais" icon="grid" active={!bar && section.path !== 'inicio' && !middle.some((it) => it.id === section.path)} />
