@@ -52,13 +52,14 @@
 | N7 | Estudos × Jornada: XP, ouro e INT por tópico, ciclo e constância; selos, Coruja e missões | NOVO | M | baixa | especificado (só documento) | `futuro/estudos-jornada.md` |
 | N8 | Estudos: cronograma de estudos com calendário dentro do módulo, sincronizado com a Agenda do app | NOVO | M | média | ideia | `futuro/modulo-estudos.md` |
 | N9 | Módulo Carreira independente de Estudos, com barra própria: projetos, apresentações e acompanhamento da carreira atual e da que está em construção (decidido: dois módulos, desenvolvidos um de cada vez) | NOVO | G | média | ideia | `futuro/modulo-estudos.md` |
+| E10 | Renomear o módulo "Estudos e Carreira" para só **Estudos** (topo, Mais, menu ☰) | EXP | P | média | aprovado | `futuro/modulo-estudos.md` |
 
 **Depende de outra coisa:** N3 fica melhor junto com N4 (notificações de verdade no Android). N2 e N5 dependem de decisões e integrações.
 
 ## Fila aprovada
 *O que pode ser construído, na ordem. Vazia = nada para construir.*
 
-- (vazia: aguardando aprovação)
+- E10: renomear "Estudos e Carreira" para "Estudos" (P), na próxima construção.
 
 **Pacotes** (cada um numa sessão, porque mexem nas mesmas partes):
 - **B, Finanças:** M9 + M10 + E5 (pequeno). **Pronto na v0.16.**
