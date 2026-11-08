@@ -62,12 +62,12 @@ Decidido:
 - **Mapas mentais:** desenho radial; editar a ideia central, os ramos e os detalhes; ligar a um notebook.
 - Dados em `AppData.study` (com padrão em `normalize()`; entra no backup). Catálogo em `src/estudosCatalogo.ts`, regras em `src/estudos.ts` (7 testes), telas em `src/modules/estudos/`.
 
-## Fica para depois (anotar na Central quando aparecer)
-- Editor gráfico de mapas (arrastar e ligar ideias).
-- Anexar PDF ou imagem dentro do app (hoje, só o link).
-- Lápis para personalizar os cartões de Estudos e cartão "Estudando agora" no Início.
-- Busca dentro do módulo (item E6).
-- "O que estudei" na Revisão semanal (ver `estudos-jornada.md`).
+## Fica para depois (já anotado na Central: M11 a M15)
+- Editor gráfico de mapas (arrastar e ligar ideias). → **M15**
+- Anexar PDF ou imagem dentro do app (hoje, só o link). → **M14**
+- Lápis para personalizar os cartões de Estudos → **M12**; cartão "Estudando agora" no Início → **M11**.
+- Busca dentro do módulo (item E6). → **M13**
+- "O que estudei" na Revisão semanal (ver `estudos-jornada.md`). → **M11**
 
 ## Tamanho e divisão
 Total: **G**. Dividir em partes, uma versão cada:

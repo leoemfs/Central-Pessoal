@@ -76,6 +76,11 @@
 | N4 | App Android | NOVO | G | baixa | especificado | `futuro/app-android.md` |
 | N5 | Código de barras, base de produtos e nota fiscal | NOVO | G | baixa | ideia | `futuro/precos-v2.md` ("Mais adiante") |
 | N6 | Módulo Estudos e Carreira: Biblioteca (áreas, trilhas, tópicos de referência), Ciclos pessoais, Meus notebooks, Fontes, Mapas mentais e Roadmaps | NOVO | G | média | pronto (v0.21), em teste por 3 dias | `futuro/modulo-estudos.md` |
+| M11 | Estudos no dia a dia: cartão "Estudando agora" no Início e "O que estudei" na Revisão semanal. Afeta: Início, Revisão | MOD | P | alta | ideia | `futuro/modulo-estudos.md` |
+| M12 | Estudos: lápis para subir, descer e ocultar cartões (como no Início e em Finanças). Afeta: só Estudos | MOD | P | média | ideia | `futuro/modulo-estudos.md`, `futuro/navegacao-v2.md` |
+| M13 | Estudos: busca dentro do módulo (tópicos, notebooks, fontes); parte do E6. Afeta: Busca | MOD | P | média | ideia | `futuro/modulo-estudos.md`, `futuro/navegacao-v2.md` |
+| M14 | Estudos: anexar PDF ou imagem no notebook (hoje só link). Afeta: backup (arquivos pesados) | MOD | M | baixa | ideia | `futuro/modulo-estudos.md` |
+| M15 | Estudos: editor de mapas mentais (arrastar e ligar ideias). Afeta: só Estudos | MOD | M | baixa | ideia | `futuro/modulo-estudos.md` |
 | N7 | Estudos × Jornada: XP, ouro e INT por tópico, ciclo e constância; selos, Coruja e missões | NOVO | M | baixa | especificado (só documento) | `futuro/estudos-jornada.md` |
 
 **Depende de outra coisa:** N3 fica melhor junto com N4 (notificações de verdade no Android). N2 e N5 dependem de decisões e integrações.
@@ -84,6 +89,15 @@
 *O que pode ser construído, na ordem. Vazia = nada para construir.*
 
 - (vazia: aguardando aprovação)
+
+**Semana de Estudos (09 a 13/11), sugerida, aguardando aprovação:** um item por dia, dentro do limite de 10%.
+| Dia | Item | Tam. |
+|---|---|---|
+| Seg 09/11 | M11: Estudos no Início e na Revisão | P |
+| Ter 10/11 | M12: lápis em Estudos | P |
+| Qua 11/11 | M13: busca em Estudos | P |
+| Qui 12/11 | N7, parte 1: XP e ouro por tópico e ciclo na Jornada | M |
+| Sex 13/11 | Folga ou ajustes do que você notar no uso (M14 e M15 ficam para depois) | — |
 
 **Pacotes** (cada um numa sessão, porque mexem nas mesmas partes):
 - **B, Finanças:** M9 + M10 + E5 (pequeno). **Pronto na v0.16.**
