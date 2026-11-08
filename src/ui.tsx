@@ -88,6 +88,20 @@ const P: Record<string, ReactNode> = {
   trendUp: <path d="M7 17 17 7M9 7h8v8" />,
   trendDown: <path d="M7 7l10 10M17 9v8H9" />,
   bars: <path d="M4 20V10M10 20V4M16 20v-7M22 20H2" />,
+  // Estudos e Carreira
+  cap: <><path d="M2 9l10-5 10 5-10 5z" /><path d="M6 11v5c0 1.7 2.7 3 6 3s6-1.3 6-3v-5" /><path d="M22 9v6" /></>,
+  route: <><circle cx="6" cy="19" r="2" /><circle cx="18" cy="5" r="2" /><path d="M8 19h8.5a3.5 3.5 0 0 0 0-7h-9a3.5 3.5 0 0 1 0-7H16" /></>,
+  link: <><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1" /><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1" /></>,
+  mindmap: <><circle cx="12" cy="12" r="2.6" /><circle cx="4.5" cy="5" r="1.8" /><circle cx="19.5" cy="5" r="1.8" /><circle cx="4.5" cy="19" r="1.8" /><circle cx="19.5" cy="19" r="1.8" /><path d="M10 10.2 6 6.4M14 10.2l4-3.8M10 13.8l-4 3.8M14 13.8l4 3.8" /></>,
+  globe: <><circle cx="12" cy="12" r="9" /><path d="M3 12h18" /><path d="M12 3c2.5 2.6 3.8 5.6 3.8 9s-1.3 6.4-3.8 9c-2.5-2.6-3.8-5.6-3.8-9S9.5 5.6 12 3z" /></>,
+  code: <path d="M8 7l-5 5 5 5M16 7l5 5-5 5M13.5 4l-3 16" />,
+  spark: <><path d="M12 3l1.9 5.6L19.5 10l-5.6 1.9L12 17.5l-1.9-5.6L4.5 10l5.6-1.4z" /><path d="M19 15.5l.8 2.2 2.2.8-2.2.8-.8 2.2-.8-2.2-2.2-.8 2.2-.8z" /></>,
+  notebook: <><rect x="5" y="3" width="14" height="18" rx="2" /><path d="M9 3v18M12.5 8H16M12.5 12H16" /></>,
+  library: <><path d="M4 4h4v16H4zM10 4h4v16h-4z" /><path d="m15.5 5 3.8-1 3.2 15.5-3.8 1z" /></>,
+  folder: <path d="M3 7a2 2 0 0 1 2-2h4l2 2.5h8a2 2 0 0 1 2 2V18a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />,
+  mic: <><rect x="9" y="3" width="6" height="11" rx="3" /><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21" /></>,
+  ext: <><path d="M14 4h6v6M20 4l-9 9" /><path d="M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5" /></>,
+  restore: <><path d="M4 12a8 8 0 1 0 2.4-5.7" /><path d="M4 4v4.5h4.5" /></>,
   archive: <><rect x="3" y="4" width="18" height="5" rx="1" /><path d="M5 9v11h14V9M10 13h4" /></>,
 };
 

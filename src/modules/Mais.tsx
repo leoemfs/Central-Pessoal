@@ -11,6 +11,7 @@ const LINKS: { path: string; hint: string }[] = [
   { path: 'agenda', hint: 'Calendário, compromissos e tarefas' },
   { path: 'nucleo', hint: 'Hábitos, meditação, respiração e treinos' },
   { path: 'listas', hint: 'Mercado com preços, compras, receitas e checklists' },
+  { path: 'estudos', hint: 'Biblioteca, ciclos de estudo, notebooks, fontes e mapas mentais' },
   { path: 'arquivo', hint: 'Anotações rápidas e informações importantes' },
   { path: 'voce', hint: 'Perfil, metas e sugestões para você' },
   { path: 'revisao', hint: 'Resumo da semana e reflexão' },
