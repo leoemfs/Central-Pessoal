@@ -1,8 +1,9 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { emptyData, normalize, seedCategories } from './data.ts';
+import { addExpense } from './finance.ts';
 import {
-  addItemFromText, addListCategory, addPrice, bestPrice, deleteListCategory, finishShopping, kindOf, launchBought, listEstimate, newItem, newList,
+  addItemFromText, addListCategory, addPrice, bestPrice, deleteListCategory, finishShopping, kindOf, launchBought, listEstimate, newItem, newList, purchaseHistory,
   parseItemText, priceCheck, qtyText, scaledQty, sendIngredients, toggleItem, uncheckAll, updateListCategory,
 } from './lists.ts';
 import type { AppData, UserList } from './types.ts';
@@ -69,6 +70,8 @@ test('lista de mercado: itens pelo texto, estimativa por mercado e concluir comp
   assert.equal(d.expenses[0].paidAt, TODAY);
   assert.equal(d.expenses[0].description, 'Mercado · Assaí');
   assert.equal(d.lists[0].items.every((i) => !i.done), true);
+  // Fica no histórico de compras (Listas › Compras).
+  assert.deepEqual(purchaseHistory(d).map((r) => [r.date, r.store, r.total, r.items]), [[TODAY, 'Assaí', 71.5, 1]]);
 });
 
 test('lista de compras: lançar os comprados uma vez só', () => {
@@ -82,6 +85,8 @@ test('lista de compras: lançar os comprados uma vez só', () => {
   d = launchBought(l.id, comp, TODAY)(d);
   d = launchBought(l.id, comp, TODAY)(d);
   assert.deepEqual(d.expenses.map((e) => e.amount), [249.9, 320]);
+  // Uma compra só no histórico, com o total dos itens lançados.
+  assert.deepEqual(d.purchases.map((p) => [p.listName, p.total, p.items]), [['Inverno', 569.9, 2]]);
   assert.deepEqual(d.lists[0].items.map((i) => i.launched), [true, true, false]);
   d = uncheckAll(l.id)(d);
   assert.equal(d.lists[0].items.some((i) => i.launched || i.done), false);
@@ -130,4 +135,17 @@ test('texto do item e backup', () => {
   assert.equal(back.listCategories.length, 5);
   // Backup antigo (sem listas): ganha as categorias padrão.
   assert.equal(normalize({ version: 2 }).listCategories.length, 5);
+});
+
+test('compras: as de antes do histórico vêm das despesas de mercado; backup guarda', () => {
+  let d = seedCategories(emptyData());
+  const food = d.categories.find((c) => c.name === 'Alimentação')!.id;
+  d = addExpense(d, { kind: 'avulsa', description: 'Mercado · Atacadão', categoryId: food, method: 'pix', cardId: null, date: '2026-10-02', amounts: [210], paidAt: '2026-10-02' }, '2026-10-02');
+  d = addExpense(d, { kind: 'avulsa', description: 'Padaria', categoryId: food, method: 'pix', cardId: null, date: '2026-10-03', amounts: [12], paidAt: '2026-10-03' }, '2026-10-03');
+  d = { ...d, purchases: [{ id: 'p1', date: '2026-11-10', listId: 'x', listName: 'Mercado do mês', store: 'Assaí', total: 380, items: 22 }] };
+  const h = purchaseHistory(d);
+  assert.deepEqual(h.map((r) => [r.date, r.title, r.store, r.items]), [['2026-11-10', 'Mercado do mês', 'Assaí', 22], ['2026-10-02', 'Compra de mercado', 'Atacadão', null]]);
+  const back = normalize(JSON.parse(JSON.stringify(d)));
+  assert.deepEqual(back.purchases, d.purchases);
+  assert.deepEqual(normalize({ version: 2, purchases: [{ id: 1 }, 'lixo'] }).purchases, []);
 });

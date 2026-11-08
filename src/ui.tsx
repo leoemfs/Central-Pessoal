@@ -10,6 +10,7 @@ const P: Record<string, ReactNode> = {
   sprout: <><path d="M12 21v-8.5" /><path d="M12 12.5c0-4.2 2.9-7 7.5-7 0 4.2-2.9 7-7.5 7z" /><path d="M12 15c0-3.4-2.4-5.8-6.5-5.8 0 3.4 2.4 5.8 6.5 5.8z" /><path d="M7.5 21h9" /></>,
   gauge: <><path d="M4.2 17.5a9 9 0 1 1 15.6 0" /><path d="m12 13.5 4-4.5" /><circle cx="12" cy="13.5" r="1.4" /><path d="M7 12h1M12 7v1M17 12h-1" /></>,
   piggy: <><path d="M4.5 11.8C4.5 8.6 7.8 6.5 12 6.5c4.3 0 7.5 2.1 7.5 5.3 0 1.8-1 3.3-2.6 4.3v2.9h-2.4v-1.7a10 10 0 0 1-4.6 0V19H7.5v-2.9c-1.8-1-3-2.5-3-4.3z" /><path d="M19.5 10.5h1.3v2.6h-1.3M9.5 6.9 8.6 4.6l2.8 1.2M15 10.5h.01" /></>,
+  list: <><path d="M9 6h11M9 12h11M9 18h11" /><circle cx="4.5" cy="6" r="1" /><circle cx="4.5" cy="12" r="1" /><circle cx="4.5" cy="18" r="1" /></>,
   star: <path d="m12 3.6 2.6 5.2 5.7.8-4.1 4 1 5.7-5.2-2.7-5.1 2.7 1-5.7-4.2-4 5.8-.8z" />,
   user: <><circle cx="12" cy="8" r="4" /><path d="M4.5 20.5c1.2-3.7 4.2-5.6 7.5-5.6s6.3 1.9 7.5 5.6" /></>,
   note: <><path d="M6 3h8.5L19 7.5V21H6z" /><path d="M14 3v5h5M9 13h7M9 17h4.5" /></>,
@@ -113,8 +114,12 @@ export function IconButton({ icon, label, onClick, tone, active }: { icon: IconN
   );
 }
 
-export function PageHeader({ title, subtitle, actions }: { title: ReactNode; subtitle?: ReactNode; actions?: ReactNode }) {
-  return (
+/**
+ * Cabeçalho da tela. Quando tem navegação (mês, semana) ou abas, vira um bloco preso no topo:
+ * some ao rolar para baixo e volta ao rolar para cima, junto com a barra de cima (igual em todos os módulos).
+ */
+export function PageHeader({ title, subtitle, actions, tabs }: { title: ReactNode; subtitle?: ReactNode; actions?: ReactNode; tabs?: ReactNode }) {
+  const header = (
     <header className="page-header">
       <div className="page-title">
         <h1>{title}</h1>
@@ -122,6 +127,34 @@ export function PageHeader({ title, subtitle, actions }: { title: ReactNode; sub
       </div>
       {actions && <div className="page-actions">{actions}</div>}
     </header>
+  );
+  if (!actions && !tabs) return header;
+  return (
+    <StickyHead>
+      {header}
+      {tabs}
+    </StickyHead>
+  );
+}
+
+/** Bloco preso no topo. O fundo em volta só aparece quando ele está de fato grudado (senão cobriria o cartão de baixo). */
+function StickyHead({ children }: { children: ReactNode }) {
+  const ref = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const check = () => {
+      const top = parseFloat(getComputedStyle(el).top) || 0;
+      el.classList.toggle('stuck', window.scrollY > 0 && el.getBoundingClientRect().top <= top + 1);
+    };
+    check();
+    window.addEventListener('scroll', check, { passive: true });
+    return () => window.removeEventListener('scroll', check);
+  }, []);
+  return (
+    <div ref={ref} className="sticky-head">
+      {children}
+    </div>
   );
 }
 
@@ -408,19 +441,18 @@ function scrollsSideways(el: Element | null, stop: Element): boolean {
 }
 
 /**
- * Abas do módulo.
- * - `sticky`: ficam presas no topo ao rolar; trocar de aba volta ao começo da tela.
- * - `swipe`: deslizar o dedo para o lado, em qualquer parte da tela do módulo, troca de aba.
+ * Abas. Com `swipe` (abas do módulo, dentro do PageHeader): deslizar o dedo para o lado, em qualquer parte
+ * da tela, troca de aba; e trocar de aba volta ao começo da tela.
  */
-export function Segmented<T extends string>({ options, value, onChange, label, sticky, swipe }: { options: { value: T; label: string }[]; value: T; onChange: (v: T) => void; label: string; sticky?: boolean; swipe?: boolean }) {
+export function Segmented<T extends string>({ options, value, onChange, label, swipe }: { options: { value: T; label: string }[]; value: T; onChange: (v: T) => void; label: string; swipe?: boolean }) {
   const ref = useRef<HTMLDivElement>(null);
-  const latest = useRef({ options, value, onChange, sticky });
-  latest.current = { options, value, onChange, sticky };
+  const latest = useRef({ options, value, onChange, swipe });
+  latest.current = { options, value, onChange, swipe };
 
   function pick(v: T) {
     if (v === latest.current.value) return;
     latest.current.onChange(v);
-    if (latest.current.sticky && window.scrollY > 0) window.scrollTo({ top: 0 });
+    if (latest.current.swipe && window.scrollY > 0) window.scrollTo({ top: 0 });
   }
 
   useEffect(() => {
@@ -455,7 +487,7 @@ export function Segmented<T extends string>({ options, value, onChange, label, s
   }, [swipe]);
 
   return (
-    <div ref={ref} className={`segmented${sticky ? ' tabs-sticky' : ''}`} role="tablist" aria-label={label}>
+    <div ref={ref} className="segmented" role="tablist" aria-label={label}>
       {options.map((o) => (
         <button key={o.value} type="button" role="tab" aria-selected={value === o.value} className={value === o.value ? 'on' : ''} onClick={() => pick(o.value)}>
           {o.label}

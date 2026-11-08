@@ -132,6 +132,16 @@ export function Ajustes() {
         </span>
         <Icon name="right" size={18} />
       </a>
+      <a className="tile" href="#/listas/categorias">
+        <span className="tile-icon">
+          <Icon name="cart" />
+        </span>
+        <span className="tile-text">
+          <strong>Categorias de Listas</strong>
+          <span className="muted">Ficam em Listas, no botão +</span>
+        </span>
+        <Icon name="right" size={18} />
+      </a>
 
       <section className="card">
         <div className="card-head">

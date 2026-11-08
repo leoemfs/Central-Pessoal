@@ -1,17 +1,16 @@
-import { useMemo, useState, type ReactNode } from 'react';
+import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import type { ViewProps } from '../App';
 import { useStore } from '../store';
 import { go, goReplace, useSubAction } from '../router';
-import { useReportTab } from '../barTab';
 import { remove, upsert } from '../actions';
 import {
   addItemFromText, addListCategory, addPrice, AISLES, bestPrice, categoryOf, deleteListCategory, finishShopping, kindOf, latestPrices, launchBought, LIST_COLORS,
   LIST_ICONS, LIST_KINDS, listEstimate, newItem, newList, perUnit, priceCheck, qtyText, removeItem, scaledQty, sendIngredients, sizeText, toggleItem, uncheckAll,
-  updateItem, updateList, updateListCategory, variantLabel, itemCost,
+  updateItem, updateList, updateListCategory, variantLabel, itemCost, purchaseHistory,
 } from '../lists';
 import type { ListCategory, ListItem, ListKind, Product, ProductVariant, UserList } from '../types';
-import { formatDMY, formatMoney } from '../utils';
-import { CategoryBadge, Chips, Empty, Field, Icon, notify, PageHeader, Pill, Progress, Segmented, Sheet, Toggle, type IconName } from '../ui';
+import { formatDMY, formatMoney, todayISO } from '../utils';
+import { CategoryBadge, Chips, Empty, Field, Icon, notify, PageHeader, Pill, Progress, Sheet, Toggle, type IconName } from '../ui';
 
 const money0 = (v: number) => `R$ ${Math.round(v).toLocaleString('pt-BR')}`;
 const parseNum = (t: string) => {
@@ -24,18 +23,138 @@ const DAY_STORE_KEY = 'central-pessoal:mercado-de-hoje';
 export function Listas({ route }: ViewProps) {
   const { data } = useStore();
   const [newOpen, setNewOpen] = useState<string | null>(null);
-  useSubAction(route, 'listas', { nova: () => setNewOpen('') });
-  const list = data.lists.find((l) => l.id === route.sub);
-  const tab = route.sub === 'precos' ? 'precos' : 'listas';
+  const [menu, setMenu] = useState(false);
+  const [cats, setCats] = useState(false);
   const recipeCat = data.listCategories.find((c) => c.kind === 'receita')?.id ?? null;
-  useReportTab('listas', list ? 'lista' : route.sub === 'receitas' ? 'receitas' : tab);
+  useSubAction(route, 'listas', {
+    nova: () => setNewOpen(''),
+    menu: () => setMenu(true),
+    categorias: () => setCats(true),
+  });
+  // Endereço antigo (Preços era uma aba de Listas): leva para a tela de Preços.
+  useEffect(() => {
+    if (route.sub === 'precos') goReplace('precos');
+  }, [route.n, route.sub]);
+  const list = data.lists.find((l) => l.id === route.sub);
   if (list) return <ListPage list={list} />;
+  const ADD = [
+    { id: 'lista', label: 'Nova lista', hint: 'Mercado, compras, checklist…', icon: 'cart' as IconName, run: () => setNewOpen('') },
+    ...(recipeCat ? [{ id: 'receita', label: 'Nova receita', hint: 'Ingredientes, porções e preparo', icon: 'pot' as IconName, run: () => setNewOpen(recipeCat) }] : []),
+  ];
   return (
     <>
       <PageHeader title="Listas" />
-      <Segmented label="Seção" sticky swipe value={tab} onChange={(v) => goReplace(v === 'precos' ? 'listas/precos' : 'listas')} options={[{ value: 'listas', label: 'Listas' }, { value: 'precos', label: 'Preços' }]} />
-      {tab === 'precos' ? <Prices /> : <ListsHome key={route.sub} initialFilter={route.sub === 'receitas' && recipeCat ? recipeCat : 'todas'} onNew={(c) => setNewOpen(c)} />}
+      <ListsHome key={route.sub} initialFilter={route.sub === 'receitas' && recipeCat ? recipeCat : 'todas'} onNew={(c) => setNewOpen(c)} />
       {newOpen !== null && <NewListSheet categoryId={newOpen} onClose={() => setNewOpen(null)} />}
+      {menu && (
+        <Sheet title="Adicionar em Listas" onClose={() => setMenu(false)}>
+          <div className="quick-list">
+            {ADD.map((a) => (
+              <button
+                key={a.id}
+                type="button"
+                className="tile"
+                onClick={() => {
+                  setMenu(false);
+                  a.run();
+                }}
+              >
+                <span className="tile-icon">
+                  <Icon name={a.icon} />
+                </span>
+                <span className="tile-text">
+                  <strong>{a.label}</strong>
+                  <span className="muted">{a.hint}</span>
+                </span>
+                <Icon name="right" size={18} />
+              </button>
+            ))}
+          </div>
+          <div className="add-menu-sep" />
+          <button
+            type="button"
+            className="tile"
+            onClick={() => {
+              setMenu(false);
+              setCats(true);
+            }}
+          >
+            <span className="tile-icon">
+              <Icon name="tag" />
+            </span>
+            <span className="tile-text">
+              <strong>Categorias</strong>
+              <span className="muted">Mercado, Receitas, Roupas, Casa e as suas</span>
+            </span>
+            <Icon name="right" size={18} />
+          </button>
+        </Sheet>
+      )}
+      {cats && <CategoriesSheet onClose={() => setCats(false)} />}
+    </>
+  );
+}
+
+/** Listas › Preços (barra de baixo). */
+export function PrecosPage() {
+  return (
+    <>
+      <PageHeader title="Preços" />
+      <Prices />
+    </>
+  );
+}
+
+/** Listas › Compras (barra de baixo): as compras concluídas pelas listas. */
+export function ComprasPage() {
+  const { data } = useStore();
+  const rows = purchaseHistory(data);
+  const month = todayISO().slice(0, 7);
+  const monthRows = rows.filter((r) => r.date.startsWith(month));
+  const monthTotal = monthRows.reduce((a, r) => a + r.total, 0);
+  return (
+    <>
+      <PageHeader title="Compras" subtitle="O que você comprou pelas listas" />
+      <section className="card">
+        <div className="summary">
+          <div className="summary-box">
+            <span className="label">Neste mês</span>
+            <span className="value">{formatMoney(monthTotal)}</span>
+          </div>
+          <div className="summary-box">
+            <span className="label">Compras no mês</span>
+            <span className="value">{monthRows.length}</span>
+          </div>
+        </div>
+      </section>
+      <section className="card">
+        <div className="card-head">
+          <h2>Histórico</h2>
+          <span className="muted small">{rows.length}</span>
+        </div>
+        {rows.length === 0 ? (
+          <Empty>Quando você concluir uma compra numa lista de mercado (ou lançar os itens de uma lista de compras), ela aparece aqui, com o total e a loja.</Empty>
+        ) : (
+          <ul className="list">
+            {rows.slice(0, 60).map((r) => (
+              <li key={r.key} className="row">
+                <span className="tile-icon">
+                  <Icon name="receipt" size={18} />
+                </span>
+                <div className="row-body">
+                  <span className="row-title">{r.title}</span>
+                  <span className="row-meta">
+                    {formatDMY(r.date)}
+                    {r.store ? ` · ${r.store}` : ''}
+                    {r.items !== null ? ` · ${r.items} ${r.items === 1 ? 'item' : 'itens'}` : ''}
+                  </span>
+                </div>
+                <strong className="tabular">{formatMoney(r.total)}</strong>
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
     </>
   );
 }
@@ -79,7 +198,6 @@ export function ListCard({ l }: { l: UserList }) {
 function ListsHome({ onNew, initialFilter = 'todas' }: { onNew: (categoryId: string) => void; initialFilter?: string }) {
   const { data } = useStore();
   const [filter, setFilter] = useState(initialFilter);
-  const [cats, setCats] = useState(false);
   const count = (id: string) => data.lists.filter((l) => l.categoryId === id).length;
   const shown = filter === 'todas' ? data.listCategories : data.listCategories.filter((c) => c.id === filter);
   const empty = data.listCategories.filter((c) => !count(c.id));
@@ -133,15 +251,6 @@ function ListsHome({ onNew, initialFilter = 'todas' }: { onNew: (categoryId: str
         );
       })}
       {filter === 'todas' && empty.length > 0 && data.lists.length > 0 && <p className="muted small center">Sem listas ainda: {empty.map((c) => c.name).join(', ')}.</p>}
-      <div className="btn-row">
-        <button type="button" className="btn" onClick={() => onNew(filter === 'todas' ? '' : filter)}>
-          <Icon name="plus" size={18} /> Nova lista
-        </button>
-        <button type="button" className="btn" onClick={() => setCats(true)}>
-          <Icon name="tag" size={18} /> Categorias
-        </button>
-      </div>
-      {cats && <CategoriesSheet onClose={() => setCats(false)} />}
     </>
   );
 }

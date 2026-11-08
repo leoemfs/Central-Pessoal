@@ -18,10 +18,11 @@ import { Revisao } from './modules/Revisao';
 import { Jornada } from './modules/Jornada';
 import { FirstRun, Voce } from './modules/Voce';
 import { Orcamento, Relatorios } from './modules/financas/Orcamento';
-import { Listas } from './modules/Listas';
+import { ComprasPage, Listas, PrecosPage } from './modules/Listas';
+import { HistoricoPage, ProgressoPage } from './modules/Progresso';
+import { ProximosPage } from './modules/Proximos';
 import { HumorPage } from './modules/Humor';
 import { activeIndex, barFor, crumb, favoriteItems, type BarItem } from './moduleBar';
-import { useCurrentTab } from './barTab';
 
 export interface ViewProps {
   route: Route;
@@ -54,7 +55,12 @@ export const SECTIONS: Section[] = [
   { path: 'voce', label: 'Você', icon: 'user', view: Voce },
   { path: 'orcamento', label: 'Orçamento', icon: 'gauge', view: Orcamento },
   { path: 'relatorios', label: 'Relatórios', icon: 'pie', view: Relatorios },
-  { path: 'listas', label: 'Listas', icon: 'cart', view: Listas, fab: 'listas/nova' },
+  { path: 'listas', label: 'Listas', icon: 'cart', view: Listas, fab: 'listas/menu' },
+  { path: 'compras', label: 'Compras', icon: 'receipt', view: ComprasPage },
+  { path: 'precos', label: 'Preços', icon: 'store', view: PrecosPage },
+  { path: 'progresso', label: 'Progresso', icon: 'bars', view: ProgressoPage },
+  { path: 'historico', label: 'Histórico', icon: 'clock', view: HistoricoPage },
+  { path: 'proximos', label: 'Próximos', icon: 'list', view: ProximosPage },
   { path: 'humor', label: 'Humor', icon: 'smile', view: HumorPage },
 ];
 
@@ -248,8 +254,7 @@ export function App() {
   const [search, setSearch] = useState(false);
   const barHidden = useHideOnScroll(`${section.path}:${route.n}`);
   const bar = barFor(section.path);
-  const moduleTab = useCurrentTab(bar?.id ?? '');
-  const barIndex = bar ? activeIndex(bar, section.path, moduleTab) : null;
+  const barIndex = bar ? activeIndex(bar, section.path) : null;
   const where = bar ? crumb(bar, barIndex) : null;
   const middle: BarItem[] = bar ? bar.items : favoriteItems(data.settings.favorites);
 
