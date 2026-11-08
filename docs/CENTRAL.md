@@ -47,6 +47,7 @@
 | N3 | Notificações | NOVO | M | baixa | especificado | `futuro/notificacoes.md` |
 | N4 | App Android | NOVO | G | baixa | especificado | `futuro/app-android.md` |
 | N5 | Código de barras, base de produtos e nota fiscal | NOVO | G | baixa | ideia | `futuro/precos-v2.md` ("Mais adiante") |
+| N6 | Módulo Estudos e Carreira: Biblioteca (áreas, trilhas, tópicos de referência), Ciclos pessoais, Meus notebooks, Fontes, Mapas mentais e Roadmaps. Dividir em N6.0 (prévia) a N6.4 | NOVO | G | média | ideia (especificando; layout a definir juntos) | `futuro/modulo-estudos.md` |
 
 **Depende de outra coisa:** N3 fica melhor junto com N4 (notificações de verdade no Android). N2 e N5 dependem de decisões e integrações.
 
