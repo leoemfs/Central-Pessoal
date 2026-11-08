@@ -80,6 +80,7 @@ Documentos sem código: módulos personalizáveis, pausar e arquivar, ROADMAP e 
 | Orçamento, relatórios, listas, preços e humor | https://claude.ai/artifact/3PiFTWyQaBYrgfScRRFxsj |
 | Jornada (pets, Codex, acessórios, visitas) | https://claude.ai/artifact/LDdQDmTYY3j56etqqMc9Qc |
 | Jornada RPG (avatar, arsenal, forja) | https://claude.ai/artifact/62xbF4H9CfYjaz7RaX554h |
+| Navegação 2.0: barra só com ícones, favoritos e lápis (E1, E2, E3) | https://claude.ai/artifact/4hm9BrHkSWd1nEwLz5p2j7 |
 | Central Pessoal (prévia geral antiga) | https://claude.ai/artifact/WHbDkKXN4LArCQ8sjuQqVt |
 
 ## Regras para construir
