@@ -1,6 +1,6 @@
-# Correção: compra no cartão "some" da fatura
+# Cartão: escolher a fatura da compra e mostrar a fatura aberta
 
-> **Status: A CORRIGIR.** Item C1 da Central (`docs/CENTRAL.md`).
+> **Status: MELHORIA (item M8 da Central).** Não era problema do app: a compra estava sendo lançada na fatura errada. Fica a melhoria para evitar a confusão.
 
 ## O que o usuário viu
 Cadastrou um cartão novo e lançou uma despesa nele. O cartão aparece em Cartões e o **limite diminui**, mas a fatura mostra **R$ 0,00** e a compra não entra nas contas do mês.

@@ -23,7 +23,7 @@
 ## Itens
 | ID | Item | Frente | Tam. | Prior. | Situação | Documento |
 |---|---|---|---|---|---|---|
-| C1 | Fatura do cartão: perguntar em qual fatura a compra entra; compra no cartão novo some da fatura (limite cai, fatura mostra R$ 0,00) | COR | P | alta | especificado | `futuro/correcao-fatura-cartao.md` |
+| M8 | Cartão: escolher em qual fatura a compra entra e mostrar a fatura aberta no cartão (evita a confusão de "compra sumiu") | MOD | P | média | especificado | `futuro/correcao-fatura-cartao.md` |
 | M1 | Hábitos: pausar e arquivar | MOD | P | alta | especificado | `futuro/habitos-pausar-arquivar.md` |
 | E1 | Módulos personalizáveis: mostrar/ocultar, barra de baixo, cartões do Início e ritmo de cada módulo (Diário: todo dia, X vezes na semana, dias certos ou quando der) | EXP | M | alta | especificado | `futuro/modulos-personalizaveis.md` |
 | M2 | Preços 2.0, parte 1: a lista puxa os produtos de Preços e estima com faixa de preço, sem prender a uma loja | MOD | M | média | especificado | `futuro/precos-v2.md` (itens 2 e 3) |
@@ -45,7 +45,7 @@
 
 - (vazia: aguardando aprovação)
 
-**Ordem sugerida** (quando aprovar): C1 → M1 → E1 → M2 → M3 → M4 → M5 → M6 → M7 → N1.
+**Ordem sugerida** (quando aprovar): M1 → E1 → M2 → M3 → M4 → M5 → M6 → M7 → M8 → N1.
 
 ## Feito
 | Versão | O que entrou | PR |
@@ -57,6 +57,8 @@
 | até v0.11 | Finanças, Agenda, Diário, Núcleo, Receitas, revisão semanal, atributos e Jornada bloqueada (14 dias) | ver PRs no GitHub |
 
 Documentos sem código: módulos personalizáveis, pausar e arquivar, ROADMAP e Central (#14 e seguintes).
+
+**Descartado:** C1 "compra no cartão novo some da fatura" (08/11): não era problema do app, a compra estava sendo marcada na fatura errada. A parte útil virou o item M8.
 
 ## Prévias visuais guardadas
 | Prévia | Link |
