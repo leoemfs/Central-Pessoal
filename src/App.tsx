@@ -1,4 +1,4 @@
-import { useEffect, useState, type ComponentType } from 'react';
+import { useEffect, useRef, useState, type ComponentType } from 'react';
 import { useStore } from './store';
 import type { Theme } from './types';
 import { go, goReplace, useRoute, type Route } from './router';
@@ -19,6 +19,9 @@ import { Jornada } from './modules/Jornada';
 import { FirstRun, Voce } from './modules/Voce';
 import { Orcamento, Relatorios } from './modules/financas/Orcamento';
 import { Listas } from './modules/Listas';
+import { HumorPage } from './modules/Humor';
+import { activeIndex, barFor, crumb, favoriteItems, type BarItem } from './moduleBar';
+import { useCurrentTab } from './barTab';
 
 export interface ViewProps {
   route: Route;
@@ -52,9 +55,9 @@ export const SECTIONS: Section[] = [
   { path: 'orcamento', label: 'Orçamento', icon: 'gauge', view: Orcamento },
   { path: 'relatorios', label: 'Relatórios', icon: 'pie', view: Relatorios },
   { path: 'listas', label: 'Listas', icon: 'cart', view: Listas, fab: 'listas/nova' },
+  { path: 'humor', label: 'Humor', icon: 'smile', view: HumorPage },
 ];
 
-const TABS = ['inicio', 'financas', 'diario', 'agenda', 'mais'];
 export const COMING_SOON: { label: string; icon: IconName; hint: string }[] = [
   { label: 'Saúde', icon: 'heartPulse', hint: 'Água, sono, remédios, consultas e peso' },
   { label: 'Estudos e trabalho', icon: 'briefcase', hint: 'Cursos, projetos e atividades' },
@@ -72,11 +75,46 @@ const QUICK: { to: string; label: string; icon: IconName; hint: string }[] = [
   { to: 'arquivo/nova', label: 'Nota', icon: 'note', hint: 'Guardar uma informação' },
 ];
 
-function NavLink({ s, active }: { s: Section; active: boolean }) {
+/** Um ícone da barra de baixo. Só o ícone; segurar o dedo mostra o nome. */
+function TabLink({ to, label, icon, active, center }: { to: string; label: string; icon: string; active: boolean; center?: boolean }) {
+  const [tip, setTip] = useState(false);
+  const timer = useRef<number | undefined>(undefined);
+  const held = useRef(false);
+  const start = () => {
+    held.current = false;
+    window.clearTimeout(timer.current);
+    timer.current = window.setTimeout(() => {
+      held.current = true;
+      setTip(true);
+    }, 420);
+  };
+  const end = () => {
+    window.clearTimeout(timer.current);
+    if (held.current) window.setTimeout(() => setTip(false), 900);
+  };
   return (
-    <a href={`#/${s.path}`} className={active ? 'active' : ''} aria-current={active ? 'page' : undefined}>
-      <Icon name={s.icon} />
-      <span>{s.label}</span>
+    <a
+      href={`#/${to}`}
+      className={`tb${active ? ' active' : ''}${center ? ' center' : ''}`}
+      aria-label={label}
+      aria-current={active ? 'page' : undefined}
+      onPointerDown={start}
+      onPointerUp={end}
+      onPointerLeave={end}
+      onPointerCancel={end}
+      onContextMenu={(e) => e.preventDefault()}
+      onClick={(e) => {
+        // Segurou para ver o nome: não navega.
+        if (held.current) {
+          e.preventDefault();
+          held.current = false;
+        }
+      }}
+    >
+      <span className="tb-pill">
+        <Icon name={icon as IconName} size={26} />
+      </span>
+      {tip && <span className="tb-tip">{label}</span>}
     </a>
   );
 }
@@ -209,8 +247,11 @@ export function App() {
   const [drawer, setDrawer] = useState(false);
   const [search, setSearch] = useState(false);
   const barHidden = useHideOnScroll(`${section.path}:${route.n}`);
-  const tabActive = TABS.includes(section.path) ? section.path : 'mais';
-  const byPath = (p: string) => SECTIONS.find((s) => s.path === p)!;
+  const bar = barFor(section.path);
+  const moduleTab = useCurrentTab(bar?.id ?? '');
+  const barIndex = bar ? activeIndex(bar, section.path, moduleTab) : null;
+  const where = bar ? crumb(bar, barIndex) : null;
+  const middle: BarItem[] = bar ? bar.items : favoriteItems(data.settings.favorites);
 
   useEffect(() => {
     if (!drawer) return;
@@ -234,7 +275,17 @@ export function App() {
         <button type="button" className="icon-btn" onClick={() => setDrawer(true)} aria-label="Abrir menu">
           <Icon name="menu" />
         </button>
-        <h1 className="topbar-title">{section.path === 'inicio' ? formatLongDate(todayISO()) : (section.title ?? section.label)}</h1>
+        <h1 className="topbar-title">
+          {section.path === 'inicio' ? (
+            formatLongDate(todayISO())
+          ) : where?.page ? (
+            <>
+              <span className="crumb">{where.module} /</span> {where.page}
+            </>
+          ) : (
+            (section.title ?? section.label)
+          )}
+        </h1>
         <button type="button" className="icon-btn" onClick={() => (section.search ? goReplace(section.search) : setSearch(true))} aria-label={section.search ? 'Buscar no diário' : 'Buscar em tudo'}>
           <Icon name="search" />
         </button>
@@ -270,9 +321,11 @@ export function App() {
       )}
 
       <nav className={`tabbar${barHidden ? ' hidden' : ''}`} aria-label="Atalhos">
-        {TABS.map((p) => (
-          <NavLink key={p} s={byPath(p)} active={tabActive === p} />
+        <TabLink to="inicio" label="Início" icon="home" active={section.path === 'inicio'} />
+        {middle.map((it, i) => (
+          <TabLink key={`${bar?.id ?? 'fav'}-${it.id}`} to={it.to} label={it.label} icon={it.icon} center={!!bar && i === 1} active={bar ? barIndex === i : section.path === it.id} />
         ))}
+        <TabLink to="mais" label="Mais" icon="grid" active={!bar && section.path !== 'inicio' && !middle.some((it) => it.id === section.path)} />
       </nav>
 
       <FirstRun />

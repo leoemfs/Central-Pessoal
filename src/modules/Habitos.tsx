@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, type CSSProperties } from 'react';
 import type { ViewProps } from '../App';
 import { useStore } from '../store';
 import { useSubAction } from '../router';
+import { useReportTab } from '../barTab';
 import { remove, upsert } from '../actions';
 import {
   amountOn, ATTRIBUTES, atRiskToday, bestClean, cleanDays, consistency, DEFAULT_TARGET, fmtQty, graduate, habitsOfDay, habitStreak, isQuantity,
@@ -136,7 +137,9 @@ export function Habitos({ route }: ViewProps) {
   const [practice, setPractice] = useState<Practice | null>(null);
   const gratRef = useRef<HTMLInputElement>(null);
 
+  useReportTab('nucleo', tab);
   useSubAction(route, 'nucleo', {
+    rituais: () => setTab('rituais'),
     novo: () => setForm({ kind: tab === 'rituais' ? 'ritual' : 'construir' }),
     mente: () => setTab('mente'),
     corpo: () => setTab('corpo'),

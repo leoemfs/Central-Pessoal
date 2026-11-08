@@ -15,7 +15,7 @@ export const NAV_GROUPS: { title: string; items: NavItem[] }[] = [
     title: 'Geral',
     items: [
       { label: 'Página inicial', icon: 'home', to: 'inicio', section: 'inicio' },
-      { label: 'Você', icon: 'smile', to: 'voce', section: 'voce' },
+      { label: 'Você', icon: 'user', to: 'voce', section: 'voce' },
       { label: 'Calendário', icon: 'calendar', to: 'agenda', section: 'agenda' },
       { label: 'Tarefas', icon: 'tasks', to: 'agenda/tarefas' },
     ],
@@ -24,6 +24,7 @@ export const NAV_GROUPS: { title: string; items: NavItem[] }[] = [
     title: 'Organização pessoal',
     items: [
       { label: 'Diário', icon: 'journal', to: 'diario', section: 'diario' },
+      { label: 'Humor', icon: 'smile', to: 'humor', section: 'humor' },
       { label: 'Notas', icon: 'note', to: 'arquivo', section: 'arquivo' },
       { label: 'Listas', icon: 'cart', to: 'listas', section: 'listas' },
       { label: 'Lembretes', icon: 'bell' },
@@ -35,15 +36,15 @@ export const NAV_GROUPS: { title: string; items: NavItem[] }[] = [
     items: [
       { label: 'Visão geral', icon: 'wallet', to: 'financas', section: 'financas' },
       { label: 'Cartões', icon: 'card', to: 'financas/cartoes' },
-      { label: 'Orçamento', icon: 'target', to: 'orcamento', section: 'orcamento' },
+      { label: 'Orçamento', icon: 'gauge', to: 'orcamento', section: 'orcamento' },
       { label: 'Relatórios', icon: 'pie', to: 'relatorios', section: 'relatorios' },
-      { label: 'Categorias', icon: 'tag', to: 'ajustes' },
+      { label: 'Categorias', icon: 'tag', to: 'financas/categorias' },
     ],
   },
   {
     title: 'Bem-estar',
     items: [
-      { label: 'Núcleo pessoal', icon: 'flame', to: 'nucleo', section: 'nucleo' },
+      { label: 'Núcleo pessoal', icon: 'sprout', to: 'nucleo', section: 'nucleo' },
       { label: 'Meditar e respirar', icon: 'heart', to: 'nucleo/mente' },
       { label: 'Treinos e alongamentos', icon: 'dumbbell', to: 'nucleo/corpo' },
       { label: 'Saúde', icon: 'heartPulse' },

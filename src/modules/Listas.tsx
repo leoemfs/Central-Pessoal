@@ -2,6 +2,7 @@ import { useMemo, useState, type ReactNode } from 'react';
 import type { ViewProps } from '../App';
 import { useStore } from '../store';
 import { go, goReplace, useSubAction } from '../router';
+import { useReportTab } from '../barTab';
 import { remove, upsert } from '../actions';
 import {
   addItemFromText, addListCategory, addPrice, AISLES, bestPrice, categoryOf, deleteListCategory, finishShopping, kindOf, latestPrices, launchBought, LIST_COLORS,
@@ -25,13 +26,15 @@ export function Listas({ route }: ViewProps) {
   const [newOpen, setNewOpen] = useState<string | null>(null);
   useSubAction(route, 'listas', { nova: () => setNewOpen('') });
   const list = data.lists.find((l) => l.id === route.sub);
-  if (list) return <ListPage list={list} />;
   const tab = route.sub === 'precos' ? 'precos' : 'listas';
+  const recipeCat = data.listCategories.find((c) => c.kind === 'receita')?.id ?? null;
+  useReportTab('listas', list ? 'lista' : route.sub === 'receitas' ? 'receitas' : tab);
+  if (list) return <ListPage list={list} />;
   return (
     <>
       <PageHeader title="Listas" />
       <Segmented label="Seção" sticky swipe value={tab} onChange={(v) => goReplace(v === 'precos' ? 'listas/precos' : 'listas')} options={[{ value: 'listas', label: 'Listas' }, { value: 'precos', label: 'Preços' }]} />
-      {tab === 'precos' ? <Prices /> : <ListsHome onNew={(c) => setNewOpen(c)} />}
+      {tab === 'precos' ? <Prices /> : <ListsHome key={route.sub} initialFilter={route.sub === 'receitas' && recipeCat ? recipeCat : 'todas'} onNew={(c) => setNewOpen(c)} />}
       {newOpen !== null && <NewListSheet categoryId={newOpen} onClose={() => setNewOpen(null)} />}
     </>
   );
@@ -73,9 +76,9 @@ export function ListCard({ l }: { l: UserList }) {
   );
 }
 
-function ListsHome({ onNew }: { onNew: (categoryId: string) => void }) {
+function ListsHome({ onNew, initialFilter = 'todas' }: { onNew: (categoryId: string) => void; initialFilter?: string }) {
   const { data } = useStore();
-  const [filter, setFilter] = useState('todas');
+  const [filter, setFilter] = useState(initialFilter);
   const [cats, setCats] = useState(false);
   const count = (id: string) => data.lists.filter((l) => l.categoryId === id).length;
   const shown = filter === 'todas' ? data.listCategories : data.listCategories.filter((c) => c.id === filter);

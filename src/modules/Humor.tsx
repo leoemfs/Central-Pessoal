@@ -2,7 +2,8 @@ import { useEffect, useState } from 'react';
 import { useStore } from '../store';
 import { clearMood, moodInfo, moodInsights, MOOD_TAGS, MOODS, setMood, setMoodNote, toggleMoodTag, weekMood } from '../mood';
 import { todayISO, WEEKDAYS, fromISO } from '../utils';
-import { Icon, notify, Pill } from '../ui';
+import { Icon, notify, PageHeader, Pill } from '../ui';
+import { weekStart } from '../review';
 
 /** Início: "Como você está hoje?" Um toque; depois, opcionalmente, o que pesou ou ajudou e uma anotação. */
 export function MoodCard() {
@@ -176,3 +177,46 @@ export function MoodWeek({ start }: { start: string }) {
 }
 
 const fmt = (n: number) => n.toLocaleString('pt-BR', { maximumFractionDigits: 1 });
+
+/** Tela do Humor (barra do Diário): o dia de hoje, a semana e os últimos registros. */
+export function HumorPage() {
+  const { data } = useStore();
+  const today = todayISO();
+  const recent = Object.entries(data.moods)
+    .filter(([day]) => day <= today)
+    .sort(([a], [b]) => b.localeCompare(a))
+    .slice(0, 30);
+  return (
+    <>
+      <PageHeader title="Humor" subtitle="Como você tem se sentido" />
+      <MoodCard />
+      <MoodWeek start={weekStart(today)} />
+      <section className="card">
+        <div className="card-head">
+          <h2>Últimos registros</h2>
+          <span className="muted small">{recent.length}</span>
+        </div>
+        {recent.length === 0 ? (
+          <p className="muted">Ainda não há registros. Marque como você está hoje, logo acima.</p>
+        ) : (
+          <ul className="list">
+            {recent.map(([day, m]) => (
+              <li key={day} className="row">
+                <span className="mood-emoji" aria-hidden="true">
+                  {moodInfo(m.v).emoji}
+                </span>
+                <div className="row-body">
+                  <span className="row-title">{moodInfo(m.v).label}</span>
+                  <span className="row-meta">
+                    {day === today ? 'Hoje' : `${WEEKDAYS[fromISO(day).getDay()]} ${day.slice(8, 10)}/${day.slice(5, 7)}`}
+                    {m.tags.length ? ` · ${m.tags.join(', ')}` : ''}
+                  </span>
+                </div>
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
+    </>
+  );
+}
