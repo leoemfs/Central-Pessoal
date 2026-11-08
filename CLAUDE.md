@@ -44,3 +44,4 @@ anotar → especificar → aprovar → construir → testar. A cada mudança de 
 - Trabalhar no branch indicado na sessão. Sem force push e sem rebase.
 - Se o branch já está todo no `main` (`git merge-base --is-ancestor`), avançar com `git merge --ff-only origin/main`; senão, continuar em cima dele.
 - Um PR por item para `main`. O Leonardo mescla; ao mesclar, o GitHub Actions publica no GitHub Pages.
+- **Sempre** que houver um PR para mesclar, mandar o link dele na resposta (ex.: `https://github.com/leoemfs/Central-Pessoal/pull/24`).
