@@ -1,6 +1,6 @@
 # Navegação 2.0, personalização de cartões, temas e Finanças
 
-> **Status:** E5, M9 e M10 **feitos na v0.16** (pacote B). E1 a E4 e E6 aguardando aprovação. Itens E1 a E6, M9 e M10 da Central (`docs/CENTRAL.md`). Decisões tomadas com o Leonardo em 08/11/2026.
+> **Status:** E5, M9 e M10 **feitos na v0.16** (pacote B); E4 **feito na v0.17** (pacote D). E1 a E3 e E6 aguardando aprovação. Itens E1 a E6, M9 e M10 da Central (`docs/CENTRAL.md`). Decisões tomadas com o Leonardo em 08/11/2026.
 
 ## Barra de baixo (E1 e E2)
 - **Fixos:** Início (esquerda) e Mais (direita).

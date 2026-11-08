@@ -11,6 +11,7 @@
     <title>Central Pessoal</title>
     <script>
       try { document.documentElement.dataset.theme = localStorage.getItem('central-pessoal:theme') || 'dark'; } catch (e) { document.documentElement.dataset.theme = 'dark'; }
+      try { var accent = localStorage.getItem('central-pessoal:accent'); if (accent) document.documentElement.dataset.accent = accent; } catch (e) {}
     </script>
   </head>
   <body>

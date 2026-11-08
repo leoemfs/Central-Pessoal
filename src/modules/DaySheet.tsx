@@ -225,7 +225,7 @@ export function DaySheet({
         )}
 
         {(routine.length > 0 || nucleo.quitting.length > 0) && (
-          <Section icon="target" title="Núcleo pessoal" extra={routine.length ? <span className="muted small">{past ? `${routineDone} de ${routine.length}` : `${routine.length} planejados`}</span> : undefined}>
+          <Section icon="sprout" title="Núcleo pessoal" extra={routine.length ? <span className="muted small">{past ? `${routineDone} de ${routine.length}` : `${routine.length} planejados`}</span> : undefined}>
             <ul className="list">
               {routine.map((h) => (
                 <li key={h.id} className="row">

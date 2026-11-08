@@ -81,7 +81,7 @@ export function CaixinhasTab({ month, newOpen, onNewClose }: { month: string; ne
         <section className="card">
           <Empty>Uma caixinha é uma meta de dinheiro guardado: viagem, reserva de emergência, um presente. Com um plano ("R$ 100 toda semana"), o app lembra o dia de guardar e mostra quanto falta.</Empty>
           <button type="button" className="btn soft block" style={{ marginTop: 12 }} onClick={() => setForm('new')}>
-            <Icon name="plusCircle" size={18} /> <span className="green">Criar a primeira caixinha</span>
+            <Icon name="plusCircle" size={18} /> <span className="accent">Criar a primeira caixinha</span>
           </button>
         </section>
       ) : (

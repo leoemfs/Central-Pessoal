@@ -28,7 +28,7 @@ O usuário registra; o app organiza, calcula e mostra o que importa no Início.
 | **Revisão semanal** | Semana de segunda a domingo: rotina (% feito e o que precisa de atenção), gastos e onde mais gastou, contas da semana seguinte, agenda, diário — e uma reflexão (o que funcionou, o que não, o que ajustar) salva no diário. Aparece no Início aos domingos e segundas. |
 | **Jornada** | **Bloqueada até 14 dias de uso dentro de 3 semanas** (um dia conta quando você registra algo; faltar não zera). O app também registra, em silêncio, os dias em que foi aberto (base da sequência de visitas). Ao desbloquear, mostra o XP, o nível e o ouro que você teria ganhado com os seus dados reais — e pergunta se a Jornada completa vale a pena ou fica para depois. Especificação completa em [docs/futuro/modulo-rpg.md](docs/futuro/modulo-rpg.md). |
 | **Abas dos módulos** | Em Finanças, Núcleo, Agenda e Listas, as abas ficam **presas no topo** ao rolar a tela, e dá para **deslizar o dedo para o lado** em qualquer parte da tela para trocar de aba. |
-| **Mais** | Você, Núcleo pessoal, Notas e Configurações (tema claro/escuro/automático, backup e dados; as categorias ficam em Finanças). |
+| **Mais** | Você, Núcleo pessoal, Notas e Configurações (**Temas**: escuro, claro ou automático e **cor de destaque** entre 8 cores com bom contraste; padrão verde no escuro e azul no claro. As cores de situação não mudam: pago verde, pendente laranja, atrasado vermelho. Também backup e dados; as categorias ficam em Finanças). |
 
 **Navegação:** barras superior e inferior que somem ao rolar para baixo e voltam ao rolar para cima (a superior mostra o nome da aba; no Início, a data); 🔍 no topo (no Diário, busca no diário); atalhos inferiores (Início, Finanças, Diário, Agenda, Mais); menu ☰ com todos os módulos agrupados (Geral, Organização pessoal, Financeiro, Bem-estar, Planejamento); 🔍 **busca em tudo** (diário, despesas, agenda e anotações); botão **+** que adiciona na aba aberta (no Início, pergunta o quê); o **voltar** do celular fecha a janela ou o menu aberto antes de sair da página. Lembretes, Metas, Saúde, Estudos, Foco e Banco de ideias aparecem como "em breve".
 
@@ -82,6 +82,7 @@ src/
   practices.test.ts  testes das práticas
   boxes.ts           Caixinhas: saldo, plano, marcos e balanço
   budget.ts          Orçamento por categoria e relatórios
+  theme.ts           Cores de destaque (paleta, contraste e o CSS gerado)
   lists.ts           Listas por categoria e Preços
   mood.ts            Humor do dia
   boxes.test.ts      testes das caixinhas

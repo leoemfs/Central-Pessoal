@@ -616,7 +616,7 @@ export function BodyTab({ open }: { open: (p: Practice) => void }) {
         <div className="practice-list">
           {plans.map((k) => {
             const w = WORKOUTS[k];
-            return <PracticeRow key={k} icon="dumbbell" tone="var(--green-text)" title={`${w.title} · ${w.sub}`} meta={`${w.ex.length} exercícios · descanso de ${w.rest} s`} rec={rec.workout === k} onClick={() => open({ kind: 'workout', id: k })} />;
+            return <PracticeRow key={k} icon="dumbbell" tone="var(--accent-text)" title={`${w.title} · ${w.sub}`} meta={`${w.ex.length} exercícios · descanso de ${w.rest} s`} rec={rec.workout === k} onClick={() => open({ kind: 'workout', id: k })} />;
           })}
         </div>
       </section>
@@ -626,7 +626,7 @@ export function BodyTab({ open }: { open: (p: Practice) => void }) {
         </div>
         <div className="practice-list">
           {Object.entries(STRETCH).map(([k, x]) => (
-            <PracticeRow key={k} icon="smile" tone="var(--green-text)" title={x.title} meta={`${x.minutes} min · ${x.moves.length} movimentos`} rec={rec.stretch === k} onClick={() => open({ kind: 'stretch', id: k })} />
+            <PracticeRow key={k} icon="smile" tone="var(--accent-text)" title={x.title} meta={`${x.minutes} min · ${x.moves.length} movimentos`} rec={rec.stretch === k} onClick={() => open({ kind: 'stretch', id: k })} />
           ))}
         </div>
       </section>

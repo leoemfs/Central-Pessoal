@@ -227,7 +227,7 @@ export function Interview({ start, onClose }: { start: number; onClose: () => vo
       <Fullscreen onClose={later} label="Vamos nos conhecer?" className="iv">
         <div className="iv-center">
           <span className="iv-logo">
-            <Icon name="smile" size={32} />
+            <Icon name="user" size={32} />
           </span>
           <h2>Vamos nos conhecer?</h2>
           <p className="muted">São {INTERVIEW_STEPS} perguntas rápidas, uns 2 minutos. Com elas, o app sugere hábitos, práticas e metas do seu jeito.</p>
@@ -437,7 +437,7 @@ function GoalList({ kind, placeholder }: { kind: 'shortGoals' | 'longGoals'; pla
         <ul className="list">
           {goals.map((g) => (
             <li key={g.id} className="row">
-              <span className="sug-icon" style={{ color: kind === 'longGoals' ? 'var(--blue-text)' : 'var(--green-text)' }}>
+              <span className="sug-icon" style={{ color: kind === 'longGoals' ? 'var(--blue-text)' : 'var(--accent-text)' }}>
                 <Icon name="target" size={16} />
               </span>
               <div className="row-body">

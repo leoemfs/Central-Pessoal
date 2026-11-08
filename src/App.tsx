@@ -43,13 +43,13 @@ export const SECTIONS: Section[] = [
   { path: 'diario', label: 'Diário', icon: 'journal', view: Diario, fab: 'diario/nova', title: 'Meu diário', search: 'diario/buscar' },
   { path: 'agenda', label: 'Agenda', icon: 'calendar', view: Agenda, fab: 'agenda/novo' },
   { path: 'mais', label: 'Mais', icon: 'grid', view: Mais },
-  { path: 'nucleo', label: 'Núcleo pessoal', icon: 'target', view: Habitos, fab: 'nucleo/novo' },
+  { path: 'nucleo', label: 'Núcleo pessoal', icon: 'sprout', view: Habitos, fab: 'nucleo/novo' },
   { path: 'arquivo', label: 'Notas', icon: 'note', view: Notas, fab: 'arquivo/nova' },
   { path: 'ajustes', label: 'Configurações', icon: 'settings', view: Ajustes },
   { path: 'revisao', label: 'Revisão semanal', icon: 'calendarCheck', view: Revisao },
   { path: 'jornada', label: 'Jornada', icon: 'sword', view: Jornada },
-  { path: 'voce', label: 'Você', icon: 'smile', view: Voce },
-  { path: 'orcamento', label: 'Orçamento', icon: 'target', view: Orcamento },
+  { path: 'voce', label: 'Você', icon: 'user', view: Voce },
+  { path: 'orcamento', label: 'Orçamento', icon: 'gauge', view: Orcamento },
   { path: 'relatorios', label: 'Relatórios', icon: 'pie', view: Relatorios },
   { path: 'listas', label: 'Listas', icon: 'cart', view: Listas, fab: 'listas/nova' },
 ];
@@ -167,8 +167,19 @@ function useHideOnScroll(resetKey: string): boolean {
 
 const THEME_COLOR = { dark: '#000000', light: '#f4f5f7' };
 
-/** Aplica o tema escolhido em Ajustes (e guarda uma cópia para abrir já no tema certo). */
-function useTheme(theme: Theme) {
+/** Aplica o tema e a cor de destaque escolhidos em Configurações (e guarda uma cópia para abrir já com eles). */
+function useTheme(theme: Theme, accent: string | null) {
+  useEffect(() => {
+    const root = document.documentElement;
+    if (accent) root.dataset.accent = accent;
+    else delete root.dataset.accent;
+    try {
+      if (accent) localStorage.setItem('central-pessoal:accent', accent);
+      else localStorage.removeItem('central-pessoal:accent');
+    } catch {
+      /* ignora */
+    }
+  }, [accent]);
   useEffect(() => {
     const root = document.documentElement;
     root.dataset.theme = theme;
@@ -190,7 +201,7 @@ function useTheme(theme: Theme) {
 
 export function App() {
   const { data, saveError } = useStore();
-  useTheme(data.settings.theme);
+  useTheme(data.settings.theme, data.settings.accent);
   const route = useRoute();
   const section = SECTIONS.find((s) => s.path === route.path) ?? SECTIONS[0];
   const View = section.view;

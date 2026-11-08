@@ -28,7 +28,8 @@
 | E1 | Favoritos e módulos: os 3 do meio da barra no Início são os favoritos (escolhidos pela pessoa); ocultar módulos; ordem no Mais; Orçamento e Relatórios saem do Mais; ritmo de cada módulo (Diário) | EXP | M | alta | especificado | `futuro/modulos-personalizaveis.md`, `futuro/navegacao-v2.md` |
 | E2 | Barra adaptativa: Início e Mais fixos; dentro do módulo, 3 ícones do próprio módulo (casa no centro); só ícones, um pouco maiores; topo mostra "Finanças / Orçamento"; segurar o ícone mostra o nome | EXP | M | alta | especificado | `futuro/navegacao-v2.md` |
 | E3 | Personalizar cartões (lápis ao lado da lupa): no Início e nos módulos, ocultar e reordenar cartões; cartões principais fixos (🔒); Humor sempre no topo do Início; avisos importantes nunca ocultos, só mudam de posição | EXP | M | alta | especificado | `futuro/navegacao-v2.md` |
-| E4 | Temas: escuro, claro e automático + cor de destaque (paleta com bom contraste). Padrão: escuro = preto e verde; claro = branco e azul escuro | EXP | M | média | especificado | `futuro/navegacao-v2.md` |
+| E4 | Temas: escuro, claro e automático + cor de destaque (paleta com bom contraste). Padrão: escuro = preto e verde; claro = branco e azul escuro | EXP | M | média | pronto (v0.17) | `futuro/navegacao-v2.md` |
+| E7 | Ícones: cada módulo com um ícone próprio e coerente (Núcleo = broto, Orçamento = medidor, Caixinha = cofrinho, Você = pessoa); antes Núcleo e Orçamento usavam o mesmo | EXP | P | média | pronto (v0.17) | — |
 | E5 | Abas internas: deslizar o dedo para trocar de aba e abas presas no topo ao rolar | EXP | P | alta | pronto (v0.16) | `futuro/navegacao-v2.md` |
 | E6 | Busca por módulo: a lupa pesquisa dentro do módulo aberto (ex.: nomes de despesas em Finanças); no Início, busca geral | EXP | P | média | ideia | `futuro/navegacao-v2.md` |
 | M9 | Finanças: botão + com menu (despesa, receita, cartão, caixinha e, separado, Categorias); categorias passam a morar dentro de Finanças | MOD | P | alta | pronto (v0.16) | `futuro/navegacao-v2.md` |
@@ -55,14 +56,15 @@
 **Pacotes** (cada um numa sessão, porque mexem nas mesmas partes):
 - **B, Finanças:** M9 + M10 + E5 (pequeno). **Pronto na v0.16.**
 - **A, Navegação:** E2 + E1 + E3 (médio a grande; prévia visual antes).
-- **D, Temas:** E4.
+- **D, Temas:** E4 (+ E7, ícones). **Pronto na v0.17.**
 - **Depois:** E6.
 
-**Ordem sugerida** (quando aprovar): pacote A → M1 → pacote D → E6 → M2 → M3 → M4 → M5 → M6 → M7 → M8 → N1.
+**Ordem sugerida** (quando aprovar): pacote A → M1 → E6 → M2 → M3 → M4 → M5 → M6 → M7 → M8 → N1.
 
 ## Feito
 | Versão | O que entrou | PR |
 |---|---|---|
+| v0.17 | Pacote D: Temas com cor de destaque (8 cores; padrão verde no escuro e azul no claro; cores de situação fixas) e ícones sem repetição entre módulos | #16 |
 | v0.16 | Pacote B: menu do + em Finanças com Categorias (saíram de Configurações), "Já pago" e "Em aberto" clicáveis, abas presas no topo e trocar de aba deslizando (Finanças, Núcleo, Agenda, Listas) | #15 |
 | v0.15 | Vale (VR/VA) em Cartões: saldo, recarga mensal e pagar com vale | #13 |
 | v0.14 | Listas com categorias, Preços, humor do dia, orçamento por categoria e relatórios | — |
