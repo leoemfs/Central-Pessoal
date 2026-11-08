@@ -39,7 +39,7 @@ interface Section {
 
 export const SECTIONS: Section[] = [
   { path: 'inicio', label: 'Início', icon: 'home', view: Dashboard, fab: 'rapido' },
-  { path: 'financas', label: 'Finanças', icon: 'wallet', view: Financas, fab: 'financas/nova' },
+  { path: 'financas', label: 'Finanças', icon: 'wallet', view: Financas, fab: 'financas/menu' },
   { path: 'diario', label: 'Diário', icon: 'journal', view: Diario, fab: 'diario/nova', title: 'Meu diário', search: 'diario/buscar' },
   { path: 'agenda', label: 'Agenda', icon: 'calendar', view: Agenda, fab: 'agenda/novo' },
   { path: 'mais', label: 'Mais', icon: 'grid', view: Mais },
@@ -218,7 +218,7 @@ export function App() {
   }
 
   return (
-    <div className="shell">
+    <div className={`shell${barHidden ? ' bars-hidden' : ''}`}>
       <header className={`topbar${barHidden ? ' hidden' : ''}`}>
         <button type="button" className="icon-btn" onClick={() => setDrawer(true)} aria-label="Abrir menu">
           <Icon name="menu" />

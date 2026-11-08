@@ -184,6 +184,27 @@ Exemplos:
 
 Essas atividades poderão oferecer recompensas maiores e conquistas exclusivas.
 
+### 5.4. Missões no ritmo da pessoa
+
+As missões seguem o **ritmo que a pessoa escolheu** para cada módulo (ver `modulos-personalizaveis.md`, "Ritmo de cada módulo"). Ninguém recebe a missão "escreva todos os dias" só porque ligou o Diário.
+
+| Ritmo escolhido no Diário | Missão da semana | Bônus da missão |
+|---|---|---|
+| Todo dia | Escrever 7 dias nesta semana | 70 XP |
+| 5 vezes na semana | Escrever 5 vezes | 50 XP |
+| 3 vezes na semana | Escrever 3 vezes | 30 XP |
+| Dias certos (ex.: ter, qui, dom) | Escrever nesses 3 dias | 30 XP |
+| Quando der | Escrever 1 vez nesta semana | 10 XP |
+
+- **Tudo equivalente:** cada registro vale o mesmo XP para todo mundo, e o bônus da missão é **10 XP por vez combinada**. Quem combina mais ganha mais, mas quem combina pouco não fica para trás por cumprir o que prometeu.
+- **Cumprir a própria meta é o que conta:** a conquista de constância ("4 semanas cumprindo o combinado") vale igual para quem escreve 1 ou 7 vezes.
+- **Passar da meta:** cada registro a mais ainda dá o XP normal do registro, sem bônus extra (para não virar pressão).
+- **Não cumpriu:** a missão só some no fim da semana, sem perder nada (regra da seção 6).
+- **A missão se ajusta com a pessoa:**
+  - 2 semanas seguidas sem cumprir → o app sugere, com carinho, uma meta menor ("Que tal 2 vezes por semana?");
+  - 3 semanas seguidas cumprindo → oferece subir a meta, com mais pontos. A pessoa sempre decide.
+- **Mesma regra nos outros módulos:** hábitos usam a frequência de cada hábito; Humor, Revisão e Caixinhas usam o ritmo escolhido. Módulo oculto não gera missão.
+
 ## 6. Regras de recompensa
 
 O sistema deverá possuir regras próprias para distribuição de XP e Gold.
@@ -197,6 +218,8 @@ Requisitos:
 - Recompensas deverão ser calculadas de acordo com a configuração da atividade.
 
 **Regra importante:** não deverá existir perda automática de XP por deixar de cumprir hábitos.
+
+Tabela de XP, ouro e atributos por módulo: `jornada-recompensas.md`.
 
 O objetivo é incentivar a consistência, não criar punições ou transformar o aplicativo em uma fonte adicional de pressão.
 
@@ -466,7 +489,7 @@ Não iniciar o desenvolvimento completo antes da consolidação da estrutura pri
 - Avatar em pixel art 16×24, **mulher ou homem**, com pele e cabelo escolhidos na criação.
 - **Espaços de equipamento:** elmo, roupa/armadura, botas, arma (espada **ou** cajado), artefato, pet e morada. Um segundo espaço de artefato abre no **nível 20**.
 - Os equipamentos são **camadas** desenhadas por cima do corpo (elmo e ombreiras), ou **trocas de cor** (roupa e botas), ou peças na mão (arma). Isso permite qualquer combinação sem desenhar cada uma.
-- **Raridades:** comum (cinza), raro (azul), épico (roxo) e místico (dourado).
+- **Raridades:** comum (cinza), raro (azul), épico (roxo), lendário (laranja) e místico (dourado, só da Forja). Bônus por raridade, formas de liberar e Codex por coleções: `jornada-raridades.md`.
 
 | Espaço | Comum | Raro | Épico | Místico |
 |---|---|---|---|---|
@@ -482,7 +505,7 @@ Não iniciar o desenvolvimento completo antes da consolidação da estrutura pri
 - **Comum e raro:** loja, com ouro. Preços de referência: comum 120–200 ouro; raro 500–700 ouro. Com a tabela de recompensas atual, um dia ativo rende cerca de 50 ouro, ou seja, um item raro custa de 2 a 3 semanas de rotina.
 - **Épico:** baús (prata, dourado e cristal) **ou** um atributo alto (ex.: Chapéu de mago com INT 50, Armadura de placas com FOR 80). O que vier primeiro.
 - **Místico:** só na **Forja mística** (B.5). Não se compra.
-- Os 6 artefatos raros dão **+10% de XP** nos hábitos do atributo correspondente (Pena → AGI, Bracelete → FOR, Grimório → INT, Gota → RES, Lanterna → SAB, Ampulheta → DIS). Também podem sair em baús, ou ser liberados com o atributo em 40.
+- Os 6 artefatos de atributo passam a ser **épicos** (os bônus começam no épico) e dão **+10% de XP** nos hábitos do atributo correspondente (Pena → AGI, Bracelete → FOR, Grimório → INT, Gota → RES, Lanterna → SAB, Ampulheta → DIS). Saem em baús, ou são liberados com o atributo em 60.
 
 ### B.4. Baús e cristais
 
@@ -546,7 +569,7 @@ O título escolhido aparece embaixo do nome, na cena e na tela cheia. Cada títu
 
 ### B.8. Pets e moradas
 
-- **Pets:** Gatinho e Cãozinho (nível 3, escolhe um), Cavalinho (nível 12 + AGI 50). O pet passeia na cena e fica feliz nos dias com registro; **nunca fica triste nem some**. Para o futuro: raposa, coruja e um dragãozinho místico.
+- **Pets:** Gatinho e Cãozinho (nível 3, escolhe um), Cavalinho (nível 12 + AGI 50). O pet passeia na cena e fica feliz nos dias com registro; **nunca fica triste nem some**. Para o futuro: raposa, coruja e um dragãozinho lendário.
 - **Moradas** (fundo da cena): Barraca de viajante (início), Casinha (nível 5), Casa de pedra (nível 15 + 600 ouro), Torre do mago (nível 25 + INT 100), Castelinho (nível 30 + 2.000 ouro), Castelo (nível 50 + todos os atributos em 100).
 - Todas as moradas têm versão de dia, tarde e noite (janelas acesas à noite).
 
@@ -614,7 +637,7 @@ Um mapa em pixel art com 7 regiões que se abrem uma por vez. Cada região é um
 | 4 | Pântano das Tentações | Hábitos a abandonar | 14 dias sem o hábito | Serpente do Vício | Botas do pântano · Domador(a) de Serpentes · baú de cristal |
 | 5 | Torre do Saber | Leitura, estudo e diário | Ler em 10 dias diferentes · 7 registros no diário | Guardião do Esquecimento | Cajado do saber (+10% de XP em leitura) · Guardiã(o) do Saber · baú dourado |
 | 6 | Montanha da Disciplina | Revisão semanal | 2 revisões semanais | Gigante da Desordem | Armadura da montanha · Escalador(a) · baú dourado |
-| 7 | Castelo do Caos | Tudo junto | 14 dias com 5 ou mais missões | **Senhor do Caos** (2 semanas) | Lâmina da ordem (mística) · morada Castelo · Senhor(a) da Ordem · baú de cristal |
+| 7 | Castelo do Caos | Tudo junto | 14 dias com 5 ou mais missões | **Senhor do Caos** (2 semanas) | Lâmina da ordem (lendária) · morada Castelo · Senhor(a) da Ordem · baú de cristal |
 
 - Os contadores dos objetivos começam do zero quando o capítulo abre.
 - Os itens da campanha são **exclusivos**: não saem em baús nem na loja, e aparecem no Arsenal como "recompensa do capítulo N".
@@ -795,19 +818,19 @@ Uma campanha fixa não serve para todo mundo. Por exemplo, "14 dias sem refriger
 | Épico | Sapinho do pântano | vencer a Serpente do Vício (ou 60 dias de visitas) |
 | Épico | Golem de pedra | vencer o Gigante da Desordem |
 | Épico | Fênix filhote | 30 dias limpo depois de uma recaída |
-| Místico | Dragãozinho | vencer o Senhor do Caos (ou nível 50) |
-| Místico | Grifo | 365 dias abrindo o app |
-| Místico | Unicórnio | todos os atributos em 100 |
+| Lendário | Dragãozinho | vencer o Senhor do Caos (ou nível 50) |
+| Lendário | Grifo | 365 dias abrindo o app |
+| Lendário | Unicórnio | todos os atributos em 100 |
 
 - **Pets que voam** (coruja, beija-flor, fênix, dragão) passeiam no céu da cena.
 - **Regiões fora da campanha:** os pets ligados a elas têm um caminho alternativo, para nenhum ficar impossível.
 
 ### F.4. Armas e acessórios
-- **Arcos:** arco curto (comum), arco longo de teixo (raro), arco élfico (épico, Agilidade 80) e **arco do vento** (místico). A personagem segura o arco e leva uma **aljava com flechas nas costas**, com a cor das flechas acompanhando o arco.
+- **Arcos:** arco curto (comum), arco longo de teixo (raro), arco élfico (épico, Agilidade 80) e **arco do vento** (místico, da Forja). A personagem segura o arco e leva uma **aljava com flechas nas costas**, com a cor das flechas acompanhando o arco.
 - **Acessórios em espaços próprios,** no lugar do "artefato" genérico:
   - **Colar:** amuleto da gota, coração de cristal, colar de pérola, colar de dente de lobo. Aparece no peito do avatar.
-  - **Anel:** anel de ferro, anel do foco, braceletes e o **anel da aurora** (místico). O segundo anel abre no nível 10.
-  - **Item mágico:** grimório, **grimório das estrelas** (místico), lanterna, ampulheta, penas, olho do oráculo e estrela polar. Flutua ao lado da personagem.
+  - **Anel:** anel de ferro, anel do foco, braceletes e o **anel da aurora** (místico, da Forja). O segundo anel abre no nível 10.
+  - **Item mágico:** grimório, **grimório das estrelas** (místico, da Forja), lanterna, ampulheta, penas, olho do oráculo e estrela polar. Flutua ao lado da personagem.
 
 ### F.5. Codex
 - **Onde fica:** no Arsenal, em duas abas: **"Vestir e comprar"** e **"Codex"**.

@@ -391,11 +391,68 @@ export function Chips<T extends string>({ options, value, onChange, label }: { o
   );
 }
 
-export function Segmented<T extends string>({ options, value, onChange, label }: { options: { value: T; label: string }[]; value: T; onChange: (v: T) => void; label: string }) {
+/** Elementos onde deslizar o dedo tem outro uso (digitar, rolar para o lado, escolher cor…). */
+const NO_SWIPE = 'input, textarea, select, [data-noswipe], .chips, .swatches';
+
+function scrollsSideways(el: Element | null, stop: Element): boolean {
+  for (let n = el; n && n !== stop; n = n.parentElement) {
+    const ox = getComputedStyle(n).overflowX;
+    if ((ox === 'auto' || ox === 'scroll') && n.scrollWidth > n.clientWidth) return true;
+  }
+  return false;
+}
+
+/**
+ * Abas do módulo.
+ * - `sticky`: ficam presas no topo ao rolar; trocar de aba volta ao começo da tela.
+ * - `swipe`: deslizar o dedo para o lado, em qualquer parte da tela do módulo, troca de aba.
+ */
+export function Segmented<T extends string>({ options, value, onChange, label, sticky, swipe }: { options: { value: T; label: string }[]; value: T; onChange: (v: T) => void; label: string; sticky?: boolean; swipe?: boolean }) {
+  const ref = useRef<HTMLDivElement>(null);
+  const latest = useRef({ options, value, onChange, sticky });
+  latest.current = { options, value, onChange, sticky };
+
+  function pick(v: T) {
+    if (v === latest.current.value) return;
+    latest.current.onChange(v);
+    if (latest.current.sticky && window.scrollY > 0) window.scrollTo({ top: 0 });
+  }
+
+  useEffect(() => {
+    if (!swipe) return;
+    const area = ref.current?.closest('main') ?? ref.current?.parentElement;
+    if (!area) return;
+    let start: { x: number; y: number; t: number } | null = null;
+    const onStart = (e: TouchEvent) => {
+      const target = e.target as Element;
+      start = e.touches.length === 1 && !target.closest(NO_SWIPE) && !scrollsSideways(target, area) ? { x: e.touches[0].clientX, y: e.touches[0].clientY, t: Date.now() } : null;
+    };
+    const onEnd = (e: TouchEvent) => {
+      if (!start) return;
+      const dx = e.changedTouches[0].clientX - start.x;
+      const dy = e.changedTouches[0].clientY - start.y;
+      const quick = Date.now() - start.t < 600;
+      start = null;
+      // Movimento claramente para o lado: pelo menos 60px e bem mais horizontal que vertical.
+      if (!quick || Math.abs(dx) < 60 || Math.abs(dx) < Math.abs(dy) * 1.8) return;
+      const { options: opts, value: cur } = latest.current;
+      const i = opts.findIndex((o) => o.value === cur);
+      const next = opts[dx < 0 ? i + 1 : i - 1];
+      if (next) pick(next.value);
+    };
+    area.addEventListener('touchstart', onStart, { passive: true });
+    area.addEventListener('touchend', onEnd, { passive: true });
+    return () => {
+      area.removeEventListener('touchstart', onStart);
+      area.removeEventListener('touchend', onEnd);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [swipe]);
+
   return (
-    <div className="segmented" role="tablist" aria-label={label}>
+    <div ref={ref} className={`segmented${sticky ? ' tabs-sticky' : ''}`} role="tablist" aria-label={label}>
       {options.map((o) => (
-        <button key={o.value} type="button" role="tab" aria-selected={value === o.value} className={value === o.value ? 'on' : ''} onClick={() => onChange(o.value)}>
+        <button key={o.value} type="button" role="tab" aria-selected={value === o.value} className={value === o.value ? 'on' : ''} onClick={() => pick(o.value)}>
           {o.label}
         </button>
       ))}

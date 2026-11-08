@@ -30,7 +30,7 @@ export function Listas({ route }: ViewProps) {
   return (
     <>
       <PageHeader title="Listas" />
-      <Segmented label="Seção" value={tab} onChange={(v) => goReplace(v === 'precos' ? 'listas/precos' : 'listas')} options={[{ value: 'listas', label: 'Listas' }, { value: 'precos', label: 'Preços' }]} />
+      <Segmented label="Seção" sticky swipe value={tab} onChange={(v) => goReplace(v === 'precos' ? 'listas/precos' : 'listas')} options={[{ value: 'listas', label: 'Listas' }, { value: 'precos', label: 'Preços' }]} />
       {tab === 'precos' ? <Prices /> : <ListsHome onNew={(c) => setNewOpen(c)} />}
       {newOpen !== null && <NewListSheet categoryId={newOpen} onClose={() => setNewOpen(null)} />}
     </>
