@@ -578,6 +578,8 @@ export interface AppData {
   sessions: PracticeSession[];
   /** Estudos e Carreira (camada pessoal). */
   study: StudyData;
+  /** Carreira (N8): vagas e candidaturas. */
+  career: CareerData;
   /** Última carga usada em cada exercício (nome → kg). */
   lastLoads: Record<string, number>;
   /** Itens excluídos (id → data), para uma futura sincronização entre aparelhos. */
@@ -587,3 +589,35 @@ export interface AppData {
 }
 
 export type Collection = 'tasks' | 'events' | 'habits' | 'notes' | 'journal' | 'categories' | 'cards' | 'incomeSources' | 'boxes' | 'lists' | 'listCategories' | 'stores' | 'vouchers';
+
+// ---------- Carreira (N8) ----------
+/** Etapas em andamento e jeitos de encerrar uma vaga. */
+export type JobStage = 'interesse' | 'enviei' | 'entrevista' | 'proposta';
+export type JobOutcome = 'contratado' | 'naopassei' | 'desisti';
+
+export interface JobApp {
+  id: string;
+  company: string;
+  role: string;
+  link: string;
+  /** Texto livre: "R$ 8.000", "a combinar". */
+  salary: string;
+  notes: string;
+  stage: JobStage;
+  /** Próximo passo: o que fazer, e quando (AAAA-MM-DD, HH:MM). */
+  next: string;
+  nextDate: string | null;
+  nextTime: string;
+  /** Compromisso criado na Agenda para o próximo passo. */
+  eventId: string | null;
+  /** Encerrada: como e quando. */
+  outcome: JobOutcome | null;
+  closedAt: string | null;
+  /** Mudanças de etapa (a mais recente por último). */
+  history: { stage: JobStage | JobOutcome; date: string }[];
+  createdAt: string;
+}
+
+export interface CareerData {
+  jobs: JobApp[];
+}

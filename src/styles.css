@@ -5242,3 +5242,31 @@ a.row {
 .st-area-title .icon {
   color: var(--accent-text);
 }
+
+/* ---------- Carreira (N8) ---------- */
+.job-card { display: flex; flex-direction: column; gap: 10px; width: 100%; text-align: left; color: inherit; font: inherit; cursor: pointer; }
+.job-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; }
+.job-name { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.job-next { display: flex; align-items: center; gap: 8px; background: var(--raised); border-radius: var(--radius-sm); padding: 8px 10px; font-size: 0.88rem; }
+.job-next svg { flex: none; color: var(--accent-text); }
+.job-next.late { color: var(--orange-text); }
+.job-next.late svg { color: var(--orange-text); }
+.job-funnel { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+.job-funnel button { border: none; background: var(--raised); color: var(--text); border-radius: var(--radius-md); padding: 10px 4px; display: flex; flex-direction: column; align-items: center; gap: 2px; cursor: pointer; font: inherit; }
+.job-funnel button b { font-size: 1.3rem; font-weight: 800; font-variant-numeric: tabular-nums; }
+.job-funnel button span { font-size: 0.72rem; color: var(--muted); }
+.job-funnel button.on { background: var(--accent-soft); color: var(--accent-text); }
+.job-funnel button.on span { color: var(--accent-text); }
+.job-filter-line { display: flex; justify-content: space-between; align-items: center; margin: 10px 2px; }
+.job-steps { display: flex; gap: 4px; }
+.job-steps button { flex: 1; min-width: 0; border: none; background: none; color: var(--faint); font: inherit; font-size: 0.74rem; padding: 4px 0; cursor: pointer; text-align: center; }
+.job-steps button i { display: block; height: 6px; border-radius: 99px; background: var(--raised-2); margin-bottom: 6px; }
+.job-steps button.done i { background: var(--accent); }
+.job-steps button.cur { color: var(--accent-text); font-weight: 700; }
+.job-steps button.cur i { background: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+.job-ask { background: var(--accent-soft); border-radius: var(--radius-md); padding: 12px; display: flex; flex-direction: column; gap: 8px; }
+.job-closed-head { width: 100%; background: none; border: none; color: inherit; font: inherit; cursor: pointer; padding: 0; }
+.job-closed-head .muted { display: inline-flex; align-items: center; gap: 4px; }
+.job-closed-row { width: 100%; background: none; border: none; color: inherit; font: inherit; text-align: left; cursor: pointer; }
+.job-closed-head.card-head { margin-bottom: 0; }
+.job-closed-head + .list { margin-top: 12px; }

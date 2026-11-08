@@ -1,6 +1,6 @@
 # Módulo Carreira (N8)
 
-> Situação: **aprovado (08/11)**, pedido do Leonardo: um módulo **próprio**, separado de Estudos.
+> Situação: **N8.1 (Vagas) pronta na v0.22 (08/11)**; faltam N8.2 a N8.4, pedido do Leonardo: um módulo **próprio**, separado de Estudos.
 > **Prévia N8.0 (08/11):** https://claude.ai/artifact/3DxpiHU7f6merD3dk6Hqmp
 > Partes escolhidas: vagas e candidaturas, metas de carreira, currículo e conquistas, trabalho atual.
 
@@ -30,11 +30,20 @@ Um lugar para acompanhar a vida profissional: onde estou (trabalho atual), onde 
 - Cartão no Início (opcional, pelo lápis): "Próximo passo" de uma vaga ou meta.
 
 ## Decidido
-- **Nome do módulo de Estudos:** passa a ser só **"Estudos"** no topo (hoje "Estudos e Carreira"); a área Carreira continua na Biblioteca. Fazer junto com a N8.1.
+- **Nome do módulo de Estudos:** passou a ser só **"Estudos"** (v0.22); a área Carreira continua na Biblioteca.
+- **Vagas em lista** com o contador de etapas no topo (pergunta 2), como na prévia.
+
+## O que foi construído (v0.22, N8.1)
+- Casa **Carreira**: próximos passos (até 3), contador por etapa (leva a Vagas já filtrada) e o que vem em breve.
+- **Vagas**: contador por etapa que filtra a lista; vagas com passo datado primeiro; atrasadas em laranja; "sem resposta há X dias" (Enviei há 7+ dias sem passo).
+- **Ficha da vaga** (salva sozinha): cargo, empresa, salário, link, etapas tocáveis, Avançar etapa, Encerrar (contratado, não passei, desisti), próximo passo com data/hora e "Pôr na Agenda" (ou "Atualizar na Agenda" se a data mudou), anotações, histórico, excluir. Vaga sem cargo e sem empresa some ao fechar.
+- **Encerradas**: recolhidas, com o resultado; dá para reabrir.
+- **Metas** na barra mostra "em breve" até a N8.4. Botão + em todas as telas: nova vaga.
+- Dados em `AppData.career` (padrão em `normalize()`; entra no backup). Regras em `src/carreira.ts` (6 testes), tela em `src/modules/Carreira.tsx`.
 
 ## Perguntas da prévia (responder antes da N8.1)
 1. A casa abre em Trabalho ou em Currículo?
-2. Vagas como lista com funil de etapas (como na prévia) ou em colunas que deslizam?
+2. ~~Vagas: lista ou colunas?~~ Lista (decidido na v0.22).
 3. Salário aberto ou escondido (toque para mostrar)?
 4. Cartão "Próximo passo" no Início já ligado ou desligado no lápis?
 
@@ -43,7 +52,7 @@ Total: **G**. Dividir em partes, uma versão cada:
 | Parte | O que entra | Tam. |
 |---|---|---|
 | N8.0 | Prévia visual navegável (Artifact) para decidir telas e barra | M · feito |
-| N8.1 | Módulo base + **Vagas e candidaturas** (etapas, próximo passo, histórico) | M |
+| N8.1 | Módulo base + **Vagas e candidaturas** (etapas, próximo passo, histórico) | M · feito (v0.22) |
 | N8.2 | **Trabalho atual** (cargos, salários, feedbacks e 1:1; pergunta sobre Finanças) | M |
 | N8.3 | **Currículo e conquistas** (+ trazer ciclos concluídos de Estudos) | M |
 | N8.4 | **Metas de carreira** (passos ligados a Estudos e Vagas) + cartão no Início | P |
