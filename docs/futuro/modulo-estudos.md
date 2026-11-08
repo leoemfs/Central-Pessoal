@@ -64,7 +64,7 @@ Decidido:
 
 ## Ideias do Leonardo (08/11, para especificar depois dos testes)
 - **N8 · Cronograma de estudos:** calendário dentro de Estudos (quando estudar cada tópico ou ciclo), sincronizado com a Agenda principal do app.
-- **N9 · Duas abas, Estudos · Carreira:** cada aba com seus atalhos na barra de baixo. A Carreira terá projetos, apresentações e acompanhamento da carreira atual e da carreira que está sendo construída. Ponto a decidir: pela regra de navegação, a barra de baixo é do módulo; com duas abas, a barra muda junto com a aba (é uma exceção à regra).
+- **N9 · Duas abas, Estudos · Carreira:** cada aba com seus atalhos na barra de baixo. A Carreira terá projetos, apresentações e acompanhamento da carreira atual e da carreira que está sendo construída. Ponto a decidir: pela regra de navegação, a barra de baixo é do módulo; com duas abas, a barra muda junto com a aba (é uma exceção à regra). **Plano B (Leonardo):** se a barra que muda com a aba ficar ruim, Estudos e Carreira viram **dois módulos independentes**, cada um com sua barra própria, seguindo a regra.
 
 ## Fica para depois (anotar na Central quando aparecer)
 - Editor gráfico de mapas (arrastar e ligar ideias).
