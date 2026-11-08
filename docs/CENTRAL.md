@@ -68,7 +68,7 @@
 ## Feito
 | Versão | O que entrou | PR |
 |---|---|---|
-| v0.21 | N6: módulo Estudos e Carreira (Biblioteca com 5 áreas e 45 trilhas, ciclos, notebooks, fontes, mapas mentais e roadmaps; barra Ciclos · Estudos · Roadmaps). Integração com a Jornada só documentada (N7) | a abrir |
+| v0.21 | N6: módulo Estudos e Carreira (Biblioteca com 5 áreas e 45 trilhas, ciclos, notebooks, fontes, mapas mentais e roadmaps; barra Ciclos · Estudos · Roadmaps). Integração com a Jornada só documentada (N7) | #23 |
 | v0.20 | A2: lápis ao lado da lupa para subir, descer e ocultar cartões no Início e em Finanças (Humor e resumo do mês fixos; avisos nunca somem) | #20 |
 | v0.19 | Navegação padronizada (E8): telas Progresso, Histórico, Próximos e Compras; Preços como tela; Categorias de Listas no +; cabeçalho mês + abas em bloco | #19 |
 | v0.18 | A1: barra de baixo só com ícones, favoritos do Início, barra própria em cada módulo, topo "Módulo / Aba", tela de Humor, Orçamento e Relatórios fora do Mais; abas que somem e voltam com a barra de cima | #17 |
