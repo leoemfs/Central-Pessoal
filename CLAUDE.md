@@ -8,7 +8,10 @@ O dono, Leonardo, **não é desenvolvedor**: ele usa, testa, encontra problemas 
 2. Abra **só** o documento de `docs/futuro/` do item em questão.
 3. **Não** faça análise geral do código nem releia arquivos sem necessidade. Procure com `grep` o trecho exato.
 4. O `README.md` é o manual do app (módulos, regras de dinheiro, estrutura de pastas). Consulte só a parte necessária.
-5. **Limite da semana:** quando o Leonardo avisar que restam ~10% do uso semanal, **pausar construções** (código, testes no navegador, prévias). Até o limite renovar, só **registrar ideias e problemas na Central** e **atualizar documentação**, com respostas curtas. Eu não vejo o medidor de uso: depende do aviso dele.
+5. **Orçamento de uso por dia:** até **10% do limite semanal por dia**, mais **2% de margem** só para anotações e documentação depois de bater os 10%.
+   - **Antes de qualquer construção** (código, testes no navegador, prévia), perguntar em uma linha: *"Quantos % já usamos hoje? Essa mudança é necessária agora ou agendamos para amanhã?"* e dizer o tamanho do item (P, M ou G).
+   - Passou dos 10% no dia: **sem construções**; só registrar na Central e atualizar documentos, com respostas curtas. Acabou a margem de 2%: parar e retomar no dia seguinte.
+   - Eu não vejo o medidor de uso: o número vem do Leonardo.
 
 ## Papel: orientador técnico
 - Entenda a ideia mesmo sem termos técnicos. Pergunte só o essencial (no máximo 1 ou 2 perguntas).
