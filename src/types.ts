@@ -23,6 +23,8 @@ export interface CalendarEvent {
   time: string;
   location: string;
   description: string;
+  /** Criado por outro módulo e mantido por ele (ex.: "carreira/abrir-m-<id>"): tocar abre a origem. */
+  origin?: string;
 }
 
 /** ritual = rotina já incorporada · construir = hábito novo · abandonar = hábito a deixar. */
@@ -444,6 +446,112 @@ export interface PracticeSession {
   createdAt: string;
 }
 
+// ---------- Estudos e Carreira ----------
+
+/** Situação de um tópico dentro de um ciclo pessoal. */
+export type StudyStatus = 'afazer' | 'andando' | 'feito';
+export type SourceKind = 'site' | 'video' | 'artigo' | 'livro' | 'pdf' | 'doc' | 'curso' | 'podcast' | 'outro';
+
+export interface StudyCycleTopic {
+  /** Id do tópico (do catálogo ou de uma trilha criada pela pessoa). */
+  id: string;
+  status: StudyStatus;
+  doneAt: string | null;
+}
+
+/** Ciclo pessoal: seleção de tópicos de uma trilha. Nunca altera a trilha. */
+export interface StudyCycle {
+  id: string;
+  name: string;
+  trackId: string;
+  topics: StudyCycleTopic[];
+  notebookId: string | null;
+  startedAt: string;
+  finishedAt: string | null;
+  createdAt: string;
+}
+
+export type StudyBlockKind = 'nota' | 'pares' | 'fontes';
+/** Um bloco dentro de um assunto do notebook: texto, pares (termo e significado) ou fontes ligadas. */
+export interface StudyBlock {
+  id: string;
+  kind: StudyBlockKind;
+  title: string;
+  text: string;
+  pairs: [string, string][];
+  sourceIds: string[];
+}
+
+export interface StudySubject {
+  id: string;
+  name: string;
+  /** Tópico da Biblioteca que deu origem (se houver). */
+  topicId: string | null;
+  blocks: StudyBlock[];
+}
+
+export interface StudyNotebook {
+  id: string;
+  name: string;
+  /** Trilha de referência (opcional). */
+  trackId: string | null;
+  subjects: StudySubject[];
+  log: { at: string; text: string }[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface StudySource {
+  id: string;
+  title: string;
+  url: string;
+  kind: SourceKind;
+  note: string;
+  notebookIds: string[];
+  createdAt: string;
+}
+
+export interface StudyMap {
+  id: string;
+  name: string;
+  center: string;
+  branches: { id: string; label: string; leaves: string[] }[];
+  notebookId: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+/** Áreas, temas e trilhas criados pela pessoa (o catálogo do app fica separado e não muda). */
+export interface StudyArea {
+  id: string;
+  name: string;
+  desc: string;
+}
+export interface StudyTheme {
+  id: string;
+  areaId: string;
+  name: string;
+}
+export interface StudyTrack {
+  id: string;
+  themeId: string;
+  name: string;
+  desc: string;
+  topics: { id: string; name: string }[];
+}
+
+export interface StudyData {
+  /** Áreas arquivadas (do catálogo ou da pessoa). Arquivar não apaga nada. */
+  archived: string[];
+  areas: StudyArea[];
+  themes: StudyTheme[];
+  tracks: StudyTrack[];
+  cycles: StudyCycle[];
+  notebooks: StudyNotebook[];
+  sources: StudySource[];
+  maps: StudyMap[];
+}
+
 export interface AppData {
   version: 2;
   tasks: Task[];
@@ -476,6 +584,10 @@ export interface AppData {
   /** Compras concluídas pelas listas (Listas › Compras). */
   purchases: Purchase[];
   sessions: PracticeSession[];
+  /** Estudos e Carreira (camada pessoal). */
+  study: StudyData;
+  /** Carreira (N8): vagas e candidaturas. */
+  career: CareerData;
   /** Última carga usada em cada exercício (nome → kg). */
   lastLoads: Record<string, number>;
   /** Itens excluídos (id → data), para uma futura sincronização entre aparelhos. */
@@ -485,3 +597,90 @@ export interface AppData {
 }
 
 export type Collection = 'tasks' | 'events' | 'habits' | 'notes' | 'journal' | 'categories' | 'cards' | 'incomeSources' | 'boxes' | 'lists' | 'listCategories' | 'stores' | 'vouchers';
+
+// ---------- Carreira (N8) ----------
+/** Etapas em andamento e jeitos de encerrar uma vaga. */
+export type JobStage = 'interesse' | 'enviei' | 'entrevista' | 'proposta';
+export type JobOutcome = 'contratado' | 'naopassei' | 'desisti';
+
+export interface JobApp {
+  id: string;
+  company: string;
+  role: string;
+  link: string;
+  /** Texto livre: "R$ 8.000", "a combinar". */
+  salary: string;
+  notes: string;
+  stage: JobStage;
+  /** Próximo passo: o que fazer, e quando (AAAA-MM-DD, HH:MM). */
+  next: string;
+  nextDate: string | null;
+  nextTime: string;
+  /** Compromisso criado na Agenda para o próximo passo. */
+  eventId: string | null;
+  /** Encerrada: como e quando. */
+  outcome: JobOutcome | null;
+  closedAt: string | null;
+  /** Mudanças de etapa (a mais recente por último). */
+  history: { stage: JobStage | JobOutcome; date: string }[];
+  createdAt: string;
+}
+
+/** Mudança no trabalho: entrada, promoção, aumento, novo emprego. A mais recente é o trabalho atual. */
+export type CareerChangeKind = 'entrada' | 'promocao' | 'aumento' | 'novoemprego';
+export interface CareerChange {
+  id: string;
+  date: string;
+  kind: CareerChangeKind;
+  role: string;
+  company: string;
+  /** Salário mensal em reais (0 = não informado). */
+  salary: number;
+  note: string;
+}
+
+export type MeetingKind = 'reuniao' | 'umum' | 'apresentacao' | 'feedback' | 'avaliacao';
+export interface Meeting {
+  id: string;
+  kind: MeetingKind;
+  title: string;
+  /** Com quem (pessoa, equipe, setor). */
+  with: string;
+  date: string;
+  time: string;
+  /** Pauta e anotações. */
+  notes: string;
+  /** Combinados (o que ficou para fazer). */
+  todos: { id: string; text: string; done: boolean }[];
+  /** Link dos slides ou do material. */
+  link: string;
+  /** Repete a cada N dias (0 = não repete). */
+  repeatDays: number;
+  /** Projetos do trabalho ligados a esta reunião. */
+  projectIds: string[];
+  /** Já criou a próxima da série. */
+  nextCreated: boolean;
+  eventId: string | null;
+}
+
+export type ProjectStatus = 'andando' | 'parado' | 'concluido';
+export interface WorkProject {
+  id: string;
+  name: string;
+  /** Área ou setor (ex.: repasse, contratos de prestadores). */
+  area: string;
+  deadline: string | null;
+  status: ProjectStatus;
+  /** Entregas: o que precisa sair, com data opcional. */
+  deliveries: { id: string; text: string; date: string | null; done: boolean }[];
+  notes: string;
+  link: string;
+  createdAt: string;
+}
+
+export interface CareerData {
+  jobs: JobApp[];
+  changes: CareerChange[];
+  meetings: Meeting[];
+  projects: WorkProject[];
+}

@@ -5,13 +5,14 @@ O dono, Leonardo, **não é desenvolvedor**: ele usa, testa, encontra problemas 
 
 ## Por onde começar (economia)
 1. Leia **`docs/CENTRAL.md`**: itens, situação, fila aprovada e o que já foi feito.
-2. Abra **só** o documento de `docs/futuro/` do item em questão.
+2. Abra **só** o documento de `docs/futuro/` do item em questão e confira no **Mapa dos módulos** (na Central) quais módulos ele afeta.
 3. **Não** faça análise geral do código nem releia arquivos sem necessidade. Procure com `grep` o trecho exato.
 4. O `README.md` é o manual do app (módulos, regras de dinheiro, estrutura de pastas). Consulte só a parte necessária.
 5. **Orçamento de uso por dia:** até **10% do limite semanal por dia**, mais **2% de margem** só para anotações e documentação depois de bater os 10%.
    - **Antes de qualquer construção** (código, testes no navegador, prévia), perguntar em uma linha: *"Quantos % já usamos hoje? Essa mudança é necessária agora ou agendamos para amanhã?"* e dizer o tamanho do item (P, M ou G).
    - Passou dos 10% no dia: **sem construções**; só registrar na Central e atualizar documentos, com respostas curtas. Acabou a margem de 2%: parar e retomar no dia seguinte.
    - Eu não vejo o medidor de uso: o número vem do Leonardo.
+   - **Combinado desta semana:** domingo 08/11 com até **25%** (dia de construir). De 09/11 a 14/11: testes e anotações, e **no máximo uma parte da Carreira por dia**, só se o dia tiver folga (combinado em 08/11).
 
 ## Papel: orientador técnico
 - Entenda a ideia mesmo sem termos técnicos. Pergunte só o essencial (no máximo 1 ou 2 perguntas).
@@ -44,3 +45,4 @@ anotar → especificar → aprovar → construir → testar. A cada mudança de 
 - Trabalhar no branch indicado na sessão. Sem force push e sem rebase.
 - Se o branch já está todo no `main` (`git merge-base --is-ancestor`), avançar com `git merge --ff-only origin/main`; senão, continuar em cima dele.
 - Um PR por item para `main`. O Leonardo mescla; ao mesclar, o GitHub Actions publica no GitHub Pages.
+- **Sempre** que houver um PR para mesclar, mandar o link dele na resposta (ex.: `https://github.com/leoemfs/Central-Pessoal/pull/24`).

@@ -83,6 +83,26 @@ export const MODULE_BARS: ModuleBar[] = [
       { id: 'precos', label: 'Preços', icon: 'store', to: 'precos', section: 'precos' },
     ],
   },
+  {
+    id: 'estudos',
+    name: 'Estudos',
+    sections: ['estudos', 'ciclos', 'roadmaps'],
+    items: [
+      { id: 'ciclos', label: 'Ciclos', icon: 'repeat', to: 'ciclos', section: 'ciclos' },
+      { id: 'estudos', label: 'Estudos', icon: 'cap', to: 'estudos', section: 'estudos' },
+      { id: 'roadmaps', label: 'Roadmaps', icon: 'route', to: 'roadmaps', section: 'roadmaps' },
+    ],
+  },
+  {
+    id: 'carreira',
+    name: 'Carreira',
+    sections: ['carreira', 'vagas', 'metas'],
+    items: [
+      { id: 'metas', label: 'Metas', icon: 'target', to: 'metas', section: 'metas' },
+      { id: 'carreira', label: 'Carreira', icon: 'briefcase', to: 'carreira', section: 'carreira' },
+      { id: 'vagas', label: 'Vagas', icon: 'send', to: 'vagas', section: 'vagas' },
+    ],
+  },
 ];
 
 /** Módulos que podem ser favoritos (os 3 do meio da barra no Início). */
@@ -92,6 +112,8 @@ export const FAVORITABLE: BarItem[] = [
   { id: 'agenda', label: 'Agenda', icon: 'calendar', to: 'agenda' },
   { id: 'nucleo', label: 'Núcleo', icon: 'sprout', to: 'nucleo' },
   { id: 'listas', label: 'Listas', icon: 'cart', to: 'listas' },
+  { id: 'estudos', label: 'Estudos', icon: 'cap', to: 'estudos' },
+  { id: 'carreira', label: 'Carreira', icon: 'briefcase', to: 'carreira' },
   { id: 'arquivo', label: 'Notas', icon: 'note', to: 'arquivo' },
   { id: 'voce', label: 'Você', icon: 'user', to: 'voce' },
   { id: 'revisao', label: 'Revisão', icon: 'calendarCheck', to: 'revisao' },

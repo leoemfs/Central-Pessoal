@@ -1,3 +1,4 @@
+import { syncCareerEvents } from './carreira';
 import { createContext, useCallback, useContext, useEffect, useRef, useState, type ReactNode } from 'react';
 import type { AppData } from './types';
 import { normalize } from './data';
@@ -14,7 +15,7 @@ const channel = typeof BroadcastChannel !== 'undefined' ? new BroadcastChannel('
 
 /** Gera as contas fixas que já deveriam existir (ex.: virou o mês com o app aberto) e registra a visita do dia. */
 const catchUp = (d: AppData) =>
-  markVisit(checkUnlock(materializeVouchers(materializeIncomes(materialize(d, addMonths(monthKey(todayISO()), FIXA_AHEAD)), addMonths(monthKey(todayISO()), INCOME_AHEAD)))));
+  syncCareerEvents(markVisit(checkUnlock(materializeVouchers(materializeIncomes(materialize(d, addMonths(monthKey(todayISO()), FIXA_AHEAD)), addMonths(monthKey(todayISO()), INCOME_AHEAD))))));
 
 async function loadData(): Promise<AppData> {
   let raw = await dbGet<unknown>(KEY);

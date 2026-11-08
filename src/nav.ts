@@ -56,11 +56,29 @@ export const NAV_GROUPS: { title: string; items: NavItem[] }[] = [
     ],
   },
   {
+    title: 'Estudos',
+    items: [
+      { label: 'Estudos', icon: 'cap', to: 'estudos', section: 'estudos' },
+      { label: 'Ciclos', icon: 'repeat', to: 'ciclos', section: 'ciclos' },
+      { label: 'Roadmaps', icon: 'route', to: 'roadmaps', section: 'roadmaps' },
+      { label: 'Meus notebooks', icon: 'notebook', to: 'estudos/notebooks' },
+      { label: 'Fontes', icon: 'link', to: 'estudos/fontes' },
+      { label: 'Mapas mentais', icon: 'mindmap', to: 'estudos/mapas' },
+    ],
+  },
+  {
+    title: 'Carreira',
+    items: [
+      { label: 'Carreira', icon: 'briefcase', to: 'carreira', section: 'carreira' },
+      { label: 'Vagas', icon: 'send', to: 'vagas', section: 'vagas' },
+      { label: 'Metas de carreira', icon: 'target', to: 'metas', section: 'metas' },
+    ],
+  },
+  {
     title: 'Planejamento',
     items: [
       { label: 'Revisão semanal', icon: 'calendarCheck', to: 'revisao', section: 'revisao' },
       { label: 'Jornada', icon: 'sword', to: 'jornada', section: 'jornada' },
-      { label: 'Estudos e trabalho', icon: 'briefcase' },
       { label: 'Foco', icon: 'timer' },
       { label: 'Banco de ideias', icon: 'bulb' },
     ],
