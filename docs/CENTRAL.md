@@ -41,7 +41,7 @@
 
 **Telas que juntam tudo** (mexeu num módulo, conferir estas): **Início** (quase todos), **Revisão semanal** (Finanças, Agenda, Diário, Núcleo, humor), **Busca** (Diário, Finanças, Agenda, Notas).
 **Partes do app todo:** barra de baixo (`moduleBar.ts`), lápis dos cartões (`cardLayout.ts`), temas (`theme.ts`), backup (`data.ts`).
-**Em breve** (sem código): Saúde, Objetivos, Foco, Banco de ideias.
+**Em breve** (sem código): Saúde (N1, módulo próprio) e Objetivos (N10, módulo próprio). Lembretes, Foco e Banco de ideias **não viram módulos**: Lembretes = Agenda + Notificações (N3); Foco = Núcleo › Mente (M16); Ideias = Notas (M17).
 
 ## Caixa de entrada
 *Ideias e problemas ainda sem classificar. Uma linha cada, com a data.*
@@ -77,7 +77,7 @@
 | M7 | Revisão semanal mais completa: autocuidado, caixinhas e vales da semana | MOD | P | baixa | especificado | `futuro/nucleo-mente-corpo.md`, `futuro/caixinhas.md` |
 | N1 | Módulo Saúde (água, sono, remédios, consultas, peso) | NOVO | G | média | especificado | `futuro/modulo-saude.md` |
 | N2 | Jornada completa (pixel art): missões no ritmo da pessoa, recompensas por módulo, raridades (comum a místico), Forja e Codex por coleções | NOVO | G | baixa | especificado | `futuro/modulo-rpg.md`, `futuro/jornada-recompensas.md`, `futuro/jornada-raridades.md` |
-| N3 | Notificações | NOVO | M | baixa | especificado | `futuro/notificacoes.md` |
+| N3 | Notificações e **lembretes** (tarefa ou compromisso com "me lembrar"; sai o "Lembretes, em breve" do menu). Afeta: Agenda, Carreira | NOVO | M | baixa | especificado | `futuro/notificacoes.md` |
 | N4 | App Android | NOVO | G | baixa | especificado | `futuro/app-android.md` |
 | N5 | Código de barras, base de produtos e nota fiscal | NOVO | G | baixa | ideia | `futuro/precos-v2.md` ("Mais adiante") |
 | N6 | Módulo Estudos e Carreira: Biblioteca (áreas, trilhas, tópicos de referência), Ciclos pessoais, Meus notebooks, Fontes, Mapas mentais e Roadmaps | NOVO | G | média | pronto (v0.21), em teste por 3 dias | `futuro/modulo-estudos.md` |
@@ -89,6 +89,9 @@
 | M14 | Estudos: anexar PDF ou imagem no notebook (hoje só link). Afeta: backup (arquivos pesados) | MOD | M | baixa | ideia | `futuro/modulo-estudos.md` |
 | M15 | Estudos: editor de mapas mentais (arrastar e ligar ideias). Afeta: só Estudos | MOD | M | baixa | ideia | `futuro/modulo-estudos.md` |
 | N9 | Sincronizar com a conta Google (pasta escondida do Drive; site e Android com os mesmos dados). Depois do N4. *Na conversa do Android foi anotado como N8; o código certo é N9.* | NOVO | M | baixa | ideia | `futuro/app-android.md` ("Sincronização") |
+| N10 | Módulo **Objetivos** (metas de vida): objetivo grande com prazo, que liga o que já existe (caixinha, hábito, ciclo de estudo, vaga ou projeto) e mostra o progresso somado. Absorve as metas de carreira (N8.4). Afeta: Finanças, Núcleo, Estudos, Carreira, Você, Início, Jornada | NOVO | M | média | ideia (especificar; prévia visual antes) | — |
+| M16 | **Foco** no Núcleo › Mente: temporizador de foco (ex.: 25 min + pausa), com histórico; ligado a um tópico de Estudos conta tempo de estudo. Afeta: Núcleo, Estudos, Revisão | MOD | P | média | ideia | — |
+| M17 | **Banco de ideias** em Notas: aba "Ideias" e o botão "transformar em" tarefa, objetivo ou notebook. Afeta: Notas, Agenda, Estudos | MOD | P | baixa | ideia | — |
 | N7 | Estudos × Jornada: XP, ouro e INT por tópico, ciclo e constância; selos, Coruja e missões | NOVO | M | baixa | especificado (só documento) | `futuro/estudos-jornada.md` |
 | N8 | Módulo Carreira (próprio, fora de Estudos): vagas e candidaturas, metas de carreira, currículo e conquistas, trabalho atual (cargos, salários, feedbacks). Dividido em N8.0 a N8.4 | NOVO | G | média | parte pronta: Vagas (v0.22), Trabalho e Reuniões (v0.23), Projetos e Agenda automática (v0.24); faltam N8.3 Currículo e N8.4 Metas | `futuro/modulo-carreira.md` |
 
