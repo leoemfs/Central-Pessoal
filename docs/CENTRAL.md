@@ -115,8 +115,9 @@
 6. Lápis nos outros módulos: E3 + M12 (Agenda, Núcleo, Listas, Estudos, Carreira) (M)
 7. Busca por módulo: E6 + M13 (P)
 8. M8 Cartão: escolher a fatura (P)
-9. M2 → M3 → M4 Preços 2.0 · M5 Agenda com repetição · M6 fichas de treino · M7 revisão completa
-10. N7 Estudos × Jornada · N1 Saúde · M14 anexos · M15 editor de mapas · depois N2, N3, N4, N5, N9
+9. N10 Treino em casa: primeiro a prévia dos 3 bonecos (agachamento, flexão, abdominal), num dia com folga; depois T1 e T2 (M)
+10. M2 → M3 → M4 Preços 2.0 · M5 Agenda com repetição · M6 fichas de treino · M7 revisão completa
+11. N7 Estudos × Jornada · N1 Saúde · M14 anexos · M15 editor de mapas · depois N2, N3, N4, N5, N9
 
 ## Feito
 | Versão | O que entrou | PR |
