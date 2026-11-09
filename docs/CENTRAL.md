@@ -47,6 +47,7 @@
 *Ideias e problemas ainda sem classificar. Uma linha cada, com a data.*
 
 - 09/11: Saúde com **dieta dentro** (plano alimentar e "segui · em parte · fugi" no dia a dia). Já anotado no N1 (parte N1.2).
+- 09/11: Saúde e treinos ligados aos hábitos sem trocar de módulo (ex.: beber água). Anotado no N1, seção "Ligação com Hábitos e Treinos".
 - 08/11: anexar os slides das apresentações (sexta sim, sexta não: avanços do setor de repasse e gestão de contratos de prestadores) dentro da reunião. Hoje só dá para guardar o link. Junta com "anexar PDF ou imagem" de Estudos.
 
 ## Itens

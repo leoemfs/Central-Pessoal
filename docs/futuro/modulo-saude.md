@@ -60,6 +60,27 @@ Ordem sugerida (cada parte com versão, testes e PR próprios):
 
 **Navegação** (regra do app): abas no topo para as partes do mesmo conteúdo; barra de baixo com ferramentas do módulo (ideia: **Hoje · Saúde · Histórico**); botão + para criar (registro, refeição, remédio, consulta, medida) e, por último, Categorias se houver.
 
+## Ligação com Hábitos e Treinos (09/11)
+**Regra:** cada dado mora em **um lugar só**; os outros módulos **mostram e marcam** esse mesmo dado. Ninguém precisa trocar de módulo nem registrar duas vezes. É o mesmo jeito que já funciona hoje entre Hábitos e Mente/Corpo (hábito ligado a uma prática é marcado sozinho).
+
+| Hábito (Núcleo) | Dado mora em | Como se ligam |
+|---|---|---|
+| Beber água (meta em ml) | Saúde › Água | o mesmo número: tocar "+250 ml" no cartão do hábito soma em Saúde, e somar em Saúde enche o anel do hábito |
+| Dormir no horário | Saúde › Sono | marcado sozinho quando o sono registrado começa até o horário do hábito |
+| Tomar remédio | Saúde › Remédios | marcado sozinho quando todos os "tomei" do dia estão feitos |
+| Seguir a dieta | Saúde › Dieta | marcado sozinho quando as refeições "segui" chegam à meta do dia (ex.: 4 de 5) |
+| Treinar | Núcleo › Corpo (fichas) | já é assim: concluir a ficha marca o hábito. Saúde só **mostra** os dias com treino no resumo, sem guardar nada |
+
+**Como fica para quem usa:**
+- No hábito, o campo **"Ligado a"** (hoje: prática de Mente/Corpo) ganha as opções de Saúde: Água, Sono, Remédios, Dieta.
+- No cartão do hábito aparece um selo pequeno (ex.: "💧 Saúde"); tocar no selo abre a parte certa de Saúde, mas marcar funciona dali mesmo.
+- Em Saúde, cada parte mostra "hábito ligado: Beber água · 12 dias seguidos", sem duplicar a sequência.
+- Treinos continuam no Núcleo (Corpo e, depois, fichas próprias do M6). Saúde não ganha aba de treino; só um cartão "Treinos da semana" que lê do Núcleo.
+
+**Dados antigos:** quem já tem um hábito de água com quantidade recebe **uma pergunta** ao abrir Saúde pela primeira vez: "Ligar o hábito Beber água à Saúde?". Se sim, o histórico do hábito vira o histórico de água (nada se perde). Se não, tudo fica como está.
+
+**Mapa dos módulos (ao construir):** Saúde passa a entregar para Núcleo (marca hábitos ligados) e a usar de Núcleo (dias com treino).
+
 ## Cuidados
 - **Nada de diagnóstico** nem conselho médico. O app só registra.
 - **Peso e medidas ficam escondidos por padrão,** para não pesar em quem não quer ver esses números.
