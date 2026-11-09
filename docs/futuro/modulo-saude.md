@@ -1,19 +1,64 @@
-# Saúde
+# Saúde (N1)
 
-> **Status: IDEIA PARA IMPLEMENTAÇÃO FUTURA.** Aparece como "em breve" na "Prévia do app". Sem desenvolvimento no app.
+> **Situação: em documentação (09/11).** Sem código. Aparece como "em breve" no app. Não foi adiantado na fila: continua no item 10 da fila sugerida.
+> **Tamanho:** G, dividido em partes (abaixo). Cada parte é uma sessão de construção, só depois de aprovada.
 
 Um módulo separado do Núcleo. A diferença:
 - **Núcleo:** o que a pessoa **pratica** (meditar, treinar, alongar);
-- **Saúde:** o que a pessoa **acompanha** (água, sono, remédios, consultas, peso).
+- **Saúde:** o que a pessoa **acompanha** (água, sono, alimentação, remédios, consultas, peso).
+
+**Afeta** (pelo Mapa dos módulos): Agenda (consultas, exames e horários de remédio), Listas (ingredientes da dieta), Você (horários de dormir e acordar), Núcleo (hábito de água, se existir), Início (cartão do dia), Revisão semanal, Busca, backup (`normalize()`), Jornada (só depois, N2).
 
 ## Partes
 | Parte | O que registra | Ligações |
 |---|---|---|
 | **Água** | copos por dia, com meta (ex.: 2 L) e um toque para somar | pode usar o hábito com quantidade que já existe |
 | **Sono** | hora de dormir e de acordar, e como acordou (bem · mais ou menos · cansado) | usa os horários de Você; alimenta as sugestões de sono |
+| **Dieta** | plano alimentar (refeições e o que comer em cada uma) e o dia a dia: "segui", "segui em parte", "fugi" | ingredientes viram lista de compras em Listas; horários das refeições podem ir para a Agenda |
 | **Remédios** | nome, dose, horários e "tomei", com lembrete | lembretes pelo mesmo sistema da Agenda |
-| **Consultas e exames** | data, especialidade, local e anotações | entram na Agenda; o resultado pode virar nota |
+| **Consultas e exames** | data, especialidade, local e anotações | entram na Agenda sozinhos (como Carreira); o resultado pode virar nota |
 | **Peso e medidas** | peso, cintura e outras medidas, com gráfico de evolução | opcional; nunca aparece no Início sem a pessoa pedir |
+
+## Dieta (pedido do Leonardo, 09/11)
+A ideia é ter a dieta **dentro** do módulo, para seguir no dia a dia.
+
+**Plano alimentar**
+- Um ou mais planos (ex.: "Dieta da nutricionista", "Semana de treino"); só um fica **em uso**.
+- Cada plano tem **refeições** (café da manhã, lanche, almoço, lanche da tarde, jantar, ceia), com horário e o que comer.
+- Cada refeição pode ter **opções** ("ou isto, ou aquilo"), como as dietas de nutricionista costumam ter.
+- Campo de anotação livre (orientações, substituições, o que evitar).
+- Pode ser diferente por dia da semana (opcional; o padrão é igual todos os dias).
+
+**No dia a dia**
+- Tela "Hoje": as refeições do plano em ordem, com um toque para marcar **segui · em parte · fugi**, e a opção escolhida.
+- Campo rápido para anotar o que comeu fora do plano (sem contar calorias por padrão).
+- Resumo da semana: quantas refeições seguidas, em parte e fora do plano.
+
+**Ligações**
+- **Listas:** botão "Gerar lista de compras" junta os ingredientes do plano da semana numa lista de Mercado (parte opcional, pode vir depois).
+- **Agenda:** horários das refeições podem aparecer como lembrete (desligado por padrão).
+- **Revisão semanal:** linha "Dieta: X de Y refeições seguidas".
+
+**Cuidados da Dieta**
+- O app **não monta dieta nem dá conselho**: a pessoa escreve o plano (o dela ou o da nutricionista).
+- Calorias e macros (proteína, carboidrato, gordura) ficam **fora da primeira versão**; se entrarem depois, ficam escondidos por padrão, como o peso.
+- "Fugi" não tem cor de erro nem aviso: é só registro.
+
+**A decidir antes de construir** (perguntar ao Leonardo):
+1. A dieta vem de nutricionista (copiar o plano pronto) ou é montada por você?
+2. Precisa de dias diferentes (ex.: dia de treino × dia de descanso) já na primeira versão?
+
+## Divisão para construir
+Ordem sugerida (cada parte com versão, testes e PR próprios):
+1. **N1.0 Prévia visual:** telas do módulo, barra de baixo e cartão no Início (só prévia, sem código).
+2. **N1.1 Água e Sono:** registros do dia e meta de água (P a M).
+3. **N1.2 Dieta:** plano alimentar e "Hoje" com segui · em parte · fugi (M).
+4. **N1.3 Remédios:** horários, "tomei" e lembrete (M).
+5. **N1.4 Consultas e exames na Agenda:** entram e se atualizam sozinhos, como Carreira (P a M).
+6. **N1.5 Peso e medidas:** com gráfico, escondido por padrão (P).
+7. **Depois:** lista de compras da dieta em Listas; ligação com a Jornada.
+
+**Navegação** (regra do app): abas no topo para as partes do mesmo conteúdo; barra de baixo com ferramentas do módulo (ideia: **Hoje · Saúde · Histórico**); botão + para criar (registro, refeição, remédio, consulta, medida) e, por último, Categorias se houver.
 
 ## Cuidados
 - **Nada de diagnóstico** nem conselho médico. O app só registra.
@@ -22,4 +67,5 @@ Um módulo separado do Núcleo. A diferença:
 
 ## Com a Jornada
 - Tomar o remédio na hora e beber a meta de água contam como missões do dia (+**Resistência**).
+- Seguir as refeições do plano pode contar como missão, mas **"fugi" nunca tira pontos**.
 - Peso e medidas **não dão recompensa**, para não incentivar metas pouco saudáveis.
