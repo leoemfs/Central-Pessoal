@@ -89,18 +89,18 @@
 | M14 | Estudos: anexar PDF ou imagem no notebook (hoje só link). Afeta: backup (arquivos pesados) | MOD | M | baixa | ideia | `futuro/modulo-estudos.md` |
 | M15 | Estudos: editor de mapas mentais (arrastar e ligar ideias). Afeta: só Estudos | MOD | M | baixa | ideia | `futuro/modulo-estudos.md` |
 | N9 | Sincronizar com a conta Google (pasta escondida do Drive; site e Android com os mesmos dados). Depois do N4. *Na conversa do Android foi anotado como N8; o código certo é N9.* | NOVO | M | baixa | ideia | `futuro/app-android.md` ("Sincronização") |
-| N10 | Módulo **Objetivos** (metas de vida): objetivo grande com prazo, que liga o que já existe (caixinha, hábito, ciclo de estudo, vaga ou projeto) e mostra o progresso somado. Absorve as metas de carreira (N8.4). Afeta: Finanças, Núcleo, Estudos, Carreira, Você, Início, Jornada | NOVO | M | média | ideia (especificar; prévia visual antes) | — |
+| N10 | Módulo **Objetivos**: central de **todas as metas do app** (caixinhas, hábitos, ciclos de estudo, carreira, orçamento, metas do Você), com criar, editar e concluir dali; a meta continua morando no módulo dela. Objetivos grandes juntam várias metas. Absorve as metas de carreira (N8.4). Partes: N10.0 prévia, N10.1 central de metas, N10.2 objetivos grandes. Afeta: Finanças, Núcleo, Estudos, Carreira, Você, Início, Jornada | NOVO | G | média | especificado (prévia antes) | `futuro/modulo-objetivos.md` |
 | M16 | **Foco** no Núcleo › Mente: temporizador de foco (ex.: 25 min + pausa), com histórico; ligado a um tópico de Estudos conta tempo de estudo. Afeta: Núcleo, Estudos, Revisão | MOD | P | média | ideia | — |
 | M17 | **Banco de ideias** em Notas: aba "Ideias" e o botão "transformar em" tarefa, objetivo ou notebook. Afeta: Notas, Agenda, Estudos | MOD | P | baixa | ideia | — |
 | N7 | Estudos × Jornada: XP, ouro e INT por tópico, ciclo e constância; selos, Coruja e missões | NOVO | M | baixa | especificado (só documento) | `futuro/estudos-jornada.md` |
-| N8 | Módulo Carreira (próprio, fora de Estudos): vagas e candidaturas, metas de carreira, currículo e conquistas, trabalho atual (cargos, salários, feedbacks). Dividido em N8.0 a N8.4 | NOVO | G | média | parte pronta: Vagas (v0.22), Trabalho e Reuniões (v0.23), Projetos e Agenda automática (v0.24); faltam N8.3 Currículo e N8.4 Metas | `futuro/modulo-carreira.md` |
+| N8 | Módulo Carreira (próprio, fora de Estudos): vagas e candidaturas, metas de carreira, currículo e conquistas, trabalho atual (cargos, salários, feedbacks). Dividido em N8.0 a N8.4 | NOVO | G | média | parte pronta: Vagas (v0.22), Trabalho e Reuniões (v0.23), Projetos e Agenda automática (v0.24); faltam N8.3 Currículo e N8.4 Metas (agora dentro de Objetivos, N10) | `futuro/modulo-carreira.md` |
 
 **Depende de outra coisa:** N3 fica melhor junto com N4 (notificações de verdade no Android). N2 e N5 dependem de decisões e integrações.
 
 ## Fila aprovada
 *O que pode ser construído, na ordem. Vazia = nada para construir.*
 
-- **N8, módulo Carreira** (aprovado em 08/11), em partes: N8.0 prévia (feita) → N8.1 Vagas (feita, v0.22) → N8.2 Trabalho atual e Reuniões (feita, v0.23) → N8.5 Agenda automática e N8.6 Projetos (feitas, v0.24) → N8.3 Currículo → N8.4 Metas. Semana de 09/11 a 14/11: testes e anotações, e no máximo uma parte por dia se houver folga.
+- **N8, módulo Carreira** (aprovado em 08/11), em partes: N8.0 prévia (feita) → N8.1 Vagas (feita, v0.22) → N8.2 Trabalho atual e Reuniões (feita, v0.23) → N8.5 Agenda automática e N8.6 Projetos (feitas, v0.24) → N8.3 Currículo → N8.4 Metas (agora dentro de Objetivos, N10). Semana de 09/11 a 14/11: testes e anotações, e no máximo uma parte por dia se houver folga.
 
 **Pacotes** (cada um numa sessão, porque mexem nas mesmas partes):
 - **B, Finanças:** M9 + M10 + E5 (pequeno). **Pronto na v0.16.**
@@ -112,7 +112,7 @@
 1. M1 Hábitos: pausar e arquivar (P)
 2. M11 Estudos no Início e na Revisão (P)
 3. N8.3 Carreira: currículo (M)
-4. N8.4 Carreira: metas (M)
+4. N10.0 + N10.1 Objetivos: prévia e central de metas (inclui as metas de carreira, antigo N8.4) (M)
 5. Resto do E1: ocultar módulos, ordem no Mais, ritmo do Diário (M)
 6. Lápis nos outros módulos: E3 + M12 (Agenda, Núcleo, Listas, Estudos, Carreira) (M)
 7. Busca por módulo: E6 + M13 (P)
