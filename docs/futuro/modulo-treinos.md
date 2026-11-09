@@ -21,7 +21,15 @@ Um lugar só para treinar, com cara de app de treino: escolher um treino pronto 
 | Durante o treino | Um exercício por vez: contagem de repetições ou anel de tempo, descanso entre exercícios, Pausar, Pular, próximo exercício |
 | Relatório | Treinos e minutos da semana e do mês, sequência de semanas cumprindo a meta |
 
-**Fica de fora:** fotos e vídeos de pessoas (pesam e não podemos copiar os do outro app; usamos ícones simples e a instrução em texto), anúncios, PRO, contas e calorias "exatas" (no máximo uma estimativa).
+**Fica de fora:** fotos e vídeos copiados do outro app (têm dono; ver "Imagens e animações"), anúncios, PRO, contas e calorias "exatas" (no máximo uma estimativa).
+
+## Imagens e animações (conversa de 09/11)
+- **Sim, dá.** Recomendação: imagens **livres para uso** (sem direitos autorais), em **duas fotos por exercício**, a posição inicial e a final, alternando sozinhas. Parece um GIF e pesa bem menos.
+- Fonte candidata: a base aberta *free-exercise-db* (cerca de 800 exercícios, com fotos). **Confirmar a licença antes de usar.**
+- Só os exercícios que o app usa (cerca de 40 a 60), guardados no próprio app, para funcionar sem internet. Não entram no backup.
+- Nas fichas próprias: campo opcional **"link do vídeo"** (abre o YouTube; precisa de internet).
+- Não copiar imagens nem GIFs do app "Treino em casa" ou de outros apps (têm dono).
+- Fotos ou vídeos próprios ficam para depois, junto com o M14 (arquivos pesados no backup).
 
 ## Navegação (seguindo a regra do app)
 - **Barra de baixo:** Desafios · **Treinos** (casa, no centro) · Relatório.
