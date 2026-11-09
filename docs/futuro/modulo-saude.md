@@ -16,7 +16,7 @@ Um módulo separado do Núcleo. A diferença:
 | **Sono** | hora de dormir e de acordar, e como acordou (bem · mais ou menos · cansado) | usa os horários de Você; alimenta as sugestões de sono |
 | **Dieta** | plano alimentar (refeições e o que comer em cada uma) e o dia a dia: "segui", "segui em parte", "fugi" | ingredientes viram lista de compras em Listas; horários das refeições podem ir para a Agenda |
 | **Remédios** | nome, dose, horários e "tomei", com lembrete | lembretes pelo mesmo sistema da Agenda |
-| **Consultas e exames** | data, especialidade, local e anotações | entram na Agenda sozinhos (como Carreira); o resultado pode virar nota |
+| **Consultas, exames e check-ups** | consultas, dentista, exames e check-ups, com data, local, anotações e intervalo para repetir | entram na Agenda sozinhos (como Carreira); sugere o próximo check-up; o resultado pode virar nota |
 | **Peso e medidas** | peso, cintura e outras medidas, com gráfico de evolução | opcional; nunca aparece no Início sem a pessoa pedir |
 
 ## Dieta (pedido do Leonardo, 09/11)
@@ -54,11 +54,31 @@ Ordem sugerida (cada parte com versão, testes e PR próprios):
 2. **N1.1 Água e Sono:** registros do dia e meta de água (P a M).
 3. **N1.2 Dieta:** plano alimentar e "Hoje" com segui · em parte · fugi (M).
 4. **N1.3 Remédios:** horários, "tomei" e lembrete (M).
-5. **N1.4 Consultas e exames na Agenda:** entram e se atualizam sozinhos, como Carreira (P a M).
+5. **N1.4 Consultas, exames e check-ups:** entram e se atualizam sozinhos na Agenda, como Carreira; intervalo de check-up e cartão "Próximos check-ups" (M).
 6. **N1.5 Peso e medidas:** com gráfico, escondido por padrão (P).
 7. **Depois:** lista de compras da dieta em Listas; ligação com a Jornada.
 
 **Navegação** (regra do app): abas no topo para as partes do mesmo conteúdo; barra de baixo com ferramentas do módulo (ideia: **Hoje · Saúde · Histórico**); botão + para criar (registro, refeição, remédio, consulta, medida) e, por último, Categorias se houver.
+
+## Módulo à parte? (decidido em 09/11: sim)
+Saúde é um **módulo próprio**, não uma aba do Núcleo nem da Agenda:
+- Núcleo é o que você **pratica**; Saúde é o que você **acompanha**. Juntar deixaria o Núcleo grande demais.
+- Saúde tem dados próprios (remédios, dieta, exames, medidas) que não cabem em hábito nem em compromisso.
+- As ligações (hábitos, treinos, Agenda) fazem tudo conversar sem trocar de módulo.
+
+## Consultas, exames e check-ups (09/11)
+**Tipos:** consulta (médico, com especialidade), dentista, exame, check-up e outro.
+
+**Cada um tem:** data e hora, profissional ou clínica, local, especialidade, motivo, anotações, "o que levar" (ex.: exames antigos, jejum) e, depois, o resultado (texto; anexar arquivo fica para depois, junto com M14).
+
+**Na Agenda, sozinhos** (igual a Carreira, N8.5): tudo com data aparece na Agenda e se atualiza; some se for excluído. Tocar abre a ficha na Saúde. Sem botão "Pôr na Agenda".
+
+**Check-ups que se repetem:** cada tipo pode ter um **intervalo** (ex.: dentista a cada 6 meses, check-up a cada 1 ano, oftalmologista a cada 2 anos).
+- Ao marcar uma consulta como **feita**, o app sugere a próxima: "Próximo dentista por volta de mai/2027. Lembrar?".
+- Cartão **"Próximos check-ups"** na Saúde: o que está marcado, o que está perto de vencer e o que está atrasado ("Dentista: última há 8 meses"), sem cor de alarme.
+- Enquanto não tem data marcada, o lembrete aparece em **Próximos** da Agenda no mês previsto, como "marcar dentista".
+
+**Depois de feita:** "Como foi" (anotação), retorno (data, vira nova consulta) e pedidos de exame (viram exames a marcar).
 
 ## Ligação com Hábitos e Treinos (09/11)
 **Regra:** cada dado mora em **um lugar só**; os outros módulos **mostram e marcam** esse mesmo dado. Ninguém precisa trocar de módulo nem registrar duas vezes. É o mesmo jeito que já funciona hoje entre Hábitos e Mente/Corpo (hábito ligado a uma prática é marcado sozinho).
