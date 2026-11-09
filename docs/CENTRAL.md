@@ -41,7 +41,7 @@
 
 **Telas que juntam tudo** (mexeu num módulo, conferir estas): **Início** (quase todos), **Revisão semanal** (Finanças, Agenda, Diário, Núcleo, humor), **Busca** (Diário, Finanças, Agenda, Notas).
 **Partes do app todo:** barra de baixo (`moduleBar.ts`), lápis dos cartões (`cardLayout.ts`), temas (`theme.ts`), backup (`data.ts`).
-**Em breve** (sem código): Saúde, Treinos (N10), Objetivos, Foco, Banco de ideias.
+**Em breve** (sem código): Saúde, Objetivos, Foco, Banco de ideias.
 
 ## Caixa de entrada
 *Ideias e problemas ainda sem classificar. Uma linha cada, com a data.*
@@ -73,7 +73,7 @@
 | M3 | Preços 2.0, parte 2: "quanto custou aqui?" ao marcar o item e histórico de compras | MOD | M | média | especificado | `futuro/precos-v2.md` (item 4) |
 | M4 | Preços 2.0, parte 3: tipos de loja e filtro; editar, excluir e juntar produtos, marcas e lojas | MOD | M | média | especificado | `futuro/precos-v2.md` (itens 1 e 4) |
 | M5 | Agenda: repetição (toda semana, mês, ano) e aniversários | MOD | M | média | ideia | — (especificar antes) |
-| M6 | Núcleo: fichas de treino próprias (exercícios, séries, descanso). Se o N10 for aprovado, vira a parte T3 dele | MOD | M | média | especificado | `futuro/nucleo-mente-corpo.md` |
+| M6 | Núcleo: fichas de treino próprias (exercícios, séries, descanso). Pode entrar depois no N10 ("crie o seu próprio") | MOD | M | média | especificado | `futuro/nucleo-mente-corpo.md` |
 | M7 | Revisão semanal mais completa: autocuidado, caixinhas e vales da semana | MOD | P | baixa | especificado | `futuro/nucleo-mente-corpo.md`, `futuro/caixinhas.md` |
 | N1 | Módulo Saúde (água, sono, remédios, consultas, peso) | NOVO | G | média | especificado | `futuro/modulo-saude.md` |
 | N2 | Jornada completa (pixel art): missões no ritmo da pessoa, recompensas por módulo, raridades (comum a místico), Forja e Codex por coleções | NOVO | G | baixa | especificado | `futuro/modulo-rpg.md`, `futuro/jornada-recompensas.md`, `futuro/jornada-raridades.md` |
@@ -89,7 +89,7 @@
 | M14 | Estudos: anexar PDF ou imagem no notebook (hoje só link). Afeta: backup (arquivos pesados) | MOD | M | baixa | ideia | `futuro/modulo-estudos.md` |
 | M15 | Estudos: editor de mapas mentais (arrastar e ligar ideias). Afeta: só Estudos | MOD | M | baixa | ideia | `futuro/modulo-estudos.md` |
 | N9 | Sincronizar com a conta Google (pasta escondida do Drive; site e Android com os mesmos dados). Depois do N4. *Na conversa do Android foi anotado como N8; o código certo é N9.* | NOVO | M | baixa | ideia | `futuro/app-android.md` ("Sincronização") |
-| N10 | Módulo Treinos (estilo "Treino em casa"): meta semanal, treinos por parte do corpo e nível, treino guiado, desafios de 28 dias, crie o seu próprio (absorve o M6) e relatório. Partes T1 a T5. Afeta: Núcleo (Corpo), Início, Revisão, Humor, Jornada | NOVO | G | média | ideia (09/11) | `futuro/modulo-treinos.md` |
+| N10 | Treino em casa (dentro do Núcleo › Corpo; fichas A, B e C continuam): abas Sem equipamento · Com equipamento, filtros Pernas · Peito · Abdome, treino guiado, link de vídeo em cada exercício, meta semanal; imagens = bonecos animados próprios (prévia de 3 antes). Afeta: Núcleo, Início, Revisão, Humor, Jornada | MOD | M | média | ideia (09/11) | `futuro/modulo-treinos.md` |
 | N7 | Estudos × Jornada: XP, ouro e INT por tópico, ciclo e constância; selos, Coruja e missões | NOVO | M | baixa | especificado (só documento) | `futuro/estudos-jornada.md` |
 | N8 | Módulo Carreira (próprio, fora de Estudos): vagas e candidaturas, metas de carreira, currículo e conquistas, trabalho atual (cargos, salários, feedbacks). Dividido em N8.0 a N8.4 | NOVO | G | média | parte pronta: Vagas (v0.22), Trabalho e Reuniões (v0.23), Projetos e Agenda automática (v0.24); faltam N8.3 Currículo e N8.4 Metas | `futuro/modulo-carreira.md` |
 

@@ -1,48 +1,36 @@
-# Módulo Treinos (estilo "Treino em casa")
+# Treino em casa (Núcleo › Corpo)
 
 > Situação: **ideia** (09/11). Nada construído. Inspiração: prints do app "Treino em casa" enviados pelo Leonardo.
-> **Afeta:** Núcleo (a aba Corpo e as fichas A, B, C e Em casa passam para cá; o treino marca o hábito ligado), Início (cartão da semana), Revisão semanal, Humor (dias com treino), Jornada (Força e XP), backup (`data.ts`).
+> **Afeta:** Núcleo (aba Corpo; o treino marca o hábito ligado), Início (cartão da semana), Revisão semanal, Humor (dias com treino), Jornada (Força e XP), backup (`data.ts`).
 
-## A ideia
-Um lugar só para treinar, com cara de app de treino: escolher um treino pronto pela parte do corpo e pelo nível, ver a lista de exercícios e tocar em **Iniciar** para ser guiado exercício por exercício. Tudo sem internet.
+## Decisões (09/11)
+- **Não vira módulo próprio.** Fica dentro do Núcleo, na aba **Corpo**. O relatório usa o **Progresso** e o **Histórico** que o Núcleo já tem.
+- **As fichas A, B e C continuam** como estão.
+- **Foco agora: Treino em casa.**
+- **Duas abas:** Sem equipamento · Com equipamento.
+- **Em cada aba, filtros:** Pernas · Peito · Abdome (dá para incluir outros depois).
+- **Cada exercício tem um campo para link de vídeo** (abre o YouTube; precisa de internet).
 
-**Recomendação:** virar um **módulo próprio, "Treinos"**, e não mais uma aba dentro do Núcleo. O conteúdo é grande (catálogo, desafios, relatório) e não cabe bem numa aba. O Núcleo continua com Rituais, Hábitos e Mente; a aba Corpo leva para Treinos. O **M6** (fichas próprias) entra aqui como "Crie o seu próprio".
+## Como fica
+- Na aba Corpo, um cartão **"Treino em casa"** (com a meta semanal, ex.: 0/3) abre a tela do treino em casa.
+- Tela do treino em casa: abas **Sem equipamento · Com equipamento**; filtros **Pernas · Peito · Abdome**; treinos em Iniciante, Intermediário e Avançado (tempo e nº de exercícios).
+- Tocar num treino: nome, nível, tempo, introdução curta, lista de exercícios (×15 ou 00:40) e **Iniciar**.
+- Tocar num exercício: imagem animada, como fazer, músculos e **link do vídeo** (pode trocar o link).
+- Durante o treino: um exercício por vez, com contagem de repetições ou anel de tempo, descanso, Pausar, Pular e o próximo exercício.
+- **Com equipamento** = o que se tem em casa: halteres, elástico e kettlebell. Academia continua nas fichas A, B e C.
 
-## O que entra (do print para o app)
-| No print | No app |
-|---|---|
-| Meta semanal (dias da semana, 0/3) | Cartão no topo: dias da semana, dias treinados marcados, meta escolhida (ex.: 3 por semana) |
-| Desafio 28 dias | Desafios com um treino por dia (ex.: "28 dias: pernas e glúteos"), mostrando "Dia 5 de 28" e o botão do dia |
-| Parte do corpo em foco | Chips: Peito · Braço · Abdômen · Perna · Glúteo · Costas e ombros · Corpo todo; em cada um, Iniciante, Intermediário e Avançado (tempo e nº de exercícios) |
-| Filtros (Iniciante, Com equipamento, Aquecimento…) | Filtros simples por nível, sem/com equipamento e objetivo |
-| Crie o seu próprio | Montar treino ou ficha: exercícios, repetições **ou** tempo, séries, carga e descanso (= M6) |
-| Alongar e aquecer | Os alongamentos guiados que já existem no Núcleo, mais aquecimentos |
-| Tela do treino | Nome, nível, tempo, nº de exercícios, introdução curta, lista (×18 ou 00:40) e **Iniciar** |
-| Durante o treino | Um exercício por vez: contagem de repetições ou anel de tempo, descanso entre exercícios, Pausar, Pular, próximo exercício |
-| Relatório | Treinos e minutos da semana e do mês, sequência de semanas cumprindo a meta |
+## Imagens e GIFs (verificado em 09/11)
+| Fonte | Pode usar? | Observação |
+|---|---|---|
+| App "Treino em casa" e outros apps | **Não** | Imagens e GIFs têm dono |
+| ExerciseDB e bancos de GIF parecidos | **Não** (sem pagar) | Licença comercial |
+| *free-exercise-db* (GitHub) | **Com dúvida** | Diz ser domínio público (Unlicense) e tem 876 exercícios com 2 fotos cada (início e fim). Para casa: sem equipamento, 34 de pernas, 14 de peito e 42 de abdome; com halter, 14, 15 e 2. **Mas os textos e as fotos parecem vir de um site comercial antigo**, então a origem é incerta |
+| *wger* (banco aberto) | Sim, dando crédito | Licença aberta (CC-BY-SA), com o autor de cada imagem. Tem menos imagens. Não consegui abrir o site daqui para conferir a quantidade |
+| **Desenhos próprios (bonecos animados)** | **Sim, são nossos** | Leves, funcionam sem internet e combinam com o visual do app |
 
-**Fica de fora:** fotos e vídeos copiados do outro app (têm dono; ver "Imagens e animações"), anúncios, PRO, contas e calorias "exatas" (no máximo uma estimativa).
+**Recomendação:** **bonecos animados feitos para o app**, um por exercício (cerca de 25 a 30 para começar). Fazem o papel do GIF, sem risco de direitos e sem pesar. Antes de fazer todos, uma **prévia com 3 exercícios** (agachamento, flexão e abdominal) para ver se ficam bons. Se não ficarem, plano B: fotos do *wger*, com crédito.
 
-## Imagens e animações (conversa de 09/11)
-- **Sim, dá.** Recomendação: imagens **livres para uso** (sem direitos autorais), em **duas fotos por exercício**, a posição inicial e a final, alternando sozinhas. Parece um GIF e pesa bem menos.
-- Fonte candidata: a base aberta *free-exercise-db* (cerca de 800 exercícios, com fotos). **Confirmar a licença antes de usar.**
-- Só os exercícios que o app usa (cerca de 40 a 60), guardados no próprio app, para funcionar sem internet. Não entram no backup.
-- Nas fichas próprias: campo opcional **"link do vídeo"** (abre o YouTube; precisa de internet).
-- Não copiar imagens nem GIFs do app "Treino em casa" ou de outros apps (têm dono).
-- Fotos ou vídeos próprios ficam para depois, junto com o M14 (arquivos pesados no backup).
-
-## Navegação (seguindo a regra do app)
-- **Barra de baixo:** Desafios · **Treinos** (casa, no centro) · Relatório.
-- **Abas no topo da casa:** Em casa · Academia (as fichas A, B, C).
-- **Botão +:** Criar treino · Criar ficha · (separado) Categorias.
-
-## Dividir em partes (G no total)
-1. **T1, base (M):** módulo novo, meta semanal, tela do treino e treino guiado; mudar as fichas do Núcleo para cá sem perder dados.
-2. **T2, catálogo (M):** treinos prontos por parte do corpo e nível, filtros, alongar e aquecer. É a parte de mais conteúdo (lista de exercícios com instrução).
-3. **T3, crie o seu próprio (M):** é o M6.
-4. **T4, desafios (P):** 28 dias, um treino por dia.
-5. **T5, relatório (P):** semana, mês e sequência; Início e Revisão semanal.
-
-## Antes de especificar
-- Foco: em casa sem equipamento, academia, ou os dois?
-- Prévia visual (Artifact) recomendada antes do T1, porque a tela muda bastante.
+## Partes (M no total)
+1. **T1 (M):** tela do Treino em casa (abas e filtros), tela do treino, treino guiado, link de vídeo, meta semanal, Progresso e Histórico.
+2. **T2 (P a M):** os bonecos animados dos exercícios (depois da prévia aprovada).
+3. **Depois:** desafio de 28 dias e "crie o seu próprio" (M6), se ainda fizer sentido.
