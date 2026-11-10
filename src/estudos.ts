@@ -4,7 +4,7 @@
  * - Ciclo = seleção pessoal de tópicos de uma trilha. Criar, mudar ou concluir um ciclo nunca mexe na trilha.
  * - Recomendações ("estude X antes") são só avisos.
  */
-import type { SourceKind, StudyBlock, StudyCycle, StudyData, StudyMap, StudyNotebook, StudyPage, StudyStatus } from './types.ts';
+import type { RichNode, SourceKind, StudyBlock, StudyCycle, StudyData, StudyMap, StudyNotebook, StudyPage, StudyStatus } from './types.ts';
 import { CATALOG, slug, type CatMap, type CatSource, type CatTopic } from './estudosCatalogo.ts';
 import { uid } from './utils.ts';
 
@@ -217,12 +217,65 @@ export function moveItem<T>(list: T[], i: number, dir: -1 | 1): T[] {
 
 // ---------- Notebooks, fontes e mapas ----------
 
-export function block(kind: StudyBlock['kind'], title: string, text = ''): StudyBlock {
-  return { id: uid(), kind, title, text, pairs: [], sourceIds: [] };
+// ---------- Texto rico (páginas dos notebooks) ----------
+
+export const emptyDoc = (): RichNode => ({ type: 'doc', content: [{ type: 'paragraph' }] });
+
+const para = (text: string): RichNode => (text ? { type: 'paragraph', content: [{ type: 'text', text }] } : { type: 'paragraph' });
+
+/** Todo o texto do documento, em linha (para busca e para saber se a página está vazia). */
+export function docText(n: RichNode | undefined): string {
+  if (!n) return '';
+  if (typeof n.text === 'string') return n.text;
+  return (n.content ?? []).map(docText).filter(Boolean).join(' ');
+}
+
+/** Vazia = sem texto e sem imagem. */
+export function docIsEmpty(n: RichNode | undefined): boolean {
+  if (!n) return true;
+  if (n.type === 'image' || n.type === 'horizontalRule') return false;
+  if (typeof n.text === 'string') return !n.text.trim();
+  return (n.content ?? []).every(docIsEmpty);
+}
+
+/** Aceita só documentos bem formados; qualquer outra coisa vira documento vazio. */
+export function normalizeDoc(raw: unknown): RichNode {
+  const ok = (x: unknown): x is RichNode => isRec(x) && typeof x.type === 'string' && (x.content === undefined || (Array.isArray(x.content) && x.content.every(ok)));
+  return ok(raw) && raw.type === 'doc' && raw.content?.length ? raw : emptyDoc();
+}
+
+/**
+ * Converte os blocos antigos (até a v0.26) em texto rico, sem perder nada:
+ * anotação → título + parágrafos; termos → título + lista "termo: significado" (termo em negrito).
+ * Blocos de fontes viram as fontes ligadas à página (`sourceIds`).
+ */
+export function blocksToDoc(blocks: StudyBlock[]): { doc: RichNode; sourceIds: string[] } {
+  const content: RichNode[] = [];
+  const sourceIds: string[] = [];
+  const title = (t: string) => content.push({ type: 'heading', attrs: { level: 3 }, content: [{ type: 'text', text: t }] });
+  for (const b of blocks) {
+    if (b.kind === 'fontes') {
+      for (const id of b.sourceIds) if (!sourceIds.includes(id)) sourceIds.push(id);
+    } else if (b.kind === 'pares') {
+      if (!b.pairs.length) continue;
+      title(b.title || 'Termos');
+      content.push({
+        type: 'bulletList',
+        content: b.pairs.map(([x, y]) => ({
+          type: 'listItem',
+          content: [{ type: 'paragraph', content: [{ type: 'text', text: x, marks: [{ type: 'bold' }] }, ...(y ? [{ type: 'text', text: `: ${y}` }] : [])] }],
+        })),
+      });
+    } else if (b.text.trim()) {
+      if (b.title && b.title !== 'Anotações') title(b.title);
+      for (const line of b.text.split('\n')) if (line.trim()) content.push(para(line.trim()));
+    }
+  }
+  return { doc: content.length ? { type: 'doc', content } : emptyDoc(), sourceIds };
 }
 
 export function newPage(name: string, topicId: string | null, parentId: string | null, now: string): StudyPage {
-  return { id: uid(), parentId, name: name.trim() || 'Página sem título', topicId, blocks: [block('nota', 'Anotações')], updatedAt: now };
+  return { id: uid(), parentId, name: name.trim() || 'Página sem título', topicId, doc: emptyDoc(), sourceIds: [], updatedAt: now };
 }
 
 /** Notebook novo; se vier de uma trilha, ganha uma página por tópico escolhido (ou por todos). */
@@ -309,6 +362,21 @@ const recs = (x: unknown) => (Array.isArray(x) ? x.filter((i): i is Rec => isRec
 const STATUSES: StudyStatus[] = ['afazer', 'andando', 'feito'];
 const KINDS = SOURCE_KINDS.map((k) => k.value);
 
+/** Conteúdo da página: o documento novo, ou os blocos antigos convertidos. */
+function pageContent(s: Rec): { doc: RichNode; sourceIds: string[] } {
+  if (isRec(s.doc)) return { doc: normalizeDoc(s.doc), sourceIds: strs(s.sourceIds) };
+  return blocksToDoc(
+    recs(s.blocks).map((b) => ({
+      id: b.id as string,
+      kind: b.kind === 'pares' || b.kind === 'fontes' ? b.kind : ('nota' as const),
+      title: str(b.title),
+      text: str(b.text),
+      pairs: Array.isArray(b.pairs) ? b.pairs.filter((p): p is [string, string] => Array.isArray(p) && typeof p[0] === 'string' && typeof p[1] === 'string').map((p) => [p[0], p[1]] as [string, string]) : [],
+      sourceIds: strs(b.sourceIds),
+    })),
+  );
+}
+
 export function normalizeStudy(raw: unknown): StudyData {
   const r = isRec(raw) ? raw : {};
   const now = new Date().toISOString();
@@ -341,14 +409,7 @@ export function normalizeStudy(raw: unknown): StudyData {
           parentId: typeof s.parentId === 'string' && tops.has(s.parentId) && s.parentId !== s.id ? s.parentId : null,
           name: str(s.name, 'Página'),
           topicId: typeof s.topicId === 'string' ? s.topicId : null,
-          blocks: recs(s.blocks).map((b) => ({
-            id: b.id as string,
-            kind: b.kind === 'pares' || b.kind === 'fontes' ? b.kind : ('nota' as const),
-            title: str(b.title),
-            text: str(b.text),
-            pairs: Array.isArray(b.pairs) ? b.pairs.filter((p): p is [string, string] => Array.isArray(p) && typeof p[0] === 'string' && typeof p[1] === 'string').map((p) => [p[0], p[1]] as [string, string]) : [],
-            sourceIds: strs(b.sourceIds),
-          })),
+          ...pageContent(s),
           updatedAt: str(s.updatedAt, str(n.updatedAt, now)),
         })),
         log: Array.isArray(n.log) ? n.log.filter((l): l is { at: string; text: string } => isRec(l) && typeof l.at === 'string' && typeof l.text === 'string') : [],

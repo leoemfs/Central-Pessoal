@@ -1,6 +1,6 @@
 # Estudos 2.0: notebooks com páginas, editor, mapas e sincronização (N11)
 
-> Situação: **N11.1 pronta na v0.26 (10/11)**; as outras partes aguardam aprovação, uma de cada vez. Documento do Leonardo "Módulo Estudos: evolução funcional e experiência de uso" recebido na conversa; aqui ficam o resumo, as recomendações e a divisão em partes.
+> Situação: **N11.1 pronta na v0.26 e N11.2a/b na v0.27 (10/11)**; as outras partes aguardam aprovação, uma de cada vez. Documento do Leonardo "Módulo Estudos: evolução funcional e experiência de uso" recebido na conversa; aqui ficam o resumo, as recomendações e a divisão em partes.
 > Nada aqui está construído. Base atual: `modulo-estudos.md` (v0.21).
 
 ## Objetivo
@@ -47,6 +47,18 @@ E uma quarta, do editor: **o celular pode ter menos botões, nunca menos conteú
 1. **Ciclos continuam.** A barra da trilha tem "Notebook" e "Montar ciclo".
 2. **Editor com biblioteca pronta** (Tiptap), na N11.2.
 3. **Subpáginas: um nível.**
+
+## O que foi construído (v0.27, N11.2a e N11.2b)
+- **Editor de texto** em cada página (biblioteca Tiptap 3.33.1, carregada só ao abrir uma página; arquivo separado de ~137 KB compactado).
+- **Blocos:** texto, título 1/2/3, lista, lista numerada, checklist, citação, divisor, **alternante** (o texto do bloco vira o título; abre e recolhe, e o estado fica guardado) e imagem. O seletor "Tipo do bloco" transforma um bloco em outro sem apagar o texto.
+- **Texto:** negrito, itálico, sublinhado, destaque, 5 cores, link (com ficha para o endereço).
+- **Mover blocos:** setas de subir e descer na barra (valem para computador e celular). Arrastar com o mouse ficou de fora.
+- **Celular × computador:** a mesma tela e o mesmo documento. Abaixo de 900px a barra mostra tipo, negrito, itálico, destaque, lista, checklist e mover; "Mais" abre o resto. Testado: página feita em 1280px aberta em 412px com a mesma estrutura, editada no celular e reaberta.
+- **Imagens:** reduzidas para até 1280px (JPEG) e guardadas dentro da página; entram no backup. PDFs e outros arquivos continuam no M14.
+- **Salvar:** sozinho, meio segundo depois de parar de digitar, ao sair do campo e ao fechar o app. O histórico ganha uma linha por página a cada visita.
+- **Dados:** a página guarda `doc` (JSON do editor) e `sourceIds` (fontes ligadas). Os blocos antigos são convertidos em `normalize()`: anotação → parágrafos; termos → lista com o termo em negrito; fontes → fontes da página. `StudyBlock` só existe para essa conversão.
+- Regras em `src/estudos.ts` (`blocksToDoc`, `normalizeDoc`, `docText`, `docIsEmpty`), 2 testes novos. Tela em `src/modules/estudos/Editor.tsx`.
+- Correção junto: o botão + de Estudos esticava no computador.
 
 ## O que foi construído (v0.26, N11.1)
 - Notebook com **descrição**, **páginas** e **subpáginas** (um nível). Capa do notebook: lista de páginas em árvore, ciclos ligados, fontes, mapas e histórico. Cada página tem sua tela, com caminho no topo, subpáginas e anterior/próxima.

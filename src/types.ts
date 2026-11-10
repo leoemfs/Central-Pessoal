@@ -472,7 +472,7 @@ export interface StudyCycle {
 }
 
 export type StudyBlockKind = 'nota' | 'pares' | 'fontes';
-/** Um bloco dentro de um assunto do notebook: texto, pares (termo e significado) ou fontes ligadas. */
+/** Formato antigo (até a v0.26): blocos de texto, pares e fontes. Hoje só existe para converter dados antigos. */
 export interface StudyBlock {
   id: string;
   kind: StudyBlockKind;
@@ -490,8 +490,20 @@ export interface StudyPage {
   name: string;
   /** Tópico da Biblioteca que deu origem (se houver). Só referência: a Biblioteca nunca muda. */
   topicId: string | null;
-  blocks: StudyBlock[];
+  /** Conteúdo da página: documento de texto rico (formato JSON do editor, igual no computador e no celular). */
+  doc: RichNode;
+  /** Fontes ligadas a esta página. */
+  sourceIds: string[];
   updatedAt: string;
+}
+
+/** Nó do documento de texto rico (parágrafo, título, lista, texto com marcas…). */
+export interface RichNode {
+  type: string;
+  attrs?: Record<string, unknown>;
+  content?: RichNode[];
+  marks?: { type: string; attrs?: Record<string, unknown> }[];
+  text?: string;
 }
 
 export interface StudyNotebook {

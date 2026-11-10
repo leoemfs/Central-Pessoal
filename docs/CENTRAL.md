@@ -108,7 +108,7 @@
 | N10 | Módulo **Objetivos**: central de **todas as metas do app** (caixinhas, hábitos, ciclos de estudo, carreira, orçamento, metas do Você), com criar, editar e concluir dali; a meta continua morando no módulo dela. Objetivos grandes juntam várias metas. Absorve as metas de carreira (N8.4). Partes: N10.0 prévia, N10.1 central de metas, N10.2 objetivos grandes. Afeta: Finanças, Núcleo, Estudos, Carreira, Você, Início, Jornada | NOVO | G | média | especificado (prévia antes) | `futuro/modulo-objetivos.md` |
 | M16 | **Foco** no Núcleo › Mente: temporizador de foco (ex.: 25 min + pausa), com histórico; ligado a um tópico de Estudos conta tempo de estudo. Afeta: Núcleo, Estudos, Revisão | MOD | P | média | ideia | — |
 | M17 | **Banco de ideias** em Notas: aba "Ideias" e o botão "transformar em" tarefa, objetivo ou notebook. Afeta: Notas, Agenda, Estudos | MOD | P | baixa | ideia | — |
-| N11 | **Estudos 2.0**: notebooks com páginas e subpáginas e tópicos de várias áreas; editor de texto em blocos (completo no computador, simples no celular); mapas mentais em árvore com zoom; exportar/importar Estudos com tratamento de conflito; tutorial; conteúdo nos tópicos da Biblioteca. Partes N11.1 a N11.7. Absorve o M15. Afeta: Estudos, backup | MOD | G | alta | parte pronta (v0.26): N11.1 páginas e subpáginas; faltam N11.2 a N11.7 | `futuro/estudos-v2.md` |
+| N11 | **Estudos 2.0**: notebooks com páginas e subpáginas e tópicos de várias áreas; editor de texto em blocos (completo no computador, simples no celular); mapas mentais em árvore com zoom; exportar/importar Estudos com tratamento de conflito; tutorial; conteúdo nos tópicos da Biblioteca. Partes N11.1 a N11.7. Absorve o M15. Afeta: Estudos, backup | MOD | G | alta | parte pronta: N11.1 páginas (v0.26) e N11.2 editor de texto (v0.27); faltam N11.3 a N11.7 | `futuro/estudos-v2.md` |
 | N7 | Estudos × Jornada: XP, ouro e INT por tópico, ciclo e constância; selos, Coruja e missões | NOVO | M | baixa | especificado (só documento) | `futuro/estudos-jornada.md` |
 | N8 | Módulo Carreira (próprio, fora de Estudos): vagas e candidaturas, metas de carreira, currículo e conquistas, trabalho atual (cargos, salários, feedbacks). Dividido em N8.0 a N8.4 | NOVO | G | média | parte pronta: Vagas (v0.22), Trabalho e Reuniões (v0.23), Projetos e Agenda automática (v0.24); faltam N8.3 Currículo e N8.4 Metas (agora dentro de Objetivos, N10) | `futuro/modulo-carreira.md` |
 
@@ -142,6 +142,7 @@
 ## Feito
 | Versão | O que entrou | PR |
 |---|---|---|
+| v0.27 | N11.2a e b Estudos 2.0: editor de texto nas páginas dos notebooks (títulos, listas, checklist, citação, divisor, alternante, negrito, itálico, sublinhado, destaque, cores, link, imagem, mover blocos); barra simples no celular e completa no computador; anotações antigas convertidas | #33 |
 | v0.26 | N11.1 Estudos 2.0, parte 1: notebooks com páginas e subpáginas, descrição, "Adicionar ao notebook" na trilha (tópicos de várias áreas no mesmo notebook, com a origem guardada), organizar páginas; os assuntos antigos viraram páginas | #32 |
 | v0.25.1 | Personalização: o jeito escolhido da barra fica marcado ("✓ em uso") e aparece um aviso ao trocar | — |
 | v0.25 | E10, E11 e E13: Personalização em Configurações (jeito da barra, favoritos, tocar de novo, esconder ao rolar) e o voltar do celular: ferramenta → casa do módulo → Início | — |
