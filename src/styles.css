@@ -304,16 +304,16 @@ button {
   .tabbar {
     display: none;
   }
+  /* Coluna central de até 980px: o espaço sobrando vira margem da própria tela,
+     assim tudo alinha (cabeçalho preso, cartões dentro de blocos personalizáveis, chips). */
   .main {
     margin-left: var(--sidebar-w);
     max-width: none;
-    padding: 32px 40px 120px;
+    padding: 32px max(40px, calc((100vw - var(--sidebar-w) - 980px) / 2)) 120px;
   }
-  .main > * {
-    width: 100%;
-    max-width: 980px;
-    margin-left: auto;
-    margin-right: auto;
+  .cat-chips {
+    margin: 0;
+    padding: 0 0 2px;
   }
   .fab {
     bottom: 32px;
