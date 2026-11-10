@@ -277,7 +277,7 @@ export function SourceSheet({ onClose, source, preset, notebookId }: { onClose: 
     set((s) => ({
       ...s,
       sources: s.sources.filter((x) => x.id !== source.id),
-      notebooks: s.notebooks.map((n) => ({ ...n, pages: n.pages.map((su) => ({ ...su, blocks: su.blocks.map((b) => ({ ...b, sourceIds: b.sourceIds.filter((i) => i !== source.id) })) })) })),
+      notebooks: s.notebooks.map((n) => ({ ...n, pages: n.pages.map((su) => ({ ...su, sourceIds: su.sourceIds.filter((i) => i !== source.id) })) })),
     }));
     onClose();
     notify('Fonte excluída');

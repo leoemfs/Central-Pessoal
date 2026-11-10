@@ -1,11 +1,14 @@
-import { useEffect, useState } from 'react';
+import { lazy, Suspense, useEffect, useRef, useState } from 'react';
 import { go } from '../../router';
-import { cycleCounts, movePage, newPage, pageTree, removePage, setPageParent, topicState, touch, trackPath } from '../../estudos';
-import type { StudyBlock, StudyNotebook, StudyPage } from '../../types';
+import { cycleCounts, docIsEmpty, movePage, newPage, pageTree, removePage, setPageParent, topicState, touch, trackPath } from '../../estudos';
+import type { RichNode, StudyNotebook, StudyPage } from '../../types';
 import { Empty, Field, Icon, MultiChips, notify, PageHeader, Sheet, type IconName } from '../../ui';
-import { formatDateTime, uid } from '../../utils';
+import { formatDateTime } from '../../utils';
 import { Missing } from './Biblioteca';
 import { DualProgress, NewMapSheet, NotebookSheet, nowISO, Path, SourceCard, SourceSheet, StatusPill, trackCrumbs, useStudy } from './shared';
+
+// O editor é pesado: só é baixado quando uma página é aberta.
+const RichEditor = lazy(() => import('./Editor'));
 
 const plural = (n: number, one: string, many: string) => `${n} ${n === 1 ? one : many}`;
 
@@ -57,18 +60,19 @@ export function NotebooksPage() {
 }
 
 type Extra = { label: string; hint: string; icon: IconName; run: () => void }[];
-type Edit = { kind: 'block'; block: StudyBlock | null; type: StudyBlock['kind'] } | { kind: 'page'; page: StudyPage | null; parentId: string | null } | { kind: 'notebook' } | { kind: 'source' } | { kind: 'map' };
+type Edit = { kind: 'sources' } | { kind: 'page'; page: StudyPage | null; parentId: string | null } | { kind: 'notebook' } | { kind: 'source' } | { kind: 'map' };
 
 /** #/estudos/notebook/:id (capa: páginas, fontes, mapas…) e #/estudos/notebook/:id/:pagina (uma página). */
 export function NotebookPage({ id, pageId, setExtra }: { id: string; pageId: string; setExtra: (x: Extra | undefined) => void }) {
   const { study, lib, set } = useStudy();
   const [edit, setEdit] = useState<Edit | null>(null);
   const [sorting, setSorting] = useState(false);
+  const logged = useRef('');
   const nb = study.notebooks.find((n) => n.id === id);
   const page = nb?.pages.find((p) => p.id === pageId);
   useEffect(() => {
     const extra: Extra = [{ label: 'Nova página neste notebook', hint: 'Um espaço novo para anotar', icon: 'plus', run: () => setEdit({ kind: 'page', page: null, parentId: null }) }];
-    if (page) extra.push({ label: 'Anotação nesta página', hint: 'Texto livre', icon: 'edit', run: () => setEdit({ kind: 'block', block: null, type: 'nota' }) });
+    if (page && !page.parentId) extra.push({ label: 'Subpágina aqui', hint: 'Uma parte menor desta página', icon: 'note', run: () => setEdit({ kind: 'page', page: null, parentId: page.id }) });
     setExtra(extra);
     return () => setExtra(undefined);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -80,6 +84,16 @@ export function NotebookPage({ id, pageId, setExtra }: { id: string; pageId: str
   const savePage = (pid: string, fn: (p: StudyPage) => StudyPage, log: string) => {
     const now = nowISO();
     save((n) => touch({ ...n, pages: n.pages.map((p) => (p.id === pid ? { ...fn(p), updatedAt: now } : p)) }, log, now));
+  };
+  // Digitar salva sem encher o histórico: uma linha por página a cada visita.
+  const saveDoc = (pid: string, name: string, doc: RichNode) => {
+    const now = nowISO();
+    const first = logged.current !== pid;
+    logged.current = pid;
+    save((n) => {
+      const next = { ...n, updatedAt: now, pages: n.pages.map((p) => (p.id === pid ? { ...p, doc, updatedAt: now } : p)) };
+      return first ? touch(next, `Anotações em ${name}`, now) : next;
+    });
   };
   const href = (pid?: string) => `#/estudos/notebook/${nb.id}${pid ? `/${pid}` : ''}`;
 
@@ -116,15 +130,8 @@ export function NotebookPage({ id, pageId, setExtra }: { id: string; pageId: str
           }
         />
       )}
-      {edit?.kind === 'block' && page && (
-        <BlockSheet
-          type={edit.type}
-          block={edit.block}
-          notebookId={nb.id}
-          onClose={() => setEdit(null)}
-          onSave={(b) => savePage(page.id, (s) => ({ ...s, blocks: edit.block ? s.blocks.map((x) => (x.id === b.id ? b : x)) : [...s.blocks, b] }), `${edit.block ? 'Editado' : 'Novo bloco'} em ${page.name}`)}
-          onDelete={edit.block ? () => savePage(page.id, (s) => ({ ...s, blocks: s.blocks.filter((x) => x.id !== edit.block!.id) }), `Bloco excluído em ${page.name}`) : undefined}
-        />
+      {edit?.kind === 'sources' && page && (
+        <PageSources notebookId={nb.id} value={page.sourceIds} onClose={() => setEdit(null)} onSave={(ids) => savePage(page.id, (x) => ({ ...x, sourceIds: ids }), `Fontes de ${page.name}`)} />
       )}
     </>
   );
@@ -139,6 +146,7 @@ export function NotebookPage({ id, pageId, setExtra }: { id: string; pageId: str
     const i = tree.findIndex((x) => x.page.id === page.id);
     const prev = tree[i - 1]?.page;
     const next = tree[i + 1]?.page;
+    const pageSources = page.sourceIds.map((sid) => study.sources.find((x) => x.id === sid)).filter((x): x is NonNullable<typeof x> => !!x);
     return (
       <>
         <Path items={[{ label: 'Meus notebooks', to: 'estudos/notebooks' }, { label: nb.name, to: `estudos/notebook/${nb.id}` }, ...(parent ? [{ label: parent.name, to: `estudos/notebook/${nb.id}/${parent.id}` }] : []), { label: page.name }]} />
@@ -155,71 +163,36 @@ export function NotebookPage({ id, pageId, setExtra }: { id: string; pageId: str
             {state && <StatusPill status={state.status} />}
           </div>
         )}
-        <section className="card st-subject">
+        <section className="card st-page">
           <div className="card-head">
             <h2>{page.name}</h2>
             <button type="button" className="icon-btn" onClick={() => setEdit({ kind: 'page', page, parentId: page.parentId })} aria-label="Editar página">
               <Icon name="edit" size={16} />
             </button>
           </div>
-          {page.blocks.length === 0 && <p className="muted small">Página vazia. Adicione uma anotação, uma lista de termos ou fontes.</p>}
-          {page.blocks.map((b) => (
-            <div key={b.id} className="st-block">
-              <div className="st-block-head">
-                <h3>
-                  <Icon name={b.kind === 'nota' ? 'edit' : b.kind === 'pares' ? 'list' : 'link'} size={14} />
-                  {b.title || (b.kind === 'nota' ? 'Anotações' : b.kind === 'pares' ? 'Termos' : 'Fontes')}
-                </h3>
-                <button type="button" className="icon-btn st-quiet" onClick={() => setEdit({ kind: 'block', block: b, type: b.kind })} aria-label="Editar bloco">
-                  <Icon name="edit" size={15} />
-                </button>
-              </div>
-              {b.kind === 'nota' &&
-                (b.text ? (
-                  <p className="st-note">{b.text}</p>
-                ) : (
-                  <button type="button" className="st-placeholder" onClick={() => setEdit({ kind: 'block', block: b, type: 'nota' })}>
-                    Toque para escrever o que aprendeu…
-                  </button>
-                ))}
-              {b.kind === 'pares' &&
-                (b.pairs.length ? (
-                  <dl className="st-pairs">
-                    {b.pairs.map(([x, y], k) => (
-                      <div key={k}>
-                        <dt>{x}</dt>
-                        <dd>{y}</dd>
-                      </div>
-                    ))}
-                  </dl>
-                ) : (
-                  <p className="muted small">Sem termos ainda.</p>
-                ))}
-              {b.kind === 'fontes' && (
-                <div className="st-res-list">
-                  {b.sourceIds.some((sid) => study.sources.some((s) => s.id === sid)) ? (
-                    b.sourceIds.map((sid) => {
-                      const s = study.sources.find((x) => x.id === sid);
-                      return s ? <SourceCard key={sid} s={s} /> : null;
-                    })
-                  ) : (
-                    <p className="muted small">Nenhuma fonte escolhida.</p>
-                  )}
-                </div>
-              )}
-            </div>
-          ))}
-          <div className="st-add-row">
-            <button type="button" className="btn soft small" onClick={() => setEdit({ kind: 'block', block: null, type: 'nota' })}>
-              <Icon name="plus" size={15} /> Anotação
-            </button>
-            <button type="button" className="btn soft small" onClick={() => setEdit({ kind: 'block', block: null, type: 'pares' })}>
-              <Icon name="plus" size={15} /> Termos
-            </button>
-            <button type="button" className="btn soft small" onClick={() => setEdit({ kind: 'block', block: null, type: 'fontes' })}>
-              <Icon name="plus" size={15} /> Fontes
+          <Suspense fallback={<p className="muted small">Abrindo o editor…</p>}>
+            <RichEditor key={page.id} doc={page.doc} onChange={(doc) => saveDoc(page.id, page.name, doc)} />
+          </Suspense>
+        </section>
+
+        <section className="card">
+          <div className="card-head">
+            <h2>Fontes desta página</h2>
+            <button type="button" className="link" onClick={() => setEdit({ kind: 'sources' })}>
+              Escolher
             </button>
           </div>
+          {pageSources.length ? (
+            <div className="st-res-list">
+              {pageSources.map((x) => (
+                <SourceCard key={x.id} s={x} />
+              ))}
+            </div>
+          ) : (
+            <p className="muted small" style={{ margin: 0 }}>
+              Ligue aqui os sites, vídeos e livros que você usou nesta página.
+            </p>
+          )}
         </section>
 
         {!page.parentId && (
@@ -328,7 +301,7 @@ export function NotebookPage({ id, pageId, setExtra }: { id: string; pageId: str
               const sibs = nb.pages.filter((x) => x.parentId === p.parentId);
               const k = sibs.indexOf(p);
               const st = p.topicId ? topicState(study.cycles, p.topicId) : null;
-              const filled = p.blocks.some((b) => b.text || b.pairs.length || b.sourceIds.length);
+              const filled = !docIsEmpty(p.doc) || p.sourceIds.length > 0;
               const body = (
                 <>
                   <span className={`tile-icon small${depth ? '' : ' st-blue'}`}>
@@ -538,88 +511,41 @@ function PageSheet({ notebook, page, parentId, onClose, onSave, onDelete }: { no
   );
 }
 
-const pairsToText = (p: [string, string][]) => p.map(([a, b]) => `${a} = ${b}`).join('\n');
-const textToPairs = (t: string): [string, string][] =>
-  t
-    .split('\n')
-    .map((l) => l.trim())
-    .filter(Boolean)
-    .map((l) => {
-      const m = l.split(/\s*(?:=|–|—|:| - )\s*/);
-      return [m[0], m.slice(1).join(' ')] as [string, string];
-    });
-
-function BlockSheet({ type, block: b, notebookId, onClose, onSave, onDelete }: { type: StudyBlock['kind']; block: StudyBlock | null; notebookId: string; onClose: () => void; onSave: (b: StudyBlock) => void; onDelete?: () => void }) {
+/** Escolher as fontes ligadas à página (e cadastrar uma nova sem sair). */
+function PageSources({ notebookId, value, onClose, onSave }: { notebookId: string; value: string[]; onClose: () => void; onSave: (ids: string[]) => void }) {
   const { study } = useStudy();
-  const [title, setTitle] = useState(b?.title ?? (type === 'nota' ? 'Anotações' : type === 'pares' ? 'Vocabulário' : 'Fontes'));
-  const [text, setText] = useState(b?.text ?? '');
-  const [pairs, setPairs] = useState(b ? pairsToText(b.pairs) : '');
-  const [ids, setIds] = useState<string[]>(b?.sourceIds ?? []);
+  const [ids, setIds] = useState(value);
   const [newSource, setNewSource] = useState(false);
-  const [confirm, setConfirm] = useState(false);
-  const label = type === 'nota' ? 'Anotação' : type === 'pares' ? 'Lista de termos' : 'Fontes do assunto';
   return (
     <Sheet
-      title={b ? `Editar ${label.toLowerCase()}` : label}
+      title="Fontes desta página"
       onClose={onClose}
       footer={
-        <div className="btn-row">
-          {onDelete && (
-            <button
-              type="button"
-              className="btn danger"
-              onClick={() => {
-                if (!confirm) return setConfirm(true);
-                onDelete();
-                onClose();
-              }}
-            >
-              {confirm ? 'Confirmar exclusão' : 'Excluir'}
-            </button>
-          )}
-          <button
-            type="button"
-            className="btn primary"
-            onClick={() => {
-              onSave({ id: b?.id ?? uid(), kind: type, title: title.trim(), text: text.trim(), pairs: type === 'pares' ? textToPairs(pairs) : [], sourceIds: type === 'fontes' ? ids : [] });
-              onClose();
-            }}
-          >
-            Salvar
-          </button>
-        </div>
+        <button
+          type="button"
+          className="btn primary block"
+          onClick={() => {
+            onSave(ids.filter((i) => study.sources.some((s) => s.id === i)));
+            onClose();
+          }}
+        >
+          Salvar
+        </button>
       }
     >
       <div className="form">
-        <Field label="Título do bloco" hint={type === 'nota' ? 'Ex.: Anotações, Resumo, Projeto prático, Dúvidas.' : type === 'pares' ? 'Ex.: Vocabulário, Exemplos, Comandos.' : undefined}>
-          <input className="input" value={title} onChange={(e) => setTitle(e.target.value)} />
-        </Field>
-        {type === 'nota' && (
-          <Field label="Texto">
-            <textarea className="input" rows={9} value={text} onChange={(e) => setText(e.target.value)} placeholder="O que você aprendeu, com suas palavras." autoFocus />
-          </Field>
+        {study.sources.length ? (
+          <MultiChips options={study.sources.map((s) => [s.id, s.title])} value={ids} onToggle={(id) => setIds((v) => (v.includes(id) ? v.filter((x) => x !== id) : [...v, id]))} label="Fontes" />
+        ) : (
+          <p className="muted small" style={{ margin: 0 }}>
+            Você ainda não tem fontes guardadas.
+          </p>
         )}
-        {type === 'pares' && (
-          <Field label="Termos" hint='Um por linha, no formato "termo = significado".'>
-            <textarea className="input" rows={8} value={pairs} onChange={(e) => setPairs(e.target.value)} placeholder={'Good morning = Bom dia\nSee you later = Até mais'} autoFocus />
-          </Field>
-        )}
-        {type === 'fontes' && (
-          <div className="field">
-            <span className="field-label">Escolha as fontes</span>
-            {study.sources.length ? (
-              <MultiChips options={study.sources.map((s) => [s.id, s.title])} value={ids} onToggle={(id) => setIds((v) => (v.includes(id) ? v.filter((x) => x !== id) : [...v, id]))} label="Fontes" />
-            ) : (
-              <p className="muted small">Você ainda não tem fontes guardadas.</p>
-            )}
-            <button type="button" className="btn soft small" onClick={() => setNewSource(true)}>
-              <Icon name="plus" size={15} /> Nova fonte
-            </button>
-          </div>
-        )}
+        <button type="button" className="btn soft small" onClick={() => setNewSource(true)}>
+          <Icon name="plus" size={15} /> Nova fonte
+        </button>
       </div>
       {newSource && <SourceSheet notebookId={notebookId} onClose={() => setNewSource(false)} />}
     </Sheet>
   );
 }
-
