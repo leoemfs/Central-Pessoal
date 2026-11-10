@@ -1,6 +1,6 @@
 # Estudos 2.0: notebooks com páginas, editor, mapas e sincronização (N11)
 
-> Situação: **ideia, especificando** (10/11). Documento do Leonardo "Módulo Estudos: evolução funcional e experiência de uso" recebido na conversa; aqui ficam o resumo, as recomendações e a divisão em partes.
+> Situação: **N11.1 pronta na v0.26 (10/11)**; as outras partes aguardam aprovação, uma de cada vez. Documento do Leonardo "Módulo Estudos: evolução funcional e experiência de uso" recebido na conversa; aqui ficam o resumo, as recomendações e a divisão em partes.
 > Nada aqui está construído. Base atual: `modulo-estudos.md` (v0.21).
 
 ## Objetivo
@@ -43,10 +43,19 @@ E uma quarta, do editor: **o celular pode ter menos botões, nunca menos conteú
 - **Computador × celular:** a mesma tela, com a barra de ferramentas completa a partir de 900px de largura (o app já tem esse corte) e a barra simples abaixo disso.
 - **Hierarquia da Biblioteca:** o documento pede Área → Assunto → Trilha → Tópico. Hoje existe um "nível" opcional (Inglês › A1 › trilha). Recomendo manter como está: o nível só aparece onde faz sentido e o caminho na tela já orienta.
 
-## A decidir com o Leonardo
-1. **Ciclos:** o documento novo não fala deles. Recomendo **manter** (são o "Estudando agora" e o progresso) e somar "Adicionar ao notebook" na mesma barra da trilha.
-2. **Biblioteca externa para o editor** (Tiptap): pode?
-3. Subpáginas: um nível basta para começar?
+## Decidido (10/11: "seguir as sugestões")
+1. **Ciclos continuam.** A barra da trilha tem "Notebook" e "Montar ciclo".
+2. **Editor com biblioteca pronta** (Tiptap), na N11.2.
+3. **Subpáginas: um nível.**
+
+## O que foi construído (v0.26, N11.1)
+- Notebook com **descrição**, **páginas** e **subpáginas** (um nível). Capa do notebook: lista de páginas em árvore, ciclos ligados, fontes, mapas e histórico. Cada página tem sua tela, com caminho no topo, subpáginas e anterior/próxima.
+- **Organizar:** subir e descer entre irmãs; editar para renomear, mudar de lugar (principal ou dentro de outra) e excluir (leva as subpáginas, com confirmação).
+- **Trilha › "Notebook":** leva os tópicos marcados para um notebook existente ou novo, sem repetir. Um notebook junta tópicos de várias trilhas e áreas; a página mostra "Da Biblioteca: …" e a situação no ciclo.
+- Ao montar um ciclo, o app sugere o notebook que já tem páginas daqueles tópicos.
+- **Migração:** os "assuntos" antigos viram páginas principais em `normalize()`, com os mesmos blocos. Cada página tem `updatedAt` (base da sincronização da N11.4).
+- Blocos continuam os de antes (anotação, termos, fontes); o editor rico entra na N11.2a.
+- Regras em `src/estudos.ts` (`pageTree`, `movePage`, `setPageParent`, `removePage`, `addTopicsAsPages`), 2 testes novos.
 
 ## Fora do escopo agora
 Sincronização automática por login (fica no N9), PDFs e documentos dentro do app (M14), colaboração, IA que lê as fontes.

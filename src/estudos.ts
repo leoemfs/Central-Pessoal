@@ -4,7 +4,7 @@
  * - Ciclo = seleção pessoal de tópicos de uma trilha. Criar, mudar ou concluir um ciclo nunca mexe na trilha.
  * - Recomendações ("estude X antes") são só avisos.
  */
-import type { SourceKind, StudyBlock, StudyCycle, StudyData, StudyMap, StudyNotebook, StudyStatus } from './types.ts';
+import type { SourceKind, StudyBlock, StudyCycle, StudyData, StudyMap, StudyNotebook, StudyPage, StudyStatus } from './types.ts';
 import { CATALOG, slug, type CatMap, type CatSource, type CatTopic } from './estudosCatalogo.ts';
 import { uid } from './utils.ts';
 
@@ -221,16 +221,19 @@ export function block(kind: StudyBlock['kind'], title: string, text = ''): Study
   return { id: uid(), kind, title, text, pairs: [], sourceIds: [] };
 }
 
-/** Notebook novo; se vier de uma trilha, ganha um assunto por tópico escolhido (ou por todos). */
-export function newNotebook(name: string, tr: TrackView | null, topicIds: string[] | null, now: string): StudyNotebook {
+export function newPage(name: string, topicId: string | null, parentId: string | null, now: string): StudyPage {
+  return { id: uid(), parentId, name: name.trim() || 'Página sem título', topicId, blocks: [block('nota', 'Anotações')], updatedAt: now };
+}
+
+/** Notebook novo; se vier de uma trilha, ganha uma página por tópico escolhido (ou por todos). */
+export function newNotebook(name: string, tr: TrackView | null, topicIds: string[] | null, now: string, desc = ''): StudyNotebook {
   const topics = tr ? tr.topics.filter((t) => !topicIds || topicIds.includes(t.id)) : [];
   return {
     id: uid(),
     name: name.trim() || 'Novo notebook',
+    desc: desc.trim(),
     trackId: tr?.id ?? null,
-    subjects: topics.length
-      ? topics.map((t) => ({ id: uid(), name: t.name, topicId: t.id, blocks: [block('nota', 'Anotações')] }))
-      : [{ id: uid(), name: 'Primeiro assunto', topicId: null, blocks: [block('nota', 'Anotações')] }],
+    pages: topics.length ? topics.map((t) => newPage(t.name, t.id, null, now)) : [newPage('Primeira página', null, null, now)],
     log: [{ at: now, text: tr ? `Criado a partir da trilha ${tr.name}` : 'Criado do zero' }],
     createdAt: now,
     updatedAt: now,
@@ -242,11 +245,49 @@ export function touch(nb: StudyNotebook, text: string, now: string): StudyNotebo
   return { ...nb, updatedAt: now, log: [{ at: now, text }, ...nb.log].slice(0, 50) };
 }
 
-/** Garante que os tópicos do ciclo existam como assuntos do notebook (sem duplicar). */
-export function addTopicsAsSubjects(nb: StudyNotebook, topics: { id: string; name: string }[]): StudyNotebook {
-  const have = new Set(nb.subjects.map((s) => s.topicId).filter(Boolean));
-  const extra = topics.filter((t) => !have.has(t.id)).map((t) => ({ id: uid(), name: t.name, topicId: t.id, blocks: [block('nota', 'Anotações')] }));
-  return extra.length ? { ...nb, subjects: [...nb.subjects, ...extra] } : nb;
+/** Tópicos da Biblioteca viram páginas do notebook (sem duplicar). Podem vir de qualquer trilha ou área. */
+export function addTopicsAsPages(nb: StudyNotebook, topics: { id: string; name: string }[], now = new Date().toISOString()): StudyNotebook {
+  const have = new Set(nb.pages.map((s) => s.topicId).filter(Boolean));
+  const extra = topics.filter((t) => !have.has(t.id) && have.add(t.id)).map((t) => newPage(t.name, t.id, null, now));
+  return extra.length ? { ...nb, pages: [...nb.pages, ...extra] } : nb;
+}
+
+/** Páginas na ordem de leitura: cada página principal seguida das suas subpáginas. */
+export function pageTree(nb: StudyNotebook): { page: StudyPage; depth: 0 | 1 }[] {
+  const out: { page: StudyPage; depth: 0 | 1 }[] = [];
+  for (const p of nb.pages.filter((x) => !x.parentId)) {
+    out.push({ page: p, depth: 0 });
+    for (const c of nb.pages.filter((x) => x.parentId === p.id)) out.push({ page: c, depth: 1 });
+  }
+  return out;
+}
+
+/** Exclui a página e as subpáginas dela. */
+export function removePage(nb: StudyNotebook, id: string): StudyNotebook {
+  return { ...nb, pages: nb.pages.filter((p) => p.id !== id && p.parentId !== id) };
+}
+
+/** Sobe ou desce a página entre as irmãs (mesma página-mãe). */
+export function movePage(nb: StudyNotebook, id: string, dir: -1 | 1): StudyNotebook {
+  const page = nb.pages.find((p) => p.id === id);
+  if (!page) return nb;
+  const sibs = nb.pages.filter((p) => p.parentId === page.parentId);
+  const other = sibs[sibs.indexOf(page) + dir];
+  if (!other) return nb;
+  const i = nb.pages.indexOf(page);
+  const j = nb.pages.indexOf(other);
+  const pages = [...nb.pages];
+  [pages[i], pages[j]] = [pages[j], pages[i]];
+  return { ...nb, pages };
+}
+
+/** Muda a página de lugar: principal (null) ou subpágina de uma página principal. Um nível só. */
+export function setPageParent(nb: StudyNotebook, id: string, parentId: string | null): StudyNotebook {
+  const page = nb.pages.find((p) => p.id === id);
+  const parent = parentId ? nb.pages.find((p) => p.id === parentId) : null;
+  if (!page || page.parentId === parentId) return nb;
+  if (parentId && (!parent || parent.parentId || parentId === id || nb.pages.some((p) => p.parentId === id))) return nb;
+  return { ...nb, pages: nb.pages.map((p) => (p.id === id ? { ...p, parentId } : p)) };
 }
 
 export function mapFromSuggestion(s: CatMap, now: string): StudyMap {
@@ -286,27 +327,35 @@ export function normalizeStudy(raw: unknown): StudyData {
       finishedAt: typeof c.finishedAt === 'string' ? c.finishedAt : null,
       createdAt: str(c.createdAt, now),
     })),
-    notebooks: recs(r.notebooks).map((n) => ({
-      id: n.id as string,
-      name: str(n.name, 'Notebook'),
-      trackId: typeof n.trackId === 'string' ? n.trackId : null,
-      subjects: recs(n.subjects).map((s) => ({
-        id: s.id as string,
-        name: str(s.name, 'Assunto'),
-        topicId: typeof s.topicId === 'string' ? s.topicId : null,
-        blocks: recs(s.blocks).map((b) => ({
-          id: b.id as string,
-          kind: b.kind === 'pares' || b.kind === 'fontes' ? b.kind : 'nota',
-          title: str(b.title),
-          text: str(b.text),
-          pairs: Array.isArray(b.pairs) ? b.pairs.filter((p): p is [string, string] => Array.isArray(p) && typeof p[0] === 'string' && typeof p[1] === 'string').map((p) => [p[0], p[1]] as [string, string]) : [],
-          sourceIds: strs(b.sourceIds),
+    notebooks: recs(r.notebooks).map((n) => {
+      // Até a v0.25 as páginas se chamavam "assuntos" (subjects): viram páginas principais.
+      const raw = recs(Array.isArray(n.pages) ? n.pages : n.subjects);
+      const tops = new Set(raw.filter((p) => typeof p.parentId !== 'string').map((p) => p.id as string));
+      return {
+        id: n.id as string,
+        name: str(n.name, 'Notebook'),
+        desc: str(n.desc),
+        trackId: typeof n.trackId === 'string' ? n.trackId : null,
+        pages: raw.map((s) => ({
+          id: s.id as string,
+          parentId: typeof s.parentId === 'string' && tops.has(s.parentId) && s.parentId !== s.id ? s.parentId : null,
+          name: str(s.name, 'Página'),
+          topicId: typeof s.topicId === 'string' ? s.topicId : null,
+          blocks: recs(s.blocks).map((b) => ({
+            id: b.id as string,
+            kind: b.kind === 'pares' || b.kind === 'fontes' ? b.kind : ('nota' as const),
+            title: str(b.title),
+            text: str(b.text),
+            pairs: Array.isArray(b.pairs) ? b.pairs.filter((p): p is [string, string] => Array.isArray(p) && typeof p[0] === 'string' && typeof p[1] === 'string').map((p) => [p[0], p[1]] as [string, string]) : [],
+            sourceIds: strs(b.sourceIds),
+          })),
+          updatedAt: str(s.updatedAt, str(n.updatedAt, now)),
         })),
-      })),
-      log: Array.isArray(n.log) ? n.log.filter((l): l is { at: string; text: string } => isRec(l) && typeof l.at === 'string' && typeof l.text === 'string') : [],
-      createdAt: str(n.createdAt, now),
-      updatedAt: str(n.updatedAt, now),
-    })),
+        log: Array.isArray(n.log) ? n.log.filter((l): l is { at: string; text: string } => isRec(l) && typeof l.at === 'string' && typeof l.text === 'string') : [],
+        createdAt: str(n.createdAt, now),
+        updatedAt: str(n.updatedAt, now),
+      };
+    }),
     sources: recs(r.sources).map((s) => ({
       id: s.id as string,
       title: str(s.title, 'Fonte'),
