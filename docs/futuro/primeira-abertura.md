@@ -17,14 +17,22 @@ A barra de baixo é modular (muda dentro de cada módulo). Sem orientação, que
 5. **3 favoritos**, na ordem dos toques, com a barra de baixo mostrada ao vivo.
 6. **Ritmo do Diário** (só se o Diário está ligado): todo dia, 3x, 2x, dias certos ou quando der (E1).
 7. **Barra e cor:** o jeito da barra (favorito no mesmo lugar, ao lado do Início ou no centro), com prévia na Agenda, e a cor de destaque.
-8. **Tutorial da barra**, interativo, em 6 passos. A pessoa toca de verdade:
+8. **Jornada (opcional):** um cartão explica o modo jogo:
+   - cada hábito cumprido, conta paga no prazo ou registro no Diário vira XP e ouro;
+   - o personagem sobe de nível, ganha itens e pets e enfrenta chefes semanais;
+   - **nunca tira pontos**, e libera depois de **14 dias de uso**.
+
+   Duas escolhas:
+   - **"Quero a Jornada":** mostra quantos dias faltam e avisa quando liberar;
+   - **"Agora não":** o app fica sem jogo, o módulo Jornada fica oculto no Mais, e dá para ligar depois em Personalização.
+9. **Tutorial da barra**, interativo, em 6 passos. A pessoa toca de verdade:
    1. "Estes são seus 3 favoritos" → tocar num;
    2. "A barra virou a do módulo" (o contorno marca a casa) → tocar numa ferramenta;
    3. "Voltar leva ao módulo" → voltar;
    4. "Trocar de módulo direto" → tocar de novo na casa e escolher outro;
    5. "Segure para ver o nome" → segurar um ícone;
    6. "Tudo o mais fica no Mais" (e Configurações › Personalização).
-9. **Pronto:** resumo do que foi montado e "Ir para o Início".
+10. **Pronto:** resumo do que foi montado (inclui a escolha da Jornada) e "Ir para o Início".
 
 ## Regras
 - **Pular:** usa o padrão (Finanças, Diário e Agenda; tudo à vista). O tutorial pode ser pulado sozinho.
@@ -42,6 +50,7 @@ A barra de baixo é modular (muda dentro de cada módulo). Sem orientação, que
 settings: {
   hiddenModules: string[];            // módulos desligados (ficam no Mais)
   onboarding: { done: boolean; tutorialSeen: boolean; areas: string[] };
+  journeyWanted: boolean | null;     // escolha da entrevista; null = não perguntado (quem já usa)
   journalRhythm: 'todo' | '3x' | '2x' | 'dias' | 'livre';
 }
 ```
