@@ -10,6 +10,7 @@ import { DEFAULT_FAVORITES, normalizeFavorites } from './moduleBar.ts';
 import { normalizeLayouts } from './cardLayout.ts';
 import { DEFAULT_LIST_CATEGORIES, normalizeListData } from './lists.ts';
 import { emptyStudy, normalizeStudy } from './estudos.ts';
+import { emptyCareer, normalizeCareer } from './carreira.ts';
 
 export const COLORS = ['#22c55e', '#3b82f6', '#8b5cf6', '#f97316', '#ef4444', '#94a3b8', '#eab308', '#ec4899', '#06b6d4'];
 /** As 6 cores do cartão, como na referência visual. */
@@ -52,7 +53,7 @@ export function emptyData(): AppData {
     incomes: [],
     incomeSeries: [],
     incomeSources: [],
-    settings: { theme: 'dark', accent: null, favorites: [...DEFAULT_FAVORITES], cards: {}, seededCategories: false, seededIncomeSources: false, lastBackupAt: null, activeDays: [], visitDays: [], journeyUnlockedAt: null, journeyChoice: null },
+    settings: { theme: 'dark', accent: null, favorites: [...DEFAULT_FAVORITES], cards: {}, barLayout: 'fixo', tapToFavorites: true, hideOnScroll: true, seededCategories: false, seededIncomeSources: false, lastBackupAt: null, activeDays: [], visitDays: [], journeyUnlockedAt: null, journeyChoice: null },
     profile: emptyProfile('novo'),
     boxes: [],
     moods: {},
@@ -66,6 +67,7 @@ export function emptyData(): AppData {
     purchases: [],
     sessions: [],
     study: emptyStudy(),
+    career: emptyCareer(),
     lastLoads: {},
     deleted: {},
     legacy: {},
@@ -121,6 +123,9 @@ export function normalize(raw: unknown): AppData {
       accent: normalizeAccent(settings.accent),
       favorites: normalizeFavorites(settings.favorites),
       cards: normalizeLayouts(settings.cards),
+      barLayout: settings.barLayout === 'lado' || settings.barLayout === 'centro' ? settings.barLayout : 'fixo',
+      tapToFavorites: settings.tapToFavorites !== false,
+      hideOnScroll: settings.hideOnScroll !== false,
       seededCategories: settings.seededCategories === true,
       seededIncomeSources: settings.seededIncomeSources === true,
       lastBackupAt: typeof settings.lastBackupAt === 'string' ? settings.lastBackupAt : null,
@@ -140,6 +145,7 @@ export function normalize(raw: unknown): AppData {
       .filter((p) => typeof p.id === 'string' && typeof p.date === 'string' && typeof p.total === 'number')
       .map((p) => ({ id: p.id as string, date: p.date as string, listId: String(p.listId ?? ''), listName: String(p.listName ?? ''), store: String(p.store ?? ''), total: p.total as number, items: typeof p.items === 'number' ? p.items : 0 })),
     study: normalizeStudy(r.study),
+    career: normalizeCareer(r.career),
     lastLoads: isRec(r.lastLoads) ? Object.fromEntries(Object.entries(r.lastLoads).filter((e): e is [string, number] => typeof e[1] === 'number')) : {},
     deleted: isRec(r.deleted) ? (r.deleted as Record<string, string>) : {},
     legacy: isRec(r.legacy) ? r.legacy : {},

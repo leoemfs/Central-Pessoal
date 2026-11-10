@@ -13,7 +13,7 @@ import { CreateMenu, DualProgress, useCreate, useStudy } from './shared';
 const START = ['en-a1-contatos', 'ia-prompts', 'prod-semana', 'car-cv', 'dev-logica'];
 
 /**
- * Estudos e Carreira. Endereços:
+ * Estudos. Endereços:
  * #/estudos · /biblioteca · /area/:id · /tema/:id · /nivel/:tema/:id · /trilha/:id
  * /notebooks · /notebook/:id[/:assunto] · /fontes · /mapas · /mapa/:id
  * Ciclos e Roadmaps têm telas próprias (#/ciclos, #/roadmaps), na barra de baixo.
@@ -84,7 +84,7 @@ function Home() {
   const firstTime = study.cycles.length === 0 && study.notebooks.length === 0;
   return (
     <>
-      <PageHeader title="Estudos e Carreira" subtitle="Seu espaço para explorar, planejar e guardar o que aprende." />
+      <PageHeader title="Estudos" subtitle="Seu espaço para explorar, planejar e guardar o que aprende." />
 
       {/* Bloco principal (fixo): Biblioteca e Meus notebooks + Fontes e Mapas mentais */}
       <div className="st-main-block">

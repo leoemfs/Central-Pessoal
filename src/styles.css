@@ -4489,6 +4489,72 @@ a.row {
   }
 }
 
+/* ---------- v0.20.2: tocar de novo no módulo mostra os favoritos ---------- */
+.tb-hint {
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% + 8px);
+  transform: translateX(-50%);
+  background: var(--accent);
+  color: var(--on-accent);
+  font-size: 0.78rem;
+  font-weight: 600;
+  padding: 5px 12px;
+  border-radius: 999px;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+/* ---------- v0.21: Configurações › Personalização ---------- */
+.pz-title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  margin: 18px 0 8px;
+}
+.card-head + .pz-title {
+  margin-top: 4px;
+}
+.pz-options {
+  display: grid;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.pz-options .option-card {
+  display: grid;
+  gap: 4px;
+  text-align: left;
+  padding: 12px 14px;
+  border-radius: var(--radius-md);
+  border: 1.5px solid var(--border);
+  background: var(--raised);
+  color: var(--text);
+  font: inherit;
+}
+.pz-demo {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 4px;
+  margin-top: 6px;
+}
+.pz-demo i {
+  font-style: normal;
+  font-size: 0.7rem;
+  text-align: center;
+  padding: 5px 0;
+  border-radius: 8px;
+  background: var(--raised-2);
+  color: var(--muted);
+}
+.pz-demo i.mod {
+  background: var(--accent-soft);
+  color: var(--accent-text);
+  font-weight: 700;
+  box-shadow: inset 0 0 0 1.5px var(--accent);
+}
+.pz-options + .toggle-row,
+.toggle-row + .toggle-row {
+  margin-top: 12px;
+}
 /* ---------- Estudos e Carreira ---------- */
 
 .st-path {
@@ -5241,4 +5307,66 @@ a.row {
 }
 .st-area-title .icon {
   color: var(--accent-text);
+}
+
+/* ---------- Carreira (N8) ---------- */
+.job-card { display: flex; flex-direction: column; gap: 10px; width: 100%; text-align: left; color: inherit; font: inherit; cursor: pointer; }
+.job-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; }
+.job-name { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.job-next { display: flex; align-items: center; gap: 8px; background: var(--raised); border-radius: var(--radius-sm); padding: 8px 10px; font-size: 0.88rem; }
+.job-next svg { flex: none; color: var(--accent-text); }
+.job-next.late { color: var(--orange-text); }
+.job-next.late svg { color: var(--orange-text); }
+.job-funnel { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+.job-funnel button { border: none; background: var(--raised); color: var(--text); border-radius: var(--radius-md); padding: 10px 4px; display: flex; flex-direction: column; align-items: center; gap: 2px; cursor: pointer; font: inherit; }
+.job-funnel button b { font-size: 1.3rem; font-weight: 800; font-variant-numeric: tabular-nums; }
+.job-funnel button span { font-size: 0.72rem; color: var(--muted); }
+.job-funnel button.on { background: var(--accent-soft); color: var(--accent-text); }
+.job-funnel button.on span { color: var(--accent-text); }
+.job-filter-line { display: flex; justify-content: space-between; align-items: center; margin: 10px 2px; }
+.job-steps { display: flex; gap: 4px; }
+.job-steps button { flex: 1; min-width: 0; border: none; background: none; color: var(--faint); font: inherit; font-size: 0.74rem; padding: 4px 0; cursor: pointer; text-align: center; }
+.job-steps button i { display: block; height: 6px; border-radius: 99px; background: var(--raised-2); margin-bottom: 6px; }
+.job-steps button.done i { background: var(--accent); }
+.job-steps button.cur { color: var(--accent-text); font-weight: 700; }
+.job-steps button.cur i { background: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+.job-ask { background: var(--accent-soft); border-radius: var(--radius-md); padding: 12px; display: flex; flex-direction: column; gap: 8px; }
+.job-closed-head { width: 100%; background: none; border: none; color: inherit; font: inherit; cursor: pointer; padding: 0; }
+.job-closed-head .muted { display: inline-flex; align-items: center; gap: 4px; }
+.job-closed-row { width: 100%; background: none; border: none; color: inherit; font: inherit; text-align: left; cursor: pointer; }
+.job-closed-head.card-head { margin-bottom: 0; }
+.job-closed-head + .list { margin-top: 12px; }
+.career-role { font-size: 1.15rem; font-weight: 700; }
+.career-salary { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; background: var(--raised); border: none; border-radius: var(--radius-md); padding: 10px 12px; color: inherit; font: inherit; cursor: pointer; text-align: left; }
+.career-salary b { font-size: 1.5rem; font-weight: 800; font-variant-numeric: tabular-nums; }
+.career-amount { display: flex; flex-direction: column; align-items: flex-end; gap: 2px; white-space: nowrap; }
+.career-up { color: var(--accent-text); }
+.career-down { color: var(--red-text); }
+.career-plain { width: 100%; background: none; border: none; color: inherit; font: inherit; text-align: left; cursor: pointer; display: flex; }
+.row-body.career-plain { flex-direction: column; padding: 0; }
+.career-past { opacity: 0.7; }
+.career-check { width: 24px; height: 24px; flex: none; border-radius: 50%; border: 2px solid var(--border-strong); background: none; color: var(--on-accent); display: grid; place-items: center; cursor: pointer; padding: 0; }
+.career-check.on { background: var(--accent); border-color: var(--accent); }
+.career-done { text-decoration: line-through; color: var(--faint); }
+.career-add { display: flex; gap: 8px; margin-top: 8px; }
+.career-add .input { flex: 1; min-width: 0; }
+.career-sync { display: flex; align-items: center; gap: 6px; margin: 0; }
+.career-late { color: var(--orange-text); }
+.career-project .row-body { gap: 4px; }
+.career-linked { background: var(--raised); border-radius: var(--radius-md); padding: 10px 12px; display: flex; flex-direction: column; gap: 6px; }
+.career-linked-head { justify-content: space-between; align-items: center; gap: 8px; }
+.career-mini { margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 4px; font-size: 0.9rem; }
+.career-date { flex: 0 0 9.5rem; }
+.ev-origin { font-size: 0.72rem; }
+
+/* v0.25.1: o jeito escolhido da barra fica marcado */
+.pz-options .option-card.on {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+.pz-options .option-card.on strong::after {
+  content: '  ✓ em uso';
+  color: var(--accent-text);
+  font-size: 0.8rem;
+  font-weight: 600;
 }

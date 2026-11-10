@@ -62,18 +62,12 @@ Decidido:
 - **Mapas mentais:** desenho radial; editar a ideia central, os ramos e os detalhes; ligar a um notebook.
 - Dados em `AppData.study` (com padrão em `normalize()`; entra no backup). Catálogo em `src/estudosCatalogo.ts`, regras em `src/estudos.ts` (7 testes), telas em `src/modules/estudos/`.
 
-## Ideias do Leonardo (08/11, para especificar depois dos testes)
-- **N8 · Cronograma de estudos:** calendário dentro de Estudos (quando estudar cada tópico ou ciclo), sincronizado com a Agenda principal do app.
-- **N9 · Carreira vira um módulo próprio (decidido em 08/11):** Estudos e Carreira passam a ser **dois módulos independentes**, cada um com sua barra, desenvolvidos um de cada vez, cada um focado no que se propõe. O módulo **Carreira** terá projetos, apresentações e o acompanhamento da carreira atual e da carreira que está sendo construída. A ideia anterior, de duas abas com a barra mudando junto, foi descartada.
-  - **Decidido:** o módulo atual passa a se chamar só **Estudos** (troca no app pequena, P; fazer na próxima construção).
-  - A decidir quando especificar: a área Carreira da Biblioteca (trilhas de currículo, entrevistas…) fica em Estudos e aparece como atalho no módulo Carreira?
-
-## Fica para depois (anotar na Central quando aparecer)
-- Editor gráfico de mapas (arrastar e ligar ideias).
-- Anexar PDF ou imagem dentro do app (hoje, só o link).
-- Lápis para personalizar os cartões de Estudos e cartão "Estudando agora" no Início.
-- Busca dentro do módulo (item E6).
-- "O que estudei" na Revisão semanal (ver `estudos-jornada.md`).
+## Fica para depois (já anotado na Central: M11 a M15)
+- Editor gráfico de mapas (arrastar e ligar ideias). → **M15**
+- Anexar PDF ou imagem dentro do app (hoje, só o link). → **M14**
+- Lápis para personalizar os cartões de Estudos → **M12**; cartão "Estudando agora" no Início → **M11**.
+- Busca dentro do módulo (item E6). → **M13**
+- "O que estudei" na Revisão semanal (ver `estudos-jornada.md`). → **M11**
 
 ## Tamanho e divisão
 Total: **G**. Dividir em partes, uma versão cada:

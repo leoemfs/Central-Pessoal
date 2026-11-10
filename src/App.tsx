@@ -25,6 +25,7 @@ import { HumorPage } from './modules/Humor';
 import { Estudos } from './modules/estudos/Estudos';
 import { CiclosPage } from './modules/estudos/Ciclos';
 import { RoadmapsPage } from './modules/estudos/Roadmaps';
+import { CarreiraPage, MetasPage, VagasPage } from './modules/Carreira';
 import { useCardEditor } from './Cards';
 import { activeIndex, barFor, barItems, crumb, favoriteItems, type BarItem } from './moduleBar';
 
@@ -67,9 +68,12 @@ export const SECTIONS: Section[] = [
   { path: 'proximos', label: 'Próximos', icon: 'list', view: ProximosPage },
   { path: 'humor', label: 'Humor', icon: 'smile', view: HumorPage },
   // O + de Estudos fica dentro do próprio módulo (muda conforme a tela: notebook, mapa…).
-  { path: 'estudos', label: 'Estudos e Carreira', icon: 'cap', view: Estudos },
+  { path: 'estudos', label: 'Estudos', icon: 'cap', view: Estudos },
   { path: 'ciclos', label: 'Ciclos', icon: 'repeat', view: CiclosPage },
   { path: 'roadmaps', label: 'Roadmaps', icon: 'route', view: RoadmapsPage },
+  { path: 'carreira', label: 'Carreira', icon: 'briefcase', view: CarreiraPage, fab: 'carreira/menu' },
+  { path: 'vagas', label: 'Vagas', icon: 'send', view: VagasPage, fab: 'vagas/nova' },
+  { path: 'metas', label: 'Metas', icon: 'target', view: MetasPage, fab: 'carreira/menu' },
 ];
 
 export const COMING_SOON: { label: string; icon: IconName; hint: string }[] = [
@@ -89,7 +93,7 @@ const QUICK: { to: string; label: string; icon: IconName; hint: string }[] = [
 ];
 
 /** Um ícone da barra de baixo. Só o ícone; segurar o dedo mostra o nome. */
-function TabLink({ to, label, icon, active, center }: { to: string; label: string; icon: string; active: boolean; center?: boolean }) {
+function TabLink({ to, label, icon, active, center, onTap }: { to: string; label: string; icon: string; active: boolean; center?: boolean; onTap?: () => void }) {
   const [tip, setTip] = useState(false);
   const timer = useRef<number | undefined>(undefined);
   const held = useRef(false);
@@ -121,6 +125,11 @@ function TabLink({ to, label, icon, active, center }: { to: string; label: strin
         if (held.current) {
           e.preventDefault();
           held.current = false;
+          return;
+        }
+        if (onTap) {
+          e.preventDefault();
+          onTap();
         }
       }}
     >
@@ -196,6 +205,14 @@ function Drawer({ current, onClose }: { current: string; onClose: () => void }) 
   );
 }
 
+/** Navega guardando de qual módulo veio, para o "voltar" da ferramenta levar à casa do módulo. */
+function navTo(to: string, mode: 'push' | 'replace', fromHome: string) {
+  const url = `#/${to}`;
+  if (mode === 'push') history.pushState({ fromHome }, '', url);
+  else history.replaceState({ fromHome: (history.state as { fromHome?: string } | null)?.fromHome ?? null }, '', url);
+  window.dispatchEvent(new HashChangeEvent('hashchange'));
+}
+
 /** Barra superior que some ao rolar para baixo e volta ao rolar para cima. */
 function useHideOnScroll(resetKey: string): boolean {
   const [hidden, setHidden] = useState(false);
@@ -259,13 +276,45 @@ export function App() {
   const [quickOpen, setQuickOpen] = useState(false);
   const [drawer, setDrawer] = useState(false);
   const [search, setSearch] = useState(false);
-  const barHidden = useHideOnScroll(`${section.path}:${route.n}`);
+  const scrollHidden = useHideOnScroll(`${section.path}:${route.n}`);
+  const barHidden = data.settings.hideOnScroll && scrollHidden;
   const bar = barFor(section.path);
   const barIndex = bar ? activeIndex(bar, section.path) : null;
   const editor = useCardEditor();
   const where = bar ? crumb(bar, barIndex) : null;
-  const placed = bar ? barItems(bar, data.settings.favorites) : null;
+  // Tocar de novo no módulo em que você já está mostra os favoritos, para trocar de módulo sem passar pelo Início.
+  const [showFavs, setShowFavs] = useState(false);
+  useEffect(() => setShowFavs(false), [route.path, route.n]);
+  const placed = bar && !showFavs ? barItems(bar, data.settings.favorites, data.settings.barLayout) : null;
   const middle: BarItem[] = placed ? placed.items : favoriteItems(data.settings.favorites);
+
+  /**
+   * O que cada ícone faz ao ser tocado, para o "voltar" do celular seguir: ferramenta → casa do módulo → Início.
+   * - Da casa do módulo para uma ferramenta: abre por cima (voltar retorna à casa).
+   * - De uma ferramenta para outra: troca no lugar.
+   * - Da ferramenta para a casa: volta, se veio da casa.
+   * - Trocar de módulo pelos favoritos (dentro de outro módulo): troca no lugar (voltar vai ao Início).
+   */
+  function tapFor(it: BarItem, i: number): (() => void) | undefined {
+    if (placed && bar) {
+      const atHome = section.path === bar.items[1].section;
+      if (i === placed.home) {
+        if (atHome) return data.settings.tapToFavorites ? () => setShowFavs(true) : undefined;
+        return () => {
+          if ((history.state as { fromHome?: string } | null)?.fromHome === bar.id) history.back();
+          else goReplace(it.to);
+        };
+      }
+      if (!it.section) return () => goReplace(it.to); // atalho (ex.: Hoje)
+      if (atHome) return () => navTo(it.to, 'push', bar.id);
+      return () => navTo(it.to, 'replace', bar.id);
+    }
+    if (showFavs && bar) {
+      if (it.to === section.path) return () => setShowFavs(false);
+      return () => goReplace(it.to);
+    }
+    return undefined;
+  }
 
   useEffect(() => {
     if (!drawer) return;
@@ -342,9 +391,18 @@ export function App() {
       <nav className={`tabbar${barHidden ? ' hidden' : ''}`} aria-label="Atalhos">
         <TabLink to="inicio" label="Início" icon="home" active={section.path === 'inicio'} />
         {middle.map((it, i) => (
-          <TabLink key={`${bar?.id ?? 'fav'}-${it.id}`} to={it.to} label={it.label} icon={it.icon} center={!!placed && i === placed.home} active={bar ? it.section === section.path : section.path === it.id} />
+          <TabLink
+            key={`${placed ? bar!.id : 'fav'}-${it.id}`}
+            to={it.to}
+            label={it.label}
+            icon={it.icon}
+            center={!!placed && i === placed.home}
+            active={placed ? it.section === section.path : section.path === it.id || (!!bar && bar.id === it.id)}
+            onTap={tapFor(it, i)}
+          />
         ))}
         <TabLink to="mais" label="Mais" icon="grid" active={!bar && section.path !== 'inicio' && !middle.some((it) => it.id === section.path)} />
+        {showFavs && <span className="tb-hint">Escolha o módulo</span>}
       </nav>
 
       <FirstRun />

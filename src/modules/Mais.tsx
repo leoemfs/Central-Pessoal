@@ -1,7 +1,6 @@
-import { useState } from 'react';
 import { COMING_SOON, SECTIONS } from '../App';
 import { useStore } from '../store';
-import { addFavorite, FAVORITABLE, favoriteItems } from '../moduleBar';
+import { addFavorite, FAVORITABLE } from '../moduleBar';
 import { Icon, notify, PageHeader, Sheet, type IconName } from '../ui';
 
 /** Todos os módulos. Orçamento e Relatórios ficam dentro de Finanças (na barra de baixo). */
@@ -12,36 +11,18 @@ const LINKS: { path: string; hint: string }[] = [
   { path: 'nucleo', hint: 'Hábitos, meditação, respiração e treinos' },
   { path: 'listas', hint: 'Mercado com preços, compras, receitas e checklists' },
   { path: 'estudos', hint: 'Biblioteca, ciclos de estudo, notebooks, fontes e mapas mentais' },
+  { path: 'carreira', hint: 'Vagas e candidaturas; em breve trabalho atual, currículo e metas' },
   { path: 'arquivo', hint: 'Anotações rápidas e informações importantes' },
   { path: 'voce', hint: 'Perfil, metas e sugestões para você' },
   { path: 'revisao', hint: 'Resumo da semana e reflexão' },
   { path: 'jornada', hint: 'Desbloqueia com 14 dias de uso' },
-  { path: 'ajustes', hint: 'Temas, backup e dados' },
+  { path: 'ajustes', hint: 'Personalização (temas, favoritos, barra), backup e dados' },
 ];
 
 export function Mais() {
-  const { data } = useStore();
-  const [pick, setPick] = useState(false);
-  const favs = favoriteItems(data.settings.favorites);
   return (
     <>
       <PageHeader title="Mais" />
-      <section className="card">
-        <div className="card-head">
-          <h2>Favoritos do Início</h2>
-          <button type="button" className="btn soft small" onClick={() => setPick(true)}>
-            <Icon name="edit" size={16} /> Trocar
-          </button>
-        </div>
-        <p className="muted small">Os 3 ícones do meio da barra de baixo quando você está no Início.</p>
-        <div className="fav-row">
-          {favs.map((f) => (
-            <a key={f.id} className="fav-chip" href={`#/${f.to}`}>
-              <Icon name={f.icon as IconName} size={18} /> {f.label}
-            </a>
-          ))}
-        </div>
-      </section>
       <div className="tile-grid">
         {LINKS.map((l) => {
           const s = SECTIONS.find((x) => x.path === l.path)!;
@@ -73,13 +54,12 @@ export function Mais() {
           </div>
         ))}
       </div>
-      {pick && <FavoritesSheet onClose={() => setPick(false)} />}
     </>
   );
 }
 
 /** Escolher os 3 favoritos: tocar num módulo coloca na barra; o mais antigo sai. */
-function FavoritesSheet({ onClose }: { onClose: () => void }) {
+export function FavoritesSheet({ onClose }: { onClose: () => void }) {
   const { data, update } = useStore();
   const favs = data.settings.favorites;
   function toggle(id: string) {

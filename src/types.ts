@@ -23,6 +23,8 @@ export interface CalendarEvent {
   time: string;
   location: string;
   description: string;
+  /** Criado por outro módulo e mantido por ele (ex.: "carreira/abrir-m-<id>"): tocar abre a origem. */
+  origin?: string;
 }
 
 /** ritual = rotina já incorporada · construir = hábito novo · abandonar = hábito a deixar. */
@@ -220,6 +222,12 @@ export interface Settings {
   favorites: [string, string, string];
   /** Ordem e cartões ocultos de cada tela (lápis ao lado da lupa). */
   cards: Record<string, { order: string[]; hidden: string[] }>;
+  /** Barra de baixo dentro do módulo: 'fixo' = o favorito fica no lugar dele; 'lado' = o módulo vai para o lado do Início; 'centro' = o módulo vai para o centro. */
+  barLayout: 'fixo' | 'lado' | 'centro';
+  /** Tocar de novo no módulo aberto mostra os favoritos. */
+  tapToFavorites: boolean;
+  /** As barras de cima e de baixo somem ao rolar a tela para baixo. */
+  hideOnScroll: boolean;
   seededCategories: boolean;
   seededIncomeSources: boolean;
   lastBackupAt: string | null;
@@ -578,6 +586,8 @@ export interface AppData {
   sessions: PracticeSession[];
   /** Estudos e Carreira (camada pessoal). */
   study: StudyData;
+  /** Carreira (N8): vagas e candidaturas. */
+  career: CareerData;
   /** Última carga usada em cada exercício (nome → kg). */
   lastLoads: Record<string, number>;
   /** Itens excluídos (id → data), para uma futura sincronização entre aparelhos. */
@@ -587,3 +597,90 @@ export interface AppData {
 }
 
 export type Collection = 'tasks' | 'events' | 'habits' | 'notes' | 'journal' | 'categories' | 'cards' | 'incomeSources' | 'boxes' | 'lists' | 'listCategories' | 'stores' | 'vouchers';
+
+// ---------- Carreira (N8) ----------
+/** Etapas em andamento e jeitos de encerrar uma vaga. */
+export type JobStage = 'interesse' | 'enviei' | 'entrevista' | 'proposta';
+export type JobOutcome = 'contratado' | 'naopassei' | 'desisti';
+
+export interface JobApp {
+  id: string;
+  company: string;
+  role: string;
+  link: string;
+  /** Texto livre: "R$ 8.000", "a combinar". */
+  salary: string;
+  notes: string;
+  stage: JobStage;
+  /** Próximo passo: o que fazer, e quando (AAAA-MM-DD, HH:MM). */
+  next: string;
+  nextDate: string | null;
+  nextTime: string;
+  /** Compromisso criado na Agenda para o próximo passo. */
+  eventId: string | null;
+  /** Encerrada: como e quando. */
+  outcome: JobOutcome | null;
+  closedAt: string | null;
+  /** Mudanças de etapa (a mais recente por último). */
+  history: { stage: JobStage | JobOutcome; date: string }[];
+  createdAt: string;
+}
+
+/** Mudança no trabalho: entrada, promoção, aumento, novo emprego. A mais recente é o trabalho atual. */
+export type CareerChangeKind = 'entrada' | 'promocao' | 'aumento' | 'novoemprego';
+export interface CareerChange {
+  id: string;
+  date: string;
+  kind: CareerChangeKind;
+  role: string;
+  company: string;
+  /** Salário mensal em reais (0 = não informado). */
+  salary: number;
+  note: string;
+}
+
+export type MeetingKind = 'reuniao' | 'umum' | 'apresentacao' | 'feedback' | 'avaliacao';
+export interface Meeting {
+  id: string;
+  kind: MeetingKind;
+  title: string;
+  /** Com quem (pessoa, equipe, setor). */
+  with: string;
+  date: string;
+  time: string;
+  /** Pauta e anotações. */
+  notes: string;
+  /** Combinados (o que ficou para fazer). */
+  todos: { id: string; text: string; done: boolean }[];
+  /** Link dos slides ou do material. */
+  link: string;
+  /** Repete a cada N dias (0 = não repete). */
+  repeatDays: number;
+  /** Projetos do trabalho ligados a esta reunião. */
+  projectIds: string[];
+  /** Já criou a próxima da série. */
+  nextCreated: boolean;
+  eventId: string | null;
+}
+
+export type ProjectStatus = 'andando' | 'parado' | 'concluido';
+export interface WorkProject {
+  id: string;
+  name: string;
+  /** Área ou setor (ex.: repasse, contratos de prestadores). */
+  area: string;
+  deadline: string | null;
+  status: ProjectStatus;
+  /** Entregas: o que precisa sair, com data opcional. */
+  deliveries: { id: string; text: string; date: string | null; done: boolean }[];
+  notes: string;
+  link: string;
+  createdAt: string;
+}
+
+export interface CareerData {
+  jobs: JobApp[];
+  changes: CareerChange[];
+  meetings: Meeting[];
+  projects: WorkProject[];
+}
