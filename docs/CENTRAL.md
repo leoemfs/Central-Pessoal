@@ -142,7 +142,7 @@
 ## Feito
 | Versão | O que entrou | PR |
 |---|---|---|
-| v0.27 | N11.2a e b Estudos 2.0: editor de texto nas páginas dos notebooks (títulos, listas, checklist, citação, divisor, alternante, negrito, itálico, sublinhado, destaque, cores, link, imagem, mover blocos); barra simples no celular e completa no computador; anotações antigas convertidas | PRNUM |
+| v0.27 | N11.2a e b Estudos 2.0: editor de texto nas páginas dos notebooks (títulos, listas, checklist, citação, divisor, alternante, negrito, itálico, sublinhado, destaque, cores, link, imagem, mover blocos); barra simples no celular e completa no computador; anotações antigas convertidas | #33 |
 | v0.26 | N11.1 Estudos 2.0, parte 1: notebooks com páginas e subpáginas, descrição, "Adicionar ao notebook" na trilha (tópicos de várias áreas no mesmo notebook, com a origem guardada), organizar páginas; os assuntos antigos viraram páginas | #32 |
 | v0.25.1 | Personalização: o jeito escolhido da barra fica marcado ("✓ em uso") e aparece um aviso ao trocar | — |
 | v0.25 | E10, E11 e E13: Personalização em Configurações (jeito da barra, favoritos, tocar de novo, esconder ao rolar) e o voltar do celular: ferramenta → casa do módulo → Início | — |
