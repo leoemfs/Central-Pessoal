@@ -47,7 +47,7 @@ export function Estudos({ route }: ViewProps) {
       page = <NotebooksPage />;
       break;
     case 'notebook':
-      page = <NotebookPage key={a} id={a} subjectId={b} setExtra={setExtra} />;
+      page = <NotebookPage key={a} id={a} pageId={b} setExtra={setExtra} />;
       break;
     case 'fontes':
       page = <FontesPage />;

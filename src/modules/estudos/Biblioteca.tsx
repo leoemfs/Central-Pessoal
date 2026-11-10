@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { go } from '../../router';
-import { addTopicsAsSubjects, defaultCycleName, findSource, missingBefore, moveItem, newCycle, newNotebook, remainingTopics, topicState, touch, trackPath, trackProgress, type TrackView } from '../../estudos';
+import { addTopicsAsPages, defaultCycleName, findSource, missingBefore, moveItem, newCycle, newNotebook, remainingTopics, topicState, touch, trackPath, trackProgress, type TrackView } from '../../estudos';
 import type { StudySource } from '../../types';
 import { Empty, Field, Icon, notify, PageHeader, Sheet, type IconName } from '../../ui';
 import { todayISO, uid } from '../../utils';
@@ -239,6 +239,7 @@ export function TrilhaPage({ id }: { id: string }) {
   const [build, setBuild] = useState(false);
   const [edit, setEdit] = useState(false);
   const [nb, setNb] = useState(false);
+  const [toNb, setToNb] = useState(false);
   const tr = lib.track(id);
   if (!tr) return <Missing what="Trilha" />;
   const prog = trackProgress(study.cycles, tr);
@@ -259,7 +260,7 @@ export function TrilhaPage({ id }: { id: string }) {
         <Icon name="info" size={18} />
         <span>
           <strong>Trilha de referência</strong>
-          Marque os tópicos que quer estudar agora. A trilha continua inteira e na mesma ordem; o que você escolher vira um <b>ciclo seu</b>.
+          Marque os tópicos que te interessam. Depois, leve para um <b>notebook</b> (para anotar) ou monte um <b>ciclo</b> (para acompanhar o progresso). A trilha continua inteira e na mesma ordem.
         </span>
       </div>
       {prog.done > 0 && (
@@ -355,7 +356,7 @@ export function TrilhaPage({ id }: { id: string }) {
                   </span>
                   <div className="row-body">
                     <span className="row-title">{n.name}</span>
-                    <span className="row-meta">{plural(n.subjects.length, 'assunto', 'assuntos')}</span>
+                    <span className="row-meta">{plural(n.pages.length, 'página', 'páginas')}</span>
                   </div>
                   <Icon name="right" size={18} />
                 </a>
@@ -381,14 +382,21 @@ export function TrilhaPage({ id }: { id: string }) {
           <span className="muted small">{sel.length ? tr.topics.filter((t) => sel.includes(t.id)).map((t) => t.name).join(', ') : 'Toque nos quadrados para escolher'}</span>
         </div>
         {sel.length > 0 && (
-          <button type="button" className="btn ghost small" onClick={() => setSel([])}>
-            Limpar
+          <button type="button" className="icon-btn st-quiet" onClick={() => setSel([])} aria-label="Limpar a escolha" title="Limpar">
+            <Icon name="x" size={18} />
           </button>
         )}
-        <button type="button" className="btn primary" disabled={!sel.length} onClick={() => setBuild(true)}>
-          Montar ciclo
-        </button>
+        <div className="st-actionbar-btns">
+          <button type="button" className="btn soft" disabled={!sel.length} onClick={() => setToNb(true)}>
+            <Icon name="notebook" size={16} /> Notebook
+          </button>
+          <button type="button" className="btn primary" disabled={!sel.length} onClick={() => setBuild(true)}>
+            Montar ciclo
+          </button>
+        </div>
       </div>
+
+      {toNb && <AddToNotebook track={tr} topicIds={tr.topics.filter((t) => sel.includes(t.id)).map((t) => t.id)} onClose={() => setToNb(false)} />}
 
       {build && <CycleBuilder track={tr} selected={tr.topics.filter((t) => sel.includes(t.id)).map((t) => t.id)} onClose={() => setBuild(false)} />}
       {edit && <TrackSheet trackId={tr.id} onClose={() => setEdit(false)} />}
@@ -397,13 +405,80 @@ export function TrilhaPage({ id }: { id: string }) {
   );
 }
 
+/** Levar os tópicos escolhidos para um notebook (existente ou novo). A Biblioteca não muda; a página guarda a origem. */
+function AddToNotebook({ track, topicIds, onClose }: { track: TrackView; topicIds: string[]; onClose: () => void }) {
+  const { study, lib, set } = useStudy();
+  const recent = [...study.notebooks].sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
+  const [choice, setChoice] = useState<string>(recent.find((n) => n.trackId === track.id)?.id ?? recent[0]?.id ?? 'novo');
+  const path = trackPath(lib, track);
+  const [name, setName] = useState(track.levelId ? `${path[1]} ${path[2]}` : path[1] ?? track.name);
+  const topics = topicIds.map((id) => lib.topic(id)!).filter(Boolean);
+  const target = study.notebooks.find((n) => n.id === choice);
+  const already = target ? topics.filter((t) => target.pages.some((p) => p.topicId === t.id)).length : 0;
+  function add() {
+    const now = nowISO();
+    if (choice === 'novo') {
+      if (!name.trim()) return notify('Dê um nome ao notebook');
+      const nb = newNotebook(name, track, topicIds, now);
+      set((s) => ({ ...s, notebooks: [nb, ...s.notebooks] }));
+      onClose();
+      notify('Notebook criado', `${plural(topics.length, 'página nova', 'páginas novas')}, uma por tópico.`);
+      go(`estudos/notebook/${nb.id}`);
+      return;
+    }
+    const added = topics.length - already;
+    if (added > 0) set((s) => ({ ...s, notebooks: s.notebooks.map((n) => (n.id === choice ? touch(addTopicsAsPages(n, topics, now), `${plural(added, 'tópico adicionado', 'tópicos adicionados')} de ${track.name}`, now) : n)) }));
+    onClose();
+    notify(added > 0 ? `${plural(added, 'página nova', 'páginas novas')} em ${target?.name}` : 'Esses tópicos já estavam no notebook');
+    go(`estudos/notebook/${choice}`);
+  }
+  return (
+    <Sheet
+      title="Adicionar ao notebook"
+      onClose={onClose}
+      footer={
+        <button type="button" className="btn primary block" onClick={add}>
+          {choice === 'novo' ? 'Criar notebook' : 'Adicionar'}
+        </button>
+      }
+    >
+      <div className="form">
+        <p className="muted small" style={{ margin: 0 }}>
+          Cada tópico vira uma página sua para anotar. Um notebook pode juntar tópicos de várias trilhas e áreas. Na Biblioteca, nada muda.
+        </p>
+        <div className="field">
+          <span className="field-label">{plural(topics.length, 'tópico', 'tópicos')}</span>
+          <span className="muted small">{topics.map((t) => t.name).join(' · ')}</span>
+        </div>
+        <Field label="Para qual notebook?">
+          <select className="input" value={choice} onChange={(e) => setChoice(e.target.value)}>
+            {recent.map((n) => (
+              <option key={n.id} value={n.id}>
+                {n.name}
+              </option>
+            ))}
+            <option value="novo">Criar um notebook novo</option>
+          </select>
+        </Field>
+        {choice === 'novo' && (
+          <Field label="Nome do notebook">
+            <input className="input" value={name} onChange={(e) => setName(e.target.value)} />
+          </Field>
+        )}
+        {already > 0 && <span className="field-hint">{plural(already, 'tópico já está', 'tópicos já estão')} neste notebook e não será repetido.</span>}
+      </div>
+    </Sheet>
+  );
+}
+
 /** Montar o ciclo: nome, ordem e (opcional) notebook. */
 function CycleBuilder({ track, selected, onClose }: { track: TrackView; selected: string[]; onClose: () => void }) {
   const { study, lib, set } = useStudy();
   const [name, setName] = useState(() => defaultCycleName(study.cycles, track, lib));
   const [order, setOrder] = useState(selected);
-  const sameTrack = study.notebooks.filter((n) => n.trackId === track.id);
-  const [nbChoice, setNbChoice] = useState<string>(sameTrack[0]?.id ?? 'nenhum');
+  // Sugere o notebook que já tem páginas destes tópicos; senão, um da mesma trilha.
+  const related = study.notebooks.find((n) => n.pages.some((p) => p.topicId && selected.includes(p.topicId))) ?? study.notebooks.find((n) => n.trackId === track.id);
+  const [nbChoice, setNbChoice] = useState<string>(related?.id ?? 'nenhum');
   function create() {
     const now = nowISO();
     const topics = order.map((id) => lib.topic(id)!).filter(Boolean);
@@ -416,7 +491,7 @@ function CycleBuilder({ track, selected, onClose }: { track: TrackView; selected
       notebookId = nb.id;
     } else if (nbChoice !== 'nenhum') {
       notebookId = nbChoice;
-      notebooks = notebooks.map((n) => (n.id === nbChoice ? touch(addTopicsAsSubjects(n, topics), `Ciclo "${name.trim()}" ligado`, now) : n));
+      notebooks = notebooks.map((n) => (n.id === nbChoice ? touch(addTopicsAsPages(n, topics), `Ciclo "${name.trim()}" ligado`, now) : n));
     }
     const c = newCycle({ trackId: track.id, topicIds: order, name, notebookId, today: todayISO(), now });
     set((s) => ({ ...s, cycles: [c, ...s.cycles], notebooks }));
@@ -458,7 +533,7 @@ function CycleBuilder({ track, selected, onClose }: { track: TrackView; selected
           </ol>
           <span className="field-hint">A ordem é sua. Na trilha, nada muda.</span>
         </div>
-        <Field label="Notebook (opcional)" hint="Com notebook, cada tópico do ciclo vira um assunto para anotar.">
+        <Field label="Notebook (opcional)" hint="Com notebook, cada tópico do ciclo vira uma página para anotar.">
           <select className="input" value={nbChoice} onChange={(e) => setNbChoice(e.target.value)}>
             <option value="nenhum">Sem notebook</option>
             <option value="novo">Criar um notebook para este ciclo</option>

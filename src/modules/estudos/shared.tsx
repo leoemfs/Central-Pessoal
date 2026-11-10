@@ -192,19 +192,20 @@ export function NotebookSheet({ onClose, notebook, trackId }: { onClose: () => v
   const { study, lib, set } = useStudy();
   const [name, setName] = useState(notebook?.name ?? (trackId ? (lib.track(trackId)?.name ?? '') : ''));
   const [track, setTrack] = useState(notebook?.trackId ?? trackId ?? '');
+  const [desc, setDesc] = useState(notebook?.desc ?? '');
   const [confirm, setConfirm] = useState(false);
   function save() {
     if (!name.trim()) return notify('Dê um nome ao notebook');
     const now = nowISO();
     if (notebook) {
-      set((s) => ({ ...s, notebooks: s.notebooks.map((n) => (n.id === notebook.id ? touch({ ...n, name: name.trim(), trackId: track || null }, 'Notebook renomeado', now) : n)) }));
+      set((s) => ({ ...s, notebooks: s.notebooks.map((n) => (n.id === notebook.id ? touch({ ...n, name: name.trim(), desc: desc.trim(), trackId: track || null }, 'Notebook editado', now) : n)) }));
       onClose();
       return;
     }
-    const nb = newNotebook(name, track ? (lib.track(track) ?? null) : null, null, now);
+    const nb = newNotebook(name, track ? (lib.track(track) ?? null) : null, null, now, desc);
     set((s) => ({ ...s, notebooks: [nb, ...s.notebooks] }));
     onClose();
-    notify('Notebook criado', track ? 'Cada tópico da trilha virou um assunto.' : undefined);
+    notify('Notebook criado', track ? 'Cada tópico da trilha virou uma página.' : undefined);
     go(`estudos/notebook/${nb.id}`);
   }
   function del() {
@@ -242,7 +243,10 @@ export function NotebookSheet({ onClose, notebook, trackId }: { onClose: () => v
         <Field label="Nome">
           <input className="input" value={name} onChange={(e) => setName(e.target.value)} placeholder="Ex.: Inglês A1, Estudos de IA…" autoFocus={!notebook} />
         </Field>
-        <Field label="Trilha de referência (opcional)" hint={notebook ? 'Só muda a referência; os assuntos continuam os mesmos.' : 'Com uma trilha, cada tópico vira um assunto do notebook. Sem trilha, você organiza do seu jeito.'}>
+        <Field label="Descrição (opcional)">
+          <input className="input" value={desc} onChange={(e) => setDesc(e.target.value)} placeholder="Para que serve este notebook" />
+        </Field>
+        <Field label="Trilha de referência (opcional)" hint={notebook ? 'Só muda a referência; as páginas continuam as mesmas.' : 'Com uma trilha, cada tópico vira uma página. Sem trilha, você organiza do seu jeito. Depois dá para juntar tópicos de outras áreas.'}>
           <TrackSelect lib={lib} value={track} onChange={setTrack} archived={study.archived} />
         </Field>
       </div>
@@ -273,7 +277,7 @@ export function SourceSheet({ onClose, source, preset, notebookId }: { onClose: 
     set((s) => ({
       ...s,
       sources: s.sources.filter((x) => x.id !== source.id),
-      notebooks: s.notebooks.map((n) => ({ ...n, subjects: n.subjects.map((su) => ({ ...su, blocks: su.blocks.map((b) => ({ ...b, sourceIds: b.sourceIds.filter((i) => i !== source.id) })) })) })),
+      notebooks: s.notebooks.map((n) => ({ ...n, pages: n.pages.map((su) => ({ ...su, sourceIds: su.sourceIds.filter((i) => i !== source.id) })) })),
     }));
     onClose();
     notify('Fonte excluída');

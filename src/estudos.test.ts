@@ -2,7 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { CATALOG, SUGGESTED_MAPS } from './estudosCatalogo.ts';
 import {
-  addTopicsAsSubjects,
+  addTopicsAsPages,
   cycleCounts,
   defaultCycleName,
   emptyStudy,
@@ -11,7 +11,17 @@ import {
   missingBefore,
   moveItem,
   newCycle,
+  blocksToDoc,
+  docIsEmpty,
+  docText,
+  emptyDoc,
+  movePage,
+  normalizeDoc,
   newNotebook,
+  newPage,
+  pageTree,
+  removePage,
+  setPageParent,
   nextStatus,
   normalizeStudy,
   remainingTopics,
@@ -110,13 +120,13 @@ test('notebook a partir da trilha, assuntos sem duplicar e mapa sugerido', () =>
   const lib = library(emptyStudy());
   const tr = lib.track('en-a1-contatos')!;
   const nb = newNotebook('Inglês A1', tr, [tr.topics[0].id, tr.topics[1].id], 'agora');
-  assert.deepEqual(nb.subjects.map((s) => s.name), ['Cumprimentos e apresentações', 'Alfabeto e pronúncia']);
+  assert.deepEqual(nb.pages.map((s) => s.name), ['Cumprimentos e apresentações', 'Alfabeto e pronúncia']);
   assert.equal(nb.trackId, tr.id);
-  const nb2 = addTopicsAsSubjects(nb, [tr.topics[1], tr.topics[2]]);
-  assert.equal(nb2.subjects.length, 3);
+  const nb2 = addTopicsAsPages(nb, [tr.topics[1], tr.topics[2]]);
+  assert.equal(nb2.pages.length, 3);
   const livre = newNotebook('', null, null, 'agora');
   assert.equal(livre.name, 'Novo notebook');
-  assert.equal(livre.subjects.length, 1);
+  assert.equal(livre.pages.length, 1);
   const m = mapFromSuggestion(SUGGESTED_MAPS[0], 'agora');
   assert.equal(m.branches.length, SUGGESTED_MAPS[0].branches.length);
   m.branches[0].leaves.push('x');
@@ -137,5 +147,71 @@ test('dados antigos e backups: estudos começam vazios e campos ruins são corri
   assert.equal(s.cycles[0].topics[0].status, 'afazer');
   assert.equal(s.cycles[0].topics[1].doneAt, TODAY);
   assert.equal(s.sources[0].kind, 'outro');
-  assert.deepEqual(s.notebooks[0].subjects[0].blocks[0].pairs, [['a', 'b']]);
+  assert.equal(docText(s.notebooks[0].pages[0].doc), 'Termos a : b');
+});
+
+test('páginas e subpáginas: ordem, mover, mudar de lugar e excluir', () => {
+  const lib = library(emptyStudy());
+  let nb = newNotebook('IA', null, null, 'agora', ' Estudos de IA ');
+  assert.equal(nb.desc, 'Estudos de IA');
+  // Tópicos de áreas diferentes no mesmo notebook, sem duplicar, com a origem guardada.
+  const a = lib.track('ia-prompts')!.topics[0];
+  const b = lib.track('dev-python')!.topics[0];
+  nb = addTopicsAsPages(nb, [a, b, a], 'agora');
+  assert.deepEqual(nb.pages.map((p) => p.topicId), [null, a.id, b.id]);
+  const [p0, p1, p2] = nb.pages;
+  const sub = newPage('Exemplos', null, p1.id, 'agora');
+  nb = { ...nb, pages: [...nb.pages, sub] };
+  assert.deepEqual(pageTree(nb).map((x) => [x.page.name, x.depth]), [[p0.name, 0], [p1.name, 0], ['Exemplos', 1], [p2.name, 0]]);
+  // Mover só entre irmãs.
+  assert.deepEqual(pageTree(movePage(nb, p2.id, -1)).map((x) => x.page.id), [p0.id, p2.id, p1.id, sub.id]);
+  assert.equal(movePage(nb, sub.id, 1), nb);
+  // Um nível só: página com subpágina não vira subpágina; subpágina não recebe subpágina.
+  assert.equal(setPageParent(nb, p1.id, p0.id), nb);
+  assert.equal(setPageParent(nb, p2.id, sub.id), nb);
+  assert.equal(setPageParent(nb, p2.id, p0.id).pages.find((p) => p.id === p2.id)!.parentId, p0.id);
+  assert.equal(setPageParent(nb, sub.id, null).pages.find((p) => p.id === sub.id)!.parentId, null);
+  // Excluir a página leva as subpáginas junto.
+  assert.deepEqual(removePage(nb, p1.id).pages.map((p) => p.id), [p0.id, p2.id]);
+});
+
+test('notebooks antigos: assuntos viram páginas principais, sem perder nada', () => {
+  const s = normalizeStudy({ notebooks: [{ id: 'n', name: 'Inglês', updatedAt: 'ontem', subjects: [{ id: 'a', name: 'Cumprimentos', topicId: 't1', blocks: [{ id: 'b', kind: 'nota', title: 'Anotações', text: 'oi' }] }] }] });
+  const nb = s.notebooks[0];
+  assert.equal(nb.desc, '');
+  assert.deepEqual(nb.pages.map((p) => [p.id, p.name, p.parentId, p.topicId, p.updatedAt]), [['a', 'Cumprimentos', null, 't1', 'ontem']]);
+  assert.equal(docText(nb.pages[0].doc), 'oi');
+  // Subpágina apontando para página que não existe (ou para outra subpágina) vira principal.
+  const t = normalizeStudy({ notebooks: [{ id: 'n', pages: [{ id: 'a' }, { id: 'b', parentId: 'a' }, { id: 'c', parentId: 'b' }, { id: 'd', parentId: 'x' }] }] });
+  assert.deepEqual(t.notebooks[0].pages.map((p) => p.parentId), [null, 'a', null, null]);
+});
+
+test('texto rico: blocos antigos viram documento, sem perder nada', () => {
+  const { doc, sourceIds } = blocksToDoc([
+    { id: '1', kind: 'nota', title: 'Anotações', text: 'Linha um\n\nLinha dois', pairs: [], sourceIds: [] },
+    { id: '2', kind: 'nota', title: 'Projeto prático', text: 'Fazer uma lista', pairs: [], sourceIds: [] },
+    { id: '3', kind: 'pares', title: 'Vocabulário', text: '', pairs: [['Good morning', 'Bom dia'], ['Hi', '']], sourceIds: [] },
+    { id: '4', kind: 'fontes', title: 'Fontes', text: '', pairs: [], sourceIds: ['f1', 'f2', 'f1'] },
+    { id: '5', kind: 'nota', title: 'Anotações', text: '  ', pairs: [], sourceIds: [] },
+  ]);
+  assert.deepEqual(doc.content!.map((n) => n.type), ['paragraph', 'paragraph', 'heading', 'paragraph', 'heading', 'bulletList']);
+  assert.equal(docText(doc), 'Linha um Linha dois Projeto prático Fazer uma lista Vocabulário Good morning : Bom dia Hi');
+  assert.deepEqual(doc.content![5].content![0].content![0].content![0].marks, [{ type: 'bold' }]);
+  assert.deepEqual(sourceIds, ['f1', 'f2']);
+  // Página sem nada vira documento vazio (um parágrafo), nunca documento quebrado.
+  assert.deepEqual(blocksToDoc([]).doc, emptyDoc());
+  assert.equal(docIsEmpty(emptyDoc()), true);
+  assert.equal(docIsEmpty(doc), false);
+  assert.equal(docIsEmpty({ type: 'doc', content: [{ type: 'image', attrs: { src: 'x' } }] }), false);
+});
+
+test('texto rico: documento salvo passa inteiro; lixo vira documento vazio', () => {
+  const rico = { type: 'doc', content: [{ type: 'heading', attrs: { level: 1 }, content: [{ type: 'text', text: 'Título', marks: [{ type: 'highlight' }] }] }, { type: 'details', content: [{ type: 'detailsSummary' }, { type: 'detailsContent', content: [{ type: 'paragraph' }] }] }] };
+  const s = normalizeStudy({ notebooks: [{ id: 'n', pages: [{ id: 'p', doc: rico, sourceIds: ['f', 3] }, { id: 'q', doc: { type: 'x' } }, { id: 'r', doc: { type: 'doc', content: [{ nada: 1 }] } }] }] });
+  const [p, q, r] = s.notebooks[0].pages;
+  assert.deepEqual(p.doc, rico);
+  assert.deepEqual(p.sourceIds, ['f']);
+  assert.deepEqual(q.doc, emptyDoc());
+  assert.deepEqual(r.doc, emptyDoc());
+  assert.deepEqual(normalizeDoc(JSON.parse(JSON.stringify(rico))), rico);
 });
