@@ -482,20 +482,25 @@ export interface StudyBlock {
   sourceIds: string[];
 }
 
-export interface StudySubject {
+/** Página de um notebook. Subpágina = página com `parentId` (um nível só). */
+export interface StudyPage {
   id: string;
+  /** Página-mãe; null = página principal. */
+  parentId: string | null;
   name: string;
-  /** Tópico da Biblioteca que deu origem (se houver). */
+  /** Tópico da Biblioteca que deu origem (se houver). Só referência: a Biblioteca nunca muda. */
   topicId: string | null;
   blocks: StudyBlock[];
+  updatedAt: string;
 }
 
 export interface StudyNotebook {
   id: string;
   name: string;
-  /** Trilha de referência (opcional). */
+  desc: string;
+  /** Trilha de referência (opcional). Um notebook pode ter páginas de várias trilhas e áreas. */
   trackId: string | null;
-  subjects: StudySubject[];
+  pages: StudyPage[];
   log: { at: string; text: string }[];
   createdAt: string;
   updatedAt: string;

@@ -5370,3 +5370,49 @@ a.row {
   font-size: 0.8rem;
   font-weight: 600;
 }
+
+/* Estudos 2.0 (N11.1): páginas e subpáginas */
+.st-origin {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  flex-wrap: wrap;
+  font-size: 0.86rem;
+  color: var(--muted);
+}
+.st-origin > .icon {
+  flex: none;
+  color: var(--faint);
+  margin-top: 2px;
+}
+.st-origin > span:not(.pill) {
+  flex: 1;
+  min-width: 0;
+}
+.st-head-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.st-subpage > .row {
+  padding-left: 22px;
+}
+.st-pager a.btn {
+  text-align: center;
+}
+.st-actionbar {
+  flex-wrap: wrap;
+}
+.st-actionbar-text {
+  flex: 1 1 140px;
+}
+.st-actionbar-btns {
+  display: flex;
+  gap: 8px;
+  flex: 1 1 auto;
+  justify-content: flex-end;
+}
+.st-actionbar-btns .btn {
+  min-height: 42px;
+  padding-inline: 14px;
+}
