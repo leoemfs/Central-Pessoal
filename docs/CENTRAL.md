@@ -47,6 +47,8 @@
 *Ideias e problemas ainda sem classificar. Uma linha cada, com a data.*
 
 - 08/11: anexar os slides das apresentações (sexta sim, sexta não: avanços do setor de repasse e gestão de contratos de prestadores) dentro da reunião. Hoje só dá para guardar o link. Junta com "anexar PDF ou imagem" de Estudos.
+- 08/11: Estudos: cronograma de estudos com calendário dentro do módulo, sincronizado com a Agenda do app.
+- 08/11: Você: perguntas de carreira (emprego atual, carreira desejada, melhorias na atual, caminhos até a desejada) para a carreira desejada orientar os tópicos sugeridos em Estudos. Conferir com N10 (Objetivos) e N8.
 
 ## Itens
 | ID | Item | Frente | Tam. | Prior. | Situação | Documento |
@@ -90,11 +92,12 @@
 | M12 | Estudos: lápis para subir, descer e ocultar cartões (como no Início e em Finanças). Afeta: só Estudos | MOD | P | média | ideia | `futuro/modulo-estudos.md`, `futuro/navegacao-v2.md` |
 | M13 | Estudos: busca dentro do módulo (tópicos, notebooks, fontes); parte do E6. Afeta: Busca | MOD | P | média | ideia | `futuro/modulo-estudos.md`, `futuro/navegacao-v2.md` |
 | M14 | Estudos: anexar PDF ou imagem no notebook (hoje só link). Afeta: backup (arquivos pesados) | MOD | M | baixa | ideia | `futuro/modulo-estudos.md` |
-| M15 | Estudos: editor de mapas mentais (arrastar e ligar ideias). Afeta: só Estudos | MOD | M | baixa | ideia | `futuro/modulo-estudos.md` |
+| M15 | Estudos: editor de mapas mentais (arrastar e ligar ideias). Afeta: só Estudos | MOD | M | baixa | ideia (entra no N11.3) | `futuro/modulo-estudos.md` |
 | N9 | Sincronizar com a conta Google (pasta escondida do Drive; site e Android com os mesmos dados). Depois do N4. *Na conversa do Android foi anotado como N8; o código certo é N9.* | NOVO | M | baixa | ideia | `futuro/app-android.md` ("Sincronização") |
 | N10 | Módulo **Objetivos**: central de **todas as metas do app** (caixinhas, hábitos, ciclos de estudo, carreira, orçamento, metas do Você), com criar, editar e concluir dali; a meta continua morando no módulo dela. Objetivos grandes juntam várias metas. Absorve as metas de carreira (N8.4). Partes: N10.0 prévia, N10.1 central de metas, N10.2 objetivos grandes. Afeta: Finanças, Núcleo, Estudos, Carreira, Você, Início, Jornada | NOVO | G | média | especificado (prévia antes) | `futuro/modulo-objetivos.md` |
 | M16 | **Foco** no Núcleo › Mente: temporizador de foco (ex.: 25 min + pausa), com histórico; ligado a um tópico de Estudos conta tempo de estudo. Afeta: Núcleo, Estudos, Revisão | MOD | P | média | ideia | — |
 | M17 | **Banco de ideias** em Notas: aba "Ideias" e o botão "transformar em" tarefa, objetivo ou notebook. Afeta: Notas, Agenda, Estudos | MOD | P | baixa | ideia | — |
+| N11 | **Estudos 2.0**: notebooks com páginas e subpáginas e tópicos de várias áreas; editor de texto em blocos (completo no computador, simples no celular); mapas mentais em árvore com zoom; exportar/importar Estudos com tratamento de conflito; tutorial; conteúdo nos tópicos da Biblioteca. Partes N11.1 a N11.7. Absorve o M15. Afeta: Estudos, backup | MOD | G | alta | ideia (especificando) | `futuro/estudos-v2.md` |
 | N7 | Estudos × Jornada: XP, ouro e INT por tópico, ciclo e constância; selos, Coruja e missões | NOVO | M | baixa | especificado (só documento) | `futuro/estudos-jornada.md` |
 | N8 | Módulo Carreira (próprio, fora de Estudos): vagas e candidaturas, metas de carreira, currículo e conquistas, trabalho atual (cargos, salários, feedbacks). Dividido em N8.0 a N8.4 | NOVO | G | média | parte pronta: Vagas (v0.22), Trabalho e Reuniões (v0.23), Projetos e Agenda automática (v0.24); faltam N8.3 Currículo e N8.4 Metas (agora dentro de Objetivos, N10) | `futuro/modulo-carreira.md` |
 
