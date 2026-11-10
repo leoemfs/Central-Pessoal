@@ -85,7 +85,7 @@ Não são do Android, mas a mudança fica mais segura com elas (`docs/auditoria-
 | **Play Store (teste fechado)** | Publica para uma lista de e-mails (você e amigos) | Atualiza sozinho, link fácil | Conta de desenvolvedor (taxa única de US$ 25) e revisão do Google |
 | **Play Store (público)** | Aberto a todos | Alcance | Política de privacidade, ficha da loja, revisões mais lentas |
 
-Recomendação: começar por **APK direto** e passar para o **teste fechado** quando for mandar para os amigos.
+**Decidido em 10/11/2026:** começar por **APK direto**. Passar para o teste fechado da Play Store quando for mandar para os amigos.
 
 ### Requisitos do sistema
 - Android mínimo: **8.0** (canais de notificação). Alvo: a versão exigida pela Play Store no ano.

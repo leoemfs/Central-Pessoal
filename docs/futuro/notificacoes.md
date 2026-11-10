@@ -142,3 +142,9 @@ StudyCycle.schedule?: { days: number[]; time: string } | null;
 - **Sem permissão especial:** o Android pode atrasar um aviso em alguns minutos (até uns 10 com economia de bateria). Serve para contas, hábitos e resumos.
 - **Com a permissão "Alarmes e lembretes":** hora exata, mas a pessoa precisa liberar numa tela do sistema, e a Play Store só aceita essa permissão em apps de agenda ou alarme.
 - **Recomendação:** pedir só se a pessoa ligar lembretes de compromisso ou reunião, explicando o motivo. O resto usa o modo comum.
+
+## Decisões do Leonardo (10/11/2026)
+1. **Contas e faturas em todos os níveis** (baixa, média e alta): sim.
+2. **Juntar hábitos por período** (manhã, tarde, noite) na alta: sim, como opção que liga e desliga.
+3. **Estudos:** cada ciclo ganha um cronograma (dias da semana e horário). **Treinos:** o aviso usa o hábito ligado ao treino (sem plano próprio).
+4. **Hora exata:** pedir a permissão de "Alarmes e lembretes" só para compromissos e reuniões. O resto pode atrasar alguns minutos.

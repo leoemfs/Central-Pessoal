@@ -59,9 +59,9 @@
 | E12 | Trocar de módulo sem passar pelo Início: tocar de novo no módulo em que você está mostra os favoritos na barra | EXP | P | alta | pronto (v0.25) | `futuro/navegacao-v2.md` |
 | E13 | Configurações › **Personalização**: tema e cor, favoritos do Início, jeito da barra (favorito no mesmo lugar, ao lado do Início ou no centro), "tocar de novo mostra os favoritos" e "esconder as barras ao rolar" | EXP | P | alta | pronto (v0.25) | `futuro/navegacao-v2.md` |
 | C2 | Hábitos: nome do hábito aparecia uma letra por linha quando havia "Não falhe 2x" e "Iniciar" no cartão | COR | P | alta | pronto (v0.18) | — |
-| C3 | **Registro defeituoso deixa o app em branco**: conferir os campos ao abrir os dados, tela de erro com saída (exportar, recarregar, Configurações) e "desfazer importação" | COR | M | **alta** | ideia (análise de nov/2026) | `auditoria-2026-11.md` |
+| C3 | **Registro defeituoso deixa o app em branco**: conferir os campos ao abrir os dados, tela de erro com saída (exportar, recarregar, Configurações) e "desfazer importação" | COR | M | **alta** | aprovado (10/11) | `auditoria-2026-11.md` |
 | C4 | Salvamento de reserva pode perder dados em silêncio (avisar e usar a cópia mais nova) | COR | P | média | ideia | `auditoria-2026-11.md` |
-| C5 | Rodar os testes em todo PR e antes de publicar (hoje só compila) | COR | P | média | ideia | `auditoria-2026-11.md` |
+| C5 | Rodar os testes em todo PR e antes de publicar (hoje só compila) | COR | P | média | aprovado (10/11) | `auditoria-2026-11.md` |
 | C6 | Sequência de hábitos lenta para quem nunca falha (86 ms com 5 anos e 25 hábitos) | COR | P | média | ideia | `auditoria-2026-11.md` |
 | C7 | Gravar por coleção, só o que mudou (hoje regrava o banco inteiro a cada toque) | COR | M | média | ideia | `auditoria-2026-11.md` |
 | C8 | Faturas agrupadas numa passada só (Início, Agenda, Próximos) | COR | P | baixa | ideia | `auditoria-2026-11.md` |
@@ -114,6 +114,7 @@
 ## Fila aprovada
 *O que pode ser construído, na ordem. Vazia = nada para construir.*
 
+- **Antes de tudo (aprovado em 10/11): C3** (registro defeituoso deixa o app em branco: conferir os dados ao abrir, tela de erro com saída e desfazer importação) **e C5** (rodar os testes em todo PR e antes de publicar). Depois segue o E14.
 - **Implementação nº 1: E14, primeira abertura + tutorial da barra** (pedido em 10/11; prévia feita, aguardando o "aprovado" para construir). Junta o resto do E1.
 - **N8, módulo Carreira** (aprovado em 08/11), em partes: N8.0 prévia (feita) → N8.1 Vagas (feita, v0.22) → N8.2 Trabalho atual e Reuniões (feita, v0.23) → N8.5 Agenda automática e N8.6 Projetos (feitas, v0.24) → N8.3 Currículo → N8.4 Metas (agora dentro de Objetivos, N10). Semana de 09/11 a 14/11: testes e anotações, e no máximo uma parte por dia se houver folga.
 
