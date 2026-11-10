@@ -37,7 +37,10 @@ A barra de baixo é modular (muda dentro de cada módulo). Sem orientação, que
 ## Regras
 - **Pular:** usa o padrão (Finanças, Diário e Agenda; tudo à vista). O tutorial pode ser pulado sozinho.
 - **Rever o tutorial:** Mais › **Como usar a barra**.
-- **Quem já usa o app** não vê a entrevista sozinho: aparece um convite no Início ("Conheça a nova barra · 1 minuto") que abre só o tutorial.
+- **Quem já usa o app** (como o Leonardo) não fica de fora. Aparece **uma vez** no Início um cartão "Monte o app do seu jeito · 2 minutos", com dois botões:
+  - **"Fazer agora"**: abre a mesma entrevista, **já preenchida com o que a pessoa usa hoje** (favoritos, módulos com dados, jeito da barra, cor, escolha da Jornada). Ela só ajusta. Nada é apagado: módulo desligado só fica guardado no Mais;
+  - **"Só o tutorial da barra"**: abre direto o tutorial.
+- **Refazer quando quiser:** Configurações › Personalização › **"Refazer a montagem do app"** e Mais › **"Como usar a barra"**.
 - **A entrevista do Você** (rotina, metas, dinheiro) continua separada, para quando a pessoa quiser se aprofundar. Os primeiros passos dela (nome e áreas) passam a vir daqui.
 - Tudo o que foi escolhido muda depois em **Configurações › Personalização**.
 

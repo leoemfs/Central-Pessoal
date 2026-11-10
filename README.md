@@ -130,6 +130,10 @@ src/
     Ajustes.tsx, Mais.tsx
 ```
 
+## Análises
+
+- [Análise profunda de novembro de 2026](docs/auditoria-2026-11.md): código, segurança, testes de gargalo com 1 a 10 anos de dados, limpeza e ressalvas. As correções estão na Central (C3 a C9, M18 a M20).
+
 ## Implementações futuras
 
 Documentos de funcionalidades planejadas, ainda **sem desenvolvimento**:
