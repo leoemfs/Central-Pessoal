@@ -59,6 +59,17 @@
 | E12 | Trocar de módulo sem passar pelo Início: tocar de novo no módulo em que você está mostra os favoritos na barra | EXP | P | alta | pronto (v0.25) | `futuro/navegacao-v2.md` |
 | E13 | Configurações › **Personalização**: tema e cor, favoritos do Início, jeito da barra (favorito no mesmo lugar, ao lado do Início ou no centro), "tocar de novo mostra os favoritos" e "esconder as barras ao rolar" | EXP | P | alta | pronto (v0.25) | `futuro/navegacao-v2.md` |
 | C2 | Hábitos: nome do hábito aparecia uma letra por linha quando havia "Não falhe 2x" e "Iniciar" no cartão | COR | P | alta | pronto (v0.18) | — |
+| C3 | **Registro defeituoso deixa o app em branco**: conferir os campos ao abrir os dados, tela de erro com saída (exportar, recarregar, Configurações) e "desfazer importação" | COR | M | **alta** | ideia (análise de nov/2026) | `auditoria-2026-11.md` |
+| C4 | Salvamento de reserva pode perder dados em silêncio (avisar e usar a cópia mais nova) | COR | P | média | ideia | `auditoria-2026-11.md` |
+| C5 | Rodar os testes em todo PR e antes de publicar (hoje só compila) | COR | P | média | ideia | `auditoria-2026-11.md` |
+| C6 | Sequência de hábitos lenta para quem nunca falha (86 ms com 5 anos e 25 hábitos) | COR | P | média | ideia | `auditoria-2026-11.md` |
+| C7 | Gravar por coleção, só o que mudou (hoje regrava o banco inteiro a cada toque) | COR | M | média | ideia | `auditoria-2026-11.md` |
+| C8 | Faturas agrupadas numa passada só (Início, Agenda, Próximos) | COR | P | baixa | ideia | `auditoria-2026-11.md` |
+| C9 | Segurança: política de conteúdo (CSP), conferir links, bloqueio do app (PIN/digital) e backup com senha | COR | M | média | ideia | `auditoria-2026-11.md` |
+| M18 | Início mais leve: cada cartão só recalcula quando o seu dado muda | MOD | M | baixa | ideia | `auditoria-2026-11.md` |
+| M19 | Carregar Estudos, Carreira e Jornada só ao abrir (app inicial menor) | MOD | P | baixa | ideia | `auditoria-2026-11.md` |
+| M20 | Limpeza: tirar 6 funções e 8 estilos sem uso, dividir arquivos grandes e os estilos por módulo, trocar `confirm()` por confirmação do app | MOD | M | baixa | ideia | `auditoria-2026-11.md` |
+| N3.3 | **Níveis de notificação** (baixa, média, alta, personalizado) com "Me lembrar" e sino; parte 1 sem Android: marcações + lista de avisos dos próximos 7 dias | NOVO | M | média | especificado (simulado) | `futuro/notificacoes.md` |
 | M1 | Hábitos: pausar e arquivar | MOD | P | alta | especificado | `futuro/habitos-pausar-arquivar.md` |
 | E14 | **Primeira abertura**: entrevista de toque (áreas → módulos à vista → 3 favoritos → ritmo do Diário → barra e cor → **Jornada: o que é e se quer ou não**) e **tutorial interativo da barra** (6 passos); quem já usa recebe uma vez o convite "Monte o app do seu jeito" (entrevista já preenchida com o que usa hoje, ou só o tutorial) e pode refazer em Personalização; Mais › Como usar a barra. Junta com o resto do E1 (ocultar módulos e ritmo do Diário) | EXP | M | **1ª** | especificado (prévia feita) | `futuro/primeira-abertura.md` |
 | E1 | Favoritos e módulos: os 3 do meio da barra no Início são os favoritos (escolhidos pela pessoa); ocultar módulos; ordem no Mais; Orçamento e Relatórios saem do Mais; ritmo de cada módulo (Diário) | EXP | M | alta | parte pronta (v0.18): favoritos e Mais; falta ocultar módulos, ordem no Mais e ritmo do Diário | `futuro/modulos-personalizaveis.md`, `futuro/navegacao-v2.md` |
@@ -81,7 +92,7 @@
 | N3 | Notificações e **lembretes** (tarefa ou compromisso com "me lembrar"; sai o "Lembretes, em breve" do menu). Afeta: Agenda, Carreira | NOVO | M | baixa | especificado | `futuro/notificacoes.md` |
 | N3.1 | Notificações já no app (sem servidor): **"Lembrar no celular"** (compromisso, conta, revisão → agenda do celular, hora certa, Android e iPhone) e **bolinha no ícone** do app com o que está pendente hoje | NOVO | P | média | ideia | `futuro/notificacoes.md` |
 | N3.2 | **Resumo do dia** no Android (Chrome, app instalado): o celular acorda o app ~1 vez por dia e avisa "2 contas vencem amanhã" (sem hora certa) | NOVO | M | baixa | ideia | `futuro/notificacoes.md` |
-| N4 | App Android | NOVO | G | baixa | especificado | `futuro/app-android.md` |
+| N4 | App Android (preparo conferido em 10/11: 10 pontos de adaptação, passo a passo da mudança e lista de testes) | NOVO | G | baixa | especificado | `futuro/app-android.md` |
 | N5 | Código de barras, base de produtos e nota fiscal | NOVO | G | baixa | ideia | `futuro/precos-v2.md` ("Mais adiante") |
 | N6 | Módulo Estudos e Carreira: Biblioteca (áreas, trilhas, tópicos de referência), Ciclos pessoais, Meus notebooks, Fontes, Mapas mentais e Roadmaps | NOVO | G | média | pronto (v0.21), em teste por 3 dias | `futuro/modulo-estudos.md` |
 | N8.5 | Carreira × Agenda automática: tudo que tem data em Carreira (reuniões, passos das vagas e, depois, projetos) aparece sozinho na Agenda do app e se atualiza quando muda; some se for excluído. Sem botão "Pôr na Agenda" | NOVO | P | alta | pronto (v0.24) | `futuro/modulo-carreira.md` |
