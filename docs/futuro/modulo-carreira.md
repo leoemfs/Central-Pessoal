@@ -75,6 +75,8 @@ Total: **G**. Dividir em partes, uma versão cada:
 | N8.3 | **Currículo e conquistas** (+ trazer ciclos concluídos de Estudos) | M |
 | N8.4 | **Metas de carreira** (passos ligados a Estudos e Vagas) + cartão no Início | P |
 
+> **09/11:** as metas de carreira (N8.4) passam a morar no módulo **Objetivos** (N10, `modulo-objetivos.md`), área Carreira. O botão **Metas** da barra de Carreira abrirá Objetivos filtrado por Carreira.
+
 Ordem recomendada: N8.0 → N8.1 → N8.2 → N8.3 → N8.4 (vagas primeiro porque é o que tem data e cobra ação).
 
 ## Fora do escopo
