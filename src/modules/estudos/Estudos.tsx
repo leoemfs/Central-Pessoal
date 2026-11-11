@@ -57,6 +57,8 @@ export function Estudos({ route }: ViewProps) {
       break;
     case 'mapa':
       page = <MapaPage key={a} id={a} />;
+      // O mapa tem os próprios botões de criar ideias, logo abaixo do desenho.
+      fab = false;
       break;
     default:
       page = <Home />;

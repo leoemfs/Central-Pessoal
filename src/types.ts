@@ -528,12 +528,25 @@ export interface StudySource {
   createdAt: string;
 }
 
+/** Uma ideia do mapa mental. */
+export interface MapNode {
+  id: string;
+  text: string;
+  /** Cor própria; null = herda a cor do ramo. */
+  color: string | null;
+  /** Recolhida: as ideias de dentro ficam guardadas, mas escondidas no desenho. */
+  collapsed: boolean;
+  children: MapNode[];
+}
+
 export interface StudyMap {
   id: string;
   name: string;
-  center: string;
-  branches: { id: string; label: string; leaves: string[] }[];
+  /** Ideia central; os ramos e sub-ramos ficam em `children`. */
+  root: MapNode;
   notebookId: string | null;
+  /** Página do notebook a que o mapa se refere (opcional). */
+  pageId: string | null;
   createdAt: string;
   updatedAt: string;
 }

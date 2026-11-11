@@ -5191,46 +5191,6 @@ a.row {
 }
 
 /* Mapas mentais */
-.st-map {
-  display: block;
-  width: 100%;
-  height: auto;
-}
-.st-map-wrap {
-  border-radius: var(--radius);
-  border: 1px solid var(--border);
-  background: var(--surface);
-  padding: 6px;
-}
-.st-map-branchline {
-  stroke: var(--accent);
-  stroke-width: 2;
-  opacity: 0.6;
-}
-.st-map-leafline {
-  stroke: var(--border-strong);
-  stroke-width: 1.5;
-}
-.st-map-node {
-  fill: var(--raised-2);
-}
-.st-map-nodetext {
-  fill: var(--text);
-  font-size: 12px;
-  font-weight: 600;
-}
-.st-map-leaf {
-  fill: var(--muted);
-  font-size: 11px;
-}
-.st-map-center {
-  fill: var(--accent);
-}
-.st-map-centertext {
-  fill: var(--on-accent);
-  font-size: 14px;
-  font-weight: 700;
-}
 .st-map-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -5251,9 +5211,6 @@ a.row {
 }
 .st-map-card:hover {
   border-color: var(--border-strong);
-}
-.st-map.small .st-map-leaf {
-  font-size: 13px;
 }
 .st-map-card-text {
   display: flex;
@@ -5728,5 +5685,134 @@ a.row {
   .main > .fab {
     width: 58px;
     margin: 0;
+  }
+}
+
+/* Estudos 2.0 (N11.3): mapas mentais em árvore */
+.mm-canvas {
+  position: relative;
+  height: min(58vh, 520px);
+  min-height: 300px;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  background: var(--surface);
+  overflow: hidden;
+  outline: none;
+}
+.mm-canvas:focus-visible {
+  border-color: var(--accent);
+}
+.mm-canvas svg {
+  display: block;
+  /* O gesto é do mapa (arrastar e pinça), não da página. */
+  touch-action: none;
+  cursor: grab;
+  user-select: none;
+  -webkit-user-select: none;
+}
+.mm-canvas svg:active {
+  cursor: grabbing;
+}
+.mm-node {
+  cursor: pointer;
+}
+.mm-box {
+  fill: var(--raised-2);
+  stroke-width: 1.5;
+}
+.mm-node.root .mm-box {
+  fill: var(--accent);
+  stroke: none;
+}
+.mm-node.on .mm-box {
+  stroke: var(--text);
+  stroke-width: 2.5;
+  stroke-opacity: 1;
+}
+.mm-text {
+  fill: var(--text);
+  pointer-events: none;
+}
+.mm-node.root .mm-text {
+  fill: var(--on-accent);
+}
+.mm-toggle-dot {
+  fill: var(--surface);
+  stroke-width: 1.6;
+}
+.mm-toggle-text {
+  fill: var(--text);
+  font-size: 11px;
+  font-weight: 700;
+  pointer-events: none;
+}
+.mm-zoom {
+  position: absolute;
+  right: 10px;
+  bottom: 10px;
+  display: flex;
+  gap: 6px;
+}
+.mm-zoom button {
+  min-width: 42px;
+  height: 42px;
+  padding: 0 12px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: var(--tabbar-bg);
+  backdrop-filter: blur(10px);
+  color: var(--text);
+  font-size: 1.2rem;
+  font-weight: 600;
+}
+.mm-zoom button.wide {
+  font-size: 0.85rem;
+}
+.mm-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.mm-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.mm-actions .btn.small {
+  min-height: 42px;
+}
+.mm-colors {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.mm-swatch {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  color: var(--text);
+  font-weight: 700;
+}
+.mm-swatch.auto {
+  background: var(--raised-2);
+  border-color: var(--border-strong);
+}
+.mm-swatch.on {
+  border-color: var(--text);
+  box-shadow: 0 0 0 2px var(--surface) inset;
+}
+.mm-tip {
+  margin: 0;
+}
+.mm-thumb {
+  display: block;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  pointer-events: none;
+}
+@media (min-width: 900px) {
+  .mm-canvas {
+    height: min(64vh, 640px);
   }
 }

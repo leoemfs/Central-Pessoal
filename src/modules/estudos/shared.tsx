@@ -1,9 +1,10 @@
 import { useState, type ReactNode } from 'react';
 import { useStore } from '../../store';
 import { go } from '../../router';
-import type { SourceKind, StudyData, StudyMap, StudyNotebook, StudySource, StudyStatus } from '../../types';
-import { library, newNotebook, SOURCE_KINDS, sourceKind, STATUS_LABEL, touch, trackPath, type Library, type TrackView } from '../../estudos';
+import type { SourceKind, StudyData, StudyNotebook, StudySource, StudyStatus } from '../../types';
+import { library, newMap, newNotebook, SOURCE_KINDS, sourceKind, STATUS_LABEL, touch, trackPath, type Library, type TrackView } from '../../estudos';
 import { Field, Icon, MultiChips, notify, Pill, Sheet, type IconName } from '../../ui';
+import { fromBranches } from '../../mapas';
 import { uid } from '../../utils';
 
 /** Dados de Estudos + biblioteca montada + atalho para alterar só a parte de estudos. */
@@ -107,61 +108,6 @@ export function SourceCard({ s, onEdit, extra }: { s: { title: string; url: stri
   );
 }
 
-// ---------- Mapa mental (desenho) ----------
-
-/** Desenho radial: ideia central, ramos em volta e folhas mais para fora. */
-export function MapDrawing({ map, small }: { map: { name: string; center: string; branches: { label: string; leaves: string[] }[] }; small?: boolean }) {
-  const W = 400;
-  const H = 340;
-  const cx = W / 2;
-  const cy = H / 2;
-  const n = Math.max(1, map.branches.length);
-  const lines: ReactNode[] = [];
-  const nodes: ReactNode[] = [];
-  const cut = (s: string, max: number) => (s.length > max ? `${s.slice(0, max - 1)}…` : s);
-  map.branches.forEach((b, i) => {
-    const ang = -Math.PI / 2 + (i / n) * Math.PI * 2;
-    const x = cx + Math.cos(ang) * 92;
-    const y = cy + Math.sin(ang) * 74;
-    const leaves = b.leaves.slice(0, 4);
-    const spread = Math.min(0.5, (Math.PI * 2) / n / 2.4);
-    leaves.forEach((leaf, j) => {
-      const a2 = ang + (leaves.length === 1 ? 0 : (j / (leaves.length - 1) - 0.5) * spread * 2);
-      const fx = cx + Math.cos(a2) * 168;
-      const fy = cy + Math.sin(a2) * 140;
-      lines.push(<line key={`l${i}-${j}`} x1={x} y1={y} x2={fx} y2={fy} className="st-map-leafline" />);
-      nodes.push(
-        <text key={`t${i}-${j}`} x={fx} y={fy + 4} textAnchor="middle" className="st-map-leaf">
-          {cut(leaf, 14)}
-        </text>,
-      );
-    });
-    lines.push(<line key={`b${i}`} x1={cx} y1={cy} x2={x} y2={y} className="st-map-branchline" />);
-    const label = cut(b.label, 14);
-    const w = label.length * 7 + 22;
-    nodes.push(
-      <g key={`n${i}`}>
-        <rect x={x - w / 2} y={y - 14} width={w} height={28} rx={14} className="st-map-node" />
-        <text x={x} y={y + 4} textAnchor="middle" className="st-map-nodetext">
-          {label}
-        </text>
-      </g>,
-    );
-  });
-  const center = cut(map.center || map.name, 16);
-  const cw = center.length * 8 + 34;
-  return (
-    <svg className={`st-map${small ? ' small' : ''}`} viewBox={`0 0 ${W} ${H}`} role="img" aria-label={`Mapa mental: ${map.name}`}>
-      {lines}
-      {nodes}
-      <rect x={cx - cw / 2} y={cy - 18} width={cw} height={36} rx={18} className="st-map-center" />
-      <text x={cx} y={cy + 5} textAnchor="middle" className="st-map-centertext">
-        {center}
-      </text>
-    </svg>
-  );
-}
-
 // ---------- Formulários ----------
 
 /** Escolher uma trilha (opcional), agrupada por área. */
@@ -216,7 +162,7 @@ export function NotebookSheet({ onClose, notebook, trackId }: { onClose: () => v
       notebooks: s.notebooks.filter((n) => n.id !== notebook.id),
       cycles: s.cycles.map((c) => (c.notebookId === notebook.id ? { ...c, notebookId: null } : c)),
       sources: s.sources.map((x) => ({ ...x, notebookIds: x.notebookIds.filter((i) => i !== notebook.id) })),
-      maps: s.maps.map((m) => (m.notebookId === notebook.id ? { ...m, notebookId: null } : m)),
+      maps: s.maps.map((m) => (m.notebookId === notebook.id ? { ...m, notebookId: null, pageId: null } : m)),
     }));
     onClose();
     notify('Notebook excluído', 'Fontes, mapas e ciclos continuam guardados.');
@@ -330,21 +276,12 @@ export function SourceSheet({ onClose, source, preset, notebookId }: { onClose: 
   );
 }
 
-export function NewMapSheet({ onClose, notebookId }: { onClose: () => void; notebookId?: string }) {
+export function NewMapSheet({ onClose, notebookId, pageId, center }: { onClose: () => void; notebookId?: string; pageId?: string; center?: string }) {
   const { set } = useStudy();
-  const [name, setName] = useState('');
+  const [name, setName] = useState(center ?? '');
   function save() {
     if (!name.trim()) return notify('Dê um nome ao mapa');
-    const now = nowISO();
-    const m: StudyMap = {
-      id: uid(),
-      name: name.trim(),
-      center: name.trim(),
-      branches: ['Ideia 1', 'Ideia 2', 'Ideia 3'].map((label) => ({ id: uid(), label, leaves: [] })),
-      notebookId: notebookId ?? null,
-      createdAt: now,
-      updatedAt: now,
-    };
+    const m = newMap(name, fromBranches(name.trim(), [{ label: 'Ideia 1', leaves: [] }, { label: 'Ideia 2', leaves: [] }, { label: 'Ideia 3', leaves: [] }]), nowISO(), notebookId ?? null, pageId ?? null);
     set((s) => ({ ...s, maps: [m, ...s.maps] }));
     onClose();
     go(`estudos/mapa/${m.id}`);
@@ -359,7 +296,7 @@ export function NewMapSheet({ onClose, notebookId }: { onClose: () => void; note
         </button>
       }
     >
-      <Field label="Ideia central" hint="Depois você troca os ramos e escreve as ideias de cada um.">
+      <Field label="Ideia central" hint="Fica no meio do mapa. Depois você cria ramos e sub-ramos em volta dela.">
         <input className="input" value={name} onChange={(e) => setName(e.target.value)} placeholder="Ex.: Front-end, Verbos irregulares…" autoFocus />
       </Field>
     </Sheet>

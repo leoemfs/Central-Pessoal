@@ -3,8 +3,10 @@ import { go } from '../../router';
 import { cycleCounts, docIsEmpty, movePage, newPage, pageTree, removePage, setPageParent, topicState, touch, trackPath } from '../../estudos';
 import type { RichNode, StudyNotebook, StudyPage } from '../../types';
 import { Empty, Field, Icon, MultiChips, notify, PageHeader, Sheet, type IconName } from '../../ui';
+import { countNodes } from '../../mapas';
 import { formatDateTime } from '../../utils';
 import { Missing } from './Biblioteca';
+import { MapThumb } from './Mapas';
 import { DualProgress, NewMapSheet, NotebookSheet, nowISO, Path, SourceCard, SourceSheet, StatusPill, trackCrumbs, useStudy } from './shared';
 
 // O editor é pesado: só é baixado quando uma página é aberta.
@@ -60,7 +62,7 @@ export function NotebooksPage() {
 }
 
 type Extra = { label: string; hint: string; icon: IconName; run: () => void }[];
-type Edit = { kind: 'sources' } | { kind: 'page'; page: StudyPage | null; parentId: string | null } | { kind: 'notebook' } | { kind: 'source' } | { kind: 'map' };
+type Edit = { kind: 'sources' } | { kind: 'page'; page: StudyPage | null; parentId: string | null } | { kind: 'notebook' } | { kind: 'source' } | { kind: 'map'; pageId?: string; center?: string };
 
 /** #/estudos/notebook/:id (capa: páginas, fontes, mapas…) e #/estudos/notebook/:id/:pagina (uma página). */
 export function NotebookPage({ id, pageId, setExtra }: { id: string; pageId: string; setExtra: (x: Extra | undefined) => void }) {
@@ -72,6 +74,7 @@ export function NotebookPage({ id, pageId, setExtra }: { id: string; pageId: str
   const page = nb?.pages.find((p) => p.id === pageId);
   useEffect(() => {
     const extra: Extra = [{ label: 'Nova página neste notebook', hint: 'Um espaço novo para anotar', icon: 'plus', run: () => setEdit({ kind: 'page', page: null, parentId: null }) }];
+    if (page) extra.push({ label: 'Mapa mental desta página', hint: 'Ideias ligadas sobre este assunto', icon: 'mindmap', run: () => setEdit({ kind: 'map', pageId: page.id, center: page.name }) });
     if (page && !page.parentId) extra.push({ label: 'Subpágina aqui', hint: 'Uma parte menor desta página', icon: 'note', run: () => setEdit({ kind: 'page', page: null, parentId: page.id }) });
     setExtra(extra);
     return () => setExtra(undefined);
@@ -101,7 +104,7 @@ export function NotebookPage({ id, pageId, setExtra }: { id: string; pageId: str
     <>
       {edit?.kind === 'notebook' && <NotebookSheet notebook={nb} onClose={() => setEdit(null)} />}
       {edit?.kind === 'source' && <SourceSheet notebookId={nb.id} onClose={() => setEdit(null)} />}
-      {edit?.kind === 'map' && <NewMapSheet notebookId={nb.id} onClose={() => setEdit(null)} />}
+      {edit?.kind === 'map' && <NewMapSheet notebookId={nb.id} pageId={edit.pageId} center={edit.center} onClose={() => setEdit(null)} />}
       {edit?.kind === 'page' && (
         <PageSheet
           notebook={nb}
@@ -146,6 +149,7 @@ export function NotebookPage({ id, pageId, setExtra }: { id: string; pageId: str
     const i = tree.findIndex((x) => x.page.id === page.id);
     const prev = tree[i - 1]?.page;
     const next = tree[i + 1]?.page;
+    const pageMaps = study.maps.filter((x) => x.notebookId === nb.id && x.pageId === page.id);
     const pageSources = page.sourceIds.map((sid) => study.sources.find((x) => x.id === sid)).filter((x): x is NonNullable<typeof x> => !!x);
     return (
       <>
@@ -191,6 +195,32 @@ export function NotebookPage({ id, pageId, setExtra }: { id: string; pageId: str
           ) : (
             <p className="muted small" style={{ margin: 0 }}>
               Ligue aqui os sites, vídeos e livros que você usou nesta página.
+            </p>
+          )}
+        </section>
+
+        <section className="card">
+          <div className="card-head">
+            <h2>Mapas desta página</h2>
+            <button type="button" className="link" onClick={() => setEdit({ kind: 'map', pageId: page.id, center: page.name })}>
+              Novo
+            </button>
+          </div>
+          {pageMaps.length ? (
+            <div className="st-map-grid">
+              {pageMaps.map((x) => (
+                <a key={x.id} className="st-map-card" href={`#/estudos/mapa/${x.id}`}>
+                  <MapThumb root={x.root} name={x.name} />
+                  <span className="st-map-card-text">
+                    <strong>{x.name}</strong>
+                    <small className="muted">{plural(countNodes(x.root) - 1, 'ideia', 'ideias')}</small>
+                  </span>
+                </a>
+              ))}
+            </div>
+          ) : (
+            <p className="muted small" style={{ margin: 0 }}>
+              Organize este assunto num mapa: uma ideia no centro e os ramos em volta.
             </p>
           )}
         </section>
@@ -415,7 +445,10 @@ export function NotebookPage({ id, pageId, setExtra }: { id: string; pageId: str
                   </span>
                   <div className="row-body">
                     <span className="row-title">{m.name}</span>
-                    <span className="row-meta">{m.branches.length} ramos</span>
+                    <span className="row-meta">
+                      {plural(countNodes(m.root) - 1, 'ideia', 'ideias')}
+                      {m.pageId && nb.pages.some((p) => p.id === m.pageId) && ` · ${nb.pages.find((p) => p.id === m.pageId)!.name}`}
+                    </span>
                   </div>
                   <Icon name="right" size={18} />
                 </a>
