@@ -136,7 +136,7 @@
 ## Feito
 | Versão | O que entrou | PR |
 |---|---|---|
-| v0.39 | N9.0: dados preparados para sincronizar (data de alteração e exclusões registradas em todos os módulos, num lugar só; ids estáveis para parcelas, contas fixas, receitas, recargas e categorias padrão). Nada muda na tela | #39 |
+| v0.39 | N9.0: dados preparados para sincronizar (data de alteração e exclusões registradas em todos os módulos, num lugar só; ids estáveis para parcelas, contas fixas, receitas, recargas e categorias padrão). Nada muda na tela | #40 |
 | v0.38 | M7: Revisão semanal com "Autocuidado e dinheiro guardado" (minutos de meditação e respiração, treinos, alongamentos e caminhadas; guardado e tirado das caixinhas; gasto e saldo dos vales) | #38 |
 | v0.37 | N8.3 Carreira › Currículo: abas Trabalho · Currículo; experiências, formação, cursos e certificados, idiomas, habilidades e conquistas (com resultado); "Trazer de Estudos" põe ciclos concluídos como curso; "Item no currículo" no botão + | #38 |
 | v0.36 | M8: ao lançar no cartão, "Entra na fatura de" com a fatura calculada já marcada e as vizinhas para trocar (também ao editar; parcelas e conta fixa seguem a escolhida); aviso ao salvar; o cartão mostra a fatura aberta (e a que vence no mês, se for outra); linha "No cartão este mês" na aba Mês | #38 |
