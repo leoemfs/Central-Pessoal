@@ -41,7 +41,7 @@ const plusMinutes = (day: string, time: string, minutes: number) => {
   return `${d}T${String(Math.floor(t / 60)).padStart(2, '0')}:${String(t % 60).padStart(2, '0')}:00`;
 };
 
-const FOOTER = 'Criado pela Central Pessoal: mude pelo app (o que mudar aqui não volta para o app).';
+const FOOTER = 'Criado pelo CP Hub: mude pelo app (o que mudar aqui não volta para o app).';
 
 export function wantedEvents(d: AppData, today: string = todayISO()): WantedEvent[] {
   const g = d.settings.googleCalendar;

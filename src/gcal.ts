@@ -6,7 +6,7 @@ import { DriveError } from './drive.ts';
 import type { ExistingEvent, WantedEvent } from './calendarSync.ts';
 
 export const CALENDAR_SCOPE = 'https://www.googleapis.com/auth/calendar.app.created';
-export const CALENDAR_NAME = 'Central Pessoal';
+export const CALENDAR_NAME = 'CP Hub';
 const API = 'https://www.googleapis.com/calendar/v3';
 
 type Fetch = typeof fetch;
@@ -20,10 +20,14 @@ async function call(f: Fetch, token: string, url: string, init: RequestInit = {}
   return res;
 }
 
-/** A agenda guardada ainda existe? */
+/** A agenda guardada ainda existe? (Se tiver o nome antigo, troca para o atual.) */
 export async function calendarExists(token: string, id: string, f: Fetch = fetch): Promise<boolean> {
   try {
-    await call(f, token, `${API}/calendars/${encodeURIComponent(id)}?fields=id`);
+    const res = await call(f, token, `${API}/calendars/${encodeURIComponent(id)}?fields=id,summary`);
+    const { summary } = (await res.json()) as { summary?: string };
+    if (summary !== undefined && summary !== CALENDAR_NAME) {
+      await call(f, token, `${API}/calendars/${encodeURIComponent(id)}?fields=id`, { method: 'PATCH', body: JSON.stringify({ summary: CALENDAR_NAME }) }).catch(() => undefined);
+    }
     return true;
   } catch (e) {
     if (e instanceof DriveError && (e.status === 404 || e.status === 410)) return false;
@@ -34,7 +38,7 @@ export async function calendarExists(token: string, id: string, f: Fetch = fetch
 export async function createCalendar(token: string, timeZone: string, f: Fetch = fetch): Promise<string> {
   const res = await call(f, token, `${API}/calendars?fields=id`, {
     method: 'POST',
-    body: JSON.stringify({ summary: CALENDAR_NAME, description: 'Lembretes da Central Pessoal (compromissos, contas e tarefas). Mude pelo app.', timeZone }),
+    body: JSON.stringify({ summary: CALENDAR_NAME, description: 'Lembretes do CP Hub (compromissos, contas e tarefas). Mude pelo app.', timeZone }),
   });
   return String(((await res.json()) as { id: string }).id);
 }
