@@ -72,7 +72,7 @@ O endereço fica `https://<usuario>.github.io/Central-Pessoal/`. Para instalar n
 
 - Os dados ficam no IndexedDB do navegador. O app pede ao navegador armazenamento persistente.
 - Cada aparelho tem os seus próprios dados. Use **Ajustes → Exportar / Importar** para backup ou para levar os dados a outro aparelho. O Início avisa quando o último backup tem mais de 30 dias.
-- Os registros guardam a data de criação, e as exclusões ficam marcadas (`deleted`). Isso prepara uma futura sincronização entre aparelhos.
+- **Preparado para sincronizar (N9.0, `src/sync.ts`):** toda alteração passa por um registro único na loja. Cada item com id (em qualquer módulo, inclusive dentro de Estudos e Carreira) guarda em `stamps` a data da última alteração, e cada parte do app guarda `stamps['@parte']`. O que é apagado entra em `deleted` (id → data) e é esquecido depois de 90 dias. Itens gerados pelo app (parcelas, contas fixas, receitas mensais, recargas do vale, categorias padrão) têm **id estável**, igual em qualquer aparelho. Nada muda na tela. A sincronização com o Google Drive vem no N9.1 e N9.2 ([docs/futuro/sincronizar-google.md](docs/futuro/sincronizar-google.md)).
 - Dados do primeiro protótipo (localStorage) são migrados automaticamente.
 - **Proteção contra dados com defeito** (`src/sanitize.ts`): ao abrir os dados (ou importar um backup), cada despesa, série, cartão, receita, nota, registro do diário, tarefa, compromisso e categoria é conferido. O que dá para consertar ganha valores padrão; o que não tem o essencial (ex.: despesa sem valor ou sem data) fica guardado à parte em `legacy.descartados` (vai no backup, não some), e Configurações › Backup avisa quantos são.
 - **Tela de erro com saída** (`src/ErrorScreen.tsx`): se uma tela der erro, aparece "Algo deu errado" com **Exportar backup**, **Recarregar** e **Abrir Configurações**, e a barra de baixo continua funcionando.
@@ -120,6 +120,7 @@ src/
   incomes.test.ts    testes das receitas
   data.ts            formato dos dados, categorias padrão e migração
   db.ts              IndexedDB
+  sync.ts            Datas de alteração e exclusões (N9.0)
   store.tsx          estado global e salvamento automático
   router.ts          navegação por #endereço
   ui.tsx             ícones e componentes (janelas, campo de valor, status…)

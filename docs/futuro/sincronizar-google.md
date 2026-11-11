@@ -20,7 +20,7 @@ Pedido de 11/11: guardar os dados no Google Drive (pasta escondida do app, `appD
 ## Partes (fazer nesta ordem)
 | Parte | O que é | Tam. |
 |---|---|---|
-| **N9.0 Preparar os dados** (absorve o N11.6) | Data de alteração e registro de exclusões em **todos** os módulos. Hoje só Finanças e Receitas registram exclusões, e só 8 dos tipos de dados têm data de alteração. Não muda nada na tela. | M |
+| **N9.0 Preparar os dados** (absorve o N11.6) ✅ v0.39 | Data de alteração e registro de exclusões em **todos** os módulos, feitos num lugar só (`src/sync.ts`, chamado pela loja). Ids estáveis para o que o app gera. Não muda nada na tela. | M |
 | **N9.1 Conta Google e cópia na nuvem** | Botão "Entrar com Google"; cópia automática dos dados na pasta escondida; "Restaurar da nuvem" num aparelho novo | M |
 | **N9.2 Sincronizar entre aparelhos** | Junta por item (regra acima), sincroniza sozinho nos momentos acima, aviso de situação | M |
 | **N9.3 Imagens e PDFs** | Fotos nos registros do Diário (novo) e anexos PDF/imagem em Estudos (M14) e nas reuniões de Carreira (caixa de entrada de 08/11), guardados no Drive | M |
@@ -38,3 +38,15 @@ Criar um projeto grátis no **Google Cloud Console** e um "ID do cliente OAuth" 
 - No aparelho, imagens e PDFs ficam no IndexedDB, num depósito separado dos dados.
 - O **N4 (Android)** depois usa o mesmo formato; lá o login Google precisa de um plugin nativo. Por isso o N9 **não depende mais** do N4: dá para fazer antes, no site (computador e celular).
 - Testes `node:test` para a junção por item e as exclusões (`src/sync.ts`); no navegador, simular dois aparelhos com dois perfis do Playwright.
+
+## Como ficou o N9.0 (v0.39)
+- `trackChanges(antes, depois)` roda em toda alteração (loja: `update`, abertura do app, volta ao app e restaurar backup). Compara só as partes que mudaram (rápido: ~6 ms com 5.000 despesas).
+- `stamps[id]` = última alteração do item; `stamps['@parte']` = última alteração da parte (para o que não tem id: humor por dia, orçamentos, configurações, cargas, vídeos).
+- `deleted[id]` = quando foi apagado; sai de lá se o item voltar; esquecido após 90 dias (`pruneDeleted`, ao abrir).
+- Ids estáveis (`stableId` em `utils.ts`): ocorrência de série = `série~número`; receita mensal = `série~número`; recarga = `vale~recarga~mês`; categoria padrão = `categoria~nome`; fonte padrão = `fonte~nome`.
+
+## Para lembrar no N9.2
+- Dados de antes da v0.39 não têm `stamps`: tratar item sem data como "antigo" (vale a data de `updatedAt`/`createdAt`, se tiver).
+- Parcelas e receitas geradas antes da v0.39 têm ids aleatórios: na primeira junção, tratar como o mesmo item quando `seriesId` + `installment` forem iguais. Categorias e fontes padrão antigas: juntar pelo nome.
+- **Apagar tudo** (Configurações) hoje registra tudo como excluído: com a sincronização ligada, perguntar "Só neste aparelho" ou "Em todos".
+- Restaurar um backup também conta como alteração (o que não está no backup vira excluído). Avisar isso na tela quando a sincronização estiver ligada.

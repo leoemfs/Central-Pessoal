@@ -8,14 +8,17 @@ import { INCOME_AHEAD, materializeIncomes } from './incomes';
 import { materializeVouchers } from './vouchers';
 import { dbGet, dbSet, requestPersistence } from './db';
 import { addMonths, monthKey, todayISO } from './utils';
+import { pruneDeleted, trackChanges } from './sync';
 
 const KEY = 'data';
 const LEGACY_LOCALSTORAGE_KEY = 'central-pessoal:v1';
 const channel = typeof BroadcastChannel !== 'undefined' ? new BroadcastChannel('central-pessoal') : null;
 
 /** Gera as contas fixas que já deveriam existir (ex.: virou o mês com o app aberto) e registra a visita do dia. */
-const catchUp = (d: AppData) =>
+const generate = (d: AppData) =>
   syncCareerEvents(markVisit(checkUnlock(materializeVouchers(materializeIncomes(materialize(d, addMonths(monthKey(todayISO()), FIXA_AHEAD)), addMonths(monthKey(todayISO()), INCOME_AHEAD))))));
+/** Igual, registrando as datas de alteração e as exclusões (N9.0). */
+const catchUp = (d: AppData) => trackChanges(d, generate(d));
 
 async function loadData(): Promise<AppData> {
   let raw = await dbGet<unknown>(KEY);
@@ -28,7 +31,7 @@ async function loadData(): Promise<AppData> {
       /* ignora */
     }
   }
-  return catchUp(normalize(raw));
+  return catchUp(pruneDeleted(normalize(raw)));
 }
 
 type Updater = (d: AppData) => AppData;
@@ -112,11 +115,12 @@ export function DataProvider({ children }: { children: ReactNode }) {
       setData((d) => {
         if (!d) return d;
         const next = fn(d);
-        return next === d ? d : checkUnlock(markActive(next));
+        return next === d ? d : trackChanges(d, checkUnlock(markActive(next)));
       }),
     [],
   );
-  const replace = useCallback((d: AppData) => setData(catchUp(d)), []);
+  // Backup restaurado: o que não está nele conta como excluído; o que está, como alterado agora.
+  const replace = useCallback((d: AppData) => setData((prev) => (prev ? trackChanges(prev, generate({ ...d, deleted: { ...prev.deleted, ...d.deleted } })) : catchUp(d))), []);
 
   // Os dados não abriram: a rede de proteção (ErrorBoundary) mostra a saída.
   if (loadError) throw loadError;

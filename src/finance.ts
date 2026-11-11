@@ -3,7 +3,7 @@
  * Todas as funções recebem o estado e devolvem um novo estado (sem mutação).
  */
 import type { AppData, CreditCard, Expense, ExpenseKind, ExpenseSeries, PaymentMethod } from './types.ts';
-import { addMonths, clampDay, dayOf, monthKey, pad, sum, todayISO, uid } from './utils.ts';
+import { addMonths, clampDay, dayOf, monthKey, pad, sum, todayISO, stableId, uid } from './utils.ts';
 
 export const PAYMENT_LABEL: Record<PaymentMethod, string> = {
   pix: 'Pix',
@@ -96,7 +96,8 @@ interface Template {
 
 function buildOccurrence(t: Template, k: number, amount: number, card: CreditCard | undefined, stamp: string): Expense {
   const base = {
-    id: uid(),
+    // Ocorrência de uma série: id estável (série + número), igual em todos os aparelhos.
+    id: t.seriesId ? stableId(t.seriesId, k + 1) : uid(),
     kind: t.kind,
     seriesId: t.seriesId,
     installment: t.kind === 'avulsa' ? null : k + 1,
