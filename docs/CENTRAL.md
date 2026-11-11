@@ -143,7 +143,7 @@
 ## Feito
 | Versão | O que entrou | PR |
 |---|---|---|
-| v0.28 | N11.3 Estudos 2.0: mapas mentais em árvore (ramos e sub-ramos, editar, mover, mudar de ramo, recolher, cores, zoom, arrastar e pinça, salva sozinho), ligados a notebook ou página; mapas antigos convertidos | PRNUM |
+| v0.28 | N11.3 Estudos 2.0: mapas mentais em árvore (ramos e sub-ramos, editar, mover, mudar de ramo, recolher, cores, zoom, arrastar e pinça, salva sozinho), ligados a notebook ou página; mapas antigos convertidos | #35 |
 | v0.27.1 | C10: telas alinhadas no computador (coluna central de 980 px para cabeçalho, cartões e chips) | — |
 | v0.27 | N11.2a e b Estudos 2.0: editor de texto nas páginas dos notebooks (títulos, listas, checklist, citação, divisor, alternante, negrito, itálico, sublinhado, destaque, cores, link, imagem, mover blocos); barra simples no celular e completa no computador; anotações antigas convertidas | #33 |
 | v0.26 | N11.1 Estudos 2.0, parte 1: notebooks com páginas e subpáginas, descrição, "Adicionar ao notebook" na trilha (tópicos de várias áreas no mesmo notebook, com a origem guardada), organizar páginas; os assuntos antigos viraram páginas | #32 |
