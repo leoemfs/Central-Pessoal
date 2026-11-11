@@ -1,6 +1,6 @@
 # Treino em casa (Núcleo › Corpo)
 
-> Situação: **ideia** (09/11). Nada construído. Inspiração: prints do app "Treino em casa" enviados pelo Leonardo.
+> Situação: **pronto na v0.29** (11/11, PR #37). Aprovado em 11/11 ("implemente em partes: telas, bonecos"). Inspiração: prints do app "Treino em casa" enviados pelo Leonardo.
 > **Afeta:** Núcleo (aba Corpo; o treino marca o hábito ligado), Início (cartão da semana), Revisão semanal, Humor (dias com treino), Jornada (Força e XP), backup (`data.ts`).
 
 ## Decisões (09/11)
@@ -30,7 +30,14 @@
 
 **Recomendação:** **bonecos animados feitos para o app**, um por exercício (cerca de 25 a 30 para começar). Fazem o papel do GIF, sem risco de direitos e sem pesar. Antes de fazer todos, uma **prévia com 3 exercícios** (agachamento, flexão e abdominal) para ver se ficam bons. Se não ficarem, plano B: fotos do *wger*, com crédito.
 
-## Partes (M no total)
-1. **T1 (M):** tela do Treino em casa (abas e filtros), tela do treino, treino guiado, link de vídeo, meta semanal, Progresso e Histórico.
-2. **T2 (P a M):** os bonecos animados dos exercícios (depois da prévia aprovada).
-3. **Depois:** desafio de 28 dias e "crie o seu próprio" (M6), se ainda fizer sentido.
+## O que foi feito (v0.29)
+- **Telas:** cartão "Treino em casa" na aba Corpo (dias da semana e meta, que se muda no lápis; conta qualquer treino do Núcleo); tela com as abas **Sem equipamento · Com equipamento**; filtros pelas **8 partes do corpo**, cada uma com uma explicação simples (Pernas, Glúteos, Peito, Costas, Ombros, Braços, Antebraços, Abdome); 3 níveis (Iniciante: 2 voltas e até 4 exercícios; Intermediário: 3 voltas e até 5; Avançado: 3 voltas, até 6 e mais repetições); tela do treino com a lista e **Iniciar**; treino guiado (prepare-se, exercício com "Feito" ou tempo, descanso com +10 s e pular, "Terminar e salvar").
+- **Exercícios:** 43 (25 sem equipamento, 18 com halteres, elástico ou kettlebell). Tocar abre o passo a passo, o boneco e o **link do vídeo** (colar o link; sem link, "Procurar no YouTube").
+- **Bonecos:** 47 desenhos próprios animados (`src/bonecos.ts`), também nos movimentos dos **alongamentos guiados**.
+- O treino é salvo como treino do Núcleo (entra no Histórico, no Progresso, no Início e na Revisão) e marca o hábito ligado a "Treino".
+- A ficha antiga "Treino em casa" (sem equipamento, 20 min) passou a se chamar **"Circuito em casa"**, para não confundir.
+- Dados novos: `workoutGoal` (padrão 3) e `exerciseVideos` (padrão vazio), com valor padrão em `normalize()`.
+
+## Depois
+- Desafio de 28 dias e "crie o seu próprio" (M6).
+- Ajustar bonecos que ficarem estranhos no uso (é só mudar os ângulos em `bonecos.ts`).
