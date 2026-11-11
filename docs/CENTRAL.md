@@ -114,7 +114,7 @@
 | M15 | Estudos: editor de mapas mentais (arrastar e ligar ideias). Afeta: só Estudos | MOD | M | baixa | pronto na N11.3 (v0.28) | `futuro/modulo-estudos.md` |
 | N9 | Sincronizar com o Google Drive: pasta escondida do app, tudo sincroniza sozinho entre computador e celular, fotos no Diário, anexos PDF/imagem, exportar para pasta visível. Partes N9.0 (preparar dados, absorve N11.6) a N9.4. Não depende mais do N4. *Na conversa do Android foi anotado como N8; o código certo é N9.* | NOVO | G | alta | em andamento: N9.0 (v0.39) e N9.1 (v0.40) prontos; ID do cliente Google configurado (v0.40.1); login testado pelo Leonardo em 11/11; N9.2 pronto (v0.41), no ar e conferido em 11/11; **N9.3a fotos no Diário pronto (v0.42)**; próximo N9.3b (PDFs anexados) | `futuro/sincronizar-google.md` |
 | N9.5 | **Lembretes pelo Google Agenda** (11/11): o app cria a agenda "Central Pessoal" no Google e põe compromissos (com Carreira), contas a pagar e tarefas com data, com aviso; muda no app → muda no Google; só de ida. O celular avisa pelo app Google Agenda enquanto não há notificações (substitui o .ics do N3.1). Afeta: Agenda, Finanças, Carreira, Configurações | NOVO | M | alta | pronto (v0.43), **no ar e testado pelo Leonardo em 11/11** | `futuro/google-agenda.md` |
-| N10 | Módulo **Objetivos**: central de **todas as metas do app** (caixinhas, hábitos, ciclos de estudo, carreira, orçamento, metas do Você), com criar, editar e concluir dali; a meta continua morando no módulo dela. Objetivos grandes juntam várias metas. Absorve as metas de carreira (N8.4). Partes: N10.0 prévia, N10.1 central de metas, N10.2 objetivos grandes. Afeta: Finanças, Núcleo, Estudos, Carreira, Você, Início, Jornada | NOVO | G | média | especificado (prévia antes) | `futuro/modulo-objetivos.md` |
+| N10 | Módulo **Objetivos**: central de **todas as metas do app** (caixinhas, hábitos, ciclos de estudo, carreira, orçamento, metas do Você), com criar, editar e concluir dali; a meta continua morando no módulo dela. Objetivos grandes juntam várias metas. Absorve as metas de carreira (N8.4). Partes: N10.0 prévia, N10.1 central de metas, N10.2 objetivos grandes. Afeta: Finanças, Núcleo, Estudos, Carreira, Você, Início, Jornada | NOVO | G | média | prévia feita e aprovada (11/11): orçamento conta como meta; barra Grandes · Objetivos · Concluídos; favorito para quem escolher metas | `futuro/modulo-objetivos.md` |
 | M16 | **Foco** no Núcleo › Mente: temporizador de foco (ex.: 25 min + pausa), com histórico; ligado a um tópico de Estudos conta tempo de estudo. Afeta: Núcleo, Estudos, Revisão | MOD | P | média | ideia | — |
 | M17 | **Banco de ideias** em Notas: aba "Ideias" e o botão "transformar em" tarefa, objetivo ou notebook. Afeta: Notas, Agenda, Estudos | MOD | P | baixa | ideia | — |
 | N11 | **Estudos 2.0**: notebooks com páginas e subpáginas e tópicos de várias áreas; editor de texto em blocos (completo no computador, simples no celular); mapas mentais em árvore com zoom; exportar/importar Estudos com tratamento de conflito; tutorial; conteúdo nos tópicos da Biblioteca. Partes N11.1 a N11.7. Absorve o M15. Afeta: Estudos, backup | MOD | G | alta | parte pronta: N11.1 páginas (v0.26), N11.2 editor (v0.27) e N11.3 mapas mentais (v0.28); faltam N11.4 a N11.7 | `futuro/estudos-v2.md` |
@@ -133,7 +133,7 @@
 
 **O que continua aprovado, na ordem:**
 0. **N9 Sincronizar com o Google Drive** (G, aprovado em 11/11: "pode começar"), em partes: ~~N9.0 preparar os dados~~ (v0.39) → ~~N9.1 conta Google e cópia na nuvem~~ (v0.40) → ~~N9.2 sincronizar~~ (v0.41) → N9.3 fotos e PDFs (~~N9.3a fotos no Diário~~ v0.42; N9.3b PDFs) → N9.4 exportar. Uma parte por vez, conforme o uso do dia. Ver `futuro/sincronizar-google.md`.
-1. **N10 Objetivos** (G): primeiro a **prévia N10.0** (visual), depois N10.1 central de metas (inclui as metas de carreira, antigo N8.4). Precisa da prévia antes de construir.
+1. **N10 Objetivos** (G): ~~prévia N10.0~~ (aprovada em 11/11) → N10.1 central de metas (inclui as metas de carreira, antigo N8.4) → N10.2 objetivos grandes.
 2. **M2 → M3 → M4 Preços 2.0** (M cada, já especificados).
 3. **M6** fichas de treino próprias (M).
 4. **M5** Agenda com repetição e aniversários (especificar antes).
@@ -208,6 +208,7 @@ Documentos sem código: Mapa dos módulos (08/11), módulos personalizáveis, pa
 | Três jeitos da barra de baixo (centro, favorito fixo, ao lado do Início) — E9/E10 | https://claude.ai/artifact/BYyRT9QPSLYnNUJr2Ga5pN |
 | Saúde (N1.0, versão P): telas Hoje, Consultas e check-ups e Dieta | https://claude.ai/artifact/LJRc3AgwWsTmuA8ymQCqEv |
 | Primeira abertura: entrevista, módulos, favoritos e tutorial da barra (E14, construído na v0.31) | https://claude.ai/artifact/Ky4NT9oh9tZQKv9FksYYCz |
+| Objetivos (N10.0): metas de todo o app, objetivos grandes, concluídos e cartão no Início | https://claude.ai/artifact/TEPSkVaKWYhuxBcoZvkZA4 |
 | Central Pessoal (prévia geral antiga) | https://claude.ai/artifact/WHbDkKXN4LArCQ8sjuQqVt |
 
 ## Regras para construir
