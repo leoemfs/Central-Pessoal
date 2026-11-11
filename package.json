@@ -1,7 +1,7 @@
 {
   "name": "central-pessoal",
   "private": true,
-  "version": "0.25.1",
+  "version": "0.28.1",
   "type": "module",
   "description": "Central Pessoal — finanças, diário, agenda e organização pessoal em um só lugar.",
   "scripts": {
@@ -12,6 +12,15 @@
     "test": "node --test --experimental-strip-types --no-warnings src/*.test.ts"
   },
   "dependencies": {
+    "@tiptap/extension-details": "3.33.1",
+    "@tiptap/extension-highlight": "3.33.1",
+    "@tiptap/extension-image": "3.33.1",
+    "@tiptap/extension-list": "3.33.1",
+    "@tiptap/extension-text-style": "3.33.1",
+    "@tiptap/extensions": "3.33.1",
+    "@tiptap/pm": "3.33.1",
+    "@tiptap/react": "3.33.1",
+    "@tiptap/starter-kit": "3.33.1",
     "react": "^19.3.1",
     "react-dom": "^19.3.1"
   },

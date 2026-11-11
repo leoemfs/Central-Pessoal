@@ -41,12 +41,14 @@
 
 **Telas que juntam tudo** (mexeu num módulo, conferir estas): **Início** (quase todos), **Revisão semanal** (Finanças, Agenda, Diário, Núcleo, humor), **Busca** (Diário, Finanças, Agenda, Notas).
 **Partes do app todo:** barra de baixo (`moduleBar.ts`), lápis dos cartões (`cardLayout.ts`), temas (`theme.ts`), backup (`data.ts`).
-**Em breve** (sem código): Saúde, Objetivos, Foco, Banco de ideias.
+**Em breve** (sem código): Saúde (N1, módulo próprio) e Objetivos (N10, módulo próprio). Lembretes, Foco e Banco de ideias **não viram módulos**: Lembretes = Agenda + Notificações (N3); Foco = Núcleo › Mente (M16); Ideias = Notas (M17).
 
 ## Caixa de entrada
 *Ideias e problemas ainda sem classificar. Uma linha cada, com a data.*
 
 - 08/11: anexar os slides das apresentações (sexta sim, sexta não: avanços do setor de repasse e gestão de contratos de prestadores) dentro da reunião. Hoje só dá para guardar o link. Junta com "anexar PDF ou imagem" de Estudos.
+- 08/11: Estudos: cronograma de estudos com calendário dentro do módulo, sincronizado com a Agenda do app.
+- 08/11: Você: perguntas de carreira (emprego atual, carreira desejada, melhorias na atual, caminhos até a desejada) para a carreira desejada orientar os tópicos sugeridos em Estudos. Conferir com N10 (Objetivos) e N8.
 
 ## Itens
 | ID | Item | Frente | Tam. | Prior. | Situação | Documento |
@@ -59,7 +61,20 @@
 | E12 | Trocar de módulo sem passar pelo Início: tocar de novo no módulo em que você está mostra os favoritos na barra | EXP | P | alta | pronto (v0.25) | `futuro/navegacao-v2.md` |
 | E13 | Configurações › **Personalização**: tema e cor, favoritos do Início, jeito da barra (favorito no mesmo lugar, ao lado do Início ou no centro), "tocar de novo mostra os favoritos" e "esconder as barras ao rolar" | EXP | P | alta | pronto (v0.25) | `futuro/navegacao-v2.md` |
 | C2 | Hábitos: nome do hábito aparecia uma letra por linha quando havia "Não falhe 2x" e "Iniciar" no cartão | COR | P | alta | pronto (v0.18) | — |
+| C10 | **Telas quebradas no computador** (10/11, prints): botão + vira uma faixa oval na largura toda (Estudos › notebook); Início com cartões esticados na tela inteira; Listas com título e chips desalinhados do conteúdo; Finanças com o bloco mês + abas mais estreito que os cartões. No celular está ok | COR | P | alta | pronto (v0.27.1) | — |
+| C3 | **Registro defeituoso deixa o app em branco**: conferir os campos ao abrir os dados, tela de erro com saída (exportar, recarregar, Configurações) e "desfazer importação" | COR | M | **alta** | aprovado (10/11) | `auditoria-2026-11.md` |
+| C4 | Salvamento de reserva pode perder dados em silêncio (avisar e usar a cópia mais nova) | COR | P | média | ideia | `auditoria-2026-11.md` |
+| C5 | Rodar os testes em todo PR e antes de publicar (hoje só compila) | COR | P | média | aprovado (10/11) | `auditoria-2026-11.md` |
+| C6 | Sequência de hábitos lenta para quem nunca falha (86 ms com 5 anos e 25 hábitos) | COR | P | média | ideia | `auditoria-2026-11.md` |
+| C7 | Gravar por coleção, só o que mudou (hoje regrava o banco inteiro a cada toque) | COR | M | média | ideia | `auditoria-2026-11.md` |
+| C8 | Faturas agrupadas numa passada só (Início, Agenda, Próximos) | COR | P | baixa | ideia | `auditoria-2026-11.md` |
+| C9 | Segurança: política de conteúdo (CSP), conferir links, bloqueio do app (PIN/digital) e backup com senha | COR | M | média | ideia | `auditoria-2026-11.md` |
+| M18 | Início mais leve: cada cartão só recalcula quando o seu dado muda | MOD | M | baixa | ideia | `auditoria-2026-11.md` |
+| M19 | Carregar Estudos, Carreira e Jornada só ao abrir (app inicial menor) | MOD | P | baixa | ideia | `auditoria-2026-11.md` |
+| M20 | Limpeza: tirar 6 funções e 8 estilos sem uso, dividir arquivos grandes e os estilos por módulo, trocar `confirm()` por confirmação do app | MOD | M | baixa | ideia | `auditoria-2026-11.md` |
+| N3.3 | **Níveis de notificação** (baixa, média, alta, personalizado) com "Me lembrar" e sino; parte 1 sem Android: marcações + lista de avisos dos próximos 7 dias | NOVO | M | média | especificado (simulado) | `futuro/notificacoes.md` |
 | M1 | Hábitos: pausar e arquivar | MOD | P | alta | especificado | `futuro/habitos-pausar-arquivar.md` |
+| E14 | **Primeira abertura**: entrevista de toque (áreas → módulos à vista → 3 favoritos → ritmo do Diário → barra e cor → **Jornada: o que é e se quer ou não**) e **tutorial interativo da barra** (6 passos); quem já usa recebe uma vez o convite "Monte o app do seu jeito" (entrevista já preenchida com o que usa hoje, ou só o tutorial) e pode refazer em Personalização; Mais › Como usar a barra. Junta com o resto do E1 (ocultar módulos e ritmo do Diário) | EXP | M | **1ª** | especificado (prévia feita) | `futuro/primeira-abertura.md` |
 | E1 | Favoritos e módulos: os 3 do meio da barra no Início são os favoritos (escolhidos pela pessoa); ocultar módulos; ordem no Mais; Orçamento e Relatórios saem do Mais; ritmo de cada módulo (Diário) | EXP | M | alta | parte pronta (v0.18): favoritos e Mais; falta ocultar módulos, ordem no Mais e ritmo do Diário | `futuro/modulos-personalizaveis.md`, `futuro/navegacao-v2.md` |
 | E2 | Barra adaptativa: Início e Mais fixos; dentro do módulo, 3 ícones do próprio módulo (casa no centro); só ícones, um pouco maiores; topo mostra "Finanças / Orçamento"; segurar o ícone mostra o nome | EXP | M | alta | pronto (v0.18) | `futuro/navegacao-v2.md` |
 | E3 | Personalizar cartões (lápis ao lado da lupa): no Início e nos módulos, ocultar e reordenar cartões; cartões principais fixos (🔒); Humor sempre no topo do Início; avisos importantes nunca ocultos, só mudam de posição | EXP | M | alta | parte pronta (v0.20): Início e Finanças; falta Agenda, Núcleo e Listas | `futuro/navegacao-v2.md` |
@@ -73,12 +88,14 @@
 | M3 | Preços 2.0, parte 2: "quanto custou aqui?" ao marcar o item e histórico de compras | MOD | M | média | especificado | `futuro/precos-v2.md` (item 4) |
 | M4 | Preços 2.0, parte 3: tipos de loja e filtro; editar, excluir e juntar produtos, marcas e lojas | MOD | M | média | especificado | `futuro/precos-v2.md` (itens 1 e 4) |
 | M5 | Agenda: repetição (toda semana, mês, ano) e aniversários | MOD | M | média | ideia | — (especificar antes) |
-| M6 | Núcleo: fichas de treino próprias (exercícios, séries, descanso). Pode entrar depois no N10 ("crie o seu próprio") | MOD | M | média | especificado | `futuro/nucleo-mente-corpo.md` |
+| M6 | Núcleo: fichas de treino próprias (exercícios, séries, descanso). Pode entrar depois no M21 ("crie o seu próprio") | MOD | M | média | especificado | `futuro/nucleo-mente-corpo.md` |
 | M7 | Revisão semanal mais completa: autocuidado, caixinhas e vales da semana | MOD | P | baixa | especificado | `futuro/nucleo-mente-corpo.md`, `futuro/caixinhas.md` |
 | N1 | Módulo Saúde (água, sono, remédios, consultas, peso) | NOVO | G | média | especificado | `futuro/modulo-saude.md` |
 | N2 | Jornada completa (pixel art): missões no ritmo da pessoa, recompensas por módulo, raridades (comum a místico), Forja e Codex por coleções | NOVO | G | baixa | especificado | `futuro/modulo-rpg.md`, `futuro/jornada-recompensas.md`, `futuro/jornada-raridades.md` |
-| N3 | Notificações | NOVO | M | baixa | especificado | `futuro/notificacoes.md` |
-| N4 | App Android | NOVO | G | baixa | especificado | `futuro/app-android.md` |
+| N3 | Notificações e **lembretes** (tarefa ou compromisso com "me lembrar"; sai o "Lembretes, em breve" do menu). Afeta: Agenda, Carreira | NOVO | M | baixa | especificado | `futuro/notificacoes.md` |
+| N3.1 | Notificações já no app (sem servidor): **"Lembrar no celular"** (compromisso, conta, revisão → agenda do celular, hora certa, Android e iPhone) e **bolinha no ícone** do app com o que está pendente hoje | NOVO | P | média | ideia | `futuro/notificacoes.md` |
+| N3.2 | **Resumo do dia** no Android (Chrome, app instalado): o celular acorda o app ~1 vez por dia e avisa "2 contas vencem amanhã" (sem hora certa) | NOVO | M | baixa | ideia | `futuro/notificacoes.md` |
+| N4 | App Android (preparo conferido em 10/11: 10 pontos de adaptação, passo a passo da mudança e lista de testes) | NOVO | G | baixa | especificado | `futuro/app-android.md` |
 | N5 | Código de barras, base de produtos e nota fiscal | NOVO | G | baixa | ideia | `futuro/precos-v2.md` ("Mais adiante") |
 | N6 | Módulo Estudos e Carreira: Biblioteca (áreas, trilhas, tópicos de referência), Ciclos pessoais, Meus notebooks, Fontes, Mapas mentais e Roadmaps | NOVO | G | média | pronto (v0.21), em teste por 3 dias | `futuro/modulo-estudos.md` |
 | N8.5 | Carreira × Agenda automática: tudo que tem data em Carreira (reuniões, passos das vagas e, depois, projetos) aparece sozinho na Agenda do app e se atualiza quando muda; some se for excluído. Sem botão "Pôr na Agenda" | NOVO | P | alta | pronto (v0.24) | `futuro/modulo-carreira.md` |
@@ -87,18 +104,25 @@
 | M12 | Estudos: lápis para subir, descer e ocultar cartões (como no Início e em Finanças). Afeta: só Estudos | MOD | P | média | ideia | `futuro/modulo-estudos.md`, `futuro/navegacao-v2.md` |
 | M13 | Estudos: busca dentro do módulo (tópicos, notebooks, fontes); parte do E6. Afeta: Busca | MOD | P | média | ideia | `futuro/modulo-estudos.md`, `futuro/navegacao-v2.md` |
 | M14 | Estudos: anexar PDF ou imagem no notebook (hoje só link). Afeta: backup (arquivos pesados) | MOD | M | baixa | ideia | `futuro/modulo-estudos.md` |
-| M15 | Estudos: editor de mapas mentais (arrastar e ligar ideias). Afeta: só Estudos | MOD | M | baixa | ideia | `futuro/modulo-estudos.md` |
+| M15 | Estudos: editor de mapas mentais (arrastar e ligar ideias). Afeta: só Estudos | MOD | M | baixa | pronto na N11.3 (v0.28) | `futuro/modulo-estudos.md` |
 | N9 | Sincronizar com a conta Google (pasta escondida do Drive; site e Android com os mesmos dados). Depois do N4. *Na conversa do Android foi anotado como N8; o código certo é N9.* | NOVO | M | baixa | ideia | `futuro/app-android.md` ("Sincronização") |
-| N10 | Treino em casa (dentro do Núcleo › Corpo; fichas A, B e C continuam): abas Sem equipamento · Com equipamento, filtros Pernas · Peito · Abdome, treino guiado, link de vídeo em cada exercício, meta semanal; imagens = bonecos animados próprios (prévia de 3 antes). Afeta: Núcleo, Início, Revisão, Humor, Jornada | MOD | M | média | ideia (09/11) | `futuro/modulo-treinos.md` |
+| N10 | Módulo **Objetivos**: central de **todas as metas do app** (caixinhas, hábitos, ciclos de estudo, carreira, orçamento, metas do Você), com criar, editar e concluir dali; a meta continua morando no módulo dela. Objetivos grandes juntam várias metas. Absorve as metas de carreira (N8.4). Partes: N10.0 prévia, N10.1 central de metas, N10.2 objetivos grandes. Afeta: Finanças, Núcleo, Estudos, Carreira, Você, Início, Jornada | NOVO | G | média | especificado (prévia antes) | `futuro/modulo-objetivos.md` |
+| M16 | **Foco** no Núcleo › Mente: temporizador de foco (ex.: 25 min + pausa), com histórico; ligado a um tópico de Estudos conta tempo de estudo. Afeta: Núcleo, Estudos, Revisão | MOD | P | média | ideia | — |
+| M17 | **Banco de ideias** em Notas: aba "Ideias" e o botão "transformar em" tarefa, objetivo ou notebook. Afeta: Notas, Agenda, Estudos | MOD | P | baixa | ideia | — |
+| N11 | **Estudos 2.0**: notebooks com páginas e subpáginas e tópicos de várias áreas; editor de texto em blocos (completo no computador, simples no celular); mapas mentais em árvore com zoom; exportar/importar Estudos com tratamento de conflito; tutorial; conteúdo nos tópicos da Biblioteca. Partes N11.1 a N11.7. Absorve o M15. Afeta: Estudos, backup | MOD | G | alta | parte pronta: N11.1 páginas (v0.26), N11.2 editor (v0.27) e N11.3 mapas mentais (v0.28); faltam N11.4 a N11.7 | `futuro/estudos-v2.md` |
+| C11 | Estudos, editor: as cores do texto ficavam paradas no meio da página ao rolar; agora ficam presas logo abaixo da barra de formatação e rolam junto | COR | P | alta | pronto (v0.28.1) | `futuro/estudos-v2.md` |
+| M21 | Treino em casa (dentro do Núcleo › Corpo; fichas A, B e C continuam): abas Sem equipamento · Com equipamento, filtros Pernas · Peito · Abdome, treino guiado, link de vídeo em cada exercício, meta semanal; imagens = bonecos animados próprios (prévia de 3 antes). Afeta: Núcleo, Início, Revisão, Humor, Jornada | MOD | M | média | ideia (09/11) | `futuro/modulo-treinos.md` |
 | N7 | Estudos × Jornada: XP, ouro e INT por tópico, ciclo e constância; selos, Coruja e missões | NOVO | M | baixa | especificado (só documento) | `futuro/estudos-jornada.md` |
-| N8 | Módulo Carreira (próprio, fora de Estudos): vagas e candidaturas, metas de carreira, currículo e conquistas, trabalho atual (cargos, salários, feedbacks). Dividido em N8.0 a N8.4 | NOVO | G | média | parte pronta: Vagas (v0.22), Trabalho e Reuniões (v0.23), Projetos e Agenda automática (v0.24); faltam N8.3 Currículo e N8.4 Metas | `futuro/modulo-carreira.md` |
+| N8 | Módulo Carreira (próprio, fora de Estudos): vagas e candidaturas, metas de carreira, currículo e conquistas, trabalho atual (cargos, salários, feedbacks). Dividido em N8.0 a N8.4 | NOVO | G | média | parte pronta: Vagas (v0.22), Trabalho e Reuniões (v0.23), Projetos e Agenda automática (v0.24); faltam N8.3 Currículo e N8.4 Metas (agora dentro de Objetivos, N10) | `futuro/modulo-carreira.md` |
 
 **Depende de outra coisa:** N3 fica melhor junto com N4 (notificações de verdade no Android). N2 e N5 dependem de decisões e integrações.
 
 ## Fila aprovada
 *O que pode ser construído, na ordem. Vazia = nada para construir.*
 
-- **N8, módulo Carreira** (aprovado em 08/11), em partes: N8.0 prévia (feita) → N8.1 Vagas (feita, v0.22) → N8.2 Trabalho atual e Reuniões (feita, v0.23) → N8.5 Agenda automática e N8.6 Projetos (feitas, v0.24) → N8.3 Currículo → N8.4 Metas. Semana de 09/11 a 14/11: testes e anotações, e no máximo uma parte por dia se houver folga.
+- **Antes de tudo (aprovado em 10/11): C3** (registro defeituoso deixa o app em branco: conferir os dados ao abrir, tela de erro com saída e desfazer importação) **e C5** (rodar os testes em todo PR e antes de publicar). Depois segue o E14.
+- **Implementação nº 1: E14, primeira abertura + tutorial da barra** (pedido em 10/11; prévia feita, aguardando o "aprovado" para construir). Junta o resto do E1.
+- **N8, módulo Carreira** (aprovado em 08/11), em partes: N8.0 prévia (feita) → N8.1 Vagas (feita, v0.22) → N8.2 Trabalho atual e Reuniões (feita, v0.23) → N8.5 Agenda automática e N8.6 Projetos (feitas, v0.24) → N8.3 Currículo → N8.4 Metas (agora dentro de Objetivos, N10). Semana de 09/11 a 14/11: testes e anotações, e no máximo uma parte por dia se houver folga.
 
 **Pacotes** (cada um numa sessão, porque mexem nas mesmas partes):
 - **B, Finanças:** M9 + M10 + E5 (pequeno). **Pronto na v0.16.**
@@ -110,18 +134,23 @@
 1. M1 Hábitos: pausar e arquivar (P)
 2. M11 Estudos no Início e na Revisão (P)
 3. N8.3 Carreira: currículo (M)
-4. N8.4 Carreira: metas (M)
+4. N10.0 + N10.1 Objetivos: prévia e central de metas (inclui as metas de carreira, antigo N8.4) (M)
 5. Resto do E1: ocultar módulos, ordem no Mais, ritmo do Diário (M)
 6. Lápis nos outros módulos: E3 + M12 (Agenda, Núcleo, Listas, Estudos, Carreira) (M)
 7. Busca por módulo: E6 + M13 (P)
 8. M8 Cartão: escolher a fatura (P)
-9. N10 Treino em casa: primeiro a prévia dos 3 bonecos (agachamento, flexão, abdominal), num dia com folga; depois T1 e T2 (M)
+9. M21 Treino em casa: primeiro a prévia dos 3 bonecos (agachamento, flexão, abdominal), num dia com folga; depois T1 e T2 (M)
 10. M2 → M3 → M4 Preços 2.0 · M5 Agenda com repetição · M6 fichas de treino · M7 revisão completa
 11. N7 Estudos × Jornada · N1 Saúde · M14 anexos · M15 editor de mapas · depois N2, N3, N4, N5, N9
 
 ## Feito
 | Versão | O que entrou | PR |
 |---|---|---|
+| v0.28.1 | C11: paleta de cores do editor acompanha a barra ao rolar | #36 |
+| v0.28 | N11.3 Estudos 2.0: mapas mentais em árvore (ramos e sub-ramos, editar, mover, mudar de ramo, recolher, cores, zoom, arrastar e pinça, salva sozinho), ligados a notebook ou página; mapas antigos convertidos | #35 |
+| v0.27.1 | C10: telas alinhadas no computador (coluna central de 980 px para cabeçalho, cartões e chips) | — |
+| v0.27 | N11.2a e b Estudos 2.0: editor de texto nas páginas dos notebooks (títulos, listas, checklist, citação, divisor, alternante, negrito, itálico, sublinhado, destaque, cores, link, imagem, mover blocos); barra simples no celular e completa no computador; anotações antigas convertidas | #33 |
+| v0.26 | N11.1 Estudos 2.0, parte 1: notebooks com páginas e subpáginas, descrição, "Adicionar ao notebook" na trilha (tópicos de várias áreas no mesmo notebook, com a origem guardada), organizar páginas; os assuntos antigos viraram páginas | #32 |
 | v0.25.1 | Personalização: o jeito escolhido da barra fica marcado ("✓ em uso") e aparece um aviso ao trocar | — |
 | v0.25 | E10, E11 e E13: Personalização em Configurações (jeito da barra, favoritos, tocar de novo, esconder ao rolar) e o voltar do celular: ferramenta → casa do módulo → Início | — |
 | v0.25 | E12: tocar de novo no módulo aberto mostra os favoritos, para trocar de módulo direto | — |
@@ -156,6 +185,7 @@ Documentos sem código: Mapa dos módulos (08/11), módulos personalizáveis, pa
 | Estudos e Carreira (N6.0): Biblioteca, trilhas, ciclos, notebooks, fontes, mapas e roadmaps | https://claude.ai/artifact/WJ3kw4zvwtdDKTiUVUB3rD |
 | Carreira (N8.0): Trabalho, Currículo, Vagas com etapas, Metas, botão + e cartão no Início | https://claude.ai/artifact/3DxpiHU7f6merD3dk6Hqmp |
 | Três jeitos da barra de baixo (centro, favorito fixo, ao lado do Início) — E9/E10 | https://claude.ai/artifact/BYyRT9QPSLYnNUJr2Ga5pN |
+| Primeira abertura: entrevista, módulos, favoritos e tutorial da barra (E14) | https://claude.ai/artifact/Ky4NT9oh9tZQKv9FksYYCz |
 | Central Pessoal (prévia geral antiga) | https://claude.ai/artifact/WHbDkKXN4LArCQ8sjuQqVt |
 
 ## Regras para construir

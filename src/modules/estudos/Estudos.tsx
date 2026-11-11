@@ -47,7 +47,7 @@ export function Estudos({ route }: ViewProps) {
       page = <NotebooksPage />;
       break;
     case 'notebook':
-      page = <NotebookPage key={a} id={a} subjectId={b} setExtra={setExtra} />;
+      page = <NotebookPage key={a} id={a} pageId={b} setExtra={setExtra} />;
       break;
     case 'fontes':
       page = <FontesPage />;
@@ -57,6 +57,8 @@ export function Estudos({ route }: ViewProps) {
       break;
     case 'mapa':
       page = <MapaPage key={a} id={a} />;
+      // O mapa tem os próprios botões de criar ideias, logo abaixo do desenho.
+      fab = false;
       break;
     default:
       page = <Home />;
