@@ -50,7 +50,7 @@ A ideia é ter a dieta **dentro** do módulo, para seguir no dia a dia.
 
 ## Divisão para construir
 Ordem sugerida (cada parte com versão, testes e PR próprios):
-1. **N1.0 Prévia visual:** telas do módulo, barra de baixo e cartão no Início (só prévia, sem código).
+1. **N1.0 Prévia visual:** versão P feita em 11/11 (Hoje, Consultas e check-ups, Dieta): https://claude.ai/artifact/LJRc3AgwWsTmuA8ymQCqEv. Falta: Histórico, menu do +, cartão no Início, Remédios, Medidas e selo no hábito.
 2. **N1.1 Água e Sono:** registros do dia e meta de água (P a M).
 3. **N1.2 Dieta:** plano alimentar e "Hoje" com segui · em parte · fugi (M).
 4. **N1.3 Remédios:** horários, "tomei" e lembrete (M).
