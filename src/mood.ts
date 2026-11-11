@@ -87,7 +87,7 @@ function syncJournal(d: AppData, day: string): AppData {
     return { ...d, journal: d.journal.map((j) => (j.id === existing.id ? { ...j, title, summary, content: m.note, updatedAt: now } : j)) };
   }
   const created = day === todayISO() ? now : `${day}T20:00:00`;
-  const entry: JournalEntry = { id: uid(), createdAt: created, title, summary, content: m.note, tag: 'Humor', updatedAt: now };
+  const entry: JournalEntry = { id: uid(), createdAt: created, title, summary, content: m.note, tag: 'Humor', photos: [], updatedAt: now };
   return { ...d, journal: [entry, ...d.journal], moods: { ...d.moods, [day]: { ...m, journalId: entry.id } } };
 }
 

@@ -60,6 +60,7 @@ export function Revisao() {
       summary,
       content: existing ? `${existing.content}\n\n${parts.join('\n\n')}` : parts.join('\n\n'),
       tag: 'Revisão',
+      photos: existing?.photos ?? [],
       updatedAt: now,
     };
     update(upsert('journal', entry));

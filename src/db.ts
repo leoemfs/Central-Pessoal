@@ -49,6 +49,24 @@ export async function dbSet(key: string, value: unknown): Promise<void> {
   }
 }
 
+export async function dbDelete(key: string): Promise<void> {
+  try {
+    await run('readwrite', (s) => s.delete(key));
+  } catch {
+    localStorage.removeItem(FALLBACK_PREFIX + key);
+  }
+}
+
+/** Chaves que começam com `prefix` (ex.: os arquivos guardados). */
+export async function dbKeys(prefix: string): Promise<string[]> {
+  try {
+    const keys = await run('readonly', (s) => s.getAllKeys(IDBKeyRange.bound(prefix, `${prefix}\uffff`)));
+    return keys.map(String);
+  } catch {
+    return [];
+  }
+}
+
 /** Pede ao navegador para não apagar os dados automaticamente. */
 export async function requestPersistence(): Promise<boolean> {
   try {
