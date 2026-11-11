@@ -1,15 +1,16 @@
 /**
- * N9.1: conta Google e cópia automática dos dados no Drive (pasta escondida do app).
+ * N9.1 + N9.2: conta Google e sincronização automática pelo Drive (pasta escondida do app).
  *
  * - O login usa o Google Identity Services (só no navegador, sem servidor). O acesso vale ~1 hora;
- *   depois disso o app não abre janelas sozinho: a cópia para e aparece "Continuar salvando" (um toque).
+ *   depois disso o app não abre janelas sozinho: aparece "Continuar sincronizando" (um toque).
  * - A situação da conexão é **deste aparelho** (localStorage), não vai nos dados nem no backup.
- * - Antes de salvar por cima, confere se outro aparelho salvou depois (`decide`). Se sim, pergunta
- *   qual fica (a junção automática chega no N9.2).
+ * - Se outro aparelho salvou na nuvem, junta item por item (`mergeData`) antes de salvar.
  */
 import { useSyncExternalStore } from 'react';
 import type { AppData } from './types';
-import { DRIVE_SCOPE, decide, downloadData, findData, isAuthError, uploadData, whoAmI, type CloudFile } from './drive';
+import { DRIVE_SCOPE, downloadData, findData, isAuthError, uploadData, whoAmI, type CloudFile } from './drive';
+import { normalize } from './data';
+import { mergeData } from './sync';
 import { uid } from './utils';
 
 /**
@@ -23,6 +24,8 @@ const STATE_KEY = 'central-pessoal:google';
 const TOKEN_KEY = 'central-pessoal:google-token';
 /** Espera depois da última mudança antes de salvar (agrupa digitação). */
 const SAVE_DELAY = 15_000;
+/** Com o app aberto, confere a nuvem de tempos em tempos. */
+const SYNC_EVERY = 5 * 60_000;
 
 export type CloudStatus = 'ok' | 'salvando' | 'reconectar' | 'escolher' | 'offline' | 'erro';
 
@@ -59,8 +62,8 @@ function write(key: string, value: unknown) {
 }
 
 let state: CloudState | null = read<CloudState>(STATE_KEY);
-// Ficou "salvando" quando o app fechou: volta ao normal.
-if (state && state.status === 'salvando') state = { ...state, status: 'ok' };
+// Ficou "salvando" quando o app fechou, ou na escolha de cópia da v0.40 (o N9.2 junta sozinho): volta ao normal.
+if (state && (state.status === 'salvando' || state.status === 'escolher')) state = { ...state, status: 'ok', cloud: null };
 const listeners = new Set<() => void>();
 
 function set(next: CloudState | null) {
@@ -155,14 +158,17 @@ async function askToken(): Promise<string> {
   });
 }
 
-// ---------- cópia na nuvem ----------
+// ---------- sincronização ----------
 let getData: () => AppData | null = () => null;
-/** A loja informa como ler os dados atuais. */
-export function setDataSource(fn: () => AppData | null) {
-  getData = fn;
+let mergeSink: (remote: AppData) => void = () => undefined;
+/** A loja informa como ler os dados atuais e como juntar os que vieram da nuvem. */
+export function setDataSource(read: () => AppData | null, merge: (remote: AppData) => void) {
+  getData = read;
+  mergeSink = merge;
 }
 
 let busy = false;
+let again = false;
 let timer: number | undefined;
 
 function failed(e: unknown) {
@@ -173,11 +179,20 @@ function failed(e: unknown) {
   else patch({ status: 'erro' });
 }
 
-/** Salva agora. Sem acesso válido: só abre a janela do Google se `interactive` (veio de um toque). */
-export async function saveNow(interactive = false, force = false): Promise<void> {
-  const d = getData();
-  if (!state || !d || busy) return;
-  if (state.status === 'escolher' && !force) return;
+/** Partes que não entram na comparação (a cópia da nuvem não precisa delas iguais). */
+const comparable = (d: AppData) => JSON.stringify({ ...d, legacy: null });
+
+/**
+ * Sincroniza agora: se outro aparelho salvou na nuvem, junta item por item (N9.2) e, se este
+ * aparelho tem algo que a nuvem não tem, salva a junção. Sem acesso válido, só abre a janela do
+ * Google se `interactive` (veio de um toque).
+ */
+export async function syncNow(interactive = false): Promise<void> {
+  if (!state || !getData()) return;
+  if (busy) {
+    again = true;
+    return;
+  }
   let token = storedToken();
   if (!token) {
     if (!interactive) return void patch({ status: 'reconectar' });
@@ -189,26 +204,40 @@ export async function saveNow(interactive = false, force = false): Promise<void>
   }
   busy = true;
   patch({ status: 'salvando' });
+  // Mudanças feitas durante a sincronização ficam para a próxima.
+  const started = new Date().toISOString();
   try {
     const cloud = await findData(token);
-    if (!force && decide(cloud, state.lastCloudTime) === 'escolher') {
-      patch({ status: 'escolher', cloud });
-      return;
+    let toSave = getData()!;
+    let upload = !cloud || hasUnsaved(toSave, state);
+    if (cloud && cloud.modifiedTime !== state.lastCloudTime) {
+      const remote = normalize(await downloadData(token, cloud.id));
+      toSave = mergeData(toSave, remote);
+      mergeSink(remote);
+      upload = comparable(toSave) !== comparable(remote);
+      patch({ lastCloudTime: cloud.modifiedTime });
     }
-    const saved = await uploadData(token, JSON.stringify(getData() ?? d), state.device, cloud?.id ?? null);
-    patch({ status: 'ok', lastSavedAt: new Date().toISOString(), lastCloudTime: saved.modifiedTime, cloud: null });
+    if (upload) {
+      const saved = await uploadData(token, JSON.stringify(toSave), state.device, cloud?.id ?? null);
+      patch({ lastCloudTime: saved.modifiedTime });
+    }
+    patch({ status: 'ok', lastSavedAt: started, cloud: null });
   } catch (e) {
     failed(e);
   } finally {
     busy = false;
+    if (again) {
+      again = false;
+      scheduleSave();
+    }
   }
 }
 
-/** Mudou algo: salva daqui a pouco (se estiver conectado). */
+/** Mudou algo: sincroniza daqui a pouco (se estiver conectado). */
 export function scheduleSave() {
-  if (!state || state.status === 'escolher') return;
+  if (!state) return;
   window.clearTimeout(timer);
-  timer = window.setTimeout(() => void saveNow(false), SAVE_DELAY);
+  timer = window.setTimeout(() => void syncNow(false), SAVE_DELAY);
 }
 
 /** Saindo do app: tenta salvar já o que estiver pendente. */
@@ -216,11 +245,22 @@ export function flushSave() {
   const d = getData();
   if (!state || !d || !hasUnsaved(d, state)) return;
   window.clearTimeout(timer);
-  void saveNow(false);
+  void syncNow(false);
 }
 
-/** "Entrar com Google" (vem de um toque). */
-export async function connect(): Promise<'ok' | 'escolher' | 'cancelado' | 'erro'> {
+let started = false;
+/** App aberto: sincroniza agora, ao voltar para o app e a cada 5 minutos com ele aberto. */
+export function startCloud() {
+  if (started || typeof window === 'undefined') return;
+  started = true;
+  const visible = () => document.visibilityState === 'visible';
+  void syncNow(false);
+  document.addEventListener('visibilitychange', () => visible() && void syncNow(false));
+  window.setInterval(() => visible() && void syncNow(false), SYNC_EVERY);
+}
+
+/** "Entrar com Google" (vem de um toque). Se já houver dados na nuvem, junta com os deste aparelho. */
+export async function connect(): Promise<'ok' | 'cancelado' | 'erro'> {
   let token: string;
   try {
     token = await askToken();
@@ -231,36 +271,11 @@ export async function connect(): Promise<'ok' | 'escolher' | 'cancelado' | 'erro
     const who = await whoAmI(token);
     const device = state?.device || uid();
     set({ email: who.email, name: who.name, device, lastSavedAt: null, lastCloudTime: null, status: 'ok', cloud: null });
-    await saveNow(false);
-    return state?.status === 'escolher' ? 'escolher' : state?.status === 'ok' ? 'ok' : 'erro';
+    await syncNow(false);
+    return state?.status === 'ok' ? 'ok' : 'erro';
   } catch (e) {
     failed(e);
     return 'erro';
-  }
-}
-
-/** Escolha "Manter a deste aparelho": salva por cima da cópia da nuvem. */
-export const keepThisDevice = () => saveNow(true, true);
-
-/** Escolha "Usar a da nuvem" ou "Trazer da nuvem": baixa os dados (quem chama troca os dados do app). */
-export async function fetchCloud(): Promise<unknown | null> {
-  if (!state) return null;
-  let token = storedToken();
-  try {
-    token ??= await askToken();
-  } catch {
-    return null;
-  }
-  try {
-    const cloud = await findData(token);
-    if (!cloud) return null;
-    const raw = await downloadData(token, cloud.id);
-    // Os dados trazidos passam a ser a referência: a próxima cópia salva por cima sem perguntar.
-    patch({ status: 'ok', lastCloudTime: cloud.modifiedTime, lastSavedAt: new Date().toISOString(), cloud: null });
-    return raw;
-  } catch (e) {
-    failed(e);
-    return null;
   }
 }
 

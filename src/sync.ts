@@ -86,3 +86,102 @@ export function pruneDeleted(d: AppData, now: Date = new Date()): AppData {
   const kept = entries.filter(([, at]) => at >= limit);
   return kept.length === entries.length ? d : { ...d, deleted: Object.fromEntries(kept) };
 }
+
+// ---------- N9.2: juntar os dados de dois aparelhos ----------
+
+interface MergeCtx {
+  /** Datas de alteração de cada lado. */
+  sa: Record<string, string>;
+  sb: Record<string, string>;
+  /** Exclusões dos dois lados juntas. */
+  deleted: Record<string, string>;
+}
+
+const isIdItem = (x: unknown): x is Rec => isRec(x) && typeof x.id === 'string' && x.id !== '';
+
+/** As duas listas são de itens com id (e pelo menos uma tem item)? */
+function idLists(a: unknown, b: unknown): boolean {
+  if (!(Array.isArray(a) || a === undefined) || !(Array.isArray(b) || b === undefined)) return false;
+  const all = [...((a as unknown[]) ?? []), ...((b as unknown[]) ?? [])];
+  return all.length > 0 && all.every(isIdItem);
+}
+
+/** Junta dois valores. `aNewer`: o lado A é o mais recente (vale quando não dá para juntar). */
+function mergeValue(a: unknown, b: unknown, aNewer: boolean, ctx: MergeCtx): unknown {
+  if (a === undefined) return b;
+  if (b === undefined) return a;
+  if (idLists(a, b)) return mergeById(a as Rec[], b as Rec[], aNewer, ctx);
+  if (isRec(a) && isRec(b)) {
+    const out: Rec = {};
+    for (const k of new Set([...Object.keys(a), ...Object.keys(b)])) out[k] = mergeValue(a[k], b[k], aNewer, ctx);
+    return out;
+  }
+  return aNewer ? a : b;
+}
+
+/** Junta listas pelo id: item dos dois lados → o mais recente (e as listas dentro dele, item a item);
+ * item de um lado só → fica, a não ser que o outro lado tenha excluído depois da última alteração. */
+function mergeById(la: Rec[], lb: Rec[], aNewer: boolean, ctx: MergeCtx): Rec[] {
+  const A = new Map(la.map((x) => [x.id as string, x]));
+  const B = new Map(lb.map((x) => [x.id as string, x]));
+  // A ordem é a do lado mais recente; o que só existe do outro lado vai no fim.
+  const order = aNewer ? [...la, ...lb] : [...lb, ...la];
+  const seen = new Set<string>();
+  const out: Rec[] = [];
+  for (const x of order) {
+    const id = x.id as string;
+    if (seen.has(id)) continue;
+    seen.add(id);
+    const a = A.get(id);
+    const b = B.get(id);
+    if (a && b) {
+      const sa = ctx.sa[id] ?? '';
+      const sb = ctx.sb[id] ?? '';
+      out.push(mergeValue(a, b, sa === sb ? aNewer : sa > sb, ctx) as Rec);
+    } else {
+      const stamp = (a ? ctx.sa[id] : ctx.sb[id]) ?? '';
+      const del = ctx.deleted[id];
+      if (del && del >= stamp) continue; // excluído depois da última alteração
+      out.push((a ?? b) as Rec);
+    }
+  }
+  return out;
+}
+
+const maxMap = (a: Record<string, string>, b: Record<string, string>) => {
+  const out = { ...a };
+  for (const [k, v] of Object.entries(b)) if (!(k in out) || v > out[k]) out[k] = v;
+  return out;
+};
+const union = (a: string[], b: string[]) => [...new Set([...a, ...b])].sort();
+
+/**
+ * Junta os dados deste aparelho (`local`) com os da nuvem (`remote`), item por item.
+ * Nada some sem motivo: o que foi criado num aparelho entra no outro; no mesmo item, vale a
+ * alteração mais recente; exclusão só vence se veio depois da última alteração do item.
+ */
+export function mergeData(local: AppData, remote: AppData): AppData {
+  const ctx: MergeCtx = { sa: local.stamps, sb: remote.stamps, deleted: maxMap(local.deleted, remote.deleted) };
+  const L = local as unknown as Rec;
+  const R = remote as unknown as Rec;
+  const out: Rec = { ...L };
+  for (const key of new Set([...Object.keys(L), ...Object.keys(R)])) {
+    if (SKIP.has(key)) continue;
+    const aNewer = (local.stamps[`@${key}`] ?? '') >= (remote.stamps[`@${key}`] ?? '');
+    out[key] = mergeValue(L[key], R[key], aNewer, ctx);
+  }
+  const merged = out as unknown as AppData;
+  // Dias de uso e de visita: os dos dois aparelhos contam.
+  merged.settings = {
+    ...merged.settings,
+    activeDays: union(local.settings.activeDays, remote.settings.activeDays),
+    visitDays: union(local.settings.visitDays, remote.settings.visitDays),
+  };
+  merged.stamps = maxMap(local.stamps, remote.stamps);
+  // O que continua existindo sai das exclusões.
+  const present = new Map<string, unknown>();
+  for (const key of Object.keys(out)) if (!SKIP.has(key)) collect(out[key], present);
+  merged.deleted = Object.fromEntries(Object.entries(ctx.deleted).filter(([id]) => !present.has(id)));
+  for (const id of Object.keys(merged.deleted)) delete merged.stamps[id];
+  return merged;
+}

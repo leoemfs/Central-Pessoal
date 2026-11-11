@@ -8,8 +8,8 @@ import { INCOME_AHEAD, materializeIncomes } from './incomes';
 import { materializeVouchers } from './vouchers';
 import { dbGet, dbSet, requestPersistence } from './db';
 import { addMonths, monthKey, todayISO } from './utils';
-import { pruneDeleted, trackChanges } from './sync';
-import { flushSave, scheduleSave, setDataSource } from './cloud';
+import { mergeData, pruneDeleted, trackChanges } from './sync';
+import { flushSave, scheduleSave, setDataSource, startCloud } from './cloud';
 
 const KEY = 'data';
 const LEGACY_LOCALSTORAGE_KEY = 'central-pessoal:v1';
@@ -93,7 +93,22 @@ export function DataProvider({ children }: { children: ReactNode }) {
   // A cópia na nuvem lê sempre os dados mais recentes.
   const latest = useRef<AppData | null>(null);
   latest.current = data;
-  useEffect(() => setDataSource(() => latest.current), []);
+  // N9.2: o que veio da nuvem é juntado com os dados mais atuais deste aparelho, sem mudar as datas
+  // de alteração (só o que as regras geram depois da junção ganha data nova).
+  useEffect(() => {
+    setDataSource(
+      () => latest.current,
+      (remote) =>
+        setData((prev) => {
+          if (!prev) return prev;
+          const merged = mergeData(prev, remote);
+          return trackChanges(merged, generate(merged));
+        }),
+    );
+  }, []);
+  useEffect(() => {
+    if (data) startCloud();
+  }, [data]);
 
   useEffect(() => {
     const onHide = () => {

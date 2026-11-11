@@ -1,15 +1,14 @@
 import { useEffect, useState } from 'react';
 import { useStore } from '../store';
-import { normalize } from '../data';
 import { Icon } from '../ui';
 import { formatDateTime } from '../utils';
-import { connect, disconnect, fetchCloud, GOOGLE_CLIENT_ID, hasUnsaved, keepThisDevice, loadGis, saveNow, useCloud } from '../cloud';
+import { connect, disconnect, GOOGLE_CLIENT_ID, hasUnsaved, loadGis, syncNow, useCloud } from '../cloud';
 
 type Message = { tone: 'green' | 'red'; text: string };
 
-/** Configurações › Conta Google (N9.1): cópia automática dos dados na pasta escondida do Drive. */
-export function GoogleCard({ keepCopy, onMessage }: { keepCopy: () => Promise<boolean>; onMessage: (m: Message) => void }) {
-  const { data, replace } = useStore();
+/** Configurações › Conta Google (N9.1 + N9.2): sincronização automática pelo Drive (pasta escondida do app). */
+export function GoogleCard({ onMessage }: { onMessage: (m: Message) => void }) {
+  const { data } = useStore();
   const cloud = useCloud();
   const [working, setWorking] = useState(false);
 
@@ -24,31 +23,12 @@ export function GoogleCard({ keepCopy, onMessage }: { keepCopy: () => Promise<bo
     setWorking(true);
     const r = await connect();
     setWorking(false);
-    if (r === 'ok') onMessage({ tone: 'green', text: 'Conta Google ligada. Seus dados agora têm uma cópia no seu Drive, salva sozinha.' });
+    if (r === 'ok') onMessage({ tone: 'green', text: 'Conta Google ligada. Este aparelho agora sincroniza sozinho com os outros pelo seu Drive.' });
     else if (r === 'erro') onMessage({ tone: 'red', text: 'Não deu para ligar a conta Google agora. Confira a internet e tente de novo.' });
   }
 
-  async function useCloudCopy() {
-    const when = cloud?.cloud?.modifiedTime ? ` (salva em ${formatDateTime(cloud.cloud.modifiedTime)})` : '';
-    if (!confirm(`Trocar os dados deste aparelho pela cópia da nuvem${when}? Dá para desfazer depois, em Backup.`)) return;
-    if (!(await keepCopy()) && !confirm('Não foi possível guardar uma cópia dos dados atuais para desfazer. Continuar mesmo assim?')) return;
-    setWorking(true);
-    const raw = await fetchCloud();
-    setWorking(false);
-    if (!raw) return onMessage({ tone: 'red', text: 'Não deu para trazer a cópia da nuvem agora. Tente de novo.' });
-    replace(normalize(raw));
-    onMessage({ tone: 'green', text: 'Pronto: este aparelho está com os dados da nuvem.' });
-  }
-
-  async function keepMine() {
-    if (!confirm('Salvar os dados deste aparelho por cima da cópia da nuvem? A cópia que está lá agora deixa de existir.')) return;
-    setWorking(true);
-    await keepThisDevice();
-    setWorking(false);
-  }
-
   function leave() {
-    if (!confirm('Sair da conta Google? Os dados continuam neste aparelho; só para de salvar a cópia no Drive.')) return;
+    if (!confirm('Sair da conta Google neste aparelho? Os dados continuam aqui; só para de sincronizar.')) return;
     disconnect();
     onMessage({ tone: 'green', text: 'Conta Google desligada neste aparelho.' });
   }
@@ -60,7 +40,7 @@ export function GoogleCard({ keepCopy, onMessage }: { keepCopy: () => Promise<bo
           <h2>Conta Google</h2>
         </div>
         <p className="muted">
-          Guarde uma cópia dos seus dados no seu Google Drive, salva sozinha a cada mudança. Fica numa pasta escondida que só o app enxerga; o app não vê o resto do seu Drive.
+          Sincronize seus dados entre o celular e o computador pelo seu Google Drive, sozinho. Fica numa pasta escondida que só o app enxerga; o app não vê o resto do seu Drive.
         </p>
         <button type="button" className="btn primary block" style={{ marginTop: 14 }} onClick={enter} disabled={working}>
           <Icon name="cloud" size={18} /> {working ? 'Entrando…' : 'Entrar com Google'}
@@ -72,14 +52,14 @@ export function GoogleCard({ keepCopy, onMessage }: { keepCopy: () => Promise<bo
   const pending = hasUnsaved(data, cloud);
   const statusText =
     cloud.status === 'salvando'
-      ? 'Salvando…'
+      ? 'Sincronizando…'
       : cloud.status === 'offline'
-        ? 'Sem internet: salva quando a conexão voltar.'
+        ? 'Sem internet: sincroniza quando a conexão voltar.'
         : cloud.status === 'erro'
-          ? 'Não deu para salvar da última vez. Tenta de novo sozinho na próxima mudança.'
+          ? 'Não deu para sincronizar da última vez. Tenta de novo sozinho.'
           : cloud.lastSavedAt
-            ? `Cópia na nuvem: ${formatDateTime(cloud.lastSavedAt)}${pending ? ' · mudanças esperando' : ''}`
-            : 'Ainda sem cópia na nuvem.';
+            ? `Sincronizado: ${formatDateTime(cloud.lastSavedAt)}${pending ? ' · mudanças esperando' : ''}`
+            : 'Ainda não sincronizado.';
 
   return (
     <section className="card">
@@ -88,20 +68,12 @@ export function GoogleCard({ keepCopy, onMessage }: { keepCopy: () => Promise<bo
         <span className="muted small">{cloud.email}</span>
       </div>
 
-      {cloud.status === 'escolher' ? (
-        <div className="info-box">
-          <Icon name="info" />
-          <div>
-            <strong>Já existe uma cópia na nuvem</strong>
-            {cloud.cloud?.modifiedTime ? `Salva em ${formatDateTime(cloud.cloud.modifiedTime)}` : 'Salva antes'}, por outro aparelho ou antes de você entrar aqui. Qual fica? (A junção automática das duas chega na próxima parte.)
-          </div>
-        </div>
-      ) : cloud.status === 'reconectar' ? (
+      {cloud.status === 'reconectar' ? (
         <div className="info-box">
           <Icon name="cloud" />
           <div>
-            <strong>Toque para continuar salvando</strong>
-            O acesso ao Google vence depois de um tempo. Um toque e a cópia volta a ser salva sozinha.
+            <strong>Toque para continuar sincronizando</strong>
+            O acesso ao Google vence depois de um tempo. Um toque e o app volta a sincronizar sozinho.
           </div>
         </div>
       ) : (
@@ -109,28 +81,13 @@ export function GoogleCard({ keepCopy, onMessage }: { keepCopy: () => Promise<bo
           <Icon name={cloud.status === 'ok' && !pending ? 'checkCircle' : 'cloud'} size={16} /> {statusText}
         </p>
       )}
+      <p className="muted small" style={{ marginTop: 6 }}>
+        Sincroniza ao abrir o app, ao voltar para ele, a cada 5 minutos e logo depois de cada mudança. O que você cria ou muda em um aparelho aparece no outro.
+      </p>
 
-      <div className="btn-row" style={{ marginTop: 14 }}>
-        {cloud.status === 'escolher' ? (
-          <>
-            <button type="button" className="btn" onClick={useCloudCopy} disabled={working}>
-              <Icon name="download" size={18} /> Usar a da nuvem
-            </button>
-            <button type="button" className="btn primary" onClick={keepMine} disabled={working}>
-              <Icon name="upload" size={18} /> Manter a deste aparelho
-            </button>
-          </>
-        ) : (
-          <>
-            <button type="button" className="btn primary" onClick={() => void saveNow(true)} disabled={working || cloud.status === 'salvando'}>
-              <Icon name="cloud" size={18} /> {cloud.status === 'reconectar' ? 'Continuar salvando' : 'Salvar agora'}
-            </button>
-            <button type="button" className="btn" onClick={useCloudCopy} disabled={working}>
-              <Icon name="download" size={18} /> Trazer da nuvem
-            </button>
-          </>
-        )}
-      </div>
+      <button type="button" className="btn primary block" style={{ marginTop: 14 }} onClick={() => void syncNow(true)} disabled={cloud.status === 'salvando'}>
+        <Icon name="cloud" size={18} /> {cloud.status === 'reconectar' ? 'Continuar sincronizando' : 'Sincronizar agora'}
+      </button>
       <button type="button" className="btn ghost" style={{ marginTop: 10, width: '100%' }} onClick={leave}>
         Sair da conta Google
       </button>

@@ -201,12 +201,10 @@ export function Dashboard() {
         </a>
       )
     ) },
-    { id: 'nuvem', label: 'Aviso da cópia na nuvem', lock: 'keep', node: (
+    { id: 'nuvem', label: 'Aviso da sincronização', lock: 'keep', node: (
       cloudStuck && (
         <a className="alert orange" href="#/ajustes" style={{ textDecoration: 'none' }}>
-          {cloud?.status === 'escolher'
-            ? 'Cópia na nuvem parada: escolha qual cópia fica. Toque para ver.'
-            : `Cópia na nuvem parada${cloudDays ? ` há ${cloudDays} dia(s)` : ''}. Toque para continuar salvando.`}
+          {`Sincronização parada${cloudDays ? ` há ${cloudDays} dia(s)` : ''}. Toque para continuar sincronizando.`}
         </a>
       )
     ) },

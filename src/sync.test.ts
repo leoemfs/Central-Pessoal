@@ -97,3 +97,72 @@ test('itens gerados pelo app têm o mesmo id em qualquer aparelho', () => {
   const r = addIncome(emptyData(), { description: 'Salário', sourceId: '', amount: 5000, date: '2026-11-05', recurring: true, receivedAt: null }, '2026-11-03');
   assert.equal(r.incomes[0].id, `${r.incomeSeries[0].id}~1`);
 });
+
+// ---------- N9.2: juntar dois aparelhos ----------
+import { mergeData } from './sync.ts';
+
+const TA = '2026-11-12T10:00:00.000Z';
+const TB = '2026-11-12T11:00:00.000Z';
+const TC = '2026-11-12T12:00:00.000Z';
+const withEvents = (events: CalendarEvent[], stamps: Record<string, string> = {}, deleted: Record<string, string> = {}): AppData =>
+  ({ ...emptyData(), events, stamps, deleted });
+
+test('juntar: o que foi criado em cada aparelho fica nos dois', () => {
+  const cel = withEvents([ev('c', 'Do celular')], { c: TA, '@events': TA });
+  const pc = withEvents([ev('p', 'Do computador')], { p: TB, '@events': TB });
+  const m = mergeData(cel, pc);
+  assert.deepEqual(m.events.map((e) => e.id).sort(), ['c', 'p']);
+  assert.equal(m.stamps.c, TA);
+  assert.equal(m.stamps.p, TB);
+});
+
+test('juntar: no mesmo item vale a alteração mais recente (dos dois lados)', () => {
+  const a = withEvents([ev('x', 'Antigo')], { x: TA });
+  const b = withEvents([ev('x', 'Novo')], { x: TB });
+  assert.equal(mergeData(a, b).events[0].title, 'Novo');
+  assert.equal(mergeData(b, a).events[0].title, 'Novo');
+});
+
+test('juntar: exclusão vence alteração mais antiga; alteração mais nova vence exclusão', () => {
+  const kept = withEvents([ev('x', 'A')], { x: TA });
+  const gone = withEvents([], {}, { x: TB });
+  const m = mergeData(kept, gone);
+  assert.equal(m.events.length, 0);
+  assert.equal(m.deleted.x, TB);
+  const edited = withEvents([ev('x', 'Editado')], { x: TC });
+  const m2 = mergeData(gone, edited);
+  assert.equal(m2.events[0]?.title, 'Editado');
+  assert.equal(m2.deleted.x, undefined);
+});
+
+test('juntar: listas dentro de listas (Carreira) item a item', () => {
+  const base = emptyData();
+  const job = (id: string, role: string) => ({ id, role }) as unknown as AppData['career']['jobs'][number];
+  const a = { ...base, career: { ...base.career, jobs: [job('j1', 'Analista')] }, stamps: { j1: TA, '@career': TA } };
+  const b = { ...base, career: { ...base.career, jobs: [job('j2', 'Gerente')] }, stamps: { j2: TB, '@career': TB } };
+  assert.deepEqual(mergeData(a, b).career.jobs.map((j) => j.id).sort(), ['j1', 'j2']);
+});
+
+test('juntar: humor de dias diferentes fica todo; configurações do lado mais recente; dias de uso somam', () => {
+  const base = emptyData();
+  const mood = { ...Object.values(normalize({ moods: { '2026-11-10': { mood: 4 } } }).moods)[0] };
+  const a: AppData = { ...base, moods: { '2026-11-10': mood }, settings: { ...base.settings, theme: 'light', activeDays: ['2026-11-10'] }, stamps: { '@settings': TA, '@moods': TA } };
+  const b: AppData = { ...base, moods: { '2026-11-11': mood }, settings: { ...base.settings, theme: 'dark', activeDays: ['2026-11-11'] }, stamps: { '@settings': TB, '@moods': TB } };
+  const m = mergeData(a, b);
+  assert.deepEqual(Object.keys(m.moods).sort(), ['2026-11-10', '2026-11-11']);
+  assert.equal(m.settings.theme, 'dark');
+  assert.deepEqual(m.settings.activeDays, ['2026-11-10', '2026-11-11']);
+});
+
+test('juntar consigo mesmo não muda nada; a ordem segue o lado mais recente', () => {
+  const a = withEvents([ev('1', 'A'), ev('2', 'B')], { 1: TA, 2: TA, '@events': TA });
+  assert.deepEqual(mergeData(a, a), a);
+  const b = withEvents([ev('2', 'B'), ev('1', 'A')], { 1: TA, 2: TA, '@events': TB });
+  assert.deepEqual(mergeData(a, b).events.map((e) => e.id), ['2', '1']);
+});
+
+test('juntar dados antigos sem datas: une tudo, sem perder nada', () => {
+  const a = withEvents([ev('1', 'A')]);
+  const b = withEvents([ev('2', 'B')]);
+  assert.deepEqual(mergeData(a, b).events.map((e) => e.id).sort(), ['1', '2']);
+});
