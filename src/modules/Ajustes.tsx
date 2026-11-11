@@ -8,12 +8,9 @@ import { Icon, notify, PageHeader, Segmented, Toggle, type IconName } from '../u
 import { favoriteItems } from '../moduleBar';
 import { FavoritesSheet } from './Mais';
 import { ACCENTS, accentById } from '../theme';
+import { BAR_LAYOUTS, fitFavorites, hiddenFrom, MIN_VISIBLE, MODULES, rhythmLabel, toggleModule, visibleFrom } from '../setup';
+import { openSetup, openTutorial, RhythmPicker } from './Montagem';
 
-const BAR_LAYOUTS: { id: 'fixo' | 'lado' | 'centro'; label: string; hint: string; demo: string[] }[] = [
-  { id: 'fixo', label: 'Favorito no mesmo lugar', hint: 'O módulo fica onde está nos favoritos (ex.: Agenda em 3º); as ferramentas ocupam os outros espaços.', demo: ['H', 'f', 'f', 'M', '+'] },
-  { id: 'lado', label: 'Módulo ao lado do Início', hint: 'O módulo vai para o 1º espaço do meio; as ferramentas ficam à direita.', demo: ['H', 'M', 'f', 'f', '+'] },
-  { id: 'centro', label: 'Módulo no centro', hint: 'O módulo vai para o meio; as ferramentas ficam dos lados.', demo: ['H', 'f', 'M', 'f', '+'] },
-];
 
 const UNDO_KEY = 'antesDaImportacao';
 interface Snapshot {
@@ -186,6 +183,39 @@ export function Ajustes() {
           </button>
         </div>
 
+        <h3 className="pz-title">Módulos à vista</h3>
+        <p className="muted small">Desligado fica guardado no Mais, sem apagar nada. Pelo menos {MIN_VISIBLE} à vista.</p>
+        <div className="chips" role="group" aria-label="Módulos à vista">
+          {MODULES.map((m) => {
+            const visible = visibleFrom(data.settings.hiddenModules);
+            const on = visible.includes(m.id);
+            return (
+              <button
+                key={m.id}
+                type="button"
+                className={`chip-btn${on ? ' on' : ''}`}
+                aria-pressed={on}
+                onClick={() => {
+                  const next = toggleModule(visible, m.id);
+                  if (next === visible) return notify(`Pelo menos ${MIN_VISIBLE} módulos`, 'Ligue outro antes de desligar este.');
+                  update((d) => ({ ...d, settings: { ...d.settings, hiddenModules: hiddenFrom(next), favorites: fitFavorites(d.settings.favorites, next), ...(m.id === 'jornada' ? { journeyWanted: !on } : {}) } }));
+                  notify(m.label, on ? 'Guardado no Mais.' : 'De volta à vista.');
+                }}
+              >
+                {m.label}
+              </button>
+            );
+          })}
+        </div>
+
+        {!data.settings.hiddenModules.includes('diario') && (
+          <>
+            <h3 className="pz-title">Ritmo do Diário</h3>
+            <p className="muted small">Agora: {rhythmLabel(data.settings.journalRhythm)}. O Início só convida nesse ritmo e nunca conta falta.</p>
+            <RhythmPicker value={data.settings.journalRhythm} onChange={(journalRhythm) => setSetting({ journalRhythm })} />
+          </>
+        )}
+
         <h3 className="pz-title">Barra de baixo dentro de um módulo</h3>
         <div className="pz-options" role="radiogroup" aria-label="Jeito da barra de baixo">
           {BAR_LAYOUTS.map((o) => (
@@ -218,6 +248,14 @@ export function Ajustes() {
             <span className="muted small">A barra de cima, o mês e as abas e a barra de baixo somem ao rolar para baixo e voltam ao subir.</span>
           </div>
           <Toggle checked={data.settings.hideOnScroll} onChange={(v) => setSetting({ hideOnScroll: v })} label="Esconder as barras ao rolar" />
+        </div>
+        <div className="btn-row" style={{ marginTop: 14 }}>
+          <button type="button" className="btn soft small" onClick={() => openSetup('convite')}>
+            <Icon name="grid" size={16} /> Refazer a montagem do app
+          </button>
+          <button type="button" className="btn ghost small" onClick={openTutorial}>
+            Como usar a barra
+          </button>
         </div>
       </section>
       {favPick && <FavoritesSheet onClose={() => setFavPick(false)} />}

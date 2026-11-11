@@ -11,6 +11,7 @@ import { normalizeLayouts } from './cardLayout.ts';
 import { DEFAULT_LIST_CATEGORIES, normalizeListData } from './lists.ts';
 import { emptyStudy, normalizeStudy } from './estudos.ts';
 import { emptyCareer, normalizeCareer } from './carreira.ts';
+import { DEFAULT_RHYTHM, MODULES, normalizeRhythm, SETUP_AREAS } from './setup.ts';
 import { fixCard, fixCategory, fixEvent, fixExpense, fixExpenseSeries, fixIncome, fixIncomeSeries, fixJournal, fixNote, fixTask, sanitizeList } from './sanitize.ts';
 
 export const COLORS = ['#22c55e', '#3b82f6', '#8b5cf6', '#f97316', '#ef4444', '#94a3b8', '#eab308', '#ec4899', '#06b6d4'];
@@ -54,7 +55,7 @@ export function emptyData(): AppData {
     incomes: [],
     incomeSeries: [],
     incomeSources: [],
-    settings: { theme: 'dark', accent: null, favorites: [...DEFAULT_FAVORITES], cards: {}, barLayout: 'fixo', tapToFavorites: true, hideOnScroll: true, seededCategories: false, seededIncomeSources: false, lastBackupAt: null, activeDays: [], visitDays: [], journeyUnlockedAt: null, journeyChoice: null },
+    settings: { theme: 'dark', accent: null, favorites: [...DEFAULT_FAVORITES], cards: {}, barLayout: 'fixo', tapToFavorites: true, hideOnScroll: true, seededCategories: false, seededIncomeSources: false, lastBackupAt: null, activeDays: [], visitDays: [], journeyUnlockedAt: null, journeyChoice: null, hiddenModules: [], setup: 'novo', tutorialSeen: false, setupAreas: [], journeyWanted: null, journalRhythm: { ...DEFAULT_RHYTHM } },
     profile: emptyProfile('novo'),
     boxes: [],
     moods: {},
@@ -158,6 +159,13 @@ export function normalize(raw: unknown): AppData {
       visitDays: strings(settings.visitDays),
       journeyUnlockedAt: typeof settings.journeyUnlockedAt === 'string' ? settings.journeyUnlockedAt : null,
       journeyChoice: settings.journeyChoice === 'quero' || settings.journeyChoice === 'depois' ? settings.journeyChoice : null,
+      hiddenModules: strings(settings.hiddenModules).filter((id, i, a) => MODULES.some((m) => m.id === id) && a.indexOf(id) === i).slice(0, MODULES.length - 3),
+      // Quem já tinha dados recebe o convite no Início; instalação nova abre a montagem sozinha.
+      setup: settings.setup === 'novo' || settings.setup === 'convite' || settings.setup === 'feito' ? settings.setup : Object.keys(r).length > 0 ? 'convite' : 'novo',
+      tutorialSeen: settings.tutorialSeen === true,
+      setupAreas: strings(settings.setupAreas).filter((id) => SETUP_AREAS.some((a) => a.id === id)),
+      journeyWanted: typeof settings.journeyWanted === 'boolean' ? settings.journeyWanted : null,
+      journalRhythm: normalizeRhythm(settings.journalRhythm),
     },
     // Quem já tinha dados (atualização ou backup) não vê a entrevista de surpresa.
     profile: normalizeProfile(r.profile, Object.keys(r).length > 0),

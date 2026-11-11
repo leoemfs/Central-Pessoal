@@ -74,8 +74,8 @@
 | M20 | Limpeza: tirar 6 funções e 8 estilos sem uso, dividir arquivos grandes e os estilos por módulo, trocar `confirm()` por confirmação do app | MOD | M | baixa | ideia | `auditoria-2026-11.md` |
 | N3.3 | **Níveis de notificação** (baixa, média, alta, personalizado) com "Me lembrar" e sino; parte 1 sem Android: marcações + lista de avisos dos próximos 7 dias | NOVO | M | média | especificado (simulado) | `futuro/notificacoes.md` |
 | M1 | Hábitos: pausar e arquivar | MOD | P | alta | especificado | `futuro/habitos-pausar-arquivar.md` |
-| E14 | **Primeira abertura**: entrevista de toque (áreas → módulos à vista → 3 favoritos → ritmo do Diário → barra e cor → **Jornada: o que é e se quer ou não**) e **tutorial interativo da barra** (6 passos); quem já usa recebe uma vez o convite "Monte o app do seu jeito" (entrevista já preenchida com o que usa hoje, ou só o tutorial) e pode refazer em Personalização; Mais › Como usar a barra. Junta com o resto do E1 (ocultar módulos e ritmo do Diário) | EXP | M | **1ª** | especificado (prévia feita) | `futuro/primeira-abertura.md` |
-| E1 | Favoritos e módulos: os 3 do meio da barra no Início são os favoritos (escolhidos pela pessoa); ocultar módulos; ordem no Mais; Orçamento e Relatórios saem do Mais; ritmo de cada módulo (Diário) | EXP | M | alta | parte pronta (v0.18): favoritos e Mais; falta ocultar módulos, ordem no Mais e ritmo do Diário | `futuro/modulos-personalizaveis.md`, `futuro/navegacao-v2.md` |
+| E14 | **Primeira abertura**: entrevista de toque (áreas → módulos à vista → 3 favoritos → ritmo do Diário → barra e cor → **Jornada: o que é e se quer ou não**) e **tutorial interativo da barra** (6 passos); quem já usa recebe uma vez o convite "Monte o app do seu jeito" (entrevista já preenchida com o que usa hoje, ou só o tutorial) e pode refazer em Personalização; Mais › Como usar a barra. Junta com o resto do E1 (ocultar módulos e ritmo do Diário) | EXP | M | **1ª** | pronto (v0.31) | `futuro/primeira-abertura.md` |
+| E1 | Favoritos e módulos: os 3 do meio da barra no Início são os favoritos (escolhidos pela pessoa); ocultar módulos; ordem no Mais; Orçamento e Relatórios saem do Mais; ritmo de cada módulo (Diário) | EXP | M | alta | quase pronto: favoritos e Mais (v0.18), ocultar módulos e ritmo do Diário (v0.31); falta só a ordem no Mais | `futuro/modulos-personalizaveis.md`, `futuro/navegacao-v2.md` |
 | E2 | Barra adaptativa: Início e Mais fixos; dentro do módulo, 3 ícones do próprio módulo (casa no centro); só ícones, um pouco maiores; topo mostra "Finanças / Orçamento"; segurar o ícone mostra o nome | EXP | M | alta | pronto (v0.18) | `futuro/navegacao-v2.md` |
 | E3 | Personalizar cartões (lápis ao lado da lupa): no Início e nos módulos, ocultar e reordenar cartões; cartões principais fixos (🔒); Humor sempre no topo do Início; avisos importantes nunca ocultos, só mudam de posição | EXP | M | alta | parte pronta (v0.20): Início e Finanças; falta Agenda, Núcleo e Listas | `futuro/navegacao-v2.md` |
 | E4 | Temas: escuro, claro e automático + cor de destaque (paleta com bom contraste). Padrão: escuro = preto e verde; claro = branco e azul escuro | EXP | M | média | pronto (v0.17) | `futuro/navegacao-v2.md` |
@@ -145,8 +145,9 @@
 ## Feito
 | Versão | O que entrou | PR |
 |---|---|---|
-| v0.30 | C3: dados com defeito não deixam mais o app em branco (cada registro é conferido ao abrir; o que não tem conserto fica guardado à parte), tela de erro com Exportar backup / Recarregar / Configurações, e "Desfazer importação" (também desfaz "apagar tudo") | — |
-| v0.29.1 | C5: os testes rodam em todo PR (✅/❌ no PR) e antes de publicar; se falharem, nada é publicado | — |
+| v0.31 | E14 + resto do E1: montagem do app na primeira abertura (áreas, módulos à vista, favoritos, ritmo do Diário, barra e cor, Jornada), tutorial da barra em 6 passos, convite "Monte o app do seu jeito" para quem já usa, módulos guardados no Mais e cartão do ritmo do Diário no Início | #38 |
+| v0.30 | C3: dados com defeito não deixam mais o app em branco (cada registro é conferido ao abrir; o que não tem conserto fica guardado à parte), tela de erro com Exportar backup / Recarregar / Configurações, e "Desfazer importação" (também desfaz "apagar tudo") | #38 |
+| v0.29.1 | C5: os testes rodam em todo PR (✅/❌ no PR) e antes de publicar; se falharem, nada é publicado | #38 |
 | v0.29 | M21 Treino em casa no Núcleo › Corpo: meta da semana, Sem/Com equipamento, 8 partes do corpo × 3 níveis, treino guiado, link de vídeo; 47 bonecos animados próprios (exercícios e alongamentos). A ficha "Treino em casa" antiga passou a se chamar "Circuito em casa" | #37 |
 | v0.28.1 | C11: paleta de cores do editor acompanha a barra ao rolar | #36 |
 | v0.28 | N11.3 Estudos 2.0: mapas mentais em árvore (ramos e sub-ramos, editar, mover, mudar de ramo, recolher, cores, zoom, arrastar e pinça, salva sozinho), ligados a notebook ou página; mapas antigos convertidos | #35 |
@@ -187,7 +188,7 @@ Documentos sem código: Mapa dos módulos (08/11), módulos personalizáveis, pa
 | Estudos e Carreira (N6.0): Biblioteca, trilhas, ciclos, notebooks, fontes, mapas e roadmaps | https://claude.ai/artifact/WJ3kw4zvwtdDKTiUVUB3rD |
 | Carreira (N8.0): Trabalho, Currículo, Vagas com etapas, Metas, botão + e cartão no Início | https://claude.ai/artifact/3DxpiHU7f6merD3dk6Hqmp |
 | Três jeitos da barra de baixo (centro, favorito fixo, ao lado do Início) — E9/E10 | https://claude.ai/artifact/BYyRT9QPSLYnNUJr2Ga5pN |
-| Primeira abertura: entrevista, módulos, favoritos e tutorial da barra (E14) | https://claude.ai/artifact/Ky4NT9oh9tZQKv9FksYYCz |
+| Primeira abertura: entrevista, módulos, favoritos e tutorial da barra (E14, construído na v0.31) | https://claude.ai/artifact/Ky4NT9oh9tZQKv9FksYYCz |
 | Central Pessoal (prévia geral antiga) | https://claude.ai/artifact/WHbDkKXN4LArCQ8sjuQqVt |
 
 ## Regras para construir

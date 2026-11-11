@@ -239,6 +239,27 @@ export interface Settings {
   journeyUnlockedAt: string | null;
   /** Resposta depois de desbloquear: quer a Jornada ou não por agora. */
   journeyChoice: 'quero' | 'depois' | null;
+  /** Módulos desligados (ficam guardados no Mais, sem apagar nada). Ids de MODULES em setup.ts. */
+  hiddenModules: string[];
+  /** Montagem do app (E14): novo = abre sozinha; convite = quem já usava vê um cartão no Início; feito = já montou ou dispensou. */
+  setup: 'novo' | 'convite' | 'feito';
+  /** O tutorial da barra já foi visto (ou pulado). */
+  tutorialSeen: boolean;
+  /** O que a pessoa quer organizar (ids de SETUP_AREAS em setup.ts). */
+  setupAreas: string[];
+  /** Escolha da montagem: quer a Jornada (true), agora não (false) ou não perguntado (null). */
+  journeyWanted: boolean | null;
+  /** Com que frequência quer escrever no Diário (o Início só convida nesse ritmo). */
+  journalRhythm: JournalRhythm;
+}
+
+export interface JournalRhythm {
+  /** todo-dia · semana (perWeek vezes) · dias (dias certos) · livre (quando der, sem convite). */
+  mode: 'todo-dia' | 'semana' | 'dias' | 'livre';
+  /** 2 a 5, no modo 'semana'. */
+  perWeek: number;
+  /** 0 = domingo … 6 = sábado, no modo 'dias'. */
+  days: number[];
 }
 
 // ---------- Humor do dia ----------

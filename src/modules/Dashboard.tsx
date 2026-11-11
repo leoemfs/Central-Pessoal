@@ -21,6 +21,8 @@ import { EventItem, sortEvents } from './Agenda';
 import { entrySummary, entryTitle } from './Diario';
 import { BillRow } from './financas/Financas';
 import { useCategoryOf } from './financas/shared';
+import { JournalRhythmCard, SetupInvite } from './Montagem';
+import { isHidden } from '../setup';
 
 function SeeAll({ href, label = 'Ver tudo' }: { href: string; label?: string }) {
   return (
@@ -35,6 +37,9 @@ function greetingEmoji(): string {
   const h = new Date().getHours();
   return h >= 5 && h < 12 ? '☀️' : h >= 12 && h < 18 ? '🌤️' : '🌙';
 }
+
+/** Cartões do Início que pertencem a um módulo (somem se ele estiver guardado). */
+const OF_MODULE: Record<string, string> = { guardar: 'financas', orcamento: 'financas', vale: 'financas', listas: 'listas', ritmo: 'diario', revisao: 'diario', paravoce: 'voce' };
 
 const plural = (n: number, one: string, many: string) => `${n} ${n === 1 ? one : many}`;
 
@@ -61,7 +66,7 @@ export function Dashboard() {
   const pendingTasks = data.tasks.filter((t) => !t.done).length;
   const lastEntry = journal[0];
   const lastEntryLabel = lastEntry ? relativeDay(toISO(new Date(lastEntry.createdAt))).toLowerCase() : null;
-  const day: { to: string; icon: IconName; title: string; text: string }[] = [
+  const allDay: { to: string; icon: IconName; title: string; text: string }[] = [
     { to: 'agenda', icon: 'calendar', title: 'Agenda', text: eventsToday ? `${plural(eventsToday, 'compromisso', 'compromissos')} hoje` : 'Nenhum compromisso hoje' },
     { to: 'financas', icon: 'wallet', title: 'Finanças', text: dueSoon.length ? `${plural(dueSoon.length, 'conta próxima', 'contas próximas')} do vencimento` : 'Nenhuma conta vencendo nos próximos dias' },
     { to: 'diario', icon: 'book', title: 'Diário', text: lastEntryLabel ? `Último registro: ${lastEntryLabel}` : 'Nenhum registro ainda' },
@@ -75,6 +80,10 @@ export function Dashboard() {
     { to: 'nucleo', icon: 'sprout', title: 'Núcleo pessoal', text: routine.length ? `${routineDone} de ${routine.length} rituais e hábitos feitos` : 'Nada programado para hoje' },
   ];
 
+  // Módulos guardados (desligados na montagem) saem do "Seu dia" e dos cartões do Início.
+  const day = allDay.filter((d) => !isHidden(data, d.to));
+  const off = (mod: string) => isHidden(data, mod);
+
   const backupDays = data.settings.lastBackupAt ? Math.floor((Date.now() - new Date(data.settings.lastBackupAt).getTime()) / 864e5) : null;
   const hasData = data.expenses.length + data.journal.length + data.tasks.length + data.events.length > 0;
   const needsBackup = hasData && (backupDays === null || backupDays > 30);
@@ -82,6 +91,12 @@ export function Dashboard() {
   const cards: CardDef[] = [
     { id: 'humor', label: 'Humor do dia', lock: 'top', node: (
       <MoodCard />
+    ) },
+    { id: 'montagem', label: 'Monte o app do seu jeito', node: (
+      <SetupInvite />
+    ) },
+    { id: 'ritmo', label: 'Convite do Diário', node: (
+      <JournalRhythmCard />
     ) },
     { id: 'perfil', label: 'Complete seu perfil', node: (
       <AskCard onAnswer={() => setInterview(true)} />
@@ -312,7 +327,7 @@ export function Dashboard() {
         </div>
       </header>
 
-      <CardScreen screen="inicio" cards={cards} />
+      <CardScreen screen="inicio" cards={cards.filter((c) => !OF_MODULE[c.id] || !off(OF_MODULE[c.id]))} />
       {interview && <Interview start={p.onboarding.step} onClose={() => setInterview(false)} />}
     </>
   );
