@@ -29,7 +29,7 @@ anotar → especificar → aprovar → construir → testar. A cada mudança de 
 ## Regra de navegação (vale para o app todo)
 - **Abas no topo:** partes do mesmo conteúdo, para alternar (Despesas · Receitas · Cartões · Caixinhas).
 - **Barra de baixo (guia rápida):** Início e Mais nas pontas; no meio, ferramentas que olham o módulo de outro jeito (planejar, analisar, atalho do dia), com a casa do módulo no centro. Configuração em `src/moduleBar.ts`.
-- **Botão +:** tudo o que cria algo; por último, separado, **Categorias** (padrão para qualquer categoria do app; Configurações só tem atalhos).
+- **Botão +:** tudo o que cria algo; por último, separado, **Categorias** (padrão para qualquer categoria do app; Configurações não tem atalhos para elas).
 - **Cabeçalho da tela:** mês/semana + abas formam **um bloco** preso no topo, que some e volta junto com a barra de cima (`PageHeader` com `actions`/`tabs`).
 - **Cada coisa aparece em um lugar só.** O que está na barra não aparece também como botão ou aba.
 
