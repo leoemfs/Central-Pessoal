@@ -5,6 +5,16 @@ export function uid(): string {
   return Date.now().toString(36) + Math.random().toString(36).slice(2, 10);
 }
 
+/**
+ * Id estável para itens gerados pelo app (parcelas, recargas, categorias padrão):
+ * o mesmo item ganha o mesmo id em qualquer aparelho, e a sincronização (N9) não duplica.
+ */
+export function stableId(...parts: (string | number)[]): string {
+  return parts
+    .map((p) => String(p).normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, ''))
+    .join('~');
+}
+
 export const pad = (n: number) => String(n).padStart(2, '0');
 
 /** Data local (não UTC) no formato AAAA-MM-DD. */

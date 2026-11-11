@@ -1,24 +1,59 @@
-import { useRef, useState, type ChangeEvent, type CSSProperties } from 'react';
+import { useEffect, useRef, useState, type ChangeEvent, type CSSProperties } from 'react';
 import { useStore } from '../store';
-import { emptyData, normalize } from '../data';
+import { discardedCount, emptyData, normalize } from '../data';
+import { dbGet, dbSet } from '../db';
 import type { Theme } from '../types';
 import { formatDMY, toISO, todayISO } from '../utils';
 import { Icon, notify, PageHeader, Segmented, Toggle, type IconName } from '../ui';
 import { favoriteItems } from '../moduleBar';
 import { FavoritesSheet } from './Mais';
 import { ACCENTS, accentById } from '../theme';
+import { BAR_LAYOUTS, fitFavorites, hiddenFrom, MIN_VISIBLE, MODULES, rhythmLabel, toggleModule, visibleFrom } from '../setup';
+import { openSetup, openTutorial, RhythmPicker } from './Montagem';
+import { GoogleCard } from './ContaGoogle';
+import { disconnect, useCloud } from '../cloud';
 
-const BAR_LAYOUTS: { id: 'fixo' | 'lado' | 'centro'; label: string; hint: string; demo: string[] }[] = [
-  { id: 'fixo', label: 'Favorito no mesmo lugar', hint: 'O módulo fica onde está nos favoritos (ex.: Agenda em 3º); as ferramentas ocupam os outros espaços.', demo: ['H', 'f', 'f', 'M', '+'] },
-  { id: 'lado', label: 'Módulo ao lado do Início', hint: 'O módulo vai para o 1º espaço do meio; as ferramentas ficam à direita.', demo: ['H', 'M', 'f', 'f', '+'] },
-  { id: 'centro', label: 'Módulo no centro', hint: 'O módulo vai para o meio; as ferramentas ficam dos lados.', demo: ['H', 'f', 'M', 'f', '+'] },
-];
+
+const UNDO_KEY = 'antesDaImportacao';
+interface Snapshot {
+  at: string;
+  reason: 'importacao' | 'apagar' | 'nuvem';
+  data: unknown;
+}
 
 export function Ajustes() {
   const { data, update, replace, persisted } = useStore();
   const fileRef = useRef<HTMLInputElement>(null);
   const [message, setMessage] = useState<{ tone: 'green' | 'red'; text: string } | null>(null);
   const [favPick, setFavPick] = useState(false);
+  // C3: cópia dos dados de antes da última importação (ou de "apagar tudo"), para desfazer.
+  const [undo, setUndo] = useState<Snapshot | null>(null);
+  useEffect(() => {
+    dbGet<Snapshot | null>(UNDO_KEY).then((x) => setUndo(x && typeof x.at === 'string' ? x : null)).catch(() => setUndo(null));
+  }, []);
+  const broken = discardedCount(data);
+  const cloud = useCloud();
+
+  async function keepCopy(reason: Snapshot['reason']): Promise<boolean> {
+    const snap: Snapshot = { at: new Date().toISOString(), reason, data };
+    try {
+      await dbSet(UNDO_KEY, snap);
+      setUndo(snap);
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
+  function undoLast() {
+    if (!undo) return;
+    const what = undo.reason === 'importacao' ? 'a importação' : undo.reason === 'nuvem' ? 'o "usar a cópia da nuvem"' : 'o "apagar tudo"';
+    if (!confirm(`Desfazer ${what} de ${formatDMY(toISO(new Date(undo.at)))}? Os dados voltam a ser os de antes, e o que foi feito depois disso se perde.`)) return;
+    replace(normalize(undo.data));
+    dbSet(UNDO_KEY, null).catch(() => undefined);
+    setUndo(null);
+    setMessage({ tone: 'green', text: 'Pronto: os dados voltaram a ser os de antes.' });
+  }
   function setSetting(patch: Partial<typeof data.settings>) {
     update((d) => ({ ...d, settings: { ...d.settings, ...patch } }));
   }
@@ -33,7 +68,7 @@ export function Ajustes() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `central-pessoal-backup-${todayISO()}.json`;
+    a.download = `cp-hub-backup-${todayISO()}.json`;
     document.body.appendChild(a);
     a.click();
     a.remove();
@@ -49,16 +84,23 @@ export function Ajustes() {
     try {
       const imported = normalize(JSON.parse(await file.text()));
       const n = imported.expenses.length + imported.journal.length + imported.tasks.length + imported.events.length + imported.notes.length + imported.habits.length;
-      if (!confirm(`Importar ${n} item(ns) de "${file.name}"? Isso substitui todos os dados atuais deste aparelho.`)) return;
+      const synced = cloud ? ' Com a conta Google ligada, o backup também vale para os outros aparelhos.' : '';
+      if (!confirm(`Importar ${n} item(ns) de "${file.name}"? Isso substitui todos os dados atuais deste aparelho (dá para desfazer depois, aqui em Backup).${synced}`)) return;
+      if (!(await keepCopy('importacao')) && !confirm('Não foi possível guardar uma cópia dos dados atuais para desfazer. Importar mesmo assim?')) return;
       replace(imported);
-      setMessage({ tone: 'green', text: `Backup importado: ${n} item(ns).` });
+      const bad = discardedCount(imported) - broken;
+      setMessage({ tone: 'green', text: `Backup importado: ${n} item(ns).${bad > 0 ? ` ${bad} registro(s) com defeito ficaram guardados à parte.` : ''}` });
     } catch {
-      setMessage({ tone: 'red', text: 'Arquivo inválido. Escolha um backup .json exportado pela Central Pessoal.' });
+      setMessage({ tone: 'red', text: 'Arquivo inválido. Escolha um backup .json exportado pelo CP Hub.' });
     }
   }
 
-  function clearAll() {
-    if (confirm('Apagar TODOS os dados deste aparelho? Isso não pode ser desfeito. Exporte um backup antes, se quiser.')) {
+  async function clearAll() {
+    const synced = cloud ? ' A conta Google será desligada neste aparelho: a cópia no Drive e os outros aparelhos continuam com os dados.' : '';
+    if (confirm(`Apagar TODOS os dados deste aparelho? Dá para desfazer em Backup logo depois; mesmo assim, exporte um backup antes, se quiser.${synced}`)) {
+      await keepCopy('apagar');
+      // Sem isso, "apagar" viraria exclusão em todos os aparelhos na próxima sincronização.
+      if (cloud) disconnect();
       replace({ ...normalize(emptyData()), settings: { ...normalize(emptyData()).settings, theme: data.settings.theme } });
       setMessage({ tone: 'green', text: 'Todos os dados foram apagados.' });
     }
@@ -148,6 +190,39 @@ export function Ajustes() {
           </button>
         </div>
 
+        <h3 className="pz-title">Módulos à vista</h3>
+        <p className="muted small">Desligado fica guardado no Mais, sem apagar nada. Pelo menos {MIN_VISIBLE} à vista.</p>
+        <div className="chips" role="group" aria-label="Módulos à vista">
+          {MODULES.map((m) => {
+            const visible = visibleFrom(data.settings.hiddenModules);
+            const on = visible.includes(m.id);
+            return (
+              <button
+                key={m.id}
+                type="button"
+                className={`chip-btn${on ? ' on' : ''}`}
+                aria-pressed={on}
+                onClick={() => {
+                  const next = toggleModule(visible, m.id);
+                  if (next === visible) return notify(`Pelo menos ${MIN_VISIBLE} módulos`, 'Ligue outro antes de desligar este.');
+                  update((d) => ({ ...d, settings: { ...d.settings, hiddenModules: hiddenFrom(next), favorites: fitFavorites(d.settings.favorites, next), ...(m.id === 'jornada' ? { journeyWanted: !on } : {}) } }));
+                  notify(m.label, on ? 'Guardado no Mais.' : 'De volta à vista.');
+                }}
+              >
+                {m.label}
+              </button>
+            );
+          })}
+        </div>
+
+        {!data.settings.hiddenModules.includes('diario') && (
+          <>
+            <h3 className="pz-title">Ritmo do Diário</h3>
+            <p className="muted small">Agora: {rhythmLabel(data.settings.journalRhythm)}. O Início só convida nesse ritmo e nunca conta falta.</p>
+            <RhythmPicker value={data.settings.journalRhythm} onChange={(journalRhythm) => setSetting({ journalRhythm })} />
+          </>
+        )}
+
         <h3 className="pz-title">Barra de baixo dentro de um módulo</h3>
         <div className="pz-options" role="radiogroup" aria-label="Jeito da barra de baixo">
           {BAR_LAYOUTS.map((o) => (
@@ -181,36 +256,25 @@ export function Ajustes() {
           </div>
           <Toggle checked={data.settings.hideOnScroll} onChange={(v) => setSetting({ hideOnScroll: v })} label="Esconder as barras ao rolar" />
         </div>
+        <div className="btn-row" style={{ marginTop: 14 }}>
+          <button type="button" className="btn soft small" onClick={() => openSetup('convite')}>
+            <Icon name="grid" size={16} /> Refazer a montagem do app
+          </button>
+          <button type="button" className="btn ghost small" onClick={openTutorial}>
+            Como usar a barra
+          </button>
+        </div>
       </section>
       {favPick && <FavoritesSheet onClose={() => setFavPick(false)} />}
 
-      <a className="tile" href="#/financas/categorias">
-        <span className="tile-icon">
-          <Icon name="wallet" />
-        </span>
-        <span className="tile-text">
-          <strong>Categorias de Finanças</strong>
-          <span className="muted">Agora ficam em Finanças, no botão +</span>
-        </span>
-        <Icon name="right" size={18} />
-      </a>
-      <a className="tile" href="#/listas/categorias">
-        <span className="tile-icon">
-          <Icon name="cart" />
-        </span>
-        <span className="tile-text">
-          <strong>Categorias de Listas</strong>
-          <span className="muted">Ficam em Listas, no botão +</span>
-        </span>
-        <Icon name="right" size={18} />
-      </a>
+      <GoogleCard onMessage={setMessage} />
 
       <section className="card">
         <div className="card-head">
           <h2>Backup</h2>
           <span className="muted small">{data.settings.lastBackupAt ? `Último: ${formatDMY(toISO(new Date(data.settings.lastBackupAt)))}` : 'Nenhum ainda'}</span>
         </div>
-        <p className="muted">Seus dados ficam só neste aparelho. Exporte um backup de vez em quando — ele também serve para levar tudo para outro aparelho.</p>
+        <p className="muted">{cloud ? 'Além da cópia no Google Drive, você pode exportar um arquivo de backup de vez em quando.' : 'Seus dados ficam só neste aparelho. Exporte um backup de vez em quando — ele também serve para levar tudo para outro aparelho.'}</p>
         <div className="btn-row" style={{ marginTop: 14 }}>
           <button type="button" className="btn primary" onClick={exportBackup}>
             <Icon name="download" size={18} /> Exportar
@@ -220,6 +284,21 @@ export function Ajustes() {
           </button>
         </div>
         <input ref={fileRef} type="file" accept="application/json,.json" hidden onChange={importBackup} />
+        {data.journal.some((e) => e.photos.length > 0) && (
+          <p className="muted small" style={{ marginTop: 10 }}>
+            As fotos do Diário não vão no arquivo de backup: ficam neste aparelho{cloud ? ' e no seu Google Drive' : ' (ligue a conta Google para guardá-las no Drive)'}.
+          </p>
+        )}
+        {undo && (
+          <button type="button" className="btn ghost" style={{ marginTop: 10, width: '100%' }} onClick={undoLast}>
+            <Icon name="undo" size={18} /> Desfazer {undo.reason === 'importacao' ? 'importação' : undo.reason === 'nuvem' ? '"usar a da nuvem"' : '"apagar tudo"'} de {formatDMY(toISO(new Date(undo.at)))}
+          </button>
+        )}
+        {broken > 0 && (
+          <p className="muted small" style={{ marginTop: 10 }}>
+            {broken} registro(s) com defeito foram guardados à parte para não travar o app. Eles vão junto no backup.
+          </p>
+        )}
       </section>
 
       <section className="card">
@@ -248,7 +327,7 @@ export function Ajustes() {
         </button>
       </section>
 
-      <p className="muted small center">Central Pessoal · seus dados não saem do seu aparelho</p>
+      <p className="muted small center">CP Hub · {cloud ? 'seus dados ficam no aparelho e no seu Google Drive' : 'seus dados não saem do seu aparelho'}</p>
 
     </>
   );

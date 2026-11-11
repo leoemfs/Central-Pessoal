@@ -25,7 +25,7 @@ test('revisão junta núcleo, finanças, agenda e diário da semana', () => {
     ],
     events: [{ id: 'e', title: 'Dentista', date: '2026-11-04', time: '', location: '', description: '' }, { id: 'f', title: 'Viagem', date: '2026-11-12', time: '', location: '', description: '' }],
     tasks: [{ id: 't', title: 'X', notes: '', due: '2026-11-03', priority: 'media', tag: '', done: true, createdAt: '', doneAt: '2026-11-03T10:00:00' }],
-    journal: [{ id: 'j', createdAt: '2026-11-05T21:00:00', title: 'Dia bom', summary: '', content: '', tag: '', updatedAt: '' }],
+    journal: [{ id: 'j', createdAt: '2026-11-05T21:00:00', title: 'Dia bom', summary: '', content: '', tag: '', photos: [], updatedAt: '' }],
   };
   const inp = (p: Partial<ExpenseInput>): ExpenseInput => ({ kind: 'avulsa', description: 'M', categoryId: 'a', method: 'pix', cardId: null, date: '2026-11-03', amounts: [100], paidAt: null, ...p });
   d = addExpense(d, inp({ paidAt: '2026-11-03' }), TODAY);
@@ -46,4 +46,23 @@ test('revisão junta núcleo, finanças, agenda e diário da semana', () => {
   assert.equal(r.nextEvents, 1);
   assert.equal(r.tasksDone, 1);
   assert.equal(r.journal.length, 1);
+});
+
+test('M7: revisão traz autocuidado, caixinhas e vales da semana', async () => {
+  const { normalize } = await import('./data.ts');
+  const { weekReview } = await import('./review.ts');
+  const d = normalize({
+    version: 2,
+    sessions: [{ id: 's1', date: '2026-11-10', type: 'meditacao', minutes: 10 }, { id: 's2', date: '2026-11-11', type: 'treino', minutes: 40 }, { id: 's3', date: '2026-11-01', type: 'treino', minutes: 40 }],
+    boxes: [{ id: 'b', name: 'Viagem', color: '#22c55e', target: 1000, plan: null, moves: [{ id: 'm1', date: '2026-11-10', amount: 100, kind: 'plano', reason: null }, { id: 'm2', date: '2026-11-12', amount: 30, kind: 'retirada', reason: 'outro' }, { id: 'm3', date: '2026-10-01', amount: 500, kind: 'extra', reason: null }], createdAt: '2026-10-01' }],
+    vouchers: [{ id: 'v', name: 'VR', color: '#f97316', recharge: null, startBalance: 500, startDate: '2026-11-01', recharged: [], createdAt: '2026-11-01' }],
+    expenses: [{ id: 'e', amount: 42, dueDate: '2026-11-11', paidAt: '2026-11-11', method: 'vale', voucherId: 'v', description: 'Almoço' }],
+  });
+  const r = weekReview(d, '2026-11-09', '2026-11-13');
+  assert.deepEqual(r.care, { mindMinutes: 10, workouts: 1, moves: 0, total: 2 });
+  assert.equal(r.saved.deposited, 100);
+  assert.equal(r.saved.withdrawn, 30);
+  assert.deepEqual(r.saved.boxes, [{ name: 'Viagem', amount: 70 }]);
+  assert.equal(r.vouchers[0].spent, 42);
+  assert.equal(r.vouchers[0].balance, 458);
 });

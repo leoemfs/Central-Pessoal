@@ -3,9 +3,10 @@ import { useMemo, useState } from 'react';
 import { useStore } from '../store';
 import { upsert } from '../actions';
 import { defaultReviewWeek, weekReview, weekStart } from '../review';
+import { studyWeek } from '../estudos';
 import type { JournalEntry } from '../types';
 import { addDays, formatDate, formatDateTime, formatMoney, todayISO, uid } from '../utils';
-import { CategoryBadge, Empty, Field, Icon, MonthNav, PageHeader, Pill } from '../ui';
+import { CategoryBadge, Empty, Field, Icon, MonthNav, PageHeader, Pill, Progress } from '../ui';
 import { BillRow } from './financas/Financas';
 import { useCategoryOf } from './financas/shared';
 import { entryTitle } from './Diario';
@@ -19,6 +20,12 @@ export function Revisao() {
   const today = todayISO();
   const [start, setStart] = useState(defaultReviewWeek(today));
   const r = useMemo(() => weekReview(data, start, today), [data, start, today]);
+  // M11: Estudos na revisão (só se o módulo está à vista e tem algo para mostrar).
+  const study = useMemo(() => {
+    if (data.settings.hiddenModules.includes('estudos')) return null;
+    const w = studyWeek(data.study, r.start, r.end < today ? r.end : today);
+    return w.topicsDone.length || w.noteDays || w.cycles.length ? w : null;
+  }, [data.study, data.settings.hiddenModules, r.start, r.end, today]);
   const label = `${short(start)} – ${short(r.end)}`;
   const title = `Revisão da semana ${label}`;
   const existing = data.journal.find((j) => j.tag === 'Revisão' && j.title === title);
@@ -53,6 +60,7 @@ export function Revisao() {
       summary,
       content: existing ? `${existing.content}\n\n${parts.join('\n\n')}` : parts.join('\n\n'),
       tag: 'Revisão',
+      photos: existing?.photos ?? [],
       updatedAt: now,
     };
     update(upsert('journal', entry));
@@ -216,6 +224,91 @@ export function Revisao() {
             </div>
           </dl>
         </section>
+
+        {(r.care.total > 0 || r.saved.boxes.length > 0 || r.vouchers.length > 0) && (
+          <section className="card">
+            <div className="card-head">
+              <h2>Autocuidado e dinheiro guardado</h2>
+            </div>
+            <dl className="detail-rows">
+              {r.care.total > 0 && (
+                <>
+                  <div>
+                    <dt>Meditação e respiração</dt>
+                    <dd>{r.care.mindMinutes} min</dd>
+                  </div>
+                  <div>
+                    <dt>Treinos</dt>
+                    <dd>{r.care.workouts}</dd>
+                  </div>
+                  <div>
+                    <dt>Alongamentos e caminhadas</dt>
+                    <dd>{r.care.moves}</dd>
+                  </div>
+                </>
+              )}
+              {r.saved.boxes.length > 0 && (
+                <div>
+                  <dt>Guardado nas caixinhas</dt>
+                  <dd className="green">{formatMoney(r.saved.deposited)}{r.saved.withdrawn > 0 ? ` (tirou ${formatMoney(r.saved.withdrawn)})` : ''}</dd>
+                </div>
+              )}
+              {r.vouchers.map((v) => (
+                <div key={v.name}>
+                  <dt>{v.name}: gasto na semana</dt>
+                  <dd>
+                    {formatMoney(v.spent)} <span className="muted small">· saldo {formatMoney(v.balance)}</span>
+                  </dd>
+                </div>
+              ))}
+            </dl>
+            {r.saved.boxes.length > 0 && (
+              <p className="muted small" style={{ marginTop: 8 }}>
+                {r.saved.boxes.map((b) => `${b.name}: ${b.amount >= 0 ? '+' : '−'}${formatMoney(Math.abs(b.amount))}`).join(' · ')}
+              </p>
+            )}
+          </section>
+        )}
+
+        {study && (
+          <section className="card">
+            <div className="card-head">
+              <h2>O que estudei</h2>
+              <a className="link" href="#/estudos">Abrir</a>
+            </div>
+            <dl className="detail-rows">
+              <div>
+                <dt>Tópicos concluídos</dt>
+                <dd>{study.topicsDone.length}</dd>
+              </div>
+              <div>
+                <dt>Dias com anotação</dt>
+                <dd>{study.noteDays}</dd>
+              </div>
+            </dl>
+            {study.topicsDone.length > 0 && (
+              <ul className="list">
+                {study.topicsDone.slice(0, 6).map((t) => (
+                  <li key={t.id} className="row">
+                    <Icon name="check" size={16} />
+                    <div className="row-body">
+                      <span className="row-title">{t.name}</span>
+                      <span className="row-meta">{t.cycle}</span>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            )}
+            {study.cycles.map((c) => (
+              <div key={c.id} className="review-study-cycle">
+                <span className="small">
+                  {c.name} · {c.done} de {c.total}
+                </span>
+                <Progress pct={c.pct} />
+              </div>
+            ))}
+          </section>
+        )}
 
         <section className="card">
           <div className="card-head">

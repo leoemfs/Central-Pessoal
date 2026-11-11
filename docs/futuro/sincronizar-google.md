@@ -1,0 +1,103 @@
+# N9: Sincronizar com o Google Drive
+
+Pedido de 11/11: guardar os dados no Google Drive (pasta escondida do app, `appDataFolder`), guardar e exportar dados e PDFs, guardar imagens do Diário, sincronizar tudo sozinho e ter os mesmos dados no computador e no celular.
+
+## Como vai funcionar (para o Leonardo)
+- Em **Configurações › Conta Google**: botão **"Entrar com Google"**. Depois disso o app sincroniza sozinho.
+- **Quando sincroniza:** ao abrir o app, ao voltar para ele, alguns segundos depois de cada mudança e a cada poucos minutos com o app aberto. Sem internet o app funciona igual e manda tudo quando a internet voltar.
+- **Aviso discreto** no topo das Configurações: "Sincronizado às 14:32" ou "Sem internet: 3 mudanças esperando".
+- **Computador e celular:** entrar com a mesma conta Google nos dois. O primeiro aparelho sobe os dados; o segundo pergunta "Juntar com os dados deste aparelho?" (ou "Usar só os da nuvem").
+- **Pasta escondida:** os arquivos do app ficam no Drive, mas **você não os vê** na lista do Drive. Só o app lê. Ocupa espaço dos 15 GB grátis do Google.
+- **Exportar:** o que você quiser ver ou mandar para alguém (backup legível, PDFs) vai para uma **pasta visível "Central Pessoal"** no seu Drive.
+- **Sair da conta:** os dados continuam no aparelho; só para de sincronizar.
+
+## O que fica salvo e onde
+| Onde | O quê | Quem vê |
+|---|---|---|
+| **No aparelho** (memória do navegador) | Tudo do app, como hoje. Com o N9.3, também uma cópia das fotos e PDFs, para abrir sem internet | Só quem usa o aparelho |
+| **Drive, pasta escondida do app** › `dados.json` | Todos os dados de todos os módulos: Finanças, Agenda, Diário e humor, Núcleo, Listas e Preços, Notas, Estudos, Carreira (inclusive salários), Você, Jornada e Configurações (tema, barra, favoritos, ordem dos cartões). Mais as datas de alteração e as exclusões | Só o app (não aparece na lista do Drive) |
+| **Drive, pasta escondida** › `arquivos/` | Fotos do Diário e PDFs e imagens anexados (Estudos, reuniões, vagas) | Só o app |
+| **Drive, pasta visível "Central Pessoal"** | Só o que você mandar exportar: backup em arquivo e PDFs gerados pelo app | Você (e quem você compartilhar) |
+
+Não sai nada para outro lugar. O app não lê o resto do Drive e não guarda a senha do Google.
+
+## PDFs (resposta de 11/11: "PDFs de currículo, por exemplo")
+- **Gerar PDF** a partir do que já está no app. O primeiro é o **currículo** (Carreira › Currículo › "Gerar PDF"): baixar, compartilhar ou, com a conta Google ligada, salvar na pasta "Central Pessoal". Esse é o item **M22**, que não depende do Google e pode vir antes.
+- **Anexar PDF** que veio de fora (ex.: o currículo enviado numa vaga, slides de reunião, material de estudo): parte N9.3.
+- Depois, outros PDFs do mesmo jeito (relatório do mês de Finanças, Revisão semanal), anotados quando ele pedir.
+
+## Regras
+- **Junta por item, não por arquivo inteiro.** Cada despesa, registro, hábito etc. tem um id e uma data de alteração. Se o mesmo item mudou nos dois aparelhos, **fica a mudança mais recente**.
+- **Exclusões são registradas** para o item apagado num aparelho não "ressuscitar" pelo outro. O registro é limpo depois de 90 dias.
+- **Imagens e PDFs** ficam em arquivos separados (não dentro dos dados), para o app continuar leve. No aparelho fica uma cópia para abrir sem internet. Fotos são reduzidas antes de subir (lado maior com 1600 px).
+- O **backup em arquivo** (Configurações) continua existindo, igual hoje.
+
+## Partes (fazer nesta ordem)
+| Parte | O que é | Tam. |
+|---|---|---|
+| **N9.0 Preparar os dados** (absorve o N11.6) ✅ v0.39 | Data de alteração e registro de exclusões em **todos** os módulos, feitos num lugar só (`src/sync.ts`, chamado pela loja). Ids estáveis para o que o app gera. Não muda nada na tela. | M |
+| **N9.1 Conta Google e cópia na nuvem** ✅ v0.40 | Botão "Entrar com Google"; cópia automática dos dados na pasta escondida; "Restaurar da nuvem" num aparelho novo | M |
+| **N9.2 Sincronizar entre aparelhos** ✅ v0.41 | Junta por item (regra acima), sincroniza sozinho nos momentos acima, aviso de situação | M |
+| **N9.3 Imagens e PDFs** (dividido em 11/11: **N9.3a fotos no Diário** ✅ v0.42; **N9.3b** anexos PDF/imagem em Estudos, reuniões e vagas) | Fotos nos registros do Diário (novo) e anexos PDF/imagem em Estudos (M14), nas reuniões de Carreira (caixa de entrada de 08/11) e nas vagas (o currículo enviado em cada candidatura), guardados no Drive | M |
+| **N9.4 Exportar para o Drive** | Botão "Exportar para o Drive": backup e PDFs gerados pelo app (começando pelo **currículo em PDF**, M22) na pasta visível "Central Pessoal" | P |
+
+Cada parte vira uma versão e um PR. N9.0 e N9.1 já dão segurança (cópia na nuvem) mesmo antes da sincronização.
+
+## O que o Leonardo precisa fazer (uma vez, ~10 min)
+Criar um projeto grátis no **Google Cloud Console** e um "ID do cliente OAuth" para o endereço `https://leoemfs.github.io`. Eu passo o passo a passo na hora do N9.1. As permissões usadas (`drive.appdata` e `drive.file`) só dão acesso à pasta do app e aos arquivos que o app criou, **não ao resto do seu Drive**, e não precisam de revisão do Google.
+
+## Notas técnicas
+- Sem servidor: login pelo **Google Identity Services** (token no navegador) e chamadas diretas à **API do Drive v3** (`spaces=appDataFolder`).
+- O acesso do Google dura cerca de 1 hora; o app renova sozinho enquanto a conta Google estiver ativa no navegador. De vez em quando pode pedir um toque em "Entrar".
+- Arquivos na pasta escondida: `dados.json` (todos os dados, com data de alteração por item) e `arquivos/<id>` (imagens e PDFs). Ler a data do arquivo antes de baixar, para não baixar à toa.
+- No aparelho, imagens e PDFs ficam no IndexedDB, num depósito separado dos dados.
+- O **N4 (Android)** depois usa o mesmo formato; lá o login Google precisa de um plugin nativo. Por isso o N9 **não depende mais** do N4: dá para fazer antes, no site (computador e celular).
+- Testes `node:test` para a junção por item e as exclusões (`src/sync.ts`); no navegador, simular dois aparelhos com dois perfis do Playwright.
+
+## Como ficou o N9.0 (v0.39)
+- `trackChanges(antes, depois)` roda em toda alteração (loja: `update`, abertura do app, volta ao app e restaurar backup). Compara só as partes que mudaram (rápido: ~6 ms com 5.000 despesas).
+- `stamps[id]` = última alteração do item; `stamps['@parte']` = última alteração da parte (para o que não tem id: humor por dia, orçamentos, configurações, cargas, vídeos).
+- `deleted[id]` = quando foi apagado; sai de lá se o item voltar; esquecido após 90 dias (`pruneDeleted`, ao abrir).
+- Ids estáveis (`stableId` em `utils.ts`): ocorrência de série = `série~número`; receita mensal = `série~número`; recarga = `vale~recarga~mês`; categoria padrão = `categoria~nome`; fonte padrão = `fonte~nome`.
+
+## Para lembrar no N9.2
+- Dados de antes da v0.39 não têm `stamps`: tratar item sem data como "antigo" (vale a data de `updatedAt`/`createdAt`, se tiver).
+- Parcelas e receitas geradas antes da v0.39 têm ids aleatórios: na primeira junção, tratar como o mesmo item quando `seriesId` + `installment` forem iguais. Categorias e fontes padrão antigas: juntar pelo nome.
+- **Apagar tudo** (Configurações) hoje registra tudo como excluído: com a sincronização ligada, perguntar "Só neste aparelho" ou "Em todos".
+- Restaurar um backup também conta como alteração (o que não está no backup vira excluído). Avisar isso na tela quando a sincronização estiver ligada.
+
+## Como ficou o N9.1 (v0.40)
+- Configurações › **Conta Google**: "Entrar com Google" → cópia automática (15 s depois da última mudança e ao sair do app), "Salvar agora", "Trazer da nuvem" e "Sair da conta Google".
+- **Outro aparelho salvou depois** (ou 1ª vez deste aparelho com cópia já existente): para de salvar e pergunta "Usar a da nuvem" (guarda cópia para desfazer) ou "Manter a deste aparelho". O N9.2 troca isso pela junção automática.
+- **Acesso vencido** (~1 hora): sem janelas sozinhas; aparece "Continuar salvando". Se a cópia ficar parada mais de 1 dia, o Início avisa (cartão "Aviso da cópia na nuvem").
+- Código: `src/drive.ts` (API do Drive, testada com um Drive de mentira em `drive.test.ts`), `src/cloud.ts` (login e cópia automática), `src/modules/ContaGoogle.tsx` (cartão).
+- Testado no navegador com dois aparelhos simulados e Google de mentira: entrar, 1ª cópia, 2º aparelho escolhe "Usar a da nuvem", mudança no 2º salva sozinha, 1º aparelho é avisado, acesso vencido, sair.
+
+## Passo a passo do Google Cloud (Leonardo, uma vez)
+1. Abrir **console.cloud.google.com** com a sua conta Google e criar um projeto chamado **Central Pessoal**.
+2. **APIs e serviços › Biblioteca** → procurar **Google Drive API** → **Ativar**.
+3. **Google Auth Platform** (ou "Tela de consentimento OAuth") → **Começar**: nome do app *Central Pessoal*, seu e-mail de suporte, público **Externo**, seu e-mail de contato → **Criar**.
+4. **Acesso a dados** → **Adicionar ou remover escopos** → marcar `.../auth/drive.appdata` → **Atualizar** → **Salvar**.
+5. **Público** (link direto: console.cloud.google.com/auth/audience) → em **Usuários de teste**, adicionar o seu e-mail. Sem isso, o login dá "Acesso bloqueado… Erro 403: access_denied" (aconteceu em 11/11; resolvido assim). (Deixar "Em teste" é o mais simples; na 1ª vez o Google pode mostrar "app não verificado": tocar em **Continuar**.)
+6. **Clientes** → **Criar cliente** → tipo **Aplicativo da Web** → em **Origens JavaScript autorizadas**, adicionar `https://leoemfs.github.io` → **Criar**.
+7. Copiar o **ID do cliente** (termina em `.apps.googleusercontent.com`) e mandar para o Claude. Ele não é senha. **Não** mande a "chave secreta do cliente".
+
+Feito em 11/11 (projeto "My First Project", origem `https://leoemfs.github.io`). O Claude colocou o ID em `src/cloud.ts` (`CLIENT_ID`, v0.40.1) e, a partir daí, o cartão "Conta Google" aparece em Configurações.
+
+## Como ficou o N9.2 (v0.41)
+- **Junção item por item** (`mergeData` em `src/sync.ts`, com testes): item criado em um aparelho entra no outro; no mesmo item, vale a data de alteração mais recente (e listas dentro do item são juntadas item a item); item que só existe de um lado some só se o outro lado o excluiu **depois** da última alteração; partes sem id (humor por dia, orçamentos, configurações) juntam chave por chave, e no conflito vale o aparelho que mexeu naquela parte por último; dias de uso e de visita somam.
+- **Quando sincroniza:** ao abrir o app, ao voltar para ele, a cada 5 minutos com ele aberto, 15 s depois de cada mudança e ao sair. Só baixa se a cópia da nuvem mudou; só envia se este aparelho tem algo que a nuvem não tem.
+- A loja junta os dados da nuvem com os mais atuais do aparelho **sem mudar as datas de alteração** (só o que as regras geram depois ganha data nova). Assim uma junção não "rouba" a vez de uma edição feita no outro aparelho.
+- Saiu a escolha "Usar a da nuvem / Manter a deste aparelho" e o "Trazer da nuvem": agora junta sozinho. Quem ficou na escolha da v0.40 volta ao normal.
+- **Apagar todos os dados** com a conta ligada desliga a conta neste aparelho (senão o apagar viraria exclusão em todos). **Importar backup** com a conta ligada avisa que vale para todos.
+- Limites conhecidos: chave removida de partes sem id (ex.: um orçamento apagado) pode voltar do outro aparelho; exclusões com mais de 90 dias são esquecidas (aparelho parado mais de 90 dias pode trazer de volta algo excluído).
+- Testado no navegador com dois aparelhos simulados (Google e Drive de mentira): A entra; B entra e fica com os dados dos dois; A volta ao app e recebe o do B; A exclui e a exclusão chega no B sem "ressuscitar"; acesso vencido mostra "Continuar sincronizando".
+
+## Como ficou o N9.3a (v0.42)
+- **Diário:** "Adicionar fotos" no formulário (até 6 por registro), miniaturas com X para tirar, fotos no registro aberto ("· 2 fotos" no fechado) e foto em tela cheia (deslizar ou setas trocam).
+- **Onde fica:** a foto é reduzida (1600 px, JPEG 82%) e guardada à parte: aparelho (IndexedDB, `arquivo:<id>`) e Drive (`arquivo-<id>` na pasta escondida). Os dados só têm a referência `{ id, type, w, h }`, que é um item com id: tirar a foto ou excluir o registro entra nas exclusões.
+- **Sincronização (`syncFiles` em `cloud.ts`, plano em `attachments.ts`):** depois dos dados, sobe o que falta na nuvem, baixa o que falta no aparelho (até 10 por vez; o resto na próxima) e apaga só o que foi **excluído** (assim uma foto que outro aparelho acabou de subir não é apagada por engano). Erro nas fotos não desfaz a sincronização dos dados.
+- Sem conta Google: as fotos ficam só no aparelho; as excluídas saem do aparelho ao salvar.
+- As fotos **não vão no arquivo de backup** (aviso em Backup).
+- Testado no navegador com dois aparelhos simulados: A cria registro com 2 fotos → sobem para a nuvem → B entra e vê as 2 fotos (e em tela cheia) → A tira uma → some da nuvem e do B.
+- **N9.3b (falta):** anexos PDF e imagem em Estudos (M14), nas reuniões de Carreira (slides) e nas vagas (currículo enviado), usando o mesmo `files.ts`/`attachments.ts` (`referencedFiles` passa a olhar esses lugares).

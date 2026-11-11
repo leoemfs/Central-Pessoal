@@ -1,6 +1,6 @@
 # Cartão: escolher a fatura da compra e mostrar a fatura aberta
 
-> **Status: MELHORIA (item M8 da Central).** Não era problema do app: a compra estava sendo lançada na fatura errada. Fica a melhoria para evitar a confusão.
+> **Status: PRONTO na v0.36** (11/11/2026). Item M8 da Central. Não era problema do app: a compra estava sendo lançada na fatura errada. Fica a melhoria para evitar a confusão.
 
 ## O que o usuário viu
 Cadastrou um cartão novo e lançou uma despesa nele. O cartão aparece em Cartões e o **limite diminui**, mas a fatura mostra **R$ 0,00** e a compra não entra nas contas do mês.
@@ -33,3 +33,10 @@ Cadastrou um cartão novo e lançou uma despesa nele. O cartão aparece em Cart�
 - Regra: compra no dia do fechamento e depois dele cai na fatura seguinte; antes dele, na fatura atual (já existe, conferir).
 - Nova regra `openInvoiceMonth(card, hoje)` com testes: antes do fechamento, no dia e depois; meses curtos (dia 31); vencimento antes do fechamento.
 - No navegador (celular): cadastrar cartão novo, lançar compra hoje com fechamento já passado e com fechamento por vir, e ver valor no cartão, no aviso, na aba Mês e na fatura.
+
+## Como ficou (v0.36)
+- Regras em `src/finance.ts`: `openInvoiceMonth`, `invoiceChoices` (a anterior só aparece se ainda não venceu na data da compra), `invoiceMonth` opcional em `addExpense`/`editExpense` (e guardado na série da conta fixa). Testes em `src/invoiceChoice.test.ts`.
+- Formulário: "Entra na fatura de" (ou "A 1ª parcela entra na fatura de") com chips "dezembro · vence 10/12"; a calculada vem marcada. Em compra parcelada ou fixa já lançada, a data fica travada, mas a fatura pode ser trocada: as parcelas do escopo escolhido andam o mesmo número de meses.
+- Ao salvar: aviso "Entra na fatura de dezembro de 2026 · Vence 10/12/2026".
+- Aba Cartões (olhando o mês de hoje): "Fatura aberta (dezembro)" com fechamento e vencimento; se a fatura que vence no mês tiver valor, aparece também "Vence em novembro: R$ X". Tocar abre a fatura aberta.
+- Aba Mês: "No cartão este mês: R$ Y (entram nas próximas faturas)", que abre a fatura.

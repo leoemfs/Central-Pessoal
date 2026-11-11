@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, type CSSProperties } from 'react';
+import { CardScreen } from '../Cards';
 import type { ViewProps } from '../App';
 import { useStore } from '../store';
 import { useSubAction } from '../router';
@@ -6,10 +7,11 @@ import { remove, upsert } from '../actions';
 import {
   amountOn, ATTRIBUTES, atRiskToday, bestClean, cleanDays, consistency, DEFAULT_TARGET, fmtQty, graduate, habitsOfDay, habitStreak, isQuantity,
   isScheduled, KIND_INFO, PERIODS, progressToRitual, setAmount, startOf, suggestAttributes, toggleCheck, toggleSlip,
+  activeHabits, archiveHabit, currentPause, isArchived, pauseHabit, resumedToday, resumeHabit,
 } from '../habits';
 import type { DayPeriod, Habit, HabitKind } from '../types';
 import { addDays, formatDMY, fromISO, todayISO, uid, WEEKDAYS } from '../utils';
-import { Chips, Empty, Field, Icon, PageHeader, Pill, Progress, Segmented, Sheet, Toggle, type IconName } from '../ui';
+import { Chips, Empty, Field, Icon, notify, PageHeader, Pill, Progress, Segmented, Sheet, Toggle, type IconName } from '../ui';
 import { LINK_OPTIONS, linkLabel, recommended } from '../practices';
 import { suggestions } from '../profile';
 import { BodyTab, MindTab, PracticeScreen, practiceFromLink, type Practice } from './Praticas';
@@ -163,9 +165,12 @@ export function Habitos({ route }: ViewProps) {
   const habitSugs = suggestions(data).filter((s) => s.act.type === 'habit').slice(0, 2);
 
   const day = habitsOfDay(data.habits, today);
-  const rituals = data.habits.filter((h) => h.kind === 'ritual');
-  const building = data.habits.filter((h) => h.kind === 'construir');
-  const quitting = data.habits.filter((h) => h.kind === 'abandonar');
+  // M1: arquivados saem de tudo; pausados ficam numa seção própria ("Pausados").
+  const active = activeHabits(data.habits, today);
+  const running = active.filter((h) => !currentPause(h, today));
+  const rituals = running.filter((h) => h.kind === 'ritual');
+  const building = running.filter((h) => h.kind === 'construir');
+  const quitting = active.filter((h) => h.kind === 'abandonar');
   const notToday = rituals.filter((h) => !isScheduled(h, today));
   const doneToday = day.rituals.filter((h) => h.checks.includes(today)).length;
   const atRisk = [...day.rituals, ...day.building].filter((h) => atRiskToday(h, today));
@@ -195,12 +200,16 @@ export function Habitos({ route }: ViewProps) {
       ) : tab === 'corpo' ? (
         <BodyTab open={setPractice} />
       ) : tab === 'rituais' ? (
-        rituals.length === 0 ? (
+        rituals.length === 0 && !data.habits.some((h) => h.kind === 'ritual') ? (
           <section className="card">
             <Empty>Rituais são as rotinas que já fazem parte do seu dia — usar fio dental, dormir às 23h. Toque em + para criar o primeiro.</Empty>
           </section>
         ) : (
           <>
+            <CardScreen
+              screen="nucleo"
+              cards={[
+                { id: 'hoje', label: 'Hoje', lock: 'top', node: (
             <section className="card raised">
               <div className="toggle-row">
                 <div>
@@ -216,11 +225,10 @@ export function Habitos({ route }: ViewProps) {
                 </p>
               )}
             </section>
-
-            {PERIODS.map((p) => {
-              const list = day.rituals.filter((h) => h.period === p.id);
-              if (!list.length) return null;
-              return (
+                ) },
+                ...PERIODS.map((p) => {
+                  const list = day.rituals.filter((h) => h.period === p.id);
+                  return { id: `periodo-${p.id}`, label: p.label, node: list.length > 0 && (
                 <section key={p.id} className="card">
                   <div className="card-head">
                     <h2>{p.label}</h2>
@@ -235,6 +243,7 @@ export function Habitos({ route }: ViewProps) {
                             {h.time && <Pill>{h.time}</Pill>}
                             {qtyText(h, today) && <span className="tabular">{qtyText(h, today)}</span>}
                             {h.cue && <span>Depois de {h.cue}</span>}
+                            {resumedToday(h, today) && <Pill tone="green">Voltou hoje</Pill>}
                             <RiskPill h={h} today={today} />
                           </span>
                         </button>
@@ -249,10 +258,9 @@ export function Habitos({ route }: ViewProps) {
                     ))}
                   </ul>
                 </section>
-              );
-            })}
-
-            {notToday.length > 0 && (
+                  ) };
+                }),
+                { id: 'outros', label: 'Em outros dias', node: notToday.length > 0 && (
               <section className="card">
                 <div className="card-head">
                   <h2>Em outros dias</h2>
@@ -274,7 +282,10 @@ export function Habitos({ route }: ViewProps) {
                   ))}
                 </ul>
               </section>
-            )}
+            ) },
+                { id: 'guardados', label: 'Pausados e arquivados', node: <KeptHabits kinds={['ritual']} onOpen={setDetailId} /> },
+              ]}
+            />
           </>
         )
       ) : (
@@ -329,6 +340,7 @@ export function Habitos({ route }: ViewProps) {
               ))}
             </div>
           )}
+          <KeptHabits kinds={['construir', 'abandonar']} onOpen={setDetailId} />
         </>
       )}
 
@@ -336,6 +348,93 @@ export function Habitos({ route }: ViewProps) {
       {practice && <PracticeScreen p={practice} onClose={() => setPractice(null)} />}
       {detailId && <HabitDetail id={detailId} onClose={() => setDetailId(null)} onEdit={(h) => setForm({ kind: h.kind, habit: h })} />}
     </>
+  );
+}
+
+/** Pausados e arquivados (M1), recolhidos no fim da aba. */
+function KeptHabits({ kinds, onOpen }: { kinds: HabitKind[]; onOpen: (id: string) => void }) {
+  const { data, update } = useStore();
+  const today = todayISO();
+  const mine = data.habits.filter((h) => kinds.includes(h.kind));
+  const paused = mine.filter((h) => !isArchived(h, today) && currentPause(h, today));
+  const archived = mine.filter((h) => isArchived(h, today));
+  if (!paused.length && !archived.length) return null;
+  return (
+    <>
+      {paused.length > 0 && (
+        <details className="card kept" open>
+          <summary>
+            <h2>Pausados ({paused.length})</h2>
+          </summary>
+          <ul className="list">
+            {paused.map((h) => {
+              const p = currentPause(h, today)!;
+              return (
+                <li key={h.id} className="row">
+                  <button type="button" className="row-body link-row" onClick={() => onOpen(h.id)}>
+                    <span className="row-title">{h.name}</span>
+                    <span className="row-meta">{p.to ? `Volta em ${formatDMY(addDays(p.to, 1))}` : 'Pausado sem data'} · a sequência fica congelada</span>
+                  </button>
+                  <button type="button" className="btn soft small" onClick={() => { update(resumeHabit(h.id, today)); notify(`${h.name} voltou`, 'Já aparece em Hoje.'); }}>
+                    Retomar
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
+        </details>
+      )}
+      {archived.length > 0 && (
+        <details className="card kept">
+          <summary>
+            <h2>Arquivados ({archived.length})</h2>
+          </summary>
+          <ul className="list">
+            {archived.map((h) => (
+              <li key={h.id} className="row">
+                <button type="button" className="row-body link-row" onClick={() => onOpen(h.id)}>
+                  <span className="row-title">{h.name}</span>
+                  <span className="row-meta">Arquivado em {formatDMY(h.archivedAt!)} · histórico guardado</span>
+                </button>
+                <button type="button" className="btn ghost small" onClick={() => { update(archiveHabit(h.id, null)); notify(`${h.name} restaurado`); }}>
+                  Restaurar
+                </button>
+              </li>
+            ))}
+          </ul>
+        </details>
+      )}
+    </>
+  );
+}
+
+/** Pausar: até uma data (volta sozinho nesse dia) ou sem data. */
+function PauseSheet({ h, onClose }: { h: Habit; onClose: () => void }) {
+  const { update } = useStore();
+  const today = todayISO();
+  const [until, setUntil] = useState(addDays(today, 7));
+  const go = (date: string | null) => {
+    update(pauseHabit(h.id, today, date));
+    notify(`${h.name} pausado`, date ? `Volta sozinho em ${formatDMY(date)}. A sequência fica congelada.` : 'Volta quando você tocar em Retomar. A sequência fica congelada.');
+    onClose();
+  };
+  return (
+    <Sheet title={`Pausar "${h.name}"`} onClose={onClose}>
+      <p className="muted small" style={{ marginTop: 0 }}>
+        Enquanto pausado, ele não aparece em Hoje, no Início, na Agenda nem na Revisão, e não conta como falta.
+      </p>
+      <Field label="Volta em">
+        <input type="date" className="input" value={until} min={addDays(today, 1)} onChange={(e) => setUntil(e.target.value)} />
+      </Field>
+      <div className="btn-row">
+        <button type="button" className="btn primary" disabled={!until || until <= today} onClick={() => go(until)}>
+          Pausar até {until > today ? formatDMY(until) : '…'}
+        </button>
+        <button type="button" className="btn" onClick={() => go(null)}>
+          Sem data
+        </button>
+      </div>
+    </Sheet>
   );
 }
 
@@ -508,14 +607,24 @@ function HabitDetail({ id, onClose, onEdit }: { id: string; onClose: () => void;
   const { data, update } = useStore();
   const today = todayISO();
   const h = data.habits.find((x) => x.id === id);
+  const [pausing, setPausing] = useState(false);
   if (!h) return null;
   const quit = h.kind === 'abandonar';
 
   function del() {
-    if (confirm(`Excluir "${h!.name}" e todo o histórico?`)) {
+    if (confirm(`Excluir "${h!.name}" de vez, com todo o histórico? Para só tirar da frente, use Arquivar.`)) {
       update(remove('habits', h!.id));
       onClose();
     }
+  }
+  const archived = isArchived(h, today);
+  const paused = currentPause(h, today);
+  function archive() {
+    update(archiveHabit(h!.id, today));
+    onClose();
+    const days = cleanDays(h!, today);
+    if (quit && days >= 7) notify('Que marca! 🎉', `Você ficou ${days} dias sem ${h!.name.toLowerCase()}. O histórico fica guardado em Arquivados.`);
+    else notify(`${h!.name} arquivado`, 'Saiu de tudo, mas o histórico fica guardado em Arquivados.');
   }
 
   return (
@@ -593,18 +702,45 @@ function HabitDetail({ id, onClose, onEdit }: { id: string; onClose: () => void;
           <Icon name="repeat" size={18} /> Transformar em ritual
         </button>
       )}
+      {(paused || archived) && (
+        <p className="alert green" style={{ marginTop: 12 }}>
+          {archived ? `Arquivado em ${formatDMY(h.archivedAt!)}. O histórico continua aqui.` : paused!.to ? `Pausado até ${formatDMY(paused!.to)}; volta em ${formatDMY(addDays(paused!.to, 1))}.` : 'Pausado sem data.'}
+        </p>
+      )}
       <div className="btn-row">
-        <button
-          type="button"
-          className="btn"
-          onClick={() => onEdit(h)}
-        >
-          <Icon name="edit" size={18} /> Editar
-        </button>
+        {archived ? (
+          <button type="button" className="btn soft" onClick={() => { update(archiveHabit(h.id, null)); notify(`${h.name} restaurado`); }}>
+            <Icon name="undo" size={18} /> Restaurar
+          </button>
+        ) : (
+          <>
+            {!quit &&
+              (paused ? (
+                <button type="button" className="btn soft" onClick={() => { update(resumeHabit(h.id, today)); notify(`${h.name} voltou`, 'Já aparece em Hoje.'); }}>
+                  <Icon name="play" size={18} /> Retomar agora
+                </button>
+              ) : (
+                <button type="button" className="btn" onClick={() => setPausing(true)}>
+                  <Icon name="pause" size={18} /> Pausar
+                </button>
+              ))}
+            <button type="button" className="btn" onClick={archive}>
+              <Icon name="archive" size={18} /> Arquivar
+            </button>
+          </>
+        )}
+      </div>
+      <div className="btn-row">
+        {!archived && (
+          <button type="button" className="btn" onClick={() => onEdit(h)}>
+            <Icon name="edit" size={18} /> Editar
+          </button>
+        )}
         <button type="button" className="btn danger" onClick={del}>
-          <Icon name="trash" size={18} /> Excluir
+          <Icon name="trash" size={18} /> {archived ? 'Excluir de vez' : 'Excluir'}
         </button>
       </div>
+      {pausing && <PauseSheet h={h} onClose={() => setPausing(false)} />}
     </Sheet>
   );
 }
@@ -658,6 +794,8 @@ function HabitForm({ kind: initialKind, habit, onClose }: { kind: HabitKind; hab
       cue: quit ? '' : cue.trim().replace(/^depois de\s+/i, ''),
       target,
       slips: habit?.slips ?? [],
+      pauses: habit?.pauses ?? [],
+      archivedAt: habit?.archivedAt ?? null,
       startDate: quit ? startDate || todayISO() : (habit?.startDate ?? todayISO()),
       goal: goalN,
       unit: goalN !== null ? unit.trim() : '',

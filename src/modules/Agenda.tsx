@@ -160,23 +160,20 @@ export function Agenda({ route }: ViewProps) {
             </div>
             <p className="muted small" style={{ marginTop: 6 }}>Toque num dia para ver tudo o que acontece nele.</p>
           </section>
-
-          <div className="stack">
-            <section className="card">
-              <div className="card-head">
-                <h2>Próximos compromissos</h2>
-              </div>
-              {upcoming.length === 0 ? (
-                <Empty>Nenhum compromisso marcado.</Empty>
-              ) : (
-                <ul className="list">
-                  {upcoming.map((e) => (
-                    <EventItem key={e.id} ev={e} showDate onClick={() => (e.origin ? go(e.origin) : (pick(e.date), setEventForm(e)))} />
-                  ))}
-                </ul>
-              )}
-            </section>
-          </div>
+          <section className="card">
+            <div className="card-head">
+              <h2>Próximos compromissos</h2>
+            </div>
+            {upcoming.length === 0 ? (
+              <Empty>Nenhum compromisso marcado.</Empty>
+            ) : (
+              <ul className="list">
+                {upcoming.map((e) => (
+                  <EventItem key={e.id} ev={e} showDate onClick={() => (e.origin ? go(e.origin) : (pick(e.date), setEventForm(e)))} />
+                ))}
+              </ul>
+            )}
+          </section>
         </div>
       )}
 

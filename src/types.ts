@@ -67,6 +67,10 @@ export interface Habit {
    */
   link: string;
   createdAt: string;
+  /** Períodos pausados (AAAA-MM-DD, de/até inclusive; o último pode estar em aberto: to = null). */
+  pauses: { from: string; to: string | null }[];
+  /** Data (AAAA-MM-DD) em que foi arquivado; null = ativo. O histórico fica. */
+  archivedAt: string | null;
 }
 
 export interface Note {
@@ -75,6 +79,16 @@ export interface Note {
   content: string;
   pinned: boolean;
   updatedAt: string;
+}
+
+/** Foto guardada à parte (N9.3): o arquivo fica no aparelho e no Drive; aqui só a referência. */
+export interface Photo {
+  id: string;
+  /** Tipo do arquivo (ex.: image/jpeg). */
+  type: string;
+  /** Largura e altura (px), para reservar o espaço antes de carregar. */
+  w: number;
+  h: number;
 }
 
 export interface JournalEntry {
@@ -86,6 +100,8 @@ export interface JournalEntry {
   content: string;
   /** Etiqueta opcional (ex.: "Pessoal"). */
   tag: string;
+  /** Fotos do registro (N9.3). */
+  photos: Photo[];
   updatedAt: string;
 }
 
@@ -173,6 +189,8 @@ export interface ExpenseSeries {
   count: number | null;
   /** Quantas ocorrências já foram geradas. */
   generated: number;
+  /** Cartão: fatura (AAAA-MM) escolhida para a 1ª ocorrência (M8). Sem valor, a calculada pela data. */
+  invoiceMonth?: string | null;
   createdAt: string;
 }
 
@@ -239,6 +257,39 @@ export interface Settings {
   journeyUnlockedAt: string | null;
   /** Resposta depois de desbloquear: quer a Jornada ou não por agora. */
   journeyChoice: 'quero' | 'depois' | null;
+  /** Módulos desligados (ficam guardados no Mais, sem apagar nada). Ids de MODULES em setup.ts. */
+  hiddenModules: string[];
+  /** Montagem do app (E14): novo = abre sozinha; convite = quem já usava vê um cartão no Início; feito = já montou ou dispensou. */
+  setup: 'novo' | 'convite' | 'feito';
+  /** O tutorial da barra já foi visto (ou pulado). */
+  tutorialSeen: boolean;
+  /** O que a pessoa quer organizar (ids de SETUP_AREAS em setup.ts). */
+  setupAreas: string[];
+  /** Escolha da montagem: quer a Jornada (true), agora não (false) ou não perguntado (null). */
+  journeyWanted: boolean | null;
+  /** Com que frequência quer escrever no Diário (o Início só convida nesse ritmo). */
+  journalRhythm: JournalRhythm;
+  /** N9.5: lembretes pelo Google Agenda (vale para todos os aparelhos). */
+  googleCalendar: GoogleCalendarSettings;
+}
+
+export interface GoogleCalendarSettings {
+  on: boolean;
+  /** O que vai para a agenda "Central Pessoal". */
+  events: boolean;
+  bills: boolean;
+  tasks: boolean;
+  /** Id da agenda "Central Pessoal" no Google (criada pelo app). */
+  calendarId: string | null;
+}
+
+export interface JournalRhythm {
+  /** todo-dia · semana (perWeek vezes) · dias (dias certos) · livre (quando der, sem convite). */
+  mode: 'todo-dia' | 'semana' | 'dias' | 'livre';
+  /** 2 a 5, no modo 'semana'. */
+  perWeek: number;
+  /** 0 = domingo … 6 = sábado, no modo 'dias'. */
+  days: number[];
 }
 
 // ---------- Humor do dia ----------
@@ -472,7 +523,7 @@ export interface StudyCycle {
 }
 
 export type StudyBlockKind = 'nota' | 'pares' | 'fontes';
-/** Um bloco dentro de um assunto do notebook: texto, pares (termo e significado) ou fontes ligadas. */
+/** Formato antigo (até a v0.26): blocos de texto, pares e fontes. Hoje só existe para converter dados antigos. */
 export interface StudyBlock {
   id: string;
   kind: StudyBlockKind;
@@ -482,20 +533,37 @@ export interface StudyBlock {
   sourceIds: string[];
 }
 
-export interface StudySubject {
+/** Página de um notebook. Subpágina = página com `parentId` (um nível só). */
+export interface StudyPage {
   id: string;
+  /** Página-mãe; null = página principal. */
+  parentId: string | null;
   name: string;
-  /** Tópico da Biblioteca que deu origem (se houver). */
+  /** Tópico da Biblioteca que deu origem (se houver). Só referência: a Biblioteca nunca muda. */
   topicId: string | null;
-  blocks: StudyBlock[];
+  /** Conteúdo da página: documento de texto rico (formato JSON do editor, igual no computador e no celular). */
+  doc: RichNode;
+  /** Fontes ligadas a esta página. */
+  sourceIds: string[];
+  updatedAt: string;
+}
+
+/** Nó do documento de texto rico (parágrafo, título, lista, texto com marcas…). */
+export interface RichNode {
+  type: string;
+  attrs?: Record<string, unknown>;
+  content?: RichNode[];
+  marks?: { type: string; attrs?: Record<string, unknown> }[];
+  text?: string;
 }
 
 export interface StudyNotebook {
   id: string;
   name: string;
-  /** Trilha de referência (opcional). */
+  desc: string;
+  /** Trilha de referência (opcional). Um notebook pode ter páginas de várias trilhas e áreas. */
   trackId: string | null;
-  subjects: StudySubject[];
+  pages: StudyPage[];
   log: { at: string; text: string }[];
   createdAt: string;
   updatedAt: string;
@@ -511,12 +579,25 @@ export interface StudySource {
   createdAt: string;
 }
 
+/** Uma ideia do mapa mental. */
+export interface MapNode {
+  id: string;
+  text: string;
+  /** Cor própria; null = herda a cor do ramo. */
+  color: string | null;
+  /** Recolhida: as ideias de dentro ficam guardadas, mas escondidas no desenho. */
+  collapsed: boolean;
+  children: MapNode[];
+}
+
 export interface StudyMap {
   id: string;
   name: string;
-  center: string;
-  branches: { id: string; label: string; leaves: string[] }[];
+  /** Ideia central; os ramos e sub-ramos ficam em `children`. */
+  root: MapNode;
   notebookId: string | null;
+  /** Página do notebook a que o mapa se refere (opcional). */
+  pageId: string | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -590,8 +671,14 @@ export interface AppData {
   career: CareerData;
   /** Última carga usada em cada exercício (nome → kg). */
   lastLoads: Record<string, number>;
+  /** Treino em casa (M21): meta de dias com treino por semana (1 a 7). */
+  workoutGoal: number;
+  /** Treino em casa: link de vídeo de cada exercício (id → endereço). */
+  exerciseVideos: Record<string, string>;
   /** Itens excluídos (id → data), para uma futura sincronização entre aparelhos. */
   deleted: Record<string, string>;
+  /** N9.0: data da última alteração de cada item (id → data) e de cada parte (`@chave` → data). */
+  stamps: Record<string, string>;
   /** Dados da versão anterior que ainda não têm tela (ex.: receitas). */
   legacy: Record<string, unknown>;
 }
@@ -678,9 +765,31 @@ export interface WorkProject {
   createdAt: string;
 }
 
+export type ResumeKind = 'experiencia' | 'formacao' | 'curso' | 'idioma' | 'habilidade' | 'conquista';
+
+/** Item do currículo (N8.3): experiência, formação, curso/certificado, idioma, habilidade ou conquista. */
+export interface ResumeItem {
+  id: string;
+  kind: ResumeKind;
+  /** Cargo, curso, idioma, habilidade ou a conquista em si. */
+  title: string;
+  /** Empresa, instituição ou plataforma. */
+  org: string;
+  /** AAAA-MM (ou vazio). */
+  from: string;
+  /** AAAA-MM; vazio = até hoje (ou sem data). */
+  to: string;
+  /** Detalhes, nível (idioma) ou resultado (conquista: "reduzi o tempo X em 30%"). */
+  note: string;
+  /** Veio de um ciclo concluído em Estudos. */
+  cycleId: string | null;
+  createdAt: string;
+}
+
 export interface CareerData {
   jobs: JobApp[];
   changes: CareerChange[];
   meetings: Meeting[];
   projects: WorkProject[];
+  resume: ResumeItem[];
 }

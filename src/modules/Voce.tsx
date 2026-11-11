@@ -623,12 +623,3 @@ export function Voce({ route }: ViewProps) {
     </>
   );
 }
-
-/** Abre a entrevista sozinha na primeira abertura do app. */
-export function FirstRun() {
-  const { data } = useStore();
-  const [open, setOpen] = useState(data.profile.onboarding.state === 'novo');
-  if (!open) return null;
-  return <Interview start={-1} onClose={() => setOpen(false)} />;
-}
-

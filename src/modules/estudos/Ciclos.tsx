@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import type { ViewProps } from '../../App';
 import { go } from '../../router';
-import { addTopicsAsSubjects, cycleCounts, newNotebook, nextStatus, remainingTopics, setTopicStatus, touch, trackPath } from '../../estudos';
+import { addTopicsAsPages, cycleCounts, newNotebook, nextStatus, remainingTopics, setTopicStatus, touch, trackPath } from '../../estudos';
 import type { StudyCycle } from '../../types';
 import { Field, Icon, notify, PageHeader, Sheet } from '../../ui';
 import { formatDMY, todayISO } from '../../utils';
@@ -94,15 +94,16 @@ function CicloPage({ id }: { id: string }) {
     if (!tr) return;
     const now = nowISO();
     const topics = c!.topics.map((t) => lib.topic(t.id)!).filter(Boolean);
-    const existing = study.notebooks.find((x) => x.trackId === tr.id);
+    const ids = c!.topics.map((t) => t.id);
+    const existing = study.notebooks.find((x) => x.pages.some((p) => p.topicId && ids.includes(p.topicId))) ?? study.notebooks.find((x) => x.trackId === tr.id);
     if (existing) {
-      set((s) => ({ ...s, cycles: s.cycles.map((x) => (x.id === c!.id ? { ...x, notebookId: existing.id } : x)), notebooks: s.notebooks.map((x) => (x.id === existing.id ? touch(addTopicsAsSubjects(x, topics), `Ciclo "${c!.name}" ligado`, now) : x)) }));
+      set((s) => ({ ...s, cycles: s.cycles.map((x) => (x.id === c!.id ? { ...x, notebookId: existing.id } : x)), notebooks: s.notebooks.map((x) => (x.id === existing.id ? touch(addTopicsAsPages(x, topics), `Ciclo "${c!.name}" ligado`, now) : x)) }));
       notify('Ciclo ligado ao notebook', existing.name);
     } else {
       const path = trackPath(lib, tr);
       const created = newNotebook(tr.levelId ? `${path[1]} ${path[2]}` : tr.name, tr, c!.topics.map((t) => t.id), now);
       set((s) => ({ ...s, cycles: s.cycles.map((x) => (x.id === c!.id ? { ...x, notebookId: created.id } : x)), notebooks: [created, ...s.notebooks] }));
-      notify('Notebook criado', 'Cada tópico do ciclo virou um assunto.');
+      notify('Notebook criado', 'Cada tópico do ciclo virou uma página.');
     }
   }
   return (
@@ -158,7 +159,7 @@ function CicloPage({ id }: { id: string }) {
         <ul className="list">
           {c.topics.map((t, i) => {
             const tp = lib.topic(t.id);
-            const sub = nb?.subjects.find((s) => s.topicId === t.id);
+            const sub = nb?.pages.find((s) => s.topicId === t.id);
             return (
               <li key={t.id} className="row">
                 <span className="st-num tabular">{i + 1}</span>

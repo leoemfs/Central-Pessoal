@@ -60,7 +60,7 @@ Pedido de 08/11: reuniões e projetos de carreira sincronizados com o **calendá
 - **Construído (v0.24):** `syncCareerEvents` em `src/carreira.ts` roda em toda mudança de Carreira e ao abrir o app. Compromissos de Carreira têm `origin` ("carreira/abrir-m|j|p-<id>"); na Agenda aparecem com a etiqueta "Carreira" e abrem a ficha de origem. O local digitado na Agenda é mantido; o resto vem de Carreira. Entrega concluída, vaga encerrada e projeto concluído saem da Agenda.
 
 ## Perguntas da prévia (responder antes da N8.1)
-1. A casa abre em Trabalho ou em Currículo?
+1. ~~A casa abre em Trabalho ou em Currículo?~~ Abre em Trabalho (mantém como era; decidido na v0.37, dá para mudar).
 2. ~~Vagas: lista ou colunas?~~ Lista (decidido na v0.22).
 3. ~~Salário?~~ Escondido, toque para mostrar (decidido).
 4. Cartão "Próximo passo" no Início já ligado ou desligado no lápis?
@@ -75,7 +75,16 @@ Total: **G**. Dividir em partes, uma versão cada:
 | N8.3 | **Currículo e conquistas** (+ trazer ciclos concluídos de Estudos) | M |
 | N8.4 | **Metas de carreira** (passos ligados a Estudos e Vagas) + cartão no Início | P |
 
+> **09/11:** as metas de carreira (N8.4) passam a morar no módulo **Objetivos** (N10, `modulo-objetivos.md`), área Carreira. O botão **Metas** da barra de Carreira abrirá Objetivos filtrado por Carreira.
+
 Ordem recomendada: N8.0 → N8.1 → N8.2 → N8.3 → N8.4 (vagas primeiro porque é o que tem data e cobra ação).
 
 ## Fora do escopo
 Buscar vagas na internet, importar do LinkedIn, gerar PDF de currículo (fica para depois), integração com serviços externos.
+
+## O que foi construído (v0.37, N8.3)
+- Casa com abas **Trabalho · Currículo** (deslizar troca; abre em Trabalho).
+- **Currículo**: experiências (início e fim; sem fim = atual), formação, cursos e certificados, idiomas (com nível), habilidades e conquistas (quando e resultado). Tocar edita; excluir pede confirmação.
+- **Trazer de Estudos**: ciclos com todos os tópicos concluídos aparecem com "Adicionar" e viram curso (guardam de qual ciclo vieram, para não repetir).
+- Botão +: "Item no currículo". Dados em `career.resume` (padrão vazio em `normalize()`); regras `resumeOf`, `cyclesToResume`, `upsertResume` e `removeResume` em `src/carreira.ts`, com teste.
+- **Depois:** gerar o currículo em PDF.

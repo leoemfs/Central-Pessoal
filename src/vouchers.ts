@@ -3,7 +3,7 @@
  * A recarga entra como receita (fonte "Vale-alimentação") e as compras como despesas já pagas, que descontam do saldo.
  */
 import type { AppData, Income, VoucherCard } from './types.ts';
-import { addDays, addMonths, clampDay, dayOf, daysInMonth, monthKey, sum, todayISO, uid } from './utils.ts';
+import { addDays, addMonths, clampDay, dayOf, daysInMonth, monthKey, sum, todayISO, stableId, uid } from './utils.ts';
 
 export const VOUCHER_COLORS = ['#f97316', '#22c55e', '#ec4899', '#3b82f6', '#eab308', '#8b5cf6'];
 
@@ -70,7 +70,7 @@ function voucherSource(d: AppData): { d: AppData; id: string } {
   const plain = (s: string) => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
   const ex = d.incomeSources.find((s) => plain(s.name).startsWith('vale'));
   if (ex) return { d, id: ex.id };
-  const src = { id: uid(), name: 'Vale-alimentação', icon: 'utensils', color: '#f97316' };
+  const src = { id: stableId('fonte', 'Vale-alimentação'), name: 'Vale-alimentação', icon: 'utensils', color: '#f97316' };
   return { d: { ...d, incomeSources: [...d.incomeSources, src] }, id: src.id };
 }
 
@@ -89,7 +89,7 @@ export function materializeVouchers(d: AppData, today: string = todayISO()): App
       const date = clampDay(m, v.recharge.day);
       if (date <= v.startDate || date > today || v.recharged.includes(m)) continue;
       months.push(m);
-      added.push({ id: uid(), seriesId: null, installment: null, description: `Recarga · ${v.name}`, sourceId: '', amount: v.recharge.amount, date, receivedAt: date, createdAt: stamp, updatedAt: stamp, voucherId: v.id });
+      added.push({ id: stableId(v.id, 'recarga', m), seriesId: null, installment: null, description: `Recarga · ${v.name}`, sourceId: '', amount: v.recharge.amount, date, receivedAt: date, createdAt: stamp, updatedAt: stamp, voucherId: v.id });
     }
     if (!added.length) continue;
     const src = voucherSource(next);

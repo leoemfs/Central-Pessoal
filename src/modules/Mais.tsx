@@ -2,6 +2,8 @@ import { COMING_SOON, SECTIONS } from '../App';
 import { useStore } from '../store';
 import { addFavorite, FAVORITABLE } from '../moduleBar';
 import { Icon, notify, PageHeader, Sheet, type IconName } from '../ui';
+import { isHidden } from '../setup';
+import { openSetup, openTutorial } from './Montagem';
 
 /** Todos os módulos. Orçamento e Relatórios ficam dentro de Finanças (na barra de baixo). */
 const LINKS: { path: string; hint: string }[] = [
@@ -19,27 +21,65 @@ const LINKS: { path: string; hint: string }[] = [
   { path: 'ajustes', hint: 'Personalização (temas, favoritos, barra), backup e dados' },
 ];
 
+function LinkTile({ path, hint }: { path: string; hint: string }) {
+  const s = SECTIONS.find((x) => x.path === path)!;
+  return (
+    <a className="tile" href={`#/${path}`}>
+      <span className="tile-icon">
+        <Icon name={s.icon} />
+      </span>
+      <span className="tile-text">
+        <strong>{s.label}</strong>
+        <span className="muted">{hint}</span>
+      </span>
+      <Icon name="right" size={18} />
+    </a>
+  );
+}
+
 export function Mais() {
+  const { data } = useStore();
+  const shown = LINKS.filter((l) => !isHidden(data, l.path));
+  const kept = LINKS.filter((l) => isHidden(data, l.path));
   return (
     <>
       <PageHeader title="Mais" />
       <div className="tile-grid">
-        {LINKS.map((l) => {
-          const s = SECTIONS.find((x) => x.path === l.path)!;
-          return (
-            <a key={l.path} className="tile" href={`#/${l.path}`}>
+        {shown.map((l) => (
+          <LinkTile key={l.path} {...l} />
+        ))}
+        <button type="button" className="tile" onClick={openTutorial}>
+          <span className="tile-icon">
+            <Icon name="info" />
+          </span>
+          <span className="tile-text">
+            <strong>Como usar a barra</strong>
+            <span className="muted">Tutorial de 1 minuto: favoritos, ferramentas do módulo, voltar e trocar de módulo</span>
+          </span>
+          <Icon name="right" size={18} />
+        </button>
+      </div>
+      {kept.length > 0 && (
+        <>
+          <h2 className="section-title">Guardados</h2>
+          <p className="muted small">Módulos desligados: continuam aqui, com tudo o que você já registrou. Para trazer de volta, use Personalização.</p>
+          <div className="tile-grid">
+            {kept.map((l) => (
+              <LinkTile key={l.path} {...l} />
+            ))}
+            <button type="button" className="tile" onClick={() => openSetup('convite')}>
               <span className="tile-icon">
-                <Icon name={s.icon} />
+                <Icon name="grid" />
               </span>
               <span className="tile-text">
-                <strong>{s.label}</strong>
-                <span className="muted">{l.hint}</span>
+                <strong>Montar o app do seu jeito</strong>
+                <span className="muted">Escolher de novo os módulos à vista e os favoritos</span>
               </span>
               <Icon name="right" size={18} />
-            </a>
-          );
-        })}
-      </div>
+            </button>
+          </div>
+        </>
+      )}
       <h2 className="section-title">Em breve</h2>
       <div className="tile-grid">
         {COMING_SOON.map((c) => (
@@ -75,7 +115,7 @@ export function FavoritesSheet({ onClose }: { onClose: () => void }) {
         Escolha 3. Ao marcar um novo, o mais antigo sai. Os outros módulos continuam no Mais e no menu ☰.
       </p>
       <ul className="list">
-        {FAVORITABLE.map((f) => {
+        {FAVORITABLE.filter((f) => !isHidden(data, f.id)).map((f) => {
           const on = favs.includes(f.id);
           return (
             <li key={f.id}>

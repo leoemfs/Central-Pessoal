@@ -10,6 +10,7 @@ import { monthBalance } from '../incomes';
 import { addDays, formatDateTime, formatLongDate, formatMoney, formatMonth, greeting, monthKey, relativeDay, toISO, todayISO } from '../utils';
 import { Empty, Icon, Pill, Progress, type IconName } from '../ui';
 import { sortTasks, TaskItem } from './Tarefas';
+import { useCloud } from '../cloud';
 import { AskCard, ForYou, Interview } from './Voce';
 import { WeekPractice } from './Praticas';
 import { SaveToday } from './financas/Caixinhas';
@@ -21,6 +22,9 @@ import { EventItem, sortEvents } from './Agenda';
 import { entrySummary, entryTitle } from './Diario';
 import { BillRow } from './financas/Financas';
 import { useCategoryOf } from './financas/shared';
+import { JournalRhythmCard, SetupInvite } from './Montagem';
+import { isHidden } from '../setup';
+import { activeCycles, cycleCounts, library } from '../estudos';
 
 function SeeAll({ href, label = 'Ver tudo' }: { href: string; label?: string }) {
   return (
@@ -36,7 +40,46 @@ function greetingEmoji(): string {
   return h >= 5 && h < 12 ? '☀️' : h >= 12 && h < 18 ? '🌤️' : '🌙';
 }
 
+/** Cartões do Início que pertencem a um módulo (somem se ele estiver guardado). */
+const OF_MODULE: Record<string, string> = { estudos: 'estudos', guardar: 'financas', orcamento: 'financas', vale: 'financas', listas: 'listas', ritmo: 'diario', revisao: 'diario', paravoce: 'voce' };
+
 const plural = (n: number, one: string, many: string) => `${n} ${n === 1 ? one : many}`;
+
+/** M11: ciclos de Estudos em andamento, com o próximo tópico. Some se não houver ciclo. */
+function StudyNow() {
+  const { data } = useStore();
+  const cycles = useMemo(() => activeCycles(data.study).slice(0, 2), [data.study]);
+  if (!cycles.length) return null;
+  const lib = library(data.study);
+  return (
+    <section className="card">
+      <div className="card-head">
+        <h2>Estudando agora</h2>
+        <SeeAll href="#/ciclos" label="Ciclos" />
+      </div>
+      <ul className="list">
+        {cycles.map((c) => {
+          const n = cycleCounts(c);
+          const next = c.topics.find((t) => t.status === 'andando') ?? c.topics.find((t) => t.status === 'afazer');
+          return (
+            <li key={c.id}>
+              <a className="row study-now" href={`#/ciclos/${c.id}`}>
+                <span className="row-body">
+                  <span className="row-title">{c.name}</span>
+                  <Progress pct={n.pct} />
+                  <span className="row-meta">
+                    {n.done} de {n.total} tópicos{next ? ` · agora: ${lib.topic(next.id)?.name ?? 'próximo tópico'}` : ''}
+                  </span>
+                </span>
+                <Icon name="right" size={18} />
+              </a>
+            </li>
+          );
+        })}
+      </ul>
+    </section>
+  );
+}
 
 export function Dashboard() {
   const { data, update } = useStore();
@@ -61,7 +104,7 @@ export function Dashboard() {
   const pendingTasks = data.tasks.filter((t) => !t.done).length;
   const lastEntry = journal[0];
   const lastEntryLabel = lastEntry ? relativeDay(toISO(new Date(lastEntry.createdAt))).toLowerCase() : null;
-  const day: { to: string; icon: IconName; title: string; text: string }[] = [
+  const allDay: { to: string; icon: IconName; title: string; text: string }[] = [
     { to: 'agenda', icon: 'calendar', title: 'Agenda', text: eventsToday ? `${plural(eventsToday, 'compromisso', 'compromissos')} hoje` : 'Nenhum compromisso hoje' },
     { to: 'financas', icon: 'wallet', title: 'Finanças', text: dueSoon.length ? `${plural(dueSoon.length, 'conta próxima', 'contas próximas')} do vencimento` : 'Nenhuma conta vencendo nos próximos dias' },
     { to: 'diario', icon: 'book', title: 'Diário', text: lastEntryLabel ? `Último registro: ${lastEntryLabel}` : 'Nenhum registro ainda' },
@@ -75,13 +118,28 @@ export function Dashboard() {
     { to: 'nucleo', icon: 'sprout', title: 'Núcleo pessoal', text: routine.length ? `${routineDone} de ${routine.length} rituais e hábitos feitos` : 'Nada programado para hoje' },
   ];
 
+  // Módulos guardados (desligados na montagem) saem do "Seu dia" e dos cartões do Início.
+  const day = allDay.filter((d) => !isHidden(data, d.to));
+  const off = (mod: string) => isHidden(data, mod);
+
   const backupDays = data.settings.lastBackupAt ? Math.floor((Date.now() - new Date(data.settings.lastBackupAt).getTime()) / 864e5) : null;
   const hasData = data.expenses.length + data.journal.length + data.tasks.length + data.events.length > 0;
-  const needsBackup = hasData && (backupDays === null || backupDays > 30);
+  // N9.1: com a cópia na nuvem em dia, não precisa do aviso de backup em arquivo.
+  const cloud = useCloud();
+  const cloudDays = cloud?.lastSavedAt ? Math.floor((Date.now() - new Date(cloud.lastSavedAt).getTime()) / 864e5) : null;
+  const needsBackup = hasData && !cloud && (backupDays === null || backupDays > 30);
+  // Conectado, mas a cópia parou há mais de 1 dia (acesso vencido, escolha pendente ou erro).
+  const cloudStuck = !!cloud && cloud.status !== 'ok' && cloud.status !== 'salvando' && (cloudDays === null || cloudDays >= 1);
 
   const cards: CardDef[] = [
     { id: 'humor', label: 'Humor do dia', lock: 'top', node: (
       <MoodCard />
+    ) },
+    { id: 'montagem', label: 'Monte o app do seu jeito', node: (
+      <SetupInvite />
+    ) },
+    { id: 'ritmo', label: 'Convite do Diário', node: (
+      <JournalRhythmCard />
     ) },
     { id: 'perfil', label: 'Complete seu perfil', node: (
       <AskCard onAnswer={() => setInterview(true)} />
@@ -118,6 +176,9 @@ export function Dashboard() {
     { id: 'listas', label: 'Listas fixadas', node: (
       <PinnedLists />
     ) },
+    { id: 'estudos', label: 'Estudando agora', node: (
+      <StudyNow />
+    ) },
     { id: 'paravoce', label: 'Para você', node: (
       <ForYou />
     ) },
@@ -137,6 +198,13 @@ export function Dashboard() {
       needsBackup && (
         <a className="alert orange" href="#/ajustes" style={{ textDecoration: 'none' }}>
           {backupDays === null ? 'Você ainda não fez um backup.' : `Último backup há ${backupDays} dias.`} Seus dados ficam só neste aparelho — toque para exportar.
+        </a>
+      )
+    ) },
+    { id: 'nuvem', label: 'Aviso da sincronização', lock: 'keep', node: (
+      cloudStuck && (
+        <a className="alert orange" href="#/ajustes" style={{ textDecoration: 'none' }}>
+          {`Sincronização parada${cloudDays ? ` há ${cloudDays} dia(s)` : ''}. Toque para continuar sincronizando.`}
         </a>
       )
     ) },
@@ -312,7 +380,7 @@ export function Dashboard() {
         </div>
       </header>
 
-      <CardScreen screen="inicio" cards={cards} />
+      <CardScreen screen="inicio" cards={cards.filter((c) => !OF_MODULE[c.id] || !off(OF_MODULE[c.id]))} />
       {interview && <Interview start={p.onboarding.step} onClose={() => setInterview(false)} />}
     </>
   );

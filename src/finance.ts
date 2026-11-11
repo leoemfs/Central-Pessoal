@@ -3,7 +3,7 @@
  * Todas as funções recebem o estado e devolvem um novo estado (sem mutação).
  */
 import type { AppData, CreditCard, Expense, ExpenseKind, ExpenseSeries, PaymentMethod } from './types.ts';
-import { addMonths, clampDay, dayOf, monthKey, pad, sum, todayISO, uid } from './utils.ts';
+import { addMonths, clampDay, dayOf, monthKey, pad, sum, todayISO, stableId, uid } from './utils.ts';
 
 export const PAYMENT_LABEL: Record<PaymentMethod, string> = {
   pix: 'Pix',
@@ -49,6 +49,22 @@ export function invoiceClosingDate(card: CardDays, invoiceMonth: string): string
   return clampDay(closeMonth, card.closingDay);
 }
 
+/** Fatura aberta hoje: a que está recebendo as compras agora (M8). */
+export function openInvoiceMonth(card: CardDays, today: string = todayISO()): string {
+  return invoiceMonthFor(card, today);
+}
+
+/**
+ * Faturas que a pessoa pode escolher ao lançar uma compra (M8): a calculada pela data, a anterior
+ * (quando ainda não venceu na data da compra; ex.: cartão recém-cadastrado, compra que o banco já pôs
+ * na fatura que está fechando) e a seguinte.
+ */
+export function invoiceChoices(card: CardDays, purchaseDate: string): string[] {
+  const calc = invoiceMonthFor(card, purchaseDate);
+  const prev = addMonths(calc, -1);
+  return [...(invoiceDueDate(card, prev) >= purchaseDate ? [prev] : []), calc, addMonths(calc, 1)];
+}
+
 // ---------- Parcelas ----------
 
 /** Divide um total em N parcelas; os centavos que sobram vão para a última (100/3 → 33,33 + 33,33 + 33,34). */
@@ -74,11 +90,14 @@ interface Template {
   method: PaymentMethod;
   startDate: string;
   installments: number | null;
+  /** Fatura escolhida para a 1ª ocorrência no cartão (M8); sem escolha, vale a calculada pela data. */
+  invoiceMonth?: string | null;
 }
 
 function buildOccurrence(t: Template, k: number, amount: number, card: CreditCard | undefined, stamp: string): Expense {
   const base = {
-    id: uid(),
+    // Ocorrência de uma série: id estável (série + número), igual em todos os aparelhos.
+    id: t.seriesId ? stableId(t.seriesId, k + 1) : uid(),
     kind: t.kind,
     seriesId: t.seriesId,
     installment: t.kind === 'avulsa' ? null : k + 1,
@@ -93,7 +112,7 @@ function buildOccurrence(t: Template, k: number, amount: number, card: CreditCar
   if (card) {
     // Parcelas de uma compra mantêm a data da compra; uma assinatura no cartão "compra" de novo todo mês.
     const purchaseDate = t.kind === 'fixa' ? clampDay(addMonths(monthKey(t.startDate), k), dayOf(t.startDate)) : t.startDate;
-    const invoiceMonth = addMonths(invoiceMonthFor(card, t.startDate), k);
+    const invoiceMonth = addMonths(t.invoiceMonth ?? invoiceMonthFor(card, t.startDate), k);
     return { ...base, method: 'cartao', cardId: card.id, purchaseDate, invoiceMonth, dueDate: invoiceDueDate(card, invoiceMonth) };
   }
   return {
@@ -108,7 +127,7 @@ function buildOccurrence(t: Template, k: number, amount: number, card: CreditCar
 
 /** Mês de referência da 1ª ocorrência de uma série (vencimento ou fatura). */
 function firstMonth(s: ExpenseSeries, card: CreditCard | undefined): string {
-  return card ? invoiceMonthFor(card, s.startDate) : monthKey(s.startDate);
+  return card ? (s.invoiceMonth ?? invoiceMonthFor(card, s.startDate)) : monthKey(s.startDate);
 }
 
 export interface ExpenseInput {
@@ -125,6 +144,8 @@ export interface ExpenseInput {
   paidAt: string | null;
   /** Pago com vale (VR/VA). A despesa já nasce paga. */
   voucherId?: string | null;
+  /** No cartão: fatura escolhida (AAAA-MM) para a compra (ou a 1ª parcela). Sem escolha, a calculada pela data. */
+  invoiceMonth?: string | null;
 }
 
 export function addExpense(d: AppData, input: ExpenseInput, today: string = todayISO()): AppData {
@@ -139,6 +160,7 @@ export function addExpense(d: AppData, input: ExpenseInput, today: string = toda
     method,
     startDate: input.date,
     installments: input.kind === 'parcelada' ? input.amounts.length : null,
+    invoiceMonth: card ? (input.invoiceMonth ?? null) : null,
   };
 
   if (input.kind === 'avulsa') {
@@ -161,6 +183,7 @@ export function addExpense(d: AppData, input: ExpenseInput, today: string = toda
     count: input.kind === 'parcelada' ? input.amounts.length : null,
     generated: 0,
     createdAt: stamp,
+    ...(card && input.invoiceMonth ? { invoiceMonth: input.invoiceMonth } : {}),
   };
   template.seriesId = series.id;
 
@@ -258,6 +281,8 @@ export interface ExpensePatch {
   method: PaymentMethod;
   cardId: string | null;
   voucherId?: string | null;
+  /** No cartão: trocar a fatura (AAAA-MM). Em série, as próximas parcelas andam junto. */
+  invoiceMonth?: string | null;
 }
 
 function scopeTargets(d: AppData, e: Expense, scope: Scope): Expense[] {
@@ -277,7 +302,7 @@ export function editExpense(d: AppData, id: string, patch: ExpensePatch, scope: 
       // Despesa avulsa pode trocar forma de pagamento, cartão e data livremente.
       const card = patch.method === 'cartao' ? d.cards.find((c) => c.id === patch.cardId) : undefined;
       if (card) {
-        const invoiceMonth = invoiceMonthFor(card, patch.date);
+        const invoiceMonth = patch.invoiceMonth ?? invoiceMonthFor(card, patch.date);
         next = { ...next, method: 'cartao', cardId: card.id, purchaseDate: patch.date, invoiceMonth, dueDate: invoiceDueDate(card, invoiceMonth), paidAt: null };
       } else {
         const method = patch.method === 'cartao' ? 'pix' : patch.method;
@@ -286,9 +311,16 @@ export function editExpense(d: AppData, id: string, patch: ExpensePatch, scope: 
       }
     } else if (!e.cardId) {
       next.dueDate = patch.date;
+    } else if (patch.invoiceMonth && patch.invoiceMonth !== e.invoiceMonth) {
+      const card = d.cards.find((c) => c.id === e.cardId);
+      if (card) next = { ...next, invoiceMonth: patch.invoiceMonth, dueDate: invoiceDueDate(card, patch.invoiceMonth) };
     }
     return { ...d, expenses: d.expenses.map((x) => (x.id === id ? next : x)) };
   }
+
+  // Cartão em série: trocar a fatura desta empurra as do escopo pelo mesmo número de meses.
+  const shift = e.cardId && e.invoiceMonth && patch.invoiceMonth && patch.invoiceMonth !== e.invoiceMonth ? monthsBetween(e.invoiceMonth, patch.invoiceMonth) : 0;
+  const seriesCard = shift ? d.cards.find((c) => c.id === e.cardId) : undefined;
 
   // Em série: descrição e categoria mudam em todas do escopo; valor e dia só nas que ainda não foram pagas.
   const ids = new Set(scopeTargets(d, e, scope).map((x) => x.id));
@@ -296,14 +328,20 @@ export function editExpense(d: AppData, id: string, patch: ExpensePatch, scope: 
   const expenses = d.expenses.map((x) => {
     if (!ids.has(x.id)) return x;
     if (paidDate(x, d.cards) !== null) return { ...x, ...common };
+    if (seriesCard && x.invoiceMonth) {
+      const invoiceMonth = addMonths(x.invoiceMonth, shift);
+      return { ...x, ...common, amount: patch.amount, invoiceMonth, dueDate: invoiceDueDate(seriesCard, invoiceMonth) };
+    }
     const dueDate = x.cardId ? x.dueDate : clampDay(monthKey(x.dueDate), newDay);
     return { ...x, ...common, amount: patch.amount, dueDate };
   });
-  const series = d.series.map((s) =>
-    s.id === e.seriesId
-      ? { ...s, description: patch.description, categoryId: patch.categoryId, amount: patch.amount, startDate: s.cardId ? s.startDate : clampDay(monthKey(s.startDate), newDay) }
-      : s,
-  );
+  const series = d.series.map((s) => {
+    if (s.id !== e.seriesId) return s;
+    const base = { ...s, description: patch.description, categoryId: patch.categoryId, amount: patch.amount, startDate: s.cardId ? s.startDate : clampDay(monthKey(s.startDate), newDay) };
+    // Conta fixa no cartão: as próximas ocorrências geradas seguem a nova fatura.
+    if (seriesCard) return { ...base, invoiceMonth: addMonths(firstMonth(s, seriesCard), shift) };
+    return base;
+  });
   return { ...d, expenses, series };
 }
 
@@ -333,6 +371,13 @@ export function deleteExpense(d: AppData, id: string, scope: Scope): AppData {
     return keep;
   });
   return { ...d, expenses, series, deleted };
+}
+
+/** Meses de diferença entre duas faturas (AAAA-MM). */
+function monthsBetween(a: string, b: string): number {
+  const [ya, ma] = a.split('-').map(Number);
+  const [yb, mb] = b.split('-').map(Number);
+  return (yb - ya) * 12 + (mb - ma);
 }
 
 // ---------- Faturas ----------

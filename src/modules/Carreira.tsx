@@ -1,10 +1,13 @@
 import { useEffect, useState, type ReactNode } from 'react';
+import { CardScreen } from '../Cards';
 import type { ViewProps } from '../App';
 import { go, useSubAction } from '../router';
 import { useStore } from '../store';
 import type { AppData, CareerChange, CareerChangeKind, JobApp, JobStage, Meeting, ProjectStatus, WorkProject } from '../types';
 import { addDays, formatDate, formatMoney, relativeDay, todayISO, uid } from '../utils';
-import { Chips, Empty, Field, Icon, MoneyInput, MultiChips, notify, PageHeader, Pill, Progress, Sheet, Toggle } from '../ui';
+import { Chips, Empty, Field, Icon, MoneyInput, MultiChips, notify, PageHeader, Pill, Progress, Segmented, Sheet, Toggle, type IconName } from '../ui';
+import { cyclesToResume, removeResume, RESUME_KINDS, resumeOf, upsertResume } from '../carreira';
+import type { ResumeItem, ResumeKind } from '../types';
 import {
   applySalaryToFinance,
   CHANGE_LABEL,
@@ -122,7 +125,9 @@ export function CarreiraPage({ route }: ViewProps) {
     update(saveProject(pr));
     setProjectId(pr.id);
   }
-  useSubAction(route, 'carreira', { menu: () => setMenu(true), reuniao: createMeeting, mudanca: () => setChangeOpen(true), projeto: createProject });
+  const [tab, setTab] = useState<'trabalho' | 'curriculo'>('trabalho');
+  const [resumeEdit, setResumeEdit] = useState<ResumeItem | ResumeKind | null>(null);
+  useSubAction(route, 'carreira', { menu: () => setMenu(true), reuniao: createMeeting, mudanca: () => setChangeOpen(true), projeto: createProject, curriculo: () => setTab('curriculo'), 'novo-item': () => { setTab('curriculo'); setResumeEdit('conquista'); } });
   // Vindo da Agenda: #/carreira/abrir-m-<id> (reunião), abrir-j-<id> (vaga), abrir-p-<id> (projeto).
   useEffect(() => {
     const m = /^abrir-([mjp])-(.+)$/.exec(route.sub);
@@ -145,8 +150,30 @@ export function CarreiraPage({ route }: ViewProps) {
 
   return (
     <>
-      <PageHeader title="Carreira" subtitle="Onde você está, para onde quer ir e as vagas no caminho." />
+      <PageHeader
+        title="Carreira"
+        subtitle="Onde você está, para onde quer ir e as vagas no caminho."
+        tabs={
+          <Segmented
+            label="Seção"
+            swipe
+            value={tab}
+            onChange={setTab}
+            options={[
+              { value: 'trabalho', label: 'Trabalho' },
+              { value: 'curriculo', label: 'Currículo' },
+            ]}
+          />
+        }
+      />
+      {tab === 'curriculo' ? (
+        <ResumeTab onEdit={setResumeEdit} />
+      ) : (
 
+      <CardScreen
+        screen="carreira"
+        cards={[
+          { id: 'trabalho', label: 'Trabalho atual', lock: 'top', node: (
       <section className="card">
         <div className="card-head">
           <h2>Trabalho atual</h2>
@@ -175,7 +202,8 @@ export function CarreiraPage({ route }: ViewProps) {
           </button>
         </div>
       </section>
-
+      ) },
+          { id: 'reunioes', label: 'Reuniões', node: (
       <section className="card">
         <div className="card-head">
           <h2>Reuniões</h2>
@@ -196,7 +224,8 @@ export function CarreiraPage({ route }: ViewProps) {
           </ul>
         )}
       </section>
-
+      ) },
+          { id: 'projetos', label: 'Projetos', node: (
       <section className="card">
         <div className="card-head">
           <h2>Projetos</h2>
@@ -265,8 +294,8 @@ export function CarreiraPage({ route }: ViewProps) {
           </>
         )}
       </section>
-
-      {todos.length > 0 && (
+      ) },
+          { id: 'combinados', label: 'Combinados em aberto', node: todos.length > 0 && (
         <section className="card">
           <div className="card-head">
             <h2>Combinados em aberto</h2>
@@ -286,9 +315,8 @@ export function CarreiraPage({ route }: ViewProps) {
             ))}
           </ul>
         </section>
-      )}
-
-      {history.length > 0 && (
+      ) },
+          { id: 'cargos', label: 'Cargos e salários', node: history.length > 0 && (
         <section className="card">
           <div className="card-head">
             <h2>Cargos e salários</h2>
@@ -318,8 +346,8 @@ export function CarreiraPage({ route }: ViewProps) {
             ))}
           </ul>
         </section>
-      )}
-
+      ) },
+          { id: 'vagas', label: 'Vagas: próximos passos', node: (
       <section className="card">
         <div className="card-head">
           <h2>Vagas: próximos passos</h2>
@@ -337,7 +365,8 @@ export function CarreiraPage({ route }: ViewProps) {
           <Empty>{open.length ? `${open.length} vaga(s) em andamento, nenhuma com passo marcado.` : 'Nenhuma vaga em andamento.'}</Empty>
         )}
       </section>
-
+      ) },
+          { id: 'breve', label: 'Chegando em breve', node: (
       <section className="card">
         <div className="card-head">
           <h2>Chegando em breve</h2>
@@ -359,6 +388,10 @@ export function CarreiraPage({ route }: ViewProps) {
           </li>
         </ul>
       </section>
+      ) },
+        ]}
+      />
+      )}
 
       {menu && (
         <Sheet title="Criar em Carreira" onClose={() => setMenu(false)}>
@@ -378,6 +411,11 @@ export function CarreiraPage({ route }: ViewProps) {
               <span className="tile-text"><strong>Novo projeto</strong><span className="muted">Projeto do setor com prazo e entregas</span></span>
               <Icon name="right" size={18} />
             </button>
+            <button type="button" className="tile" onClick={() => { setMenu(false); setTab('curriculo'); setResumeEdit('conquista'); }}>
+              <span className="tile-icon"><Icon name="star" /></span>
+              <span className="tile-text"><strong>Item no currículo</strong><span className="muted">Conquista, experiência, curso, idioma ou habilidade</span></span>
+              <Icon name="right" size={18} />
+            </button>
             <button type="button" className="tile" onClick={() => { setMenu(false); setChangeOpen(true); }}>
               <span className="tile-icon"><Icon name="briefcase" /></span>
               <span className="tile-text"><strong>Mudança de cargo ou salário</strong><span className="muted">Entrada, promoção, aumento ou novo emprego</span></span>
@@ -387,6 +425,7 @@ export function CarreiraPage({ route }: ViewProps) {
         </Sheet>
       )}
       {changeOpen && <ChangeSheet onClose={() => setChangeOpen(false)} />}
+      {resumeEdit && <ResumeSheet item={typeof resumeEdit === 'string' ? null : resumeEdit} kind={typeof resumeEdit === 'string' ? resumeEdit : resumeEdit.kind} onClose={() => setResumeEdit(null)} />}
       {meetingId && <MeetingSheet id={meetingId} onClose={() => setMeetingId(null)} onOpen={setMeetingId} onOpenProject={(pid) => { setMeetingId(null); setProjectId(pid); }} />}
       {projectId && <ProjectSheet id={projectId} onClose={() => setProjectId(null)} onOpenMeeting={(mid) => { setProjectId(null); setMeetingId(mid); }} />}
       {openId && <JobSheet id={openId} onClose={() => setOpenId(null)} />}
@@ -987,5 +1026,156 @@ export function MetasPage() {
         </Empty>
       </section>
     </>
+  );
+}
+
+// ---------- Currículo e conquistas (N8.3) ----------
+
+const monthLabel = (m: string) => (m ? `${m.slice(5, 7)}/${m.slice(0, 4)}` : '');
+function period(i: ResumeItem): string {
+  if (!i.from && !i.to) return '';
+  if (i.from && !i.to) return i.kind === 'experiencia' || i.kind === 'formacao' ? `desde ${monthLabel(i.from)} (atual)` : monthLabel(i.from);
+  return i.from && i.from !== i.to ? `${monthLabel(i.from)} – ${monthLabel(i.to)}` : monthLabel(i.to);
+}
+
+function ResumeTab({ onEdit }: { onEdit: (x: ResumeItem | ResumeKind) => void }) {
+  const { data, update } = useStore();
+  const items = data.career.resume;
+  const fromStudy = cyclesToResume(data);
+  return (
+    <>
+      {fromStudy.length > 0 && (
+        <section className="card raised">
+          <div className="card-head">
+            <h2>Trazer de Estudos</h2>
+          </div>
+          <p className="muted small">Ciclos concluídos que podem entrar no currículo como curso.</p>
+          <ul className="list">
+            {fromStudy.map((c) => (
+              <li key={c.id} className="row">
+                <div className="row-body">
+                  <span className="row-title">{c.name}</span>
+                  <span className="row-meta">Concluído em {monthLabel(c.to)}</span>
+                </div>
+                <button
+                  type="button"
+                  className="btn soft small"
+                  onClick={() => {
+                    update(upsertResume({ id: uid(), kind: 'curso', title: c.name, org: 'Estudos (CP Hub)', from: c.from, to: c.to, note: '', cycleId: c.id, createdAt: new Date().toISOString() }));
+                    notify('Entrou no currículo', `${c.name}, em Cursos e certificados.`);
+                  }}
+                >
+                  Adicionar
+                </button>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+      {items.length === 0 && (
+        <section className="card">
+          <Empty>O que você já fez: experiências, formação, cursos, idiomas, habilidades e conquistas com resultado. O app só guarda e organiza; o currículo em PDF fica para depois.</Empty>
+        </section>
+      )}
+      {RESUME_KINDS.map((k) => {
+        const list = resumeOf(items, k.id);
+        return (
+          <section key={k.id} className="card">
+            <div className="card-head">
+              <h2 className="cat-title">
+                <Icon name={k.icon as IconName} size={18} /> {k.plural}
+              </h2>
+              <button type="button" className="link" onClick={() => onEdit(k.id)}>
+                + Adicionar
+              </button>
+            </div>
+            {list.length === 0 ? (
+              <p className="muted small">Nada ainda.</p>
+            ) : (
+              <ul className="list">
+                {list.map((i) => (
+                  <li key={i.id}>
+                    <button type="button" className="row" onClick={() => onEdit(i)}>
+                      <div className="row-body">
+                        <span className="row-title">{i.title || 'Sem título'}</span>
+                        <span className="row-meta">{[i.org, period(i), i.note].filter(Boolean).join(' · ')}</span>
+                      </div>
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </section>
+        );
+      })}
+    </>
+  );
+}
+
+function ResumeSheet({ item, kind: initialKind, onClose }: { item: ResumeItem | null; kind: ResumeKind; onClose: () => void }) {
+  const { update } = useStore();
+  const [kind, setKind] = useState<ResumeKind>(item?.kind ?? initialKind);
+  const [title, setTitle] = useState(item?.title ?? '');
+  const [org, setOrg] = useState(item?.org ?? '');
+  const [from, setFrom] = useState(item?.from ?? '');
+  const [to, setTo] = useState(item?.to ?? '');
+  const [note, setNote] = useState(item?.note ?? '');
+  const info = RESUME_KINDS.find((k) => k.id === kind)!;
+  function save() {
+    if (!title.trim()) return notify('Falta o nome', info.titleHint);
+    update(upsertResume({ id: item?.id ?? uid(), kind, title: title.trim(), org: org.trim(), from, to, note: note.trim(), cycleId: item?.cycleId ?? null, createdAt: item?.createdAt ?? new Date().toISOString() }));
+    onClose();
+  }
+  return (
+    <Sheet title={item ? 'Editar no currículo' : 'Adicionar ao currículo'} onClose={onClose}>
+      <div className="chips" role="radiogroup" aria-label="Tipo">
+        {RESUME_KINDS.map((k) => (
+          <button key={k.id} type="button" role="radio" aria-checked={kind === k.id} className={`chip-btn${kind === k.id ? ' on' : ''}`} onClick={() => setKind(k.id)}>
+            {k.label}
+          </button>
+        ))}
+      </div>
+      <Field label={info.titleHint}>
+        <input className="input" value={title} onChange={(e) => setTitle(e.target.value)} autoFocus={!item} />
+      </Field>
+      {info.orgHint && (
+        <Field label={info.orgHint}>
+          <input className="input" value={org} onChange={(e) => setOrg(e.target.value)} />
+        </Field>
+      )}
+      {kind !== 'idioma' && kind !== 'habilidade' && (
+        <div className="form-row">
+          <Field label={kind === 'conquista' || kind === 'curso' ? 'Quando' : 'Início'}>
+            <input type="month" className="input" value={kind === 'conquista' || kind === 'curso' ? to || from : from} onChange={(e) => (kind === 'conquista' || kind === 'curso' ? (setTo(e.target.value), setFrom(e.target.value)) : setFrom(e.target.value))} />
+          </Field>
+          {(kind === 'experiencia' || kind === 'formacao') && (
+            <Field label="Fim" hint="Vazio = atual">
+              <input type="month" className="input" value={to} onChange={(e) => setTo(e.target.value)} />
+            </Field>
+          )}
+        </div>
+      )}
+      <Field label={info.noteHint}>
+        <textarea className="input" rows={3} value={note} onChange={(e) => setNote(e.target.value)} />
+      </Field>
+      <div className="btn-row">
+        <button type="button" className="btn primary" onClick={save}>
+          Salvar
+        </button>
+        {item && (
+          <button
+            type="button"
+            className="btn danger"
+            onClick={() => {
+              if (!confirm(`Excluir "${item.title}" do currículo?`)) return;
+              update(removeResume(item.id));
+              onClose();
+            }}
+          >
+            <Icon name="trash" size={18} /> Excluir
+          </button>
+        )}
+      </div>
+    </Sheet>
   );
 }

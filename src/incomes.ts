@@ -3,7 +3,7 @@
  * e o balanço do mês contra as despesas. Sem dependência de interface.
  */
 import type { AppData, Income, IncomeSeries } from './types.ts';
-import { addMonths, clampDay, dayOf, monthKey, sum, todayISO, uid } from './utils.ts';
+import { addMonths, clampDay, dayOf, monthKey, sum, todayISO, stableId, uid } from './utils.ts';
 import { monthBills, summarize } from './finance.ts';
 
 /** Meses à frente em que as receitas mensais já ficam geradas. */
@@ -22,7 +22,7 @@ export interface IncomeInput {
 
 function occurrence(s: Pick<IncomeSeries, 'id' | 'description' | 'sourceId' | 'startDate'>, k: number, amount: number, stamp: string): Income {
   return {
-    id: uid(),
+    id: stableId(s.id, k + 1),
     seriesId: s.id,
     installment: k + 1,
     description: s.description,
