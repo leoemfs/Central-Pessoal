@@ -11,7 +11,7 @@ import { ACCENTS, accentById } from '../theme';
 import { BAR_LAYOUTS, fitFavorites, hiddenFrom, MIN_VISIBLE, MODULES, rhythmLabel, toggleModule, visibleFrom } from '../setup';
 import { openSetup, openTutorial, RhythmPicker } from './Montagem';
 import { GoogleCard } from './ContaGoogle';
-import { useCloud } from '../cloud';
+import { disconnect, useCloud } from '../cloud';
 
 
 const UNDO_KEY = 'antesDaImportacao';
@@ -84,7 +84,8 @@ export function Ajustes() {
     try {
       const imported = normalize(JSON.parse(await file.text()));
       const n = imported.expenses.length + imported.journal.length + imported.tasks.length + imported.events.length + imported.notes.length + imported.habits.length;
-      if (!confirm(`Importar ${n} item(ns) de "${file.name}"? Isso substitui todos os dados atuais deste aparelho (dá para desfazer depois, aqui em Backup).`)) return;
+      const synced = cloud ? ' Com a conta Google ligada, o backup também vale para os outros aparelhos.' : '';
+      if (!confirm(`Importar ${n} item(ns) de "${file.name}"? Isso substitui todos os dados atuais deste aparelho (dá para desfazer depois, aqui em Backup).${synced}`)) return;
       if (!(await keepCopy('importacao')) && !confirm('Não foi possível guardar uma cópia dos dados atuais para desfazer. Importar mesmo assim?')) return;
       replace(imported);
       const bad = discardedCount(imported) - broken;
@@ -95,8 +96,11 @@ export function Ajustes() {
   }
 
   async function clearAll() {
-    if (confirm('Apagar TODOS os dados deste aparelho? Dá para desfazer em Backup logo depois; mesmo assim, exporte um backup antes, se quiser.')) {
+    const synced = cloud ? ' A conta Google será desligada neste aparelho: a cópia no Drive e os outros aparelhos continuam com os dados.' : '';
+    if (confirm(`Apagar TODOS os dados deste aparelho? Dá para desfazer em Backup logo depois; mesmo assim, exporte um backup antes, se quiser.${synced}`)) {
       await keepCopy('apagar');
+      // Sem isso, "apagar" viraria exclusão em todos os aparelhos na próxima sincronização.
+      if (cloud) disconnect();
       replace({ ...normalize(emptyData()), settings: { ...normalize(emptyData()).settings, theme: data.settings.theme } });
       setMessage({ tone: 'green', text: 'Todos os dados foram apagados.' });
     }
@@ -284,7 +288,7 @@ export function Ajustes() {
         <Icon name="right" size={18} />
       </a>
 
-      <GoogleCard keepCopy={() => keepCopy('nuvem')} onMessage={setMessage} />
+      <GoogleCard onMessage={setMessage} />
 
       <section className="card">
         <div className="card-head">

@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { decide, downloadData, DriveError, findData, isAuthError, uploadData, whoAmI, type CloudFile } from './drive.ts';
+import { downloadData, DriveError, findData, isAuthError, uploadData, whoAmI } from './drive.ts';
 
 /** Drive de mentira, na memória: entende as chamadas que o app faz. */
 function fakeDrive(token = 'tok') {
@@ -61,12 +61,4 @@ test('conta: nome e e-mail', async () => {
 test('acesso vencido vira erro de login (401)', async () => {
   await assert.rejects(findData('vencido', fakeDrive().f), (e) => isAuthError(e));
   assert.equal(isAuthError(new DriveError(500, 'x')), false);
-});
-
-test('decide: só salva por cima se a última cópia foi deste aparelho', () => {
-  const cloud: CloudFile = { id: 'f1', modifiedTime: 'T2', device: 'pc', size: 10 };
-  assert.equal(decide(null, null), 'enviar');
-  assert.equal(decide(cloud, 'T2'), 'enviar');
-  assert.equal(decide(cloud, 'T1'), 'escolher'); // outro aparelho salvou depois
-  assert.equal(decide(cloud, null), 'escolher'); // 1ª vez deste aparelho, já existe cópia
 });

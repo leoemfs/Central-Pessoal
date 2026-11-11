@@ -106,7 +106,7 @@
 | M13 | Estudos: busca dentro do módulo (tópicos, notebooks, fontes); parte do E6. Afeta: Busca | MOD | P | média | pronto (v0.35) | `futuro/modulo-estudos.md`, `futuro/navegacao-v2.md` |
 | M14 | Estudos: anexar PDF ou imagem no notebook (hoje só link). Afeta: backup (arquivos pesados). Feito junto com o **N9.3** | MOD | M | baixa | ideia | `futuro/modulo-estudos.md` |
 | M15 | Estudos: editor de mapas mentais (arrastar e ligar ideias). Afeta: só Estudos | MOD | M | baixa | pronto na N11.3 (v0.28) | `futuro/modulo-estudos.md` |
-| N9 | Sincronizar com o Google Drive: pasta escondida do app, tudo sincroniza sozinho entre computador e celular, fotos no Diário, anexos PDF/imagem, exportar para pasta visível. Partes N9.0 (preparar dados, absorve N11.6) a N9.4. Não depende mais do N4. *Na conversa do Android foi anotado como N8; o código certo é N9.* | NOVO | G | alta | em andamento: N9.0 (v0.39) e N9.1 (v0.40) prontos; ID do cliente Google configurado (v0.40.1); próximo N9.2 | `futuro/sincronizar-google.md` |
+| N9 | Sincronizar com o Google Drive: pasta escondida do app, tudo sincroniza sozinho entre computador e celular, fotos no Diário, anexos PDF/imagem, exportar para pasta visível. Partes N9.0 (preparar dados, absorve N11.6) a N9.4. Não depende mais do N4. *Na conversa do Android foi anotado como N8; o código certo é N9.* | NOVO | G | alta | em andamento: N9.0 (v0.39) e N9.1 (v0.40) prontos; ID do cliente Google configurado (v0.40.1); login testado pelo Leonardo em 11/11; N9.2 pronto (v0.41); próximo N9.3 (fotos e PDFs) | `futuro/sincronizar-google.md` |
 | N10 | Módulo **Objetivos**: central de **todas as metas do app** (caixinhas, hábitos, ciclos de estudo, carreira, orçamento, metas do Você), com criar, editar e concluir dali; a meta continua morando no módulo dela. Objetivos grandes juntam várias metas. Absorve as metas de carreira (N8.4). Partes: N10.0 prévia, N10.1 central de metas, N10.2 objetivos grandes. Afeta: Finanças, Núcleo, Estudos, Carreira, Você, Início, Jornada | NOVO | G | média | especificado (prévia antes) | `futuro/modulo-objetivos.md` |
 | M16 | **Foco** no Núcleo › Mente: temporizador de foco (ex.: 25 min + pausa), com histórico; ligado a um tópico de Estudos conta tempo de estudo. Afeta: Núcleo, Estudos, Revisão | MOD | P | média | ideia | — |
 | M17 | **Banco de ideias** em Notas: aba "Ideias" e o botão "transformar em" tarefa, objetivo ou notebook. Afeta: Notas, Agenda, Estudos | MOD | P | baixa | ideia | — |
@@ -125,7 +125,7 @@
 **Aprovado em 11/11 ("pode fazer", fila toda).** Feito nesta sessão, tudo no PR #38: C5 (v0.29.1), C3 (v0.30), E14 + resto do E1 (v0.31), M1 (v0.32), M11 (v0.33), lápis E3 + M12 (v0.34), busca E6 + M13 (v0.35), M8 (v0.36), N8.3 Currículo (v0.37) e M7 (v0.38).
 
 **O que continua aprovado, na ordem:**
-0. **N9 Sincronizar com o Google Drive** (G, aprovado em 11/11: "pode começar"), em partes: ~~N9.0 preparar os dados~~ (v0.39) → ~~N9.1 conta Google e cópia na nuvem~~ (v0.40) → N9.2 sincronizar → N9.3 fotos e PDFs → N9.4 exportar. Uma parte por vez, conforme o uso do dia. Ver `futuro/sincronizar-google.md`.
+0. **N9 Sincronizar com o Google Drive** (G, aprovado em 11/11: "pode começar"), em partes: ~~N9.0 preparar os dados~~ (v0.39) → ~~N9.1 conta Google e cópia na nuvem~~ (v0.40) → ~~N9.2 sincronizar~~ (v0.41) → N9.3 fotos e PDFs → N9.4 exportar. Uma parte por vez, conforme o uso do dia. Ver `futuro/sincronizar-google.md`.
 1. **N10 Objetivos** (G): primeiro a **prévia N10.0** (visual), depois N10.1 central de metas (inclui as metas de carreira, antigo N8.4). Precisa da prévia antes de construir.
 2. **M2 → M3 → M4 Preços 2.0** (M cada, já especificados).
 3. **M6** fichas de treino próprias (M).
@@ -138,6 +138,7 @@
 ## Feito
 | Versão | O que entrou | PR |
 |---|---|---|
+| v0.41 | N9.2: sincronização automática entre aparelhos (ao abrir, ao voltar, a cada 5 min e depois de cada mudança), juntando item por item: o que foi criado em cada aparelho fica nos dois, vale a alteração mais recente, exclusão não "ressuscita". Saiu a escolha de cópia | #43 |
 | v0.40.1 | N9.1: ID do cliente Google configurado; o cartão "Conta Google" aparece em Configurações | #42 |
 | v0.40 | N9.1: Configurações › Conta Google: entrar com Google, cópia automática dos dados na pasta escondida do Drive, "Salvar agora", "Trazer da nuvem", aviso quando outro aparelho salvou depois (usar a da nuvem ou manter a deste), "Continuar salvando" quando o acesso vence e aviso no Início se a cópia parar. Aparece quando o ID do cliente Google for configurado | #41 |
 | v0.39 | N9.0: dados preparados para sincronizar (data de alteração e exclusões registradas em todos os módulos, num lugar só; ids estáveis para parcelas, contas fixas, receitas, recargas e categorias padrão). Nada muda na tela | #40 |

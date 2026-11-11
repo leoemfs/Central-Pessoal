@@ -37,7 +37,7 @@ Não sai nada para outro lugar. O app não lê o resto do Drive e não guarda a 
 |---|---|---|
 | **N9.0 Preparar os dados** (absorve o N11.6) ✅ v0.39 | Data de alteração e registro de exclusões em **todos** os módulos, feitos num lugar só (`src/sync.ts`, chamado pela loja). Ids estáveis para o que o app gera. Não muda nada na tela. | M |
 | **N9.1 Conta Google e cópia na nuvem** ✅ v0.40 | Botão "Entrar com Google"; cópia automática dos dados na pasta escondida; "Restaurar da nuvem" num aparelho novo | M |
-| **N9.2 Sincronizar entre aparelhos** | Junta por item (regra acima), sincroniza sozinho nos momentos acima, aviso de situação | M |
+| **N9.2 Sincronizar entre aparelhos** ✅ v0.41 | Junta por item (regra acima), sincroniza sozinho nos momentos acima, aviso de situação | M |
 | **N9.3 Imagens e PDFs** | Fotos nos registros do Diário (novo) e anexos PDF/imagem em Estudos (M14), nas reuniões de Carreira (caixa de entrada de 08/11) e nas vagas (o currículo enviado em cada candidatura), guardados no Drive | M |
 | **N9.4 Exportar para o Drive** | Botão "Exportar para o Drive": backup e PDFs gerados pelo app (começando pelo **currículo em PDF**, M22) na pasta visível "Central Pessoal" | P |
 
@@ -78,8 +78,17 @@ Criar um projeto grátis no **Google Cloud Console** e um "ID do cliente OAuth" 
 2. **APIs e serviços › Biblioteca** → procurar **Google Drive API** → **Ativar**.
 3. **Google Auth Platform** (ou "Tela de consentimento OAuth") → **Começar**: nome do app *Central Pessoal*, seu e-mail de suporte, público **Externo**, seu e-mail de contato → **Criar**.
 4. **Acesso a dados** → **Adicionar ou remover escopos** → marcar `.../auth/drive.appdata` → **Atualizar** → **Salvar**.
-5. **Público** → em **Usuários de teste**, adicionar o seu e-mail. (Deixar "Em teste" é o mais simples; na 1ª vez o Google pode mostrar "app não verificado": tocar em **Continuar**.)
+5. **Público** (link direto: console.cloud.google.com/auth/audience) → em **Usuários de teste**, adicionar o seu e-mail. Sem isso, o login dá "Acesso bloqueado… Erro 403: access_denied" (aconteceu em 11/11; resolvido assim). (Deixar "Em teste" é o mais simples; na 1ª vez o Google pode mostrar "app não verificado": tocar em **Continuar**.)
 6. **Clientes** → **Criar cliente** → tipo **Aplicativo da Web** → em **Origens JavaScript autorizadas**, adicionar `https://leoemfs.github.io` → **Criar**.
 7. Copiar o **ID do cliente** (termina em `.apps.googleusercontent.com`) e mandar para o Claude. Ele não é senha. **Não** mande a "chave secreta do cliente".
 
 Feito em 11/11 (projeto "My First Project", origem `https://leoemfs.github.io`). O Claude colocou o ID em `src/cloud.ts` (`CLIENT_ID`, v0.40.1) e, a partir daí, o cartão "Conta Google" aparece em Configurações.
+
+## Como ficou o N9.2 (v0.41)
+- **Junção item por item** (`mergeData` em `src/sync.ts`, com testes): item criado em um aparelho entra no outro; no mesmo item, vale a data de alteração mais recente (e listas dentro do item são juntadas item a item); item que só existe de um lado some só se o outro lado o excluiu **depois** da última alteração; partes sem id (humor por dia, orçamentos, configurações) juntam chave por chave, e no conflito vale o aparelho que mexeu naquela parte por último; dias de uso e de visita somam.
+- **Quando sincroniza:** ao abrir o app, ao voltar para ele, a cada 5 minutos com ele aberto, 15 s depois de cada mudança e ao sair. Só baixa se a cópia da nuvem mudou; só envia se este aparelho tem algo que a nuvem não tem.
+- A loja junta os dados da nuvem com os mais atuais do aparelho **sem mudar as datas de alteração** (só o que as regras geram depois ganha data nova). Assim uma junção não "rouba" a vez de uma edição feita no outro aparelho.
+- Saiu a escolha "Usar a da nuvem / Manter a deste aparelho" e o "Trazer da nuvem": agora junta sozinho. Quem ficou na escolha da v0.40 volta ao normal.
+- **Apagar todos os dados** com a conta ligada desliga a conta neste aparelho (senão o apagar viraria exclusão em todos). **Importar backup** com a conta ligada avisa que vale para todos.
+- Limites conhecidos: chave removida de partes sem id (ex.: um orçamento apagado) pode voltar do outro aparelho; exclusões com mais de 90 dias são esquecidas (aparelho parado mais de 90 dias pode trazer de volta algo excluído).
+- Testado no navegador com dois aparelhos simulados (Google e Drive de mentira): A entra; B entra e fica com os dados dos dois; A volta ao app e recebe o do B; A exclui e a exclusão chega no B sem "ressuscitar"; acesso vencido mostra "Continuar sincronizando".

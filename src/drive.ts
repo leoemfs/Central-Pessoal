@@ -79,14 +79,3 @@ export async function whoAmI(token: string, f: Fetch = fetch): Promise<{ email: 
   const body = (await res.json()) as { user?: { emailAddress?: string; displayName?: string } };
   return { email: body.user?.emailAddress ?? '', name: body.user?.displayName ?? '' };
 }
-
-/**
- * Pode salvar por cima da cópia da nuvem?
- * - 'enviar': não há cópia, ou a última foi este aparelho que salvou (ou trouxe);
- * - 'escolher': outro aparelho salvou depois (ou é a 1ª vez deste aparelho). Até a junção
- *   automática (N9.2), a pessoa escolhe qual fica, para nada se perder sem aviso.
- */
-export function decide(cloud: CloudFile | null, lastCloudTime: string | null): 'enviar' | 'escolher' {
-  if (!cloud) return 'enviar';
-  return lastCloudTime !== null && cloud.modifiedTime === lastCloudTime ? 'enviar' : 'escolher';
-}
