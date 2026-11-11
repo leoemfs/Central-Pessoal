@@ -49,7 +49,6 @@
 - 08/11: anexar os slides das apresentações (sexta sim, sexta não: avanços do setor de repasse e gestão de contratos de prestadores) dentro da reunião. Hoje só dá para guardar o link. Junta com "anexar PDF ou imagem" de Estudos. Entra no **N9.3** (anexos guardados no Drive).
 - 08/11: Estudos: cronograma de estudos com calendário dentro do módulo, sincronizado com a Agenda do app.
 - 08/11: Você: perguntas de carreira (emprego atual, carreira desejada, melhorias na atual, caminhos até a desejada) para a carreira desejada orientar os tópicos sugeridos em Estudos. Conferir com N10 (Objetivos) e N8.
-- 11/11: mudar o **nome visual** do app (nome embaixo do ícone, título e textos dentro do app). Endereço e repositório continuam iguais. Esperando o nome novo. Tamanho P.
 
 ## Itens
 | ID | Item | Frente | Tam. | Prior. | Situação | Documento |
@@ -140,6 +139,7 @@
 ## Feito
 | Versão | O que entrou | PR |
 |---|---|---|
+| v0.43.1 | Nome visual **CP Hub** (ícone, título, textos, nome do arquivo de backup e da agenda no Google, que é renomeada sozinha). Endereço, repositório, dados e login continuam iguais | #47 |
 | v0.43 | N9.5: lembretes no Google Agenda (agenda "Central Pessoal" com compromissos, contas e tarefas, aviso no celular, só de ida) + correção: a junção de configurações passa a ser campo a campo | #46 |
 | v0.42 | N9.3a: fotos no Diário (até 6 por registro, tela cheia), guardadas no aparelho e sincronizadas pelo Drive; foto tirada ou registro excluído some nos dois aparelhos | #44 |
 | v0.41 | N9.2: sincronização automática entre aparelhos (ao abrir, ao voltar, a cada 5 min e depois de cada mudança), juntando item por item: o que foi criado em cada aparelho fica nos dois, vale a alteração mais recente, exclusão não "ressuscita". Saiu a escolha de cópia | #43 |

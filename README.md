@@ -1,4 +1,6 @@
-# Central Pessoal
+# CP Hub (Central Pessoal)
+
+**Nome visual: CP Hub** (desde a v0.43.1: ícone, título e textos). O endereço, o repositório e os nomes internos (banco de dados, arquivos no Drive) continuam "Central Pessoal" / `central-pessoal`.
 
 Aplicativo pessoal para organizar a vida num lugar só: **finanças, diário, agenda, tarefas, hábitos e anotações**.
 O usuário registra; o app organiza, calcula e mostra o que importa no Início.

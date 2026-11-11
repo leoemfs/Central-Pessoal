@@ -1061,7 +1061,7 @@ function ResumeTab({ onEdit }: { onEdit: (x: ResumeItem | ResumeKind) => void })
                   type="button"
                   className="btn soft small"
                   onClick={() => {
-                    update(upsertResume({ id: uid(), kind: 'curso', title: c.name, org: 'Estudos (Central Pessoal)', from: c.from, to: c.to, note: '', cycleId: c.id, createdAt: new Date().toISOString() }));
+                    update(upsertResume({ id: uid(), kind: 'curso', title: c.name, org: 'Estudos (CP Hub)', from: c.from, to: c.to, note: '', cycleId: c.id, createdAt: new Date().toISOString() }));
                     notify('Entrou no currículo', `${c.name}, em Cursos e certificados.`);
                   }}
                 >
