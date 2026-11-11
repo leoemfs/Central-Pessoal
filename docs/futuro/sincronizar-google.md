@@ -11,6 +11,11 @@ Pedido de 11/11: guardar os dados no Google Drive (pasta escondida do app, `appD
 - **Exportar:** o que você quiser ver ou mandar para alguém (backup legível, PDFs) vai para uma **pasta visível "Central Pessoal"** no seu Drive.
 - **Sair da conta:** os dados continuam no aparelho; só para de sincronizar.
 
+## PDFs (resposta de 11/11: "PDFs de currículo, por exemplo")
+- **Gerar PDF** a partir do que já está no app. O primeiro é o **currículo** (Carreira › Currículo › "Gerar PDF"): baixar, compartilhar ou, com a conta Google ligada, salvar na pasta "Central Pessoal". Esse é o item **M22**, que não depende do Google e pode vir antes.
+- **Anexar PDF** que veio de fora (ex.: o currículo enviado numa vaga, slides de reunião, material de estudo): parte N9.3.
+- Depois, outros PDFs do mesmo jeito (relatório do mês de Finanças, Revisão semanal), anotados quando ele pedir.
+
 ## Regras
 - **Junta por item, não por arquivo inteiro.** Cada despesa, registro, hábito etc. tem um id e uma data de alteração. Se o mesmo item mudou nos dois aparelhos, **fica a mudança mais recente**.
 - **Exclusões são registradas** para o item apagado num aparelho não "ressuscitar" pelo outro. O registro é limpo depois de 90 dias.
@@ -23,8 +28,8 @@ Pedido de 11/11: guardar os dados no Google Drive (pasta escondida do app, `appD
 | **N9.0 Preparar os dados** (absorve o N11.6) ✅ v0.39 | Data de alteração e registro de exclusões em **todos** os módulos, feitos num lugar só (`src/sync.ts`, chamado pela loja). Ids estáveis para o que o app gera. Não muda nada na tela. | M |
 | **N9.1 Conta Google e cópia na nuvem** | Botão "Entrar com Google"; cópia automática dos dados na pasta escondida; "Restaurar da nuvem" num aparelho novo | M |
 | **N9.2 Sincronizar entre aparelhos** | Junta por item (regra acima), sincroniza sozinho nos momentos acima, aviso de situação | M |
-| **N9.3 Imagens e PDFs** | Fotos nos registros do Diário (novo) e anexos PDF/imagem em Estudos (M14) e nas reuniões de Carreira (caixa de entrada de 08/11), guardados no Drive | M |
-| **N9.4 Exportar para o Drive** | Botão "Exportar para o Drive": backup e PDFs na pasta visível "Central Pessoal" | P |
+| **N9.3 Imagens e PDFs** | Fotos nos registros do Diário (novo) e anexos PDF/imagem em Estudos (M14), nas reuniões de Carreira (caixa de entrada de 08/11) e nas vagas (o currículo enviado em cada candidatura), guardados no Drive | M |
+| **N9.4 Exportar para o Drive** | Botão "Exportar para o Drive": backup e PDFs gerados pelo app (começando pelo **currículo em PDF**, M22) na pasta visível "Central Pessoal" | P |
 
 Cada parte vira uma versão e um PR. N9.0 e N9.1 já dão segurança (cópia na nuvem) mesmo antes da sincronização.
 
