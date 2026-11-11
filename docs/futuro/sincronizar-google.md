@@ -78,7 +78,7 @@ Criar um projeto grátis no **Google Cloud Console** e um "ID do cliente OAuth" 
 2. **APIs e serviços › Biblioteca** → procurar **Google Drive API** → **Ativar**.
 3. **Google Auth Platform** (ou "Tela de consentimento OAuth") → **Começar**: nome do app *Central Pessoal*, seu e-mail de suporte, público **Externo**, seu e-mail de contato → **Criar**.
 4. **Acesso a dados** → **Adicionar ou remover escopos** → marcar `.../auth/drive.appdata` → **Atualizar** → **Salvar**.
-5. **Público** → em **Usuários de teste**, adicionar o seu e-mail. (Deixar "Em teste" é o mais simples; na 1ª vez o Google pode mostrar "app não verificado": tocar em **Continuar**.)
+5. **Público** (link direto: console.cloud.google.com/auth/audience) → em **Usuários de teste**, adicionar o seu e-mail. Sem isso, o login dá "Acesso bloqueado… Erro 403: access_denied" (aconteceu em 11/11; resolvido assim). (Deixar "Em teste" é o mais simples; na 1ª vez o Google pode mostrar "app não verificado": tocar em **Continuar**.)
 6. **Clientes** → **Criar cliente** → tipo **Aplicativo da Web** → em **Origens JavaScript autorizadas**, adicionar `https://leoemfs.github.io` → **Criar**.
 7. Copiar o **ID do cliente** (termina em `.apps.googleusercontent.com`) e mandar para o Claude. Ele não é senha. **Não** mande a "chave secreta do cliente".
 
