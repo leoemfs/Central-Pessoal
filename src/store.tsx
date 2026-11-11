@@ -9,6 +9,7 @@ import { materializeVouchers } from './vouchers';
 import { dbGet, dbSet, requestPersistence } from './db';
 import { addMonths, monthKey, todayISO } from './utils';
 import { pruneDeleted, trackChanges } from './sync';
+import { flushSave, scheduleSave, setDataSource } from './cloud';
 
 const KEY = 'data';
 const LEGACY_LOCALSTORAGE_KEY = 'central-pessoal:v1';
@@ -85,10 +86,21 @@ export function DataProvider({ children }: { children: ReactNode }) {
     pending.current = data;
     window.clearTimeout(timer.current);
     timer.current = window.setTimeout(flush, 250);
+    // N9.1: cópia na nuvem, alguns segundos depois da última mudança (se a conta Google estiver ligada).
+    scheduleSave();
   }, [data, flush]);
 
+  // A cópia na nuvem lê sempre os dados mais recentes.
+  const latest = useRef<AppData | null>(null);
+  latest.current = data;
+  useEffect(() => setDataSource(() => latest.current), []);
+
   useEffect(() => {
-    const onHide = () => document.visibilityState === 'hidden' && flush();
+    const onHide = () => {
+      if (document.visibilityState !== 'hidden') return;
+      flush();
+      flushSave();
+    };
     const onShow = () => document.visibilityState === 'visible' && setData((d) => (d ? catchUp(d) : d));
     document.addEventListener('visibilitychange', onHide);
     document.addEventListener('visibilitychange', onShow);

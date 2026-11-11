@@ -11,6 +11,16 @@ Pedido de 11/11: guardar os dados no Google Drive (pasta escondida do app, `appD
 - **Exportar:** o que você quiser ver ou mandar para alguém (backup legível, PDFs) vai para uma **pasta visível "Central Pessoal"** no seu Drive.
 - **Sair da conta:** os dados continuam no aparelho; só para de sincronizar.
 
+## O que fica salvo e onde
+| Onde | O quê | Quem vê |
+|---|---|---|
+| **No aparelho** (memória do navegador) | Tudo do app, como hoje. Com o N9.3, também uma cópia das fotos e PDFs, para abrir sem internet | Só quem usa o aparelho |
+| **Drive, pasta escondida do app** › `dados.json` | Todos os dados de todos os módulos: Finanças, Agenda, Diário e humor, Núcleo, Listas e Preços, Notas, Estudos, Carreira (inclusive salários), Você, Jornada e Configurações (tema, barra, favoritos, ordem dos cartões). Mais as datas de alteração e as exclusões | Só o app (não aparece na lista do Drive) |
+| **Drive, pasta escondida** › `arquivos/` | Fotos do Diário e PDFs e imagens anexados (Estudos, reuniões, vagas) | Só o app |
+| **Drive, pasta visível "Central Pessoal"** | Só o que você mandar exportar: backup em arquivo e PDFs gerados pelo app | Você (e quem você compartilhar) |
+
+Não sai nada para outro lugar. O app não lê o resto do Drive e não guarda a senha do Google.
+
 ## PDFs (resposta de 11/11: "PDFs de currículo, por exemplo")
 - **Gerar PDF** a partir do que já está no app. O primeiro é o **currículo** (Carreira › Currículo › "Gerar PDF"): baixar, compartilhar ou, com a conta Google ligada, salvar na pasta "Central Pessoal". Esse é o item **M22**, que não depende do Google e pode vir antes.
 - **Anexar PDF** que veio de fora (ex.: o currículo enviado numa vaga, slides de reunião, material de estudo): parte N9.3.
@@ -26,7 +36,7 @@ Pedido de 11/11: guardar os dados no Google Drive (pasta escondida do app, `appD
 | Parte | O que é | Tam. |
 |---|---|---|
 | **N9.0 Preparar os dados** (absorve o N11.6) ✅ v0.39 | Data de alteração e registro de exclusões em **todos** os módulos, feitos num lugar só (`src/sync.ts`, chamado pela loja). Ids estáveis para o que o app gera. Não muda nada na tela. | M |
-| **N9.1 Conta Google e cópia na nuvem** | Botão "Entrar com Google"; cópia automática dos dados na pasta escondida; "Restaurar da nuvem" num aparelho novo | M |
+| **N9.1 Conta Google e cópia na nuvem** ✅ v0.40 | Botão "Entrar com Google"; cópia automática dos dados na pasta escondida; "Restaurar da nuvem" num aparelho novo | M |
 | **N9.2 Sincronizar entre aparelhos** | Junta por item (regra acima), sincroniza sozinho nos momentos acima, aviso de situação | M |
 | **N9.3 Imagens e PDFs** | Fotos nos registros do Diário (novo) e anexos PDF/imagem em Estudos (M14), nas reuniões de Carreira (caixa de entrada de 08/11) e nas vagas (o currículo enviado em cada candidatura), guardados no Drive | M |
 | **N9.4 Exportar para o Drive** | Botão "Exportar para o Drive": backup e PDFs gerados pelo app (começando pelo **currículo em PDF**, M22) na pasta visível "Central Pessoal" | P |
@@ -55,3 +65,21 @@ Criar um projeto grátis no **Google Cloud Console** e um "ID do cliente OAuth" 
 - Parcelas e receitas geradas antes da v0.39 têm ids aleatórios: na primeira junção, tratar como o mesmo item quando `seriesId` + `installment` forem iguais. Categorias e fontes padrão antigas: juntar pelo nome.
 - **Apagar tudo** (Configurações) hoje registra tudo como excluído: com a sincronização ligada, perguntar "Só neste aparelho" ou "Em todos".
 - Restaurar um backup também conta como alteração (o que não está no backup vira excluído). Avisar isso na tela quando a sincronização estiver ligada.
+
+## Como ficou o N9.1 (v0.40)
+- Configurações › **Conta Google**: "Entrar com Google" → cópia automática (15 s depois da última mudança e ao sair do app), "Salvar agora", "Trazer da nuvem" e "Sair da conta Google".
+- **Outro aparelho salvou depois** (ou 1ª vez deste aparelho com cópia já existente): para de salvar e pergunta "Usar a da nuvem" (guarda cópia para desfazer) ou "Manter a deste aparelho". O N9.2 troca isso pela junção automática.
+- **Acesso vencido** (~1 hora): sem janelas sozinhas; aparece "Continuar salvando". Se a cópia ficar parada mais de 1 dia, o Início avisa (cartão "Aviso da cópia na nuvem").
+- Código: `src/drive.ts` (API do Drive, testada com um Drive de mentira em `drive.test.ts`), `src/cloud.ts` (login e cópia automática), `src/modules/ContaGoogle.tsx` (cartão).
+- Testado no navegador com dois aparelhos simulados e Google de mentira: entrar, 1ª cópia, 2º aparelho escolhe "Usar a da nuvem", mudança no 2º salva sozinha, 1º aparelho é avisado, acesso vencido, sair.
+
+## Passo a passo do Google Cloud (Leonardo, uma vez)
+1. Abrir **console.cloud.google.com** com a sua conta Google e criar um projeto chamado **Central Pessoal**.
+2. **APIs e serviços › Biblioteca** → procurar **Google Drive API** → **Ativar**.
+3. **Google Auth Platform** (ou "Tela de consentimento OAuth") → **Começar**: nome do app *Central Pessoal*, seu e-mail de suporte, público **Externo**, seu e-mail de contato → **Criar**.
+4. **Acesso a dados** → **Adicionar ou remover escopos** → marcar `.../auth/drive.appdata` → **Atualizar** → **Salvar**.
+5. **Público** → em **Usuários de teste**, adicionar o seu e-mail. (Deixar "Em teste" é o mais simples; na 1ª vez o Google pode mostrar "app não verificado": tocar em **Continuar**.)
+6. **Clientes** → **Criar cliente** → tipo **Aplicativo da Web** → em **Origens JavaScript autorizadas**, adicionar `https://leoemfs.github.io` → **Criar**.
+7. Copiar o **ID do cliente** (termina em `.apps.googleusercontent.com`) e mandar para o Claude. Ele não é senha. **Não** mande a "chave secreta do cliente".
+
+O Claude coloca o ID em `src/cloud.ts` (`CLIENT_ID`) e, a partir daí, o cartão "Conta Google" aparece em Configurações.

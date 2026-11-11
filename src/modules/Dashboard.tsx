@@ -10,6 +10,7 @@ import { monthBalance } from '../incomes';
 import { addDays, formatDateTime, formatLongDate, formatMoney, formatMonth, greeting, monthKey, relativeDay, toISO, todayISO } from '../utils';
 import { Empty, Icon, Pill, Progress, type IconName } from '../ui';
 import { sortTasks, TaskItem } from './Tarefas';
+import { useCloud } from '../cloud';
 import { AskCard, ForYou, Interview } from './Voce';
 import { WeekPractice } from './Praticas';
 import { SaveToday } from './financas/Caixinhas';
@@ -123,7 +124,12 @@ export function Dashboard() {
 
   const backupDays = data.settings.lastBackupAt ? Math.floor((Date.now() - new Date(data.settings.lastBackupAt).getTime()) / 864e5) : null;
   const hasData = data.expenses.length + data.journal.length + data.tasks.length + data.events.length > 0;
-  const needsBackup = hasData && (backupDays === null || backupDays > 30);
+  // N9.1: com a cópia na nuvem em dia, não precisa do aviso de backup em arquivo.
+  const cloud = useCloud();
+  const cloudDays = cloud?.lastSavedAt ? Math.floor((Date.now() - new Date(cloud.lastSavedAt).getTime()) / 864e5) : null;
+  const needsBackup = hasData && !cloud && (backupDays === null || backupDays > 30);
+  // Conectado, mas a cópia parou há mais de 1 dia (acesso vencido, escolha pendente ou erro).
+  const cloudStuck = !!cloud && cloud.status !== 'ok' && cloud.status !== 'salvando' && (cloudDays === null || cloudDays >= 1);
 
   const cards: CardDef[] = [
     { id: 'humor', label: 'Humor do dia', lock: 'top', node: (
@@ -192,6 +198,15 @@ export function Dashboard() {
       needsBackup && (
         <a className="alert orange" href="#/ajustes" style={{ textDecoration: 'none' }}>
           {backupDays === null ? 'Você ainda não fez um backup.' : `Último backup há ${backupDays} dias.`} Seus dados ficam só neste aparelho — toque para exportar.
+        </a>
+      )
+    ) },
+    { id: 'nuvem', label: 'Aviso da cópia na nuvem', lock: 'keep', node: (
+      cloudStuck && (
+        <a className="alert orange" href="#/ajustes" style={{ textDecoration: 'none' }}>
+          {cloud?.status === 'escolher'
+            ? 'Cópia na nuvem parada: escolha qual cópia fica. Toque para ver.'
+            : `Cópia na nuvem parada${cloudDays ? ` há ${cloudDays} dia(s)` : ''}. Toque para continuar salvando.`}
         </a>
       )
     ) },

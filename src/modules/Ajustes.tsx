@@ -10,12 +10,14 @@ import { FavoritesSheet } from './Mais';
 import { ACCENTS, accentById } from '../theme';
 import { BAR_LAYOUTS, fitFavorites, hiddenFrom, MIN_VISIBLE, MODULES, rhythmLabel, toggleModule, visibleFrom } from '../setup';
 import { openSetup, openTutorial, RhythmPicker } from './Montagem';
+import { GoogleCard } from './ContaGoogle';
+import { useCloud } from '../cloud';
 
 
 const UNDO_KEY = 'antesDaImportacao';
 interface Snapshot {
   at: string;
-  reason: 'importacao' | 'apagar';
+  reason: 'importacao' | 'apagar' | 'nuvem';
   data: unknown;
 }
 
@@ -30,6 +32,7 @@ export function Ajustes() {
     dbGet<Snapshot | null>(UNDO_KEY).then((x) => setUndo(x && typeof x.at === 'string' ? x : null)).catch(() => setUndo(null));
   }, []);
   const broken = discardedCount(data);
+  const cloud = useCloud();
 
   async function keepCopy(reason: Snapshot['reason']): Promise<boolean> {
     const snap: Snapshot = { at: new Date().toISOString(), reason, data };
@@ -44,7 +47,7 @@ export function Ajustes() {
 
   function undoLast() {
     if (!undo) return;
-    const what = undo.reason === 'importacao' ? 'a importação' : 'o "apagar tudo"';
+    const what = undo.reason === 'importacao' ? 'a importação' : undo.reason === 'nuvem' ? 'o "usar a cópia da nuvem"' : 'o "apagar tudo"';
     if (!confirm(`Desfazer ${what} de ${formatDMY(toISO(new Date(undo.at)))}? Os dados voltam a ser os de antes, e o que foi feito depois disso se perde.`)) return;
     replace(normalize(undo.data));
     dbSet(UNDO_KEY, null).catch(() => undefined);
@@ -281,12 +284,14 @@ export function Ajustes() {
         <Icon name="right" size={18} />
       </a>
 
+      <GoogleCard keepCopy={() => keepCopy('nuvem')} onMessage={setMessage} />
+
       <section className="card">
         <div className="card-head">
           <h2>Backup</h2>
           <span className="muted small">{data.settings.lastBackupAt ? `Último: ${formatDMY(toISO(new Date(data.settings.lastBackupAt)))}` : 'Nenhum ainda'}</span>
         </div>
-        <p className="muted">Seus dados ficam só neste aparelho. Exporte um backup de vez em quando — ele também serve para levar tudo para outro aparelho.</p>
+        <p className="muted">{cloud ? 'Além da cópia no Google Drive, você pode exportar um arquivo de backup de vez em quando.' : 'Seus dados ficam só neste aparelho. Exporte um backup de vez em quando — ele também serve para levar tudo para outro aparelho.'}</p>
         <div className="btn-row" style={{ marginTop: 14 }}>
           <button type="button" className="btn primary" onClick={exportBackup}>
             <Icon name="download" size={18} /> Exportar
@@ -298,7 +303,7 @@ export function Ajustes() {
         <input ref={fileRef} type="file" accept="application/json,.json" hidden onChange={importBackup} />
         {undo && (
           <button type="button" className="btn ghost" style={{ marginTop: 10, width: '100%' }} onClick={undoLast}>
-            <Icon name="undo" size={18} /> Desfazer {undo.reason === 'importacao' ? 'importação' : '"apagar tudo"'} de {formatDMY(toISO(new Date(undo.at)))}
+            <Icon name="undo" size={18} /> Desfazer {undo.reason === 'importacao' ? 'importação' : undo.reason === 'nuvem' ? '"usar a da nuvem"' : '"apagar tudo"'} de {formatDMY(toISO(new Date(undo.at)))}
           </button>
         )}
         {broken > 0 && (
@@ -334,7 +339,7 @@ export function Ajustes() {
         </button>
       </section>
 
-      <p className="muted small center">Central Pessoal · seus dados não saem do seu aparelho</p>
+      <p className="muted small center">Central Pessoal · {cloud ? 'seus dados ficam no aparelho e no seu Google Drive' : 'seus dados não saem do seu aparelho'}</p>
 
     </>
   );
