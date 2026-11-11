@@ -200,7 +200,7 @@ function Drawer({ current, onClose }: { current: string; onClose: () => void }) 
     <div className="drawer-backdrop" onMouseDown={(e) => e.target === e.currentTarget && onClose()}>
       <nav className="drawer" aria-label="Menu">
         <div className="drawer-head">
-          <strong>Central Pessoal</strong>
+          <strong>CP Hub</strong>
           <button type="button" className="icon-btn" onClick={onClose} aria-label="Fechar menu">
             <Icon name="x" />
           </button>
@@ -330,7 +330,7 @@ export function App() {
   }, [drawer]);
 
   useEffect(() => {
-    document.title = section.path === 'inicio' ? 'Central Pessoal' : `${section.title ?? section.label} · Central Pessoal`;
+    document.title = section.path === 'inicio' ? 'CP Hub' : `${section.title ?? section.label} · CP Hub`;
   }, [section]);
 
   function fab() {
@@ -368,7 +368,7 @@ export function App() {
       <nav className="sidebar" aria-label="Seções">
         <a className="brand" href="#/inicio">
           <img src="./icon.svg" alt="" width={30} height={30} />
-          <span>Central Pessoal</span>
+          <span>CP Hub</span>
         </a>
         <button type="button" className="search sidebar-search" onClick={() => setSearch(true)}>
           <Icon name="search" size={18} /> <span>Buscar em tudo</span>

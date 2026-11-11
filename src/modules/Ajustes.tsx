@@ -68,7 +68,7 @@ export function Ajustes() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `central-pessoal-backup-${todayISO()}.json`;
+    a.download = `cp-hub-backup-${todayISO()}.json`;
     document.body.appendChild(a);
     a.click();
     a.remove();
@@ -91,7 +91,7 @@ export function Ajustes() {
       const bad = discardedCount(imported) - broken;
       setMessage({ tone: 'green', text: `Backup importado: ${n} item(ns).${bad > 0 ? ` ${bad} registro(s) com defeito ficaram guardados à parte.` : ''}` });
     } catch {
-      setMessage({ tone: 'red', text: 'Arquivo inválido. Escolha um backup .json exportado pela Central Pessoal.' });
+      setMessage({ tone: 'red', text: 'Arquivo inválido. Escolha um backup .json exportado pelo CP Hub.' });
     }
   }
 
@@ -327,7 +327,7 @@ export function Ajustes() {
         </button>
       </section>
 
-      <p className="muted small center">Central Pessoal · {cloud ? 'seus dados ficam no aparelho e no seu Google Drive' : 'seus dados não saem do seu aparelho'}</p>
+      <p className="muted small center">CP Hub · {cloud ? 'seus dados ficam no aparelho e no seu Google Drive' : 'seus dados não saem do seu aparelho'}</p>
 
     </>
   );

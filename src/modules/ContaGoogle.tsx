@@ -110,7 +110,7 @@ const PARTS: { id: CalendarPart; label: string; hint: string }[] = [
   { id: 'tasks', label: 'Tarefas com data', hint: 'No dia do prazo. Aviso às 9h.' },
 ];
 
-/** N9.5: lembretes pelo Google Agenda (agenda "Central Pessoal", só de ida). */
+/** N9.5: lembretes pelo Google Agenda (agenda "CP Hub", só de ida). */
 function CalendarSection({
   settings,
   status,
@@ -130,18 +130,18 @@ function CalendarSection({
     setWorking(true);
     const r = await enableCalendar();
     setWorking(false);
-    if (r === 'ok') onMessage({ tone: 'green', text: 'Lembretes ligados: veja a agenda "Central Pessoal" no seu Google Agenda. O celular avisa pelo app Google Agenda.' });
+    if (r === 'ok') onMessage({ tone: 'green', text: 'Lembretes ligados: veja a agenda "CP Hub" no seu Google Agenda. O celular avisa pelo app Google Agenda.' });
     else if (r === 'cancelado') onMessage({ tone: 'red', text: 'Sem a permissão da agenda, os lembretes não podem ser ligados. Na janela do Google, deixe marcada a opção da agenda.' });
     else onMessage({ tone: 'red', text: 'Não deu para ligar os lembretes agora. Tente de novo.' });
   }
 
   async function turnOff() {
     if (!confirm('Desligar os lembretes no Google Agenda?')) return;
-    const remove = confirm('Apagar também a agenda "Central Pessoal" do seu Google Agenda? (Cancelar mantém os eventos que já estão lá.)');
+    const remove = confirm('Apagar também a agenda "CP Hub" do seu Google Agenda? (Cancelar mantém os eventos que já estão lá.)');
     setWorking(true);
     await disableCalendar(remove);
     setWorking(false);
-    onMessage({ tone: 'green', text: remove ? 'Lembretes desligados e agenda "Central Pessoal" apagada.' : 'Lembretes desligados.' });
+    onMessage({ tone: 'green', text: remove ? 'Lembretes desligados e agenda "CP Hub" apagada.' : 'Lembretes desligados.' });
   }
 
   return (
@@ -149,7 +149,7 @@ function CalendarSection({
       <div className="toggle-row">
         <div>
           <strong>Lembretes no Google Agenda</strong>
-          <span className="muted small">O app põe compromissos, contas e tarefas numa agenda "Central Pessoal" do seu Google Agenda, e o celular avisa pelo app Google Agenda. Mudou aqui, muda lá (só de ida).</span>
+          <span className="muted small">O app põe compromissos, contas e tarefas numa agenda "CP Hub" do seu Google Agenda, e o celular avisa pelo app Google Agenda. Mudou aqui, muda lá (só de ida).</span>
         </div>
         <Toggle checked={settings.on} onChange={(v) => void (v ? turnOn() : turnOff())} label="Lembretes no Google Agenda" />
       </div>
