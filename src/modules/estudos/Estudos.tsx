@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { CardScreen, type CardDef } from '../../Cards';
 import type { ViewProps } from '../../App';
 import { cycleCounts, trackPath } from '../../estudos';
 import { Icon, PageHeader, type IconName } from '../../ui';
@@ -84,11 +85,8 @@ function Home() {
   const active = study.cycles.filter((c) => !c.finishedAt);
   const lastNb = [...study.notebooks].sort((x, y) => y.updatedAt.localeCompare(x.updatedAt))[0];
   const firstTime = study.cycles.length === 0 && study.notebooks.length === 0;
-  return (
-    <>
-      <PageHeader title="Estudos" subtitle="Seu espaço para explorar, planejar e guardar o que aprende." />
-
-      {/* Bloco principal (fixo): Biblioteca e Meus notebooks + Fontes e Mapas mentais */}
+  const cards: CardDef[] = [
+    { id: 'principal', label: 'Biblioteca, notebooks, fontes e mapas', lock: 'top', node: (
       <div className="st-main-block">
         <div className="st-hero-pair">
           <a className="st-hero" href="#/estudos/biblioteca">
@@ -129,7 +127,8 @@ function Home() {
           </a>
         </div>
       </div>
-
+    ) },
+    { id: 'agora', label: 'Estudando agora', node: (
       <section className="card">
         <div className="card-head">
           <h2>Estudando agora</h2>
@@ -167,8 +166,8 @@ function Home() {
           </div>
         )}
       </section>
-
-      {lastNb && (
+    ) },
+    { id: 'continuar', label: 'Continuar o último notebook', node: lastNb && (
         <a className="tile" href={`#/estudos/notebook/${lastNb.id}`}>
           <span className="tile-icon st-blue">
             <Icon name="notebook" />
@@ -179,10 +178,8 @@ function Home() {
           </span>
           <Icon name="right" size={18} />
         </a>
-      )}
-
-      {firstTime && (
-        <>
+    ) },
+    { id: 'como', label: 'Como funciona', node: firstTime && (
           <section className="card">
             <div className="card-head">
               <h2>Como funciona</h2>
@@ -203,6 +200,8 @@ function Home() {
             </ol>
             <p className="muted small">Também dá para começar direto por um notebook, sem trilha nenhuma.</p>
           </section>
+    ) },
+    { id: 'sugestoes', label: 'Sugestões para começar', node: firstTime && (
           <section className="card">
             <div className="card-head">
               <h2>Sugestões para começar</h2>
@@ -226,8 +225,12 @@ function Home() {
                 ))}
             </ul>
           </section>
-        </>
-      )}
+    ) },
+  ];
+  return (
+    <>
+      <PageHeader title="Estudos" subtitle="Seu espaço para explorar, planejar e guardar o que aprende." />
+      <CardScreen screen="estudos" cards={cards} />
     </>
   );
 }

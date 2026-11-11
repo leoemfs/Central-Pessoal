@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react';
+import { CardScreen } from '../Cards';
 import type { ViewProps } from '../App';
 import { useStore } from '../store';
 import { go, useSubAction } from '../router';
@@ -129,6 +130,10 @@ export function Agenda({ route }: ViewProps) {
         </>
       ) : (
         <div className="grid-2">
+          <CardScreen
+            screen="agenda"
+            cards={[
+              { id: 'calendario', label: 'Calendário', lock: 'top', node: (
           <section className="card">
             <div className="calendar" role="grid" aria-label={formatMonth(month)}>
               {WEEKDAYS.map((w) => (
@@ -160,8 +165,8 @@ export function Agenda({ route }: ViewProps) {
             </div>
             <p className="muted small" style={{ marginTop: 6 }}>Toque num dia para ver tudo o que acontece nele.</p>
           </section>
-
-          <div className="stack">
+          ) },
+              { id: 'proximos', label: 'Próximos compromissos', node: (
             <section className="card">
               <div className="card-head">
                 <h2>Próximos compromissos</h2>
@@ -176,7 +181,9 @@ export function Agenda({ route }: ViewProps) {
                 </ul>
               )}
             </section>
-          </div>
+          ) },
+            ]}
+          />
         </div>
       )}
 

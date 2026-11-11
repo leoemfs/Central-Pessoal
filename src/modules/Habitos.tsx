@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, type CSSProperties } from 'react';
+import { CardScreen } from '../Cards';
 import type { ViewProps } from '../App';
 import { useStore } from '../store';
 import { useSubAction } from '../router';
@@ -205,6 +206,10 @@ export function Habitos({ route }: ViewProps) {
           </section>
         ) : (
           <>
+            <CardScreen
+              screen="nucleo"
+              cards={[
+                { id: 'hoje', label: 'Hoje', lock: 'top', node: (
             <section className="card raised">
               <div className="toggle-row">
                 <div>
@@ -220,11 +225,10 @@ export function Habitos({ route }: ViewProps) {
                 </p>
               )}
             </section>
-
-            {PERIODS.map((p) => {
-              const list = day.rituals.filter((h) => h.period === p.id);
-              if (!list.length) return null;
-              return (
+                ) },
+                ...PERIODS.map((p) => {
+                  const list = day.rituals.filter((h) => h.period === p.id);
+                  return { id: `periodo-${p.id}`, label: p.label, node: list.length > 0 && (
                 <section key={p.id} className="card">
                   <div className="card-head">
                     <h2>{p.label}</h2>
@@ -254,10 +258,9 @@ export function Habitos({ route }: ViewProps) {
                     ))}
                   </ul>
                 </section>
-              );
-            })}
-
-            {notToday.length > 0 && (
+                  ) };
+                }),
+                { id: 'outros', label: 'Em outros dias', node: notToday.length > 0 && (
               <section className="card">
                 <div className="card-head">
                   <h2>Em outros dias</h2>
@@ -279,8 +282,10 @@ export function Habitos({ route }: ViewProps) {
                   ))}
                 </ul>
               </section>
-            )}
-            <KeptHabits kinds={['ritual']} onOpen={setDetailId} />
+            ) },
+                { id: 'guardados', label: 'Pausados e arquivados', node: <KeptHabits kinds={['ritual']} onOpen={setDetailId} /> },
+              ]}
+            />
           </>
         )
       ) : (

@@ -1,4 +1,5 @@
 import { useEffect, useState, type ReactNode } from 'react';
+import { CardScreen } from '../Cards';
 import type { ViewProps } from '../App';
 import { go, useSubAction } from '../router';
 import { useStore } from '../store';
@@ -147,6 +148,10 @@ export function CarreiraPage({ route }: ViewProps) {
     <>
       <PageHeader title="Carreira" subtitle="Onde você está, para onde quer ir e as vagas no caminho." />
 
+      <CardScreen
+        screen="carreira"
+        cards={[
+          { id: 'trabalho', label: 'Trabalho atual', lock: 'top', node: (
       <section className="card">
         <div className="card-head">
           <h2>Trabalho atual</h2>
@@ -175,7 +180,8 @@ export function CarreiraPage({ route }: ViewProps) {
           </button>
         </div>
       </section>
-
+      ) },
+          { id: 'reunioes', label: 'Reuniões', node: (
       <section className="card">
         <div className="card-head">
           <h2>Reuniões</h2>
@@ -196,7 +202,8 @@ export function CarreiraPage({ route }: ViewProps) {
           </ul>
         )}
       </section>
-
+      ) },
+          { id: 'projetos', label: 'Projetos', node: (
       <section className="card">
         <div className="card-head">
           <h2>Projetos</h2>
@@ -265,8 +272,8 @@ export function CarreiraPage({ route }: ViewProps) {
           </>
         )}
       </section>
-
-      {todos.length > 0 && (
+      ) },
+          { id: 'combinados', label: 'Combinados em aberto', node: todos.length > 0 && (
         <section className="card">
           <div className="card-head">
             <h2>Combinados em aberto</h2>
@@ -286,9 +293,8 @@ export function CarreiraPage({ route }: ViewProps) {
             ))}
           </ul>
         </section>
-      )}
-
-      {history.length > 0 && (
+      ) },
+          { id: 'cargos', label: 'Cargos e salários', node: history.length > 0 && (
         <section className="card">
           <div className="card-head">
             <h2>Cargos e salários</h2>
@@ -318,8 +324,8 @@ export function CarreiraPage({ route }: ViewProps) {
             ))}
           </ul>
         </section>
-      )}
-
+      ) },
+          { id: 'vagas', label: 'Vagas: próximos passos', node: (
       <section className="card">
         <div className="card-head">
           <h2>Vagas: próximos passos</h2>
@@ -337,7 +343,8 @@ export function CarreiraPage({ route }: ViewProps) {
           <Empty>{open.length ? `${open.length} vaga(s) em andamento, nenhuma com passo marcado.` : 'Nenhuma vaga em andamento.'}</Empty>
         )}
       </section>
-
+      ) },
+          { id: 'breve', label: 'Chegando em breve', node: (
       <section className="card">
         <div className="card-head">
           <h2>Chegando em breve</h2>
@@ -359,6 +366,9 @@ export function CarreiraPage({ route }: ViewProps) {
           </li>
         </ul>
       </section>
+      ) },
+        ]}
+      />
 
       {menu && (
         <Sheet title="Criar em Carreira" onClose={() => setMenu(false)}>

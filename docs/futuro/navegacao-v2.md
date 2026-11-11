@@ -82,3 +82,7 @@ settings: {
   theme: { mode: 'escuro' | 'claro' | 'auto'; accent: string | null };  // null = padrão do tema
 }
 ```
+
+
+## Lápis nos outros módulos (v0.34)
+Agenda (calendário fixo + Próximos compromissos), Núcleo › Rituais (Hoje fixo, um cartão por período, Em outros dias, Pausados e arquivados), Listas (um cartão por categoria, na visão "Todas"), Estudos (bloco principal fixo, Estudando agora, Continuar, Como funciona, Sugestões) e Carreira (Trabalho atual fixo e as demais seções). Mesmo componente `CardScreen` (`src/Cards.tsx`); a ordem fica em `settings.cards[tela]`.
