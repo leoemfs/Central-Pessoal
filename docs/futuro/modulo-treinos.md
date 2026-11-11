@@ -32,7 +32,7 @@
 
 ## O que foi feito (v0.29)
 - **Telas:** cartão "Treino em casa" na aba Corpo (dias da semana e meta, que se muda no lápis; conta qualquer treino do Núcleo); tela com as abas **Sem equipamento · Com equipamento**; filtros pelas **8 partes do corpo**, cada uma com uma explicação simples (Pernas, Glúteos, Peito, Costas, Ombros, Braços, Antebraços, Abdome); 3 níveis (Iniciante: 2 voltas e até 4 exercícios; Intermediário: 3 voltas e até 5; Avançado: 3 voltas, até 6 e mais repetições); tela do treino com a lista e **Iniciar**; treino guiado (prepare-se, exercício com "Feito" ou tempo, descanso com +10 s e pular, "Terminar e salvar").
-- **Exercícios:** 43 (25 sem equipamento, 18 com halteres, elástico ou kettlebell). Tocar abre o passo a passo, o boneco e o **link do vídeo** (colar o link; sem link, "Procurar no YouTube").
+- **Exercícios:** 44 (25 sem equipamento, 19 com halteres, elástico ou kettlebell). Tocar abre o passo a passo, o boneco e o **link do vídeo** (colar o link; sem link, "Procurar no YouTube").
 - **Bonecos:** 47 desenhos próprios animados (`src/bonecos.ts`), também nos movimentos dos **alongamentos guiados**.
 - O treino é salvo como treino do Núcleo (entra no Histórico, no Progresso, no Início e na Revisão) e marca o hábito ligado a "Treino".
 - A ficha antiga "Treino em casa" (sem equipamento, 20 min) passou a se chamar **"Circuito em casa"**, para não confundir.
