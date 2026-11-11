@@ -11,6 +11,16 @@ Pedido de 11/11: guardar os dados no Google Drive (pasta escondida do app, `appD
 - **Exportar:** o que você quiser ver ou mandar para alguém (backup legível, PDFs) vai para uma **pasta visível "Central Pessoal"** no seu Drive.
 - **Sair da conta:** os dados continuam no aparelho; só para de sincronizar.
 
+## O que fica salvo e onde
+| Onde | O quê | Quem vê |
+|---|---|---|
+| **No aparelho** (memória do navegador) | Tudo do app, como hoje. Com o N9.3, também uma cópia das fotos e PDFs, para abrir sem internet | Só quem usa o aparelho |
+| **Drive, pasta escondida do app** › `dados.json` | Todos os dados de todos os módulos: Finanças, Agenda, Diário e humor, Núcleo, Listas e Preços, Notas, Estudos, Carreira (inclusive salários), Você, Jornada e Configurações (tema, barra, favoritos, ordem dos cartões). Mais as datas de alteração e as exclusões | Só o app (não aparece na lista do Drive) |
+| **Drive, pasta escondida** › `arquivos/` | Fotos do Diário e PDFs e imagens anexados (Estudos, reuniões, vagas) | Só o app |
+| **Drive, pasta visível "Central Pessoal"** | Só o que você mandar exportar: backup em arquivo e PDFs gerados pelo app | Você (e quem você compartilhar) |
+
+Não sai nada para outro lugar. O app não lê o resto do Drive e não guarda a senha do Google.
+
 ## PDFs (resposta de 11/11: "PDFs de currículo, por exemplo")
 - **Gerar PDF** a partir do que já está no app. O primeiro é o **currículo** (Carreira › Currículo › "Gerar PDF"): baixar, compartilhar ou, com a conta Google ligada, salvar na pasta "Central Pessoal". Esse é o item **M22**, que não depende do Google e pode vir antes.
 - **Anexar PDF** que veio de fora (ex.: o currículo enviado numa vaga, slides de reunião, material de estudo): parte N9.3.
