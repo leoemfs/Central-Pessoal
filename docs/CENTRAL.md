@@ -46,6 +46,9 @@
 ## Caixa de entrada
 *Ideias e problemas ainda sem classificar. Uma linha cada, com a data.*
 
+- 09/11: Saúde com **dieta dentro** (plano alimentar e "segui · em parte · fugi" no dia a dia). Já anotado no N1 (parte N1.2).
+- 09/11: Saúde e treinos ligados aos hábitos sem trocar de módulo (ex.: beber água). Anotado no N1, seção "Ligação com Hábitos e Treinos".
+- 09/11: Saúde é módulo à parte (decidido). Marcar check-up, consultas e dentista, com intervalo para repetir e lembrete do próximo. Anotado no N1 (parte N1.4).
 - 08/11: anexar os slides das apresentações (sexta sim, sexta não: avanços do setor de repasse e gestão de contratos de prestadores) dentro da reunião. Hoje só dá para guardar o link. Junta com "anexar PDF ou imagem" de Estudos. Entra no **N9.3** (anexos guardados no Drive).
 - 08/11: Estudos: cronograma de estudos com calendário dentro do módulo, sincronizado com a Agenda do app.
 - 08/11: Você: perguntas de carreira (emprego atual, carreira desejada, melhorias na atual, caminhos até a desejada) para a carreira desejada orientar os tópicos sugeridos em Estudos. Conferir com N10 (Objetivos) e N8.
@@ -94,7 +97,7 @@
 | M5 | Agenda: repetição (toda semana, mês, ano) e aniversários | MOD | M | média | ideia | — (especificar antes) |
 | M6 | Núcleo: fichas de treino próprias (exercícios, séries, descanso). Pode entrar depois no M21 ("crie o seu próprio") | MOD | M | média | especificado | `futuro/nucleo-mente-corpo.md` |
 | M7 | Revisão semanal mais completa: autocuidado, caixinhas e vales da semana | MOD | P | baixa | pronto (v0.38) | `futuro/nucleo-mente-corpo.md`, `futuro/caixinhas.md` |
-| N1 | Módulo Saúde (água, sono, remédios, consultas, peso) | NOVO | G | média | especificado | `futuro/modulo-saude.md` |
+| N1 | Módulo Saúde, à parte (água, sono, **dieta**, remédios, consultas, dentista e check-ups, peso), dividido em N1.0 a N1.5. Afeta: Agenda, Listas, Você, Núcleo, Início, Revisão, backup | NOVO | G | média | especificado, prévia aprovada (11/11); não adiantado na fila | `futuro/modulo-saude.md` |
 | N2 | Jornada completa (pixel art): missões no ritmo da pessoa, recompensas por módulo, raridades (comum a místico), Forja e Codex por coleções | NOVO | G | baixa | especificado | `futuro/modulo-rpg.md`, `futuro/jornada-recompensas.md`, `futuro/jornada-raridades.md` |
 | N3 | Notificações e **lembretes** (tarefa ou compromisso com "me lembrar"; sai o "Lembretes, em breve" do menu). Afeta: Agenda, Carreira | NOVO | M | baixa | especificado | `futuro/notificacoes.md` |
 | N3.1 | Notificações já no app (sem servidor): **"Lembrar no celular"** (a parte da agenda passa a ser o **N9.5**, pelo Google Agenda) (compromisso, conta, revisão → agenda do celular, hora certa, Android e iPhone) e **bolinha no ícone** do app com o que está pendente hoje | NOVO | P | média | ideia | `futuro/notificacoes.md` |
@@ -203,6 +206,7 @@ Documentos sem código: Mapa dos módulos (08/11), módulos personalizáveis, pa
 | Estudos e Carreira (N6.0): Biblioteca, trilhas, ciclos, notebooks, fontes, mapas e roadmaps | https://claude.ai/artifact/WJ3kw4zvwtdDKTiUVUB3rD |
 | Carreira (N8.0): Trabalho, Currículo, Vagas com etapas, Metas, botão + e cartão no Início | https://claude.ai/artifact/3DxpiHU7f6merD3dk6Hqmp |
 | Três jeitos da barra de baixo (centro, favorito fixo, ao lado do Início) — E9/E10 | https://claude.ai/artifact/BYyRT9QPSLYnNUJr2Ga5pN |
+| Saúde (N1.0, versão P): telas Hoje, Consultas e check-ups e Dieta | https://claude.ai/artifact/LJRc3AgwWsTmuA8ymQCqEv |
 | Primeira abertura: entrevista, módulos, favoritos e tutorial da barra (E14, construído na v0.31) | https://claude.ai/artifact/Ky4NT9oh9tZQKv9FksYYCz |
 | Central Pessoal (prévia geral antiga) | https://claude.ai/artifact/WHbDkKXN4LArCQ8sjuQqVt |
 

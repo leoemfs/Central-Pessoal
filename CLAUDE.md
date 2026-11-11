@@ -44,5 +44,7 @@ anotar → especificar → aprovar → construir → testar. A cada mudança de 
 ## Git
 - Trabalhar no branch indicado na sessão. Sem force push e sem rebase.
 - Se o branch já está todo no `main` (`git merge-base --is-ancestor`), avançar com `git merge --ff-only origin/main`; senão, continuar em cima dele.
-- Um PR por item para `main`. O Leonardo mescla; ao mesclar, o GitHub Actions publica no GitHub Pages.
+- Um PR por item para `main`. PR **com código** (qualquer mudança fora de `docs/`, `README.md` e `CLAUDE.md`): o Leonardo mescla; ao mesclar, o GitHub Actions publica no GitHub Pages.
+- PR **só de documentação** (só `docs/`, `README.md` ou `CLAUDE.md`): o Claude mescla sozinho, depois de juntar o `main` (combinado em 11/11).
+- Antes de abrir ou atualizar um PR: `git fetch origin main` e `git merge origin/main`, resolvendo os conflitos (sem perder nada dos dois lados). O link enviado já vai sem conflito.
 - **Sempre** que houver um PR para mesclar, mandar o link dele na resposta (ex.: `https://github.com/leoemfs/Central-Pessoal/pull/24`).
