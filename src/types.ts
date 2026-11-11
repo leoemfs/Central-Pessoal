@@ -739,9 +739,31 @@ export interface WorkProject {
   createdAt: string;
 }
 
+export type ResumeKind = 'experiencia' | 'formacao' | 'curso' | 'idioma' | 'habilidade' | 'conquista';
+
+/** Item do currículo (N8.3): experiência, formação, curso/certificado, idioma, habilidade ou conquista. */
+export interface ResumeItem {
+  id: string;
+  kind: ResumeKind;
+  /** Cargo, curso, idioma, habilidade ou a conquista em si. */
+  title: string;
+  /** Empresa, instituição ou plataforma. */
+  org: string;
+  /** AAAA-MM (ou vazio). */
+  from: string;
+  /** AAAA-MM; vazio = até hoje (ou sem data). */
+  to: string;
+  /** Detalhes, nível (idioma) ou resultado (conquista: "reduzi o tempo X em 30%"). */
+  note: string;
+  /** Veio de um ciclo concluído em Estudos. */
+  cycleId: string | null;
+  createdAt: string;
+}
+
 export interface CareerData {
   jobs: JobApp[];
   changes: CareerChange[];
   meetings: Meeting[];
   projects: WorkProject[];
+  resume: ResumeItem[];
 }

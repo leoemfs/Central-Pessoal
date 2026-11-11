@@ -33,8 +33,8 @@
 | **Diário** (registros, Humor, Revisão) | registros, humor do dia | Humor, Mente ("Três coisas boas") e Revisão viram registros | Início, Agenda, Revisão, Busca, Jornada | `mood.ts`, `review.ts` |
 | **Núcleo pessoal** (rituais, hábitos, mente, corpo, treino em casa) | hábitos, práticas, última carga, meta de treinos da semana, links de vídeo dos exercícios | Você (hábitos sugeridos), Mente e Corpo (marcam o hábito ligado) | Início, Agenda, Revisão, Jornada (atributos e XP), Humor (dias com treino) | `habits.ts`, `practices.ts` |
 | **Listas** (listas, Preços, Compras) | categorias de listas, listas, produtos, marcas, lojas, preços, compras | Finanças (categorias) | Finanças (despesa "Mercado · loja"), Início (listas fixadas) | `lists.ts` |
-| **Estudos** | estudos (áreas, trilhas, ciclos, notebooks, fontes, mapas) | nada (isolado) | Início ("Estudando agora"), Revisão ("O que estudei"); N7 vai ligar à Jornada | `estudos.ts`, `estudosCatalogo.ts` |
-| **Carreira** (vagas, trabalho atual, reuniões, projetos) | carreira (vagas, cargos, salários, reuniões, projetos) | nada | Agenda (tudo com data entra sozinho e se atualiza), Finanças (aumento atualiza o salário, se você quiser) | `carreira.ts` |
+| **Estudos** | estudos (áreas, trilhas, ciclos, notebooks, fontes, mapas) | nada (isolado) | Início ("Estudando agora"), Revisão ("O que estudei"), Carreira (ciclos concluídos viram curso no currículo); N7 vai ligar à Jornada | `estudos.ts`, `estudosCatalogo.ts` |
+| **Carreira** (vagas, trabalho atual, reuniões, projetos, currículo) | carreira (vagas, cargos, salários, reuniões, projetos, currículo) | Estudos (ciclos concluídos, só leitura) | Agenda (tudo com data entra sozinho e se atualiza), Finanças (aumento atualiza o salário, se você quiser) | `carreira.ts` |
 | **Você** | perfil | Núcleo (hábitos) e Caixinhas (para sugerir) | Núcleo (hábito), Agenda (compromissos), Finanças (caixinha), Início | `profile.ts` |
 | **Notas** | notas | nada | Busca | — |
 | **Jornada** (bloqueada) | ajustes da Jornada | Finanças, Agenda, Diário, Núcleo (dias de uso, XP, ouro) | nada por enquanto | `journey.ts`, `jornada/` |
@@ -113,7 +113,7 @@
 | C11 | Estudos, editor: as cores do texto ficavam paradas no meio da página ao rolar; agora ficam presas logo abaixo da barra de formatação e rolam junto | COR | P | alta | pronto (v0.28.1) | `futuro/estudos-v2.md` |
 | M21 | Treino em casa (Núcleo › Corpo; fichas A, B e C continuam): meta da semana, abas Sem equipamento · Com equipamento, 8 partes do corpo em 3 níveis, treino guiado, link de vídeo em cada exercício; bonecos animados próprios nos exercícios e nos alongamentos. Afeta: Núcleo, Início, Revisão, Humor, Jornada | MOD | M | média | pronto (v0.29) | `futuro/modulo-treinos.md` |
 | N7 | Estudos × Jornada: XP, ouro e INT por tópico, ciclo e constância; selos, Coruja e missões | NOVO | M | baixa | especificado (só documento) | `futuro/estudos-jornada.md` |
-| N8 | Módulo Carreira (próprio, fora de Estudos): vagas e candidaturas, metas de carreira, currículo e conquistas, trabalho atual (cargos, salários, feedbacks). Dividido em N8.0 a N8.4 | NOVO | G | média | parte pronta: Vagas (v0.22), Trabalho e Reuniões (v0.23), Projetos e Agenda automática (v0.24); faltam N8.3 Currículo e N8.4 Metas (agora dentro de Objetivos, N10) | `futuro/modulo-carreira.md` |
+| N8 | Módulo Carreira (próprio, fora de Estudos): vagas e candidaturas, metas de carreira, currículo e conquistas, trabalho atual (cargos, salários, feedbacks). Dividido em N8.0 a N8.4 | NOVO | G | média | parte pronta: Vagas (v0.22), Trabalho e Reuniões (v0.23), Projetos e Agenda automática (v0.24), Currículo (v0.37); falta N8.4 Metas (agora dentro de Objetivos, N10) | `futuro/modulo-carreira.md` |
 
 **Depende de outra coisa:** N3 fica melhor junto com N4 (notificações de verdade no Android). N2 e N5 dependem de decisões e integrações.
 
@@ -145,6 +145,7 @@
 ## Feito
 | Versão | O que entrou | PR |
 |---|---|---|
+| v0.37 | N8.3 Carreira › Currículo: abas Trabalho · Currículo; experiências, formação, cursos e certificados, idiomas, habilidades e conquistas (com resultado); "Trazer de Estudos" põe ciclos concluídos como curso; "Item no currículo" no botão + | #38 |
 | v0.36 | M8: ao lançar no cartão, "Entra na fatura de" com a fatura calculada já marcada e as vizinhas para trocar (também ao editar; parcelas e conta fixa seguem a escolhida); aviso ao salvar; o cartão mostra a fatura aberta (e a que vence no mês, se for outra); linha "No cartão este mês" na aba Mês | #38 |
 | v0.35 | E6 + M13: a lupa busca dentro do módulo aberto ("Em Finanças" · "Em tudo"); a busca passou a achar também cartões, vales, caixinhas, hábitos, listas e itens, produtos, notebooks e páginas, fontes, mapas, trilhas e tópicos, vagas, reuniões e projetos | #38 |
 | v0.34 | E3 + M12: lápis para subir, descer e ocultar cartões também na Agenda (calendário fixo), no Núcleo › Rituais (Hoje fixo; cada período é um cartão), em Listas (cada categoria é um cartão), em Estudos (bloco principal fixo) e em Carreira (Trabalho atual fixo) | #38 |

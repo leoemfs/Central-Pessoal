@@ -10,7 +10,7 @@ const TODAY = '2026-11-08';
 const job = (id: string, extra = {}) => ({ ...newJob(id, '2026-11-01', '2026-11-01T10:00:00Z'), company: 'Acme', role: 'Analista', ...extra });
 
 test('dados antigos e backups ganham Carreira vazia; lixo é limpo', () => {
-  assert.deepEqual(normalize({}).career, { jobs: [], changes: [], meetings: [], projects: [] });
+  assert.deepEqual(normalize({}).career, { jobs: [], changes: [], meetings: [], projects: [], resume: [] });
   assert.deepEqual(normalize({ career: { jobs: [] } }).career.meetings, []);
   const c = normalizeCareer({ jobs: [{ id: 'a', stage: 'xpto', outcome: 'talvez', nextDate: '12/11', history: [{ stage: 'enviei', date: '2026-11-02' }, { stage: 'nada', date: '2026-11-03' }] }, { sem: 'id' }] });
   assert.equal(c.jobs.length, 1);
@@ -133,4 +133,25 @@ test('reuniões: próximas e anteriores; a próxima da série leva os combinados
   assert.equal(n.notes, '');
   assert.deepEqual(n.todos.map((t) => t.id), ['t1']);
   assert.equal(nextMeeting(old, 'x'), null);
+});
+
+test('N8.3: currículo normaliza, ordena e traz ciclos concluídos de Estudos', async () => {
+  const { normalizeCareer, resumeOf, cyclesToResume, upsertResume } = await import('./carreira.ts');
+  const { normalize } = await import('./data.ts');
+  const c = normalizeCareer({ resume: [
+    { id: 'a', kind: 'experiencia', title: 'Analista', from: '2020-01', to: '2022-05' },
+    { id: 'b', kind: 'experiencia', title: 'Coordenador', from: '2022-06', to: '' },
+    { id: 'x', kind: 'invalido', title: 'Algo', from: 'ontem' },
+  ] });
+  assert.deepEqual(resumeOf(c.resume, 'experiencia').map((i) => i.id), ['b', 'a']);
+  assert.equal(c.resume[2].kind, 'conquista');
+  assert.equal(c.resume[2].from, '');
+  assert.deepEqual(normalizeCareer({}).resume, []);
+  let d = normalize({ version: 2, study: { cycles: [
+    { id: 'c1', name: 'Inglês A1', trackId: 't', topics: [{ id: 't1', status: 'feito', doneAt: '2026-10-20' }], startedAt: '2026-09-01', finishedAt: null, createdAt: '2026-09-01' },
+    { id: 'c2', name: 'Em andamento', trackId: 't', topics: [{ id: 't2', status: 'andando', doneAt: null }], startedAt: '2026-09-01', finishedAt: null, createdAt: '2026-09-01' },
+  ] } });
+  assert.deepEqual(cyclesToResume(d).map((x) => [x.id, x.to]), [['c1', '2026-10']]);
+  d = upsertResume({ id: 'r', kind: 'curso', title: 'Inglês A1', org: '', from: '2026-09', to: '2026-10', note: '', cycleId: 'c1', createdAt: '' })(d);
+  assert.equal(cyclesToResume(d).length, 0);
 });
