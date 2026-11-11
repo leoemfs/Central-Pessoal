@@ -69,6 +69,7 @@ E uma quarta, do editor: **o celular pode ter menos botões, nunca menos conteú
 - **Dados:** a página guarda `doc` (JSON do editor) e `sourceIds` (fontes ligadas). Os blocos antigos são convertidos em `normalize()`: anotação → parágrafos; termos → lista com o termo em negrito; fontes → fontes da página. `StudyBlock` só existe para essa conversão.
 - Regras em `src/estudos.ts` (`blocksToDoc`, `normalizeDoc`, `docText`, `docIsEmpty`), 2 testes novos. Tela em `src/modules/estudos/Editor.tsx`.
 - Correção junto: o botão + de Estudos esticava no computador.
+- **v0.28.1 (C11):** a barra e a paleta de cores ficam num bloco só (`.ed-bar`) preso no topo; antes a paleta ficava parada no texto ao rolar.
 
 ## O que foi construído (v0.26, N11.1)
 - Notebook com **descrição**, **páginas** e **subpáginas** (um nível). Capa do notebook: lista de páginas em árvore, ciclos ligados, fontes, mapas e histórico. Cada página tem sua tela, com caminho no topo, subpáginas e anterior/próxima.

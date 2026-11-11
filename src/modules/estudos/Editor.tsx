@@ -211,6 +211,8 @@ export default function RichEditor({ doc, onChange, placeholder = 'Escreva aqui 
 
   return (
     <div className={`ed${more ? ' more' : ''}`}>
+      {/* Barra e cores juntas num bloco preso no topo: as cores acompanham a barra ao rolar. */}
+      <div className="ed-bar">
       <div className="ed-toolbar" role="toolbar" aria-label="Formatação">
         <select className="ed-type" aria-label="Tipo do bloco" value={currentType(e)} onChange={(ev) => setType(e, ev.target.value as BlockType)}>
           {TYPES.map((t) => (
@@ -281,6 +283,7 @@ export default function RichEditor({ doc, onChange, placeholder = 'Escreva aqui 
           ))}
         </div>
       )}
+      </div>
       <EditorContent editor={e} />
       <input ref={file} type="file" accept="image/*" hidden onChange={(ev) => (addImage(ev.target.files?.[0]), (ev.target.value = ''))} />
       {link !== null && (
