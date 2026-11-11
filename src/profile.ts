@@ -263,7 +263,7 @@ export function habitFromSpec(s: HabitSpec, color: string, today: string = today
   return {
     id: uid(), name: s.name, color, kind: s.kind, checks: [], days: s.days, period: s.period, time: s.time, cue: '', target: 66, slips: [],
     startDate: today, goal: s.goal?.amount ?? null, unit: s.goal?.unit ?? '', step: s.goal?.step ?? 1, amounts: {},
-    attrs: suggestAttributes(s.name), link: s.link, createdAt: new Date().toISOString(),
+    attrs: suggestAttributes(s.name), link: s.link, createdAt: new Date().toISOString(), pauses: [], archivedAt: null,
   };
 }
 

@@ -73,7 +73,7 @@
 | M19 | Carregar Estudos, Carreira e Jornada só ao abrir (app inicial menor) | MOD | P | baixa | ideia | `auditoria-2026-11.md` |
 | M20 | Limpeza: tirar 6 funções e 8 estilos sem uso, dividir arquivos grandes e os estilos por módulo, trocar `confirm()` por confirmação do app | MOD | M | baixa | ideia | `auditoria-2026-11.md` |
 | N3.3 | **Níveis de notificação** (baixa, média, alta, personalizado) com "Me lembrar" e sino; parte 1 sem Android: marcações + lista de avisos dos próximos 7 dias | NOVO | M | média | especificado (simulado) | `futuro/notificacoes.md` |
-| M1 | Hábitos: pausar e arquivar | MOD | P | alta | especificado | `futuro/habitos-pausar-arquivar.md` |
+| M1 | Hábitos: pausar e arquivar | MOD | P | alta | pronto (v0.32) | `futuro/habitos-pausar-arquivar.md` |
 | E14 | **Primeira abertura**: entrevista de toque (áreas → módulos à vista → 3 favoritos → ritmo do Diário → barra e cor → **Jornada: o que é e se quer ou não**) e **tutorial interativo da barra** (6 passos); quem já usa recebe uma vez o convite "Monte o app do seu jeito" (entrevista já preenchida com o que usa hoje, ou só o tutorial) e pode refazer em Personalização; Mais › Como usar a barra. Junta com o resto do E1 (ocultar módulos e ritmo do Diário) | EXP | M | **1ª** | pronto (v0.31) | `futuro/primeira-abertura.md` |
 | E1 | Favoritos e módulos: os 3 do meio da barra no Início são os favoritos (escolhidos pela pessoa); ocultar módulos; ordem no Mais; Orçamento e Relatórios saem do Mais; ritmo de cada módulo (Diário) | EXP | M | alta | quase pronto: favoritos e Mais (v0.18), ocultar módulos e ritmo do Diário (v0.31); falta só a ordem no Mais | `futuro/modulos-personalizaveis.md`, `futuro/navegacao-v2.md` |
 | E2 | Barra adaptativa: Início e Mais fixos; dentro do módulo, 3 ícones do próprio módulo (casa no centro); só ícones, um pouco maiores; topo mostra "Finanças / Orçamento"; segurar o ícone mostra o nome | EXP | M | alta | pronto (v0.18) | `futuro/navegacao-v2.md` |
@@ -145,6 +145,7 @@
 ## Feito
 | Versão | O que entrou | PR |
 |---|---|---|
+| v0.32 | M1: pausar hábitos (até uma data ou sem data; a sequência congela e não conta falta) e arquivar (sai de tudo, histórico fica; comemora a marca do hábito a abandonar), com seções Pausados e Arquivados no Núcleo | #38 |
 | v0.31 | E14 + resto do E1: montagem do app na primeira abertura (áreas, módulos à vista, favoritos, ritmo do Diário, barra e cor, Jornada), tutorial da barra em 6 passos, convite "Monte o app do seu jeito" para quem já usa, módulos guardados no Mais e cartão do ritmo do Diário no Início | #38 |
 | v0.30 | C3: dados com defeito não deixam mais o app em branco (cada registro é conferido ao abrir; o que não tem conserto fica guardado à parte), tela de erro com Exportar backup / Recarregar / Configurações, e "Desfazer importação" (também desfaz "apagar tudo") | #38 |
 | v0.29.1 | C5: os testes rodam em todo PR (✅/❌ no PR) e antes de publicar; se falharem, nada é publicado | #38 |

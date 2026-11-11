@@ -64,7 +64,7 @@ export function weekReview(d: AppData, start: string, today: string = todayISO()
     })
     .filter((r) => r.scheduled > 0)
     .sort((a, b) => a.done / a.scheduled - b.done / b.scheduled);
-  const quitting = d.habits.filter((h) => h.kind === 'abandonar' && h.startDate <= last).map((h) => ({ habit: h, slips: h.slips.filter((x) => inRange(x, start, last)).length }));
+  const quitting = d.habits.filter((h) => h.kind === 'abandonar' && h.startDate <= last && (!h.archivedAt || h.archivedAt >= start)).map((h) => ({ habit: h, slips: h.slips.filter((x) => inRange(x, start, last)).length }));
 
   // Finanças: gasto = contas fora do cartão que vencem na semana + compras no cartão feitas na semana
   // (uma compra parcelada conta pelo total, no dia da compra).

@@ -30,10 +30,60 @@ export function startOf(h: Habit): string {
   return first && first < created ? first : created;
 }
 
-/** O ritual/hábito está programado para este dia da semana? */
-export function isScheduled(h: Habit, day: string): boolean {
-  return h.kind !== 'abandonar' && h.days.includes(weekday(day));
+/** Dia dentro de uma pausa? (a sequência congela e não conta falta) */
+export function isPaused(h: Habit, day: string): boolean {
+  return h.pauses.some((p) => p.from <= day && (p.to === null || day <= p.to));
 }
+
+/** Arquivado neste dia (ou antes)? O histórico de antes continua valendo. */
+export const isArchived = (h: Habit, day: string = todayISO()): boolean => h.archivedAt !== null && h.archivedAt <= day;
+
+/** O ritual/hábito está programado para este dia? (não conta dias pausados nem depois de arquivado) */
+export function isScheduled(h: Habit, day: string): boolean {
+  return h.kind !== 'abandonar' && h.days.includes(weekday(day)) && !isPaused(h, day) && !isArchived(h, day);
+}
+
+/** Pausa em andamento hoje (ou null). `to` = último dia pausado; volta no dia seguinte. */
+export function currentPause(h: Habit, today: string = todayISO()): { from: string; to: string | null } | null {
+  return h.pauses.find((p) => p.from <= today && (p.to === null || today <= p.to)) ?? null;
+}
+
+/** A pausa acabou ontem: "voltou hoje". */
+export const resumedToday = (h: Habit, today: string = todayISO()): boolean => h.pauses.some((p) => p.to === addDays(today, -1));
+
+/** Pausar a partir de hoje, até o dia anterior a `until` (null = sem data). */
+export function pauseHabit(id: string, today: string, until: string | null) {
+  return (d: AppData): AppData => ({
+    ...d,
+    habits: d.habits.map((h) =>
+      h.id === id && h.kind !== 'abandonar' && !currentPause(h, today)
+        ? { ...h, pauses: [...h.pauses, { from: today, to: until && until > today ? addDays(until, -1) : null }] }
+        : h,
+    ),
+  });
+}
+
+/** Retomar agora: a pausa termina ontem (se começou hoje, é desfeita). */
+export function resumeHabit(id: string, today: string) {
+  return (d: AppData): AppData => ({
+    ...d,
+    habits: d.habits.map((h) => {
+      if (h.id !== id) return h;
+      const pauses = h.pauses
+        .map((p) => (p.from <= today && (p.to === null || today <= p.to) ? { ...p, to: addDays(today, -1) } : p))
+        .filter((p) => p.to === null || p.to >= p.from);
+      return { ...h, pauses };
+    }),
+  });
+}
+
+/** Arquivar (sai de tudo, histórico fica) ou restaurar. */
+export function archiveHabit(id: string, today: string | null) {
+  return (d: AppData): AppData => ({ ...d, habits: d.habits.map((h) => (h.id === id ? { ...h, archivedAt: today } : h)) });
+}
+
+/** Hábitos ativos: nem arquivados (pausados continuam na lista, numa seção própria). */
+export const activeHabits = (habits: Habit[], today: string = todayISO()) => habits.filter((h) => !isArchived(h, today));
 
 /**
  * Sequência atual: dias programados seguidos cumpridos.
@@ -74,6 +124,7 @@ export function consistency(h: Habit, today: string = todayISO(), window = 30): 
 
 /** Hábito a abandonar: dias desde a última recaída (ou desde o início). */
 export function cleanDays(h: Habit, today: string = todayISO()): number {
+  if (h.archivedAt && h.archivedAt < today) today = h.archivedAt;
   const slips = h.slips.filter((d) => d <= today).sort();
   const from = slips.length ? slips[slips.length - 1] : h.startDate;
   return Math.max(0, diffDays(from, today));
@@ -81,6 +132,7 @@ export function cleanDays(h: Habit, today: string = todayISO()): number {
 
 /** Maior período sem recaída. */
 export function bestClean(h: Habit, today: string = todayISO()): number {
+  if (h.archivedAt && h.archivedAt < today) today = h.archivedAt;
   const points = [h.startDate, ...h.slips.filter((d) => d >= h.startDate && d <= today).sort(), today];
   let best = 0;
   for (let i = 1; i < points.length; i++) best = Math.max(best, diffDays(points[i - 1], points[i]));
@@ -99,7 +151,7 @@ export function habitsOfDay(habits: Habit[], day: string) {
   return {
     rituals: habits.filter((h) => h.kind === 'ritual' && isScheduled(h, day)).sort(byTime),
     building: habits.filter((h) => h.kind === 'construir' && isScheduled(h, day)).sort(byTime),
-    quitting: habits.filter((h) => h.kind === 'abandonar' && h.startDate <= day),
+    quitting: habits.filter((h) => h.kind === 'abandonar' && !isArchived(h, day) && h.startDate <= day),
   };
 }
 

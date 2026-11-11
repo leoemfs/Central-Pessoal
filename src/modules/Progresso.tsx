@@ -1,5 +1,5 @@
 import { useStore } from '../store';
-import { ATTRIBUTES, attributeTotals, bestClean, cleanDays, consistency, habitStreak, KIND_INFO, progressToRitual } from '../habits';
+import { activeHabits, ATTRIBUTES, attributeTotals, bestClean, cleanDays, consistency, habitStreak, KIND_INFO, progressToRitual } from '../habits';
 import type { Habit, HabitKind, PracticeSession, PracticeType } from '../types';
 import { addDays, formatDMY, todayISO } from '../utils';
 import { Empty, Icon, PageHeader, Pill, Progress, type IconName } from '../ui';
@@ -10,7 +10,7 @@ const pct = (v: number | null) => (v === null ? '—' : `${Math.round(v * 100)}%
 export function ProgressoPage() {
   const { data } = useStore();
   const today = todayISO();
-  const habits = data.habits;
+  const habits = activeHabits(data.habits, today);
   const doing = habits.filter((h) => h.kind !== 'abandonar');
   const values = doing.map((h) => consistency(h, today, 30)).filter((v): v is number => v !== null);
   const avg = values.length ? values.reduce((a, b) => a + b, 0) / values.length : null;

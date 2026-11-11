@@ -3,7 +3,7 @@
  * Ao concluir uma prática, os hábitos ligados a ela são marcados sozinhos.
  */
 import type { AppData, Habit, PracticeSession, PracticeType, Profile } from './types.ts';
-import { isQuantity } from './habits.ts';
+import { isArchived, isPaused, isQuantity } from './habits.ts';
 import { addDays, todayISO, uid } from './utils.ts';
 import { weekStart } from './review.ts';
 
@@ -65,7 +65,7 @@ export function linkMatches(link: string, type: string, sub: string): boolean {
 
 /** Hábitos que serão marcados ao concluir a prática hoje (ainda não marcados). */
 export function linkedToMark(habits: Habit[], type: string, sub: string, day: string): Habit[] {
-  return habits.filter((h) => h.kind !== 'abandonar' && !isQuantity(h) && !h.checks.includes(day) && linkMatches(h.link, type, sub));
+  return habits.filter((h) => h.kind !== 'abandonar' && !isQuantity(h) && !h.checks.includes(day) && !isPaused(h, day) && !isArchived(h, day) && linkMatches(h.link, type, sub));
 }
 
 /** Marca os hábitos ligados (sem desmarcar nada). */

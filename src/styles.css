@@ -6321,3 +6321,31 @@ body[data-coach='mais'] .tabbar a:last-of-type .tb-pill {
     bottom: 24px;
   }
 }
+
+/* ---------- v0.32: hábitos pausados e arquivados (M1) ---------- */
+details.kept > summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  cursor: pointer;
+  list-style: none;
+}
+details.kept > summary::-webkit-details-marker {
+  display: none;
+}
+details.kept > summary::after {
+  content: '▾';
+  color: var(--muted);
+  transition: transform 0.15s;
+}
+details.kept:not([open]) > summary::after {
+  transform: rotate(-90deg);
+}
+details.kept > summary h2 {
+  margin: 0;
+  font-size: 1rem;
+}
+details.kept[open] > summary {
+  margin-bottom: 8px;
+}

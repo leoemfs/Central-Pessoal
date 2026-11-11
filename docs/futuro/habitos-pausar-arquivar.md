@@ -1,6 +1,6 @@
 # Hábitos: pausar e arquivar
 
-> **Status: OBJETIVO PARA O FUTURO.** Sem desenvolvimento.
+> **Status: PRONTO na v0.32** (11/11/2026). Item M1 da Central.
 
 Hoje, para tirar um ritual ou hábito da frente, a única saída é **excluir**, e o histórico vai junto. A vida muda (viagem, lesão, outra rotina), e o hábito precisa poder esperar ou terminar sem se perder.
 
@@ -35,3 +35,11 @@ interface Habit {
 ```
 - `isScheduled` passa a responder "não" nos dias pausados. Assim a sequência, a consistência, o "não falhe 2x", a Revisão e a Agenda se ajustam sozinhos.
 - Retomar = fechar o período aberto (`to` = ontem).
+
+## Como ficou (v0.32)
+- Regras em `src/habits.ts` (`isPaused`, `isArchived`, `pauseHabit`, `resumeHabit`, `archiveHabit`, `activeHabits`), com testes em `src/habitPause.test.ts`.
+- `isScheduled` responde "não" nos dias pausados e depois do arquivamento. Por isso sequência, consistência, "não falhe 2x", Hoje, Início, Agenda, Revisão e o marcar automático das práticas se ajustam sozinhos.
+- "Pausar" no detalhe do hábito: até uma data (volta sozinho nesse dia, com o selo "Voltou hoje") ou sem data. "Retomar agora" fecha a pausa ontem; se ela começou hoje, é desfeita.
+- "Arquivar" em qualquer tipo. No hábito a abandonar, os "dias sem" congelam na data e o app comemora a marca (7 dias ou mais).
+- No Núcleo: seção "Pausados (n)" aberta, com Retomar, e "Arquivados (n)" recolhida, com Restaurar. No detalhe do arquivado aparece "Excluir de vez".
+- Progresso ignora os arquivados; a Revisão mostra o hábito a abandonar até a semana em que foi arquivado.

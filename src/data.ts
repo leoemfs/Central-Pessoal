@@ -263,6 +263,12 @@ export function normalizeHabit(h: Record<string, unknown>): Habit {
     attrs: Array.isArray(h.attrs) ? strings(h.attrs) : suggestAttributes(typeof h.name === 'string' ? h.name : ''),
     link: typeof h.link === 'string' ? h.link : '',
     createdAt,
+    pauses: Array.isArray(h.pauses)
+      ? h.pauses
+          .filter((x): x is Rec => isRec(x) && typeof x.from === 'string')
+          .map((x) => ({ from: x.from as string, to: typeof x.to === 'string' ? x.to : null }))
+      : [],
+    archivedAt: typeof h.archivedAt === 'string' ? h.archivedAt : null,
   };
 }
 

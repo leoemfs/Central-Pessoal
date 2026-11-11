@@ -67,6 +67,10 @@ export interface Habit {
    */
   link: string;
   createdAt: string;
+  /** Períodos pausados (AAAA-MM-DD, de/até inclusive; o último pode estar em aberto: to = null). */
+  pauses: { from: string; to: string | null }[];
+  /** Data (AAAA-MM-DD) em que foi arquivado; null = ativo. O histórico fica. */
+  archivedAt: string | null;
 }
 
 export interface Note {
