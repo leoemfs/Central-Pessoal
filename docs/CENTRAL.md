@@ -65,7 +65,7 @@
 | C10 | **Telas quebradas no computador** (10/11, prints): botão + vira uma faixa oval na largura toda (Estudos › notebook); Início com cartões esticados na tela inteira; Listas com título e chips desalinhados do conteúdo; Finanças com o bloco mês + abas mais estreito que os cartões. No celular está ok | COR | P | alta | pronto (v0.27.1) | — |
 | C12 | **Telas quebradas no celular** (11/11, prints): "Monte o app do seu jeito" com os botões Começar e Agora não altos e estreitos; Configurações com "Como usar a barra" estourando o cartão (a tela dava zoom e rolava para o lado); zoom com dois dedos desligado no app (o mapa mental de Estudos continua com o zoom dele) | COR | P | alta | pronto (v0.38.1) | — |
 | C13 | **Lápis quebrava a tela** (11/11, print da Agenda): no modo de editar cartões, um texto comprido (ex.: nome de compromisso) alargava o cartão e a tela ficava cortada, sem os botões Restaurar e Pronto. Valia para todas as telas com lápis | COR | P | alta | pronto (v0.43.2) | — |
-| E16 | Agenda sem o lápis de personalizar cartões (11/11: "nem acho interessante editar aqui"). Aguardando aprovação | EXP | P | média | ideia | — |
+| E16 | Agenda sem o lápis de personalizar cartões (11/11: "nem acho interessante editar aqui"); calendário e próximos compromissos ficam sempre à vista | EXP | P | média | pronto (v0.43.4) | — |
 | C3 | **Registro defeituoso deixa o app em branco**: conferir os campos ao abrir os dados, tela de erro com saída (exportar, recarregar, Configurações) e "desfazer importação" | COR | M | **alta** | pronto (v0.30) | `auditoria-2026-11.md` |
 | C4 | Salvamento de reserva pode perder dados em silêncio (avisar e usar a cópia mais nova) | COR | P | média | ideia | `auditoria-2026-11.md` |
 | C5 | Rodar os testes em todo PR e antes de publicar (hoje só compila) | COR | P | média | pronto (v0.29.1) | `auditoria-2026-11.md` |
@@ -81,7 +81,7 @@
 | E14 | **Primeira abertura**: entrevista de toque (áreas → módulos à vista → 3 favoritos → ritmo do Diário → barra e cor → **Jornada: o que é e se quer ou não**) e **tutorial interativo da barra** (6 passos); quem já usa recebe uma vez o convite "Monte o app do seu jeito" (entrevista já preenchida com o que usa hoje, ou só o tutorial) e pode refazer em Personalização; Mais › Como usar a barra. Junta com o resto do E1 (ocultar módulos e ritmo do Diário) | EXP | M | **1ª** | pronto (v0.31) | `futuro/primeira-abertura.md` |
 | E1 | Favoritos e módulos: os 3 do meio da barra no Início são os favoritos (escolhidos pela pessoa); ocultar módulos; ordem no Mais; Orçamento e Relatórios saem do Mais; ritmo de cada módulo (Diário) | EXP | M | alta | quase pronto: favoritos e Mais (v0.18), ocultar módulos e ritmo do Diário (v0.31); falta só a ordem no Mais | `futuro/modulos-personalizaveis.md`, `futuro/navegacao-v2.md` |
 | E2 | Barra adaptativa: Início e Mais fixos; dentro do módulo, 3 ícones do próprio módulo (casa no centro); só ícones, um pouco maiores; topo mostra "Finanças / Orçamento"; segurar o ícone mostra o nome | EXP | M | alta | pronto (v0.18) | `futuro/navegacao-v2.md` |
-| E3 | Personalizar cartões (lápis ao lado da lupa): no Início e nos módulos, ocultar e reordenar cartões; cartões principais fixos (🔒); Humor sempre no topo do Início; avisos importantes nunca ocultos, só mudam de posição | EXP | M | alta | pronto: Início e Finanças (v0.20); Agenda, Núcleo, Listas, Estudos e Carreira (v0.34) | `futuro/navegacao-v2.md` |
+| E3 | Personalizar cartões (lápis ao lado da lupa): no Início e nos módulos, ocultar e reordenar cartões; cartões principais fixos (🔒); Humor sempre no topo do Início; avisos importantes nunca ocultos, só mudam de posição | EXP | M | alta | pronto: Início e Finanças (v0.20); Núcleo, Listas, Estudos e Carreira (v0.34); Agenda saiu na v0.43.4 (E16) | `futuro/navegacao-v2.md` |
 | E4 | Temas: escuro, claro e automático + cor de destaque (paleta com bom contraste). Padrão: escuro = preto e verde; claro = branco e azul escuro | EXP | M | média | pronto (v0.17) | `futuro/navegacao-v2.md` |
 | E7 | Ícones: cada módulo com um ícone próprio e coerente (Núcleo = broto, Orçamento = medidor, Caixinha = cofrinho, Você = pessoa); antes Núcleo e Orçamento usavam o mesmo | EXP | P | média | pronto (v0.17) | — |
 | E5 | Abas internas: deslizar o dedo para trocar de aba e abas presas no topo ao rolar | EXP | P | alta | pronto (v0.16) | `futuro/navegacao-v2.md` |
@@ -142,8 +142,9 @@
 ## Feito
 | Versão | O que entrou | PR |
 |---|---|---|
+| v0.43.4 | E16: Agenda sem o lápis; calendário e próximos compromissos sempre à vista | #49 |
 | v0.43.3 | Nome visual **CP Hub** (ícone, título, textos, nome do arquivo de backup e da agenda no Google, que é renomeada sozinha). Endereço, repositório, dados e login continuam iguais | #48 |
-| v0.43.2 | C13: modo de editar cartões (lápis) não alarga mais a tela quando há texto comprido | — |
+| v0.43.2 | C13: modo de editar cartões (lápis) não alarga mais a tela quando há texto comprido | #47 |
 | v0.43.1 | E15: Configurações sem os atalhos de Categorias (ficam só no botão + de Finanças e de Listas). Tinha ficado de fora do #39, que foi mesclado antes | #45 |
 | v0.43 | N9.5: lembretes no Google Agenda (agenda "Central Pessoal" com compromissos, contas e tarefas, aviso no celular, só de ida) + correção: a junção de configurações passa a ser campo a campo | #46 |
 | v0.42 | N9.3a: fotos no Diário (até 6 por registro, tela cheia), guardadas no aparelho e sincronizadas pelo Drive; foto tirada ou registro excluído some nos dois aparelhos | #44 |
