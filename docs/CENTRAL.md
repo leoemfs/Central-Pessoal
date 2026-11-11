@@ -64,6 +64,8 @@
 | C2 | Hábitos: nome do hábito aparecia uma letra por linha quando havia "Não falhe 2x" e "Iniciar" no cartão | COR | P | alta | pronto (v0.18) | — |
 | C10 | **Telas quebradas no computador** (10/11, prints): botão + vira uma faixa oval na largura toda (Estudos › notebook); Início com cartões esticados na tela inteira; Listas com título e chips desalinhados do conteúdo; Finanças com o bloco mês + abas mais estreito que os cartões. No celular está ok | COR | P | alta | pronto (v0.27.1) | — |
 | C12 | **Telas quebradas no celular** (11/11, prints): "Monte o app do seu jeito" com os botões Começar e Agora não altos e estreitos; Configurações com "Como usar a barra" estourando o cartão (a tela dava zoom e rolava para o lado); zoom com dois dedos desligado no app (o mapa mental de Estudos continua com o zoom dele) | COR | P | alta | pronto (v0.38.1) | — |
+| C13 | **Lápis quebrava a tela** (11/11, print da Agenda): no modo de editar cartões, um texto comprido (ex.: nome de compromisso) alargava o cartão e a tela ficava cortada, sem os botões Restaurar e Pronto. Valia para todas as telas com lápis | COR | P | alta | pronto (v0.43.2) | — |
+| E16 | Agenda sem o lápis de personalizar cartões (11/11: "nem acho interessante editar aqui"). Aguardando aprovação | EXP | P | média | ideia | — |
 | C3 | **Registro defeituoso deixa o app em branco**: conferir os campos ao abrir os dados, tela de erro com saída (exportar, recarregar, Configurações) e "desfazer importação" | COR | M | **alta** | pronto (v0.30) | `auditoria-2026-11.md` |
 | C4 | Salvamento de reserva pode perder dados em silêncio (avisar e usar a cópia mais nova) | COR | P | média | ideia | `auditoria-2026-11.md` |
 | C5 | Rodar os testes em todo PR e antes de publicar (hoje só compila) | COR | P | média | pronto (v0.29.1) | `auditoria-2026-11.md` |
@@ -140,6 +142,7 @@
 ## Feito
 | Versão | O que entrou | PR |
 |---|---|---|
+| v0.43.2 | C13: modo de editar cartões (lápis) não alarga mais a tela quando há texto comprido | — |
 | v0.43.1 | E15: Configurações sem os atalhos de Categorias (ficam só no botão + de Finanças e de Listas). Tinha ficado de fora do #39, que foi mesclado antes | #45 |
 | v0.43 | N9.5: lembretes no Google Agenda (agenda "Central Pessoal" com compromissos, contas e tarefas, aviso no celular, só de ida) + correção: a junção de configurações passa a ser campo a campo | #46 |
 | v0.42 | N9.3a: fotos no Diário (até 6 por registro, tela cheia), guardadas no aparelho e sincronizadas pelo Drive; foto tirada ou registro excluído some nos dois aparelhos | #44 |

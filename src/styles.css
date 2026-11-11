@@ -4424,6 +4424,7 @@ a.row {
 .card-slot.editing {
   display: flex;
   flex-direction: column;
+  min-width: 0;
   gap: 10px;
   padding: 10px;
   border: 1.5px dashed var(--border-strong);
@@ -4434,6 +4435,11 @@ a.row {
   flex-direction: column;
   gap: 16px;
   pointer-events: none;
+}
+/* Texto comprido (com reticências) não pode alargar a tela no modo de edição. */
+.card-slot.editing .card-slot-body,
+.card-slot.editing .card-slot-body > * {
+  min-width: 0;
 }
 .card-slot.editing .card-slot-body:empty::before {
   content: attr(data-empty);
