@@ -69,6 +69,8 @@ export function emptyData(): AppData {
     study: emptyStudy(),
     career: emptyCareer(),
     lastLoads: {},
+    workoutGoal: 3,
+    exerciseVideos: {},
     deleted: {},
     legacy: {},
   };
@@ -147,6 +149,8 @@ export function normalize(raw: unknown): AppData {
     study: normalizeStudy(r.study),
     career: normalizeCareer(r.career),
     lastLoads: isRec(r.lastLoads) ? Object.fromEntries(Object.entries(r.lastLoads).filter((e): e is [string, number] => typeof e[1] === 'number')) : {},
+    workoutGoal: typeof r.workoutGoal === 'number' && Number.isFinite(r.workoutGoal) ? Math.min(7, Math.max(1, Math.round(r.workoutGoal))) : 3,
+    exerciseVideos: isRec(r.exerciseVideos) ? Object.fromEntries(Object.entries(r.exerciseVideos).filter((e): e is [string, string] => typeof e[1] === 'string' && e[1] !== '')) : {},
     deleted: isRec(r.deleted) ? (r.deleted as Record<string, string>) : {},
     legacy: isRec(r.legacy) ? r.legacy : {},
   };

@@ -5823,3 +5823,218 @@ a.row {
     height: min(64vh, 640px);
   }
 }
+
+/* Treino em casa (M21) e bonecos */
+.boneco {
+  display: block;
+  width: 100%;
+  height: auto;
+  color: var(--accent);
+}
+.boneco .bn-line,
+.boneco .bn-back {
+  fill: none;
+  stroke: var(--accent);
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.boneco .bn-back {
+  opacity: 0.4;
+}
+.boneco .bn-head {
+  fill: var(--accent);
+}
+.boneco .bn-floor {
+  stroke: var(--border-strong);
+  stroke-width: 1.5;
+}
+.boneco .bn-prop {
+  stroke: var(--muted);
+  stroke-linecap: round;
+}
+.boneco .bn-weight {
+  fill: var(--muted);
+}
+.boneco .bn-band {
+  stroke: var(--orange);
+  stroke-width: 1.6;
+}
+.pr-boneco {
+  width: min(240px, 70vw);
+  flex: none;
+}
+.pr-boneco.small {
+  width: 150px;
+}
+.ring-timer.small {
+  width: 150px;
+  height: 150px;
+}
+.ring-timer.small > div {
+  width: 136px;
+  height: 136px;
+}
+.tc-goal {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  border: 0;
+  background: none;
+  color: var(--muted);
+  font: inherit;
+  cursor: pointer;
+}
+.tc-goal strong {
+  font-size: 1.15rem;
+  color: var(--accent-text);
+}
+.tc-week {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+  margin: 4px 0 14px;
+}
+.tc-day {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  color: var(--muted);
+}
+.tc-day small {
+  font-size: 0.7rem;
+}
+.tc-day b {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-weight: 600;
+  background: var(--raised);
+  border: 1.5px solid transparent;
+}
+.tc-day.today b {
+  border-color: var(--accent);
+  color: var(--accent-text);
+}
+.tc-day.done b {
+  background: var(--accent);
+  color: var(--on-accent);
+}
+.tc-top strong {
+  font-size: 1.05rem;
+}
+.tc-body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 14px 16px 24px;
+}
+.tc-hint {
+  margin: -2px 0 0;
+}
+.tc-list,
+.tc-steps {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.tc-level,
+.tc-step {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 12px 8px 8px;
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  text-align: left;
+  font: inherit;
+  cursor: pointer;
+}
+.tc-step {
+  border: 0;
+  border-bottom: 1px solid var(--border);
+  border-radius: 0;
+  background: none;
+  padding: 6px 0;
+}
+.tc-level .row-body,
+.tc-step .row-body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.tc-thumb {
+  width: 84px;
+  flex: none;
+  border-radius: 10px;
+  background: var(--raised);
+}
+.tc-bolts {
+  display: flex;
+  gap: 1px;
+  color: var(--faint);
+}
+.tc-bolts .on {
+  color: var(--accent-text);
+}
+.tc-hero {
+  border-radius: 18px;
+  background: radial-gradient(90% 90% at 50% 40%, var(--accent-soft), transparent 70%), var(--raised);
+  padding: 8px 24px 0;
+}
+.tc-hero .boneco {
+  max-width: 320px;
+  margin-inline: auto;
+}
+.tc-hero.small .boneco {
+  max-width: 240px;
+}
+.tc-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+.tc-meta span {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+.tc-sub {
+  margin: 6px 0 0;
+  font-size: 1.05rem;
+}
+.tc-how {
+  margin: 4px 0 8px;
+  padding-left: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.tc-links {
+  display: flex;
+  gap: 8px;
+}
+.tc-links .btn {
+  flex: 1;
+  text-decoration: none;
+}
+
+/* Folha (ex.: exercício) aberta por cima de uma tela cheia */
+.fullscreen ~ .sheet-backdrop {
+  z-index: 130;
+}

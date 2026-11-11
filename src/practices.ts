@@ -40,7 +40,7 @@ export const WORKOUTS: Record<string, Workout> = {
   A: { title: 'Treino A', sub: 'Peito e tríceps', rest: 60, ex: [['Supino reto', 3, 10, 20], ['Supino inclinado com halteres', 3, 10, 12], ['Crucifixo', 3, 12, 8], ['Tríceps na corda', 3, 12, 15], ['Tríceps francês', 3, 10, 10]] },
   B: { title: 'Treino B', sub: 'Costas e bíceps', rest: 60, ex: [['Puxada frente', 3, 10, 35], ['Remada baixa', 3, 10, 30], ['Remada unilateral', 3, 10, 14], ['Rosca direta', 3, 10, 10], ['Rosca martelo', 3, 12, 8]] },
   C: { title: 'Treino C', sub: 'Pernas', rest: 60, ex: [['Agachamento', 3, 10, 30], ['Leg press', 3, 12, 80], ['Cadeira extensora', 3, 12, 25], ['Mesa flexora', 3, 12, 20], ['Panturrilha em pé', 3, 15, 30]] },
-  casa: { title: 'Treino em casa', sub: 'Sem equipamento · 20 min', rest: 45, ex: [['Agachamento livre', 3, 15, 0], ['Flexão (pode ser com joelho no chão)', 3, 10, 0], ['Ponte de glúteo', 3, 15, 0], ['Prancha (segundos)', 3, 30, 0], ['Afundo alternado', 3, 10, 0]] },
+  casa: { title: 'Circuito em casa', sub: 'Sem equipamento · 20 min', rest: 45, ex: [['Agachamento livre', 3, 15, 0], ['Flexão (pode ser com joelho no chão)', 3, 10, 0], ['Ponte de glúteo', 3, 15, 0], ['Prancha (segundos)', 3, 30, 0], ['Afundo alternado', 3, 10, 0]] },
 };
 
 export const MED_DURATIONS = [3, 5, 10, 15, 20];

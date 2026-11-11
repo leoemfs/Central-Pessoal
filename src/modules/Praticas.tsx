@@ -7,6 +7,10 @@ import {
 import type { PracticeSession } from '../types';
 import { todayISO, uid } from '../utils';
 import { Chips, Fullscreen, Icon, notify, Pill, type IconName } from '../ui';
+import { stretchFigure } from '../bonecos';
+import { amountText, homeWorkout } from '../treinos';
+import { Boneco } from './Boneco';
+import { HomeCard, HomeWorkouts } from './TreinoCasa';
 
 export type Practice =
   | { kind: 'med'; minutes: number }
@@ -14,6 +18,7 @@ export type Practice =
   | { kind: 'breath'; id: string }
   | { kind: 'stretch'; id: string }
   | { kind: 'workout'; id: string }
+  | { kind: 'home'; id: string }
   | { kind: 'walk' };
 
 /** Abre a prática de um hábito ligado ("meditacao", "alongamento:lombar"…). Gratidão não tem tela cheia. */
@@ -162,6 +167,7 @@ export function PracticeScreen({ p, onClose }: { p: Practice; onClose: () => voi
   else if (p.kind === 'breath') screen = <Breathe id={p.id} finish={finish} onCancel={onClose} />;
   else if (p.kind === 'stretch') screen = <StretchRun id={p.id} finish={finish} onCancel={onClose} />;
   else if (p.kind === 'workout') screen = <WorkoutRun id={p.id} finish={finish} onCancel={onClose} />;
+  else if (p.kind === 'home') screen = <HomeRun id={p.id} finish={finish} onCancel={onClose} />;
   else screen = <Walk finish={finish} onCancel={onClose} />;
 
   return (
@@ -321,7 +327,8 @@ function StretchRun({ id, finish }: RunProps & { id: string }) {
           ))}
         </div>
         <h2>{m[0]}</h2>
-        <div className="ring-timer" style={{ '--p': pct } as CSSProperties}>
+        <Boneco fig={stretchFigure(m[0])} label={m[0]} slow play={!paused} className="pr-boneco" />
+        <div className="ring-timer small" style={{ '--p': pct } as CSSProperties}>
           <div>
             <span className="pr-clock tabular">{Math.max(0, left)}</span>
             <span className="muted small">segundos</span>
@@ -509,6 +516,135 @@ function Walk({ finish, onCancel }: RunProps) {
   );
 }
 
+// ---------- Treino em casa (M21) ----------
+
+function HomeRun({ id, finish, onCancel }: RunProps & { id: string }) {
+  const w = homeWorkout(id);
+  const steps = w?.steps ?? [];
+  const [i, setI] = useState(0);
+  const [rest, setRest] = useState(true);
+  const [left, setLeft] = useState(5);
+  const [paused, setPaused] = useState(false);
+  const start = useRef(Date.now());
+  const done = useRef(0);
+  const ended = useRef(false);
+  const st = steps[Math.min(i, steps.length - 1)];
+  const timed = rest || st?.ex.kind === 'tempo';
+
+  function end() {
+    if (ended.current || !w) return;
+    ended.current = true;
+    bell();
+    if (!done.current) return onCancel();
+    finish(
+      { type: 'treino', sub: 'casa', title: `Treino em casa · ${w.title}`, minutes: (Date.now() - start.current) / 60000, sets: done.current },
+      w.title,
+      `${done.current} de ${steps.length} séries feitas. Bom trabalho!`,
+    );
+  }
+  function next(counted: boolean) {
+    if (counted) done.current += 1;
+    if (i + 1 >= steps.length) return end();
+    bell(true);
+    setI(i + 1);
+    setRest(true);
+    setLeft(w!.rest);
+  }
+  function go() {
+    setRest(false);
+    setLeft(st.amount);
+  }
+  useEffect(() => {
+    if (paused || !timed) return;
+    const t = window.setInterval(() => setLeft((l) => l - 1), 1000);
+    return () => window.clearInterval(t);
+  }, [paused, timed, i, rest]);
+  useEffect(() => {
+    if (!timed || left > 0) return;
+    if (rest) {
+      bell(true);
+      go();
+    } else next(true);
+  });
+  useEffect(() => {
+    if (!w) onCancel();
+  });
+  if (!w || !st) return null;
+
+  const total = rest ? (i === 0 ? 5 : w.rest) : st.amount;
+  const pct = timed ? ((total - left) / total) * 100 : 0;
+  return (
+    <>
+      <div className="pr-body">
+        <span className="pr-label">{rest ? (i === 0 ? 'Prepare-se' : 'Descanso') : `Série ${i + 1} de ${steps.length}`}</span>
+        {rest ? (
+          <>
+            <div className="ring-timer small" style={{ '--p': pct } as CSSProperties}>
+              <div>
+                <span className="pr-clock tabular">{Math.max(0, left)}</span>
+                <span className="muted small">segundos</span>
+              </div>
+            </div>
+            <span className="muted small">A seguir</span>
+            <Boneco fig={st.ex.fig} label={st.ex.name} className="pr-boneco small" />
+            <h2>
+              {st.ex.name} <span className="muted tabular">{amountText(st)}</span>
+            </h2>
+          </>
+        ) : (
+          <>
+            <Boneco fig={st.ex.fig} label={st.ex.name} play={!paused} className="pr-boneco" />
+            <h2>{st.ex.name}</h2>
+            {st.ex.kind === 'reps' ? (
+              <p className="pr-count tabular">×{st.amount}</p>
+            ) : (
+              <div className="ring-timer small" style={{ '--p': pct } as CSSProperties}>
+                <div>
+                  <span className="pr-clock tabular">{Math.max(0, left)}</span>
+                  <span className="muted small">segundos</span>
+                </div>
+              </div>
+            )}
+            <p className="pr-guide">{st.ex.how.join(' ')}</p>
+          </>
+        )}
+        {done.current > 0 && (
+          <button type="button" className="link small" onClick={end}>
+            Terminar e salvar
+          </button>
+        )}
+      </div>
+      <div className="pr-foot">
+        {rest ? (
+          <>
+            <button type="button" className="btn" onClick={() => setLeft((l) => l + 10)}>
+              +10 s
+            </button>
+            <button type="button" className="btn primary" onClick={go}>
+              Pular descanso
+            </button>
+          </>
+        ) : (
+          <>
+            <button type="button" className="btn ghost" onClick={() => next(false)}>
+              Pular
+            </button>
+            {st.ex.kind === 'tempo' ? (
+              <button type="button" className="btn" onClick={() => setPaused(!paused)}>
+                {paused ? 'Continuar' : 'Pausar'}
+              </button>
+            ) : (
+              <button type="button" className="btn primary" onClick={() => next(true)}>
+                <Icon name="check" size={18} /> Feito
+              </button>
+            )}
+          </>
+        )}
+      </div>
+    </>
+  );
+}
+
 // ---------- Abas Mente e Corpo do Núcleo ----------
 
 function PracticeRow({ icon, tone, title, meta, rec, onClick }: { icon: IconName; tone: string; title: string; meta: string; rec?: boolean; onClick: () => void }) {
@@ -600,15 +736,26 @@ export function MindTab({ open, gratRef }: { open: (p: Practice) => void; gratRe
 
 export function BodyTab({ open }: { open: (p: Practice) => void }) {
   const { data } = useStore();
+  const [home, setHome] = useState(false);
   const rec = recommended(data.profile);
   const week = weekPractice(data.sessions);
   const walks = data.sessions.filter((x) => x.type === 'caminhada').slice(-3).reverse();
   const plans = Object.keys(WORKOUTS).sort((a, b) => (a === rec.workout ? -1 : b === rec.workout ? 1 : 0));
   return (
     <>
+      <HomeCard onOpen={() => setHome(true)} />
+      {home && (
+        <HomeWorkouts
+          onClose={() => setHome(false)}
+          onStart={(id) => {
+            setHome(false);
+            open({ kind: 'home', id });
+          }}
+        />
+      )}
       <section className="card">
         <div className="card-head">
-          <h2>Treinos</h2>
+          <h2>Fichas de treino</h2>
           <span className="muted small">
             {week.workouts} {week.workouts === 1 ? 'treino' : 'treinos'} esta semana
           </span>

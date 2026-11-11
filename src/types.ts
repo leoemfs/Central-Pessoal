@@ -620,6 +620,10 @@ export interface AppData {
   career: CareerData;
   /** Última carga usada em cada exercício (nome → kg). */
   lastLoads: Record<string, number>;
+  /** Treino em casa (M21): meta de dias com treino por semana (1 a 7). */
+  workoutGoal: number;
+  /** Treino em casa: link de vídeo de cada exercício (id → endereço). */
+  exerciseVideos: Record<string, string>;
   /** Itens excluídos (id → data), para uma futura sincronização entre aparelhos. */
   deleted: Record<string, string>;
   /** Dados da versão anterior que ainda não têm tela (ex.: receitas). */

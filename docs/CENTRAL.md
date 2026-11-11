@@ -31,7 +31,7 @@
 | **Finanças** (despesas, receitas, cartões, vales, caixinhas, orçamento, relatórios) | despesas, séries, categorias, receitas, fontes, cartões, vales, caixinhas, orçamentos | Listas (despesa de "Concluir compra"), Você (caixinha sugerida), Carreira (salário após aumento) | Início, Agenda (contas e compras no cartão do dia), Revisão, Busca, Jornada, Listas (categoria Mercado) | `finance.ts`, `incomes.ts`, `boxes.ts`, `budget.ts` |
 | **Agenda** (compromissos, tarefas, Próximos) | compromissos, tarefas | Finanças (contas e cartão), Núcleo (hábitos marcáveis), Diário (registros do dia), Você (compromissos sugeridos), Carreira (reuniões, passos das vagas, prazos e entregas, automático) | Início, Revisão, Busca, Jornada | `upcoming.ts` |
 | **Diário** (registros, Humor, Revisão) | registros, humor do dia | Humor, Mente ("Três coisas boas") e Revisão viram registros | Início, Agenda, Revisão, Busca, Jornada | `mood.ts`, `review.ts` |
-| **Núcleo pessoal** (rituais, hábitos, mente, corpo) | hábitos, práticas, última carga | Você (hábitos sugeridos), Mente e Corpo (marcam o hábito ligado) | Início, Agenda, Revisão, Jornada (atributos e XP), Humor (dias com treino) | `habits.ts`, `practices.ts` |
+| **Núcleo pessoal** (rituais, hábitos, mente, corpo, treino em casa) | hábitos, práticas, última carga, meta de treinos da semana, links de vídeo dos exercícios | Você (hábitos sugeridos), Mente e Corpo (marcam o hábito ligado) | Início, Agenda, Revisão, Jornada (atributos e XP), Humor (dias com treino) | `habits.ts`, `practices.ts` |
 | **Listas** (listas, Preços, Compras) | categorias de listas, listas, produtos, marcas, lojas, preços, compras | Finanças (categorias) | Finanças (despesa "Mercado · loja"), Início (listas fixadas) | `lists.ts` |
 | **Estudos** | estudos (áreas, trilhas, ciclos, notebooks, fontes, mapas) | nada (isolado) | nada por enquanto (N7 vai ligar à Jornada) | `estudos.ts`, `estudosCatalogo.ts` |
 | **Carreira** (vagas, trabalho atual, reuniões, projetos) | carreira (vagas, cargos, salários, reuniões, projetos) | nada | Agenda (tudo com data entra sozinho e se atualiza), Finanças (aumento atualiza o salário, se você quiser) | `carreira.ts` |
@@ -88,7 +88,7 @@
 | M3 | Preços 2.0, parte 2: "quanto custou aqui?" ao marcar o item e histórico de compras | MOD | M | média | especificado | `futuro/precos-v2.md` (item 4) |
 | M4 | Preços 2.0, parte 3: tipos de loja e filtro; editar, excluir e juntar produtos, marcas e lojas | MOD | M | média | especificado | `futuro/precos-v2.md` (itens 1 e 4) |
 | M5 | Agenda: repetição (toda semana, mês, ano) e aniversários | MOD | M | média | ideia | — (especificar antes) |
-| M6 | Núcleo: fichas de treino próprias (exercícios, séries, descanso) | MOD | M | média | especificado | `futuro/nucleo-mente-corpo.md` |
+| M6 | Núcleo: fichas de treino próprias (exercícios, séries, descanso). Pode entrar depois no M21 ("crie o seu próprio") | MOD | M | média | especificado | `futuro/nucleo-mente-corpo.md` |
 | M7 | Revisão semanal mais completa: autocuidado, caixinhas e vales da semana | MOD | P | baixa | especificado | `futuro/nucleo-mente-corpo.md`, `futuro/caixinhas.md` |
 | N1 | Módulo Saúde (água, sono, remédios, consultas, peso) | NOVO | G | média | especificado | `futuro/modulo-saude.md` |
 | N2 | Jornada completa (pixel art): missões no ritmo da pessoa, recompensas por módulo, raridades (comum a místico), Forja e Codex por coleções | NOVO | G | baixa | especificado | `futuro/modulo-rpg.md`, `futuro/jornada-recompensas.md`, `futuro/jornada-raridades.md` |
@@ -111,6 +111,7 @@
 | M17 | **Banco de ideias** em Notas: aba "Ideias" e o botão "transformar em" tarefa, objetivo ou notebook. Afeta: Notas, Agenda, Estudos | MOD | P | baixa | ideia | — |
 | N11 | **Estudos 2.0**: notebooks com páginas e subpáginas e tópicos de várias áreas; editor de texto em blocos (completo no computador, simples no celular); mapas mentais em árvore com zoom; exportar/importar Estudos com tratamento de conflito; tutorial; conteúdo nos tópicos da Biblioteca. Partes N11.1 a N11.7. Absorve o M15. Afeta: Estudos, backup | MOD | G | alta | parte pronta: N11.1 páginas (v0.26), N11.2 editor (v0.27) e N11.3 mapas mentais (v0.28); faltam N11.4 a N11.7 | `futuro/estudos-v2.md` |
 | C11 | Estudos, editor: as cores do texto ficavam paradas no meio da página ao rolar; agora ficam presas logo abaixo da barra de formatação e rolam junto | COR | P | alta | pronto (v0.28.1) | `futuro/estudos-v2.md` |
+| M21 | Treino em casa (Núcleo › Corpo; fichas A, B e C continuam): meta da semana, abas Sem equipamento · Com equipamento, 8 partes do corpo em 3 níveis, treino guiado, link de vídeo em cada exercício; bonecos animados próprios nos exercícios e nos alongamentos. Afeta: Núcleo, Início, Revisão, Humor, Jornada | MOD | M | média | pronto (v0.29) | `futuro/modulo-treinos.md` |
 | N7 | Estudos × Jornada: XP, ouro e INT por tópico, ciclo e constância; selos, Coruja e missões | NOVO | M | baixa | especificado (só documento) | `futuro/estudos-jornada.md` |
 | N8 | Módulo Carreira (próprio, fora de Estudos): vagas e candidaturas, metas de carreira, currículo e conquistas, trabalho atual (cargos, salários, feedbacks). Dividido em N8.0 a N8.4 | NOVO | G | média | parte pronta: Vagas (v0.22), Trabalho e Reuniões (v0.23), Projetos e Agenda automática (v0.24); faltam N8.3 Currículo e N8.4 Metas (agora dentro de Objetivos, N10) | `futuro/modulo-carreira.md` |
 
@@ -144,6 +145,7 @@
 ## Feito
 | Versão | O que entrou | PR |
 |---|---|---|
+| v0.29 | M21 Treino em casa no Núcleo › Corpo: meta da semana, Sem/Com equipamento, 8 partes do corpo × 3 níveis, treino guiado, link de vídeo; 47 bonecos animados próprios (exercícios e alongamentos). A ficha "Treino em casa" antiga passou a se chamar "Circuito em casa" | #37 |
 | v0.28.1 | C11: paleta de cores do editor acompanha a barra ao rolar | #36 |
 | v0.28 | N11.3 Estudos 2.0: mapas mentais em árvore (ramos e sub-ramos, editar, mover, mudar de ramo, recolher, cores, zoom, arrastar e pinça, salva sozinho), ligados a notebook ou página; mapas antigos convertidos | #35 |
 | v0.27.1 | C10: telas alinhadas no computador (coluna central de 980 px para cabeçalho, cartões e chips) | — |
