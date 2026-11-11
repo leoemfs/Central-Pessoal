@@ -16,7 +16,7 @@ import { uid } from './utils';
  * ID do cliente OAuth (Google Cloud Console › Clientes, termina em .apps.googleusercontent.com).
  * Não é segredo: vai no código do site. Vazio = o cartão "Conta Google" não aparece.
  */
-const CLIENT_ID = '';
+const CLIENT_ID = '997356157870-6pk11auqsjpliq8eth7o3vp3tdcpeo7k.apps.googleusercontent.com';
 export const GOOGLE_CLIENT_ID: string = (import.meta.env.VITE_GOOGLE_CLIENT_ID as string | undefined) || CLIENT_ID;
 
 const STATE_KEY = 'central-pessoal:google';
