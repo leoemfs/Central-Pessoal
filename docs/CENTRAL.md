@@ -49,6 +49,7 @@
 - 08/11: anexar os slides das apresentações (sexta sim, sexta não: avanços do setor de repasse e gestão de contratos de prestadores) dentro da reunião. Hoje só dá para guardar o link. Junta com "anexar PDF ou imagem" de Estudos. Entra no **N9.3** (anexos guardados no Drive).
 - 08/11: Estudos: cronograma de estudos com calendário dentro do módulo, sincronizado com a Agenda do app.
 - 08/11: Você: perguntas de carreira (emprego atual, carreira desejada, melhorias na atual, caminhos até a desejada) para a carreira desejada orientar os tópicos sugeridos em Estudos. Conferir com N10 (Objetivos) e N8.
+- 11/11: mudar o **nome visual** do app (nome embaixo do ícone, título e textos dentro do app). Endereço e repositório continuam iguais. Esperando o nome novo. Tamanho P.
 
 ## Itens
 | ID | Item | Frente | Tam. | Prior. | Situação | Documento |
