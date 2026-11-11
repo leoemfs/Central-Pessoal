@@ -139,7 +139,7 @@
 ## Feito
 | Versão | O que entrou | PR |
 |---|---|---|
-| v0.43 | N9.5: lembretes no Google Agenda (agenda "Central Pessoal" com compromissos, contas e tarefas, aviso no celular, só de ida) + correção: a junção de configurações passa a ser campo a campo | #45 |
+| v0.43 | N9.5: lembretes no Google Agenda (agenda "Central Pessoal" com compromissos, contas e tarefas, aviso no celular, só de ida) + correção: a junção de configurações passa a ser campo a campo | #46 |
 | v0.42 | N9.3a: fotos no Diário (até 6 por registro, tela cheia), guardadas no aparelho e sincronizadas pelo Drive; foto tirada ou registro excluído some nos dois aparelhos | #44 |
 | v0.41 | N9.2: sincronização automática entre aparelhos (ao abrir, ao voltar, a cada 5 min e depois de cada mudança), juntando item por item: o que foi criado em cada aparelho fica nos dois, vale a alteração mais recente, exclusão não "ressuscita". Saiu a escolha de cópia | #43 |
 | v0.40.1 | N9.1: ID do cliente Google configurado; o cartão "Conta Google" aparece em Configurações | #42 |
