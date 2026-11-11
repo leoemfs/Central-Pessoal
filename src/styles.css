@@ -6349,3 +6349,16 @@ details.kept > summary h2 {
 details.kept[open] > summary {
   margin-bottom: 8px;
 }
+
+/* ---------- v0.33: Estudos no Início e na Revisão (M11) ---------- */
+.study-now .row-body {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.review-study-cycle {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 10px;
+}

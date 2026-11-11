@@ -442,3 +442,26 @@ export function normalizeStudy(raw: unknown): StudyData {
     })),
   };
 }
+
+// ---------- Estudos no dia a dia (M11): Início e Revisão ----------
+
+/** Ciclos em andamento (com tópico a fazer ou estudando), do mais recente para o mais antigo. */
+export function activeCycles(study: StudyData): StudyCycle[] {
+  return study.cycles.filter((c) => !c.finishedAt && c.topics.some((t) => t.status !== 'feito')).sort((a, b) => b.startedAt.localeCompare(a.startedAt));
+}
+
+/** "O que estudei nesta semana": tópicos concluídos, ciclos andando e dias com anotação (de `start` a `last`). */
+export function studyWeek(study: StudyData, start: string, last: string) {
+  const lib = library(study);
+  const inWeek = (d: string | null | undefined) => !!d && d.slice(0, 10) >= start && d.slice(0, 10) <= last;
+  const topicsDone: { id: string; name: string; cycle: string }[] = [];
+  for (const c of study.cycles)
+    for (const t of c.topics) if (t.status === 'feito' && inWeek(t.doneAt) && !topicsDone.some((x) => x.id === t.id)) topicsDone.push({ id: t.id, name: lib.topic(t.id)?.name ?? 'Tópico', cycle: c.name });
+  const noteDays = new Set<string>();
+  for (const nb of study.notebooks) {
+    for (const p of nb.pages) if (inWeek(p.updatedAt)) noteDays.add(p.updatedAt.slice(0, 10));
+    for (const l of nb.log) if (inWeek(l.at)) noteDays.add(l.at.slice(0, 10));
+  }
+  const cycles = activeCycles(study).map((c) => ({ id: c.id, name: c.name, ...cycleCounts(c) }));
+  return { topicsDone, noteDays: noteDays.size, cycles };
+}

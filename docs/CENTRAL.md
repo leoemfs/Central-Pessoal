@@ -33,7 +33,7 @@
 | **Diário** (registros, Humor, Revisão) | registros, humor do dia | Humor, Mente ("Três coisas boas") e Revisão viram registros | Início, Agenda, Revisão, Busca, Jornada | `mood.ts`, `review.ts` |
 | **Núcleo pessoal** (rituais, hábitos, mente, corpo, treino em casa) | hábitos, práticas, última carga, meta de treinos da semana, links de vídeo dos exercícios | Você (hábitos sugeridos), Mente e Corpo (marcam o hábito ligado) | Início, Agenda, Revisão, Jornada (atributos e XP), Humor (dias com treino) | `habits.ts`, `practices.ts` |
 | **Listas** (listas, Preços, Compras) | categorias de listas, listas, produtos, marcas, lojas, preços, compras | Finanças (categorias) | Finanças (despesa "Mercado · loja"), Início (listas fixadas) | `lists.ts` |
-| **Estudos** | estudos (áreas, trilhas, ciclos, notebooks, fontes, mapas) | nada (isolado) | nada por enquanto (N7 vai ligar à Jornada) | `estudos.ts`, `estudosCatalogo.ts` |
+| **Estudos** | estudos (áreas, trilhas, ciclos, notebooks, fontes, mapas) | nada (isolado) | Início ("Estudando agora"), Revisão ("O que estudei"); N7 vai ligar à Jornada | `estudos.ts`, `estudosCatalogo.ts` |
 | **Carreira** (vagas, trabalho atual, reuniões, projetos) | carreira (vagas, cargos, salários, reuniões, projetos) | nada | Agenda (tudo com data entra sozinho e se atualiza), Finanças (aumento atualiza o salário, se você quiser) | `carreira.ts` |
 | **Você** | perfil | Núcleo (hábitos) e Caixinhas (para sugerir) | Núcleo (hábito), Agenda (compromissos), Finanças (caixinha), Início | `profile.ts` |
 | **Notas** | notas | nada | Busca | — |
@@ -100,7 +100,7 @@
 | N6 | Módulo Estudos e Carreira: Biblioteca (áreas, trilhas, tópicos de referência), Ciclos pessoais, Meus notebooks, Fontes, Mapas mentais e Roadmaps | NOVO | G | média | pronto (v0.21), em teste por 3 dias | `futuro/modulo-estudos.md` |
 | N8.5 | Carreira × Agenda automática: tudo que tem data em Carreira (reuniões, passos das vagas e, depois, projetos) aparece sozinho na Agenda do app e se atualiza quando muda; some se for excluído. Sem botão "Pôr na Agenda" | NOVO | P | alta | pronto (v0.24) | `futuro/modulo-carreira.md` |
 | N8.6 | Carreira: **Projetos do trabalho** (ex.: repasse, contratos de prestadores) com prazo, entregas com data, situação e ligação com as reuniões; prazos e entregas na Agenda | NOVO | M | alta | pronto (v0.24) | `futuro/modulo-carreira.md` |
-| M11 | Estudos no dia a dia: cartão "Estudando agora" no Início e "O que estudei" na Revisão semanal. Afeta: Início, Revisão | MOD | P | alta | ideia | `futuro/modulo-estudos.md` |
+| M11 | Estudos no dia a dia: cartão "Estudando agora" no Início e "O que estudei" na Revisão semanal. Afeta: Início, Revisão | MOD | P | alta | pronto (v0.33) | `futuro/modulo-estudos.md` |
 | M12 | Estudos: lápis para subir, descer e ocultar cartões (como no Início e em Finanças). Afeta: só Estudos | MOD | P | média | ideia | `futuro/modulo-estudos.md`, `futuro/navegacao-v2.md` |
 | M13 | Estudos: busca dentro do módulo (tópicos, notebooks, fontes); parte do E6. Afeta: Busca | MOD | P | média | ideia | `futuro/modulo-estudos.md`, `futuro/navegacao-v2.md` |
 | M14 | Estudos: anexar PDF ou imagem no notebook (hoje só link). Afeta: backup (arquivos pesados) | MOD | M | baixa | ideia | `futuro/modulo-estudos.md` |
@@ -145,6 +145,7 @@
 ## Feito
 | Versão | O que entrou | PR |
 |---|---|---|
+| v0.33 | M11: cartão "Estudando agora" no Início (ciclos em andamento, progresso e o tópico da vez) e "O que estudei" na Revisão semanal (tópicos concluídos, dias com anotação e ciclos) | #38 |
 | v0.32 | M1: pausar hábitos (até uma data ou sem data; a sequência congela e não conta falta) e arquivar (sai de tudo, histórico fica; comemora a marca do hábito a abandonar), com seções Pausados e Arquivados no Núcleo | #38 |
 | v0.31 | E14 + resto do E1: montagem do app na primeira abertura (áreas, módulos à vista, favoritos, ritmo do Diário, barra e cor, Jornada), tutorial da barra em 6 passos, convite "Monte o app do seu jeito" para quem já usa, módulos guardados no Mais e cartão do ritmo do Diário no Início | #38 |
 | v0.30 | C3: dados com defeito não deixam mais o app em branco (cada registro é conferido ao abrir; o que não tem conserto fica guardado à parte), tela de erro com Exportar backup / Recarregar / Configurações, e "Desfazer importação" (também desfaz "apagar tudo") | #38 |

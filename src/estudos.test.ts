@@ -216,3 +216,20 @@ test('texto rico: documento salvo passa inteiro; lixo vira documento vazio', () 
   assert.deepEqual(r.doc, emptyDoc());
   assert.deepEqual(normalizeDoc(JSON.parse(JSON.stringify(rico))), rico);
 });
+
+test('M11: semana de estudo e ciclos em andamento', async () => {
+  const { activeCycles, studyWeek, emptyStudy } = await import('./estudos.ts');
+  const study = {
+    ...emptyStudy(),
+    cycles: [
+      { id: 'c1', name: 'Inglês 1', trackId: 't', topics: [{ id: 'x1', status: 'feito' as const, doneAt: '2026-11-10' }, { id: 'x2', status: 'andando' as const, doneAt: null }], notebookId: null, startedAt: '2026-11-01', finishedAt: null, createdAt: '2026-11-01' },
+      { id: 'c2', name: 'Antigo', trackId: 't', topics: [{ id: 'y1', status: 'feito' as const, doneAt: '2026-10-01' }], notebookId: null, startedAt: '2026-09-01', finishedAt: null, createdAt: '2026-09-01' },
+    ],
+    notebooks: [{ id: 'n', name: 'N', desc: '', trackId: null, pages: [{ id: 'p', parentId: null, name: 'P', topicId: null, doc: { type: 'doc' }, sourceIds: [], updatedAt: '2026-11-11T10:00:00Z' }], log: [{ at: '2026-11-09T09:00:00Z', text: 'x' }], createdAt: '', updatedAt: '' }],
+  };
+  assert.deepEqual(activeCycles(study).map((c) => c.id), ['c1']);
+  const w = studyWeek(study, '2026-11-09', '2026-11-15');
+  assert.deepEqual(w.topicsDone.map((t) => t.id), ['x1']);
+  assert.equal(w.noteDays, 2);
+  assert.equal(w.cycles[0].done, 1);
+});

@@ -3,9 +3,10 @@ import { useMemo, useState } from 'react';
 import { useStore } from '../store';
 import { upsert } from '../actions';
 import { defaultReviewWeek, weekReview, weekStart } from '../review';
+import { studyWeek } from '../estudos';
 import type { JournalEntry } from '../types';
 import { addDays, formatDate, formatDateTime, formatMoney, todayISO, uid } from '../utils';
-import { CategoryBadge, Empty, Field, Icon, MonthNav, PageHeader, Pill } from '../ui';
+import { CategoryBadge, Empty, Field, Icon, MonthNav, PageHeader, Pill, Progress } from '../ui';
 import { BillRow } from './financas/Financas';
 import { useCategoryOf } from './financas/shared';
 import { entryTitle } from './Diario';
@@ -19,6 +20,12 @@ export function Revisao() {
   const today = todayISO();
   const [start, setStart] = useState(defaultReviewWeek(today));
   const r = useMemo(() => weekReview(data, start, today), [data, start, today]);
+  // M11: Estudos na revisão (só se o módulo está à vista e tem algo para mostrar).
+  const study = useMemo(() => {
+    if (data.settings.hiddenModules.includes('estudos')) return null;
+    const w = studyWeek(data.study, r.start, r.end < today ? r.end : today);
+    return w.topicsDone.length || w.noteDays || w.cycles.length ? w : null;
+  }, [data.study, data.settings.hiddenModules, r.start, r.end, today]);
   const label = `${short(start)} – ${short(r.end)}`;
   const title = `Revisão da semana ${label}`;
   const existing = data.journal.find((j) => j.tag === 'Revisão' && j.title === title);
@@ -216,6 +223,46 @@ export function Revisao() {
             </div>
           </dl>
         </section>
+
+        {study && (
+          <section className="card">
+            <div className="card-head">
+              <h2>O que estudei</h2>
+              <a className="link" href="#/estudos">Abrir</a>
+            </div>
+            <dl className="detail-rows">
+              <div>
+                <dt>Tópicos concluídos</dt>
+                <dd>{study.topicsDone.length}</dd>
+              </div>
+              <div>
+                <dt>Dias com anotação</dt>
+                <dd>{study.noteDays}</dd>
+              </div>
+            </dl>
+            {study.topicsDone.length > 0 && (
+              <ul className="list">
+                {study.topicsDone.slice(0, 6).map((t) => (
+                  <li key={t.id} className="row">
+                    <Icon name="check" size={16} />
+                    <div className="row-body">
+                      <span className="row-title">{t.name}</span>
+                      <span className="row-meta">{t.cycle}</span>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            )}
+            {study.cycles.map((c) => (
+              <div key={c.id} className="review-study-cycle">
+                <span className="small">
+                  {c.name} · {c.done} de {c.total}
+                </span>
+                <Progress pct={c.pct} />
+              </div>
+            ))}
+          </section>
+        )}
 
         <section className="card">
           <div className="card-head">

@@ -23,6 +23,7 @@ import { BillRow } from './financas/Financas';
 import { useCategoryOf } from './financas/shared';
 import { JournalRhythmCard, SetupInvite } from './Montagem';
 import { isHidden } from '../setup';
+import { activeCycles, cycleCounts, library } from '../estudos';
 
 function SeeAll({ href, label = 'Ver tudo' }: { href: string; label?: string }) {
   return (
@@ -39,9 +40,45 @@ function greetingEmoji(): string {
 }
 
 /** Cartões do Início que pertencem a um módulo (somem se ele estiver guardado). */
-const OF_MODULE: Record<string, string> = { guardar: 'financas', orcamento: 'financas', vale: 'financas', listas: 'listas', ritmo: 'diario', revisao: 'diario', paravoce: 'voce' };
+const OF_MODULE: Record<string, string> = { estudos: 'estudos', guardar: 'financas', orcamento: 'financas', vale: 'financas', listas: 'listas', ritmo: 'diario', revisao: 'diario', paravoce: 'voce' };
 
 const plural = (n: number, one: string, many: string) => `${n} ${n === 1 ? one : many}`;
+
+/** M11: ciclos de Estudos em andamento, com o próximo tópico. Some se não houver ciclo. */
+function StudyNow() {
+  const { data } = useStore();
+  const cycles = useMemo(() => activeCycles(data.study).slice(0, 2), [data.study]);
+  if (!cycles.length) return null;
+  const lib = library(data.study);
+  return (
+    <section className="card">
+      <div className="card-head">
+        <h2>Estudando agora</h2>
+        <SeeAll href="#/ciclos" label="Ciclos" />
+      </div>
+      <ul className="list">
+        {cycles.map((c) => {
+          const n = cycleCounts(c);
+          const next = c.topics.find((t) => t.status === 'andando') ?? c.topics.find((t) => t.status === 'afazer');
+          return (
+            <li key={c.id}>
+              <a className="row study-now" href={`#/ciclos/${c.id}`}>
+                <span className="row-body">
+                  <span className="row-title">{c.name}</span>
+                  <Progress pct={n.pct} />
+                  <span className="row-meta">
+                    {n.done} de {n.total} tópicos{next ? ` · agora: ${lib.topic(next.id)?.name ?? 'próximo tópico'}` : ''}
+                  </span>
+                </span>
+                <Icon name="right" size={18} />
+              </a>
+            </li>
+          );
+        })}
+      </ul>
+    </section>
+  );
+}
 
 export function Dashboard() {
   const { data, update } = useStore();
@@ -132,6 +169,9 @@ export function Dashboard() {
     ) },
     { id: 'listas', label: 'Listas fixadas', node: (
       <PinnedLists />
+    ) },
+    { id: 'estudos', label: 'Estudando agora', node: (
+      <StudyNow />
     ) },
     { id: 'paravoce', label: 'Para você', node: (
       <ForYou />
