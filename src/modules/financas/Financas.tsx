@@ -3,7 +3,7 @@ import type { ViewProps } from '../../App';
 import { useStore } from '../../store';
 import { useSubAction } from '../../router';
 import {
-  billStatus, cardUsed, categoryTotals, FIXA_AHEAD, getInvoice, installmentLabel, materialize, monthBills, summarize, type Bill,
+  billStatus, cardUsed, categoryTotals, FIXA_AHEAD, getInvoice, installmentLabel, materialize, monthBills, openInvoiceMonth, summarize, type Bill,
 } from '../../finance';
 import { addMonths, formatDMY, formatMoney, formatMonth, monthKey, todayISO } from '../../utils';
 import { CategoryBadge, Chips, Empty, Icon, type IconName, MonthNav, PageHeader, Pill, Progress, Segmented, Sheet } from '../../ui';
@@ -75,6 +75,12 @@ export function Financas({ route }: ViewProps) {
 
   const bills = useMemo(() => monthBills(data, month, today), [data, month, today]);
   const summary = summarize(bills);
+  // M8: compras no cartão feitas neste mês que caem numa fatura futura (não entram no total do mês).
+  const laterOnCard = useMemo(() => {
+    const xs = data.expenses.filter((e) => e.cardId && e.purchaseDate && monthKey(e.purchaseDate) === month && e.invoiceMonth && e.invoiceMonth > month);
+    const first = [...xs].sort((a, b) => (a.invoiceMonth ?? '').localeCompare(b.invoiceMonth ?? ''))[0];
+    return { total: xs.reduce((n, e) => n + e.amount, 0), cardId: first?.cardId ?? '', month: first?.invoiceMonth ?? month };
+  }, [data.expenses, month]);
   const paidCount = bills.filter((b) => b.paidAt).length;
   const shownBills = filter === 'pagas' ? bills.filter((b) => b.paidAt) : filter === 'abertas' ? bills.filter((b) => !b.paidAt) : bills;
   const cats = useMemo(() => categoryTotals(data, month), [data, month]);
@@ -122,6 +128,11 @@ export function Financas({ route }: ViewProps) {
                       </p>
                     </button>
                   </div>
+                  {laterOnCard.total > 0 && (
+                    <button type="button" className="later-card link" onClick={() => setInvoice({ cardId: laterOnCard.cardId, month: laterOnCard.month })}>
+                      No cartão este mês: {formatMoney(laterOnCard.total)} (entram nas próximas faturas)
+                    </button>
+                  )}
                 </section>
               ) },
               { id: 'contas', label: 'Contas por vencimento', node: (
@@ -204,25 +215,39 @@ export function Financas({ route }: ViewProps) {
           ) : (
             <div className="cards-list">
               {data.cards.map((card) => {
-                // Fatura que vence no mês escolhido acima (a mesma que aparece na aba Mês).
-                const current = month;
-                const inv = getInvoice(data, card, current, today);
+                // M8: olhando o mês de hoje, o cartão mostra a fatura ABERTA (a que recebe as compras agora).
+                // Se a fatura que vence neste mês tiver valor e for outra, aparece também.
+                const viewingNow = month === monthKey(today);
+                const open = openInvoiceMonth(card, today);
+                const main = viewingNow ? open : month;
+                const inv = getInvoice(data, card, main, today);
+                const due = getInvoice(data, card, month, today);
+                const showDue = viewingNow && main !== month && due.total > 0;
                 const used = cardUsed(data, card);
+                const mName = (m: string) => formatMonth(m).split(' ')[0].toLowerCase();
                 return (
-                  <button key={card.id} type="button" className="card-tile" onClick={() => setInvoice({ cardId: card.id, month: current })}>
+                  <button key={card.id} type="button" className="card-tile" onClick={() => setInvoice({ cardId: card.id, month: main })}>
                     <CreditCardVisual name={card.name} color={card.color}>
                       Fecha dia {card.closingDay} · Vence dia {card.dueDay}
                     </CreditCardVisual>
                     <div className="card-stats">
                       <div>
-                        <span className="muted">Fatura de {formatMonth(month).split(' ')[0].toLowerCase()}</span>
+                        <span className="muted">{viewingNow ? `Fatura aberta (${mName(main)})` : `Fatura de ${mName(main)}`}</span>
                         <strong>{formatMoney(inv.total)}</strong>
                       </div>
                       <div>
-                        <span className="muted">Vencimento</span>
-                        <strong>{formatDMY(inv.dueDate)}</strong>
+                        <span className="muted">{inv.status === 'aberta' ? `Fecha ${formatDMY(inv.closingDate).slice(0, 5)}` : 'Vencimento'}</span>
+                        <strong>{inv.status === 'aberta' ? `Vence ${formatDMY(inv.dueDate).slice(0, 5)}` : formatDMY(inv.dueDate)}</strong>
                       </div>
                     </div>
+                    {showDue && (
+                      <div className="toggle-row card-due-row">
+                        <span className="small">
+                          Vence em {mName(month)} ({formatDMY(due.dueDate).slice(0, 5)}): <b>{formatMoney(due.total)}</b>
+                        </span>
+                        <InvoiceStatusPill invoice={due} />
+                      </div>
+                    )}
                     <div className="toggle-row">
                       <InvoiceStatusPill invoice={inv} />
                       {card.limit ? <span className="muted small">Disponível {formatMoney(card.limit - used)}</span> : null}

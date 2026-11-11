@@ -53,7 +53,7 @@
 ## Itens
 | ID | Item | Frente | Tam. | Prior. | Situação | Documento |
 |---|---|---|---|---|---|---|
-| M8 | Cartão: escolher em qual fatura a compra entra e mostrar a fatura aberta no cartão (evita a confusão de "compra sumiu") | MOD | P | média | especificado | `futuro/correcao-fatura-cartao.md` |
+| M8 | Cartão: escolher em qual fatura a compra entra e mostrar a fatura aberta no cartão (evita a confusão de "compra sumiu") | MOD | P | média | pronto (v0.36) | `futuro/correcao-fatura-cartao.md` |
 | E8 | Navegação padronizada: regra abas × barra × botão +; Núcleo (Progresso · Núcleo · Histórico), Agenda (Hoje · Agenda · Próximos), Listas (Compras · Listas · Preços, sem abas); Orçamento/Relatórios sem botões repetidos em Finanças; Categorias de Listas no botão +; mês e abas num bloco que some e volta junto | EXP | M | alta | pronto (v0.19) | `futuro/navegacao-v2.md` |
 | E9 | Barra: o módulo favorito **fica na mesma posição** ao entrar nele (Finanças 1º, Diário 2º, Agenda 3º); só os outros dois espaços viram as ferramentas do módulo, na ordem. Módulo que não é favorito entra no centro. | EXP | P | alta | pronto (v0.20.1) | `futuro/navegacao-v2.md` |
 | E10 | Barra: **escolha em Configurações** de como o módulo aparece ao entrar nele: "favorito no mesmo lugar" (v0.20.1) ou "módulo ao lado do Início" (e talvez "no centro"). Padrão a definir depois de ~3 dias de teste. Comparar na prévia "Três jeitos da barra". | EXP | P | média | pronto (v0.25) | `futuro/navegacao-v2.md` |
@@ -145,6 +145,7 @@
 ## Feito
 | Versão | O que entrou | PR |
 |---|---|---|
+| v0.36 | M8: ao lançar no cartão, "Entra na fatura de" com a fatura calculada já marcada e as vizinhas para trocar (também ao editar; parcelas e conta fixa seguem a escolhida); aviso ao salvar; o cartão mostra a fatura aberta (e a que vence no mês, se for outra); linha "No cartão este mês" na aba Mês | #38 |
 | v0.35 | E6 + M13: a lupa busca dentro do módulo aberto ("Em Finanças" · "Em tudo"); a busca passou a achar também cartões, vales, caixinhas, hábitos, listas e itens, produtos, notebooks e páginas, fontes, mapas, trilhas e tópicos, vagas, reuniões e projetos | #38 |
 | v0.34 | E3 + M12: lápis para subir, descer e ocultar cartões também na Agenda (calendário fixo), no Núcleo › Rituais (Hoje fixo; cada período é um cartão), em Listas (cada categoria é um cartão), em Estudos (bloco principal fixo) e em Carreira (Trabalho atual fixo) | #38 |
 | v0.33 | M11: cartão "Estudando agora" no Início (ciclos em andamento, progresso e o tópico da vez) e "O que estudei" na Revisão semanal (tópicos concluídos, dias com anotação e ciclos) | #38 |

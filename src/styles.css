@@ -6367,3 +6367,22 @@ details.kept[open] > summary {
 .search-scope {
   margin: 10px 0 4px;
 }
+
+/* ---------- v0.36: fatura do cartão (M8) ---------- */
+.later-card {
+  display: block;
+  width: 100%;
+  margin-top: 12px;
+  padding: 0;
+  border: 0;
+  background: none;
+  text-align: left;
+  font: inherit;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+.card-due-row {
+  margin-top: 4px;
+  padding-top: 8px;
+  border-top: 1px dashed var(--border);
+}

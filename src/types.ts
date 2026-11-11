@@ -177,6 +177,8 @@ export interface ExpenseSeries {
   count: number | null;
   /** Quantas ocorrências já foram geradas. */
   generated: number;
+  /** Cartão: fatura (AAAA-MM) escolhida para a 1ª ocorrência (M8). Sem valor, a calculada pela data. */
+  invoiceMonth?: string | null;
   createdAt: string;
 }
 

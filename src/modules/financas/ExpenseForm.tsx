@@ -1,12 +1,12 @@
 import { useState } from 'react';
 import { useStore } from '../../store';
 import {
-  addExpense, editExpense, invoiceDueDate, invoiceMonthFor, KIND_LABEL, PAYMENT_LABEL, splitAmount,
+  addExpense, editExpense, invoiceChoices, invoiceDueDate, invoiceMonthFor, KIND_LABEL, PAYMENT_LABEL, splitAmount,
   type ExpensePatch, type Scope,
 } from '../../finance';
 import type { Expense, ExpenseKind, PaymentMethod } from '../../types';
 import { addMonths, dayOf, formatDMY, formatMoney, formatMonth, todayISO } from '../../utils';
-import { CategoryBadge, Chips, Field, Icon, MoneyInput, Sheet, Toggle, type IconName } from '../../ui';
+import { CategoryBadge, Chips, Field, Icon, MoneyInput, notify, Sheet, Toggle, type IconName } from '../../ui';
 import { CategorySheet } from './CategorySheet';
 import { CardForm } from './CardForm';
 import { ScopeSheet } from './ScopeSheet';
@@ -44,6 +44,8 @@ export function ExpenseForm({ editing, initialDate, onClose }: { editing?: Expen
   const [catSheet, setCatSheet] = useState(false);
   const [cardSheet, setCardSheet] = useState(false);
   const [pendingPatch, setPendingPatch] = useState<ExpensePatch | null>(null);
+  // M8: fatura escolhida (null = a calculada pela data).
+  const [invoice, setInvoice] = useState<string | null>(editing?.invoiceMonth ?? null);
   const [error, setError] = useState('');
 
   const isCard = method === 'cartao';
@@ -57,13 +59,16 @@ export function ExpenseForm({ editing, initialDate, onClose }: { editing?: Expen
 
   const dateLabel = isCard || isVoucher ? 'Data da compra' : kind === 'parcelada' ? 'Vencimento da 1ª parcela' : kind === 'fixa' ? 'Primeiro vencimento' : 'Data de vencimento';
 
+  // Faturas possíveis: pela data da compra; numa série já lançada, em volta da fatura atual.
+  const choices = card && date ? (lockDate && editing?.invoiceMonth ? [addMonths(editing.invoiceMonth, -1), editing.invoiceMonth, addMonths(editing.invoiceMonth, 1)] : invoiceChoices(card, date)) : [];
+  const autoInvoice = card && date ? (lockDate && editing?.invoiceMonth ? editing.invoiceMonth : invoiceMonthFor(card, date)) : null;
+  const chosen = invoice && choices.includes(invoice) ? invoice : autoInvoice;
+
   let dateHint: string | undefined;
   if (card && date) {
-    const inv = invoiceMonthFor(card, date);
+    const inv = chosen ?? invoiceMonthFor(card, date);
     if (kind === 'parcelada' && !editing) {
       dateHint = `1ª parcela na fatura de ${formatMonth(inv).toLowerCase()} (vence ${formatDMY(invoiceDueDate(card, inv))}); última em ${formatMonth(addMonths(inv, count - 1)).toLowerCase()}.`;
-    } else if (!inSeries) {
-      dateHint = `Entra na fatura de ${formatMonth(inv).toLowerCase()} · vence ${formatDMY(invoiceDueDate(card, inv))}.`;
     }
   } else if (voucher) {
     const bal = voucherBalance(data, voucher) + (editing?.voucherId === voucher.id ? editing.amount : 0);
@@ -115,11 +120,13 @@ export function ExpenseForm({ editing, initialDate, onClose }: { editing?: Expen
           amounts,
           paidAt: kind === 'avulsa' && !isCard && (paidNow || isVoucher) ? (date > today ? today : date) : null,
           voucherId: isVoucher ? voucherId : null,
+          invoiceMonth: card && chosen !== invoiceMonthFor(card, date) ? chosen : null,
         }),
       );
+      if (card && chosen) notify(`Entra na fatura de ${formatMonth(chosen).toLowerCase()}`, `Vence ${formatDMY(invoiceDueDate(card, chosen))} · ${card.name}`);
       return onClose();
     }
-    const patch: ExpensePatch = { description: description.trim(), categoryId: categoryId!, amount: value, date, method, cardId: isCard ? cardId : null, voucherId: isVoucher ? voucherId : null };
+    const patch: ExpensePatch = { description: description.trim(), categoryId: categoryId!, amount: value, date, method, cardId: isCard ? cardId : null, voucherId: isVoucher ? voucherId : null, invoiceMonth: card ? chosen : null };
     if (inSeries) return setPendingPatch(patch);
     update((d) => editExpense(d, editing.id, patch, 'one'));
     onClose();
@@ -267,9 +274,25 @@ export function ExpenseForm({ editing, initialDate, onClose }: { editing?: Expen
           </div>
         )}
 
-        <Field label={dateLabel} hint={lockDate ? 'Compras no cartão mantêm a fatura original.' : dateHint}>
+        <Field label={dateLabel} hint={lockDate ? 'A data da compra fica; a fatura dá para trocar logo abaixo.' : dateHint}>
           <input type="date" className="input" value={date} disabled={lockDate} onChange={(e) => setDate(e.target.value)} />
         </Field>
+
+        {card && choices.length > 0 && (
+          <div className="field">
+            <span className="field-label">{kind === 'parcelada' ? 'A 1ª parcela entra na fatura de' : 'Entra na fatura de'}</span>
+            <div className="chips" role="radiogroup" aria-label="Fatura">
+              {choices.map((m) => (
+                <button key={m} type="button" role="radio" aria-checked={chosen === m} className={`chip-btn${chosen === m ? ' on' : ''}`} onClick={() => setInvoice(m)}>
+                  {formatMonth(m).split(' ')[0].toLowerCase()} · vence {formatDMY(invoiceDueDate(card, m)).slice(0, 5)}
+                </button>
+              ))}
+            </div>
+            <span className="muted small">
+              {chosen === autoInvoice ? 'Calculada pela data e pelo fechamento do cartão.' : 'Escolhida por você (ex.: o banco já pôs a compra nessa fatura).'}
+            </span>
+          </div>
+        )}
 
         <Field label="Descrição">
           <input className="input" value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Ex.: Parcela da moto, internet…" />

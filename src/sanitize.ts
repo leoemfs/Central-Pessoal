@@ -72,6 +72,7 @@ export function fixExpenseSeries(r: Rec, now: string): ExpenseSeries | null {
     count: intOrNull(r.count),
     generated: typeof r.generated === 'number' && r.generated >= 0 ? Math.floor(r.generated) : 0,
     createdAt: stamp(r.createdAt, now),
+    invoiceMonth: method === 'cartao' && typeof r.invoiceMonth === 'string' && MONTH.test(r.invoiceMonth) ? r.invoiceMonth : null,
   } as ExpenseSeries;
 }
 
