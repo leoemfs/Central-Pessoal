@@ -604,6 +604,7 @@ button {
 }
 .btn-row {
   display: flex;
+  flex-wrap: wrap;
   gap: 10px;
 }
 .btn-row > * {
@@ -3667,7 +3668,7 @@ h2.left {
   gap: 8px;
   height: 160px;
 }
-.col {
+.cols > .col {
   flex: 1;
   height: 100%;
   display: flex;
@@ -3682,7 +3683,7 @@ h2.left {
   padding: 0;
   font: inherit;
 }
-.col i {
+.cols > .col i {
   display: block;
   width: 100%;
   max-width: 38px;
@@ -3690,11 +3691,11 @@ h2.left {
   border-radius: 8px 8px 4px 4px;
   background: var(--raised-2);
 }
-.col.on i {
+.cols > .col.on i {
   background: var(--accent);
 }
-.col span,
-.col small {
+.cols > .col span,
+.cols > .col small {
   font-size: 0.7rem;
 }
 

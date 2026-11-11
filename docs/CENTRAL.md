@@ -62,6 +62,7 @@
 | E13 | Configurações › **Personalização**: tema e cor, favoritos do Início, jeito da barra (favorito no mesmo lugar, ao lado do Início ou no centro), "tocar de novo mostra os favoritos" e "esconder as barras ao rolar" | EXP | P | alta | pronto (v0.25) | `futuro/navegacao-v2.md` |
 | C2 | Hábitos: nome do hábito aparecia uma letra por linha quando havia "Não falhe 2x" e "Iniciar" no cartão | COR | P | alta | pronto (v0.18) | — |
 | C10 | **Telas quebradas no computador** (10/11, prints): botão + vira uma faixa oval na largura toda (Estudos › notebook); Início com cartões esticados na tela inteira; Listas com título e chips desalinhados do conteúdo; Finanças com o bloco mês + abas mais estreito que os cartões. No celular está ok | COR | P | alta | pronto (v0.27.1) | — |
+| C12 | **Telas quebradas no celular** (11/11, prints): "Monte o app do seu jeito" com os botões Começar e Agora não altos e estreitos; Configurações com "Como usar a barra" estourando o cartão (a tela dava zoom e rolava para o lado); zoom com dois dedos desligado no app (o mapa mental de Estudos continua com o zoom dele) | COR | P | alta | pronto (v0.38.1) | — |
 | C3 | **Registro defeituoso deixa o app em branco**: conferir os campos ao abrir os dados, tela de erro com saída (exportar, recarregar, Configurações) e "desfazer importação" | COR | M | **alta** | pronto (v0.30) | `auditoria-2026-11.md` |
 | C4 | Salvamento de reserva pode perder dados em silêncio (avisar e usar a cópia mais nova) | COR | P | média | ideia | `auditoria-2026-11.md` |
 | C5 | Rodar os testes em todo PR e antes de publicar (hoje só compila) | COR | P | média | pronto (v0.29.1) | `auditoria-2026-11.md` |
@@ -135,6 +136,7 @@
 ## Feito
 | Versão | O que entrou | PR |
 |---|---|---|
+| v0.38.1 | C12: botões da "Monte o app do seu jeito" no tamanho certo, botões de Configurações › Personalização quebram linha em vez de estourar a tela, e zoom com dois dedos desligado (mapa mental mantém o zoom próprio) | #39 |
 | v0.38 | M7: Revisão semanal com "Autocuidado e dinheiro guardado" (minutos de meditação e respiração, treinos, alongamentos e caminhadas; guardado e tirado das caixinhas; gasto e saldo dos vales) | #38 |
 | v0.37 | N8.3 Carreira › Currículo: abas Trabalho · Currículo; experiências, formação, cursos e certificados, idiomas, habilidades e conquistas (com resultado); "Trazer de Estudos" põe ciclos concluídos como curso; "Item no currículo" no botão + | #38 |
 | v0.36 | M8: ao lançar no cartão, "Entra na fatura de" com a fatura calculada já marcada e as vizinhas para trocar (também ao editar; parcelas e conta fixa seguem a escolhida); aviso ao salvar; o cartão mostra a fatura aberta (e a que vence no mês, se for outra); linha "No cartão este mês" na aba Mês | #38 |
