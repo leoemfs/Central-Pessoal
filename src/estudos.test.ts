@@ -128,9 +128,10 @@ test('notebook a partir da trilha, assuntos sem duplicar e mapa sugerido', () =>
   assert.equal(livre.name, 'Novo notebook');
   assert.equal(livre.pages.length, 1);
   const m = mapFromSuggestion(SUGGESTED_MAPS[0], 'agora');
-  assert.equal(m.branches.length, SUGGESTED_MAPS[0].branches.length);
-  m.branches[0].leaves.push('x');
-  assert.notEqual(SUGGESTED_MAPS[0].branches[0][1].length, m.branches[0].leaves.length);
+  assert.equal(m.root.text, SUGGESTED_MAPS[0].center);
+  assert.equal(m.root.children.length, SUGGESTED_MAPS[0].branches.length);
+  m.root.children[0].children.push({ id: 'x', text: 'x', color: null, collapsed: false, children: [] });
+  assert.notEqual(SUGGESTED_MAPS[0].branches[0][1].length, m.root.children[0].children.length);
   assert.deepEqual(moveItem([1, 2, 3], 0, 1), [2, 1, 3]);
   assert.deepEqual(moveItem([1, 2, 3], 2, 1), [1, 2, 3]);
 });

@@ -4,8 +4,9 @@
  * - Ciclo = seleção pessoal de tópicos de uma trilha. Criar, mudar ou concluir um ciclo nunca mexe na trilha.
  * - Recomendações ("estude X antes") são só avisos.
  */
-import type { RichNode, SourceKind, StudyBlock, StudyCycle, StudyData, StudyMap, StudyNotebook, StudyPage, StudyStatus } from './types.ts';
+import type { MapNode, RichNode, SourceKind, StudyBlock, StudyCycle, StudyData, StudyMap, StudyNotebook, StudyPage, StudyStatus } from './types.ts';
 import { CATALOG, slug, type CatMap, type CatSource, type CatTopic } from './estudosCatalogo.ts';
+import { fromBranches, normalizeMapRoot } from './mapas.ts';
 import { uid } from './utils.ts';
 
 export const SOURCE_KINDS: { value: SourceKind; label: string; icon: string }[] = [
@@ -343,8 +344,12 @@ export function setPageParent(nb: StudyNotebook, id: string, parentId: string | 
   return { ...nb, pages: nb.pages.map((p) => (p.id === id ? { ...p, parentId } : p)) };
 }
 
+export function newMap(name: string, root: MapNode, now: string, notebookId: string | null = null, pageId: string | null = null): StudyMap {
+  return { id: uid(), name: name.trim() || 'Novo mapa', root, notebookId, pageId, createdAt: now, updatedAt: now };
+}
+
 export function mapFromSuggestion(s: CatMap, now: string): StudyMap {
-  return { id: uid(), name: s.name, center: s.center, branches: s.branches.map(([label, leaves]) => ({ id: uid(), label, leaves: [...leaves] })), notebookId: null, createdAt: now, updatedAt: now };
+  return newMap(s.name, fromBranches(s.center, s.branches.map(([label, leaves]) => ({ label, leaves }))), now);
 }
 
 /** Uma fonte já guardada com o mesmo endereço (ou mesmo título, se não houver endereço). */
@@ -429,9 +434,9 @@ export function normalizeStudy(raw: unknown): StudyData {
     maps: recs(r.maps).map((m) => ({
       id: m.id as string,
       name: str(m.name, 'Mapa'),
-      center: str(m.center, str(m.name, 'Ideia')),
-      branches: recs(m.branches).map((b) => ({ id: b.id as string, label: str(b.label, 'Ramo'), leaves: strs(b.leaves) })),
+      root: normalizeMapRoot(m),
       notebookId: typeof m.notebookId === 'string' ? m.notebookId : null,
+      pageId: typeof m.pageId === 'string' ? m.pageId : null,
       createdAt: str(m.createdAt, now),
       updatedAt: str(m.updatedAt, now),
     })),

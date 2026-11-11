@@ -1,6 +1,6 @@
 # Estudos 2.0: notebooks com páginas, editor, mapas e sincronização (N11)
 
-> Situação: **N11.1 pronta na v0.26 e N11.2a/b na v0.27 (10/11)**; as outras partes aguardam aprovação, uma de cada vez. Documento do Leonardo "Módulo Estudos: evolução funcional e experiência de uso" recebido na conversa; aqui ficam o resumo, as recomendações e a divisão em partes.
+> Situação: **N11.1 (v0.26), N11.2a/b (v0.27) e N11.3 (v0.28) prontas**; as outras partes aguardam aprovação, uma de cada vez. Documento do Leonardo "Módulo Estudos: evolução funcional e experiência de uso" recebido na conversa; aqui ficam o resumo, as recomendações e a divisão em partes.
 > Nada aqui está construído. Base atual: `modulo-estudos.md` (v0.21).
 
 ## Objetivo
@@ -47,6 +47,16 @@ E uma quarta, do editor: **o celular pode ter menos botões, nunca menos conteú
 1. **Ciclos continuam.** A barra da trilha tem "Notebook" e "Montar ciclo".
 2. **Editor com biblioteca pronta** (Tiptap), na N11.2.
 3. **Subpáginas: um nível.**
+
+## O que foi construído (v0.28, N11.3)
+- **Árvore:** ideia central → ramos → sub-ramos (até 6 níveis). Dados em `StudyMap.root` (`MapNode`: texto, cor, recolhido, filhos); mapas antigos (centro + ramos + detalhes) convertidos em `normalize()` sem perda. Regras em `src/mapas.ts`, 5 testes em `src/mapas.test.ts`.
+- **Desenho:** automático, para os dois lados (metade dos ramos à direita, metade à esquerda), sem sobreposição; cada ramo principal com uma cor, os sub-ramos herdam; a central em verde. Linhas curvas. Texto comprido é cortado no desenho e aparece inteiro no painel.
+- **Editar:** tocar numa ideia seleciona; o painel embaixo tem o texto, "Dentro" (sub-ramo), "Ao lado", "Subir", "Descer", "Mudar de ramo" (lista dos lugares possíveis), "Recolher/Expandir", 8 cores e "Excluir" (com ideias dentro pede confirmação). Ao criar, o cursor vai para o texto novo. No teclado: Enter cria ao lado, Tab cria dentro, Delete exclui.
+- **Navegar:** arrastar move, pinça e rodinha do mouse aproximam, botões −, + e "Ajustar". Abre num tamanho legível centrado na ideia central; "Ajustar" mostra o mapa inteiro. A ideia selecionada sempre fica à vista. Alvos de toque grandes (bolinha de recolher com área de toque maior).
+- **Recolher:** a bolinha na ponta do ramo recolhe e expande; recolhido, mostra quantas ideias guarda.
+- **Notebook:** o mapa pode ser do notebook inteiro ou de uma página (`pageId`). A página tem o cartão "Mapas desta página" e o + oferece "Mapa mental desta página" (a ideia central já vem com o nome da página).
+- Salva a cada mudança. Miniaturas reais (o mesmo desenho, parado) na lista e nas sugestões.
+- Arrastar as ideias com o dedo para outro ramo ficou de fora (usa "Mudar de ramo"), para não confundir com arrastar o mapa.
 
 ## O que foi construído (v0.27, N11.2a e N11.2b)
 - **Editor de texto** em cada página (biblioteca Tiptap 3.33.1, carregada só ao abrir uma página; arquivo separado de ~137 KB compactado).
