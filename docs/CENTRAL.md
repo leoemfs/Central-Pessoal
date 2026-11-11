@@ -144,7 +144,7 @@
 ## Feito
 | Versão | O que entrou | PR |
 |---|---|---|
-| v0.28.1 | C11: paleta de cores do editor acompanha a barra ao rolar | PRNUM |
+| v0.28.1 | C11: paleta de cores do editor acompanha a barra ao rolar | #36 |
 | v0.28 | N11.3 Estudos 2.0: mapas mentais em árvore (ramos e sub-ramos, editar, mover, mudar de ramo, recolher, cores, zoom, arrastar e pinça, salva sozinho), ligados a notebook ou página; mapas antigos convertidos | #35 |
 | v0.27.1 | C10: telas alinhadas no computador (coluna central de 980 px para cabeçalho, cartões e chips) | — |
 | v0.27 | N11.2a e b Estudos 2.0: editor de texto nas páginas dos notebooks (títulos, listas, checklist, citação, divisor, alternante, negrito, itálico, sublinhado, destaque, cores, link, imagem, mover blocos); barra simples no celular e completa no computador; anotações antigas convertidas | #33 |
