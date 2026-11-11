@@ -60,6 +60,7 @@
 | E11 | Botão **voltar** (do celular): numa ferramenta da barra (ex.: Finanças / Orçamento), voltar leva para a **casa do módulo** (Finanças); voltar de novo leva para o **Início**. Não percorre todo o caminho de telas já abertas. | EXP | P | alta | pronto (v0.25) | `futuro/navegacao-v2.md` |
 | E12 | Trocar de módulo sem passar pelo Início: tocar de novo no módulo em que você está mostra os favoritos na barra | EXP | P | alta | pronto (v0.25) | `futuro/navegacao-v2.md` |
 | E13 | Configurações › **Personalização**: tema e cor, favoritos do Início, jeito da barra (favorito no mesmo lugar, ao lado do Início ou no centro), "tocar de novo mostra os favoritos" e "esconder as barras ao rolar" | EXP | P | alta | pronto (v0.25) | `futuro/navegacao-v2.md` |
+| E15 | Configurações: tirar os atalhos "Categorias de Finanças" e "Categorias de Listas" (11/11). Elas já ficam no botão + de cada módulo; segue a regra "cada coisa em um lugar só" | EXP | P | média | pronto (v0.43.1) | — |
 | C2 | Hábitos: nome do hábito aparecia uma letra por linha quando havia "Não falhe 2x" e "Iniciar" no cartão | COR | P | alta | pronto (v0.18) | — |
 | C10 | **Telas quebradas no computador** (10/11, prints): botão + vira uma faixa oval na largura toda (Estudos › notebook); Início com cartões esticados na tela inteira; Listas com título e chips desalinhados do conteúdo; Finanças com o bloco mês + abas mais estreito que os cartões. No celular está ok | COR | P | alta | pronto (v0.27.1) | — |
 | C12 | **Telas quebradas no celular** (11/11, prints): "Monte o app do seu jeito" com os botões Começar e Agora não altos e estreitos; Configurações com "Como usar a barra" estourando o cartão (a tela dava zoom e rolava para o lado); zoom com dois dedos desligado no app (o mapa mental de Estudos continua com o zoom dele) | COR | P | alta | pronto (v0.38.1) | — |
@@ -139,6 +140,7 @@
 ## Feito
 | Versão | O que entrou | PR |
 |---|---|---|
+| v0.43.1 | E15: Configurações sem os atalhos de Categorias (ficam só no botão + de Finanças e de Listas). Tinha ficado de fora do #39, que foi mesclado antes | #45 |
 | v0.43 | N9.5: lembretes no Google Agenda (agenda "Central Pessoal" com compromissos, contas e tarefas, aviso no celular, só de ida) + correção: a junção de configurações passa a ser campo a campo | #46 |
 | v0.42 | N9.3a: fotos no Diário (até 6 por registro, tela cheia), guardadas no aparelho e sincronizadas pelo Drive; foto tirada ou registro excluído some nos dois aparelhos | #44 |
 | v0.41 | N9.2: sincronização automática entre aparelhos (ao abrir, ao voltar, a cada 5 min e depois de cada mudança), juntando item por item: o que foi criado em cada aparelho fica nos dois, vale a alteração mais recente, exclusão não "ressuscita". Saiu a escolha de cópia | #43 |

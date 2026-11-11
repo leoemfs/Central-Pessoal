@@ -267,27 +267,6 @@ export function Ajustes() {
       </section>
       {favPick && <FavoritesSheet onClose={() => setFavPick(false)} />}
 
-      <a className="tile" href="#/financas/categorias">
-        <span className="tile-icon">
-          <Icon name="wallet" />
-        </span>
-        <span className="tile-text">
-          <strong>Categorias de Finanças</strong>
-          <span className="muted">Agora ficam em Finanças, no botão +</span>
-        </span>
-        <Icon name="right" size={18} />
-      </a>
-      <a className="tile" href="#/listas/categorias">
-        <span className="tile-icon">
-          <Icon name="cart" />
-        </span>
-        <span className="tile-text">
-          <strong>Categorias de Listas</strong>
-          <span className="muted">Ficam em Listas, no botão +</span>
-        </span>
-        <Icon name="right" size={18} />
-      </a>
-
       <GoogleCard onMessage={setMessage} />
 
       <section className="card">
