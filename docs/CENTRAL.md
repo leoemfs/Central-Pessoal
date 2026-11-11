@@ -136,7 +136,7 @@
 ## Feito
 | Versão | O que entrou | PR |
 |---|---|---|
-| v0.38.1 | C12: botões da "Monte o app do seu jeito" no tamanho certo, botões de Configurações › Personalização quebram linha em vez de estourar a tela, e zoom com dois dedos desligado (mapa mental mantém o zoom próprio) | — |
+| v0.38.1 | C12: botões da "Monte o app do seu jeito" no tamanho certo, botões de Configurações › Personalização quebram linha em vez de estourar a tela, e zoom com dois dedos desligado (mapa mental mantém o zoom próprio) | #39 |
 | v0.38 | M7: Revisão semanal com "Autocuidado e dinheiro guardado" (minutos de meditação e respiração, treinos, alongamentos e caminhadas; guardado e tirado das caixinhas; gasto e saldo dos vales) | #38 |
 | v0.37 | N8.3 Carreira › Currículo: abas Trabalho · Currículo; experiências, formação, cursos e certificados, idiomas, habilidades e conquistas (com resultado); "Trazer de Estudos" põe ciclos concluídos como curso; "Item no currículo" no botão + | #38 |
 | v0.36 | M8: ao lançar no cartão, "Entra na fatura de" com a fatura calculada já marcada e as vizinhas para trocar (também ao editar; parcelas e conta fixa seguem a escolhida); aviso ao salvar; o cartão mostra a fatura aberta (e a que vence no mês, se for outra); linha "No cartão este mês" na aba Mês | #38 |
