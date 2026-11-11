@@ -6362,3 +6362,8 @@ details.kept[open] > summary {
   gap: 6px;
   margin-top: 10px;
 }
+
+/* ---------- v0.35: busca por módulo (E6 + M13) ---------- */
+.search-scope {
+  margin: 10px 0 4px;
+}

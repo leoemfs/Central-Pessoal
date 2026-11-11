@@ -39,7 +39,7 @@
 | **Notas** | notas | nada | Busca | — |
 | **Jornada** (bloqueada) | ajustes da Jornada | Finanças, Agenda, Diário, Núcleo (dias de uso, XP, ouro) | nada por enquanto | `journey.ts`, `jornada/` |
 
-**Telas que juntam tudo** (mexeu num módulo, conferir estas): **Início** (quase todos), **Revisão semanal** (Finanças, Agenda, Diário, Núcleo, humor), **Busca** (Diário, Finanças, Agenda, Notas).
+**Telas que juntam tudo** (mexeu num módulo, conferir estas): **Início** (quase todos), **Revisão semanal** (Finanças, Agenda, Diário, Núcleo, humor, Estudos), **Busca** (todos os módulos; dentro de um módulo, busca só nele).
 **Partes do app todo:** barra de baixo (`moduleBar.ts`), lápis dos cartões (`cardLayout.ts`), temas (`theme.ts`), backup (`data.ts`).
 **Em breve** (sem código): Saúde (N1, módulo próprio) e Objetivos (N10, módulo próprio). Lembretes, Foco e Banco de ideias **não viram módulos**: Lembretes = Agenda + Notificações (N3); Foco = Núcleo › Mente (M16); Ideias = Notas (M17).
 
@@ -81,7 +81,7 @@
 | E4 | Temas: escuro, claro e automático + cor de destaque (paleta com bom contraste). Padrão: escuro = preto e verde; claro = branco e azul escuro | EXP | M | média | pronto (v0.17) | `futuro/navegacao-v2.md` |
 | E7 | Ícones: cada módulo com um ícone próprio e coerente (Núcleo = broto, Orçamento = medidor, Caixinha = cofrinho, Você = pessoa); antes Núcleo e Orçamento usavam o mesmo | EXP | P | média | pronto (v0.17) | — |
 | E5 | Abas internas: deslizar o dedo para trocar de aba e abas presas no topo ao rolar | EXP | P | alta | pronto (v0.16) | `futuro/navegacao-v2.md` |
-| E6 | Busca por módulo: a lupa pesquisa dentro do módulo aberto (ex.: nomes de despesas em Finanças); no Início, busca geral | EXP | P | média | ideia | `futuro/navegacao-v2.md` |
+| E6 | Busca por módulo: a lupa pesquisa dentro do módulo aberto (ex.: nomes de despesas em Finanças); no Início, busca geral | EXP | P | média | pronto (v0.35) | `futuro/navegacao-v2.md` |
 | M9 | Finanças: botão + com menu (despesa, receita, cartão, caixinha e, separado, Categorias); categorias passam a morar dentro de Finanças | MOD | P | alta | pronto (v0.16) | `futuro/navegacao-v2.md` |
 | M10 | Finanças: "Já pago" e "Em aberto" clicáveis, abrindo a lista filtrada | MOD | P | alta | pronto (v0.16) | `futuro/navegacao-v2.md` |
 | M2 | Preços 2.0, parte 1: a lista puxa os produtos de Preços e estima com faixa de preço, sem prender a uma loja | MOD | M | média | especificado | `futuro/precos-v2.md` (itens 2 e 3) |
@@ -102,7 +102,7 @@
 | N8.6 | Carreira: **Projetos do trabalho** (ex.: repasse, contratos de prestadores) com prazo, entregas com data, situação e ligação com as reuniões; prazos e entregas na Agenda | NOVO | M | alta | pronto (v0.24) | `futuro/modulo-carreira.md` |
 | M11 | Estudos no dia a dia: cartão "Estudando agora" no Início e "O que estudei" na Revisão semanal. Afeta: Início, Revisão | MOD | P | alta | pronto (v0.33) | `futuro/modulo-estudos.md` |
 | M12 | Estudos: lápis para subir, descer e ocultar cartões (como no Início e em Finanças). Afeta: só Estudos | MOD | P | média | pronto (v0.34) | `futuro/modulo-estudos.md`, `futuro/navegacao-v2.md` |
-| M13 | Estudos: busca dentro do módulo (tópicos, notebooks, fontes); parte do E6. Afeta: Busca | MOD | P | média | ideia | `futuro/modulo-estudos.md`, `futuro/navegacao-v2.md` |
+| M13 | Estudos: busca dentro do módulo (tópicos, notebooks, fontes); parte do E6. Afeta: Busca | MOD | P | média | pronto (v0.35) | `futuro/modulo-estudos.md`, `futuro/navegacao-v2.md` |
 | M14 | Estudos: anexar PDF ou imagem no notebook (hoje só link). Afeta: backup (arquivos pesados) | MOD | M | baixa | ideia | `futuro/modulo-estudos.md` |
 | M15 | Estudos: editor de mapas mentais (arrastar e ligar ideias). Afeta: só Estudos | MOD | M | baixa | pronto na N11.3 (v0.28) | `futuro/modulo-estudos.md` |
 | N9 | Sincronizar com a conta Google (pasta escondida do Drive; site e Android com os mesmos dados). Depois do N4. *Na conversa do Android foi anotado como N8; o código certo é N9.* | NOVO | M | baixa | ideia | `futuro/app-android.md` ("Sincronização") |
@@ -145,6 +145,7 @@
 ## Feito
 | Versão | O que entrou | PR |
 |---|---|---|
+| v0.35 | E6 + M13: a lupa busca dentro do módulo aberto ("Em Finanças" · "Em tudo"); a busca passou a achar também cartões, vales, caixinhas, hábitos, listas e itens, produtos, notebooks e páginas, fontes, mapas, trilhas e tópicos, vagas, reuniões e projetos | #38 |
 | v0.34 | E3 + M12: lápis para subir, descer e ocultar cartões também na Agenda (calendário fixo), no Núcleo › Rituais (Hoje fixo; cada período é um cartão), em Listas (cada categoria é um cartão), em Estudos (bloco principal fixo) e em Carreira (Trabalho atual fixo) | #38 |
 | v0.33 | M11: cartão "Estudando agora" no Início (ciclos em andamento, progresso e o tópico da vez) e "O que estudei" na Revisão semanal (tópicos concluídos, dias com anotação e ciclos) | #38 |
 | v0.32 | M1: pausar hábitos (até uma data ou sem data; a sequência congela e não conta falta) e arquivar (sai de tudo, histórico fica; comemora a marca do hábito a abandonar), com seções Pausados e Arquivados no Núcleo | #38 |

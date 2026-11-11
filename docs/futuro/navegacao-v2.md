@@ -54,9 +54,10 @@
 - **Padrões:** escuro = preto com verde (o de hoje); claro = branco com azul escuro.
 - Os ícones não mudam, só a cor de destaque.
 
-## Busca por módulo (E6, mais adiante)
+## Busca por módulo (E6, pronto na v0.35)
 - A lupa pesquisa **dentro do módulo aberto**. Em Finanças, por exemplo, procura nos nomes das despesas, receitas, cartões e caixinhas.
 - No Início, continua sendo a busca geral.
+- Como ficou: `SearchSheet` (`src/Search.tsx`) recebe o módulo da tela (`moduleOf` em `src/setup.ts`) e mostra os chips "Em Finanças" · "Em tudo". O Diário mantém a busca própria dele.
 
 ## Finanças (M9 e M10)
 - **Botão +** abre um menu:

@@ -19,7 +19,7 @@ import { Revisao } from './modules/Revisao';
 import { Jornada } from './modules/Jornada';
 import { Voce } from './modules/Voce';
 import { BarTutorial, SetupHost } from './modules/Montagem';
-import { isHidden } from './setup';
+import { isHidden, moduleOf } from './setup';
 import { Orcamento, Relatorios } from './modules/financas/Orcamento';
 import { ComprasPage, Listas, PrecosPage } from './modules/Listas';
 import { HistoricoPage, ProgressoPage } from './modules/Progresso';
@@ -355,7 +355,7 @@ export function App() {
             (section.title ?? section.label)
           )}
         </h1>
-        <button type="button" className="icon-btn" onClick={() => (section.search ? goReplace(section.search) : setSearch(true))} aria-label={section.search ? 'Buscar no diário' : 'Buscar em tudo'}>
+        <button type="button" className="icon-btn" onClick={() => (section.search ? goReplace(section.search) : setSearch(true))} aria-label={section.search ? 'Buscar no diário' : moduleOf(section.path) ? `Buscar em ${where?.module ?? section.label}` : 'Buscar em tudo'}>
           <Icon name="search" />
         </button>
         {editor.screen && (
@@ -377,7 +377,7 @@ export function App() {
       </nav>
 
       {drawer && <Drawer current={section.path} onClose={() => setDrawer(false)} />}
-      {search && <SearchSheet onClose={() => setSearch(false)} />}
+      {search && <SearchSheet onClose={() => setSearch(false)} scope={moduleOf(section.path)} />}
 
       <main className="main">
         {saveError && (
