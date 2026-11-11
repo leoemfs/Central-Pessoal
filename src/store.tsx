@@ -10,6 +10,8 @@ import { dbGet, dbSet, requestPersistence } from './db';
 import { addMonths, monthKey, todayISO } from './utils';
 import { mergeData, pruneDeleted, trackChanges } from './sync';
 import { flushSave, scheduleSave, setDataSource, startCloud } from './cloud';
+import { cleanFiles } from './files';
+import { referencedFiles } from './attachments';
 
 const KEY = 'data';
 const LEGACY_LOCALSTORAGE_KEY = 'central-pessoal:v1';
@@ -72,6 +74,8 @@ export function DataProvider({ children }: { children: ReactNode }) {
       .then(() => {
         setSaveError(false);
         channel?.postMessage('saved');
+        // N9.3: fotos excluídas saem do aparelho.
+        cleanFiles(referencedFiles(d), d.deleted).catch(() => undefined);
       })
       .catch(() => setSaveError(true));
   }, []);

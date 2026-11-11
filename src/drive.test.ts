@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { downloadData, DriveError, findData, isAuthError, uploadData, whoAmI } from './drive.ts';
+import { deleteAttachment, downloadAttachment, downloadData, DriveError, findData, isAuthError, listAttachments, uploadAttachment, uploadData, whoAmI } from './drive.ts';
 
 /** Drive de mentira, na memória: entende as chamadas que o app faz. */
 function fakeDrive(token = 'tok') {
@@ -61,4 +61,31 @@ test('conta: nome e e-mail', async () => {
 test('acesso vencido vira erro de login (401)', async () => {
   await assert.rejects(findData('vencido', fakeDrive().f), (e) => isAuthError(e));
   assert.equal(isAuthError(new DriveError(500, 'x')), false);
+});
+
+test('fotos: sobe como arquivo-<id>, lista, baixa e apaga', async () => {
+  const store = new Map<string, { name: string; body: Uint8Array }>();
+  const f = (async (input: string | URL | Request, init: RequestInit = {}) => {
+    const url = new URL(String(input));
+    const method = init.method ?? 'GET';
+    const json = (x: unknown) => new Response(JSON.stringify(x), { headers: { 'Content-Type': 'application/json' } });
+    if (method === 'POST') {
+      const raw = new Uint8Array(await new Response(init.body as Blob).arrayBuffer());
+      const text = new TextDecoder().decode(raw);
+      const name = JSON.parse(text.split('\r\n\r\n')[1].split('\r\n')[0]).name as string;
+      const id = `d${store.size + 1}`;
+      store.set(id, { name, body: raw });
+      return json({ id });
+    }
+    const m = url.pathname.match(/\/files\/([^/]+)$/);
+    if (method === 'DELETE' && m) return store.delete(m[1]), new Response(null, { status: 204 });
+    if (m) return new Response('FOTO');
+    return json({ files: [...store].map(([id, x]) => ({ id, name: x.name })) });
+  }) as typeof fetch;
+  const driveId = await uploadAttachment('t', 'f1', new Blob(['FOTO'], { type: 'image/jpeg' }), f);
+  const list = await listAttachments('t', f);
+  assert.equal(list.get('f1'), driveId);
+  assert.equal(await (await downloadAttachment('t', driveId, f)).text(), 'FOTO');
+  await deleteAttachment('t', driveId, f);
+  assert.equal((await listAttachments('t', f)).size, 0);
 });

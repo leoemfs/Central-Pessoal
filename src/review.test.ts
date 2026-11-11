@@ -25,7 +25,7 @@ test('revisão junta núcleo, finanças, agenda e diário da semana', () => {
     ],
     events: [{ id: 'e', title: 'Dentista', date: '2026-11-04', time: '', location: '', description: '' }, { id: 'f', title: 'Viagem', date: '2026-11-12', time: '', location: '', description: '' }],
     tasks: [{ id: 't', title: 'X', notes: '', due: '2026-11-03', priority: 'media', tag: '', done: true, createdAt: '', doneAt: '2026-11-03T10:00:00' }],
-    journal: [{ id: 'j', createdAt: '2026-11-05T21:00:00', title: 'Dia bom', summary: '', content: '', tag: '', updatedAt: '' }],
+    journal: [{ id: 'j', createdAt: '2026-11-05T21:00:00', title: 'Dia bom', summary: '', content: '', tag: '', photos: [], updatedAt: '' }],
   };
   const inp = (p: Partial<ExpenseInput>): ExpenseInput => ({ kind: 'avulsa', description: 'M', categoryId: 'a', method: 'pix', cardId: null, date: '2026-11-03', amounts: [100], paidAt: null, ...p });
   d = addExpense(d, inp({ paidAt: '2026-11-03' }), TODAY);

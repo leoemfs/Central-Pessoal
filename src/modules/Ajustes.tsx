@@ -305,6 +305,11 @@ export function Ajustes() {
           </button>
         </div>
         <input ref={fileRef} type="file" accept="application/json,.json" hidden onChange={importBackup} />
+        {data.journal.some((e) => e.photos.length > 0) && (
+          <p className="muted small" style={{ marginTop: 10 }}>
+            As fotos do Diário não vão no arquivo de backup: ficam neste aparelho{cloud ? ' e no seu Google Drive' : ' (ligue a conta Google para guardá-las no Drive)'}.
+          </p>
+        )}
         {undo && (
           <button type="button" className="btn ghost" style={{ marginTop: 10, width: '100%' }} onClick={undoLast}>
             <Icon name="undo" size={18} /> Desfazer {undo.reason === 'importacao' ? 'importação' : undo.reason === 'nuvem' ? '"usar a da nuvem"' : '"apagar tudo"'} de {formatDMY(toISO(new Date(undo.at)))}

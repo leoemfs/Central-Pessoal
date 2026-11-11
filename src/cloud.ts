@@ -8,7 +8,9 @@
  */
 import { useSyncExternalStore } from 'react';
 import type { AppData } from './types';
-import { DRIVE_SCOPE, downloadData, findData, isAuthError, uploadData, whoAmI, type CloudFile } from './drive';
+import { deleteAttachment, downloadAttachment, DRIVE_SCOPE, downloadData, findData, isAuthError, listAttachments, uploadAttachment, uploadData, whoAmI, type CloudFile } from './drive';
+import { planFiles, referencedFiles } from './attachments';
+import { loadFile, localFileIds, removeFile, saveFile } from './files';
 import { normalize } from './data';
 import { mergeData } from './sync';
 import { uid } from './utils';
@@ -221,6 +223,10 @@ export async function syncNow(interactive = false): Promise<void> {
       const saved = await uploadData(token, JSON.stringify(toSave), state.device, cloud?.id ?? null);
       patch({ lastCloudTime: saved.modifiedTime });
     }
+    // Fotos: um problema aqui não desfaz a sincronização dos dados (tenta de novo na próxima).
+    await syncFiles(token, toSave).catch((e: unknown) => {
+      if (isAuthError(e)) throw e;
+    });
     patch({ status: 'ok', lastSavedAt: started, cloud: null });
   } catch (e) {
     failed(e);
@@ -231,6 +237,25 @@ export async function syncNow(interactive = false): Promise<void> {
       scheduleSave();
     }
   }
+}
+
+/** Até quantos arquivos sobem ou descem por vez (o resto vai na próxima sincronização). */
+const FILES_PER_SYNC = 10;
+
+/** N9.3: fotos. Sobe as que faltam na nuvem, baixa as que faltam aqui e apaga as excluídas. */
+async function syncFiles(token: string, d: AppData) {
+  const referenced = referencedFiles(d);
+  const cloud = await listAttachments(token);
+  const plan = planFiles(referenced, await localFileIds(), new Set(cloud.keys()), d.deleted);
+  for (const id of plan.upload.slice(0, FILES_PER_SYNC)) {
+    const blob = await loadFile(id);
+    if (blob) await uploadAttachment(token, id, blob);
+  }
+  for (const id of plan.download.slice(0, FILES_PER_SYNC)) await saveFile(id, await downloadAttachment(token, cloud.get(id)!));
+  for (const id of plan.deleteCloud) await deleteAttachment(token, cloud.get(id)!);
+  for (const id of plan.deleteLocal) await removeFile(id);
+  // Ficou algo para depois: continua em seguida.
+  if (plan.upload.length > FILES_PER_SYNC || plan.download.length > FILES_PER_SYNC) again = true;
 }
 
 /** Mudou algo: sincroniza daqui a pouco (se estiver conectado). */

@@ -38,7 +38,7 @@ Não sai nada para outro lugar. O app não lê o resto do Drive e não guarda a 
 | **N9.0 Preparar os dados** (absorve o N11.6) ✅ v0.39 | Data de alteração e registro de exclusões em **todos** os módulos, feitos num lugar só (`src/sync.ts`, chamado pela loja). Ids estáveis para o que o app gera. Não muda nada na tela. | M |
 | **N9.1 Conta Google e cópia na nuvem** ✅ v0.40 | Botão "Entrar com Google"; cópia automática dos dados na pasta escondida; "Restaurar da nuvem" num aparelho novo | M |
 | **N9.2 Sincronizar entre aparelhos** ✅ v0.41 | Junta por item (regra acima), sincroniza sozinho nos momentos acima, aviso de situação | M |
-| **N9.3 Imagens e PDFs** | Fotos nos registros do Diário (novo) e anexos PDF/imagem em Estudos (M14), nas reuniões de Carreira (caixa de entrada de 08/11) e nas vagas (o currículo enviado em cada candidatura), guardados no Drive | M |
+| **N9.3 Imagens e PDFs** (dividido em 11/11: **N9.3a fotos no Diário** ✅ v0.42; **N9.3b** anexos PDF/imagem em Estudos, reuniões e vagas) | Fotos nos registros do Diário (novo) e anexos PDF/imagem em Estudos (M14), nas reuniões de Carreira (caixa de entrada de 08/11) e nas vagas (o currículo enviado em cada candidatura), guardados no Drive | M |
 | **N9.4 Exportar para o Drive** | Botão "Exportar para o Drive": backup e PDFs gerados pelo app (começando pelo **currículo em PDF**, M22) na pasta visível "Central Pessoal" | P |
 
 Cada parte vira uma versão e um PR. N9.0 e N9.1 já dão segurança (cópia na nuvem) mesmo antes da sincronização.
@@ -92,3 +92,12 @@ Feito em 11/11 (projeto "My First Project", origem `https://leoemfs.github.io`).
 - **Apagar todos os dados** com a conta ligada desliga a conta neste aparelho (senão o apagar viraria exclusão em todos). **Importar backup** com a conta ligada avisa que vale para todos.
 - Limites conhecidos: chave removida de partes sem id (ex.: um orçamento apagado) pode voltar do outro aparelho; exclusões com mais de 90 dias são esquecidas (aparelho parado mais de 90 dias pode trazer de volta algo excluído).
 - Testado no navegador com dois aparelhos simulados (Google e Drive de mentira): A entra; B entra e fica com os dados dos dois; A volta ao app e recebe o do B; A exclui e a exclusão chega no B sem "ressuscitar"; acesso vencido mostra "Continuar sincronizando".
+
+## Como ficou o N9.3a (v0.42)
+- **Diário:** "Adicionar fotos" no formulário (até 6 por registro), miniaturas com X para tirar, fotos no registro aberto ("· 2 fotos" no fechado) e foto em tela cheia (deslizar ou setas trocam).
+- **Onde fica:** a foto é reduzida (1600 px, JPEG 82%) e guardada à parte: aparelho (IndexedDB, `arquivo:<id>`) e Drive (`arquivo-<id>` na pasta escondida). Os dados só têm a referência `{ id, type, w, h }`, que é um item com id: tirar a foto ou excluir o registro entra nas exclusões.
+- **Sincronização (`syncFiles` em `cloud.ts`, plano em `attachments.ts`):** depois dos dados, sobe o que falta na nuvem, baixa o que falta no aparelho (até 10 por vez; o resto na próxima) e apaga só o que foi **excluído** (assim uma foto que outro aparelho acabou de subir não é apagada por engano). Erro nas fotos não desfaz a sincronização dos dados.
+- Sem conta Google: as fotos ficam só no aparelho; as excluídas saem do aparelho ao salvar.
+- As fotos **não vão no arquivo de backup** (aviso em Backup).
+- Testado no navegador com dois aparelhos simulados: A cria registro com 2 fotos → sobem para a nuvem → B entra e vê as 2 fotos (e em tela cheia) → A tira uma → some da nuvem e do B.
+- **N9.3b (falta):** anexos PDF e imagem em Estudos (M14), nas reuniões de Carreira (slides) e nas vagas (currículo enviado), usando o mesmo `files.ts`/`attachments.ts` (`referencedFiles` passa a olhar esses lugares).
