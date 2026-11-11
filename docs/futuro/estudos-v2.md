@@ -32,7 +32,7 @@ E uma quarta, do editor: **o celular pode ter menos botões, nunca menos conteú
 | **N11.3 Mapas mentais** (absorve o M15) | Árvore com sub-ramos, criar/editar/excluir/mover nós, recolher, cores por nível, zoom e arrastar (pinça no celular), "ajustar à tela", salvar sozinho, alvos de toque grandes; mapa dentro do notebook, ligado a páginas | M a G |
 | **N11.4 Sincronização manual** | Exportar e importar só Estudos; juntar por item usando a data de alteração; lista de conflitos com "ficar com este aparelho / com o arquivo / com os dois"; registro do que foi excluído para não "ressuscitar" itens | M |
 | **N11.5 Tutorial e testes de uso** | Tutorial contextual de 6 passos (reabrível); os 7 cenários de teste do documento, simulados em computador e celular; correções | M |
-| **N11.6 Preparar a conta** | Só documento: garantir id, data de alteração e exclusões em tudo; junta com o N9 (conta Google) | P |
+| **N11.6 Preparar a conta** | Passou para o **N9.0** (`futuro/sincronizar-google.md`) | — |
 | **N11.7 Conteúdo da Biblioteca** | Textos dos tópicos (introdução, conceitos, exemplos, exercícios). Começar por uma trilha-piloto (Inglês A1 › Primeiros contatos) e crescer aos poucos | P por trilha |
 
 ## Recomendações técnicas

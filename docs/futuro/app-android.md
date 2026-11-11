@@ -66,7 +66,7 @@ Conferi o código atual contra o que muda quando o app roda dentro do Android (C
 ### Correções do app que devem vir antes (da análise de novembro)
 Não são do Android, mas a mudança fica mais segura com elas (`docs/auditoria-2026-11.md`):
 - **C3:** conferir os registros ao abrir + tela de erro com saída + desfazer importação. É o que protege a **importação do backup** na troca.
-- **C7:** gravar por coleção. Deixa o app mais leve e prepara a sincronização.
+- **C7:** gravar por coleção. Deixa o app mais leve e prepara a sincronização.  A sincronização com o Google (N9) está em `futuro/sincronizar-google.md` e pode vir antes do Android.
 - **C5:** rodar os testes em todo PR e antes de publicar.
 
 ### Passo a passo da mudança (para sair sem erro)
