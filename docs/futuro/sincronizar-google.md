@@ -82,4 +82,4 @@ Criar um projeto grátis no **Google Cloud Console** e um "ID do cliente OAuth" 
 6. **Clientes** → **Criar cliente** → tipo **Aplicativo da Web** → em **Origens JavaScript autorizadas**, adicionar `https://leoemfs.github.io` → **Criar**.
 7. Copiar o **ID do cliente** (termina em `.apps.googleusercontent.com`) e mandar para o Claude. Ele não é senha. **Não** mande a "chave secreta do cliente".
 
-O Claude coloca o ID em `src/cloud.ts` (`CLIENT_ID`) e, a partir daí, o cartão "Conta Google" aparece em Configurações.
+Feito em 11/11 (projeto "My First Project", origem `https://leoemfs.github.io`). O Claude colocou o ID em `src/cloud.ts` (`CLIENT_ID`, v0.40.1) e, a partir daí, o cartão "Conta Google" aparece em Configurações.
