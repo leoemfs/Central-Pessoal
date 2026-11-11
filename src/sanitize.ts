@@ -140,6 +140,11 @@ export function fixJournal(r: Rec, now: string): JournalEntry {
     summary: str(r.summary),
     content: str(r.content),
     tag: str(r.tag),
+    photos: Array.isArray(r.photos)
+      ? r.photos
+          .filter((p): p is Rec => typeof p === 'object' && p !== null && typeof (p as Rec).id === 'string' && (p as Rec).id !== '')
+          .map((p) => ({ id: p.id as string, type: str(p.type) || 'image/jpeg', w: Number(p.w) || 0, h: Number(p.h) || 0 }))
+      : [],
     updatedAt: stamp(r.updatedAt, createdAt),
   } as JournalEntry;
 }

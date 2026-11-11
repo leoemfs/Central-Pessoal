@@ -10,12 +10,14 @@ import { FavoritesSheet } from './Mais';
 import { ACCENTS, accentById } from '../theme';
 import { BAR_LAYOUTS, fitFavorites, hiddenFrom, MIN_VISIBLE, MODULES, rhythmLabel, toggleModule, visibleFrom } from '../setup';
 import { openSetup, openTutorial, RhythmPicker } from './Montagem';
+import { GoogleCard } from './ContaGoogle';
+import { disconnect, useCloud } from '../cloud';
 
 
 const UNDO_KEY = 'antesDaImportacao';
 interface Snapshot {
   at: string;
-  reason: 'importacao' | 'apagar';
+  reason: 'importacao' | 'apagar' | 'nuvem';
   data: unknown;
 }
 
@@ -30,6 +32,7 @@ export function Ajustes() {
     dbGet<Snapshot | null>(UNDO_KEY).then((x) => setUndo(x && typeof x.at === 'string' ? x : null)).catch(() => setUndo(null));
   }, []);
   const broken = discardedCount(data);
+  const cloud = useCloud();
 
   async function keepCopy(reason: Snapshot['reason']): Promise<boolean> {
     const snap: Snapshot = { at: new Date().toISOString(), reason, data };
@@ -44,7 +47,7 @@ export function Ajustes() {
 
   function undoLast() {
     if (!undo) return;
-    const what = undo.reason === 'importacao' ? 'a importação' : 'o "apagar tudo"';
+    const what = undo.reason === 'importacao' ? 'a importação' : undo.reason === 'nuvem' ? 'o "usar a cópia da nuvem"' : 'o "apagar tudo"';
     if (!confirm(`Desfazer ${what} de ${formatDMY(toISO(new Date(undo.at)))}? Os dados voltam a ser os de antes, e o que foi feito depois disso se perde.`)) return;
     replace(normalize(undo.data));
     dbSet(UNDO_KEY, null).catch(() => undefined);
@@ -81,7 +84,8 @@ export function Ajustes() {
     try {
       const imported = normalize(JSON.parse(await file.text()));
       const n = imported.expenses.length + imported.journal.length + imported.tasks.length + imported.events.length + imported.notes.length + imported.habits.length;
-      if (!confirm(`Importar ${n} item(ns) de "${file.name}"? Isso substitui todos os dados atuais deste aparelho (dá para desfazer depois, aqui em Backup).`)) return;
+      const synced = cloud ? ' Com a conta Google ligada, o backup também vale para os outros aparelhos.' : '';
+      if (!confirm(`Importar ${n} item(ns) de "${file.name}"? Isso substitui todos os dados atuais deste aparelho (dá para desfazer depois, aqui em Backup).${synced}`)) return;
       if (!(await keepCopy('importacao')) && !confirm('Não foi possível guardar uma cópia dos dados atuais para desfazer. Importar mesmo assim?')) return;
       replace(imported);
       const bad = discardedCount(imported) - broken;
@@ -92,8 +96,11 @@ export function Ajustes() {
   }
 
   async function clearAll() {
-    if (confirm('Apagar TODOS os dados deste aparelho? Dá para desfazer em Backup logo depois; mesmo assim, exporte um backup antes, se quiser.')) {
+    const synced = cloud ? ' A conta Google será desligada neste aparelho: a cópia no Drive e os outros aparelhos continuam com os dados.' : '';
+    if (confirm(`Apagar TODOS os dados deste aparelho? Dá para desfazer em Backup logo depois; mesmo assim, exporte um backup antes, se quiser.${synced}`)) {
       await keepCopy('apagar');
+      // Sem isso, "apagar" viraria exclusão em todos os aparelhos na próxima sincronização.
+      if (cloud) disconnect();
       replace({ ...normalize(emptyData()), settings: { ...normalize(emptyData()).settings, theme: data.settings.theme } });
       setMessage({ tone: 'green', text: 'Todos os dados foram apagados.' });
     }
@@ -260,12 +267,14 @@ export function Ajustes() {
       </section>
       {favPick && <FavoritesSheet onClose={() => setFavPick(false)} />}
 
+      <GoogleCard onMessage={setMessage} />
+
       <section className="card">
         <div className="card-head">
           <h2>Backup</h2>
           <span className="muted small">{data.settings.lastBackupAt ? `Último: ${formatDMY(toISO(new Date(data.settings.lastBackupAt)))}` : 'Nenhum ainda'}</span>
         </div>
-        <p className="muted">Seus dados ficam só neste aparelho. Exporte um backup de vez em quando — ele também serve para levar tudo para outro aparelho.</p>
+        <p className="muted">{cloud ? 'Além da cópia no Google Drive, você pode exportar um arquivo de backup de vez em quando.' : 'Seus dados ficam só neste aparelho. Exporte um backup de vez em quando — ele também serve para levar tudo para outro aparelho.'}</p>
         <div className="btn-row" style={{ marginTop: 14 }}>
           <button type="button" className="btn primary" onClick={exportBackup}>
             <Icon name="download" size={18} /> Exportar
@@ -275,9 +284,14 @@ export function Ajustes() {
           </button>
         </div>
         <input ref={fileRef} type="file" accept="application/json,.json" hidden onChange={importBackup} />
+        {data.journal.some((e) => e.photos.length > 0) && (
+          <p className="muted small" style={{ marginTop: 10 }}>
+            As fotos do Diário não vão no arquivo de backup: ficam neste aparelho{cloud ? ' e no seu Google Drive' : ' (ligue a conta Google para guardá-las no Drive)'}.
+          </p>
+        )}
         {undo && (
           <button type="button" className="btn ghost" style={{ marginTop: 10, width: '100%' }} onClick={undoLast}>
-            <Icon name="undo" size={18} /> Desfazer {undo.reason === 'importacao' ? 'importação' : '"apagar tudo"'} de {formatDMY(toISO(new Date(undo.at)))}
+            <Icon name="undo" size={18} /> Desfazer {undo.reason === 'importacao' ? 'importação' : undo.reason === 'nuvem' ? '"usar a da nuvem"' : '"apagar tudo"'} de {formatDMY(toISO(new Date(undo.at)))}
           </button>
         )}
         {broken > 0 && (
@@ -313,7 +327,7 @@ export function Ajustes() {
         </button>
       </section>
 
-      <p className="muted small center">Central Pessoal · seus dados não saem do seu aparelho</p>
+      <p className="muted small center">Central Pessoal · {cloud ? 'seus dados ficam no aparelho e no seu Google Drive' : 'seus dados não saem do seu aparelho'}</p>
 
     </>
   );

@@ -81,6 +81,16 @@ export interface Note {
   updatedAt: string;
 }
 
+/** Foto guardada à parte (N9.3): o arquivo fica no aparelho e no Drive; aqui só a referência. */
+export interface Photo {
+  id: string;
+  /** Tipo do arquivo (ex.: image/jpeg). */
+  type: string;
+  /** Largura e altura (px), para reservar o espaço antes de carregar. */
+  w: number;
+  h: number;
+}
+
 export interface JournalEntry {
   id: string;
   /** Data e hora do registro (ISO). Preenchida automaticamente. */
@@ -90,6 +100,8 @@ export interface JournalEntry {
   content: string;
   /** Etiqueta opcional (ex.: "Pessoal"). */
   tag: string;
+  /** Fotos do registro (N9.3). */
+  photos: Photo[];
   updatedAt: string;
 }
 
@@ -653,6 +665,8 @@ export interface AppData {
   exerciseVideos: Record<string, string>;
   /** Itens excluídos (id → data), para uma futura sincronização entre aparelhos. */
   deleted: Record<string, string>;
+  /** N9.0: data da última alteração de cada item (id → data) e de cada parte (`@chave` → data). */
+  stamps: Record<string, string>;
   /** Dados da versão anterior que ainda não têm tela (ex.: receitas). */
   legacy: Record<string, unknown>;
 }

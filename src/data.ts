@@ -1,5 +1,5 @@
 import type { AppData, Category, DayPeriod, Expense, Habit, HabitKind, Income, PracticeSession } from './types.ts';
-import { toISO, uid } from './utils.ts';
+import { stableId, toISO, uid } from './utils.ts';
 import { suggestAttributes } from './habits.ts';
 import { emptyProfile, normalizeProfile } from './profile.ts';
 import { normalizeBox } from './boxes.ts';
@@ -74,6 +74,7 @@ export function emptyData(): AppData {
     workoutGoal: 3,
     exerciseVideos: {},
     deleted: {},
+    stamps: {},
     legacy: {},
   };
 }
@@ -83,12 +84,12 @@ export function seedCategories(d: AppData): AppData {
   let next = d;
   if (!next.settings.seededCategories) {
     const existing = new Set(next.categories.map((c) => c.name.toLowerCase()));
-    const added = DEFAULT_CATEGORIES.filter((c) => !existing.has(c.name.toLowerCase())).map((c) => ({ ...c, id: uid() }));
+    const added = DEFAULT_CATEGORIES.filter((c) => !existing.has(c.name.toLowerCase())).map((c) => ({ ...c, id: stableId('categoria', c.name) }));
     next = { ...next, categories: [...next.categories, ...added], settings: { ...next.settings, seededCategories: true } };
   }
   if (!next.settings.seededIncomeSources) {
     const existing = new Set(next.incomeSources.map((c) => c.name.toLowerCase()));
-    const added = DEFAULT_INCOME_SOURCES.filter((c) => !existing.has(c.name.toLowerCase())).map((c) => ({ ...c, id: uid() }));
+    const added = DEFAULT_INCOME_SOURCES.filter((c) => !existing.has(c.name.toLowerCase())).map((c) => ({ ...c, id: stableId('fonte', c.name) }));
     next = { ...next, incomeSources: [...next.incomeSources, ...added], settings: { ...next.settings, seededIncomeSources: true } };
   }
   return next;
@@ -97,6 +98,9 @@ export function seedCategories(d: AppData): AppData {
 type Rec = Record<string, unknown>;
 const strings = (x: unknown): string[] => (Array.isArray(x) ? x.filter((i): i is string => typeof i === 'string') : []);
 const isRec = (x: unknown): x is Rec => typeof x === 'object' && x !== null && !Array.isArray(x);
+/** Mapa de texto → texto (ex.: exclusões e datas de alteração); ignora o que não for texto. */
+const strMap = (x: unknown): Record<string, string> =>
+  isRec(x) ? Object.fromEntries(Object.entries(x).filter((e): e is [string, string] => typeof e[1] === 'string')) : {};
 function list<T>(x: unknown): T[] {
   return Array.isArray(x) ? (x.filter((i) => isRec(i) && typeof i.id === 'string') as T[]) : [];
 }
@@ -182,7 +186,8 @@ export function normalize(raw: unknown): AppData {
     lastLoads: isRec(r.lastLoads) ? Object.fromEntries(Object.entries(r.lastLoads).filter((e): e is [string, number] => typeof e[1] === 'number')) : {},
     workoutGoal: typeof r.workoutGoal === 'number' && Number.isFinite(r.workoutGoal) ? Math.min(7, Math.max(1, Math.round(r.workoutGoal))) : 3,
     exerciseVideos: isRec(r.exerciseVideos) ? Object.fromEntries(Object.entries(r.exerciseVideos).filter((e): e is [string, string] => typeof e[1] === 'string' && e[1] !== '')) : {},
-    deleted: isRec(r.deleted) ? (r.deleted as Record<string, string>) : {},
+    deleted: strMap(r.deleted),
+    stamps: strMap(r.stamps),
     legacy: Object.keys(discarded).length ? { ...legacy, descartados: mergeDiscarded(legacy.descartados, discarded) } : legacy,
   };
   d = seedCategories(d);

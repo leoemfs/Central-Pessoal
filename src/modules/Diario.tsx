@@ -1,11 +1,16 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useRef, useState, type ChangeEvent } from 'react';
 import type { ViewProps } from '../App';
 import { useStore } from '../store';
 import { useSubAction } from '../router';
 import { remove, upsert } from '../actions';
-import type { JournalEntry } from '../types';
+import type { JournalEntry, Photo } from '../types';
+import { saveFile, shrinkImage } from '../files';
+import { PhotoThumb, PhotoViewer } from './Fotos';
 import { addMonths, formatDate, formatDateTime, formatDMY, formatMonth, monthKey, nowTime, pad, relativeDay, toISO, todayISO, uid } from '../utils';
 import { Chips, Empty, Field, Icon, IconButton, MonthNav, PageHeader, Pill, Segmented, Sheet } from '../ui';
+
+/** Fotos por registro (N9.3). */
+const MAX_PHOTOS = 6;
 
 export const JOURNAL_TAGS = ['Pessoal', 'Trabalho', 'Família', 'Saúde', 'Estudos', 'Viagem', 'Revisão'];
 
@@ -33,6 +38,7 @@ function dayLabel(iso: string): string {
 }
 
 export function Diario({ route }: ViewProps) {
+  const [viewing, setViewing] = useState<{ photos: Photo[]; start: number } | null>(null);
   const { data, update } = useStore();
   const [month, setMonth] = useState(monthKey(todayISO()));
   const [editing, setEditing] = useState<JournalEntry | 'new' | null>(null);
@@ -135,6 +141,13 @@ export function Diario({ route }: ViewProps) {
               <h3 className="entry-title">{entryTitle(e)}</h3>
               {entrySummary(e) && <p className="entry-summary">{entrySummary(e)}</p>}
               {isOpen && e.content.trim() && <div className="entry-content">{e.content}</div>}
+              {isOpen && e.photos.length > 0 && (
+                <div className="photo-grid">
+                  {e.photos.map((p, i) => (
+                    <PhotoThumb key={p.id} photo={p} onClick={() => setViewing({ photos: e.photos, start: i })} />
+                  ))}
+                </div>
+              )}
               <div className="entry-foot">
                 {isOpen ? (
                   <>
@@ -147,7 +160,7 @@ export function Diario({ route }: ViewProps) {
                   </>
                 ) : (
                   <button type="button" className="expand-btn" onClick={() => toggle(e.id)}>
-                    Expandir registro <Icon name="down" size={18} />
+                    Expandir registro{e.photos.length > 0 && <span className="muted small"> · {e.photos.length} foto{e.photos.length > 1 ? 's' : ''}</span>} <Icon name="down" size={18} />
                   </button>
                 )}
               </div>
@@ -159,6 +172,7 @@ export function Diario({ route }: ViewProps) {
       </div>
 
       {editing && <EntryForm entry={editing === 'new' ? undefined : editing} onClose={() => setEditing(null)} onSaved={(e) => { changeMonth(monthKey(localDate(e.createdAt))); setOpen(new Set([e.id])); setSearching(false); }} />}
+      {viewing && <PhotoViewer photos={viewing.photos} start={viewing.start} onClose={() => setViewing(null)} />}
       {history && <HistorySheet entries={data.journal} month={month} onPick={(m) => { changeMonth(m); setHistory(false); }} onClose={() => setHistory(false)} />}
     </>
   );
@@ -174,9 +188,41 @@ function EntryForm({ entry, onClose, onSaved }: { entry?: JournalEntry; onClose:
   const [content, setContent] = useState(entry?.content ?? '');
   const [tag, setTag] = useState(entry?.tag ?? '');
   const [error, setError] = useState('');
+  // N9.3: fotos. As novas ficam só na tela até salvar (cancelar não guarda nada).
+  const [photos, setPhotos] = useState<Photo[]>(entry?.photos ?? []);
+  const [fresh, setFresh] = useState<Record<string, { blob: Blob; url: string }>>({});
+  const [busy, setBusy] = useState(false);
+  const pick = useRef<HTMLInputElement>(null);
 
-  function save() {
-    if (!title.trim() && !content.trim()) return setError('Escreva um título ou o texto do registro.');
+  async function addPhotos(ev: ChangeEvent<HTMLInputElement>) {
+    const files = [...(ev.target.files ?? [])].slice(0, MAX_PHOTOS - photos.length);
+    ev.target.value = '';
+    if (!files.length) return;
+    setBusy(true);
+    const added: Photo[] = [];
+    const blobs: Record<string, { blob: Blob; url: string }> = {};
+    for (const f of files) {
+      try {
+        const { blob, w, h } = await shrinkImage(f);
+        const p: Photo = { id: uid(), type: 'image/jpeg', w, h };
+        added.push(p);
+        blobs[p.id] = { blob, url: URL.createObjectURL(blob) };
+      } catch {
+        setError('Uma das fotos não pôde ser aberta.');
+      }
+    }
+    setPhotos((x) => [...x, ...added]);
+    setFresh((x) => ({ ...x, ...blobs }));
+    setBusy(false);
+  }
+
+  async function save() {
+    if (!title.trim() && !content.trim() && !photos.length) return setError('Escreva um título ou o texto do registro.');
+    try {
+      for (const p of photos) if (fresh[p.id]) await saveFile(p.id, fresh[p.id].blob);
+    } catch {
+      return setError('Não deu para guardar as fotos neste aparelho.');
+    }
     // Novo registro: usa o horário exato da criação. Na edição, o horário pode ser ajustado.
     const createdAt = entry ? new Date(`${date}T${time || '00:00'}:00`).toISOString() : now;
     const e: JournalEntry = {
@@ -186,6 +232,7 @@ function EntryForm({ entry, onClose, onSaved }: { entry?: JournalEntry; onClose:
       summary: summary.trim(),
       content: content.trim(),
       tag,
+      photos,
       updatedAt: new Date().toISOString(),
     };
     update(upsert('journal', e));
@@ -201,7 +248,7 @@ function EntryForm({ entry, onClose, onSaved }: { entry?: JournalEntry; onClose:
       footer={
         <>
           {error && <p className="form-error">{error}</p>}
-          <button type="button" className="btn block" onClick={save}>
+          <button type="button" className="btn block" onClick={() => void save()} disabled={busy}>
             <Icon name="send" size={18} />
             <span className="green">{entry ? 'Salvar registro' : 'Publicar atualização'}</span>
           </button>
@@ -241,9 +288,21 @@ function EntryForm({ entry, onClose, onSaved }: { entry?: JournalEntry; onClose:
         <span className="field-label">Etiqueta (opcional)</span>
         <Chips label="Etiqueta" value={tag} onChange={(v) => setTag(v === tag ? '' : v)} options={JOURNAL_TAGS.map((t) => ({ value: t, label: t }))} />
       </div>
-      <div className="future-box">
-        <Icon name="image" size={24} />
-        Adicionar imagens (em breve)
+      <div className="field">
+        <span className="field-label">Fotos {photos.length > 0 && <span className="muted small">({photos.length} de {MAX_PHOTOS})</span>}</span>
+        {photos.length > 0 && (
+          <div className="photo-grid">
+            {photos.map((p) => (
+              <PhotoThumb key={p.id} photo={p} src={fresh[p.id]?.url} onRemove={() => setPhotos((x) => x.filter((y) => y.id !== p.id))} />
+            ))}
+          </div>
+        )}
+        {photos.length < MAX_PHOTOS && (
+          <button type="button" className="btn block" style={{ marginTop: photos.length ? 10 : 0 }} onClick={() => pick.current?.click()} disabled={busy}>
+            <Icon name="image" size={18} /> {busy ? 'Preparando fotos…' : 'Adicionar fotos'}
+          </button>
+        )}
+        <input ref={pick} type="file" accept="image/*" multiple hidden onChange={addPhotos} />
       </div>
     </Sheet>
   );

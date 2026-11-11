@@ -8,14 +8,20 @@ import { INCOME_AHEAD, materializeIncomes } from './incomes';
 import { materializeVouchers } from './vouchers';
 import { dbGet, dbSet, requestPersistence } from './db';
 import { addMonths, monthKey, todayISO } from './utils';
+import { mergeData, pruneDeleted, trackChanges } from './sync';
+import { flushSave, scheduleSave, setDataSource, startCloud } from './cloud';
+import { cleanFiles } from './files';
+import { referencedFiles } from './attachments';
 
 const KEY = 'data';
 const LEGACY_LOCALSTORAGE_KEY = 'central-pessoal:v1';
 const channel = typeof BroadcastChannel !== 'undefined' ? new BroadcastChannel('central-pessoal') : null;
 
 /** Gera as contas fixas que já deveriam existir (ex.: virou o mês com o app aberto) e registra a visita do dia. */
-const catchUp = (d: AppData) =>
+const generate = (d: AppData) =>
   syncCareerEvents(markVisit(checkUnlock(materializeVouchers(materializeIncomes(materialize(d, addMonths(monthKey(todayISO()), FIXA_AHEAD)), addMonths(monthKey(todayISO()), INCOME_AHEAD))))));
+/** Igual, registrando as datas de alteração e as exclusões (N9.0). */
+const catchUp = (d: AppData) => trackChanges(d, generate(d));
 
 async function loadData(): Promise<AppData> {
   let raw = await dbGet<unknown>(KEY);
@@ -28,7 +34,7 @@ async function loadData(): Promise<AppData> {
       /* ignora */
     }
   }
-  return catchUp(normalize(raw));
+  return catchUp(pruneDeleted(normalize(raw)));
 }
 
 type Updater = (d: AppData) => AppData;
@@ -68,6 +74,8 @@ export function DataProvider({ children }: { children: ReactNode }) {
       .then(() => {
         setSaveError(false);
         channel?.postMessage('saved');
+        // N9.3: fotos excluídas saem do aparelho.
+        cleanFiles(referencedFiles(d), d.deleted).catch(() => undefined);
       })
       .catch(() => setSaveError(true));
   }, []);
@@ -82,10 +90,36 @@ export function DataProvider({ children }: { children: ReactNode }) {
     pending.current = data;
     window.clearTimeout(timer.current);
     timer.current = window.setTimeout(flush, 250);
+    // N9.1: cópia na nuvem, alguns segundos depois da última mudança (se a conta Google estiver ligada).
+    scheduleSave();
   }, [data, flush]);
 
+  // A cópia na nuvem lê sempre os dados mais recentes.
+  const latest = useRef<AppData | null>(null);
+  latest.current = data;
+  // N9.2: o que veio da nuvem é juntado com os dados mais atuais deste aparelho, sem mudar as datas
+  // de alteração (só o que as regras geram depois da junção ganha data nova).
   useEffect(() => {
-    const onHide = () => document.visibilityState === 'hidden' && flush();
+    setDataSource(
+      () => latest.current,
+      (remote) =>
+        setData((prev) => {
+          if (!prev) return prev;
+          const merged = mergeData(prev, remote);
+          return trackChanges(merged, generate(merged));
+        }),
+    );
+  }, []);
+  useEffect(() => {
+    if (data) startCloud();
+  }, [data]);
+
+  useEffect(() => {
+    const onHide = () => {
+      if (document.visibilityState !== 'hidden') return;
+      flush();
+      flushSave();
+    };
     const onShow = () => document.visibilityState === 'visible' && setData((d) => (d ? catchUp(d) : d));
     document.addEventListener('visibilitychange', onHide);
     document.addEventListener('visibilitychange', onShow);
@@ -112,11 +146,12 @@ export function DataProvider({ children }: { children: ReactNode }) {
       setData((d) => {
         if (!d) return d;
         const next = fn(d);
-        return next === d ? d : checkUnlock(markActive(next));
+        return next === d ? d : trackChanges(d, checkUnlock(markActive(next)));
       }),
     [],
   );
-  const replace = useCallback((d: AppData) => setData(catchUp(d)), []);
+  // Backup restaurado: o que não está nele conta como excluído; o que está, como alterado agora.
+  const replace = useCallback((d: AppData) => setData((prev) => (prev ? trackChanges(prev, generate({ ...d, deleted: { ...prev.deleted, ...d.deleted } })) : catchUp(d))), []);
 
   // Os dados não abriram: a rede de proteção (ErrorBoundary) mostra a saída.
   if (loadError) throw loadError;

@@ -676,7 +676,7 @@ export function MindTab({ open, gratRef }: { open: (p: Practice) => void; gratRe
     if (!items.length) return gratRef.current?.focus();
     const now = new Date().toISOString();
     const marked = linkedToMark(data.habits, 'gratidao', '', todayISO()).map((h) => h.name).join(', ');
-    update((d) => markLinked('gratidao', '')(upsert('journal', { id: uid(), createdAt: now, updatedAt: now, title: 'Três coisas boas', summary: items.join(' · '), content: items.map((x) => `• ${x}`).join('\n'), tag: 'Gratidão' })(d)));
+    update((d) => markLinked('gratidao', '')(upsert('journal', { id: uid(), createdAt: now, updatedAt: now, title: 'Três coisas boas', summary: items.join(' · '), content: items.map((x) => `• ${x}`).join('\n'), tag: 'Gratidão', photos: [] })(d)));
     setGrat(['', '', '']);
     notify('Salvo no Diário', `${items.length} ${items.length === 1 ? 'coisa boa' : 'coisas boas'}${marked ? ` · marcado: ${marked}` : ''}`);
   }

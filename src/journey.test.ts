@@ -55,8 +55,8 @@ test('XP retroativo vem dos dados reais e nunca de gastos', () => {
     ],
     tasks: [{ id: 't', title: 'X', notes: '', due: null, priority: 'media', tag: '', done: true, createdAt: '', doneAt: '2026-11-20T10:00:00' }],
     journal: [
-      { id: 'j', createdAt: '2026-11-20T21:00:00', title: 'Dia', summary: '', content: '', tag: '', updatedAt: '' },
-      { id: 'k', createdAt: '2026-11-22T21:00:00', title: 'Revisão', summary: '', content: '', tag: 'Revisão', updatedAt: '' },
+      { id: 'j', createdAt: '2026-11-20T21:00:00', title: 'Dia', summary: '', content: '', tag: '', photos: [], updatedAt: '' },
+      { id: 'k', createdAt: '2026-11-22T21:00:00', title: 'Revisão', summary: '', content: '', tag: 'Revisão', photos: [], updatedAt: '' },
     ],
   };
   const s = journeyStats(d, TODAY);
