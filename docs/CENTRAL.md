@@ -94,7 +94,7 @@
 | N1 | Módulo Saúde (água, sono, remédios, consultas, peso) | NOVO | G | média | especificado | `futuro/modulo-saude.md` |
 | N2 | Jornada completa (pixel art): missões no ritmo da pessoa, recompensas por módulo, raridades (comum a místico), Forja e Codex por coleções | NOVO | G | baixa | especificado | `futuro/modulo-rpg.md`, `futuro/jornada-recompensas.md`, `futuro/jornada-raridades.md` |
 | N3 | Notificações e **lembretes** (tarefa ou compromisso com "me lembrar"; sai o "Lembretes, em breve" do menu). Afeta: Agenda, Carreira | NOVO | M | baixa | especificado | `futuro/notificacoes.md` |
-| N3.1 | Notificações já no app (sem servidor): **"Lembrar no celular"** (compromisso, conta, revisão → agenda do celular, hora certa, Android e iPhone) e **bolinha no ícone** do app com o que está pendente hoje | NOVO | P | média | ideia | `futuro/notificacoes.md` |
+| N3.1 | Notificações já no app (sem servidor): **"Lembrar no celular"** (a parte da agenda passa a ser o **N9.5**, pelo Google Agenda) (compromisso, conta, revisão → agenda do celular, hora certa, Android e iPhone) e **bolinha no ícone** do app com o que está pendente hoje | NOVO | P | média | ideia | `futuro/notificacoes.md` |
 | N3.2 | **Resumo do dia** no Android (Chrome, app instalado): o celular acorda o app ~1 vez por dia e avisa "2 contas vencem amanhã" (sem hora certa) | NOVO | M | baixa | ideia | `futuro/notificacoes.md` |
 | N4 | App Android (preparo conferido em 10/11: 10 pontos de adaptação, passo a passo da mudança e lista de testes) | NOVO | G | baixa | especificado | `futuro/app-android.md` |
 | N5 | Código de barras, base de produtos e nota fiscal | NOVO | G | baixa | ideia | `futuro/precos-v2.md` ("Mais adiante") |
@@ -107,6 +107,7 @@
 | M14 | Estudos: anexar PDF ou imagem no notebook (hoje só link). Afeta: backup (arquivos pesados). Feito junto com o **N9.3** | MOD | M | baixa | ideia | `futuro/modulo-estudos.md` |
 | M15 | Estudos: editor de mapas mentais (arrastar e ligar ideias). Afeta: só Estudos | MOD | M | baixa | pronto na N11.3 (v0.28) | `futuro/modulo-estudos.md` |
 | N9 | Sincronizar com o Google Drive: pasta escondida do app, tudo sincroniza sozinho entre computador e celular, fotos no Diário, anexos PDF/imagem, exportar para pasta visível. Partes N9.0 (preparar dados, absorve N11.6) a N9.4. Não depende mais do N4. *Na conversa do Android foi anotado como N8; o código certo é N9.* | NOVO | G | alta | em andamento: N9.0 (v0.39) e N9.1 (v0.40) prontos; ID do cliente Google configurado (v0.40.1); login testado pelo Leonardo em 11/11; N9.2 pronto (v0.41), no ar e conferido em 11/11; **N9.3a fotos no Diário pronto (v0.42)**; próximo N9.3b (PDFs anexados) | `futuro/sincronizar-google.md` |
+| N9.5 | **Lembretes pelo Google Agenda** (11/11): o app cria a agenda "Central Pessoal" no Google e põe compromissos (com Carreira), contas a pagar e tarefas com data, com aviso; muda no app → muda no Google; só de ida. O celular avisa pelo app Google Agenda enquanto não há notificações (substitui o .ics do N3.1). Afeta: Agenda, Finanças, Carreira, Configurações | NOVO | M | alta | pronto (v0.43); falta o Leonardo ativar a API e a permissão no Google Cloud | `futuro/google-agenda.md` |
 | N10 | Módulo **Objetivos**: central de **todas as metas do app** (caixinhas, hábitos, ciclos de estudo, carreira, orçamento, metas do Você), com criar, editar e concluir dali; a meta continua morando no módulo dela. Objetivos grandes juntam várias metas. Absorve as metas de carreira (N8.4). Partes: N10.0 prévia, N10.1 central de metas, N10.2 objetivos grandes. Afeta: Finanças, Núcleo, Estudos, Carreira, Você, Início, Jornada | NOVO | G | média | especificado (prévia antes) | `futuro/modulo-objetivos.md` |
 | M16 | **Foco** no Núcleo › Mente: temporizador de foco (ex.: 25 min + pausa), com histórico; ligado a um tópico de Estudos conta tempo de estudo. Afeta: Núcleo, Estudos, Revisão | MOD | P | média | ideia | — |
 | M17 | **Banco de ideias** em Notas: aba "Ideias" e o botão "transformar em" tarefa, objetivo ou notebook. Afeta: Notas, Agenda, Estudos | MOD | P | baixa | ideia | — |
@@ -138,6 +139,7 @@
 ## Feito
 | Versão | O que entrou | PR |
 |---|---|---|
+| v0.43 | N9.5: lembretes no Google Agenda (agenda "Central Pessoal" com compromissos, contas e tarefas, aviso no celular, só de ida) + correção: a junção de configurações passa a ser campo a campo | #46 |
 | v0.42 | N9.3a: fotos no Diário (até 6 por registro, tela cheia), guardadas no aparelho e sincronizadas pelo Drive; foto tirada ou registro excluído some nos dois aparelhos | #44 |
 | v0.41 | N9.2: sincronização automática entre aparelhos (ao abrir, ao voltar, a cada 5 min e depois de cada mudança), juntando item por item: o que foi criado em cada aparelho fica nos dois, vale a alteração mais recente, exclusão não "ressuscita". Saiu a escolha de cópia | #43 |
 | v0.40.1 | N9.1: ID do cliente Google configurado; o cartão "Conta Google" aparece em Configurações | #42 |
