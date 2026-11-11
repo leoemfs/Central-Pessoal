@@ -1,6 +1,7 @@
-import { useRef, useState, type ChangeEvent, type CSSProperties } from 'react';
+import { useEffect, useRef, useState, type ChangeEvent, type CSSProperties } from 'react';
 import { useStore } from '../store';
-import { emptyData, normalize } from '../data';
+import { discardedCount, emptyData, normalize } from '../data';
+import { dbGet, dbSet } from '../db';
 import type { Theme } from '../types';
 import { formatDMY, toISO, todayISO } from '../utils';
 import { Icon, notify, PageHeader, Segmented, Toggle, type IconName } from '../ui';
@@ -14,11 +15,45 @@ const BAR_LAYOUTS: { id: 'fixo' | 'lado' | 'centro'; label: string; hint: string
   { id: 'centro', label: 'Módulo no centro', hint: 'O módulo vai para o meio; as ferramentas ficam dos lados.', demo: ['H', 'f', 'M', 'f', '+'] },
 ];
 
+const UNDO_KEY = 'antesDaImportacao';
+interface Snapshot {
+  at: string;
+  reason: 'importacao' | 'apagar';
+  data: unknown;
+}
+
 export function Ajustes() {
   const { data, update, replace, persisted } = useStore();
   const fileRef = useRef<HTMLInputElement>(null);
   const [message, setMessage] = useState<{ tone: 'green' | 'red'; text: string } | null>(null);
   const [favPick, setFavPick] = useState(false);
+  // C3: cópia dos dados de antes da última importação (ou de "apagar tudo"), para desfazer.
+  const [undo, setUndo] = useState<Snapshot | null>(null);
+  useEffect(() => {
+    dbGet<Snapshot | null>(UNDO_KEY).then((x) => setUndo(x && typeof x.at === 'string' ? x : null)).catch(() => setUndo(null));
+  }, []);
+  const broken = discardedCount(data);
+
+  async function keepCopy(reason: Snapshot['reason']): Promise<boolean> {
+    const snap: Snapshot = { at: new Date().toISOString(), reason, data };
+    try {
+      await dbSet(UNDO_KEY, snap);
+      setUndo(snap);
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
+  function undoLast() {
+    if (!undo) return;
+    const what = undo.reason === 'importacao' ? 'a importação' : 'o "apagar tudo"';
+    if (!confirm(`Desfazer ${what} de ${formatDMY(toISO(new Date(undo.at)))}? Os dados voltam a ser os de antes, e o que foi feito depois disso se perde.`)) return;
+    replace(normalize(undo.data));
+    dbSet(UNDO_KEY, null).catch(() => undefined);
+    setUndo(null);
+    setMessage({ tone: 'green', text: 'Pronto: os dados voltaram a ser os de antes.' });
+  }
   function setSetting(patch: Partial<typeof data.settings>) {
     update((d) => ({ ...d, settings: { ...d.settings, ...patch } }));
   }
@@ -49,16 +84,19 @@ export function Ajustes() {
     try {
       const imported = normalize(JSON.parse(await file.text()));
       const n = imported.expenses.length + imported.journal.length + imported.tasks.length + imported.events.length + imported.notes.length + imported.habits.length;
-      if (!confirm(`Importar ${n} item(ns) de "${file.name}"? Isso substitui todos os dados atuais deste aparelho.`)) return;
+      if (!confirm(`Importar ${n} item(ns) de "${file.name}"? Isso substitui todos os dados atuais deste aparelho (dá para desfazer depois, aqui em Backup).`)) return;
+      if (!(await keepCopy('importacao')) && !confirm('Não foi possível guardar uma cópia dos dados atuais para desfazer. Importar mesmo assim?')) return;
       replace(imported);
-      setMessage({ tone: 'green', text: `Backup importado: ${n} item(ns).` });
+      const bad = discardedCount(imported) - broken;
+      setMessage({ tone: 'green', text: `Backup importado: ${n} item(ns).${bad > 0 ? ` ${bad} registro(s) com defeito ficaram guardados à parte.` : ''}` });
     } catch {
       setMessage({ tone: 'red', text: 'Arquivo inválido. Escolha um backup .json exportado pela Central Pessoal.' });
     }
   }
 
-  function clearAll() {
-    if (confirm('Apagar TODOS os dados deste aparelho? Isso não pode ser desfeito. Exporte um backup antes, se quiser.')) {
+  async function clearAll() {
+    if (confirm('Apagar TODOS os dados deste aparelho? Dá para desfazer em Backup logo depois; mesmo assim, exporte um backup antes, se quiser.')) {
+      await keepCopy('apagar');
       replace({ ...normalize(emptyData()), settings: { ...normalize(emptyData()).settings, theme: data.settings.theme } });
       setMessage({ tone: 'green', text: 'Todos os dados foram apagados.' });
     }
@@ -220,6 +258,16 @@ export function Ajustes() {
           </button>
         </div>
         <input ref={fileRef} type="file" accept="application/json,.json" hidden onChange={importBackup} />
+        {undo && (
+          <button type="button" className="btn ghost" style={{ marginTop: 10, width: '100%' }} onClick={undoLast}>
+            <Icon name="undo" size={18} /> Desfazer {undo.reason === 'importacao' ? 'importação' : '"apagar tudo"'} de {formatDMY(toISO(new Date(undo.at)))}
+          </button>
+        )}
+        {broken > 0 && (
+          <p className="muted small" style={{ marginTop: 10 }}>
+            {broken} registro(s) com defeito foram guardados à parte para não travar o app. Eles vão junto no backup.
+          </p>
+        )}
       </section>
 
       <section className="card">

@@ -45,6 +45,7 @@ const StoreContext = createContext<Store | null>(null);
 
 export function DataProvider({ children }: { children: ReactNode }) {
   const [data, setData] = useState<AppData | null>(null);
+  const [loadError, setLoadError] = useState<Error | null>(null);
   const [saveError, setSaveError] = useState(false);
   const [persisted, setPersisted] = useState(false);
   const fromOtherTab = useRef(false);
@@ -52,7 +53,9 @@ export function DataProvider({ children }: { children: ReactNode }) {
   const timer = useRef<number | undefined>(undefined);
 
   useEffect(() => {
-    loadData().then(setData);
+    loadData()
+      .then(setData)
+      .catch((e: unknown) => setLoadError(e instanceof Error ? e : new Error(String(e))));
     requestPersistence().then(setPersisted);
   }, []);
 
@@ -115,6 +118,8 @@ export function DataProvider({ children }: { children: ReactNode }) {
   );
   const replace = useCallback((d: AppData) => setData(catchUp(d)), []);
 
+  // Os dados não abriram: a rede de proteção (ErrorBoundary) mostra a saída.
+  if (loadError) throw loadError;
   if (!data) {
     return (
       <div className="splash" aria-busy="true">

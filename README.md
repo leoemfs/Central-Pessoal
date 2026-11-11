@@ -73,6 +73,9 @@ O endereço fica `https://<usuario>.github.io/Central-Pessoal/`. Para instalar n
 - Cada aparelho tem os seus próprios dados. Use **Ajustes → Exportar / Importar** para backup ou para levar os dados a outro aparelho. O Início avisa quando o último backup tem mais de 30 dias.
 - Os registros guardam a data de criação, e as exclusões ficam marcadas (`deleted`). Isso prepara uma futura sincronização entre aparelhos.
 - Dados do primeiro protótipo (localStorage) são migrados automaticamente.
+- **Proteção contra dados com defeito** (`src/sanitize.ts`): ao abrir os dados (ou importar um backup), cada despesa, série, cartão, receita, nota, registro do diário, tarefa, compromisso e categoria é conferido. O que dá para consertar ganha valores padrão; o que não tem o essencial (ex.: despesa sem valor ou sem data) fica guardado à parte em `legacy.descartados` (vai no backup, não some), e Configurações › Backup avisa quantos são.
+- **Tela de erro com saída** (`src/ErrorScreen.tsx`): se uma tela der erro, aparece "Algo deu errado" com **Exportar backup**, **Recarregar** e **Abrir Configurações**, e a barra de baixo continua funcionando.
+- **Desfazer importação:** antes de importar um backup (ou de "apagar tudo"), o app guarda uma cópia dos dados atuais; em Backup aparece **Desfazer importação de dd/mm**.
 
 ## Estrutura
 

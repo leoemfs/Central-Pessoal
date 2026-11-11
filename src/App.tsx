@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, type ComponentType } from 'react';
+import { ErrorBoundary } from './ErrorScreen';
 import { useStore } from './store';
 import type { Theme } from './types';
 import { go, goReplace, useRoute, type Route } from './router';
@@ -379,7 +380,9 @@ export function App() {
             Não foi possível salvar neste aparelho. Exporte um backup em Ajustes.
           </div>
         )}
-        <View key={section.path} route={route} />
+        <ErrorBoundary scope="tela" resetKey={`${section.path}:${route.n}`}>
+          <View key={section.path} route={route} />
+        </ErrorBoundary>
       </main>
 
       {section.fab && (
