@@ -69,6 +69,9 @@ export function trackChanges(prev: AppData, next: AppData, now: string = new Dat
     if (partChanged || !same(a, b)) {
       stamps[`@${key}`] = now;
       changed = true;
+      // Partes que são objetos (configurações, humor por dia, Estudos…): data por campo, para a
+      // junção escolher campo a campo (abrir o app num aparelho não apaga a configuração do outro).
+      if (isRec(a) && isRec(b)) for (const k of new Set([...Object.keys(a), ...Object.keys(b)])) if (!same(a[k], b[k])) stamps[`@${key}.${k}`] = now;
     }
   }
   for (const id of removed) {
@@ -168,7 +171,18 @@ export function mergeData(local: AppData, remote: AppData): AppData {
   for (const key of new Set([...Object.keys(L), ...Object.keys(R)])) {
     if (SKIP.has(key)) continue;
     const aNewer = (local.stamps[`@${key}`] ?? '') >= (remote.stamps[`@${key}`] ?? '');
-    out[key] = mergeValue(L[key], R[key], aNewer, ctx);
+    const a = L[key];
+    const b = R[key];
+    if (isRec(a) && isRec(b)) {
+      // Campo a campo: vale o aparelho que mudou aquele campo por último.
+      const part: Rec = {};
+      for (const k of new Set([...Object.keys(a), ...Object.keys(b)])) {
+        const sa = local.stamps[`@${key}.${k}`] ?? '';
+        const sb = remote.stamps[`@${key}.${k}`] ?? '';
+        part[k] = mergeValue(a[k], b[k], sa === '' && sb === '' ? aNewer : sa >= sb, ctx);
+      }
+      out[key] = part;
+    } else out[key] = mergeValue(a, b, aNewer, ctx);
   }
   const merged = out as unknown as AppData;
   // Dias de uso e de visita: os dos dois aparelhos contam.

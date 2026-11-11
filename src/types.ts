@@ -269,6 +269,18 @@ export interface Settings {
   journeyWanted: boolean | null;
   /** Com que frequência quer escrever no Diário (o Início só convida nesse ritmo). */
   journalRhythm: JournalRhythm;
+  /** N9.5: lembretes pelo Google Agenda (vale para todos os aparelhos). */
+  googleCalendar: GoogleCalendarSettings;
+}
+
+export interface GoogleCalendarSettings {
+  on: boolean;
+  /** O que vai para a agenda "Central Pessoal". */
+  events: boolean;
+  bills: boolean;
+  tasks: boolean;
+  /** Id da agenda "Central Pessoal" no Google (criada pelo app). */
+  calendarId: string | null;
 }
 
 export interface JournalRhythm {

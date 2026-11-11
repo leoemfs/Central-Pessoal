@@ -44,3 +44,15 @@ A permissão `calendar.app.created` só deixa o app mexer na agenda que **ele me
 - Regra pura em `src/calendarSync.ts`: `wantedEvents(data, hoje)` → lista `{ id, título, início, fim, diaTodo, aviso }`; `diffEvents(queremos, existem)` → criar, mudar, apagar. Testes `node:test`.
 - Id do evento: base32hex (letras a-v e números), de 5 a 1024 caracteres. Converter o id do app para esse formato.
 - Roda no fim do `syncNow` (`cloud.ts`), só se o interruptor estiver ligado. Erro na agenda não desfaz a sincronização dos dados.
+
+## Como ficou (v0.43)
+- Feito como especificado, com uma diferença: **contas, tarefas e compromissos sem hora** viram um evento curto **às 9h** (15 min) com aviso na hora, em vez de "dia todo". O Google não deixa avisar às 9h do próprio dia num evento de dia todo.
+- Configuração em `settings.googleCalendar` (`on`, `events`, `bills`, `tasks`, `calendarId`), que vale para todos os aparelhos. A permissão da agenda é pedida em cada aparelho: sem ela, aparece "Dar acesso à agenda neste aparelho".
+- Roda no fim de cada sincronização (`syncCalendar` em `cloud.ts`): lê os eventos da agenda nos próximos 61 dias (inclusive os excluídos no Google), compara pelo resumo guardado no evento (`extendedProperties.private.sig`) e só cria, muda, restaura ou apaga a diferença. Um erro na agenda não desfaz a sincronização dos dados.
+- **Correção de junção encontrada no teste:** as configurações eram juntadas como um bloco só; como abrir o app marca a visita do dia nas configurações, um aparelho desfazia a configuração mudada no outro (ex.: desligava os lembretes). Agora cada campo tem a sua data (`@settings.campo`) e a junção escolhe campo a campo (vale para todas as partes que são objetos, como humor por dia).
+- Testado no navegador com Google, Drive e Agenda de mentira: ligar cria a agenda e 3 eventos (aviso 30 min / 9h); desligar "Tarefas" tira a tarefa; excluir o compromisso no app tira do Google; outro aparelho sem permissão mostra "Dar acesso…"; desligar e apagar remove a agenda.
+
+## Passo a passo do Google Cloud (Leonardo, uma vez)
+1. Abrir **console.cloud.google.com/apis/library/calendar-json.googleapis.com** (projeto *My First Project*) e tocar em **Ativar**.
+2. Abrir **console.cloud.google.com/auth/scopes** › **Adicionar ou remover escopos** › filtro `calendar.app.created` › marcar › **Atualizar** › **Salvar**.
+3. No app: Configurações › Conta Google › ligar **Lembretes no Google Agenda** e aceitar a permissão nova (deixar marcada a opção da agenda).
