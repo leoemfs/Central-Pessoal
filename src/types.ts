@@ -653,6 +653,8 @@ export interface AppData {
   exerciseVideos: Record<string, string>;
   /** Itens excluídos (id → data), para uma futura sincronização entre aparelhos. */
   deleted: Record<string, string>;
+  /** N9.0: data da última alteração de cada item (id → data) e de cada parte (`@chave` → data). */
+  stamps: Record<string, string>;
   /** Dados da versão anterior que ainda não têm tela (ex.: receitas). */
   legacy: Record<string, unknown>;
 }
