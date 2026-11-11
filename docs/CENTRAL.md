@@ -120,27 +120,17 @@
 ## Fila aprovada
 *O que pode ser construído, na ordem. Vazia = nada para construir.*
 
-- **Antes de tudo (aprovado em 10/11): C3** (registro defeituoso deixa o app em branco: conferir os dados ao abrir, tela de erro com saída e desfazer importação) **e C5** (rodar os testes em todo PR e antes de publicar). Depois segue o E14.
-- **Implementação nº 1: E14, primeira abertura + tutorial da barra** (pedido em 10/11; prévia feita, aguardando o "aprovado" para construir). Junta o resto do E1.
-- **N8, módulo Carreira** (aprovado em 08/11), em partes: N8.0 prévia (feita) → N8.1 Vagas (feita, v0.22) → N8.2 Trabalho atual e Reuniões (feita, v0.23) → N8.5 Agenda automática e N8.6 Projetos (feitas, v0.24) → N8.3 Currículo → N8.4 Metas (agora dentro de Objetivos, N10). Semana de 09/11 a 14/11: testes e anotações, e no máximo uma parte por dia se houver folga.
+**Aprovado em 11/11 ("pode fazer", fila toda).** Feito nesta sessão, tudo no PR #38: C5 (v0.29.1), C3 (v0.30), E14 + resto do E1 (v0.31), M1 (v0.32), M11 (v0.33), lápis E3 + M12 (v0.34), busca E6 + M13 (v0.35), M8 (v0.36), N8.3 Currículo (v0.37) e M7 (v0.38).
 
-**Pacotes** (cada um numa sessão, porque mexem nas mesmas partes):
-- **B, Finanças:** M9 + M10 + E5 (pequeno). **Pronto na v0.16.**
-- **A, Navegação:** E2 + E1 + E3 (médio a grande; prévia visual antes). **A1 (E2 + favoritos do E1) pronto na v0.18. A2 (E3, lápis) no Início e em Finanças na v0.20.** Falta o lápis nos outros módulos e o resto do E1.
-- **D, Temas:** E4 (+ E7, ícones). **Pronto na v0.17.**
-- **Depois:** E6.
+**O que continua aprovado, na ordem:**
+1. **N10 Objetivos** (G): primeiro a **prévia N10.0** (visual), depois N10.1 central de metas (inclui as metas de carreira, antigo N8.4). Precisa da prévia antes de construir.
+2. **M2 → M3 → M4 Preços 2.0** (M cada, já especificados).
+3. **M6** fichas de treino próprias (M).
+4. **M5** Agenda com repetição e aniversários (especificar antes).
+5. Resto do E1: ordem dos módulos no Mais (P).
+6. Depois: N7, N1, M14, N2, N3, N4, N5, N9.
 
-**Fila única sugerida** (aguardando aprovação; junta Carreira, Estudos e o resto). Semana de 09 a 14/11: testes e anotações, e **no máximo um item por dia** se houver folga.
-1. M1 Hábitos: pausar e arquivar (P)
-2. M11 Estudos no Início e na Revisão (P)
-3. N8.3 Carreira: currículo (M)
-4. N10.0 + N10.1 Objetivos: prévia e central de metas (inclui as metas de carreira, antigo N8.4) (M)
-5. Resto do E1: ocultar módulos, ordem no Mais, ritmo do Diário (M)
-6. Lápis nos outros módulos: E3 + M12 (Agenda, Núcleo, Listas, Estudos, Carreira) (M)
-7. Busca por módulo: E6 + M13 (P)
-8. M8 Cartão: escolher a fatura (P)
-9. M2 → M3 → M4 Preços 2.0 · M5 Agenda com repetição · M6 fichas de treino · M7 revisão completa
-10. N7 Estudos × Jornada · N1 Saúde · M14 anexos · M15 editor de mapas · depois N2, N3, N4, N5, N9
+**Pacotes** (histórico): B (Finanças) v0.16; A (Navegação) v0.18, v0.20, v0.31 e v0.34; D (Temas) v0.17; E6 na v0.35.
 
 ## Feito
 | Versão | O que entrou | PR |
