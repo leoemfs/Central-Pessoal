@@ -60,9 +60,12 @@
 | E11 | Botão **voltar** (do celular): numa ferramenta da barra (ex.: Finanças / Orçamento), voltar leva para a **casa do módulo** (Finanças); voltar de novo leva para o **Início**. Não percorre todo o caminho de telas já abertas. | EXP | P | alta | pronto (v0.25) | `futuro/navegacao-v2.md` |
 | E12 | Trocar de módulo sem passar pelo Início: tocar de novo no módulo em que você está mostra os favoritos na barra | EXP | P | alta | pronto (v0.25) | `futuro/navegacao-v2.md` |
 | E13 | Configurações › **Personalização**: tema e cor, favoritos do Início, jeito da barra (favorito no mesmo lugar, ao lado do Início ou no centro), "tocar de novo mostra os favoritos" e "esconder as barras ao rolar" | EXP | P | alta | pronto (v0.25) | `futuro/navegacao-v2.md` |
+| E15 | Configurações: tirar os atalhos "Categorias de Finanças" e "Categorias de Listas" (11/11). Elas já ficam no botão + de cada módulo; segue a regra "cada coisa em um lugar só" | EXP | P | média | pronto (v0.43.1) | — |
 | C2 | Hábitos: nome do hábito aparecia uma letra por linha quando havia "Não falhe 2x" e "Iniciar" no cartão | COR | P | alta | pronto (v0.18) | — |
 | C10 | **Telas quebradas no computador** (10/11, prints): botão + vira uma faixa oval na largura toda (Estudos › notebook); Início com cartões esticados na tela inteira; Listas com título e chips desalinhados do conteúdo; Finanças com o bloco mês + abas mais estreito que os cartões. No celular está ok | COR | P | alta | pronto (v0.27.1) | — |
 | C12 | **Telas quebradas no celular** (11/11, prints): "Monte o app do seu jeito" com os botões Começar e Agora não altos e estreitos; Configurações com "Como usar a barra" estourando o cartão (a tela dava zoom e rolava para o lado); zoom com dois dedos desligado no app (o mapa mental de Estudos continua com o zoom dele) | COR | P | alta | pronto (v0.38.1) | — |
+| C13 | **Lápis quebrava a tela** (11/11, print da Agenda): no modo de editar cartões, um texto comprido (ex.: nome de compromisso) alargava o cartão e a tela ficava cortada, sem os botões Restaurar e Pronto. Valia para todas as telas com lápis | COR | P | alta | pronto (v0.43.2) | — |
+| E16 | Agenda sem o lápis de personalizar cartões (11/11: "nem acho interessante editar aqui"). Aguardando aprovação | EXP | P | média | ideia | — |
 | C3 | **Registro defeituoso deixa o app em branco**: conferir os campos ao abrir os dados, tela de erro com saída (exportar, recarregar, Configurações) e "desfazer importação" | COR | M | **alta** | pronto (v0.30) | `auditoria-2026-11.md` |
 | C4 | Salvamento de reserva pode perder dados em silêncio (avisar e usar a cópia mais nova) | COR | P | média | ideia | `auditoria-2026-11.md` |
 | C5 | Rodar os testes em todo PR e antes de publicar (hoje só compila) | COR | P | média | pronto (v0.29.1) | `auditoria-2026-11.md` |
@@ -139,7 +142,9 @@
 ## Feito
 | Versão | O que entrou | PR |
 |---|---|---|
-| v0.43.1 | Nome visual **CP Hub** (ícone, título, textos, nome do arquivo de backup e da agenda no Google, que é renomeada sozinha). Endereço, repositório, dados e login continuam iguais | #47 |
+| v0.43.3 | Nome visual **CP Hub** (ícone, título, textos, nome do arquivo de backup e da agenda no Google, que é renomeada sozinha). Endereço, repositório, dados e login continuam iguais | #48 |
+| v0.43.2 | C13: modo de editar cartões (lápis) não alarga mais a tela quando há texto comprido | — |
+| v0.43.1 | E15: Configurações sem os atalhos de Categorias (ficam só no botão + de Finanças e de Listas). Tinha ficado de fora do #39, que foi mesclado antes | #45 |
 | v0.43 | N9.5: lembretes no Google Agenda (agenda "Central Pessoal" com compromissos, contas e tarefas, aviso no celular, só de ida) + correção: a junção de configurações passa a ser campo a campo | #46 |
 | v0.42 | N9.3a: fotos no Diário (até 6 por registro, tela cheia), guardadas no aparelho e sincronizadas pelo Drive; foto tirada ou registro excluído some nos dois aparelhos | #44 |
 | v0.41 | N9.2: sincronização automática entre aparelhos (ao abrir, ao voltar, a cada 5 min e depois de cada mudança), juntando item por item: o que foi criado em cada aparelho fica nos dois, vale a alteração mais recente, exclusão não "ressuscita". Saiu a escolha de cópia | #43 |
