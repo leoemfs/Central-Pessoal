@@ -3,6 +3,7 @@
  * Etapas em andamento: interesse → enviei → entrevista → proposta.
  * Encerrar: contratado, não passei ou desisti (a vaga vai para "Encerradas").
  */
+import type { ResumeItem, ResumeKind } from './types';
 import type { AppData, CalendarEvent, CareerChange, CareerChangeKind, CareerData, JobApp, JobOutcome, JobStage, Meeting, MeetingKind, ProjectStatus, WorkProject } from './types';
 import { editIncome } from './incomes.ts';
 import { addDays } from './utils.ts';
@@ -27,7 +28,7 @@ export const stageLabel = (s: JobStage | JobOutcome) => STAGES.find((x) => x.id 
 export const stageIndex = (s: JobStage) => STAGE_IDS.indexOf(s);
 
 export function emptyCareer(): CareerData {
-  return { jobs: [], changes: [], meetings: [], projects: [] };
+  return { jobs: [], changes: [], meetings: [], projects: [], resume: [] };
 }
 
 const isRec = (v: unknown): v is Record<string, unknown> => typeof v === 'object' && v !== null && !Array.isArray(v);
@@ -97,6 +98,7 @@ export function normalizeCareer(raw: unknown): CareerData {
     changes,
     meetings,
     projects,
+    resume: (Array.isArray(r.resume) ? r.resume : []).filter(isRec).filter((x) => typeof x.id === 'string').map(normalizeResumeItem),
     jobs: jobs.map((j): JobApp => {
       const stage = STAGE_IDS.includes(j.stage as JobStage) ? (j.stage as JobStage) : 'interesse';
       const outcome = OUTCOME_IDS.includes(j.outcome as JobOutcome) ? (j.outcome as JobOutcome) : null;
@@ -410,4 +412,60 @@ export function syncCareerEvents(d: AppData): AppData {
   });
   if (byId.size) changed = true;
   return changed ? { ...d, events: [...kept, ...byId.values()] } : d;
+}
+
+// ---------- Currículo e conquistas (N8.3) ----------
+
+export const RESUME_KINDS: { id: ResumeKind; label: string; plural: string; icon: string; titleHint: string; orgHint: string; noteHint: string }[] = [
+  { id: 'experiencia', label: 'Experiência', plural: 'Experiências', icon: 'briefcase', titleHint: 'Cargo', orgHint: 'Empresa', noteHint: 'O que fazia' },
+  { id: 'formacao', label: 'Formação', plural: 'Formação', icon: 'book', titleHint: 'Curso (ex.: Administração)', orgHint: 'Instituição', noteHint: 'Detalhes' },
+  { id: 'curso', label: 'Curso ou certificado', plural: 'Cursos e certificados', icon: 'cap', titleHint: 'Nome do curso', orgHint: 'Plataforma ou escola', noteHint: 'Carga horária, link do certificado…' },
+  { id: 'idioma', label: 'Idioma', plural: 'Idiomas', icon: 'globe', titleHint: 'Idioma', orgHint: '', noteHint: 'Nível (básico, intermediário, avançado, fluente)' },
+  { id: 'habilidade', label: 'Habilidade', plural: 'Habilidades', icon: 'bolt', titleHint: 'Habilidade (ex.: Excel avançado)', orgHint: '', noteHint: 'Detalhes' },
+  { id: 'conquista', label: 'Conquista', plural: 'Conquistas', icon: 'star', titleHint: 'O que conquistou', orgHint: 'Onde', noteHint: 'Resultado (ex.: reduzi o tempo X em 30%)' },
+];
+const RESUME_IDS = RESUME_KINDS.map((k) => k.id);
+const MONTH_RE = /^\d{4}-\d{2}$/;
+
+export function normalizeResumeItem(x: Record<string, unknown>): ResumeItem {
+  const month = (v: unknown) => (typeof v === 'string' && MONTH_RE.test(v) ? v : '');
+  return {
+    id: x.id as string,
+    kind: RESUME_IDS.includes(x.kind as ResumeKind) ? (x.kind as ResumeKind) : 'conquista',
+    title: str(x.title),
+    org: str(x.org),
+    from: month(x.from),
+    to: month(x.to),
+    note: str(x.note),
+    cycleId: typeof x.cycleId === 'string' ? x.cycleId : null,
+    createdAt: str(x.createdAt) || new Date().toISOString(),
+  };
+}
+
+/** Itens de um tipo, do mais recente para o mais antigo (em aberto = atual, primeiro). */
+export function resumeOf(items: ResumeItem[], kind: ResumeKind): ResumeItem[] {
+  const end = (i: ResumeItem) => i.to || (i.from ? '9999-99' : '');
+  return items.filter((i) => i.kind === kind).sort((a, b) => end(b).localeCompare(end(a)) || b.from.localeCompare(a.from) || b.createdAt.localeCompare(a.createdAt));
+}
+
+export function upsertResume(item: ResumeItem) {
+  return (d: AppData): AppData => {
+    const exists = d.career.resume.some((i) => i.id === item.id);
+    return { ...d, career: { ...d.career, resume: exists ? d.career.resume.map((i) => (i.id === item.id ? item : i)) : [...d.career.resume, item] } };
+  };
+}
+
+export function removeResume(id: string) {
+  return (d: AppData): AppData => ({ ...d, career: { ...d.career, resume: d.career.resume.filter((i) => i.id !== id) }, deleted: { ...d.deleted, [id]: new Date().toISOString() } });
+}
+
+/** Ciclos de Estudos concluídos (todos os tópicos feitos) que ainda não viraram curso no currículo. */
+export function cyclesToResume(d: AppData): { id: string; name: string; from: string; to: string }[] {
+  const used = new Set(d.career.resume.map((i) => i.cycleId).filter(Boolean));
+  return d.study.cycles
+    .filter((c) => c.topics.length > 0 && c.topics.every((t) => t.status === 'feito') && !used.has(c.id))
+    .map((c) => {
+      const last = c.topics.map((t) => t.doneAt ?? '').sort().pop() || c.finishedAt || c.startedAt;
+      return { id: c.id, name: c.name, from: c.startedAt.slice(0, 7), to: (c.finishedAt ?? last).slice(0, 7) };
+    });
 }

@@ -67,6 +67,10 @@ export interface Habit {
    */
   link: string;
   createdAt: string;
+  /** Períodos pausados (AAAA-MM-DD, de/até inclusive; o último pode estar em aberto: to = null). */
+  pauses: { from: string; to: string | null }[];
+  /** Data (AAAA-MM-DD) em que foi arquivado; null = ativo. O histórico fica. */
+  archivedAt: string | null;
 }
 
 export interface Note {
@@ -173,6 +177,8 @@ export interface ExpenseSeries {
   count: number | null;
   /** Quantas ocorrências já foram geradas. */
   generated: number;
+  /** Cartão: fatura (AAAA-MM) escolhida para a 1ª ocorrência (M8). Sem valor, a calculada pela data. */
+  invoiceMonth?: string | null;
   createdAt: string;
 }
 
@@ -239,6 +245,27 @@ export interface Settings {
   journeyUnlockedAt: string | null;
   /** Resposta depois de desbloquear: quer a Jornada ou não por agora. */
   journeyChoice: 'quero' | 'depois' | null;
+  /** Módulos desligados (ficam guardados no Mais, sem apagar nada). Ids de MODULES em setup.ts. */
+  hiddenModules: string[];
+  /** Montagem do app (E14): novo = abre sozinha; convite = quem já usava vê um cartão no Início; feito = já montou ou dispensou. */
+  setup: 'novo' | 'convite' | 'feito';
+  /** O tutorial da barra já foi visto (ou pulado). */
+  tutorialSeen: boolean;
+  /** O que a pessoa quer organizar (ids de SETUP_AREAS em setup.ts). */
+  setupAreas: string[];
+  /** Escolha da montagem: quer a Jornada (true), agora não (false) ou não perguntado (null). */
+  journeyWanted: boolean | null;
+  /** Com que frequência quer escrever no Diário (o Início só convida nesse ritmo). */
+  journalRhythm: JournalRhythm;
+}
+
+export interface JournalRhythm {
+  /** todo-dia · semana (perWeek vezes) · dias (dias certos) · livre (quando der, sem convite). */
+  mode: 'todo-dia' | 'semana' | 'dias' | 'livre';
+  /** 2 a 5, no modo 'semana'. */
+  perWeek: number;
+  /** 0 = domingo … 6 = sábado, no modo 'dias'. */
+  days: number[];
 }
 
 // ---------- Humor do dia ----------
@@ -712,9 +739,31 @@ export interface WorkProject {
   createdAt: string;
 }
 
+export type ResumeKind = 'experiencia' | 'formacao' | 'curso' | 'idioma' | 'habilidade' | 'conquista';
+
+/** Item do currículo (N8.3): experiência, formação, curso/certificado, idioma, habilidade ou conquista. */
+export interface ResumeItem {
+  id: string;
+  kind: ResumeKind;
+  /** Cargo, curso, idioma, habilidade ou a conquista em si. */
+  title: string;
+  /** Empresa, instituição ou plataforma. */
+  org: string;
+  /** AAAA-MM (ou vazio). */
+  from: string;
+  /** AAAA-MM; vazio = até hoje (ou sem data). */
+  to: string;
+  /** Detalhes, nível (idioma) ou resultado (conquista: "reduzi o tempo X em 30%"). */
+  note: string;
+  /** Veio de um ciclo concluído em Estudos. */
+  cycleId: string | null;
+  createdAt: string;
+}
+
 export interface CareerData {
   jobs: JobApp[];
   changes: CareerChange[];
   meetings: Meeting[];
   projects: WorkProject[];
+  resume: ResumeItem[];
 }

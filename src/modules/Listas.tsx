@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState, type ReactNode } from 'react';
+import { CardScreen } from '../Cards';
 import type { ViewProps } from '../App';
 import { useStore } from '../store';
 import { go, goReplace, useSubAction } from '../router';
@@ -201,6 +202,36 @@ function ListsHome({ onNew, initialFilter = 'todas' }: { onNew: (categoryId: str
   const count = (id: string) => data.lists.filter((l) => l.categoryId === id).length;
   const shown = filter === 'todas' ? data.listCategories : data.listCategories.filter((c) => c.id === filter);
   const empty = data.listCategories.filter((c) => !count(c.id));
+  // E3: cada categoria é um cartão; com o lápis, dá para subir, descer e ocultar.
+  const catSection = (c: (typeof data.listCategories)[number]) => {
+    const ls = data.lists.filter((l) => l.categoryId === c.id).sort((a, b) => Number(b.pinned) - Number(a.pinned) || b.createdAt.localeCompare(a.createdAt));
+    if (!ls.length && filter === 'todas') return null;
+    return (
+      <section key={c.id} className="card">
+        <div className="card-head">
+          <h2 className="cat-title">
+            <span className="dot" style={{ background: c.color }} />
+            {c.name}
+          </h2>
+          <span className="muted small">{LIST_KINDS[c.kind].label}</span>
+        </div>
+        {ls.length ? (
+          <div className="lcards">
+            {ls.map((l) => (
+              <ListCard key={l.id} l={l} />
+            ))}
+          </div>
+        ) : (
+          <Empty>Nenhuma lista em {c.name} ainda.</Empty>
+        )}
+        {filter !== 'todas' && (
+          <button type="button" className="btn soft block" style={{ marginTop: 12 }} onClick={() => onNew(c.id)}>
+            <Icon name="plus" size={18} /> <span className="green">Nova lista em {c.name}</span>
+          </button>
+        )}
+      </section>
+    );
+  };
   return (
     <>
       <div className="chips cat-chips" role="group" aria-label="Categorias">
@@ -221,35 +252,11 @@ function ListsHome({ onNew, initialFilter = 'todas' }: { onNew: (categoryId: str
           <Empty>Listas que se usam e reusam: mercado com preços, compras de roupa ou para a casa, receitas e checklists. Cada categoria tem o seu jeito.</Empty>
         </section>
       )}
-      {shown.map((c) => {
-        const ls = data.lists.filter((l) => l.categoryId === c.id).sort((a, b) => Number(b.pinned) - Number(a.pinned) || b.createdAt.localeCompare(a.createdAt));
-        if (!ls.length && filter === 'todas') return null;
-        return (
-          <section key={c.id} className="card">
-            <div className="card-head">
-              <h2 className="cat-title">
-                <span className="dot" style={{ background: c.color }} />
-                {c.name}
-              </h2>
-              <span className="muted small">{LIST_KINDS[c.kind].label}</span>
-            </div>
-            {ls.length ? (
-              <div className="lcards">
-                {ls.map((l) => (
-                  <ListCard key={l.id} l={l} />
-                ))}
-              </div>
-            ) : (
-              <Empty>Nenhuma lista em {c.name} ainda.</Empty>
-            )}
-            {filter !== 'todas' && (
-              <button type="button" className="btn soft block" style={{ marginTop: 12 }} onClick={() => onNew(c.id)}>
-                <Icon name="plus" size={18} /> <span className="green">Nova lista em {c.name}</span>
-              </button>
-            )}
-          </section>
-        );
-      })}
+      {filter === 'todas' ? (
+        <CardScreen screen="listas" cards={data.listCategories.map((c) => ({ id: c.id, label: c.name, node: catSection(c) }))} />
+      ) : (
+        shown.map((c) => catSection(c))
+      )}
       {filter === 'todas' && empty.length > 0 && data.lists.length > 0 && <p className="muted small center">Sem listas ainda: {empty.map((c) => c.name).join(', ')}.</p>}
     </>
   );

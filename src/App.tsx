@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, type ComponentType } from 'react';
+import { ErrorBoundary } from './ErrorScreen';
 import { useStore } from './store';
 import type { Theme } from './types';
 import { go, goReplace, useRoute, type Route } from './router';
@@ -16,7 +17,9 @@ import { Notas } from './modules/Notas';
 import { Ajustes } from './modules/Ajustes';
 import { Revisao } from './modules/Revisao';
 import { Jornada } from './modules/Jornada';
-import { FirstRun, Voce } from './modules/Voce';
+import { Voce } from './modules/Voce';
+import { BarTutorial, SetupHost } from './modules/Montagem';
+import { isHidden, moduleOf } from './setup';
 import { Orcamento, Relatorios } from './modules/financas/Orcamento';
 import { ComprasPage, Listas, PrecosPage } from './modules/Listas';
 import { HistoricoPage, ProgressoPage } from './modules/Progresso';
@@ -143,6 +146,9 @@ function TabLink({ to, label, icon, active, center, onTap }: { to: string; label
 
 /** Menu agrupado: usado na barra lateral (computador) e no menu ☰ (celular). */
 function NavMenu({ current, onNavigate }: { current: string; onNavigate?: () => void }) {
+  const { data } = useStore();
+  // Módulos guardados (desligados na montagem) não aparecem no menu; continuam no Mais.
+  const groups = NAV_GROUPS.map((g) => ({ ...g, items: g.items.filter((it) => !it.to || !isHidden(data, it.to)) })).filter((g) => g.items.some((it) => it.to));
   const item = (it: NavItem) =>
     it.to ? (
       <a
@@ -169,7 +175,7 @@ function NavMenu({ current, onNavigate }: { current: string; onNavigate?: () => 
     );
   return (
     <div className="nav-menu">
-      {NAV_GROUPS.map((g) => (
+      {groups.map((g) => (
         <div key={g.title} className="nav-section">
           <p className="nav-group">{g.title}</p>
           <ul>
@@ -349,7 +355,7 @@ export function App() {
             (section.title ?? section.label)
           )}
         </h1>
-        <button type="button" className="icon-btn" onClick={() => (section.search ? goReplace(section.search) : setSearch(true))} aria-label={section.search ? 'Buscar no diário' : 'Buscar em tudo'}>
+        <button type="button" className="icon-btn" onClick={() => (section.search ? goReplace(section.search) : setSearch(true))} aria-label={section.search ? 'Buscar no diário' : moduleOf(section.path) ? `Buscar em ${where?.module ?? section.label}` : 'Buscar em tudo'}>
           <Icon name="search" />
         </button>
         {editor.screen && (
@@ -371,7 +377,7 @@ export function App() {
       </nav>
 
       {drawer && <Drawer current={section.path} onClose={() => setDrawer(false)} />}
-      {search && <SearchSheet onClose={() => setSearch(false)} />}
+      {search && <SearchSheet onClose={() => setSearch(false)} scope={moduleOf(section.path)} />}
 
       <main className="main">
         {saveError && (
@@ -379,7 +385,9 @@ export function App() {
             Não foi possível salvar neste aparelho. Exporte um backup em Ajustes.
           </div>
         )}
-        <View key={section.path} route={route} />
+        <ErrorBoundary scope="tela" resetKey={`${section.path}:${route.n}`}>
+          <View key={section.path} route={route} />
+        </ErrorBoundary>
       </main>
 
       {section.fab && (
@@ -405,7 +413,8 @@ export function App() {
         {showFavs && <span className="tb-hint">Escolha o módulo</span>}
       </nav>
 
-      <FirstRun />
+      <SetupHost />
+      <BarTutorial path={section.path} nav={`${section.path}:${route.n}:${location.hash}`} showFavs={showFavs} />
       <Toasts />
 
       {quickOpen && (

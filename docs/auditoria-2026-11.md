@@ -16,6 +16,8 @@
 ## 1. O que precisa de correção (por prioridade)
 
 ### C3. Um registro defeituoso deixa o app em branco (alta)
+> **Corrigido na v0.30** (`src/sanitize.ts`, `src/ErrorScreen.tsx`, Desfazer importação em Configurações).
+
 - **Teste:** coloquei no banco uma despesa incompleta (só com o identificador). Resultado: **Início e Finanças em branco**. O mesmo acontece com cartão, receita e nota incompletos. Tarefa, compromisso, hábito, caixinha, lista, Carreira e Estudos aguentaram.
 - **Por quê:** ao abrir os dados (`normalize` em `src/data.ts`), despesas, cartões, receitas, séries, notas, diário, tarefas e compromissos são aceitos só por terem um identificador, sem conferir os campos. E o app não tem uma "rede de proteção" para erros de tela: qualquer erro derruba tudo.
 - **Quando pode acontecer:** backup editado à mão, arquivo corrompido, ou um defeito de uma versão futura. É raro, mas o efeito é o pior possível: a pessoa não consegue nem chegar em Configurações para restaurar.
@@ -29,6 +31,8 @@
 - **Correção proposta:** se a gravação principal falhar, mostrar o aviso que já existe ("Não foi possível salvar. Exporte um backup"); ao abrir, comparar as duas cópias e usar a mais nova.
 
 ### C5. Publicação sem rodar os testes (média)
+> **Corrigido na v0.29.1** (`.github/workflows/testes.yml` e `npm test` no deploy).
+
 - O GitHub publica o app a cada merge rodando só a compilação. Os 136 testes **não rodam** na publicação nem nos PRs.
 - **Correção proposta:** rodar `npm test` antes de publicar e em todo PR. Custo zero para o uso do Claude.
 

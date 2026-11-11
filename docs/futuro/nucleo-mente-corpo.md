@@ -4,7 +4,7 @@
 > - o Núcleo tem 4 abas: **Rituais · Hábitos · Mente · Corpo** (Rotina = as duas primeiras);
 > - o sino se liga e desliga no próprio botão de sino da prática, e não em Configurações;
 > - criar e editar fichas de treino ficam para uma próxima versão (por enquanto, A, B, C e Em casa);
-> - os minutos e treinos da semana aparecem no Início ("Autocuidado da semana"), mas ainda não na Revisão semanal;
+> - os minutos e treinos da semana aparecem no Início ("Autocuidado da semana") e, desde a v0.38 (M7), na Revisão semanal;
 > - nada de XP por prática ainda: os hábitos ligados é que contam para os atributos.
 > - código: `src/practices.ts` (catálogo e regras, com testes em `practices.test.ts`) e `src/modules/Praticas.tsx` (telas).
 

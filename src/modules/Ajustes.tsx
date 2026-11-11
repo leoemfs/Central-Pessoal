@@ -1,24 +1,56 @@
-import { useRef, useState, type ChangeEvent, type CSSProperties } from 'react';
+import { useEffect, useRef, useState, type ChangeEvent, type CSSProperties } from 'react';
 import { useStore } from '../store';
-import { emptyData, normalize } from '../data';
+import { discardedCount, emptyData, normalize } from '../data';
+import { dbGet, dbSet } from '../db';
 import type { Theme } from '../types';
 import { formatDMY, toISO, todayISO } from '../utils';
 import { Icon, notify, PageHeader, Segmented, Toggle, type IconName } from '../ui';
 import { favoriteItems } from '../moduleBar';
 import { FavoritesSheet } from './Mais';
 import { ACCENTS, accentById } from '../theme';
+import { BAR_LAYOUTS, fitFavorites, hiddenFrom, MIN_VISIBLE, MODULES, rhythmLabel, toggleModule, visibleFrom } from '../setup';
+import { openSetup, openTutorial, RhythmPicker } from './Montagem';
 
-const BAR_LAYOUTS: { id: 'fixo' | 'lado' | 'centro'; label: string; hint: string; demo: string[] }[] = [
-  { id: 'fixo', label: 'Favorito no mesmo lugar', hint: 'O módulo fica onde está nos favoritos (ex.: Agenda em 3º); as ferramentas ocupam os outros espaços.', demo: ['H', 'f', 'f', 'M', '+'] },
-  { id: 'lado', label: 'Módulo ao lado do Início', hint: 'O módulo vai para o 1º espaço do meio; as ferramentas ficam à direita.', demo: ['H', 'M', 'f', 'f', '+'] },
-  { id: 'centro', label: 'Módulo no centro', hint: 'O módulo vai para o meio; as ferramentas ficam dos lados.', demo: ['H', 'f', 'M', 'f', '+'] },
-];
+
+const UNDO_KEY = 'antesDaImportacao';
+interface Snapshot {
+  at: string;
+  reason: 'importacao' | 'apagar';
+  data: unknown;
+}
 
 export function Ajustes() {
   const { data, update, replace, persisted } = useStore();
   const fileRef = useRef<HTMLInputElement>(null);
   const [message, setMessage] = useState<{ tone: 'green' | 'red'; text: string } | null>(null);
   const [favPick, setFavPick] = useState(false);
+  // C3: cópia dos dados de antes da última importação (ou de "apagar tudo"), para desfazer.
+  const [undo, setUndo] = useState<Snapshot | null>(null);
+  useEffect(() => {
+    dbGet<Snapshot | null>(UNDO_KEY).then((x) => setUndo(x && typeof x.at === 'string' ? x : null)).catch(() => setUndo(null));
+  }, []);
+  const broken = discardedCount(data);
+
+  async function keepCopy(reason: Snapshot['reason']): Promise<boolean> {
+    const snap: Snapshot = { at: new Date().toISOString(), reason, data };
+    try {
+      await dbSet(UNDO_KEY, snap);
+      setUndo(snap);
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
+  function undoLast() {
+    if (!undo) return;
+    const what = undo.reason === 'importacao' ? 'a importação' : 'o "apagar tudo"';
+    if (!confirm(`Desfazer ${what} de ${formatDMY(toISO(new Date(undo.at)))}? Os dados voltam a ser os de antes, e o que foi feito depois disso se perde.`)) return;
+    replace(normalize(undo.data));
+    dbSet(UNDO_KEY, null).catch(() => undefined);
+    setUndo(null);
+    setMessage({ tone: 'green', text: 'Pronto: os dados voltaram a ser os de antes.' });
+  }
   function setSetting(patch: Partial<typeof data.settings>) {
     update((d) => ({ ...d, settings: { ...d.settings, ...patch } }));
   }
@@ -49,16 +81,19 @@ export function Ajustes() {
     try {
       const imported = normalize(JSON.parse(await file.text()));
       const n = imported.expenses.length + imported.journal.length + imported.tasks.length + imported.events.length + imported.notes.length + imported.habits.length;
-      if (!confirm(`Importar ${n} item(ns) de "${file.name}"? Isso substitui todos os dados atuais deste aparelho.`)) return;
+      if (!confirm(`Importar ${n} item(ns) de "${file.name}"? Isso substitui todos os dados atuais deste aparelho (dá para desfazer depois, aqui em Backup).`)) return;
+      if (!(await keepCopy('importacao')) && !confirm('Não foi possível guardar uma cópia dos dados atuais para desfazer. Importar mesmo assim?')) return;
       replace(imported);
-      setMessage({ tone: 'green', text: `Backup importado: ${n} item(ns).` });
+      const bad = discardedCount(imported) - broken;
+      setMessage({ tone: 'green', text: `Backup importado: ${n} item(ns).${bad > 0 ? ` ${bad} registro(s) com defeito ficaram guardados à parte.` : ''}` });
     } catch {
       setMessage({ tone: 'red', text: 'Arquivo inválido. Escolha um backup .json exportado pela Central Pessoal.' });
     }
   }
 
-  function clearAll() {
-    if (confirm('Apagar TODOS os dados deste aparelho? Isso não pode ser desfeito. Exporte um backup antes, se quiser.')) {
+  async function clearAll() {
+    if (confirm('Apagar TODOS os dados deste aparelho? Dá para desfazer em Backup logo depois; mesmo assim, exporte um backup antes, se quiser.')) {
+      await keepCopy('apagar');
       replace({ ...normalize(emptyData()), settings: { ...normalize(emptyData()).settings, theme: data.settings.theme } });
       setMessage({ tone: 'green', text: 'Todos os dados foram apagados.' });
     }
@@ -148,6 +183,39 @@ export function Ajustes() {
           </button>
         </div>
 
+        <h3 className="pz-title">Módulos à vista</h3>
+        <p className="muted small">Desligado fica guardado no Mais, sem apagar nada. Pelo menos {MIN_VISIBLE} à vista.</p>
+        <div className="chips" role="group" aria-label="Módulos à vista">
+          {MODULES.map((m) => {
+            const visible = visibleFrom(data.settings.hiddenModules);
+            const on = visible.includes(m.id);
+            return (
+              <button
+                key={m.id}
+                type="button"
+                className={`chip-btn${on ? ' on' : ''}`}
+                aria-pressed={on}
+                onClick={() => {
+                  const next = toggleModule(visible, m.id);
+                  if (next === visible) return notify(`Pelo menos ${MIN_VISIBLE} módulos`, 'Ligue outro antes de desligar este.');
+                  update((d) => ({ ...d, settings: { ...d.settings, hiddenModules: hiddenFrom(next), favorites: fitFavorites(d.settings.favorites, next), ...(m.id === 'jornada' ? { journeyWanted: !on } : {}) } }));
+                  notify(m.label, on ? 'Guardado no Mais.' : 'De volta à vista.');
+                }}
+              >
+                {m.label}
+              </button>
+            );
+          })}
+        </div>
+
+        {!data.settings.hiddenModules.includes('diario') && (
+          <>
+            <h3 className="pz-title">Ritmo do Diário</h3>
+            <p className="muted small">Agora: {rhythmLabel(data.settings.journalRhythm)}. O Início só convida nesse ritmo e nunca conta falta.</p>
+            <RhythmPicker value={data.settings.journalRhythm} onChange={(journalRhythm) => setSetting({ journalRhythm })} />
+          </>
+        )}
+
         <h3 className="pz-title">Barra de baixo dentro de um módulo</h3>
         <div className="pz-options" role="radiogroup" aria-label="Jeito da barra de baixo">
           {BAR_LAYOUTS.map((o) => (
@@ -180,6 +248,14 @@ export function Ajustes() {
             <span className="muted small">A barra de cima, o mês e as abas e a barra de baixo somem ao rolar para baixo e voltam ao subir.</span>
           </div>
           <Toggle checked={data.settings.hideOnScroll} onChange={(v) => setSetting({ hideOnScroll: v })} label="Esconder as barras ao rolar" />
+        </div>
+        <div className="btn-row" style={{ marginTop: 14 }}>
+          <button type="button" className="btn soft small" onClick={() => openSetup('convite')}>
+            <Icon name="grid" size={16} /> Refazer a montagem do app
+          </button>
+          <button type="button" className="btn ghost small" onClick={openTutorial}>
+            Como usar a barra
+          </button>
         </div>
       </section>
       {favPick && <FavoritesSheet onClose={() => setFavPick(false)} />}
@@ -220,6 +296,16 @@ export function Ajustes() {
           </button>
         </div>
         <input ref={fileRef} type="file" accept="application/json,.json" hidden onChange={importBackup} />
+        {undo && (
+          <button type="button" className="btn ghost" style={{ marginTop: 10, width: '100%' }} onClick={undoLast}>
+            <Icon name="undo" size={18} /> Desfazer {undo.reason === 'importacao' ? 'importação' : '"apagar tudo"'} de {formatDMY(toISO(new Date(undo.at)))}
+          </button>
+        )}
+        {broken > 0 && (
+          <p className="muted small" style={{ marginTop: 10 }}>
+            {broken} registro(s) com defeito foram guardados à parte para não travar o app. Eles vão junto no backup.
+          </p>
+        )}
       </section>
 
       <section className="card">

@@ -65,9 +65,9 @@ Decidido:
 ## Fica para depois (já anotado na Central: M11 a M15)
 - Editor gráfico de mapas (arrastar e ligar ideias). → **M15**
 - Anexar PDF ou imagem dentro do app (hoje, só o link). → **M14**
-- Lápis para personalizar os cartões de Estudos → **M12**; cartão "Estudando agora" no Início → **M11**.
+- Lápis para personalizar os cartões de Estudos → **M12**; cartão "Estudando agora" no Início → **M11 (pronto na v0.33)**.
 - Busca dentro do módulo (item E6). → **M13**
-- "O que estudei" na Revisão semanal (ver `estudos-jornada.md`). → **M11**
+- "O que estudei" na Revisão semanal (ver `estudos-jornada.md`). → **M11 (pronto na v0.33: tópicos concluídos, dias com anotação e ciclos em andamento; regras `activeCycles` e `studyWeek` em `src/estudos.ts`)**
 
 ## Tamanho e divisão
 Total: **G**. Dividir em partes, uma versão cada:

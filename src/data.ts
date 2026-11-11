@@ -11,6 +11,8 @@ import { normalizeLayouts } from './cardLayout.ts';
 import { DEFAULT_LIST_CATEGORIES, normalizeListData } from './lists.ts';
 import { emptyStudy, normalizeStudy } from './estudos.ts';
 import { emptyCareer, normalizeCareer } from './carreira.ts';
+import { DEFAULT_RHYTHM, MODULES, normalizeRhythm, SETUP_AREAS } from './setup.ts';
+import { fixCard, fixCategory, fixEvent, fixExpense, fixExpenseSeries, fixIncome, fixIncomeSeries, fixJournal, fixNote, fixTask, sanitizeList } from './sanitize.ts';
 
 export const COLORS = ['#22c55e', '#3b82f6', '#8b5cf6', '#f97316', '#ef4444', '#94a3b8', '#eab308', '#ec4899', '#06b6d4'];
 /** As 6 cores do cartão, como na referência visual. */
@@ -53,7 +55,7 @@ export function emptyData(): AppData {
     incomes: [],
     incomeSeries: [],
     incomeSources: [],
-    settings: { theme: 'dark', accent: null, favorites: [...DEFAULT_FAVORITES], cards: {}, barLayout: 'fixo', tapToFavorites: true, hideOnScroll: true, seededCategories: false, seededIncomeSources: false, lastBackupAt: null, activeDays: [], visitDays: [], journeyUnlockedAt: null, journeyChoice: null },
+    settings: { theme: 'dark', accent: null, favorites: [...DEFAULT_FAVORITES], cards: {}, barLayout: 'fixo', tapToFavorites: true, hideOnScroll: true, seededCategories: false, seededIncomeSources: false, lastBackupAt: null, activeDays: [], visitDays: [], journeyUnlockedAt: null, journeyChoice: null, hiddenModules: [], setup: 'novo', tutorialSeen: false, setupAreas: [], journeyWanted: null, journalRhythm: { ...DEFAULT_RHYTHM } },
     profile: emptyProfile('novo'),
     boxes: [],
     moods: {},
@@ -99,26 +101,48 @@ function list<T>(x: unknown): T[] {
   return Array.isArray(x) ? (x.filter((i) => isRec(i) && typeof i.id === 'string') as T[]) : [];
 }
 
+/** Junta os registros separados agora com os que já estavam guardados (até 200 por coleção). */
+function mergeDiscarded(prev: unknown, now: Record<string, unknown[]>): Record<string, unknown[]> {
+  const out: Record<string, unknown[]> = isRec(prev) ? Object.fromEntries(Object.entries(prev).filter((e): e is [string, unknown[]] => Array.isArray(e[1]))) : {};
+  for (const [k, items] of Object.entries(now)) out[k] = [...(out[k] ?? []), ...items].slice(-200);
+  return out;
+}
+
+/** Quantos registros com defeito estão guardados à parte (para avisar em Configurações). */
+export function discardedCount(d: AppData): number {
+  const x = d.legacy.descartados;
+  return isRec(x) ? Object.values(x).reduce<number>((n, v) => n + (Array.isArray(v) ? v.length : 0), 0) : 0;
+}
+
 /** Aceita dados da versão 1 (protótipo) ou 2, de armazenamento ou de backup. */
 export function normalize(raw: unknown): AppData {
   const r = isRec(raw) ? raw : {};
   const base = emptyData();
   const settings = isRec(r.settings) ? r.settings : {};
+  // C3: cada registro é conferido; o que não tem conserto vai para `legacy.descartados` (não some).
+  const now = new Date().toISOString();
+  const discarded: Record<string, unknown[]> = {};
+  const check = <T,>(key: string, fix: (x: Rec, now: string) => T | null): T[] => {
+    const { ok, bad } = sanitizeList(list(r[key]), fix, now);
+    if (bad.length) discarded[key] = bad;
+    return ok;
+  };
+  const legacy = isRec(r.legacy) ? { ...r.legacy } : {};
   let d: AppData = {
     ...base,
-    tasks: list(r.tasks),
-    events: list(r.events),
+    tasks: check('tasks', fixTask),
+    events: check('events', fixEvent),
     habits: list<Record<string, unknown>>(r.habits).map(normalizeHabit),
-    notes: list(r.notes),
-    journal: list(r.journal),
-    expenses: list(r.expenses),
-    series: list(r.series),
-    cards: list(r.cards),
+    notes: check('notes', fixNote),
+    journal: check('journal', fixJournal),
+    expenses: check('expenses', fixExpense),
+    series: check('series', fixExpenseSeries),
+    cards: check('cards', fixCard),
     vouchers: list<Record<string, unknown>>(r.vouchers).map(normalizeVoucher),
-    categories: list(r.categories),
-    incomes: list(r.incomes),
-    incomeSeries: list(r.incomeSeries),
-    incomeSources: list(r.incomeSources),
+    categories: check('categories', fixCategory),
+    incomes: check('incomes', fixIncome),
+    incomeSeries: check('incomeSeries', fixIncomeSeries),
+    incomeSources: check('incomeSources', fixCategory),
     settings: {
       // Só a versão 2 tem tema escolhido pelo usuário; o protótipo começa no escuro.
       theme: r.version === 2 && (settings.theme === 'light' || settings.theme === 'system') ? settings.theme : 'dark',
@@ -135,6 +159,13 @@ export function normalize(raw: unknown): AppData {
       visitDays: strings(settings.visitDays),
       journeyUnlockedAt: typeof settings.journeyUnlockedAt === 'string' ? settings.journeyUnlockedAt : null,
       journeyChoice: settings.journeyChoice === 'quero' || settings.journeyChoice === 'depois' ? settings.journeyChoice : null,
+      hiddenModules: strings(settings.hiddenModules).filter((id, i, a) => MODULES.some((m) => m.id === id) && a.indexOf(id) === i).slice(0, MODULES.length - 3),
+      // Quem já tinha dados recebe o convite no Início; instalação nova abre a montagem sozinha.
+      setup: settings.setup === 'novo' || settings.setup === 'convite' || settings.setup === 'feito' ? settings.setup : Object.keys(r).length > 0 ? 'convite' : 'novo',
+      tutorialSeen: settings.tutorialSeen === true,
+      setupAreas: strings(settings.setupAreas).filter((id) => SETUP_AREAS.some((a) => a.id === id)),
+      journeyWanted: typeof settings.journeyWanted === 'boolean' ? settings.journeyWanted : null,
+      journalRhythm: normalizeRhythm(settings.journalRhythm),
     },
     // Quem já tinha dados (atualização ou backup) não vê a entrevista de surpresa.
     profile: normalizeProfile(r.profile, Object.keys(r).length > 0),
@@ -152,7 +183,7 @@ export function normalize(raw: unknown): AppData {
     workoutGoal: typeof r.workoutGoal === 'number' && Number.isFinite(r.workoutGoal) ? Math.min(7, Math.max(1, Math.round(r.workoutGoal))) : 3,
     exerciseVideos: isRec(r.exerciseVideos) ? Object.fromEntries(Object.entries(r.exerciseVideos).filter((e): e is [string, string] => typeof e[1] === 'string' && e[1] !== '')) : {},
     deleted: isRec(r.deleted) ? (r.deleted as Record<string, string>) : {},
-    legacy: isRec(r.legacy) ? r.legacy : {},
+    legacy: Object.keys(discarded).length ? { ...legacy, descartados: mergeDiscarded(legacy.descartados, discarded) } : legacy,
   };
   d = seedCategories(d);
   if (r.version !== 2 && Array.isArray(r.transactions)) d = migrateV1Transactions(d, r.transactions);
@@ -232,6 +263,12 @@ export function normalizeHabit(h: Record<string, unknown>): Habit {
     attrs: Array.isArray(h.attrs) ? strings(h.attrs) : suggestAttributes(typeof h.name === 'string' ? h.name : ''),
     link: typeof h.link === 'string' ? h.link : '',
     createdAt,
+    pauses: Array.isArray(h.pauses)
+      ? h.pauses
+          .filter((x): x is Rec => isRec(x) && typeof x.from === 'string')
+          .map((x) => ({ from: x.from as string, to: typeof x.to === 'string' ? x.to : null }))
+      : [],
+    archivedAt: typeof h.archivedAt === 'string' ? h.archivedAt : null,
   };
 }
 

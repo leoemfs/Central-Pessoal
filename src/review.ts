@@ -5,6 +5,8 @@ import type { AppData, Expense, Habit, JournalEntry } from './types.ts';
 import { getInvoice, invoiceMonths, openBills, type Bill } from './finance.ts';
 import { attributeTotals, isScheduled } from './habits.ts';
 import { addDays, fromISO, sum, toISO, todayISO } from './utils.ts';
+import { weekPractice } from './practices.ts';
+import { voucherBalance } from './vouchers.ts';
 
 /** Segunda-feira da semana de `day`. */
 export function weekStart(day: string): string {
@@ -45,6 +47,10 @@ export interface WeekReview {
   tasksOverdue: number;
   journal: JournalEntry[];
   nextEvents: number;
+  /** M7: autocuidado (práticas do Núcleo), caixinhas e vales da semana. */
+  care: { mindMinutes: number; workouts: number; moves: number; total: number };
+  saved: { deposited: number; withdrawn: number; boxes: { name: string; amount: number }[] };
+  vouchers: { name: string; spent: number; balance: number }[];
 }
 
 const inRange = (d: string | null | undefined, a: string, b: string) => !!d && d >= a && d <= b;
@@ -64,7 +70,7 @@ export function weekReview(d: AppData, start: string, today: string = todayISO()
     })
     .filter((r) => r.scheduled > 0)
     .sort((a, b) => a.done / a.scheduled - b.done / b.scheduled);
-  const quitting = d.habits.filter((h) => h.kind === 'abandonar' && h.startDate <= last).map((h) => ({ habit: h, slips: h.slips.filter((x) => inRange(x, start, last)).length }));
+  const quitting = d.habits.filter((h) => h.kind === 'abandonar' && h.startDate <= last && (!h.archivedAt || h.archivedAt >= start)).map((h) => ({ habit: h, slips: h.slips.filter((x) => inRange(x, start, last)).length }));
 
   // Finanças: gasto = contas fora do cartão que vencem na semana + compras no cartão feitas na semana
   // (uma compra parcelada conta pelo total, no dia da compra).
@@ -101,5 +107,22 @@ export function weekReview(d: AppData, start: string, today: string = todayISO()
     tasksOverdue: d.tasks.filter((t) => !t.done && t.due !== null && t.due < today).length,
     journal: d.journal.filter((j) => inRange(toISO(new Date(j.createdAt)), start, end)).sort((a, b) => a.createdAt.localeCompare(b.createdAt)),
     nextEvents: d.events.filter((e) => e.date > end && e.date <= addDays(end, 7)).length,
+    care: weekPractice(d.sessions, last, start),
+    saved: savedWeek(d, start, end),
+    vouchers: d.vouchers
+      .map((v) => ({ name: v.name, spent: sum(d.expenses.filter((e) => e.voucherId === v.id && inRange(e.paidAt ?? e.dueDate, start, end)).map((e) => e.amount)), balance: voucherBalance(d, v, last) }))
+      .filter((v) => v.spent > 0),
+  };
+}
+
+/** Caixinhas na semana: quanto entrou, quanto saiu e o saldo de cada uma que mexeu. */
+function savedWeek(d: AppData, start: string, end: string) {
+  const moves = d.boxes.flatMap((b) => b.moves.filter((m) => inRange(m.date, start, end)).map((m) => ({ box: b.name, signed: m.kind === 'retirada' ? -m.amount : m.amount })));
+  const byBox = new Map<string, number>();
+  for (const m of moves) byBox.set(m.box, (byBox.get(m.box) ?? 0) + m.signed);
+  return {
+    deposited: sum(moves.filter((m) => m.signed > 0).map((m) => m.signed)),
+    withdrawn: sum(moves.filter((m) => m.signed < 0).map((m) => -m.signed)),
+    boxes: [...byBox.entries()].map(([name, amount]) => ({ name, amount })),
   };
 }

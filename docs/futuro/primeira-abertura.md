@@ -1,6 +1,6 @@
 # Primeira abertura: entrevista, montagem do app e tutorial da barra
 
-> **Status: ESPECIFICADO, prévia feita, aguardando aprovação.** Item E14 da Central, **implementação número 1** (pedido em 10/11/2026).
+> **Status: PRONTO na v0.31** (11/11/2026). Item E14 da Central, junto com o resto do E1 (módulos ocultos e ritmo do Diário).
 > Prévia: https://claude.ai/artifact/Ky4NT9oh9tZQKv9FksYYCz
 
 ## Por quê
@@ -57,3 +57,11 @@ settings: {
   journalRhythm: 'todo' | '3x' | '2x' | 'dias' | 'livre';
 }
 ```
+
+## Como ficou (v0.31)
+- Código: `src/setup.ts` (regras, com testes em `src/setup.test.ts`) e `src/modules/Montagem.tsx` (telas, tutorial, convite e cartão do Diário).
+- Campos novos em `settings`: `hiddenModules`, `setup` ('novo' | 'convite' | 'feito'), `tutorialSeen`, `setupAreas`, `journeyWanted`, `journalRhythm` ({ mode, perWeek, days }). Todos com padrão em `normalize()`; quem já usava fica com tudo à vista e Diário "quando der".
+- Módulo guardado: sai do menu ☰, do "Seu dia", dos cartões do Início ligados a ele e da escolha de favoritos; continua no Mais (seção Guardados) e abre normalmente.
+- O tutorial avança sozinho quando a pessoa faz o passo, mas "Próximo" e "Pular tutorial" sempre funcionam.
+- Os "Três jeitos da barra" e a cor usam os mesmos componentes da Personalização.
+- **Ficou para depois:** escolher a ordem dos módulos no Mais (E1) e o horário preferido do Diário.
