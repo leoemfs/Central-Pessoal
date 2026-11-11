@@ -5389,10 +5389,16 @@ a.row {
   gap: 10px;
   min-width: 0;
 }
-.ed-toolbar {
+.ed-bar {
   position: sticky;
   top: 62px;
   z-index: 11;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  transition: top 0.2s ease;
+}
+.ed-toolbar {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -5401,9 +5407,8 @@ a.row {
   border-radius: var(--radius-md);
   background: var(--raised);
   border: 1px solid var(--raised-border);
-  transition: top 0.2s ease;
 }
-.bars-hidden .ed-toolbar {
+.bars-hidden .ed-bar {
   top: 8px;
 }
 .ed-type {
@@ -5470,8 +5475,8 @@ a.row {
   .ed-more {
     display: none;
   }
-  .ed-toolbar,
-  .bars-hidden .ed-toolbar {
+  .ed-bar,
+  .bars-hidden .ed-bar {
     top: 12px;
   }
 }
@@ -5482,6 +5487,8 @@ a.row {
   padding: 8px;
   border-radius: var(--radius-md);
   background: var(--raised);
+  border: 1px solid var(--raised-border);
+  box-shadow: 0 6px 18px rgb(0 0 0 / 0.25);
 }
 .ed-swatch {
   width: 36px;
@@ -5675,7 +5682,7 @@ a.row {
 }
 @media (prefers-reduced-motion: reduce) {
   .ed-content .ed-details > button::before,
-  .ed-toolbar {
+  .ed-bar {
     transition: none;
   }
 }
