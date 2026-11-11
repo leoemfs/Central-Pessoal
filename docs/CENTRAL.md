@@ -39,7 +39,7 @@
 | **Notas** | notas | nada | Busca | — |
 | **Jornada** (bloqueada) | ajustes da Jornada | Finanças, Agenda, Diário, Núcleo (dias de uso, XP, ouro) | nada por enquanto | `journey.ts`, `jornada/` |
 
-**Telas que juntam tudo** (mexeu num módulo, conferir estas): **Início** (quase todos), **Revisão semanal** (Finanças, Agenda, Diário, Núcleo, humor, Estudos), **Busca** (todos os módulos; dentro de um módulo, busca só nele).
+**Telas que juntam tudo** (mexeu num módulo, conferir estas): **Início** (quase todos), **Revisão semanal** (Finanças, caixinhas, vales, Agenda, Diário, Núcleo e práticas, humor, Estudos), **Busca** (todos os módulos; dentro de um módulo, busca só nele).
 **Partes do app todo:** barra de baixo (`moduleBar.ts`), lápis dos cartões (`cardLayout.ts`), temas (`theme.ts`), backup (`data.ts`).
 **Em breve** (sem código): Saúde (N1, módulo próprio) e Objetivos (N10, módulo próprio). Lembretes, Foco e Banco de ideias **não viram módulos**: Lembretes = Agenda + Notificações (N3); Foco = Núcleo › Mente (M16); Ideias = Notas (M17).
 
@@ -89,7 +89,7 @@
 | M4 | Preços 2.0, parte 3: tipos de loja e filtro; editar, excluir e juntar produtos, marcas e lojas | MOD | M | média | especificado | `futuro/precos-v2.md` (itens 1 e 4) |
 | M5 | Agenda: repetição (toda semana, mês, ano) e aniversários | MOD | M | média | ideia | — (especificar antes) |
 | M6 | Núcleo: fichas de treino próprias (exercícios, séries, descanso). Pode entrar depois no M21 ("crie o seu próprio") | MOD | M | média | especificado | `futuro/nucleo-mente-corpo.md` |
-| M7 | Revisão semanal mais completa: autocuidado, caixinhas e vales da semana | MOD | P | baixa | especificado | `futuro/nucleo-mente-corpo.md`, `futuro/caixinhas.md` |
+| M7 | Revisão semanal mais completa: autocuidado, caixinhas e vales da semana | MOD | P | baixa | pronto (v0.38) | `futuro/nucleo-mente-corpo.md`, `futuro/caixinhas.md` |
 | N1 | Módulo Saúde (água, sono, remédios, consultas, peso) | NOVO | G | média | especificado | `futuro/modulo-saude.md` |
 | N2 | Jornada completa (pixel art): missões no ritmo da pessoa, recompensas por módulo, raridades (comum a místico), Forja e Codex por coleções | NOVO | G | baixa | especificado | `futuro/modulo-rpg.md`, `futuro/jornada-recompensas.md`, `futuro/jornada-raridades.md` |
 | N3 | Notificações e **lembretes** (tarefa ou compromisso com "me lembrar"; sai o "Lembretes, em breve" do menu). Afeta: Agenda, Carreira | NOVO | M | baixa | especificado | `futuro/notificacoes.md` |
@@ -145,6 +145,7 @@
 ## Feito
 | Versão | O que entrou | PR |
 |---|---|---|
+| v0.38 | M7: Revisão semanal com "Autocuidado e dinheiro guardado" (minutos de meditação e respiração, treinos, alongamentos e caminhadas; guardado e tirado das caixinhas; gasto e saldo dos vales) | #38 |
 | v0.37 | N8.3 Carreira › Currículo: abas Trabalho · Currículo; experiências, formação, cursos e certificados, idiomas, habilidades e conquistas (com resultado); "Trazer de Estudos" põe ciclos concluídos como curso; "Item no currículo" no botão + | #38 |
 | v0.36 | M8: ao lançar no cartão, "Entra na fatura de" com a fatura calculada já marcada e as vizinhas para trocar (também ao editar; parcelas e conta fixa seguem a escolhida); aviso ao salvar; o cartão mostra a fatura aberta (e a que vence no mês, se for outra); linha "No cartão este mês" na aba Mês | #38 |
 | v0.35 | E6 + M13: a lupa busca dentro do módulo aberto ("Em Finanças" · "Em tudo"); a busca passou a achar também cartões, vales, caixinhas, hábitos, listas e itens, produtos, notebooks e páginas, fontes, mapas, trilhas e tópicos, vagas, reuniões e projetos | #38 |

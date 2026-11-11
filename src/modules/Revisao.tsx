@@ -224,6 +224,51 @@ export function Revisao() {
           </dl>
         </section>
 
+        {(r.care.total > 0 || r.saved.boxes.length > 0 || r.vouchers.length > 0) && (
+          <section className="card">
+            <div className="card-head">
+              <h2>Autocuidado e dinheiro guardado</h2>
+            </div>
+            <dl className="detail-rows">
+              {r.care.total > 0 && (
+                <>
+                  <div>
+                    <dt>Meditação e respiração</dt>
+                    <dd>{r.care.mindMinutes} min</dd>
+                  </div>
+                  <div>
+                    <dt>Treinos</dt>
+                    <dd>{r.care.workouts}</dd>
+                  </div>
+                  <div>
+                    <dt>Alongamentos e caminhadas</dt>
+                    <dd>{r.care.moves}</dd>
+                  </div>
+                </>
+              )}
+              {r.saved.boxes.length > 0 && (
+                <div>
+                  <dt>Guardado nas caixinhas</dt>
+                  <dd className="green">{formatMoney(r.saved.deposited)}{r.saved.withdrawn > 0 ? ` (tirou ${formatMoney(r.saved.withdrawn)})` : ''}</dd>
+                </div>
+              )}
+              {r.vouchers.map((v) => (
+                <div key={v.name}>
+                  <dt>{v.name}: gasto na semana</dt>
+                  <dd>
+                    {formatMoney(v.spent)} <span className="muted small">· saldo {formatMoney(v.balance)}</span>
+                  </dd>
+                </div>
+              ))}
+            </dl>
+            {r.saved.boxes.length > 0 && (
+              <p className="muted small" style={{ marginTop: 8 }}>
+                {r.saved.boxes.map((b) => `${b.name}: ${b.amount >= 0 ? '+' : '−'}${formatMoney(Math.abs(b.amount))}`).join(' · ')}
+              </p>
+            )}
+          </section>
+        )}
+
         {study && (
           <section className="card">
             <div className="card-head">

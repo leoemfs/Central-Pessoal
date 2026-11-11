@@ -1,7 +1,7 @@
 # Caixinhas (Finanças)
 
 > **Status: IMPLEMENTADO na v0.13** (a parte de Finanças; a parte da Jornada continua para depois). Diferenças em relação a este texto:
-> - a missão "dia de guardar" aparece no Início ("Dia de guardar") e na própria aba, mas ainda não na Agenda nem na Revisão semanal;
+> - a missão "dia de guardar" aparece no Início ("Dia de guardar") e na própria aba, mas ainda não na Agenda; desde a v0.38 (M7), a Revisão semanal mostra o guardado e o tirado da semana em cada caixinha;
 > - a meta é opcional (caixinha sem meta só soma);
 > - ao comemorar os marcos (25/50/75/100%) o app mostra um aviso; baús e títulos ficam para a Jornada;
 > - o balanço do mês fica em Finanças › Receitas: linhas "Caixinhas" (o que os planos pedem e o que foi guardado) e "Livre para usar";
