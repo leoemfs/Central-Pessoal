@@ -10,6 +10,9 @@ import { useSyncExternalStore } from 'react';
 import type { AppData } from './types';
 import { deleteAttachment, downloadAttachment, DRIVE_SCOPE, downloadData, findData, isAuthError, listAttachments, uploadAttachment, uploadData, whoAmI, type CloudFile } from './drive';
 import { planFiles, referencedFiles } from './attachments';
+import { CALENDAR_DAYS, diffEvents, wantedEvents } from './calendarSync';
+import { CALENDAR_SCOPE, calendarExists, createCalendar, deleteCalendar, deleteEvent, insertEvent, listEvents, updateEvent } from './gcal';
+import { addDays, todayISO } from './utils';
 import { loadFile, localFileIds, removeFile, saveFile } from './files';
 import { normalize } from './data';
 import { mergeData } from './sync';
@@ -43,6 +46,10 @@ export interface CloudState {
   status: CloudStatus;
   /** Com status 'escolher': a cópia que está na nuvem. */
   cloud: CloudFile | null;
+  /** N9.5, neste aparelho: 'ok', 'permissao' (falta dar acesso à agenda neste aparelho) ou 'erro'. */
+  calendar?: 'ok' | 'permissao' | 'erro';
+  /** Última vez que a agenda foi atualizada por este aparelho. */
+  calendarAt?: string | null;
 }
 
 // ---------- estado (com aviso para as telas) ----------
@@ -97,6 +104,8 @@ export function hasUnsaved(d: AppData, s: CloudState | null): boolean {
 interface TokenResponse {
   access_token?: string;
   expires_in?: number;
+  /** Permissões dadas (separadas por espaço). */
+  scope?: string;
   error?: string;
 }
 interface Gis {
@@ -136,22 +145,33 @@ export function loadGis(): Promise<Gis> {
   return gisPromise;
 }
 
+interface StoredToken {
+  token: string;
+  exp: number;
+  scope?: string;
+}
 /** Acesso guardado e ainda válido (com 1 minuto de folga), ou null. */
 function storedToken(): string | null {
-  const t = read<{ token: string; exp: number }>(TOKEN_KEY);
+  const t = read<StoredToken>(TOKEN_KEY);
   return t && t.exp > Date.now() + 60_000 ? t.token : null;
 }
+/** O acesso guardado inclui a agenda (N9.5)? */
+function tokenHasCalendar(): boolean {
+  return (read<StoredToken>(TOKEN_KEY)?.scope ?? '').split(' ').includes(CALENDAR_SCOPE);
+}
+/** Lembretes no Google Agenda ligados (configuração que vale para todos os aparelhos)? */
+const calendarOn = () => getData()?.settings.googleCalendar.on === true;
 
-/** Abre a janela do Google (precisa vir de um toque). */
-async function askToken(): Promise<string> {
+/** Abre a janela do Google (precisa vir de um toque). Com a agenda ligada, pede as duas permissões. */
+async function askToken(withCalendar = calendarOn()): Promise<string> {
   const gis = await loadGis();
   return new Promise<string>((resolve, reject) => {
     const client = gis.accounts.oauth2.initTokenClient({
       client_id: GOOGLE_CLIENT_ID,
-      scope: DRIVE_SCOPE,
+      scope: withCalendar ? `${DRIVE_SCOPE} ${CALENDAR_SCOPE}` : DRIVE_SCOPE,
       callback: (r) => {
         if (r.error || !r.access_token) return reject(new Error(r.error || 'sem acesso'));
-        write(TOKEN_KEY, { token: r.access_token, exp: Date.now() + (r.expires_in ?? 3600) * 1000 });
+        write(TOKEN_KEY, { token: r.access_token, exp: Date.now() + (r.expires_in ?? 3600) * 1000, scope: r.scope ?? '' });
         resolve(r.access_token);
       },
       error_callback: (e) => reject(new Error(e.type)),
@@ -227,6 +247,8 @@ export async function syncNow(interactive = false): Promise<void> {
     await syncFiles(token, toSave).catch((e: unknown) => {
       if (isAuthError(e)) throw e;
     });
+    // N9.5: lembretes no Google Agenda (um problema aqui também não desfaz a sincronização).
+    await syncCalendar(token, toSave).catch(() => patch({ calendar: 'erro' }));
     patch({ status: 'ok', lastSavedAt: started, cloud: null });
   } catch (e) {
     failed(e);
@@ -256,6 +278,81 @@ async function syncFiles(token: string, d: AppData) {
   for (const id of plan.deleteLocal) await removeFile(id);
   // Ficou algo para depois: continua em seguida.
   if (plan.upload.length > FILES_PER_SYNC || plan.download.length > FILES_PER_SYNC) again = true;
+}
+
+/** Muda a configuração da agenda, com data de alteração (para valer nos outros aparelhos). */
+function withCalendar(d: AppData, p: Partial<AppData['settings']['googleCalendar']>): AppData {
+  const now = new Date().toISOString();
+  return { ...d, settings: { ...d.settings, googleCalendar: { ...d.settings.googleCalendar, ...p } }, stamps: { ...d.stamps, '@settings': now, '@settings.googleCalendar': now } };
+}
+
+const timeZone = () => Intl.DateTimeFormat().resolvedOptions().timeZone || 'America/Sao_Paulo';
+
+/** Agenda "Central Pessoal": acha a guardada ou cria (e guarda o id nas configurações). */
+async function ensureCalendar(token: string, d: AppData): Promise<string> {
+  const saved = d.settings.googleCalendar.calendarId;
+  if (saved && (await calendarExists(token, saved))) return saved;
+  const id = await createCalendar(token, timeZone());
+  mergeSink(withCalendar(d, { calendarId: id }));
+  return id;
+}
+
+/** N9.5: deixa a agenda "Central Pessoal" igual ao que o app tem (só de ida). */
+async function syncCalendar(token: string, d: AppData) {
+  if (!d.settings.googleCalendar.on) return;
+  if (!tokenHasCalendar()) return void patch({ calendar: 'permissao' });
+  const calId = await ensureCalendar(token, d);
+  const today = todayISO();
+  const tz = timeZone();
+  const wanted = wantedEvents(d, today);
+  const existing = await listEvents(token, calId, new Date(`${today}T00:00:00`).toISOString(), new Date(`${addDays(today, CALENDAR_DAYS + 1)}T00:00:00`).toISOString());
+  const plan = diffEvents(wanted, existing);
+  for (const w of plan.insert) await insertEvent(token, calId, w, tz);
+  for (const w of plan.update) await updateEvent(token, calId, w, tz);
+  for (const id of plan.remove) await deleteEvent(token, calId, id);
+  patch({ calendar: 'ok', calendarAt: new Date().toISOString() });
+}
+
+/** Liga os lembretes no Google Agenda (vem de um toque: pede a permissão nova). */
+export async function enableCalendar(): Promise<'ok' | 'cancelado' | 'erro'> {
+  const d = getData();
+  if (!state || !d) return 'erro';
+  let token: string;
+  try {
+    token = await askToken(true);
+  } catch {
+    return 'cancelado';
+  }
+  if (!tokenHasCalendar()) return 'cancelado'; // a pessoa desmarcou a agenda na janela do Google
+  try {
+    const calId = await ensureCalendar(token, d);
+    const cur = getData() ?? d;
+    mergeSink(withCalendar(cur, { on: true, calendarId: calId }));
+    patch({ calendar: 'ok' });
+    // A configuração entra nos dados no próximo instante; sincroniza logo depois.
+    window.setTimeout(() => void syncNow(false), 300);
+    return 'ok';
+  } catch {
+    patch({ calendar: 'erro' });
+    return 'erro';
+  }
+}
+
+/** Desliga os lembretes; com `removeCalendar`, apaga a agenda "Central Pessoal" do Google. */
+export async function disableCalendar(removeCalendar: boolean): Promise<void> {
+  const d = getData();
+  if (!d) return;
+  const calId = d.settings.googleCalendar.calendarId;
+  if (removeCalendar && calId) {
+    try {
+      const token = storedToken() && tokenHasCalendar() ? storedToken()! : await askToken(true);
+      await deleteCalendar(token, calId);
+    } catch {
+      /* fica a agenda; dá para apagar lá no Google */
+    }
+  }
+  mergeSink(withCalendar(d, { on: false, calendarId: removeCalendar ? null : calId }));
+  patch({ calendar: undefined, calendarAt: null });
 }
 
 /** Mudou algo: sincroniza daqui a pouco (se estiver conectado). */

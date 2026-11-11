@@ -166,3 +166,28 @@ test('juntar dados antigos sem datas: une tudo, sem perder nada', () => {
   const b = withEvents([ev('2', 'B')]);
   assert.deepEqual(mergeData(a, b).events.map((e) => e.id).sort(), ['1', '2']);
 });
+
+test('juntar: configuração mudada num aparelho não é desfeita só porque o outro abriu o app', () => {
+  const base = emptyData();
+  const before = { ...base, stamps: {} };
+  // A liga os lembretes às 10h.
+  const a = trackChanges(before, { ...before, settings: { ...before.settings, googleCalendar: { ...before.settings.googleCalendar, on: true } } }, TA);
+  // B só registra a visita do dia às 11h (configurações mudam, mas outro campo).
+  const b = trackChanges(before, { ...before, settings: { ...before.settings, visitDays: ['2026-11-12'] } }, TB);
+  const m1 = mergeData(b, a);
+  const m2 = mergeData(a, b);
+  for (const m of [m1, m2]) {
+    assert.equal(m.settings.googleCalendar.on, true);
+    assert.deepEqual(m.settings.visitDays, ['2026-11-12']);
+  }
+});
+
+test('juntar: humor do mesmo dia vale o mais recente; dias diferentes somam', () => {
+  const base = emptyData();
+  const mood = (n: number) => ({ ...Object.values(normalize({ moods: { '2026-11-10': { mood: n } } }).moods)[0] });
+  const a = trackChanges(base, { ...base, moods: { '2026-11-10': mood(2) } }, TA);
+  const b = trackChanges(base, { ...base, moods: { '2026-11-10': mood(5), '2026-11-11': mood(3) } }, TB);
+  const m = mergeData(a, b);
+  assert.deepEqual(m.moods['2026-11-10'], mood(5));
+  assert.ok(m.moods['2026-11-11']);
+});
