@@ -78,7 +78,7 @@
 | M5 | Agenda: repetição (toda semana, mês, ano) e aniversários | MOD | M | média | ideia | — (especificar antes) |
 | M6 | Núcleo: fichas de treino próprias (exercícios, séries, descanso) | MOD | M | média | especificado | `futuro/nucleo-mente-corpo.md` |
 | M7 | Revisão semanal mais completa: autocuidado, caixinhas e vales da semana | MOD | P | baixa | especificado | `futuro/nucleo-mente-corpo.md`, `futuro/caixinhas.md` |
-| N1 | Módulo Saúde, à parte (água, sono, **dieta**, remédios, consultas, dentista e check-ups, peso), dividido em N1.0 a N1.5. Afeta: Agenda, Listas, Você, Núcleo, Início, Revisão, backup | NOVO | G | média | em documentação (09/11); não adiantado na fila | `futuro/modulo-saude.md` |
+| N1 | Módulo Saúde, à parte (água, sono, **dieta**, remédios, consultas, dentista e check-ups, peso), dividido em N1.0 a N1.5. Afeta: Agenda, Listas, Você, Núcleo, Início, Revisão, backup | NOVO | G | média | especificado, prévia aprovada (11/11); não adiantado na fila | `futuro/modulo-saude.md` |
 | N2 | Jornada completa (pixel art): missões no ritmo da pessoa, recompensas por módulo, raridades (comum a místico), Forja e Codex por coleções | NOVO | G | baixa | especificado | `futuro/modulo-rpg.md`, `futuro/jornada-recompensas.md`, `futuro/jornada-raridades.md` |
 | N3 | Notificações | NOVO | M | baixa | especificado | `futuro/notificacoes.md` |
 | N4 | App Android | NOVO | G | baixa | especificado | `futuro/app-android.md` |

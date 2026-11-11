@@ -1,6 +1,6 @@
 # Saúde (N1)
 
-> **Situação: em documentação (09/11).** Sem código. Aparece como "em breve" no app. Não foi adiantado na fila: continua no item 10 da fila sugerida.
+> **Situação: especificado, prévia aprovada em 11/11 ("contém tudo o que preciso").** Sem código. Aparece como "em breve" no app. Não foi adiantado na fila: continua no item 10 da fila sugerida.
 > **Tamanho:** G, dividido em partes (abaixo). Cada parte é uma sessão de construção, só depois de aprovada.
 
 Um módulo separado do Núcleo. A diferença:
@@ -50,7 +50,7 @@ A ideia é ter a dieta **dentro** do módulo, para seguir no dia a dia.
 
 ## Divisão para construir
 Ordem sugerida (cada parte com versão, testes e PR próprios):
-1. **N1.0 Prévia visual:** versão P feita em 11/11 (Hoje, Consultas e check-ups, Dieta): https://claude.ai/artifact/LJRc3AgwWsTmuA8ymQCqEv. Falta: Histórico, menu do +, cartão no Início, Remédios, Medidas e selo no hábito.
+1. **N1.0 Prévia visual:** versão P feita em 11/11 (Hoje, Consultas e check-ups, Dieta): https://claude.ai/artifact/LJRc3AgwWsTmuA8ymQCqEv. Aprovada pelo Leonardo; o resto (Histórico, menu do +, cartão no Início, Remédios, Medidas e selo no hábito) segue o documento.
 2. **N1.1 Água e Sono:** registros do dia e meta de água (P a M).
 3. **N1.2 Dieta:** plano alimentar e "Hoje" com segui · em parte · fugi (M).
 4. **N1.3 Remédios:** horários, "tomei" e lembrete (M).
