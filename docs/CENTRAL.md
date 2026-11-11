@@ -64,7 +64,7 @@
 | C10 | **Telas quebradas no computador** (10/11, prints): botão + vira uma faixa oval na largura toda (Estudos › notebook); Início com cartões esticados na tela inteira; Listas com título e chips desalinhados do conteúdo; Finanças com o bloco mês + abas mais estreito que os cartões. No celular está ok | COR | P | alta | pronto (v0.27.1) | — |
 | C3 | **Registro defeituoso deixa o app em branco**: conferir os campos ao abrir os dados, tela de erro com saída (exportar, recarregar, Configurações) e "desfazer importação" | COR | M | **alta** | aprovado (10/11) | `auditoria-2026-11.md` |
 | C4 | Salvamento de reserva pode perder dados em silêncio (avisar e usar a cópia mais nova) | COR | P | média | ideia | `auditoria-2026-11.md` |
-| C5 | Rodar os testes em todo PR e antes de publicar (hoje só compila) | COR | P | média | aprovado (10/11) | `auditoria-2026-11.md` |
+| C5 | Rodar os testes em todo PR e antes de publicar (hoje só compila) | COR | P | média | pronto (v0.29.1) | `auditoria-2026-11.md` |
 | C6 | Sequência de hábitos lenta para quem nunca falha (86 ms com 5 anos e 25 hábitos) | COR | P | média | ideia | `auditoria-2026-11.md` |
 | C7 | Gravar por coleção, só o que mudou (hoje regrava o banco inteiro a cada toque) | COR | M | média | ideia | `auditoria-2026-11.md` |
 | C8 | Faturas agrupadas numa passada só (Início, Agenda, Próximos) | COR | P | baixa | ideia | `auditoria-2026-11.md` |
@@ -145,6 +145,7 @@
 ## Feito
 | Versão | O que entrou | PR |
 |---|---|---|
+| v0.29.1 | C5: os testes rodam em todo PR (✅/❌ no PR) e antes de publicar; se falharem, nada é publicado | — |
 | v0.29 | M21 Treino em casa no Núcleo › Corpo: meta da semana, Sem/Com equipamento, 8 partes do corpo × 3 níveis, treino guiado, link de vídeo; 47 bonecos animados próprios (exercícios e alongamentos). A ficha "Treino em casa" antiga passou a se chamar "Circuito em casa" | #37 |
 | v0.28.1 | C11: paleta de cores do editor acompanha a barra ao rolar | #36 |
 | v0.28 | N11.3 Estudos 2.0: mapas mentais em árvore (ramos e sub-ramos, editar, mover, mudar de ramo, recolher, cores, zoom, arrastar e pinça, salva sozinho), ligados a notebook ou página; mapas antigos convertidos | #35 |

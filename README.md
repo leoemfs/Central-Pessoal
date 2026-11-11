@@ -56,13 +56,14 @@ Requer [Node.js](https://nodejs.org) 22 ou superior.
 ```bash
 npm install
 npm run dev        # http://localhost:5173
-npm test           # testes das regras financeiras
+npm test           # testes das regras (todos os módulos)
 npm run build      # versão de produção em dist/
 ```
 
 ## Publicar (GitHub Pages)
 
-O workflow `.github/workflows/deploy.yml` publica o app a cada push na branch `main`.
+O workflow `.github/workflows/deploy.yml` publica o app a cada push na branch `main`, **só se os testes passarem** (`npm test` antes de compilar).
+O workflow `.github/workflows/testes.yml` roda os testes e a compilação em todo PR: se algo quebrar, o PR mostra um ❌ antes de mesclar.
 Para ativar: **Settings → Pages → Build and deployment → Source: GitHub Actions**.
 O endereço fica `https://<usuario>.github.io/Central-Pessoal/`. Para instalar no celular, abra o endereço e escolha **Adicionar à tela inicial**.
 
