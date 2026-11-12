@@ -6492,3 +6492,97 @@ details.kept[open] > summary {
 .kept-row .btn {
   flex: none;
 }
+
+/* Mais em grade (E18) */
+.mg-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+.mg-grid.small {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 4px;
+}
+@media (min-width: 700px) {
+  .mg-grid {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+  .mg-grid.small {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+  }
+}
+.mg-cell {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 4px 12px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  text-decoration: none;
+  font: inherit;
+  cursor: pointer;
+}
+.mg-cell:active {
+  transform: scale(0.97);
+}
+.mg-icon {
+  position: relative;
+  width: 54px;
+  height: 54px;
+  border-radius: 16px;
+  display: grid;
+  place-items: center;
+  background: var(--raised);
+  color: var(--accent-text);
+}
+.mg-name {
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-align: center;
+  line-height: 1.2;
+  overflow-wrap: anywhere;
+}
+.mg-grid.small .mg-cell {
+  background: transparent;
+  border-color: transparent;
+  padding: 6px 2px;
+}
+.mg-grid.small .mg-icon {
+  width: 46px;
+  height: 46px;
+  border-radius: 14px;
+}
+.mg-grid.small .mg-name {
+  font-size: 0.74rem;
+  font-weight: 500;
+  color: var(--muted);
+}
+.mg-cell.off {
+  opacity: 0.45;
+  cursor: default;
+}
+.mg-badge {
+  position: absolute;
+  top: -6px;
+  right: -8px;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: 10px;
+  display: grid;
+  place-items: center;
+  background: var(--accent);
+  color: var(--on-accent);
+  font-size: 0.72rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+@media (prefers-reduced-motion: reduce) {
+  .mg-cell:active {
+    transform: none;
+  }
+}

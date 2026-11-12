@@ -60,3 +60,10 @@ test('convite do Diário segue o ritmo e nunca cobra', () => {
   assert.equal(hit.invite, false);
   assert.match(hit.text, /Meta da semana feita/);
 });
+
+test('Mais em lista ou grade: dados antigos e valores estranhos ficam em lista', () => {
+  assert.equal(normalize(undefined).settings.moreLayout, 'lista');
+  assert.equal(normalize({ version: 2, settings: {} }).settings.moreLayout, 'lista');
+  assert.equal(normalize({ version: 2, settings: { moreLayout: 'mosaico' } }).settings.moreLayout, 'lista');
+  assert.equal(normalize({ version: 2, settings: { moreLayout: 'grade' } }).settings.moreLayout, 'grade');
+});
