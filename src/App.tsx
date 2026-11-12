@@ -11,7 +11,7 @@ import { Dashboard } from './modules/Dashboard';
 import { Financas } from './modules/financas/Financas';
 import { Diario } from './modules/Diario';
 import { Agenda } from './modules/Agenda';
-import { Mais } from './modules/Mais';
+import { Guardados, Mais } from './modules/Mais';
 import { Habitos } from './modules/Habitos';
 import { Notas } from './modules/Notas';
 import { Ajustes } from './modules/Ajustes';
@@ -55,6 +55,7 @@ export const SECTIONS: Section[] = [
   { path: 'diario', label: 'Diário', icon: 'journal', view: Diario, fab: 'diario/nova', title: 'Meu diário', search: 'diario/buscar' },
   { path: 'agenda', label: 'Agenda', icon: 'calendar', view: Agenda, fab: 'agenda/novo' },
   { path: 'mais', label: 'Mais', icon: 'grid', view: Mais },
+  { path: 'guardados', label: 'Guardados', icon: 'archive', view: Guardados },
   { path: 'nucleo', label: 'Núcleo pessoal', icon: 'sprout', view: Habitos, fab: 'nucleo/novo' },
   { path: 'arquivo', label: 'Notas', icon: 'note', view: Notas, fab: 'arquivo/nova' },
   { path: 'ajustes', label: 'Configurações', icon: 'settings', view: Ajustes },

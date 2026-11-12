@@ -69,8 +69,8 @@
 | C12 | **Telas quebradas no celular** (11/11, prints): "Monte o app do seu jeito" com os botões Começar e Agora não altos e estreitos; Configurações com "Como usar a barra" estourando o cartão (a tela dava zoom e rolava para o lado); zoom com dois dedos desligado no app (o mapa mental de Estudos continua com o zoom dele) | COR | P | alta | pronto (v0.38.1) | — |
 | C13 | **Lápis quebrava a tela** (11/11, print da Agenda): no modo de editar cartões, um texto comprido (ex.: nome de compromisso) alargava o cartão e a tela ficava cortada, sem os botões Restaurar e Pronto. Valia para todas as telas com lápis | COR | P | alta | pronto (v0.43.2) | — |
 | E16 | Agenda sem o lápis de personalizar cartões (11/11: "nem acho interessante editar aqui"); calendário e próximos compromissos ficam sempre à vista | EXP | P | média | pronto (v0.43.4) | — |
-| E17 | **Guardados num lugar só** (12/11): no Mais, um único cartão "Guardados" (com quantos módulos) abre uma tela com a lista dos módulos desligados, cada um com "Trazer de volta". Junto: "Montar o app do seu jeito" sai de dentro dos Guardados e vai para perto de "Como usar a barra". Afeta: Mais, Personalização | EXP | P | média | ideia | — |
-| E18 | **Mais em grade** (12/11, avaliar): opção em Personalização para ver o Mais em lista (como hoje) ou em grade (ícones grandes com o nome, 3 por linha, como a tela do celular). Avaliar com prévia visual antes. Afeta: Mais, Personalização | EXP | P | baixa | ideia | — |
+| E17 | **Guardados num lugar só** (12/11): no Mais, um único cartão "Guardados" (com quantos módulos) abre uma tela com a lista dos módulos desligados, cada um com "Trazer de volta". Junto: "Montar o app do seu jeito" sai de dentro dos Guardados e vai para perto de "Como usar a barra". Afeta: Mais, Personalização | EXP | P | média | pronto (v0.44) | — |
+| E18 | **Mais em grade** (12/11, avaliar): opção em Personalização para ver o Mais em lista (como hoje) ou em grade (ícones grandes com o nome, 3 por linha, como a tela do celular). Avaliar com prévia visual antes. Afeta: Mais, Personalização | EXP | P | baixa | prévia (12/11) | — |
 | C3 | **Registro defeituoso deixa o app em branco**: conferir os campos ao abrir os dados, tela de erro com saída (exportar, recarregar, Configurações) e "desfazer importação" | COR | M | **alta** | pronto (v0.30) | `auditoria-2026-11.md` |
 | C4 | Salvamento de reserva pode perder dados em silêncio (avisar e usar a cópia mais nova) | COR | P | média | ideia | `auditoria-2026-11.md` |
 | C5 | Rodar os testes em todo PR e antes de publicar (hoje só compila) | COR | P | média | pronto (v0.29.1) | `auditoria-2026-11.md` |
@@ -147,6 +147,7 @@
 ## Feito
 | Versão | O que entrou | PR |
 |---|---|---|
+| v0.44 | E17: Mais › **Guardados**, uma tela só com os módulos desligados e "Trazer de volta" em cada um; "Montar o app do seu jeito" sempre à vista no Mais | — |
 | v0.43.4 | E16: Agenda sem o lápis; calendário e próximos compromissos sempre à vista | #49 |
 | v0.43.3 | Nome visual **CP Hub** (ícone, título, textos, nome do arquivo de backup e da agenda no Google, que é renomeada sozinha). Endereço, repositório, dados e login continuam iguais | #48 |
 | v0.43.2 | C13: modo de editar cartões (lápis) não alarga mais a tela quando há texto comprido | #47 |
