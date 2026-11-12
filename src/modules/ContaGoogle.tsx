@@ -107,7 +107,7 @@ type CalendarPart = 'events' | 'bills' | 'tasks';
 const PARTS: { id: CalendarPart; label: string; hint: string }[] = [
   { id: 'events', label: 'Compromissos', hint: 'Da Agenda e de Carreira. Aviso 30 min antes; sem hora, às 9h.' },
   { id: 'bills', label: 'Contas a pagar', hint: 'No dia do vencimento, com o valor. Aviso às 9h.' },
-  { id: 'tasks', label: 'Tarefas com data', hint: 'No dia do prazo. Aviso às 9h.' },
+  { id: 'tasks', label: 'Tarefas no Google Tarefas', hint: 'Lista "CP Hub", ida e volta: concluir lá conclui aqui. Vai só a data (o Google não guarda hora).' },
 ];
 
 /** N9.5: lembretes pelo Google Agenda (agenda "CP Hub", só de ida). */
@@ -137,27 +137,27 @@ function CalendarSection({
 
   async function turnOff() {
     if (!confirm('Desligar os lembretes no Google Agenda?')) return;
-    const remove = confirm('Apagar também a agenda "CP Hub" do seu Google Agenda? (Cancelar mantém os eventos que já estão lá.)');
+    const remove = confirm('Apagar também a agenda "CP Hub" do Google Agenda e a lista "CP Hub" do Google Tarefas? (Cancelar mantém o que já está lá.)');
     setWorking(true);
     await disableCalendar(remove);
     setWorking(false);
-    onMessage({ tone: 'green', text: remove ? 'Lembretes desligados e agenda "CP Hub" apagada.' : 'Lembretes desligados.' });
+    onMessage({ tone: 'green', text: remove ? 'Lembretes desligados; agenda e lista "CP Hub" apagadas.' : 'Lembretes desligados.' });
   }
 
   return (
     <div className="google-calendar">
       <div className="toggle-row">
         <div>
-          <strong>Lembretes no Google Agenda</strong>
-          <span className="muted small">O app põe compromissos, contas e tarefas numa agenda "CP Hub" do seu Google Agenda, e o celular avisa pelo app Google Agenda. Mudou aqui, muda lá (só de ida).</span>
+          <strong>Google Agenda e Tarefas</strong>
+          <span className="muted small">Compromissos e contas vão para a agenda "CP Hub" do Google Agenda (o celular avisa; só de ida), e as tarefas para a lista "CP Hub" do Google Tarefas (ida e volta).</span>
         </div>
-        <Toggle checked={settings.on} onChange={(v) => void (v ? turnOn() : turnOff())} label="Lembretes no Google Agenda" />
+        <Toggle checked={settings.on} onChange={(v) => void (v ? turnOn() : turnOff())} label="Google Agenda e Tarefas" />
       </div>
       {settings.on && (
         <>
           {status === 'permissao' ? (
             <button type="button" className="btn block" style={{ marginTop: 10 }} onClick={() => void turnOn()} disabled={working}>
-              <Icon name="calendar" size={18} /> Dar acesso à agenda neste aparelho
+              <Icon name="calendar" size={18} /> Dar acesso ao Google Agenda e Tarefas neste aparelho
             </button>
           ) : (
             <p className="muted small" role="status" style={{ marginTop: 6 }}>

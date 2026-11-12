@@ -56,3 +56,25 @@ A permissão `calendar.app.created` só deixa o app mexer na agenda que **ele me
 1. Abrir **console.cloud.google.com/apis/library/calendar-json.googleapis.com** (projeto *My First Project*) e tocar em **Ativar**.
 2. Abrir **console.cloud.google.com/auth/scopes** › **Adicionar ou remover escopos** › filtro `calendar.app.created` › marcar › **Atualizar** › **Salvar**.
 3. No app: Configurações › Conta Google › ligar **Lembretes no Google Agenda** e aceitar a permissão nova (deixar marcada a opção da agenda).
+
+## N9.6: Tarefas no Google Tarefas (pedido de 12/11; pronto na v0.48)
+"A parte de tarefas acho melhor integrar com o Google Tasks."
+
+- O app cria uma lista **"CP Hub"** no Google Tarefas e põe lá as tarefas **não concluídas** (com ou sem data). O interruptor "Tarefas com data" dos lembretes no Google Agenda sai, para cada coisa aparecer num lugar só.
+- **Ida e volta (recomendado):** concluir no Google Tarefas conclui no app; criar, mudar, concluir ou excluir no app muda lá. Mudanças de título e data feitas no Google também voltam. A regra para conflito é a mesma da sincronização: vale a mudança mais recente.
+- **Limite do Google:** a API do Google Tarefas guarda só a **data** da tarefa, não a hora. O aviso no celular segue o padrão do app Google Tarefas.
+- **Permissão nova:** `tasks`. Ela dá acesso às listas de tarefas da conta, então o app passa a mexer só na lista "CP Hub". Precisa ativar a **Google Tasks API** e adicionar o escopo no Google Cloud (mesmo caminho do N9.5).
+- **Técnico:** cada tarefa do app guarda o id da tarefa no Google; a junção é por item, usando `updated` do Google e as datas de alteração do app (`stamps`). A regra pura fica em `src/tasksSync.ts`, com testes.
+- Tamanho **M**.
+
+### Como ficou o N9.6 (v0.48)
+- Interruptor "Tarefas no Google Tarefas" dentro de "Google Agenda e Tarefas" (Configurações › Conta Google). A lista "CP Hub" é achada pelo id guardado (`settings.googleCalendar.tasksList`) ou pelo nome, ou é criada.
+- Ida e volta (`planTasks` + `applyToApp` em `src/tasksSync.ts`, com 9 testes): cria no Google as tarefas abertas; mesmo conteúdo dos dois lados não faz nada; conteúdo diferente vale o mais recente; excluir no app tira do Google (só se o id estiver nas exclusões, para não apagar a tarefa de outro aparelho que este ainda não conhece); excluir no Google tira do app; criada direto no Google entra no app e ganha a marca; duplicada (dois aparelhos) fica uma.
+- O que vem do Google entra pela junção normal (`mergeData`), com a data de alteração do Google.
+- As tarefas saíram do Google Agenda (o evento "☑️" some na próxima sincronização).
+- Testado no navegador com Google Tarefas de mentira: ligar cria a lista com a tarefa (marca `CP Hub #t1`) e a agenda fica só com compromissos; concluir no Google concluiu no app; tarefa criada no Google entrou no app e ganhou a marca; nenhum erro.
+
+### Passo a passo do Google Cloud (Leonardo, uma vez)
+1. Abrir **console.cloud.google.com/apis/library/tasks.googleapis.com** (projeto *My First Project*) e tocar em **Ativar**.
+2. Abrir **console.cloud.google.com/auth/scopes** › **Adicionar ou remover escopos** › filtro `auth/tasks` › marcar a linha `.../auth/tasks` › **Atualizar** › **Salvar**.
+3. No app: Configurações › Conta Google › tocar em **"Dar acesso ao Google Agenda e Tarefas neste aparelho"** (ou desligar e ligar "Google Agenda e Tarefas") e aceitar a permissão nova.

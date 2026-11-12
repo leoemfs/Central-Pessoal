@@ -11,6 +11,8 @@ import type { AppData } from './types';
 import { deleteAttachment, downloadAttachment, DRIVE_SCOPE, downloadData, findData, isAuthError, listAttachments, uploadAttachment, uploadData, whoAmI, type CloudFile } from './drive';
 import { planFiles, referencedFiles } from './attachments';
 import { CALENDAR_DAYS, diffEvents, wantedEvents } from './calendarSync';
+import { createTask, deleteList, deleteTask, ensureList, listTasks, TASKS_SCOPE, updateTask } from './gtasks';
+import { applyToApp, planTasks } from './tasksSync';
 import { CALENDAR_SCOPE, calendarExists, createCalendar, deleteCalendar, deleteEvent, insertEvent, listEvents, updateEvent } from './gcal';
 import { addDays, todayISO } from './utils';
 import { loadFile, localFileIds, removeFile, saveFile } from './files';
@@ -155,10 +157,11 @@ function storedToken(): string | null {
   const t = read<StoredToken>(TOKEN_KEY);
   return t && t.exp > Date.now() + 60_000 ? t.token : null;
 }
+const tokenHas = (scope: string) => (read<StoredToken>(TOKEN_KEY)?.scope ?? '').split(' ').includes(scope);
 /** O acesso guardado inclui a agenda (N9.5)? */
-function tokenHasCalendar(): boolean {
-  return (read<StoredToken>(TOKEN_KEY)?.scope ?? '').split(' ').includes(CALENDAR_SCOPE);
-}
+const tokenHasCalendar = () => tokenHas(CALENDAR_SCOPE);
+/** O acesso guardado inclui o Google Tarefas (N9.6)? */
+const tokenHasTasks = () => tokenHas(TASKS_SCOPE);
 /** Lembretes no Google Agenda ligados (configuração que vale para todos os aparelhos)? */
 const calendarOn = () => getData()?.settings.googleCalendar.on === true;
 
@@ -168,7 +171,7 @@ async function askToken(withCalendar = calendarOn()): Promise<string> {
   return new Promise<string>((resolve, reject) => {
     const client = gis.accounts.oauth2.initTokenClient({
       client_id: GOOGLE_CLIENT_ID,
-      scope: withCalendar ? `${DRIVE_SCOPE} ${CALENDAR_SCOPE}` : DRIVE_SCOPE,
+      scope: withCalendar ? `${DRIVE_SCOPE} ${CALENDAR_SCOPE} ${TASKS_SCOPE}` : DRIVE_SCOPE,
       callback: (r) => {
         if (r.error || !r.access_token) return reject(new Error(r.error || 'sem acesso'));
         write(TOKEN_KEY, { token: r.access_token, exp: Date.now() + (r.expires_in ?? 3600) * 1000, scope: r.scope ?? '' });
@@ -297,10 +300,36 @@ async function ensureCalendar(token: string, d: AppData): Promise<string> {
   return id;
 }
 
-/** N9.5: deixa a agenda "Central Pessoal" igual ao que o app tem (só de ida). */
+/** N9.5 + N9.6: agenda "CP Hub" (só de ida) e lista "CP Hub" do Google Tarefas (ida e volta). */
 async function syncCalendar(token: string, d: AppData) {
-  if (!d.settings.googleCalendar.on) return;
-  if (!tokenHasCalendar()) return void patch({ calendar: 'permissao' });
+  const g = d.settings.googleCalendar;
+  if (!g.on) return;
+  let missing = false;
+  if (tokenHasCalendar()) await syncEvents(token, d);
+  else missing = true;
+  if (g.tasks) {
+    if (tokenHasTasks()) await syncTasks(token, d);
+    else missing = true;
+  }
+  patch({ calendar: missing ? 'permissao' : 'ok', calendarAt: new Date().toISOString() });
+}
+
+/** N9.6: tarefas ↔ Google Tarefas. */
+async function syncTasks(token: string, d: AppData) {
+  const listId = await ensureList(token, d.settings.googleCalendar.tasksList);
+  if (listId !== d.settings.googleCalendar.tasksList) mergeSink(withCalendar(d, { tasksList: listId }));
+  const google = await listTasks(token, listId);
+  const cur = getData() ?? d;
+  const plan = planTasks(cur, google);
+  for (const t of plan.create) await createTask(token, listId, t);
+  for (const u of plan.update) await updateTask(token, listId, u.id, u.task);
+  for (const id of plan.remove) await deleteTask(token, listId, id);
+  const fromGoogle = applyToApp(getData() ?? cur, plan);
+  if (fromGoogle) mergeSink(fromGoogle);
+}
+
+/** N9.5: deixa a agenda "CP Hub" igual ao que o app tem (só de ida). */
+async function syncEvents(token: string, d: AppData) {
   const calId = await ensureCalendar(token, d);
   const today = todayISO();
   const tz = timeZone();
@@ -310,7 +339,6 @@ async function syncCalendar(token: string, d: AppData) {
   for (const w of plan.insert) await insertEvent(token, calId, w, tz);
   for (const w of plan.update) await updateEvent(token, calId, w, tz);
   for (const id of plan.remove) await deleteEvent(token, calId, id);
-  patch({ calendar: 'ok', calendarAt: new Date().toISOString() });
 }
 
 /** Liga os lembretes no Google Agenda (vem de um toque: pede a permissão nova). */
@@ -343,15 +371,17 @@ export async function disableCalendar(removeCalendar: boolean): Promise<void> {
   const d = getData();
   if (!d) return;
   const calId = d.settings.googleCalendar.calendarId;
-  if (removeCalendar && calId) {
+  const listId = d.settings.googleCalendar.tasksList;
+  if (removeCalendar && (calId || listId)) {
     try {
       const token = storedToken() && tokenHasCalendar() ? storedToken()! : await askToken(true);
-      await deleteCalendar(token, calId);
+      if (calId) await deleteCalendar(token, calId);
+      if (listId && tokenHasTasks()) await deleteList(token, listId);
     } catch {
-      /* fica a agenda; dá para apagar lá no Google */
+      /* ficam lá; dá para apagar no Google */
     }
   }
-  mergeSink(withCalendar(d, { on: false, calendarId: removeCalendar ? null : calId }));
+  mergeSink(withCalendar(d, { on: false, calendarId: removeCalendar ? null : calId, tasksList: removeCalendar ? null : listId }));
   patch({ calendar: undefined, calendarAt: null });
 }
 

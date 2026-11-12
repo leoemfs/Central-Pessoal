@@ -52,6 +52,8 @@
 - 08/11: anexar os slides das apresentações (sexta sim, sexta não: avanços do setor de repasse e gestão de contratos de prestadores) dentro da reunião. Hoje só dá para guardar o link. Junta com "anexar PDF ou imagem" de Estudos. Entra no **N9.3** (anexos guardados no Drive).
 - 08/11: Estudos: cronograma de estudos com calendário dentro do módulo, sincronizado com a Agenda do app.
 - 08/11: Você: perguntas de carreira (emprego atual, carreira desejada, melhorias na atual, caminhos até a desejada) para a carreira desejada orientar os tópicos sugeridos em Estudos. Conferir com N10 (Objetivos) e N8.
+- 11/11: **GPS na caminhada** (Núcleo › Corpo › Caminhada): distância e percurso medidos sozinhos em vez de digitar os km. No site só funciona com a tela ligada (o navegador para o GPS com a tela apagada); com tela apagada, só no app Android (N4). Tamanho M.
+- 11/11: **Conexão com a saúde do Google** (passos, caminhadas, sono, batimentos): no Android isso é o **Health Connect**, que só um app Android acessa (o site não). Depende do N4; junta com Saúde (N1) e Treinos. Tamanho M.
 
 ## Itens
 | ID | Item | Frente | Tam. | Prior. | Situação | Documento |
@@ -118,6 +120,7 @@
 | M15 | Estudos: editor de mapas mentais (arrastar e ligar ideias). Afeta: só Estudos | MOD | M | baixa | pronto na N11.3 (v0.28) | `futuro/modulo-estudos.md` |
 | N9 | Sincronizar com o Google Drive: pasta escondida do app, tudo sincroniza sozinho entre computador e celular, fotos no Diário, anexos PDF/imagem, exportar para pasta visível. Partes N9.0 (preparar dados, absorve N11.6) a N9.4. Não depende mais do N4. *Na conversa do Android foi anotado como N8; o código certo é N9.* | NOVO | G | alta | em andamento: N9.0 (v0.39) e N9.1 (v0.40) prontos; ID do cliente Google configurado (v0.40.1); login testado pelo Leonardo em 11/11; N9.2 pronto (v0.41), no ar e conferido em 11/11; **N9.3a fotos no Diário pronto (v0.42)**; próximo N9.3b (PDFs anexados) | `futuro/sincronizar-google.md` |
 | N9.5 | **Lembretes pelo Google Agenda** (11/11): o app cria a agenda "Central Pessoal" no Google e põe compromissos (com Carreira), contas a pagar e tarefas com data, com aviso; muda no app → muda no Google; só de ida. O celular avisa pelo app Google Agenda enquanto não há notificações (substitui o .ics do N3.1). Afeta: Agenda, Finanças, Carreira, Configurações | NOVO | M | alta | pronto (v0.43), **no ar e testado pelo Leonardo em 11/11** | `futuro/google-agenda.md` |
+| N9.6 | **Tarefas no Google Tarefas** (12/11): as tarefas do app vão para uma lista "CP Hub" no Google Tarefas (em vez de virarem evento no Google Agenda). Recomendado ida e volta: concluir lá conclui no app. Limite do Google: a tarefa leva só a **data**, sem hora. Afeta: Agenda (tarefas), Configurações | NOVO | M | média | pronto (v0.48); falta o Leonardo ativar a Google Tasks API e a permissão | `futuro/google-agenda.md` ("N9.6") |
 | N10 | Módulo **Objetivos**: central de **todas as metas do app** (caixinhas, hábitos, ciclos de estudo, carreira, orçamento, metas do Você), com criar, editar e concluir dali; a meta continua morando no módulo dela. Objetivos grandes juntam várias metas. Absorve as metas de carreira (N8.4). Partes: N10.0 prévia, N10.1 central de metas, N10.2 objetivos grandes. Afeta: Finanças, Núcleo, Estudos, Carreira, Você, Início, Jornada | NOVO | G | média | prévia feita e aprovada (11/11): orçamento conta como meta; barra Grandes · Objetivos · Concluídos; favorito para quem escolher metas | `futuro/modulo-objetivos.md` |
 | M16 | **Foco** no Núcleo › Mente: temporizador de foco (ex.: 25 min + pausa), com histórico; ligado a um tópico de Estudos conta tempo de estudo. Afeta: Núcleo, Estudos, Revisão | MOD | P | média | ideia | — |
 | M17 | **Banco de ideias** em Notas: aba "Ideias" e o botão "transformar em" tarefa, objetivo ou notebook. Afeta: Notas, Agenda, Estudos | MOD | P | baixa | ideia | — |
@@ -149,6 +152,7 @@
 ## Feito
 | Versão | O que entrou | PR |
 |---|---|---|
+| v0.48 | N9.6: tarefas na lista "CP Hub" do Google Tarefas, ida e volta (concluir lá conclui aqui; criada lá entra no app); só a data, sem hora; tarefas saem do Google Agenda | #59 |
 | v0.47 | E20: o voltar **sobe um nível** (ferramenta → módulo → Início; Mais → Início; módulo aberto pelo Mais → Mais → Início) e nunca fica em ciclo; janelas continuam fechando com o voltar | — |
 | v0.46 | E19 (e o resto do E1): **lápis no Mais**, que muda a ordem dos módulos e dos 4 atalhos (cada grupo no seu lugar), na lista e na grade; "Restaurar padrão" volta a ordem original | #54 |
 | v0.45 | E18: Personalização › Tela Mais em **lista** (padrão) ou em **grade** (módulos 3 por linha com ícone grande; atalhos e "Em breve" numa linha menor; Guardados com o número) | — |

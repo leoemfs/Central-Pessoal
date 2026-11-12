@@ -281,8 +281,10 @@ export interface GoogleCalendarSettings {
   events: boolean;
   bills: boolean;
   tasks: boolean;
-  /** Id da agenda "Central Pessoal" no Google (criada pelo app). */
+  /** Id da agenda "CP Hub" no Google (criada pelo app). */
   calendarId: string | null;
+  /** N9.6: id da lista "CP Hub" no Google Tarefas (`tasks` liga a ida e volta das tarefas). */
+  tasksList: string | null;
 }
 
 export interface JournalRhythm {
