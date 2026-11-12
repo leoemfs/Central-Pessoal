@@ -46,6 +46,22 @@ A lista não pertence a nenhuma loja. O cartão "Quanto vai sair" mostra:
 - **Unidades padronizadas:** sugestão de unidade pelo produto (kg, L, un), para não misturar "pct" e "pacote".
 - **Histórico da compra:** cada compra concluída guarda a loja, o total e os itens com preço. Isso permite comparar "a mesma lista no mês passado".
 
+## 5. Preencher os preços a partir da lista (pedido de 12/11)
+**O problema no uso real:** a lista de mercado ficou grande (64 itens sem preço no Muffato), mas os itens digitados na lista não existem em Preços. Por isso não dá para entrar em Preços e dar valor a eles.
+
+**Como fica:**
+- **Todo item da lista vira (ou se liga a) um produto de Preços**, sozinho, pelo nome. Os 64 itens que já existem também são ligados na primeira abertura.
+- **Em Preços, um cartão "Sem preço"** mostra os produtos que estão nas listas e ainda não têm valor. O "64 itens sem preço aqui" da lista também abre essa tela, já com a loja escolhida.
+- **Preencher em sequência:** escolhe a loja uma vez e vai item por item (marca, tamanho ou peso, quantidade da embalagem e preço), com "Próximo" e "Pular". Volta para a lista com os totais já atualizados.
+- **Editar depois:** tocar no produto em Preços permite ajustar nome, corredor, unidade, marcas, tamanhos e preços (junto com o item 4).
+
+## 6. Catálogo pronto de produtos (pedido de 12/11)
+Para quem começa não precisar digitar tudo:
+- **Uma base de uns 300 produtos comuns de mercado** que já vem no app, como a Biblioteca de Estudos: nome, corredor, unidade (kg, L, un) e tamanhos comuns (ex.: arroz 1 kg e 5 kg; leite 1 L).
+- **Sem preço:** o preço muda com a cidade e a loja, então só a pessoa anota.
+- Ao digitar na lista, o catálogo aparece nas sugestões junto com os produtos da pessoa. O produto só passa a ser "seu" quando entra numa lista ou ganha um preço.
+- Não precisa de internet. A base pela câmera e código de barras continua no N5.
+
 ## Mais adiante (depende de integração)
 - **Código de barras pela câmera:** ler o EAN e achar a marca e o tamanho já cadastrados. No app Android, a câmera é mais confiável (ver `app-android.md`).
 - **Base pública de produtos pelo código de barras:** preencher nome, marca e tamanho sozinho. Precisa avaliar a cobertura de produtos brasileiros.
@@ -61,6 +77,7 @@ interface Purchase { id: string; listId: string; storeId: string; date: string; 
 ```
 
 ## Ordem sugerida
+0. Itens 5 e 6 entram junto com a parte 1 (M2 + M23): é o que trava o uso hoje.
 1. A lista puxa os produtos de Preços, e a estimativa usa a faixa de preço (itens 2 e 3). É o que mais ajuda no dia a dia.
 2. "Quanto custou aqui?" ao marcar o item na compra (item 4).
 3. Tipos de loja e o filtro na aba Preços (item 1).
