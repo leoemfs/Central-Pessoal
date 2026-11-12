@@ -106,7 +106,7 @@
 | N3 | Notificações e **lembretes** (tarefa ou compromisso com "me lembrar"; sai o "Lembretes, em breve" do menu). Afeta: Agenda, Carreira | NOVO | M | baixa | especificado | `futuro/notificacoes.md` |
 | N3.1 | Notificações já no app (sem servidor): **"Lembrar no celular"** (a parte da agenda passa a ser o **N9.5**, pelo Google Agenda) (compromisso, conta, revisão → agenda do celular, hora certa, Android e iPhone) e **bolinha no ícone** do app com o que está pendente hoje | NOVO | P | média | ideia | `futuro/notificacoes.md` |
 | N3.2 | **Resumo do dia** no Android (Chrome, app instalado): o celular acorda o app ~1 vez por dia e avisa "2 contas vencem amanhã" (sem hora certa) | NOVO | M | baixa | ideia | `futuro/notificacoes.md` |
-| N4 | App Android (preparo conferido em 10/11: 10 pontos de adaptação, passo a passo da mudança e lista de testes) | NOVO | G | baixa | especificado | `futuro/app-android.md` |
+| N4 | App Android (preparo conferido em 10/11: 10 pontos de adaptação; 12/11: + A11, ícone na cor de destaque e em pixel art com a Jornada, com prévia; passo a passo da mudança e lista de testes) | NOVO | G | baixa | especificado | `futuro/app-android.md` |
 | N5 | Código de barras, base de produtos e nota fiscal | NOVO | G | baixa | ideia | `futuro/precos-v2.md` ("Mais adiante") |
 | N6 | Módulo Estudos e Carreira: Biblioteca (áreas, trilhas, tópicos de referência), Ciclos pessoais, Meus notebooks, Fontes, Mapas mentais e Roadmaps | NOVO | G | média | pronto (v0.21), em teste por 3 dias | `futuro/modulo-estudos.md` |
 | N8.5 | Carreira × Agenda automática: tudo que tem data em Carreira (reuniões, passos das vagas e, depois, projetos) aparece sozinho na Agenda do app e se atualiza quando muda; some se for excluído. Sem botão "Pôr na Agenda" | NOVO | P | alta | pronto (v0.24) | `futuro/modulo-carreira.md` |
@@ -219,6 +219,7 @@ Documentos sem código: Mapa dos módulos (08/11), módulos personalizáveis, pa
 | Objetivos (N10.0): metas de todo o app, objetivos grandes, concluídos e cartão no Início | https://claude.ai/artifact/TEPSkVaKWYhuxBcoZvkZA4 |
 | Central Pessoal (prévia geral antiga) | https://claude.ai/artifact/WHbDkKXN4LArCQ8sjuQqVt |
 | E18 Mais em lista ou em grade (12/11) | https://claude.ai/artifact/QnCrHxcUu1HFwLRDgFDyth |
+| Ícone do CP Hub na cor de destaque e em pixel art com a Jornada (A11 do Android, 12/11) | https://claude.ai/artifact/8vX7j7jSvnLkRuEFDAuA9t |
 
 ## Regras para construir
 - Uma versão por item (v0.15.1, v0.16…), com testes das regras, teste no navegador (celular) e documentação atualizada.
