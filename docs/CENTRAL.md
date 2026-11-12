@@ -224,7 +224,7 @@ Documentos sem código: Mapa dos módulos (08/11), módulos personalizáveis, pa
 | Central Pessoal (prévia geral antiga) | https://claude.ai/artifact/WHbDkKXN4LArCQ8sjuQqVt |
 | E18 Mais em lista ou em grade (12/11) | https://claude.ai/artifact/QnCrHxcUu1HFwLRDgFDyth |
 | Ícone do CP Hub na cor de destaque (A11 do Android, 12/11; ícone tradicional aprovado) | https://claude.ai/artifact/8vX7j7jSvnLkRuEFDAuA9t |
-| Ícone da Jornada em pixel art, 4 opções com cantos arredondados (A11, 12/11, aguardando escolha) | https://claude.ai/artifact/UYe1Nhm59RYRVKnuojcTXN |
+| Ícone da Jornada em pixel art, 4 estilos com cantos arredondados (A11, 12/11: os 4 aprovados; a pessoa escolhe ao desbloquear a Jornada) | https://claude.ai/artifact/UYe1Nhm59RYRVKnuojcTXN |
 
 ## Regras para construir
 - Uma versão por item (v0.15.1, v0.16…), com testes das regras, teste no navegador (celular) e documentação atualizada.

@@ -49,6 +49,12 @@ Nos hábitos e rituais, a pessoa escolhe os atributos (o app sugere pelo nome). 
 
 **Missões da semana:** além das ações, cada módulo tem uma missão no ritmo que a pessoa escolheu, com bônus de 10 XP por vez combinada (ex.: Diário 3 vezes na semana = 30 XP). Detalhes em `modulo-rpg.md`, 5.4.
 
+## Recompensa de entrada: ícone da Jornada (decidido em 12/11)
+- Ao **desbloquear a Jornada e aceitar o desafio**, a pessoa ganha a escolha do **ícone do app em pixel art**, como recompensa pelo aceite.
+- São **4 estilos aprovados**, todos com o formato e os cantos arredondados do ícone de hoje, sempre na cor de destaque escolhida: **A** pixels por dentro, **B** borda pixelada com cantos redondos, **C** mosaico, **D** selo 8-bit. Prévia: https://claude.ai/artifact/UYe1Nhm59RYRVKnuojcTXN
+- Depois dá para trocar o estilo (ou voltar ao ícone tradicional) em Personalização. Jornada desligada = ícone tradicional.
+- Só funciona no **app Android** (ponto A11 de `app-android.md`); no app do navegador, o ícone da tela inicial é fixo.
+
 ## Regras para ser justo
 - **Nada se ganha gastando dinheiro.** Comprar não dá ponto.
 - **Vale o hábito, não o valor:** guardar R$ 20 ou R$ 2.000 na caixinha dá o mesmo ponto. Quem ganha menos não fica para trás.
