@@ -71,6 +71,7 @@
 | E16 | Agenda sem o lápis de personalizar cartões (11/11: "nem acho interessante editar aqui"); calendário e próximos compromissos ficam sempre à vista | EXP | P | média | pronto (v0.43.4) | — |
 | E17 | **Guardados num lugar só** (12/11): no Mais, um único cartão "Guardados" (com quantos módulos) abre uma tela com a lista dos módulos desligados, cada um com "Trazer de volta". Junto: "Montar o app do seu jeito" sai de dentro dos Guardados e vai para perto de "Como usar a barra". Afeta: Mais, Personalização | EXP | P | média | pronto (v0.44) | — |
 | E18 | **Mais em grade** (12/11, avaliar): opção em Personalização para ver o Mais em lista (como hoje) ou em grade (ícones grandes com o nome, 3 por linha, como a tela do celular). Avaliar com prévia visual antes. Afeta: Mais, Personalização | EXP | P | baixa | pronto (v0.45) | — |
+| E19 | **Lápis no Mais** (12/11, para o futuro): mudar a ordem dos módulos (na lista e na grade) e a ordem dos 4 atalhos dentro da linha deles (os 4 continuam sempre lá, só mudam de posição). É o "resto do E1: ordem no Mais", que já está na fila aprovada (item 5). Usar o mesmo lápis das outras telas (`Cards.tsx`). Afeta: Mais, Personalização, backup | EXP | P | média | ideia (junta com o resto do E1) | — |
 | C3 | **Registro defeituoso deixa o app em branco**: conferir os campos ao abrir os dados, tela de erro com saída (exportar, recarregar, Configurações) e "desfazer importação" | COR | M | **alta** | pronto (v0.30) | `auditoria-2026-11.md` |
 | C4 | Salvamento de reserva pode perder dados em silêncio (avisar e usar a cópia mais nova) | COR | P | média | ideia | `auditoria-2026-11.md` |
 | C5 | Rodar os testes em todo PR e antes de publicar (hoje só compila) | COR | P | média | pronto (v0.29.1) | `auditoria-2026-11.md` |
@@ -139,7 +140,7 @@
 2. **M2 → M3 → M4 Preços 2.0** (M cada, já especificados).
 3. **M6** fichas de treino próprias (M).
 4. **M5** Agenda com repetição e aniversários (especificar antes).
-5. Resto do E1: ordem dos módulos no Mais (P).
+5. Resto do E1: ordem dos módulos no Mais (P), agora com o **E19** (lápis no Mais: módulos e atalhos).
 6. Depois: N7, N1, N2, N3, N4, N5 (M14 vai junto com o N9.3).
 
 **Pacotes** (histórico): B (Finanças) v0.16; A (Navegação) v0.18, v0.20, v0.31 e v0.34; D (Temas) v0.17; E6 na v0.35.
