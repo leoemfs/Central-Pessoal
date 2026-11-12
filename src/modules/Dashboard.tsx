@@ -1,4 +1,5 @@
 import { CardScreen, type CardDef } from '../Cards';
+import { go } from '../router';
 import { useMemo, useState } from 'react';
 import { useStore } from '../store';
 import { toggleTask } from '../actions';
@@ -253,7 +254,7 @@ export function Dashboard() {
           <ul className="list">
             {dueSoon.slice(0, 6).map((b) => (
               <li key={b.key}>
-                <BillRow bill={b} today={today} categoryOf={categoryOf} onClick={() => (location.hash = '/financas')} />
+                <BillRow bill={b} today={today} categoryOf={categoryOf} onClick={() => go('financas')} />
               </li>
             ))}
           </ul>

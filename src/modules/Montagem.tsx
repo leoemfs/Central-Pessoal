@@ -3,6 +3,7 @@
  * Quem já usa o app recebe um convite no Início, com tudo já preenchido.
  */
 import { useEffect, useMemo, useState, type CSSProperties, type ReactNode } from 'react';
+import { go } from '../router';
 import { useStore } from '../store';
 import type { AppData, JournalRhythm } from '../types';
 import { Fullscreen, Icon, notify, type IconName } from '../ui';
@@ -218,7 +219,7 @@ function Montagem({ mode, onClose }: { mode: SetupMode; onClose: () => void }) {
   function finish(tutorial: boolean) {
     update(apply);
     onClose();
-    if (location.hash !== '#/inicio' && location.hash !== '') location.hash = '/inicio';
+    if (location.hash !== '#/inicio' && location.hash !== '') go('inicio');
     if (tutorial) window.setTimeout(openTutorial, 250);
   }
 
@@ -565,7 +566,7 @@ export function BarTutorial({ path, nav, showFavs }: { path: string; nav: string
 
   useEffect(() => {
     const f = () => {
-      if (location.hash !== '#/inicio') location.hash = '/inicio';
+      if (location.hash !== '#/inicio') go('inicio');
       setStep(0);
     };
     openers.tutorial.add(f);

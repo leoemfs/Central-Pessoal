@@ -4,6 +4,10 @@ import { App } from './App';
 import { DataProvider } from './store';
 import { ErrorBoundary } from './ErrorScreen';
 import './styles.css';
+import { startNavigation } from './router';
+
+// Voltar que sobe um nível (E20): precisa estar ligado antes da primeira tela.
+startNavigation();
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
