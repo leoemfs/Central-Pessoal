@@ -29,13 +29,41 @@ export interface CardDef extends CardInfo {
 
 const LOCK_TEXT = { top: 'Fixo no topo', keep: 'Aviso importante: não some, só muda de lugar' } as const;
 
-export function CardScreen({ screen, cards }: { screen: string; cards: CardDef[] }) {
-  const { data, update } = useStore();
+/** Liga o lápis da barra de cima nesta tela; devolve se está editando. */
+export function useEditScreen(screen: string): boolean {
   const { editing } = useSyncExternalStore(subscribe, () => state);
   useEffect(() => {
     set({ screen, editing: false });
     return () => set({ screen: null, editing: false });
   }, [screen]);
+  return editing;
+}
+
+/** Faixa "Personalizando esta tela" com Restaurar padrão e Pronto. */
+export function EditBar({ onReset }: { onReset: () => void }) {
+  return (
+    <div className="editbar" role="status">
+      <span>Personalizando esta tela</span>
+      <button
+        type="button"
+        className="btn-reset"
+        onClick={() => {
+          onReset();
+          notify('Voltou ao padrão');
+        }}
+      >
+        Restaurar padrão
+      </button>
+      <button type="button" className="btn-done" onClick={() => set({ editing: false })}>
+        Pronto
+      </button>
+    </div>
+  );
+}
+
+export function CardScreen({ screen, cards }: { screen: string; cards: CardDef[] }) {
+  const { data, update } = useStore();
+  const editing = useEditScreen(screen);
   const layout = data.settings.cards[screen];
   const { shown, hidden } = arrange(cards, layout);
   const movable = shown.filter((c) => c.lock !== 'top');
@@ -49,24 +77,7 @@ export function CardScreen({ screen, cards }: { screen: string; cards: CardDef[]
 
   return (
     <>
-      {editing && (
-        <div className="editbar" role="status">
-          <span>Personalizando esta tela</span>
-          <button
-            type="button"
-            className="btn-reset"
-            onClick={() => {
-              save(null);
-              notify('Voltou ao padrão');
-            }}
-          >
-            Restaurar padrão
-          </button>
-          <button type="button" className="btn-done" onClick={() => set({ editing: false })}>
-            Pronto
-          </button>
-        </div>
-      )}
+      {editing && <EditBar onReset={() => save(null)} />}
       {shown.map((c) => {
         const i = movable.indexOf(c);
         return (
