@@ -152,7 +152,7 @@
 ## Feito
 | Versão | O que entrou | PR |
 |---|---|---|
-| v0.48 | N9.6: tarefas na lista "CP Hub" do Google Tarefas, ida e volta (concluir lá conclui aqui; criada lá entra no app); só a data, sem hora; tarefas saem do Google Agenda | #58 |
+| v0.48 | N9.6: tarefas na lista "CP Hub" do Google Tarefas, ida e volta (concluir lá conclui aqui; criada lá entra no app); só a data, sem hora; tarefas saem do Google Agenda | #59 |
 | v0.47 | E20: o voltar **sobe um nível** (ferramenta → módulo → Início; Mais → Início; módulo aberto pelo Mais → Mais → Início) e nunca fica em ciclo; janelas continuam fechando com o voltar | — |
 | v0.46 | E19 (e o resto do E1): **lápis no Mais**, que muda a ordem dos módulos e dos 4 atalhos (cada grupo no seu lugar), na lista e na grade; "Restaurar padrão" volta a ordem original | #54 |
 | v0.45 | E18: Personalização › Tela Mais em **lista** (padrão) ou em **grade** (módulos 3 por linha com ícone grande; atalhos e "Em breve" numa linha menor; Guardados com o número) | — |
