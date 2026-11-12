@@ -6586,3 +6586,43 @@ details.kept[open] > summary {
     transform: none;
   }
 }
+
+/* Lápis no Mais (E19): blocos parados, borda tracejada e setas para mudar de lugar */
+.tile.editing,
+.mg-cell.editing {
+  border-style: dashed;
+  border-color: var(--border-strong);
+  cursor: default;
+}
+.mg-grid.small .mg-cell.editing {
+  border-color: var(--border-strong);
+  padding: 8px 2px;
+}
+.mais-move {
+  display: flex;
+  gap: 6px;
+  flex: none;
+}
+.mais-move button {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--raised);
+  color: var(--text);
+  display: grid;
+  place-items: center;
+}
+.mais-move button:disabled {
+  opacity: 0.35;
+}
+.mg-grid.small .mais-move {
+  gap: 2px;
+}
+.mg-grid.small .mais-move button {
+  width: 30px;
+  height: 30px;
+}
+.mais-sub {
+  margin: 8px 0 0;
+}

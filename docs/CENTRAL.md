@@ -71,7 +71,7 @@
 | E16 | Agenda sem o lápis de personalizar cartões (11/11: "nem acho interessante editar aqui"); calendário e próximos compromissos ficam sempre à vista | EXP | P | média | pronto (v0.43.4) | — |
 | E17 | **Guardados num lugar só** (12/11): no Mais, um único cartão "Guardados" (com quantos módulos) abre uma tela com a lista dos módulos desligados, cada um com "Trazer de volta". Junto: "Montar o app do seu jeito" sai de dentro dos Guardados e vai para perto de "Como usar a barra". Afeta: Mais, Personalização | EXP | P | média | pronto (v0.44) | — |
 | E18 | **Mais em grade** (12/11, avaliar): opção em Personalização para ver o Mais em lista (como hoje) ou em grade (ícones grandes com o nome, 3 por linha, como a tela do celular). Avaliar com prévia visual antes. Afeta: Mais, Personalização | EXP | P | baixa | pronto (v0.45) | — |
-| E19 | **Lápis no Mais** (12/11, para o futuro): mudar a ordem dos módulos (na lista e na grade) e a ordem dos 4 atalhos dentro da linha deles (os 4 continuam sempre lá, só mudam de posição). É o "resto do E1: ordem no Mais", que já está na fila aprovada (item 5). Usar o mesmo lápis das outras telas (`Cards.tsx`). Afeta: Mais, Personalização, backup | EXP | P | média | ideia (junta com o resto do E1) | — |
+| E19 | **Lápis no Mais** (12/11, para o futuro): mudar a ordem dos módulos (na lista e na grade) e a ordem dos 4 atalhos dentro da linha deles (os 4 continuam sempre lá, só mudam de posição). É o "resto do E1: ordem no Mais", que já está na fila aprovada (item 5). Usar o mesmo lápis das outras telas (`Cards.tsx`). Afeta: Mais, Personalização, backup | EXP | P | média | pronto (v0.46) | — |
 | C3 | **Registro defeituoso deixa o app em branco**: conferir os campos ao abrir os dados, tela de erro com saída (exportar, recarregar, Configurações) e "desfazer importação" | COR | M | **alta** | pronto (v0.30) | `auditoria-2026-11.md` |
 | C4 | Salvamento de reserva pode perder dados em silêncio (avisar e usar a cópia mais nova) | COR | P | média | ideia | `auditoria-2026-11.md` |
 | C5 | Rodar os testes em todo PR e antes de publicar (hoje só compila) | COR | P | média | pronto (v0.29.1) | `auditoria-2026-11.md` |
@@ -85,7 +85,7 @@
 | N3.3 | **Níveis de notificação** (baixa, média, alta, personalizado) com "Me lembrar" e sino; parte 1 sem Android: marcações + lista de avisos dos próximos 7 dias | NOVO | M | média | especificado (simulado) | `futuro/notificacoes.md` |
 | M1 | Hábitos: pausar e arquivar | MOD | P | alta | pronto (v0.32) | `futuro/habitos-pausar-arquivar.md` |
 | E14 | **Primeira abertura**: entrevista de toque (áreas → módulos à vista → 3 favoritos → ritmo do Diário → barra e cor → **Jornada: o que é e se quer ou não**) e **tutorial interativo da barra** (6 passos); quem já usa recebe uma vez o convite "Monte o app do seu jeito" (entrevista já preenchida com o que usa hoje, ou só o tutorial) e pode refazer em Personalização; Mais › Como usar a barra. Junta com o resto do E1 (ocultar módulos e ritmo do Diário) | EXP | M | **1ª** | pronto (v0.31) | `futuro/primeira-abertura.md` |
-| E1 | Favoritos e módulos: os 3 do meio da barra no Início são os favoritos (escolhidos pela pessoa); ocultar módulos; ordem no Mais; Orçamento e Relatórios saem do Mais; ritmo de cada módulo (Diário) | EXP | M | alta | quase pronto: favoritos e Mais (v0.18), ocultar módulos e ritmo do Diário (v0.31); falta só a ordem no Mais | `futuro/modulos-personalizaveis.md`, `futuro/navegacao-v2.md` |
+| E1 | Favoritos e módulos: os 3 do meio da barra no Início são os favoritos (escolhidos pela pessoa); ocultar módulos; ordem no Mais; Orçamento e Relatórios saem do Mais; ritmo de cada módulo (Diário) | EXP | M | alta | pronto: favoritos e Mais (v0.18), ocultar módulos e ritmo do Diário (v0.31), ordem no Mais com o lápis (v0.46, E19) | `futuro/modulos-personalizaveis.md`, `futuro/navegacao-v2.md` |
 | E2 | Barra adaptativa: Início e Mais fixos; dentro do módulo, 3 ícones do próprio módulo (casa no centro); só ícones, um pouco maiores; topo mostra "Finanças / Orçamento"; segurar o ícone mostra o nome | EXP | M | alta | pronto (v0.18) | `futuro/navegacao-v2.md` |
 | E3 | Personalizar cartões (lápis ao lado da lupa): no Início e nos módulos, ocultar e reordenar cartões; cartões principais fixos (🔒); Humor sempre no topo do Início; avisos importantes nunca ocultos, só mudam de posição | EXP | M | alta | pronto: Início e Finanças (v0.20); Núcleo, Listas, Estudos e Carreira (v0.34); Agenda saiu na v0.43.4 (E16) | `futuro/navegacao-v2.md` |
 | E4 | Temas: escuro, claro e automático + cor de destaque (paleta com bom contraste). Padrão: escuro = preto e verde; claro = branco e azul escuro | EXP | M | média | pronto (v0.17) | `futuro/navegacao-v2.md` |
@@ -140,7 +140,7 @@
 2. **M2 → M3 → M4 Preços 2.0** (M cada, já especificados).
 3. **M6** fichas de treino próprias (M).
 4. **M5** Agenda com repetição e aniversários (especificar antes).
-5. Resto do E1: ordem dos módulos no Mais (P), agora com o **E19** (lápis no Mais: módulos e atalhos).
+5. ~~Resto do E1: ordem dos módulos no Mais~~ feito na v0.46 (E19).
 6. Depois: N7, N1, N2, N3, N4, N5 (M14 vai junto com o N9.3).
 
 **Pacotes** (histórico): B (Finanças) v0.16; A (Navegação) v0.18, v0.20, v0.31 e v0.34; D (Temas) v0.17; E6 na v0.35.
@@ -148,6 +148,7 @@
 ## Feito
 | Versão | O que entrou | PR |
 |---|---|---|
+| v0.46 | E19 (e o resto do E1): **lápis no Mais**, que muda a ordem dos módulos e dos 4 atalhos (cada grupo no seu lugar), na lista e na grade; "Restaurar padrão" volta a ordem original | — |
 | v0.45 | E18: Personalização › Tela Mais em **lista** (padrão) ou em **grade** (módulos 3 por linha com ícone grande; atalhos e "Em breve" numa linha menor; Guardados com o número) | — |
 | v0.44 | E17: Mais › **Guardados**, uma tela só com os módulos desligados e "Trazer de volta" em cada um; "Montar o app do seu jeito" sempre à vista no Mais | #52 |
 | v0.43.4 | E16: Agenda sem o lápis; calendário e próximos compromissos sempre à vista | #49 |

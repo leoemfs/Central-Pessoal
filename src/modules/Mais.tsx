@@ -4,6 +4,8 @@ import { addFavorite, FAVORITABLE } from '../moduleBar';
 import { Icon, notify, PageHeader, Sheet, type IconName } from '../ui';
 import { hiddenFrom, isHidden, toggleModule, visibleFrom } from '../setup';
 import { openSetup, openTutorial } from './Montagem';
+import { EditBar, useEditScreen } from '../Cards';
+import { arrange, moveCard, type CardLayout } from '../cardLayout';
 
 /** Todos os módulos. Orçamento e Relatórios ficam dentro de Finanças (na barra de baixo). */
 const LINKS: { path: string; hint: string }[] = [
@@ -21,146 +23,156 @@ const LINKS: { path: string; hint: string }[] = [
   { path: 'ajustes', hint: 'Personalização (temas, favoritos, barra), backup e dados' },
 ];
 
-function LinkTile({ path, hint }: { path: string; hint: string }) {
-  const s = SECTIONS.find((x) => x.path === path)!;
-  return (
-    <a className="tile" href={`#/${path}`}>
-      <span className="tile-icon">
-        <Icon name={s.icon} />
-      </span>
-      <span className="tile-text">
-        <strong>{s.label}</strong>
-        <span className="muted">{hint}</span>
-      </span>
-      <Icon name="right" size={18} />
-    </a>
-  );
-}
-
-export function Mais() {
-  const { data } = useStore();
-  const shown = LINKS.filter((l) => !isHidden(data, l.path));
-  const kept = LINKS.filter((l) => isHidden(data, l.path));
-  if (data.settings.moreLayout === 'grade') return <MaisGrade shown={shown.map((l) => l.path)} kept={kept.map((l) => l.path)} />;
-  return (
-    <>
-      <PageHeader title="Mais" />
-      <div className="tile-grid">
-        {shown.map((l) => (
-          <LinkTile key={l.path} {...l} />
-        ))}
-        <button type="button" className="tile" onClick={openTutorial}>
-          <span className="tile-icon">
-            <Icon name="info" />
-          </span>
-          <span className="tile-text">
-            <strong>Como usar a barra</strong>
-            <span className="muted">Tutorial de 1 minuto: favoritos, ferramentas do módulo, voltar e trocar de módulo</span>
-          </span>
-          <Icon name="right" size={18} />
-        </button>
-        <button type="button" className="tile" onClick={() => openSetup('convite')}>
-          <span className="tile-icon">
-            <Icon name="grid" />
-          </span>
-          <span className="tile-text">
-            <strong>Montar o app do seu jeito</strong>
-            <span className="muted">Escolher de novo os módulos à vista e os favoritos</span>
-          </span>
-          <Icon name="right" size={18} />
-        </button>
-        {kept.length > 0 && (
-          <a className="tile" href="#/guardados">
-            <span className="tile-icon">
-              <Icon name="archive" />
-            </span>
-            <span className="tile-text">
-              <strong>Guardados · {kept.length}</strong>
-              <span className="muted">{keptNames(kept.map((l) => l.path))}: desligados, com tudo o que você já registrou</span>
-            </span>
-            <Icon name="right" size={18} />
-          </a>
-        )}
-      </div>
-      <h2 className="section-title">Em breve</h2>
-      <div className="tile-grid">
-        {COMING_SOON.map((c) => (
-          <div key={c.label} className="tile disabled" aria-disabled="true">
-            <span className="tile-icon">
-              <Icon name={c.icon} />
-            </span>
-            <span className="tile-text">
-              <strong>{c.label}</strong>
-              <span className="muted">{c.hint}</span>
-            </span>
-          </div>
-        ))}
-      </div>
-    </>
-  );
+interface Item {
+  id: string;
+  label: string;
+  short: string;
+  icon: IconName;
+  hint: string;
+  href?: string;
+  onClick?: () => void;
+  badge?: number;
 }
 
 /** Nomes curtos para caber embaixo do ícone. */
 const SHORT: Record<string, string> = { nucleo: 'Núcleo', revisao: 'Revisão', ajustes: 'Ajustes' };
+/** Onde a ordem fica guardada (mesmo lugar do lápis das outras telas; entra no backup). */
+const KEY_MODULES = 'mais';
+const KEY_SHORTCUTS = 'mais-atalhos';
 
-/** Mais em grade (E18): módulos 3 por linha; atalhos e "Em breve" numa linha menor, 4 por linha. */
-function MaisGrade({ shown, kept }: { shown: string[]; kept: string[] }) {
-  const cell = (path: string) => {
-    const s = SECTIONS.find((x) => x.path === path)!;
+/** Uma entrada do Mais: cartão (lista) ou ícone (grade). No lápis vira bloco parado com setas. */
+function Entry({ it, grid, editing, first, last, onMove }: { it: Item; grid: boolean; editing: boolean; first: boolean; last: boolean; onMove: (dir: -1 | 1) => void }) {
+  const icon = (
+    <span className={grid ? 'mg-icon' : 'tile-icon'}>
+      <Icon name={it.icon} size={grid ? 24 : undefined} />
+      {grid && it.badge ? <span className="mg-badge">{it.badge}</span> : null}
+    </span>
+  );
+  const body = grid ? (
+    <>
+      {icon}
+      <span className="mg-name">{it.short}</span>
+    </>
+  ) : (
+    <>
+      {icon}
+      <span className="tile-text">
+        <strong>{it.label}</strong>
+        <span className="muted">{it.hint}</span>
+      </span>
+    </>
+  );
+  const cls = grid ? 'mg-cell' : 'tile';
+  if (editing) {
+    const [back, fwd] = grid ? (['left', 'right'] as const) : (['up', 'down'] as const);
     return (
-      <a key={path} className="mg-cell" href={`#/${path}`}>
-        <span className="mg-icon">
-          <Icon name={s.icon} size={26} />
+      <div className={`${cls} editing`}>
+        {body}
+        <span className="mais-move">
+          <button type="button" aria-label={`Mover ${it.label} para ${grid ? 'a esquerda' : 'cima'}`} disabled={first} onClick={() => onMove(-1)}>
+            <Icon name={back} size={18} />
+          </button>
+          <button type="button" aria-label={`Mover ${it.label} para ${grid ? 'a direita' : 'baixo'}`} disabled={last} onClick={() => onMove(1)}>
+            <Icon name={fwd} size={18} />
+          </button>
         </span>
-        <span className="mg-name">{SHORT[path] ?? s.label}</span>
-      </a>
+      </div>
     );
-  };
+  }
+  const chevron = grid ? null : <Icon name="right" size={18} />;
+  return it.href ? (
+    <a className={cls} href={it.href} aria-label={grid && it.badge ? `${it.label}: ${it.hint}` : undefined}>
+      {body}
+      {chevron}
+    </a>
+  ) : (
+    <button type="button" className={cls} onClick={it.onClick}>
+      {body}
+      {chevron}
+    </button>
+  );
+}
+
+export function Mais() {
+  const { data, update } = useStore();
+  const editing = useEditScreen('mais');
+  const grid = data.settings.moreLayout === 'grade';
+  const kept = LINKS.filter((l) => isHidden(data, l.path));
+  const modules: Item[] = LINKS.filter((l) => l.path !== 'ajustes' && !isHidden(data, l.path)).map((l) => {
+    const s = SECTIONS.find((x) => x.path === l.path)!;
+    return { id: l.path, label: s.label, short: SHORT[l.path] ?? s.label, icon: s.icon, hint: l.hint, href: `#/${l.path}` };
+  });
+  const shortcuts: Item[] = [
+    { id: 'ajustes', label: 'Configurações', short: 'Ajustes', icon: 'settings', hint: 'Personalização (temas, favoritos, barra), backup e dados', href: '#/ajustes' },
+    { id: 'barra', label: 'Como usar a barra', short: 'Usar a barra', icon: 'info', hint: 'Tutorial de 1 minuto: favoritos, ferramentas do módulo, voltar e trocar de módulo', onClick: openTutorial },
+    { id: 'montar', label: 'Montar o app do seu jeito', short: 'Montar o app', icon: 'grid', hint: 'Escolher de novo os módulos à vista e os favoritos', onClick: () => openSetup('convite') },
+    ...(kept.length > 0
+      ? [{ id: 'guardados', label: grid ? 'Guardados' : `Guardados · ${kept.length}`, short: 'Guardados', icon: 'archive' as IconName, hint: `${keptNames(kept.map((l) => l.path))}: desligados, com tudo o que você já registrou`, href: '#/guardados', badge: kept.length }]
+      : []),
+  ];
+  const layouts = data.settings.cards;
+  const mods = arrange(modules, layouts[KEY_MODULES]).shown;
+  const tools = arrange(shortcuts, layouts[KEY_SHORTCUTS]).shown;
+  const save = (changes: Record<string, CardLayout | null>) =>
+    update((d) => {
+      const cards = { ...d.settings.cards };
+      for (const [k, v] of Object.entries(changes)) {
+        if (v) cards[k] = v;
+        else delete cards[k];
+      }
+      return { ...d, settings: { ...d.settings, cards } };
+    });
+  const list = (items: Item[], all: Item[], key: string) =>
+    items.map((it, i) => <Entry key={it.id} it={it} grid={grid} editing={editing} first={i === 0} last={i === items.length - 1} onMove={(dir) => save({ [key]: moveCard(all, layouts[key], it.id, dir) })} />);
+
   return (
     <>
       <PageHeader title="Mais" />
-      <div className="mg-grid">{shown.filter((p) => p !== 'ajustes').map(cell)}</div>
-      <h2 className="section-title">Atalhos</h2>
-      <div className="mg-grid small">
-        <a className="mg-cell" href="#/ajustes">
-          <span className="mg-icon">
-            <Icon name="settings" size={22} />
-          </span>
-          <span className="mg-name">Ajustes</span>
-        </a>
-        <button type="button" className="mg-cell" onClick={openTutorial}>
-          <span className="mg-icon">
-            <Icon name="info" size={22} />
-          </span>
-          <span className="mg-name">Usar a barra</span>
-        </button>
-        <button type="button" className="mg-cell" onClick={() => openSetup('convite')}>
-          <span className="mg-icon">
-            <Icon name="grid" size={22} />
-          </span>
-          <span className="mg-name">Montar o app</span>
-        </button>
-        {kept.length > 0 && (
-          <a className="mg-cell" href="#/guardados" aria-label={`Guardados: ${keptNames(kept)}`}>
-            <span className="mg-icon">
-              <Icon name="archive" size={22} />
-              <span className="mg-badge">{kept.length}</span>
-            </span>
-            <span className="mg-name">Guardados</span>
-          </a>
-        )}
-      </div>
-      <h2 className="section-title">Em breve</h2>
-      <div className="mg-grid small">
-        {COMING_SOON.map((c) => (
-          <div key={c.label} className="mg-cell off" aria-disabled="true" title={c.hint}>
-            <span className="mg-icon">
-              <Icon name={c.icon} size={22} />
-            </span>
-            <span className="mg-name">{c.label === 'Banco de ideias' ? 'Ideias' : c.label}</span>
-          </div>
-        ))}
-      </div>
+      {editing && <EditBar onReset={() => save({ [KEY_MODULES]: null, [KEY_SHORTCUTS]: null })} />}
+      {grid ? (
+        <>
+          <div className="mg-grid">{list(mods, modules, KEY_MODULES)}</div>
+          <h2 className="section-title">Atalhos</h2>
+          <div className="mg-grid small">{list(tools, shortcuts, KEY_SHORTCUTS)}</div>
+        </>
+      ) : (
+        <div className="tile-grid">
+          {list(mods, modules, KEY_MODULES)}
+          {editing && <h2 className="section-title mais-sub">Atalhos</h2>}
+          {list(tools, shortcuts, KEY_SHORTCUTS)}
+        </div>
+      )}
+      {!editing && (
+        <>
+          <h2 className="section-title">Em breve</h2>
+          {grid ? (
+            <div className="mg-grid small">
+              {COMING_SOON.map((c) => (
+                <div key={c.label} className="mg-cell off" aria-disabled="true" title={c.hint}>
+                  <span className="mg-icon">
+                    <Icon name={c.icon} size={22} />
+                  </span>
+                  <span className="mg-name">{c.label === 'Banco de ideias' ? 'Ideias' : c.label}</span>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="tile-grid">
+              {COMING_SOON.map((c) => (
+                <div key={c.label} className="tile disabled" aria-disabled="true">
+                  <span className="tile-icon">
+                    <Icon name={c.icon} />
+                  </span>
+                  <span className="tile-text">
+                    <strong>{c.label}</strong>
+                    <span className="muted">{c.hint}</span>
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
+        </>
+      )}
     </>
   );
 }
