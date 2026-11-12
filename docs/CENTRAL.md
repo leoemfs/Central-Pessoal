@@ -153,7 +153,7 @@
 ## Feito
 | Versão | O que entrou | PR |
 |---|---|---|
-| v0.50 | M3 (Preços 2.0, parte 2): **"Quanto custou aqui?"** ao marcar o item (loja, embalagem, preço e quantas; "Só marcar" pula; dá para desligar no fim da lista); o preço vai para Preços e o item mostra "Pago"; "Concluir compra" já vem com a soma do que foi anotado e compara com a **última compra da lista**; a compra guarda os itens com preço | #63 |
+| v0.50 | M3 (Preços 2.0, parte 2): **"Quanto custou aqui?"** ao marcar o item (loja, embalagem, preço e quantas; "Só marcar" pula; dá para desligar no fim da lista); o preço vai para Preços e o item mostra "Pago"; "Concluir compra" já vem com a soma do que foi anotado e compara com a **última compra da lista**; a compra guarda os itens com preço | #64 |
 | v0.49 | M2 + M23 (Preços 2.0, parte 1): todo item da lista de mercado vira produto de Preços (os antigos na primeira abertura); sugestões ao digitar (sem acento e sem plural) com faixa de preço; catálogo pronto de 311 produtos (corredor, unidade e tamanhos, sem preço); "Quanto vai sair" por loja com faixa dos itens que faltam, melhor combinação e itens sem preço à parte; cartão "Sem preço" em Preços e **Dar preço em sequência** (loja uma vez; tamanho, marca e preço; Próximo e Pular). Ficou para o M4: escolher marca no item, editar produto | #63 |
 | v0.48 | N9.6: tarefas na lista "CP Hub" do Google Tarefas, ida e volta (concluir lá conclui aqui; criada lá entra no app); só a data, sem hora; tarefas saem do Google Agenda | #59 |
 | v0.47 | E20: o voltar **sobe um nível** (ferramenta → módulo → Início; Mais → Início; módulo aberto pelo Mais → Mais → Início) e nunca fica em ciclo; janelas continuam fechando com o voltar | — |
