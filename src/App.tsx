@@ -2,7 +2,7 @@ import { useEffect, useRef, useState, type ComponentType } from 'react';
 import { ErrorBoundary } from './ErrorScreen';
 import { useStore } from './store';
 import type { Theme } from './types';
-import { go, goReplace, useRoute, type Route } from './router';
+import { go, goReplace, navigate, useRoute, type Route } from './router';
 import { Icon, Sheet, Toasts, useBackToClose, type IconName } from './ui';
 import { formatLongDate, todayISO } from './utils';
 import { NAV_GROUPS, SETTINGS_ITEM, type NavItem } from './nav';
@@ -11,7 +11,7 @@ import { Dashboard } from './modules/Dashboard';
 import { Financas } from './modules/financas/Financas';
 import { Diario } from './modules/Diario';
 import { Agenda } from './modules/Agenda';
-import { Mais } from './modules/Mais';
+import { Guardados, Mais } from './modules/Mais';
 import { Habitos } from './modules/Habitos';
 import { Notas } from './modules/Notas';
 import { Ajustes } from './modules/Ajustes';
@@ -55,6 +55,7 @@ export const SECTIONS: Section[] = [
   { path: 'diario', label: 'Diário', icon: 'journal', view: Diario, fab: 'diario/nova', title: 'Meu diário', search: 'diario/buscar' },
   { path: 'agenda', label: 'Agenda', icon: 'calendar', view: Agenda, fab: 'agenda/novo' },
   { path: 'mais', label: 'Mais', icon: 'grid', view: Mais },
+  { path: 'guardados', label: 'Guardados', icon: 'archive', view: Guardados },
   { path: 'nucleo', label: 'Núcleo pessoal', icon: 'sprout', view: Habitos, fab: 'nucleo/novo' },
   { path: 'arquivo', label: 'Notas', icon: 'note', view: Notas, fab: 'arquivo/nova' },
   { path: 'ajustes', label: 'Configurações', icon: 'settings', view: Ajustes },
@@ -115,6 +116,7 @@ function TabLink({ to, label, icon, active, center, onTap }: { to: string; label
   return (
     <a
       href={`#/${to}`}
+      data-nav="switch"
       className={`tb${active ? ' active' : ''}${center ? ' center' : ''}`}
       aria-label={label}
       aria-current={active ? 'page' : undefined}
@@ -159,7 +161,7 @@ function NavMenu({ current, onNavigate }: { current: string; onNavigate?: () => 
           if (!onNavigate) return;
           // Navega antes de fechar o menu, para o "voltar" não desfazer a navegação.
           e.preventDefault();
-          go(it.to!);
+          navigate(it.to!, 'switch');
           onNavigate();
         }}
       >
@@ -209,14 +211,6 @@ function Drawer({ current, onClose }: { current: string; onClose: () => void }) 
       </nav>
     </div>
   );
-}
-
-/** Navega guardando de qual módulo veio, para o "voltar" da ferramenta levar à casa do módulo. */
-function navTo(to: string, mode: 'push' | 'replace', fromHome: string) {
-  const url = `#/${to}`;
-  if (mode === 'push') history.pushState({ fromHome }, '', url);
-  else history.replaceState({ fromHome: (history.state as { fromHome?: string } | null)?.fromHome ?? null }, '', url);
-  window.dispatchEvent(new HashChangeEvent('hashchange'));
 }
 
 /** Barra superior que some ao rolar para baixo e volta ao rolar para cima. */
@@ -295,29 +289,22 @@ export function App() {
   const middle: BarItem[] = placed ? placed.items : favoriteItems(data.settings.favorites);
 
   /**
-   * O que cada ícone faz ao ser tocado, para o "voltar" do celular seguir: ferramenta → casa do módulo → Início.
-   * - Da casa do módulo para uma ferramenta: abre por cima (voltar retorna à casa).
-   * - De uma ferramenta para outra: troca no lugar.
-   * - Da ferramenta para a casa: volta, se veio da casa.
-   * - Trocar de módulo pelos favoritos (dentro de outro módulo): troca no lugar (voltar vai ao Início).
+   * O que cada ícone faz ao ser tocado. O "voltar" sobe um nível (E20, navStack.ts): ferramenta → casa do módulo → Início.
+   * Tocar de novo na casa mostra os favoritos (para trocar de módulo sem passar pelo Início).
    */
   function tapFor(it: BarItem, i: number): (() => void) | undefined {
     if (placed && bar) {
       const atHome = section.path === bar.items[1].section;
       if (i === placed.home) {
         if (atHome) return data.settings.tapToFavorites ? () => setShowFavs(true) : undefined;
-        return () => {
-          if ((history.state as { fromHome?: string } | null)?.fromHome === bar.id) history.back();
-          else goReplace(it.to);
-        };
+        return () => navigate(it.to, 'switch'); // volta para a casa do módulo (sai da ferramenta)
       }
       if (!it.section) return () => goReplace(it.to); // atalho (ex.: Hoje)
-      if (atHome) return () => navTo(it.to, 'push', bar.id);
-      return () => navTo(it.to, 'replace', bar.id);
+      return () => navigate(it.to, 'switch'); // ferramenta: fica logo acima da casa do módulo
     }
     if (showFavs && bar) {
       if (it.to === section.path) return () => setShowFavs(false);
-      return () => goReplace(it.to);
+      return () => navigate(it.to, 'switch');
     }
     return undefined;
   }

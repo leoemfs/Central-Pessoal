@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react';
+import { go } from '../router';
 import type { ViewProps } from '../App';
 import { useStore } from '../store';
 import {
@@ -294,7 +295,7 @@ export function Interview({ start, onClose }: { start: number; onClose: () => vo
             className="btn primary"
             onClick={() => {
               onClose();
-              if (location.hash !== '#/inicio') window.setTimeout(() => (location.hash = '/inicio'), 50);
+              if (location.hash !== '#/inicio') window.setTimeout(() => go('inicio'), 50);
             }}
           >
             Ver no Início

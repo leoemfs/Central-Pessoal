@@ -46,7 +46,7 @@ Conferi o código atual contra o que muda quando o app roda dentro do Android (C
 |---|---|---|---|---|
 | A1 | **Exportar backup** | Baixa um arquivo pelo navegador (`a.download`) | **Não funciona** dentro do app (o botão não faz nada) | Salvar com o plugin de arquivos e abrir o "Compartilhar" (Drive, WhatsApp, pasta) |
 | A2 | **Trazer os dados do site** | Dados no navegador | O app tem um banco **separado**: começa vazio | Primeira abertura oferece "Importar backup". Antes da troca: exportar no site. Ver "Passo a passo da mudança" |
-| A3 | **Botão voltar do celular** | O navegador cuida | No Início, sem telas para voltar, o botão não faz nada | No Início, voltar **minimiza** o app. Nas outras telas, segue a regra atual (ferramenta → módulo → Início) |
+| A3 | **Botão voltar do celular** | O navegador cuida | No Início, sem telas para voltar, o botão não faz nada | No Início, voltar **minimiza** o app. Nas outras telas, segue a regra do E20 (v0.47): o voltar sobe um nível pela trilha do app (`src/navStack.ts`); no Android basta ligar o botão voltar ao `history.back()` e, no Início, minimizar |
 | A4 | **Barra de cima sob o relógio** | O navegador reserva o espaço | O Android 15 desenha o app de ponta a ponta: a barra de cima ficaria **embaixo** do relógio e da bateria | Somar a área segura do topo na barra de cima (hoje só as bordas de baixo estão tratadas) |
 | A5 | **Funcionar offline** | Um "service worker" guarda os arquivos | Desnecessário (os arquivos já estão no aparelho) e pode servir versão velha | Não registrar o service worker quando estiver no app |
 | A6 | **Práticas com a tela apagada** | Os temporizadores param quando a tela apaga | Igual, e o sino pode não tocar | Manter a tela ligada durante a prática e calcular o tempo pelo relógio, não por contagem |
@@ -54,6 +54,7 @@ Conferi o código atual contra o que muda quando o app roda dentro do Android (C
 | A8 | **Links externos** (Estudos, Carreira) | Abrem em nova aba | Abrem no navegador do celular; precisa testar a volta | Usar o plugin de navegador (abre por cima e volta para o app) |
 | A9 | **Tema e cor** antes de abrir | Guardados no navegador | Funciona igual | Só testar |
 | A10 | **Atualização** | Automática ao publicar | **Só com APK novo** (ou pela Play Store) | Ver "Como o app se atualiza" |
+| A11 | **Ícone na cor de destaque** (12/11) | Ícone fixo (verde); o navegador não deixa trocar depois de instalado | O app vem com **16 ícones prontos**: as 8 cores de destaque, cada uma em duas versões, normal e **pixel art** (quando a Jornada está ativa, na mesma cor). Ao trocar a cor em Personalização ou ligar/desligar a Jornada, o app troca o ícone da tela inicial (no Android: um apelido de abertura por ícone, ligando um e desligando os outros). Na troca, o celular pode fechar o app por um instante. Prévia: https://claude.ai/artifact/8vX7j7jSvnLkRuEFDAuA9t |
 
 ### O que já está pronto (conferido)
 - Endereços relativos (`base: './'`) e rotas por `#`: funcionam sem servidor.

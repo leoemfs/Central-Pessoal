@@ -191,7 +191,7 @@ export function Ajustes() {
         </div>
 
         <h3 className="pz-title">Módulos à vista</h3>
-        <p className="muted small">Desligado fica guardado no Mais, sem apagar nada. Pelo menos {MIN_VISIBLE} à vista.</p>
+        <p className="muted small">Desligado vai para Mais › Guardados, sem apagar nada. Pelo menos {MIN_VISIBLE} à vista.</p>
         <div className="chips" role="group" aria-label="Módulos à vista">
           {MODULES.map((m) => {
             const visible = visibleFrom(data.settings.hiddenModules);
@@ -206,7 +206,7 @@ export function Ajustes() {
                   const next = toggleModule(visible, m.id);
                   if (next === visible) return notify(`Pelo menos ${MIN_VISIBLE} módulos`, 'Ligue outro antes de desligar este.');
                   update((d) => ({ ...d, settings: { ...d.settings, hiddenModules: hiddenFrom(next), favorites: fitFavorites(d.settings.favorites, next), ...(m.id === 'jornada' ? { journeyWanted: !on } : {}) } }));
-                  notify(m.label, on ? 'Guardado no Mais.' : 'De volta à vista.');
+                  notify(m.label, on ? 'Foi para Mais › Guardados.' : 'De volta à vista.');
                 }}
               >
                 {m.label}
@@ -256,6 +256,17 @@ export function Ajustes() {
           </div>
           <Toggle checked={data.settings.hideOnScroll} onChange={(v) => setSetting({ hideOnScroll: v })} label="Esconder as barras ao rolar" />
         </div>
+        <h3 className="pz-title">Tela Mais</h3>
+        <p className="muted small">Lista mostra o que tem em cada módulo; grade mostra tudo de uma vez, com ícones.</p>
+        <Segmented<'lista' | 'grade'>
+          label="Tela Mais"
+          value={data.settings.moreLayout}
+          onChange={(v) => setSetting({ moreLayout: v })}
+          options={[
+            { value: 'lista', label: 'Lista' },
+            { value: 'grade', label: 'Grade' },
+          ]}
+        />
         <div className="btn-row" style={{ marginTop: 14 }}>
           <button type="button" className="btn soft small" onClick={() => openSetup('convite')}>
             <Icon name="grid" size={16} /> Refazer a montagem do app

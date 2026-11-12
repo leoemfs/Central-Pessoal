@@ -2,7 +2,7 @@ import { useEffect, useRef, useState, type CSSProperties } from 'react';
 import { CardScreen } from '../Cards';
 import type { ViewProps } from '../App';
 import { useStore } from '../store';
-import { useSubAction } from '../router';
+import { cleanAddress, useSubAction } from '../router';
 import { remove, upsert } from '../actions';
 import {
   amountOn, ATTRIBUTES, atRiskToday, bestClean, cleanDays, consistency, DEFAULT_TARGET, fmtQty, graduate, habitsOfDay, habitStreak, isQuantity,
@@ -158,7 +158,7 @@ export function Habitos({ route }: ViewProps) {
   // Vindo do Início: #/nucleo/pratica/alongamento:lombar
   useEffect(() => {
     if (!route.sub.startsWith('pratica/')) return;
-    history.replaceState(null, '', '#/nucleo');
+    cleanAddress('nucleo');
     start(decodeURIComponent(route.sub.slice(8)));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [route.n]);

@@ -3,6 +3,7 @@
  * Quem já usa o app recebe um convite no Início, com tudo já preenchido.
  */
 import { useEffect, useMemo, useState, type CSSProperties, type ReactNode } from 'react';
+import { go } from '../router';
 import { useStore } from '../store';
 import type { AppData, JournalRhythm } from '../types';
 import { Fullscreen, Icon, notify, type IconName } from '../ui';
@@ -218,7 +219,7 @@ function Montagem({ mode, onClose }: { mode: SetupMode; onClose: () => void }) {
   function finish(tutorial: boolean) {
     update(apply);
     onClose();
-    if (location.hash !== '#/inicio' && location.hash !== '') location.hash = '/inicio';
+    if (location.hash !== '#/inicio' && location.hash !== '') go('inicio');
     if (tutorial) window.setTimeout(openTutorial, 250);
   }
 
@@ -243,7 +244,7 @@ function Montagem({ mode, onClose }: { mode: SetupMode; onClose: () => void }) {
           <p className="muted">{fresh ? 'Uns 2 minutos, só com toques. Você escolhe o que quer ver, os 3 favoritos da barra e a cor.' : 'Já está tudo preenchido com o que você usa hoje. É só ajustar.'}</p>
           <ul className="iv-points">
             <li>
-              <Icon name="lock" size={18} /> Módulo desligado fica guardado no Mais. Nada é apagado.
+              <Icon name="lock" size={18} /> Módulo desligado fica em Mais › Guardados. Nada é apagado.
             </li>
             <li>
               <Icon name="right" size={18} /> Dá para pular a qualquer momento.
@@ -365,7 +366,7 @@ function Montagem({ mode, onClose }: { mode: SetupMode; onClose: () => void }) {
                 </span>
                 <div className="row-body">
                   <span className="row-title">{m.label}</span>
-                  <span className="row-meta">{on ? m.hint : 'Guardado no Mais'}</span>
+                  <span className="row-meta">{on ? m.hint : 'Vai para Mais › Guardados'}</span>
                 </div>
                 <span className={`setup-switch${on ? ' on' : ''}`} aria-hidden="true" />
               </button>
@@ -448,7 +449,7 @@ function Montagem({ mode, onClose }: { mode: SetupMode; onClose: () => void }) {
           </button>
           <button type="button" role="radio" aria-checked={journey === false} className={`option-card${journey === false ? ' on' : ''}`} onClick={() => setJourney(false)}>
             <strong>Agora não</strong>
-            <span className="muted small">O app fica sem jogo. A Jornada fica guardada no Mais e liga depois em Personalização.</span>
+            <span className="muted small">O app fica sem jogo. A Jornada fica em Mais › Guardados e liga depois em Personalização.</span>
           </button>
         </div>
       </>
@@ -565,7 +566,7 @@ export function BarTutorial({ path, nav, showFavs }: { path: string; nav: string
 
   useEffect(() => {
     const f = () => {
-      if (location.hash !== '#/inicio') location.hash = '/inicio';
+      if (location.hash !== '#/inicio') go('inicio');
       setStep(0);
     };
     openers.tutorial.add(f);

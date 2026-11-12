@@ -46,6 +46,9 @@
 ## Caixa de entrada
 *Ideias e problemas ainda sem classificar. Uma linha cada, com a data.*
 
+- 09/11: Saúde com **dieta dentro** (plano alimentar e "segui · em parte · fugi" no dia a dia). Já anotado no N1 (parte N1.2).
+- 09/11: Saúde e treinos ligados aos hábitos sem trocar de módulo (ex.: beber água). Anotado no N1, seção "Ligação com Hábitos e Treinos".
+- 09/11: Saúde é módulo à parte (decidido). Marcar check-up, consultas e dentista, com intervalo para repetir e lembrete do próximo. Anotado no N1 (parte N1.4).
 - 08/11: anexar os slides das apresentações (sexta sim, sexta não: avanços do setor de repasse e gestão de contratos de prestadores) dentro da reunião. Hoje só dá para guardar o link. Junta com "anexar PDF ou imagem" de Estudos. Entra no **N9.3** (anexos guardados no Drive).
 - 08/11: Estudos: cronograma de estudos com calendário dentro do módulo, sincronizado com a Agenda do app.
 - 08/11: Você: perguntas de carreira (emprego atual, carreira desejada, melhorias na atual, caminhos até a desejada) para a carreira desejada orientar os tópicos sugeridos em Estudos. Conferir com N10 (Objetivos) e N8.
@@ -68,6 +71,10 @@
 | C12 | **Telas quebradas no celular** (11/11, prints): "Monte o app do seu jeito" com os botões Começar e Agora não altos e estreitos; Configurações com "Como usar a barra" estourando o cartão (a tela dava zoom e rolava para o lado); zoom com dois dedos desligado no app (o mapa mental de Estudos continua com o zoom dele) | COR | P | alta | pronto (v0.38.1) | — |
 | C13 | **Lápis quebrava a tela** (11/11, print da Agenda): no modo de editar cartões, um texto comprido (ex.: nome de compromisso) alargava o cartão e a tela ficava cortada, sem os botões Restaurar e Pronto. Valia para todas as telas com lápis | COR | P | alta | pronto (v0.43.2) | — |
 | E16 | Agenda sem o lápis de personalizar cartões (11/11: "nem acho interessante editar aqui"); calendário e próximos compromissos ficam sempre à vista | EXP | P | média | pronto (v0.43.4) | — |
+| E17 | **Guardados num lugar só** (12/11): no Mais, um único cartão "Guardados" (com quantos módulos) abre uma tela com a lista dos módulos desligados, cada um com "Trazer de volta". Junto: "Montar o app do seu jeito" sai de dentro dos Guardados e vai para perto de "Como usar a barra". Afeta: Mais, Personalização | EXP | P | média | pronto (v0.44) | — |
+| E18 | **Mais em grade** (12/11, avaliar): opção em Personalização para ver o Mais em lista (como hoje) ou em grade (ícones grandes com o nome, 3 por linha, como a tela do celular). Avaliar com prévia visual antes. Afeta: Mais, Personalização | EXP | P | baixa | pronto (v0.45) | — |
+| E19 | **Lápis no Mais** (12/11, para o futuro): mudar a ordem dos módulos (na lista e na grade) e a ordem dos 4 atalhos dentro da linha deles (os 4 continuam sempre lá, só mudam de posição). É o "resto do E1: ordem no Mais", que já está na fila aprovada (item 5). Usar o mesmo lápis das outras telas (`Cards.tsx`). Afeta: Mais, Personalização, backup | EXP | P | média | pronto (v0.46) | — |
+| E20 | **Voltar em ciclo** (12/11): o voltar segue todo o histórico de telas; passando pelo Mais, ele fica indo e voltando entre telas já vistas. Proposta: voltar **sobe um nível**, sempre igual: tela dentro do módulo → casa do módulo → Início → sai do app; Mais → Início; módulo aberto pelo Mais → Mais → Início. Janelas (folhas, menu) continuam fechando com o voltar. No Android (N4, ponto A3) a mesma regra vale, e no Início o voltar minimiza o app. Afeta: navegação do app todo (`App.tsx`, `router.ts`) | EXP | P | alta | pronto (v0.47) | `futuro/navegacao-v2.md`, `futuro/app-android.md` (A3) |
 | C3 | **Registro defeituoso deixa o app em branco**: conferir os campos ao abrir os dados, tela de erro com saída (exportar, recarregar, Configurações) e "desfazer importação" | COR | M | **alta** | pronto (v0.30) | `auditoria-2026-11.md` |
 | C4 | Salvamento de reserva pode perder dados em silêncio (avisar e usar a cópia mais nova) | COR | P | média | ideia | `auditoria-2026-11.md` |
 | C5 | Rodar os testes em todo PR e antes de publicar (hoje só compila) | COR | P | média | pronto (v0.29.1) | `auditoria-2026-11.md` |
@@ -81,7 +88,7 @@
 | N3.3 | **Níveis de notificação** (baixa, média, alta, personalizado) com "Me lembrar" e sino; parte 1 sem Android: marcações + lista de avisos dos próximos 7 dias | NOVO | M | média | especificado (simulado) | `futuro/notificacoes.md` |
 | M1 | Hábitos: pausar e arquivar | MOD | P | alta | pronto (v0.32) | `futuro/habitos-pausar-arquivar.md` |
 | E14 | **Primeira abertura**: entrevista de toque (áreas → módulos à vista → 3 favoritos → ritmo do Diário → barra e cor → **Jornada: o que é e se quer ou não**) e **tutorial interativo da barra** (6 passos); quem já usa recebe uma vez o convite "Monte o app do seu jeito" (entrevista já preenchida com o que usa hoje, ou só o tutorial) e pode refazer em Personalização; Mais › Como usar a barra. Junta com o resto do E1 (ocultar módulos e ritmo do Diário) | EXP | M | **1ª** | pronto (v0.31) | `futuro/primeira-abertura.md` |
-| E1 | Favoritos e módulos: os 3 do meio da barra no Início são os favoritos (escolhidos pela pessoa); ocultar módulos; ordem no Mais; Orçamento e Relatórios saem do Mais; ritmo de cada módulo (Diário) | EXP | M | alta | quase pronto: favoritos e Mais (v0.18), ocultar módulos e ritmo do Diário (v0.31); falta só a ordem no Mais | `futuro/modulos-personalizaveis.md`, `futuro/navegacao-v2.md` |
+| E1 | Favoritos e módulos: os 3 do meio da barra no Início são os favoritos (escolhidos pela pessoa); ocultar módulos; ordem no Mais; Orçamento e Relatórios saem do Mais; ritmo de cada módulo (Diário) | EXP | M | alta | pronto: favoritos e Mais (v0.18), ocultar módulos e ritmo do Diário (v0.31), ordem no Mais com o lápis (v0.46, E19) | `futuro/modulos-personalizaveis.md`, `futuro/navegacao-v2.md` |
 | E2 | Barra adaptativa: Início e Mais fixos; dentro do módulo, 3 ícones do próprio módulo (casa no centro); só ícones, um pouco maiores; topo mostra "Finanças / Orçamento"; segurar o ícone mostra o nome | EXP | M | alta | pronto (v0.18) | `futuro/navegacao-v2.md` |
 | E3 | Personalizar cartões (lápis ao lado da lupa): no Início e nos módulos, ocultar e reordenar cartões; cartões principais fixos (🔒); Humor sempre no topo do Início; avisos importantes nunca ocultos, só mudam de posição | EXP | M | alta | pronto: Início e Finanças (v0.20); Núcleo, Listas, Estudos e Carreira (v0.34); Agenda saiu na v0.43.4 (E16) | `futuro/navegacao-v2.md` |
 | E4 | Temas: escuro, claro e automático + cor de destaque (paleta com bom contraste). Padrão: escuro = preto e verde; claro = branco e azul escuro | EXP | M | média | pronto (v0.17) | `futuro/navegacao-v2.md` |
@@ -96,12 +103,12 @@
 | M5 | Agenda: repetição (toda semana, mês, ano) e aniversários | MOD | M | média | ideia | — (especificar antes) |
 | M6 | Núcleo: fichas de treino próprias (exercícios, séries, descanso). Pode entrar depois no M21 ("crie o seu próprio") | MOD | M | média | especificado | `futuro/nucleo-mente-corpo.md` |
 | M7 | Revisão semanal mais completa: autocuidado, caixinhas e vales da semana | MOD | P | baixa | pronto (v0.38) | `futuro/nucleo-mente-corpo.md`, `futuro/caixinhas.md` |
-| N1 | Módulo Saúde (água, sono, remédios, consultas, peso) | NOVO | G | média | especificado | `futuro/modulo-saude.md` |
+| N1 | Módulo Saúde, à parte (água, sono, **dieta**, remédios, consultas, dentista e check-ups, peso), dividido em N1.0 a N1.5. Afeta: Agenda, Listas, Você, Núcleo, Início, Revisão, backup | NOVO | G | média | especificado, prévia aprovada (11/11); não adiantado na fila | `futuro/modulo-saude.md` |
 | N2 | Jornada completa (pixel art): missões no ritmo da pessoa, recompensas por módulo, raridades (comum a místico), Forja e Codex por coleções | NOVO | G | baixa | especificado | `futuro/modulo-rpg.md`, `futuro/jornada-recompensas.md`, `futuro/jornada-raridades.md` |
 | N3 | Notificações e **lembretes** (tarefa ou compromisso com "me lembrar"; sai o "Lembretes, em breve" do menu). Afeta: Agenda, Carreira | NOVO | M | baixa | especificado | `futuro/notificacoes.md` |
 | N3.1 | Notificações já no app (sem servidor): **"Lembrar no celular"** (a parte da agenda passa a ser o **N9.5**, pelo Google Agenda) (compromisso, conta, revisão → agenda do celular, hora certa, Android e iPhone) e **bolinha no ícone** do app com o que está pendente hoje | NOVO | P | média | ideia | `futuro/notificacoes.md` |
 | N3.2 | **Resumo do dia** no Android (Chrome, app instalado): o celular acorda o app ~1 vez por dia e avisa "2 contas vencem amanhã" (sem hora certa) | NOVO | M | baixa | ideia | `futuro/notificacoes.md` |
-| N4 | App Android (preparo conferido em 10/11: 10 pontos de adaptação, passo a passo da mudança e lista de testes) | NOVO | G | baixa | especificado | `futuro/app-android.md` |
+| N4 | App Android (preparo conferido em 10/11: 10 pontos de adaptação; 12/11: + A11, ícone na cor de destaque e em pixel art com a Jornada, com prévia; passo a passo da mudança e lista de testes) | NOVO | G | baixa | especificado | `futuro/app-android.md` |
 | N5 | Código de barras, base de produtos e nota fiscal | NOVO | G | baixa | ideia | `futuro/precos-v2.md` ("Mais adiante") |
 | N6 | Módulo Estudos e Carreira: Biblioteca (áreas, trilhas, tópicos de referência), Ciclos pessoais, Meus notebooks, Fontes, Mapas mentais e Roadmaps | NOVO | G | média | pronto (v0.21), em teste por 3 dias | `futuro/modulo-estudos.md` |
 | N8.5 | Carreira × Agenda automática: tudo que tem data em Carreira (reuniões, passos das vagas e, depois, projetos) aparece sozinho na Agenda do app e se atualiza quando muda; some se for excluído. Sem botão "Pôr na Agenda" | NOVO | P | alta | pronto (v0.24) | `futuro/modulo-carreira.md` |
@@ -113,8 +120,8 @@
 | M15 | Estudos: editor de mapas mentais (arrastar e ligar ideias). Afeta: só Estudos | MOD | M | baixa | pronto na N11.3 (v0.28) | `futuro/modulo-estudos.md` |
 | N9 | Sincronizar com o Google Drive: pasta escondida do app, tudo sincroniza sozinho entre computador e celular, fotos no Diário, anexos PDF/imagem, exportar para pasta visível. Partes N9.0 (preparar dados, absorve N11.6) a N9.4. Não depende mais do N4. *Na conversa do Android foi anotado como N8; o código certo é N9.* | NOVO | G | alta | em andamento: N9.0 (v0.39) e N9.1 (v0.40) prontos; ID do cliente Google configurado (v0.40.1); login testado pelo Leonardo em 11/11; N9.2 pronto (v0.41), no ar e conferido em 11/11; **N9.3a fotos no Diário pronto (v0.42)**; próximo N9.3b (PDFs anexados) | `futuro/sincronizar-google.md` |
 | N9.5 | **Lembretes pelo Google Agenda** (11/11): o app cria a agenda "Central Pessoal" no Google e põe compromissos (com Carreira), contas a pagar e tarefas com data, com aviso; muda no app → muda no Google; só de ida. O celular avisa pelo app Google Agenda enquanto não há notificações (substitui o .ics do N3.1). Afeta: Agenda, Finanças, Carreira, Configurações | NOVO | M | alta | pronto (v0.43), **no ar e testado pelo Leonardo em 11/11** | `futuro/google-agenda.md` |
-| N9.6 | **Tarefas no Google Tarefas** (12/11): as tarefas do app vão para uma lista "CP Hub" no Google Tarefas (em vez de virarem evento no Google Agenda). Recomendado ida e volta: concluir lá conclui no app. Limite do Google: a tarefa leva só a **data**, sem hora. Afeta: Agenda (tarefas), Configurações | NOVO | M | média | especificado, esperando aprovação | `futuro/google-agenda.md` ("N9.6") |
-| N10 | Módulo **Objetivos**: central de **todas as metas do app** (caixinhas, hábitos, ciclos de estudo, carreira, orçamento, metas do Você), com criar, editar e concluir dali; a meta continua morando no módulo dela. Objetivos grandes juntam várias metas. Absorve as metas de carreira (N8.4). Partes: N10.0 prévia, N10.1 central de metas, N10.2 objetivos grandes. Afeta: Finanças, Núcleo, Estudos, Carreira, Você, Início, Jornada | NOVO | G | média | especificado (prévia antes) | `futuro/modulo-objetivos.md` |
+| N9.6 | **Tarefas no Google Tarefas** (12/11): as tarefas do app vão para uma lista "CP Hub" no Google Tarefas (em vez de virarem evento no Google Agenda). Recomendado ida e volta: concluir lá conclui no app. Limite do Google: a tarefa leva só a **data**, sem hora. Afeta: Agenda (tarefas), Configurações | NOVO | M | média | pronto (v0.48); falta o Leonardo ativar a Google Tasks API e a permissão | `futuro/google-agenda.md` ("N9.6") |
+| N10 | Módulo **Objetivos**: central de **todas as metas do app** (caixinhas, hábitos, ciclos de estudo, carreira, orçamento, metas do Você), com criar, editar e concluir dali; a meta continua morando no módulo dela. Objetivos grandes juntam várias metas. Absorve as metas de carreira (N8.4). Partes: N10.0 prévia, N10.1 central de metas, N10.2 objetivos grandes. Afeta: Finanças, Núcleo, Estudos, Carreira, Você, Início, Jornada | NOVO | G | média | prévia feita e aprovada (11/11): orçamento conta como meta; barra Grandes · Objetivos · Concluídos; favorito para quem escolher metas | `futuro/modulo-objetivos.md` |
 | M16 | **Foco** no Núcleo › Mente: temporizador de foco (ex.: 25 min + pausa), com histórico; ligado a um tópico de Estudos conta tempo de estudo. Afeta: Núcleo, Estudos, Revisão | MOD | P | média | ideia | — |
 | M17 | **Banco de ideias** em Notas: aba "Ideias" e o botão "transformar em" tarefa, objetivo ou notebook. Afeta: Notas, Agenda, Estudos | MOD | P | baixa | ideia | — |
 | N11 | **Estudos 2.0**: notebooks com páginas e subpáginas e tópicos de várias áreas; editor de texto em blocos (completo no computador, simples no celular); mapas mentais em árvore com zoom; exportar/importar Estudos com tratamento de conflito; tutorial; conteúdo nos tópicos da Biblioteca. Partes N11.1 a N11.7. Absorve o M15. Afeta: Estudos, backup | MOD | G | alta | parte pronta: N11.1 páginas (v0.26), N11.2 editor (v0.27) e N11.3 mapas mentais (v0.28); faltam N11.4 a N11.7 | `futuro/estudos-v2.md` |
@@ -133,11 +140,11 @@
 
 **O que continua aprovado, na ordem:**
 0. **N9 Sincronizar com o Google Drive** (G, aprovado em 11/11: "pode começar"), em partes: ~~N9.0 preparar os dados~~ (v0.39) → ~~N9.1 conta Google e cópia na nuvem~~ (v0.40) → ~~N9.2 sincronizar~~ (v0.41) → N9.3 fotos e PDFs (~~N9.3a fotos no Diário~~ v0.42; N9.3b PDFs) → N9.4 exportar. Uma parte por vez, conforme o uso do dia. Ver `futuro/sincronizar-google.md`.
-1. **N10 Objetivos** (G): primeiro a **prévia N10.0** (visual), depois N10.1 central de metas (inclui as metas de carreira, antigo N8.4). Precisa da prévia antes de construir.
+1. **N10 Objetivos** (G): ~~prévia N10.0~~ (aprovada em 11/11) → N10.1 central de metas (inclui as metas de carreira, antigo N8.4) → N10.2 objetivos grandes.
 2. **M2 → M3 → M4 Preços 2.0** (M cada, já especificados).
 3. **M6** fichas de treino próprias (M).
 4. **M5** Agenda com repetição e aniversários (especificar antes).
-5. Resto do E1: ordem dos módulos no Mais (P).
+5. ~~Resto do E1: ordem dos módulos no Mais~~ feito na v0.46 (E19).
 6. Depois: N7, N1, N2, N3, N4, N5 (M14 vai junto com o N9.3).
 
 **Pacotes** (histórico): B (Finanças) v0.16; A (Navegação) v0.18, v0.20, v0.31 e v0.34; D (Temas) v0.17; E6 na v0.35.
@@ -145,6 +152,11 @@
 ## Feito
 | Versão | O que entrou | PR |
 |---|---|---|
+| v0.48 | N9.6: tarefas na lista "CP Hub" do Google Tarefas, ida e volta (concluir lá conclui aqui; criada lá entra no app); só a data, sem hora; tarefas saem do Google Agenda | #58 |
+| v0.47 | E20: o voltar **sobe um nível** (ferramenta → módulo → Início; Mais → Início; módulo aberto pelo Mais → Mais → Início) e nunca fica em ciclo; janelas continuam fechando com o voltar | — |
+| v0.46 | E19 (e o resto do E1): **lápis no Mais**, que muda a ordem dos módulos e dos 4 atalhos (cada grupo no seu lugar), na lista e na grade; "Restaurar padrão" volta a ordem original | #54 |
+| v0.45 | E18: Personalização › Tela Mais em **lista** (padrão) ou em **grade** (módulos 3 por linha com ícone grande; atalhos e "Em breve" numa linha menor; Guardados com o número) | — |
+| v0.44 | E17: Mais › **Guardados**, uma tela só com os módulos desligados e "Trazer de volta" em cada um; "Montar o app do seu jeito" sempre à vista no Mais | #52 |
 | v0.43.4 | E16: Agenda sem o lápis; calendário e próximos compromissos sempre à vista | #49 |
 | v0.43.3 | Nome visual **CP Hub** (ícone, título, textos, nome do arquivo de backup e da agenda no Google, que é renomeada sozinha). Endereço, repositório, dados e login continuam iguais | #48 |
 | v0.43.2 | C13: modo de editar cartões (lápis) não alarga mais a tela quando há texto comprido | #47 |
@@ -206,8 +218,12 @@ Documentos sem código: Mapa dos módulos (08/11), módulos personalizáveis, pa
 | Estudos e Carreira (N6.0): Biblioteca, trilhas, ciclos, notebooks, fontes, mapas e roadmaps | https://claude.ai/artifact/WJ3kw4zvwtdDKTiUVUB3rD |
 | Carreira (N8.0): Trabalho, Currículo, Vagas com etapas, Metas, botão + e cartão no Início | https://claude.ai/artifact/3DxpiHU7f6merD3dk6Hqmp |
 | Três jeitos da barra de baixo (centro, favorito fixo, ao lado do Início) — E9/E10 | https://claude.ai/artifact/BYyRT9QPSLYnNUJr2Ga5pN |
+| Saúde (N1.0, versão P): telas Hoje, Consultas e check-ups e Dieta | https://claude.ai/artifact/LJRc3AgwWsTmuA8ymQCqEv |
 | Primeira abertura: entrevista, módulos, favoritos e tutorial da barra (E14, construído na v0.31) | https://claude.ai/artifact/Ky4NT9oh9tZQKv9FksYYCz |
+| Objetivos (N10.0): metas de todo o app, objetivos grandes, concluídos e cartão no Início | https://claude.ai/artifact/TEPSkVaKWYhuxBcoZvkZA4 |
 | Central Pessoal (prévia geral antiga) | https://claude.ai/artifact/WHbDkKXN4LArCQ8sjuQqVt |
+| E18 Mais em lista ou em grade (12/11) | https://claude.ai/artifact/QnCrHxcUu1HFwLRDgFDyth |
+| Ícone do CP Hub na cor de destaque e em pixel art com a Jornada (A11 do Android, 12/11) | https://claude.ai/artifact/8vX7j7jSvnLkRuEFDAuA9t |
 
 ## Regras para construir
 - Uma versão por item (v0.15.1, v0.16…), com testes das regras, teste no navegador (celular) e documentação atualizada.

@@ -246,6 +246,8 @@ export interface Settings {
   tapToFavorites: boolean;
   /** As barras de cima e de baixo somem ao rolar a tela para baixo. */
   hideOnScroll: boolean;
+  /** Tela Mais em lista (com a descrição de cada módulo) ou em grade (ícones, 3 por linha). */
+  moreLayout: 'lista' | 'grade';
   seededCategories: boolean;
   seededIncomeSources: boolean;
   lastBackupAt: string | null;

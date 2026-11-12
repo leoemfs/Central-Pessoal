@@ -6475,3 +6475,154 @@ details.kept[open] > summary {
   padding-top: 12px;
   border-top: 1px solid var(--border);
 }
+
+/* Guardados (E17): abrir o módulo à esquerda, "Trazer de volta" à direita */
+.kept-row {
+  gap: 10px;
+}
+.kept-open {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--text);
+  text-decoration: none;
+}
+.kept-row .btn {
+  flex: none;
+}
+
+/* Mais em grade (E18) */
+.mg-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+.mg-grid.small {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 4px;
+}
+@media (min-width: 700px) {
+  .mg-grid {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+  .mg-grid.small {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+  }
+}
+.mg-cell {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 4px 12px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  text-decoration: none;
+  font: inherit;
+  cursor: pointer;
+}
+.mg-cell:active {
+  transform: scale(0.97);
+}
+.mg-icon {
+  position: relative;
+  width: 54px;
+  height: 54px;
+  border-radius: 16px;
+  display: grid;
+  place-items: center;
+  background: var(--raised);
+  color: var(--accent-text);
+}
+.mg-name {
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-align: center;
+  line-height: 1.2;
+  overflow-wrap: anywhere;
+}
+.mg-grid.small .mg-cell {
+  background: transparent;
+  border-color: transparent;
+  padding: 6px 2px;
+}
+.mg-grid.small .mg-icon {
+  width: 46px;
+  height: 46px;
+  border-radius: 14px;
+}
+.mg-grid.small .mg-name {
+  font-size: 0.74rem;
+  font-weight: 500;
+  color: var(--muted);
+}
+.mg-cell.off {
+  opacity: 0.45;
+  cursor: default;
+}
+.mg-badge {
+  position: absolute;
+  top: -6px;
+  right: -8px;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: 10px;
+  display: grid;
+  place-items: center;
+  background: var(--accent);
+  color: var(--on-accent);
+  font-size: 0.72rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+@media (prefers-reduced-motion: reduce) {
+  .mg-cell:active {
+    transform: none;
+  }
+}
+
+/* Lápis no Mais (E19): blocos parados, borda tracejada e setas para mudar de lugar */
+.tile.editing,
+.mg-cell.editing {
+  border-style: dashed;
+  border-color: var(--border-strong);
+  cursor: default;
+}
+.mg-grid.small .mg-cell.editing {
+  border-color: var(--border-strong);
+  padding: 8px 2px;
+}
+.mais-move {
+  display: flex;
+  gap: 6px;
+  flex: none;
+}
+.mais-move button {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--raised);
+  color: var(--text);
+  display: grid;
+  place-items: center;
+}
+.mais-move button:disabled {
+  opacity: 0.35;
+}
+.mg-grid.small .mais-move {
+  gap: 2px;
+}
+.mg-grid.small .mais-move button {
+  width: 30px;
+  height: 30px;
+}
+.mais-sub {
+  margin: 8px 0 0;
+}
