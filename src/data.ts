@@ -187,7 +187,8 @@ export function normalize(raw: unknown): AppData {
     sessions: list<PracticeSession>(r.sessions).filter((x) => typeof x.date === 'string' && typeof x.type === 'string' && typeof x.minutes === 'number'),
     purchases: list<Record<string, unknown>>(r.purchases)
       .filter((p) => typeof p.id === 'string' && typeof p.date === 'string' && typeof p.total === 'number')
-      .map((p) => ({ id: p.id as string, date: p.date as string, listId: String(p.listId ?? ''), listName: String(p.listName ?? ''), store: String(p.store ?? ''), total: p.total as number, items: typeof p.items === 'number' ? p.items : 0 })),
+      .map((p) => ({ id: p.id as string, date: p.date as string, listId: String(p.listId ?? ''), listName: String(p.listName ?? ''), store: String(p.store ?? ''), total: p.total as number, items: typeof p.items === 'number' ? p.items : 0,
+        lines: Array.isArray(p.lines) ? (p.lines as Record<string, unknown>[]).filter((x) => isRec(x) && typeof x.price === 'number').map((x) => ({ productId: typeof x.productId === 'string' ? x.productId : null, text: String(x.text ?? ''), price: x.price as number })) : [] })),
     study: normalizeStudy(r.study),
     career: normalizeCareer(r.career),
     lastLoads: isRec(r.lastLoads) ? Object.fromEntries(Object.entries(r.lastLoads).filter((e): e is [string, number] => typeof e[1] === 'number')) : {},

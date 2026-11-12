@@ -325,6 +325,8 @@ export interface Purchase {
   total: number;
   /** Quantos itens foram comprados. */
   items: number;
+  /** M3: itens com o preço pago ("Quanto custou aqui?"). */
+  lines: { productId: string | null; text: string; price: number }[];
 }
 
 export interface ListCategory {
@@ -348,6 +350,8 @@ export interface ListItem {
   /** Valor previsto do item (listas de compras). */
   price: number | null;
   store: string;
+  /** M3: quanto pagou pelo item nesta compra (mercado). */
+  paid: number | null;
   done: boolean;
   /** Já virou despesa em Finanças. */
   launched: boolean;

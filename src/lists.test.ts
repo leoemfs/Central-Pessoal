@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import { emptyData, normalize, seedCategories } from './data.ts';
 import { addExpense } from './finance.ts';
 import {
+  lastPurchase, packCount, paidTotal, payItem,
   ensureProduct, linkMarketItems, marketEstimate, matchKey, priceRange, productSuggestions, productsWithoutPrice, sizeOptions,
   addItemFromText, addListCategory, addPrice, bestPrice, deleteListCategory, finishShopping, kindOf, launchBought, listEstimate, newItem, newList, purchaseHistory,
   parseItemText, priceCheck, qtyText, scaledQty, sendIngredients, toggleItem, uncheckAll, updateListCategory,
@@ -145,7 +146,7 @@ test('compras: as de antes do histórico vêm das despesas de mercado; backup gu
   const food = d.categories.find((c) => c.name === 'Alimentação')!.id;
   d = addExpense(d, { kind: 'avulsa', description: 'Mercado · Atacadão', categoryId: food, method: 'pix', cardId: null, date: '2026-10-02', amounts: [210], paidAt: '2026-10-02' }, '2026-10-02');
   d = addExpense(d, { kind: 'avulsa', description: 'Padaria', categoryId: food, method: 'pix', cardId: null, date: '2026-10-03', amounts: [12], paidAt: '2026-10-03' }, '2026-10-03');
-  d = { ...d, purchases: [{ id: 'p1', date: '2026-11-10', listId: 'x', listName: 'Mercado do mês', store: 'Assaí', total: 380, items: 22 }] };
+  d = { ...d, purchases: [{ id: 'p1', date: '2026-11-10', listId: 'x', listName: 'Mercado do mês', store: 'Assaí', total: 380, items: 22, lines: [] }] };
   const h = purchaseHistory(d);
   assert.deepEqual(h.map((r) => [r.date, r.title, r.store, r.items]), [['2026-11-10', 'Mercado do mês', 'Assaí', 22], ['2026-10-02', 'Compra de mercado', 'Atacadão', null]]);
   const back = normalize(JSON.parse(JSON.stringify(d)));
@@ -219,4 +220,27 @@ test('M23: nome genérico aproveita o parecido do catálogo, com o nome da pesso
   assert.deepEqual([product.name, product.aisle, product.unit], ['Café', 'Mercearia', 'kg']);
   assert.deepEqual(sizeOptions(d, product), [{ size: 250, sizeUnit: 'g' }, { size: 500, sizeUnit: 'g' }]);
   assert.equal(ensureProduct(d, 'Xampu artesanal').product.aisle, 'Outros');
+});
+
+test('M3: "Quanto custou aqui?" marca o item, anota em Preços e vira o total real da compra', () => {
+  let d = withPrices();
+  const l = newList('Mercado', 'lc-mercado');
+  d = { ...d, lists: [l] };
+  for (const t of ['2 kg feijão carioca', '3 un sabonete', 'arroz branco']) d = addItemFromText(l.id, t)(d);
+  const [feijao, sabonete] = d.lists[0].items;
+  const prod = (id: string | null) => d.products.find((p) => p.id === id);
+  assert.equal(packCount(feijao, prod(feijao.productId), { size: 1, sizeUnit: 'kg' }), 2);
+  assert.equal(packCount(feijao, prod(feijao.productId), { size: 500, sizeUnit: 'g' }), 4);
+  assert.equal(packCount(sabonete, prod(sabonete.productId), { size: 1, sizeUnit: 'un' }), 3);
+  const assai = d.stores.find((s) => s.name === 'Assaí')!.id;
+  const n = d.prices.length;
+  d = payItem(l.id, feijao.id, { storeId: assai, price: 7.99, count: 2, size: 1, sizeUnit: 'kg' }, TODAY)(d);
+  d = payItem(l.id, sabonete.id, { storeId: assai, price: 2.5, count: 3, size: 1, sizeUnit: 'un' }, TODAY)(d);
+  assert.equal(d.prices.length, n + 2);
+  assert.equal(bestPrice(d, feijao.productId!)!.price, 7.99);
+  assert.deepEqual(paidTotal(d.lists[0]), { total: 23.48, count: 2 });
+  d = finishShopping(l.id, { total: 23.48, storeName: 'Assaí', categoryId: null, reset: true }, TODAY)(d);
+  const p = lastPurchase(d, l.id)!;
+  assert.deepEqual(p.lines.map((x) => [x.text, x.price]), [['Feijão carioca', 15.98], ['Sabonete', 7.5]]);
+  assert.equal(d.lists[0].items.every((i) => i.paid === null && !i.done), true);
 });
