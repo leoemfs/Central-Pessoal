@@ -5,6 +5,7 @@
  */
 import type { AppData, ListCategory, ListItem, ListKind, PriceEntry, Product, ProductVariant, Purchase, Store, UserList } from './types.ts';
 import { addExpense } from './finance.ts';
+import { CATALOG, type CatalogProduct } from './precosCatalogo.ts';
 import { todayISO, uid } from './utils.ts';
 
 export const LIST_KINDS: Record<ListKind, { label: string; hint: string }> = {
@@ -141,9 +142,183 @@ export function itemCost(it: Pick<ListItem, 'qty' | 'unit'>, b: BestPrice, produ
   return measured ? b.perUnit * amount : b.price * q;
 }
 
+/** Chave de busca: sem acento, sem maiúscula e sem plural ("Bananas" = "banana", "limões" = "limão"). */
+export function matchKey(s: string): string {
+  return plain(s)
+    .split(/\s+/)
+    .map((w) => (w.length > 3 ? w.replace(/(oe|ae)s$/, 'ao').replace(/s$/, '') : w))
+    .join(' ');
+}
+
 export function findProduct(d: Pick<AppData, 'products'>, text: string): Product | undefined {
-  const t = plain(text);
-  return d.products.find((p) => plain(p.name) === t);
+  const t = matchKey(text);
+  return t ? d.products.find((p) => matchKey(p.name) === t) : undefined;
+}
+
+export const findCatalog = (text: string): CatalogProduct | undefined => {
+  const t = matchKey(text);
+  return CATALOG.find((c) => matchKey(c.name) === t);
+};
+
+/** Catálogo para um nome genérico: o igual ou, se não houver, o primeiro que começa com ele ("Arroz" → Arroz branco). */
+export const catalogFor = (text: string): CatalogProduct | undefined => {
+  const t = matchKey(text);
+  return t ? (findCatalog(text) ?? CATALOG.find((c) => matchKey(c.name).startsWith(`${t} `))) : undefined;
+};
+
+/** Id fixo pelo nome, para dois aparelhos criarem o mesmo produto sem duplicar. */
+export const productIdFor = (name: string) => `prod-${matchKey(name).replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')}`;
+
+/**
+ * Garante um produto de Preços para o nome do item: o já cadastrado, o do catálogo pronto ou um novo
+ * (unidade pelo jeito do item: kg/g → R$/kg; L/ml → R$/L; o resto → R$/un).
+ */
+export function ensureProduct<T extends Pick<AppData, 'products'>>(d: T, name: string, unitHint = ''): { data: T; product: Product } {
+  const own = findProduct(d, name);
+  if (own) return { data: d, product: own };
+  const exact = findCatalog(name);
+  const cat = exact ?? catalogFor(name);
+  const u = unitHint.toLowerCase();
+  const product: Product = cat
+    ? { id: productIdFor(exact ? cat.name : name), name: exact ? cat.name : name.trim(), aisle: cat.aisle, unit: cat.unit }
+    : { id: productIdFor(name), name: name.trim(), aisle: 'Outros', unit: u === 'kg' || u === 'g' ? 'kg' : u === 'l' || u === 'ml' ? 'L' : 'un' };
+  const clash = d.products.find((p) => p.id === product.id);
+  if (clash) return { data: d, product: clash };
+  return { data: { ...d, products: [...d.products, product] }, product };
+}
+
+/**
+ * M2: todo item das listas de mercado fica ligado a um produto de Preços (os antigos, na primeira abertura).
+ * Item que estava em "Outros" passa para o corredor do produto.
+ */
+export function linkMarketItems<T extends Pick<AppData, 'products' | 'lists' | 'listCategories'>>(d: T): T {
+  const market = new Set(d.listCategories.filter((c) => c.kind === 'mercado').map((c) => c.id));
+  let next = d;
+  let changed = false;
+  const lists = d.lists.map((l) => {
+    if (!market.has(l.categoryId)) return l;
+    let touched = false;
+    const items = l.items.map((it) => {
+      if (it.productId && next.products.some((p) => p.id === it.productId)) return it;
+      const r = ensureProduct(next, it.text, it.unit);
+      next = r.data;
+      touched = true;
+      return { ...it, productId: r.product.id, aisle: !it.aisle || it.aisle === 'Outros' ? r.product.aisle : it.aisle };
+    });
+    if (!touched) return l;
+    changed = true;
+    return { ...l, items };
+  });
+  return changed ? { ...next, lists } : d;
+}
+
+/** Sugestões ao digitar na lista: os seus produtos primeiro, depois o catálogo pronto. */
+export function productSuggestions(d: Pick<AppData, 'products'>, query: string, max = 6): { name: string; aisle: string; productId: string | null }[] {
+  const q = matchKey(query);
+  if (q.length < 2) return [];
+  const hit = (name: string) => {
+    const k = matchKey(name);
+    return k.startsWith(q) || k.includes(` ${q}`);
+  };
+  const own = d.products.filter((p) => hit(p.name)).map((p) => ({ name: p.name, aisle: p.aisle, productId: p.id as string | null }));
+  const keys = new Set(d.products.map((p) => matchKey(p.name)));
+  const cat = CATALOG.filter((c) => hit(c.name) && !keys.has(matchKey(c.name))).map((c) => ({ name: c.name, aisle: c.aisle, productId: null }));
+  const exact = (n: string) => Number(matchKey(n) !== q);
+  return [...own.sort((a, b) => exact(a.name) - exact(b.name)), ...cat.sort((a, b) => exact(a.name) - exact(b.name))].slice(0, max);
+}
+
+/** Faixa do preço por unidade (R$/kg, R$/L, R$/un) entre as lojas: o melhor de cada loja. */
+export function priceRange(d: Pick<AppData, 'prices' | 'variants' | 'stores'>, productId: string, latest = latestPrices(d)): { min: number; max: number } | null {
+  let r: { min: number; max: number } | null = null;
+  for (const s of d.stores) {
+    const b = bestPrice(d, productId, s.id, latest);
+    if (!b) continue;
+    r = r ? { min: Math.min(r.min, b.perUnit), max: Math.max(r.max, b.perUnit) } : { min: b.perUnit, max: b.perUnit };
+  }
+  return r;
+}
+
+/** Tamanhos para escolher ao dar preço: os já anotados do produto e os comuns do catálogo. */
+export function sizeOptions(d: Pick<AppData, 'variants'>, p: Product): { size: number; sizeUnit: ProductVariant['sizeUnit'] }[] {
+  const out: { size: number; sizeUnit: ProductVariant['sizeUnit'] }[] = [];
+  const add = (x: { size: number; sizeUnit: ProductVariant['sizeUnit'] }) => {
+    if (!out.some((o) => o.size === x.size && o.sizeUnit === x.sizeUnit)) out.push({ size: x.size, sizeUnit: x.sizeUnit });
+  };
+  d.variants.filter((v) => v.productId === p.id).forEach(add);
+  catalogFor(p.name)?.sizes.forEach(add);
+  if (!out.length) add({ size: 1, sizeUnit: p.unit });
+  return out;
+}
+
+/**
+ * M2: produtos das listas de mercado ainda sem preço (em nenhuma loja, ou só na loja indicada),
+ * na ordem em que aparecem nas listas. Itens já comprados ficam de fora.
+ */
+export function productsWithoutPrice(d: Pick<AppData, 'lists' | 'listCategories' | 'products' | 'prices' | 'variants'>, o: { listId?: string; storeId?: string } = {}): Product[] {
+  const market = new Set(d.listCategories.filter((c) => c.kind === 'mercado').map((c) => c.id));
+  const latest = latestPrices(d);
+  const out: Product[] = [];
+  for (const l of d.lists) {
+    if (!market.has(l.categoryId) || (o.listId && l.id !== o.listId)) continue;
+    for (const it of l.items) {
+      if (it.done || !it.productId || out.some((p) => p.id === it.productId)) continue;
+      const p = d.products.find((x) => x.id === it.productId);
+      if (p && !bestPrice(d, p.id, o.storeId, latest)) out.push(p);
+    }
+  }
+  return out;
+}
+
+export interface StoreQuote {
+  storeId: string;
+  /** Soma dos itens com preço nesta loja. */
+  total: number;
+  /** Itens sem preço aqui, mas com preço em outras lojas, e a faixa deles. */
+  missing: number;
+  estMin: number;
+  estMax: number;
+}
+
+/**
+ * M2: "Quanto vai sair" sem prender a lista a uma loja. Cada loja soma os itens com preço ali e estima os que
+ * faltam pela faixa das outras lojas. Também a melhor combinação (cada item onde é mais barato) e os itens sem preço.
+ */
+export function marketEstimate(d: Pick<AppData, 'prices' | 'variants' | 'stores' | 'products'>, l: UserList) {
+  const latest = latestPrices(d);
+  const r2 = (n: number) => Math.round(n * 100) / 100;
+  const quotes = l.items.map((it) => {
+      const prod = d.products.find((x) => x.id === it.productId);
+      const byStore = new Map<string, number>();
+      if (it.productId) {
+        for (const s of d.stores) {
+          const b = bestPrice(d, it.productId, s.id, latest);
+          if (b) byStore.set(s.id, itemCost(it, b, prod));
+        }
+      }
+      const costs = [...byStore.values()];
+      return { item: it, byStore, min: costs.length ? Math.min(...costs) : 0, max: costs.length ? Math.max(...costs) : 0 };
+    });
+  const priced = quotes.filter((q) => q.byStore.size > 0);
+  const stores: StoreQuote[] = d.stores
+    .map((s) => {
+      const e = { storeId: s.id, total: 0, missing: 0, estMin: 0, estMax: 0 };
+      for (const q of priced) {
+        const c = q.byStore.get(s.id);
+        if (c !== undefined) e.total += c;
+        else {
+          e.missing++;
+          e.estMin += q.min;
+          e.estMax += q.max;
+        }
+      }
+      return { ...e, total: r2(e.total), estMin: r2(e.estMin), estMax: r2(e.estMax) };
+    })
+    .filter((e) => e.missing < priced.length)
+    .sort((a, b) => a.total + (a.estMin + a.estMax) / 2 - (b.total + (b.estMin + b.estMax) / 2));
+  const combo = r2(priced.reduce((a, q) => a + q.min, 0));
+  const best = stores[0];
+  const savings = best ? r2(best.total + (best.estMin + best.estMax) / 2 - combo) : 0;
+  return { stores, combo, savings, unpriced: quotes.filter((q) => q.byStore.size === 0).map((q) => q.item), quotes: new Map(quotes.map((q) => [q.item.id, q])) };
 }
 
 /** "2 kg tomate" → 2, kg, Tomate · "Leite" → sem quantidade. */
@@ -180,12 +355,12 @@ export function newItem(p: Partial<ListItem> & { text: string }): ListItem {
   return { id: uid(), qty: null, unit: '', aisle: '', productId: null, price: null, store: '', done: false, launched: false, ...p };
 }
 
-/** Adiciona um item a partir do texto ("2 kg tomate"); no mercado, liga ao produto de Preços e ao corredor. */
+/** Mercado: adiciona um item a partir do texto ("2 kg tomate"), já ligado a um produto de Preços (o seu, do catálogo ou novo) e ao corredor. */
 export function addItemFromText(listId: string, text: string, extra: Partial<ListItem> = {}) {
   return (d: AppData): AppData => {
     const p = parseItemText(text);
-    const prod = findProduct(d, p.text);
-    return patchList(listId, (l) => ({ ...l, items: [...l.items, newItem({ text: p.text, qty: p.qty, unit: p.unit, productId: prod?.id ?? null, aisle: prod?.aisle ?? 'Outros', ...extra })] }))(d);
+    const { data, product } = ensureProduct(d, p.text, p.unit);
+    return patchList(listId, (l) => ({ ...l, items: [...l.items, newItem({ text: p.text, qty: p.qty, unit: p.unit, productId: product.id, aisle: product.aisle, ...extra })] }))(data);
   };
 }
 
@@ -268,13 +443,16 @@ export function sendIngredients(fromId: string, toId: string, itemIds: string[])
     const from = d.lists.find((l) => l.id === fromId);
     if (!from) return d;
     const f = from.serves / (from.baseServes || 1);
+    let next = d;
     const items = from.items
       .filter((i) => itemIds.includes(i.id))
       .map((i) => {
-        const prod = findProduct(d, i.text);
-        return newItem({ text: i.text, qty: i.qty ? scaledQty(i.qty, i.unit, f) : null, unit: i.unit, productId: prod?.id ?? null, aisle: prod?.aisle ?? `Receita: ${from.name}` });
+        const own = findProduct(next, i.text) ?? findCatalog(i.text);
+        const r = ensureProduct(next, i.text, i.unit);
+        next = r.data;
+        return newItem({ text: i.text, qty: i.qty ? scaledQty(i.qty, i.unit, f) : null, unit: i.unit, productId: r.product.id, aisle: own ? r.product.aisle : `Receita: ${from.name}` });
       });
-    return patchList(toId, (l) => ({ ...l, items: [...l.items, ...items] }))(d);
+    return patchList(toId, (l) => ({ ...l, items: [...l.items, ...items] }))(next);
   };
 }
 

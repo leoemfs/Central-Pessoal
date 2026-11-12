@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import { emptyData, normalize, seedCategories } from './data.ts';
 import { addExpense } from './finance.ts';
 import {
+  ensureProduct, linkMarketItems, marketEstimate, matchKey, priceRange, productSuggestions, productsWithoutPrice, sizeOptions,
   addItemFromText, addListCategory, addPrice, bestPrice, deleteListCategory, finishShopping, kindOf, launchBought, listEstimate, newItem, newList, purchaseHistory,
   parseItemText, priceCheck, qtyText, scaledQty, sendIngredients, toggleItem, uncheckAll, updateListCategory,
 } from './lists.ts';
@@ -57,7 +58,9 @@ test('lista de mercado: itens pelo texto, estimativa por mercado e concluir comp
   assert.equal(items[1].qty, 2);
   assert.equal(items[1].unit, 'kg');
   assert.equal(items[1].aisle, 'Mercearia');
-  assert.equal(items[3].productId, null);
+  // M2: item sem preço também vira produto (o Tomate vem do catálogo pronto, já no Hortifrúti).
+  assert.ok(items[3].productId);
+  assert.equal(items[3].aisle, 'Hortifrúti');
   const est = listEstimate(d, d.lists[0]);
   // Assaí: arroz 26,50 + feijão 2 × 8,99 + leite 6 × 4,59 = 72,02 (só o tomate sem preço).
   // Atacadão: arroz 24,90 + feijão 2 × 8,49 = 41,88 (leite e tomate sem preço).
@@ -103,7 +106,7 @@ test('receita: porções arredondadas e ingredientes para a lista de mercado', (
   assert.equal(qtyText(0.5), '½');
   d = sendIngredients(rec.id, shop.id, [rec.items[0].id, rec.items[2].id])(d);
   const got = d.lists[1].items;
-  assert.deepEqual(got.map((i) => [i.text, i.qty, i.aisle]), [['Ovos', 5, 'Receita: Bolo'], ['Feijão carioca', 1.5, 'Mercearia']]);
+  assert.deepEqual(got.map((i) => [i.text, i.qty, i.aisle]), [['Ovos', 5, 'Hortifrúti'], ['Feijão carioca', 1.5, 'Mercearia']]);
   assert.ok(got[1].productId);
 });
 
@@ -148,4 +151,72 @@ test('compras: as de antes do histórico vêm das despesas de mercado; backup gu
   const back = normalize(JSON.parse(JSON.stringify(d)));
   assert.deepEqual(back.purchases, d.purchases);
   assert.deepEqual(normalize({ version: 2, purchases: [{ id: 1 }, 'lixo'] }).purchases, []);
+});
+
+test('M2: busca sem acento e sem plural, sugestões com os seus produtos e o catálogo', () => {
+  const d = withPrices();
+  assert.equal(matchKey('Bananas'), matchKey('banana'));
+  assert.equal(matchKey('Limões'), matchKey('limão'));
+  const s = productSuggestions(d, 'arr');
+  assert.equal(s[0].name, 'Arroz branco');
+  assert.ok(s[0].productId);
+  assert.ok(s.some((x) => x.name === 'Arroz integral' && x.productId === null));
+  assert.equal(productSuggestions(d, 'bananas')[0].name, 'Banana');
+  const r = priceRange(d, s[0].productId!)!;
+  assert.deepEqual([r.min, r.max].map((n) => Math.round(n * 100) / 100), [4.98, 5.3]);
+});
+
+test('M2: itens antigos da lista ganham produto na primeira abertura, sem duplicar', () => {
+  let d = withPrices();
+  const items = [newItem({ text: 'bananas', aisle: 'Outros' }), newItem({ text: 'Arroz Branco' }), newItem({ text: 'Pão caseiro da vó', unit: 'kg' })];
+  d = { ...d, lists: [{ ...newList('Mercado', 'lc-mercado'), items }, { ...newList('Viagem', 'lc-viagem'), items: [newItem({ text: 'Mala' })] }] };
+  const n = d.products.length;
+  d = linkMarketItems(d);
+  const got = d.lists[0].items;
+  assert.equal(d.products.length, n + 2);
+  assert.equal(d.products.find((p) => p.id === got[0].productId)!.name, 'Banana');
+  assert.equal(got[0].aisle, 'Hortifrúti');
+  assert.equal(got[1].productId, d.products.find((p) => p.name === 'Arroz branco')!.id);
+  assert.equal(d.products.find((p) => p.id === got[2].productId)!.unit, 'kg');
+  assert.equal(d.lists[1].items[0].productId, null);
+  assert.equal(linkMarketItems(d), d);
+  // Outro aparelho cria o mesmo id.
+  assert.equal(ensureProduct(withPrices(), 'Bananas').product.id, got[0].productId);
+});
+
+test('M2: estimativa por loja com faixa dos itens que faltam, melhor combinação e sem preço', () => {
+  let d = withPrices();
+  const l = newList('Mercado', 'lc-mercado');
+  d = { ...d, lists: [l] };
+  for (const t of ['arroz branco', '2 kg feijão carioca', '6 L leite integral', 'Tomate']) d = addItemFromText(l.id, t)(d);
+  const e = marketEstimate(d, d.lists[0]);
+  const name = (id: string) => d.stores.find((s) => s.id === id)!.name;
+  // Atacadão: arroz 24,90 + feijão 16,98 = 41,88; o leite (só no Assaí) estimado em 27,54.
+  assert.deepEqual(e.stores.map((s) => [name(s.storeId), s.total, s.missing, s.estMin, s.estMax]), [['Atacadão', 41.88, 1, 27.54, 27.54], ['Assaí', 72.02, 0, 0, 0]]);
+  assert.equal(e.combo, 69.42);
+  assert.equal(e.savings, 0);
+  assert.deepEqual(e.unpriced.map((i) => i.text), ['Tomate']);
+  // "Sem preço": tomate em geral; no Atacadão, leite e tomate.
+  assert.deepEqual(productsWithoutPrice(d).map((p) => p.name), ['Tomate']);
+  const ata = d.stores.find((s) => s.name === 'Atacadão')!.id;
+  assert.deepEqual(productsWithoutPrice(d, { storeId: ata }).map((p) => p.name), ['leite integral', 'Tomate']);
+  const tomate = d.products.find((p) => p.name === 'Tomate')!;
+  assert.deepEqual(sizeOptions(d, tomate), [{ size: 1, sizeUnit: 'kg' }]);
+  const arroz = d.products.find((p) => p.name === 'Arroz branco')!;
+  assert.deepEqual(sizeOptions(d, arroz), [{ size: 5, sizeUnit: 'kg' }, { size: 1, sizeUnit: 'kg' }]);
+});
+
+test('M2: backup antigo passa pelo normalize e já liga os itens do mercado', () => {
+  const d = normalize({ lists: [{ id: 'l1', name: 'Mercado', categoryId: 'lc-mercado', items: [{ id: 'i1', text: 'Detergente' }] }] });
+  const it = d.lists[0].items[0];
+  assert.equal(d.products.find((p) => p.id === it.productId)?.aisle, 'Limpeza');
+  assert.equal(it.aisle, 'Limpeza');
+});
+
+test('M23: nome genérico aproveita o parecido do catálogo, com o nome da pessoa', () => {
+  const d = withPrices();
+  const { product } = ensureProduct(d, 'Café');
+  assert.deepEqual([product.name, product.aisle, product.unit], ['Café', 'Mercearia', 'kg']);
+  assert.deepEqual(sizeOptions(d, product), [{ size: 250, sizeUnit: 'g' }, { size: 500, sizeUnit: 'g' }]);
+  assert.equal(ensureProduct(d, 'Xampu artesanal').product.aisle, 'Outros');
 });

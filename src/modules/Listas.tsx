@@ -7,10 +7,11 @@ import { remove, upsert } from '../actions';
 import {
   addItemFromText, addListCategory, addPrice, AISLES, bestPrice, categoryOf, deleteListCategory, finishShopping, kindOf, latestPrices, launchBought, LIST_COLORS,
   LIST_ICONS, LIST_KINDS, listEstimate, newItem, newList, perUnit, priceCheck, qtyText, removeItem, scaledQty, sendIngredients, sizeText, toggleItem, uncheckAll,
-  updateItem, updateList, updateListCategory, variantLabel, itemCost, purchaseHistory,
+  updateItem, updateList, updateListCategory, variantLabel, itemCost, purchaseHistory, ensureProduct, findCatalog, marketEstimate, matchKey, parseItemText,
+  priceRange, productSuggestions, productsWithoutPrice, sizeOptions,
 } from '../lists';
 import type { ListCategory, ListItem, ListKind, Product, ProductVariant, UserList } from '../types';
-import { formatDMY, formatMoney, todayISO } from '../utils';
+import { formatDMY, formatMoney, todayISO, uid } from '../utils';
 import { CategoryBadge, Chips, Empty, Field, Icon, notify, PageHeader, Pill, Progress, Sheet, Toggle, type IconName } from '../ui';
 
 const money0 = (v: number) => `R$ ${Math.round(v).toLocaleString('pt-BR')}`;
@@ -179,7 +180,7 @@ export function ListCard({ l }: { l: UserList }) {
   const c = categoryOf(data, l);
   const k = kindOf(data, l);
   const done = l.items.filter((i) => i.done).length;
-  const est = k === 'mercado' ? listEstimate(data, l)[0] : undefined;
+  const est = k === 'mercado' ? marketEstimate(data, l).stores[0] : undefined;
   return (
     <a className="lcard" href={`#/listas/${l.id}`}>
       <CategoryBadge icon={c?.icon ?? 'tasks'} color={c?.color ?? '#94a3b8'} size={38} />
@@ -189,7 +190,7 @@ export function ListCard({ l }: { l: UserList }) {
         </strong>
         <span className="muted small">{listMeta(data, l)}</span>
         {k !== 'receita' && l.items.length > 0 && <Progress pct={(done / l.items.length) * 100} />}
-        {est && <span className="muted small">Mais barato: {data.stores.find((s) => s.id === est.storeId)?.name} · {money0(est.total)}</span>}
+        {est && <span className="muted small">Mais barato: {data.stores.find((s) => s.id === est.storeId)?.name} · {est.missing ? '≈ ' : ''}{money0(est.total + (est.estMin + est.estMax) / 2)}</span>}
       </span>
       <Icon name="right" size={16} />
     </a>
@@ -576,7 +577,14 @@ function ItemSheet({ l, it, onClose }: { l: UserList; it: ListItem; onClose: () 
             type="button"
             className="btn primary"
             onClick={() => {
-              update(updateItem(l.id, it.id, { text: text.trim() || it.text, qty: k === 'mercado' || k === 'receita' ? parseNum(qty) : it.qty, unit, aisle: k === 'mercado' ? aisle : it.aisle, price: k === 'compras' ? parseNum(price) : it.price, store }));
+              const newText = text.trim() || it.text;
+              if (k === 'mercado' && matchKey(newText) !== matchKey(it.text)) {
+                update((d) => {
+                  const r = ensureProduct(d, newText, unit);
+                  return updateItem(l.id, it.id, { productId: r.product.id })(r.data);
+                });
+              }
+              update(updateItem(l.id, it.id, { text: newText, qty: k === 'mercado' || k === 'receita' ? parseNum(qty) : it.qty, unit, aisle: k === 'mercado' ? aisle : it.aisle, price: k === 'compras' ? parseNum(price) : it.price, store }));
               onClose();
             }}
           >
@@ -639,33 +647,77 @@ function ListFooter({ l, children }: { l: UserList; children?: ReactNode }) {
 }
 
 function MarketList({ l }: { l: UserList }) {
-  const { data, update } = useStore();
+  const { data } = useStore();
   const [item, setItem] = useState<ListItem | null>(null);
   const [product, setProduct] = useState<string | null>(null);
   const [finish, setFinish] = useState(false);
+  const [fill, setFill] = useState<{ storeId: string; ids: string[] } | null>(null);
   const latest = useMemo(() => latestPrices(data), [data]);
-  const est = listEstimate(data, l);
+  const est = useMemo(() => marketEstimate(data, l), [data, l]);
   const storeName = (id: string) => data.stores.find((s) => s.id === id)?.name ?? '';
   const aisles = [...new Set(l.items.map((i) => i.aisle || 'Outros'))];
+  const range = (a: number, b: number) => (Math.round(a) === Math.round(b) ? money0(a) : `${money0(a)}–${Math.round(b).toLocaleString('pt-BR')}`);
+  const unpricedIds = [...new Set(est.unpriced.map((i) => i.productId).filter((x): x is string => !!x))];
   return (
     <>
-      {est.length > 0 && (
+      {(est.stores.length > 0 || est.unpriced.length > 0) && (
         <section className="card raised">
           <div className="card-head">
             <h2>Quanto vai sair</h2>
             <span className="muted small">pelos seus preços</span>
           </div>
           <ul className="list">
-            {est.map((e, i) => (
-              <li key={e.storeId} className="row">
-                <Icon name="store" size={18} />
-                <div className="row-body">
-                  <span className="row-title">{storeName(e.storeId)}</span>
-                  <span className="row-meta">{e.missing ? `${e.missing} ${e.missing === 1 ? 'item sem preço' : 'itens sem preço'} aqui` : 'todos os itens com preço'}</span>
-                </div>
-                <strong className={`tabular${i === 0 ? ' green' : ''}`}>{formatMoney(e.total)}</strong>
+            {est.stores.map((e, i) => (
+              <li key={e.storeId}>
+                <button
+                  type="button"
+                  className="row budget-row"
+                  disabled={!e.missing}
+                  onClick={() => setFill({ storeId: e.storeId, ids: productsWithoutPrice(data, { listId: l.id, storeId: e.storeId }).map((p) => p.id) })}
+                >
+                  <Icon name="store" size={18} />
+                  <div className="row-body">
+                    <span className="row-title">{storeName(e.storeId)}</span>
+                    <span className="row-meta">
+                      {e.missing
+                        ? `${formatMoney(e.total)} + ${e.missing} ${e.missing === 1 ? 'item sem preço' : 'itens sem preço'} aqui (em outras lojas, uns ${range(e.estMin, e.estMax)})`
+                        : 'todos os itens com preço'}
+                    </span>
+                  </div>
+                  <strong className={`tabular${i === 0 ? ' green' : ''}`}>{e.missing ? `≈ ${range(e.total + e.estMin, e.total + e.estMax)}` : formatMoney(e.total)}</strong>
+                </button>
               </li>
             ))}
+            {est.stores.length > 1 && est.savings >= 1 && (
+              <li className="row">
+                <Icon name="bolt" size={18} />
+                <div className="row-body">
+                  <span className="row-title">Melhor combinação</span>
+                  <span className="row-meta">cada item onde é mais barato · economiza uns {money0(est.savings)}</span>
+                </div>
+                <strong className="tabular">{formatMoney(est.combo)}</strong>
+              </li>
+            )}
+            {est.unpriced.length > 0 && (
+              <li>
+                <button type="button" className="row budget-row" disabled={!unpricedIds.length} onClick={() => setFill({ storeId: readDayStore(), ids: unpricedIds })}>
+                  <Icon name="tag" size={18} />
+                  <div className="row-body">
+                    <span className="row-title">
+                      {est.unpriced.length} {est.unpriced.length === 1 ? 'item sem preço' : 'itens sem preço'}
+                    </span>
+                    <span className="row-meta">
+                      {est.unpriced
+                        .slice(0, 4)
+                        .map((i) => i.text.toLowerCase())
+                        .join(', ')}
+                      {est.unpriced.length > 4 ? '…' : ''} · fora da soma
+                    </span>
+                  </div>
+                  <span className="pill">Dar preço</span>
+                </button>
+              </li>
+            )}
           </ul>
         </section>
       )}
@@ -692,7 +744,11 @@ function MarketList({ l }: { l: UserList }) {
                       l={l}
                       it={it}
                       onOpen={() => setItem(it)}
-                      meta={b ? `Melhor: ${formatMoney(itemCost(it, b, prod))}${b.variant.brand ? ` ${b.variant.brand}` : ''} no ${storeName(b.storeId)}` : 'Sem preço anotado'}
+                      meta={
+                        b
+                          ? `Melhor: ${formatMoney(itemCost(it, b, prod))}${b.variant.brand ? ` ${b.variant.brand}` : ''} no ${storeName(b.storeId)}${isOld(b.date) ? ` · preço de ${formatDMY(b.date)}` : ''}`
+                          : 'Sem preço anotado'
+                      }
                       end={
                         it.productId ? (
                           <button type="button" className="icon-btn" aria-label={`Preços de ${it.text}`} onClick={() => setProduct(it.productId)}>
@@ -707,7 +763,7 @@ function MarketList({ l }: { l: UserList }) {
           </section>
         ))
       )}
-      <AddRow placeholder='Ex.: "2 kg tomate"' onAdd={(t) => update(addItemFromText(l.id, t))} />
+      <MarketAddRow l={l} />
       <ListFooter l={l}>
         <button type="button" className="btn primary" disabled={!l.items.some((i) => i.done)} onClick={() => setFinish(true)}>
           <Icon name="check" size={18} /> Concluir compra
@@ -716,7 +772,172 @@ function MarketList({ l }: { l: UserList }) {
       {item && <ItemSheet l={l} it={item} onClose={() => setItem(null)} />}
       {product && <ProductSheet productId={product} onClose={() => setProduct(null)} />}
       {finish && <FinishSheet l={l} onClose={() => setFinish(false)} />}
+      {fill && fill.ids.length > 0 && <FillSheet productIds={fill.ids} storeId={fill.storeId} onClose={() => setFill(null)} />}
     </>
+  );
+}
+
+const isOld = (date: string) => date < new Date(Date.now() - 60 * 864e5).toISOString().slice(0, 10);
+const cents = (n: number) => n.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+/** M2: campo da lista de mercado com sugestões dos seus produtos (com a faixa de preço) e do catálogo pronto. */
+function MarketAddRow({ l }: { l: UserList }) {
+  const { data, update } = useStore();
+  const [text, setText] = useState('');
+  const latest = useMemo(() => latestPrices(data), [data]);
+  const parsed = parseItemText(text);
+  const sugs = text.trim() ? productSuggestions(data, parsed.text) : [];
+  const add = (name?: string) => {
+    if (!text.trim()) return;
+    update(addItemFromText(l.id, name ? (parsed.qty !== null ? `${parsed.qty} ${parsed.unit} ${name}` : name) : text.trim()));
+    setText('');
+  };
+  return (
+    <div className="field">
+      <div className="add-row">
+        <input className="input" value={text} onChange={(e) => setText(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && add()} placeholder='Ex.: "2 kg tomate"' aria-label="Novo item" autoComplete="off" />
+        <button type="button" className="btn" onClick={() => add()} aria-label="Adicionar">
+          <Icon name="plus" size={18} />
+        </button>
+      </div>
+      {sugs.length > 0 && (
+        <div className="sugbox" role="listbox" aria-label="Sugestões">
+          {sugs.map((sg) => {
+            const r = sg.productId ? priceRange(data, sg.productId, latest) : null;
+            const unit = data.products.find((p) => p.id === sg.productId)?.unit ?? '';
+            return (
+              <button key={sg.name} type="button" role="option" aria-selected={false} onMouseDown={(e) => e.preventDefault()} onClick={() => add(sg.name)}>
+                {sg.name}{' '}
+                <small>
+                  {sg.aisle}
+                  {r ? ` · R$ ${cents(r.min)}${r.max - r.min >= 0.01 ? `–${cents(r.max)}` : ''}/${unit}` : ''}
+                </small>
+              </button>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function writeDayStore(id: string) {
+  try {
+    localStorage.setItem(DAY_STORE_KEY, id);
+  } catch {
+    /* ignora */
+  }
+}
+
+/**
+ * M2: dar preço em sequência. Escolhe a loja uma vez e vai produto por produto (tamanho, marca e preço),
+ * com "Próximo" e "Pular". Os totais da lista se atualizam na hora.
+ */
+function FillSheet({ productIds, storeId, onClose }: { productIds: string[]; storeId: string; onClose: () => void }) {
+  const { data, update } = useStore();
+  const [store, setStore] = useState(data.stores.some((s) => s.id === storeId) ? storeId : (data.stores[0]?.id ?? ''));
+  const [storeName, setStoreName] = useState('');
+  const [i, setI] = useState(0);
+  const [saved, setSaved] = useState(0);
+  const [sizeKey, setSizeKey] = useState('0');
+  const [size, setSize] = useState('');
+  const [sizeUnit, setSizeUnit] = useState<ProductVariant['sizeUnit']>('un');
+  const [brand, setBrand] = useState('');
+  const [price, setPrice] = useState('');
+  const p = data.products.find((x) => x.id === productIds[i]);
+  const sizes = p ? sizeOptions(data, p) : [];
+  const brands = p ? [...new Set(data.variants.filter((v) => v.productId === p.id && v.brand).map((v) => v.brand))] : [];
+  const v = parseNum(price);
+  const last = i >= productIds.length - 1;
+  const finish = (n: number) => {
+    if (n) notify(n === 1 ? '1 preço anotado' : `${n} preços anotados`, 'Os totais da lista já foram atualizados.');
+    onClose();
+  };
+  const next = (save: boolean) => {
+    let n = saved;
+    if (save && p && v && (store || storeName.trim())) {
+      let sid = store;
+      if (!sid) {
+        sid = uid();
+        const name = storeName.trim();
+        update((d) => ({ ...d, stores: [...d.stores, { id: sid, name }] }));
+        setStore(sid);
+        setStoreName('');
+      }
+      const sz = sizeKey === 'outro' ? { size: parseNum(size) ?? 1, sizeUnit } : (sizes[Number(sizeKey)] ?? { size: 1, sizeUnit: p.unit });
+      update(addPrice({ storeId: sid, productId: p.id, brand: brand.trim(), size: sz.size, sizeUnit: sz.sizeUnit, price: v }));
+      writeDayStore(sid);
+      n++;
+      setSaved(n);
+    }
+    if (last || !p) return finish(n);
+    setI(i + 1);
+    setSizeKey('0');
+    setSize('');
+    setBrand('');
+    setPrice('');
+  };
+  return (
+    <Sheet
+      title="Dar preço"
+      onClose={() => finish(saved)}
+      footer={
+        <div className="btn-row">
+          <button type="button" className="btn" onClick={() => next(false)}>
+            Pular
+          </button>
+          <button type="button" className="btn primary" disabled={!!v && !store && !storeName.trim()} onClick={() => next(true)}>
+            {last ? 'Concluir' : 'Próximo'}
+          </button>
+        </div>
+      }
+    >
+      <div className="field">
+        <span className="field-label">Loja</span>
+        <Chips label="Loja" value={store} onChange={setStore} options={[...data.stores.map((s) => ({ value: s.id, label: s.name })), { value: '', label: '+ Nova' }]} />
+        {!store && <input className="input" value={storeName} onChange={(e) => setStoreName(e.target.value)} placeholder="Nome da loja" />}
+      </div>
+      <div className="field">
+        <span className="muted small">
+          {i + 1} de {productIds.length}
+        </span>
+        <Progress pct={(i / productIds.length) * 100} />
+      </div>
+      {p && (
+        <>
+          <h3 className="fill-name">
+            {p.name} <small className="muted">{p.aisle}</small>
+          </h3>
+          <div className="field">
+            <span className="field-label">Tamanho ou peso da embalagem</span>
+            <Chips label="Tamanho" value={sizeKey} onChange={setSizeKey} options={[...sizes.map((x, k) => ({ value: String(k), label: sizeText({ size: x.size, sizeUnit: x.sizeUnit } as ProductVariant) })), { value: 'outro', label: 'Outro' }]} />
+          </div>
+          {sizeKey === 'outro' && (
+            <div className="form-row">
+              <Field label="Tamanho">
+                <input className="input" inputMode="decimal" value={size} onChange={(e) => setSize(e.target.value)} placeholder="500" />
+              </Field>
+              <Field label="Unidade">
+                <select className="input" value={sizeUnit} onChange={(e) => setSizeUnit(e.target.value as ProductVariant['sizeUnit'])}>
+                  {(['g', 'kg', 'ml', 'L', 'un'] as const).map((u) => (
+                    <option key={u} value={u}>
+                      {u}
+                    </option>
+                  ))}
+                </select>
+              </Field>
+            </div>
+          )}
+          <Field label="Marca (opcional)">
+            <input className="input" value={brand} onChange={(e) => setBrand(e.target.value)} placeholder="Qualquer marca" />
+          </Field>
+          {brands.length > 0 && <Chips label="Marcas anotadas" value={brand} onChange={setBrand} options={brands.map((b) => ({ value: b, label: b }))} />}
+          <Field label="Preço">
+            <input className="input money large" inputMode="decimal" value={price} onChange={(e) => setPrice(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && next(true)} placeholder="0,00" />
+          </Field>
+        </>
+      )}
+    </Sheet>
   );
 }
 
@@ -1103,7 +1324,9 @@ function Prices() {
   const [dayStore, setDayStoreState] = useState(readDayStore);
   const [entry, setEntry] = useState(false);
   const [product, setProduct] = useState<string | null>(null);
+  const [fill, setFill] = useState<string[] | null>(null);
   const latest = useMemo(() => latestPrices(data), [data]);
+  const missing = useMemo(() => productsWithoutPrice(data), [data]);
   const setDayStore = (id: string) => {
     setDayStoreState(id);
     try {
@@ -1126,6 +1349,25 @@ function Prices() {
           <Icon name="plus" size={18} /> Anotar preço
         </button>
       </section>
+      {missing.length > 0 && (
+        <section className="card">
+          <div className="card-head">
+            <h2>Sem preço</h2>
+            <span className="muted small">{missing.length}</span>
+          </div>
+          <p className="muted small">
+            Das suas listas:{' '}
+            {missing
+              .slice(0, 5)
+              .map((p) => p.name.toLowerCase())
+              .join(', ')}
+            {missing.length > 5 ? '…' : ''}
+          </p>
+          <button type="button" className="btn block" onClick={() => setFill(missing.map((p) => p.id))}>
+            <Icon name="tag" size={18} /> Preencher em sequência
+          </button>
+        </section>
+      )}
       <section className="card">
         <div className="card-head">
           <h2>Produtos</h2>
@@ -1161,6 +1403,16 @@ function Prices() {
       </section>
       <p className="muted small center">Os preços são comparados por unidade (R$/kg, R$/L, R$/un), para comparar embalagens diferentes.</p>
       {entry && <PriceSheet dayStore={dayStore} onDayStore={setDayStore} onClose={() => setEntry(false)} />}
+      {fill && (
+        <FillSheet
+          productIds={fill}
+          storeId={dayStore}
+          onClose={() => {
+            setFill(null);
+            setDayStoreState(readDayStore());
+          }}
+        />
+      )}
       {product && <ProductSheet productId={product} onClose={() => setProduct(null)} />}
     </>
   );
@@ -1168,9 +1420,11 @@ function Prices() {
 
 function ProductSheet({ productId, onClose }: { productId: string; onClose: () => void }) {
   const { data } = useStore();
+  const [fill, setFill] = useState(false);
   const p = data.products.find((x) => x.id === productId);
   const latest = useMemo(() => latestPrices(data), [data]);
   if (!p) return null;
+  if (fill) return <FillSheet productIds={[p.id]} storeId={readDayStore()} onClose={() => setFill(false)} />;
   const vars = data.variants.filter((v) => v.productId === p.id);
   const stores = data.stores.filter((s) => vars.some((v) => latest.has(`${v.id}|${s.id}`)));
   const best = bestPrice(data, p.id, undefined, latest);
@@ -1228,7 +1482,12 @@ function ProductSheet({ productId, onClose }: { productId: string; onClose: () =
           )}
         </>
       ) : (
-        <Empty>Ainda sem preço anotado.</Empty>
+        <>
+          <Empty>Ainda sem preço anotado.</Empty>
+          <button type="button" className="btn primary block" onClick={() => setFill(true)}>
+            <Icon name="tag" size={18} /> Dar preço
+          </button>
+        </>
       )}
     </Sheet>
   );
@@ -1280,7 +1539,7 @@ function PriceSheet({ dayStore, onDayStore, onClose }: { dayStore: string; onDay
   const [price, setPrice] = useState('');
   const [promo, setPromo] = useState(false);
   const vars = prod ? data.variants.filter((v) => v.productId === prod.id) : [];
-  const matches = q.trim() && !prod ? data.products.filter((p) => p.name.toLowerCase().includes(q.trim().toLowerCase())).slice(0, 6) : [];
+  const matches = q.trim() && !prod && !isNew ? productSuggestions(data, q) : [];
   const v = parseNum(price);
   const check = prod && variant && v ? priceCheck(data, variant, v) : null;
   const last = prod && variant && store ? latestPrices(data).get(`${variant}|${store}`) : undefined;
@@ -1364,12 +1623,28 @@ function PriceSheet({ dayStore, onDayStore, onClose }: { dayStore: string; onDay
       </Field>
       {(matches.length > 0 || (q.trim() && !prod && !isNew)) && (
         <div className="sugbox">
-          {matches.map((p) => (
-            <button key={p.id} type="button" onClick={() => pick(p)}>
-              {p.name} <small>{p.aisle}</small>
+          {matches.map((m) => (
+            <button
+              key={m.name}
+              type="button"
+              onClick={() => {
+                const own = data.products.find((x) => x.id === m.productId);
+                if (own) return pick(own);
+                const c = findCatalog(m.name);
+                setQ(m.name);
+                setIsNew(true);
+                setAisle(m.aisle);
+                if (c) {
+                  setUnit(c.unit);
+                  setSize(String(c.sizes[0]?.size ?? 1).replace('.', ','));
+                  setSizeUnit(c.sizes[0]?.sizeUnit ?? 'un');
+                }
+              }}
+            >
+              {m.name} <small>{m.aisle}</small>
             </button>
           ))}
-          {!matches.some((p) => p.name.toLowerCase() === q.trim().toLowerCase()) && (
+          {!matches.some((m) => matchKey(m.name) === matchKey(q)) && (
             <button type="button" onClick={() => setIsNew(true)}>
               + Novo produto: "{q.trim()}"
             </button>

@@ -97,8 +97,8 @@
 | E6 | Busca por módulo: a lupa pesquisa dentro do módulo aberto (ex.: nomes de despesas em Finanças); no Início, busca geral | EXP | P | média | pronto (v0.35) | `futuro/navegacao-v2.md` |
 | M9 | Finanças: botão + com menu (despesa, receita, cartão, caixinha e, separado, Categorias); categorias passam a morar dentro de Finanças | MOD | P | alta | pronto (v0.16) | `futuro/navegacao-v2.md` |
 | M10 | Finanças: "Já pago" e "Em aberto" clicáveis, abrindo a lista filtrada | MOD | P | alta | pronto (v0.16) | `futuro/navegacao-v2.md` |
-| M2 | Preços 2.0, parte 1: a lista puxa os produtos de Preços e estima com faixa de preço, sem prender a uma loja; **itens da lista viram produtos e Preços mostra "Sem preço" para preencher em sequência** (12/11: lista com 64 itens sem como dar preço). Afeta: Listas, Preços, Finanças | MOD | M | **alta** | aprovado (12/11) | `futuro/precos-v2.md` (itens 2, 3 e 5) |
-| M23 | **Catálogo pronto de produtos** (~300 itens de mercado com corredor, unidade e tamanhos comuns, sem preço), para quem começa não digitar tudo. Vai junto com o M2. Afeta: Listas, Preços | MOD | M | alta | aprovado (12/11) | `futuro/precos-v2.md` (item 6) |
+| M2 | Preços 2.0, parte 1: a lista puxa os produtos de Preços e estima com faixa de preço, sem prender a uma loja; **itens da lista viram produtos e Preços mostra "Sem preço" para preencher em sequência** (12/11: lista com 64 itens sem como dar preço). Afeta: Listas, Preços, Finanças | MOD | M | **alta** | pronto (v0.49), falta o Leonardo testar | `futuro/precos-v2.md` (itens 2, 3 e 5) |
+| M23 | **Catálogo pronto de produtos** (~300 itens de mercado com corredor, unidade e tamanhos comuns, sem preço), para quem começa não digitar tudo. Vai junto com o M2. Afeta: Listas, Preços | MOD | M | alta | pronto (v0.49, 311 produtos), falta o Leonardo testar | `futuro/precos-v2.md` (item 6) |
 | M3 | Preços 2.0, parte 2: "quanto custou aqui?" ao marcar o item e histórico de compras | MOD | M | média | especificado | `futuro/precos-v2.md` (item 4) |
 | M4 | Preços 2.0, parte 3: tipos de loja e filtro; editar, excluir e juntar produtos, marcas e lojas | MOD | M | média | especificado | `futuro/precos-v2.md` (itens 1 e 4) |
 | M5 | Agenda: repetição (toda semana, mês, ano) e aniversários | MOD | M | média | ideia | — (especificar antes) |
@@ -141,7 +141,7 @@
 
 **O que continua aprovado, na ordem:**
 0. **N9 Sincronizar com o Google Drive** (G, aprovado em 11/11: "pode começar"), em partes: ~~N9.0 preparar os dados~~ (v0.39) → ~~N9.1 conta Google e cópia na nuvem~~ (v0.40) → ~~N9.2 sincronizar~~ (v0.41) → N9.3 fotos e PDFs (~~N9.3a fotos no Diário~~ v0.42; N9.3b PDFs) → N9.4 exportar. Uma parte por vez, conforme o uso do dia. Ver `futuro/sincronizar-google.md`.
-1. **M2 + M23 → M3 → M4 Preços 2.0** (M cada, já especificados). **Subiu para antes do N10 (aprovado em 12/11: "pode fazer")**, porque trava o uso: a lista com 64 itens não tinha como receber preço. M2 = itens da lista viram produtos + "Sem preço" para preencher em sequência; M23 = catálogo pronto de produtos.
+1. **~~M2 + M23~~ (v0.49) → M3 → M4 Preços 2.0** (M cada, já especificados). **Subiu para antes do N10 (aprovado em 12/11: "pode fazer")**, porque trava o uso: a lista com 64 itens não tinha como receber preço. M2 = itens da lista viram produtos + "Sem preço" para preencher em sequência; M23 = catálogo pronto de produtos.
 2. **N10 Objetivos** (G): ~~prévia N10.0~~ (aprovada em 11/11) → N10.1 central de metas (inclui as metas de carreira, antigo N8.4) → N10.2 objetivos grandes.
 3. **M6** fichas de treino próprias (M).
 4. **M5** Agenda com repetição e aniversários (especificar antes).
@@ -153,6 +153,7 @@
 ## Feito
 | Versão | O que entrou | PR |
 |---|---|---|
+| v0.49 | M2 + M23 (Preços 2.0, parte 1): todo item da lista de mercado vira produto de Preços (os antigos na primeira abertura); sugestões ao digitar (sem acento e sem plural) com faixa de preço; catálogo pronto de 311 produtos (corredor, unidade e tamanhos, sem preço); "Quanto vai sair" por loja com faixa dos itens que faltam, melhor combinação e itens sem preço à parte; cartão "Sem preço" em Preços e **Dar preço em sequência** (loja uma vez; tamanho, marca e preço; Próximo e Pular). Ficou para o M3/M4: escolher marca no item, editar produto | — |
 | v0.48 | N9.6: tarefas na lista "CP Hub" do Google Tarefas, ida e volta (concluir lá conclui aqui; criada lá entra no app); só a data, sem hora; tarefas saem do Google Agenda | #59 |
 | v0.47 | E20: o voltar **sobe um nível** (ferramenta → módulo → Início; Mais → Início; módulo aberto pelo Mais → Mais → Início) e nunca fica em ciclo; janelas continuam fechando com o voltar | — |
 | v0.46 | E19 (e o resto do E1): **lápis no Mais**, que muda a ordem dos módulos e dos 4 atalhos (cada grupo no seu lugar), na lista e na grade; "Restaurar padrão" volta a ordem original | #54 |

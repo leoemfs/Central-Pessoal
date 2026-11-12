@@ -1,6 +1,14 @@
 # Preços 2.0: lojas por tipo e listas ligadas aos preços
 
-> **Status: OBJETIVO PARA O FUTURO.** Anotado a partir do primeiro uso real no mercado (nov/2026). Sem desenvolvimento. Hoje (v0.14) está em uso a versão descrita em `modulo-precos.md`.
+> **Status: EM ANDAMENTO.** Anotado a partir do primeiro uso real no mercado (nov/2026). **Parte 1 pronta na v0.49 (M2 + M23):** itens 2, 3, 5 e 6, menos o que está em "Ficou para depois" abaixo. Próximo: M3 e M4.
+
+### Como ficou na v0.49
+- Todo item da lista de mercado se liga sozinho a um produto de Preços pelo nome (sem acento, sem plural). Os itens antigos são ligados na primeira abertura. Nome genérico ("Arroz") aproveita o parecido do catálogo ("Arroz branco": corredor, unidade e tamanhos), mas mantém o nome escrito.
+- O produto ganha um id fixo pelo nome, para dois aparelhos não criarem duplicados.
+- Catálogo pronto: 311 produtos em `src/precosCatalogo.ts`.
+- "Quanto vai sair": cada loja soma os itens com preço ali + faixa dos que faltam ("≈ R$ 197–201"); melhor combinação e quanto economiza; itens sem preço nenhum à parte, fora da soma. Tocar numa loja abre o **Dar preço** já com aquela loja.
+- Item com preço de mais de 60 dias mostra a data.
+- **Ficou para depois (M3/M4):** escolher marca específica no item (hoje vale "qualquer marca", a mais barata); "Cadastrar em Preços" e "Ligar a um produto" deixaram de ser necessários (tudo já é ligado); editar nome, corredor e unidade do produto.
 
 ## O que o uso real mostrou
 1. **Cadastrar é fácil, mas manual.** Isso continua por um tempo, até integrarmos a leitura de código de barras ou uma base de produtos (ver "Mais adiante").
