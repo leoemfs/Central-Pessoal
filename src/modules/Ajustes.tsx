@@ -256,6 +256,17 @@ export function Ajustes() {
           </div>
           <Toggle checked={data.settings.hideOnScroll} onChange={(v) => setSetting({ hideOnScroll: v })} label="Esconder as barras ao rolar" />
         </div>
+        <h3 className="pz-title">Tela Mais</h3>
+        <p className="muted small">Lista mostra o que tem em cada módulo; grade mostra tudo de uma vez, com ícones.</p>
+        <Segmented<'lista' | 'grade'>
+          label="Tela Mais"
+          value={data.settings.moreLayout}
+          onChange={(v) => setSetting({ moreLayout: v })}
+          options={[
+            { value: 'lista', label: 'Lista' },
+            { value: 'grade', label: 'Grade' },
+          ]}
+        />
         <div className="btn-row" style={{ marginTop: 14 }}>
           <button type="button" className="btn soft small" onClick={() => openSetup('convite')}>
             <Icon name="grid" size={16} /> Refazer a montagem do app

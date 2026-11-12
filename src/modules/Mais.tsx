@@ -41,6 +41,7 @@ export function Mais() {
   const { data } = useStore();
   const shown = LINKS.filter((l) => !isHidden(data, l.path));
   const kept = LINKS.filter((l) => isHidden(data, l.path));
+  if (data.settings.moreLayout === 'grade') return <MaisGrade shown={shown.map((l) => l.path)} kept={kept.map((l) => l.path)} />;
   return (
     <>
       <PageHeader title="Mais" />
@@ -92,6 +93,71 @@ export function Mais() {
               <strong>{c.label}</strong>
               <span className="muted">{c.hint}</span>
             </span>
+          </div>
+        ))}
+      </div>
+    </>
+  );
+}
+
+/** Nomes curtos para caber embaixo do ícone. */
+const SHORT: Record<string, string> = { nucleo: 'Núcleo', revisao: 'Revisão', ajustes: 'Ajustes' };
+
+/** Mais em grade (E18): módulos 3 por linha; atalhos e "Em breve" numa linha menor, 4 por linha. */
+function MaisGrade({ shown, kept }: { shown: string[]; kept: string[] }) {
+  const cell = (path: string) => {
+    const s = SECTIONS.find((x) => x.path === path)!;
+    return (
+      <a key={path} className="mg-cell" href={`#/${path}`}>
+        <span className="mg-icon">
+          <Icon name={s.icon} size={26} />
+        </span>
+        <span className="mg-name">{SHORT[path] ?? s.label}</span>
+      </a>
+    );
+  };
+  return (
+    <>
+      <PageHeader title="Mais" />
+      <div className="mg-grid">{shown.filter((p) => p !== 'ajustes').map(cell)}</div>
+      <h2 className="section-title">Atalhos</h2>
+      <div className="mg-grid small">
+        <a className="mg-cell" href="#/ajustes">
+          <span className="mg-icon">
+            <Icon name="settings" size={22} />
+          </span>
+          <span className="mg-name">Ajustes</span>
+        </a>
+        <button type="button" className="mg-cell" onClick={openTutorial}>
+          <span className="mg-icon">
+            <Icon name="info" size={22} />
+          </span>
+          <span className="mg-name">Usar a barra</span>
+        </button>
+        <button type="button" className="mg-cell" onClick={() => openSetup('convite')}>
+          <span className="mg-icon">
+            <Icon name="grid" size={22} />
+          </span>
+          <span className="mg-name">Montar o app</span>
+        </button>
+        {kept.length > 0 && (
+          <a className="mg-cell" href="#/guardados" aria-label={`Guardados: ${keptNames(kept)}`}>
+            <span className="mg-icon">
+              <Icon name="archive" size={22} />
+              <span className="mg-badge">{kept.length}</span>
+            </span>
+            <span className="mg-name">Guardados</span>
+          </a>
+        )}
+      </div>
+      <h2 className="section-title">Em breve</h2>
+      <div className="mg-grid small">
+        {COMING_SOON.map((c) => (
+          <div key={c.label} className="mg-cell off" aria-disabled="true" title={c.hint}>
+            <span className="mg-icon">
+              <Icon name={c.icon} size={22} />
+            </span>
+            <span className="mg-name">{c.label === 'Banco de ideias' ? 'Ideias' : c.label}</span>
           </div>
         ))}
       </div>
