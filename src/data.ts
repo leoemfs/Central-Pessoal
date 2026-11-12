@@ -8,7 +8,7 @@ import { normalizeVoucher } from './vouchers.ts';
 import { normalizeAccent } from './theme.ts';
 import { DEFAULT_FAVORITES, normalizeFavorites } from './moduleBar.ts';
 import { normalizeLayouts } from './cardLayout.ts';
-import { DEFAULT_LIST_CATEGORIES, normalizeListData } from './lists.ts';
+import { DEFAULT_LIST_CATEGORIES, linkMarketItems, normalizeListData } from './lists.ts';
 import { emptyStudy, normalizeStudy } from './estudos.ts';
 import { emptyCareer, normalizeCareer } from './carreira.ts';
 import { DEFAULT_RHYTHM, MODULES, normalizeRhythm, SETUP_AREAS } from './setup.ts';
@@ -197,7 +197,7 @@ export function normalize(raw: unknown): AppData {
     stamps: strMap(r.stamps),
     legacy: Object.keys(discarded).length ? { ...legacy, descartados: mergeDiscarded(legacy.descartados, discarded) } : legacy,
   };
-  d = seedCategories(d);
+  d = linkMarketItems(seedCategories(d));
   if (r.version !== 2 && Array.isArray(r.transactions)) d = migrateV1Transactions(d, r.transactions);
   return migrateLegacyIncomes(d);
 }

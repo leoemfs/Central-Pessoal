@@ -6626,3 +6626,15 @@ details.kept[open] > summary {
 .mais-sub {
   margin: 8px 0 0;
 }
+.fill-name {
+  margin: 4px 0 0;
+  font-size: 1.25rem;
+}
+.fill-name small {
+  font-size: 0.8rem;
+  font-weight: 400;
+}
+button.row:disabled {
+  opacity: 1;
+  cursor: default;
+}
