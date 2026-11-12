@@ -213,6 +213,7 @@ Documentos sem código: Mapa dos módulos (08/11), módulos personalizáveis, pa
 | Primeira abertura: entrevista, módulos, favoritos e tutorial da barra (E14, construído na v0.31) | https://claude.ai/artifact/Ky4NT9oh9tZQKv9FksYYCz |
 | Objetivos (N10.0): metas de todo o app, objetivos grandes, concluídos e cartão no Início | https://claude.ai/artifact/TEPSkVaKWYhuxBcoZvkZA4 |
 | Central Pessoal (prévia geral antiga) | https://claude.ai/artifact/WHbDkKXN4LArCQ8sjuQqVt |
+| E18 Mais em lista ou em grade (12/11) | https://claude.ai/artifact/QnCrHxcUu1HFwLRDgFDyth |
 
 ## Regras para construir
 - Uma versão por item (v0.15.1, v0.16…), com testes das regras, teste no navegador (celular) e documentação atualizada.
