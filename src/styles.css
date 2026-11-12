@@ -6475,3 +6475,20 @@ details.kept[open] > summary {
   padding-top: 12px;
   border-top: 1px solid var(--border);
 }
+
+/* Guardados (E17): abrir o módulo à esquerda, "Trazer de volta" à direita */
+.kept-row {
+  gap: 10px;
+}
+.kept-open {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--text);
+  text-decoration: none;
+}
+.kept-row .btn {
+  flex: none;
+}

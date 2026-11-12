@@ -2,7 +2,7 @@ import { COMING_SOON, SECTIONS } from '../App';
 import { useStore } from '../store';
 import { addFavorite, FAVORITABLE } from '../moduleBar';
 import { Icon, notify, PageHeader, Sheet, type IconName } from '../ui';
-import { isHidden } from '../setup';
+import { hiddenFrom, isHidden, toggleModule, visibleFrom } from '../setup';
 import { openSetup, openTutorial } from './Montagem';
 
 /** Todos os módulos. Orçamento e Relatórios ficam dentro de Finanças (na barra de baixo). */
@@ -58,28 +58,29 @@ export function Mais() {
           </span>
           <Icon name="right" size={18} />
         </button>
+        <button type="button" className="tile" onClick={() => openSetup('convite')}>
+          <span className="tile-icon">
+            <Icon name="grid" />
+          </span>
+          <span className="tile-text">
+            <strong>Montar o app do seu jeito</strong>
+            <span className="muted">Escolher de novo os módulos à vista e os favoritos</span>
+          </span>
+          <Icon name="right" size={18} />
+        </button>
+        {kept.length > 0 && (
+          <a className="tile" href="#/guardados">
+            <span className="tile-icon">
+              <Icon name="archive" />
+            </span>
+            <span className="tile-text">
+              <strong>Guardados · {kept.length}</strong>
+              <span className="muted">{keptNames(kept.map((l) => l.path))}: desligados, com tudo o que você já registrou</span>
+            </span>
+            <Icon name="right" size={18} />
+          </a>
+        )}
       </div>
-      {kept.length > 0 && (
-        <>
-          <h2 className="section-title">Guardados</h2>
-          <p className="muted small">Módulos desligados: continuam aqui, com tudo o que você já registrou. Para trazer de volta, use Personalização.</p>
-          <div className="tile-grid">
-            {kept.map((l) => (
-              <LinkTile key={l.path} {...l} />
-            ))}
-            <button type="button" className="tile" onClick={() => openSetup('convite')}>
-              <span className="tile-icon">
-                <Icon name="grid" />
-              </span>
-              <span className="tile-text">
-                <strong>Montar o app do seu jeito</strong>
-                <span className="muted">Escolher de novo os módulos à vista e os favoritos</span>
-              </span>
-              <Icon name="right" size={18} />
-            </button>
-          </div>
-        </>
-      )}
       <h2 className="section-title">Em breve</h2>
       <div className="tile-grid">
         {COMING_SOON.map((c) => (
@@ -94,6 +95,61 @@ export function Mais() {
           </div>
         ))}
       </div>
+    </>
+  );
+}
+
+const label = (path: string) => SECTIONS.find((x) => x.path === path)?.label ?? path;
+/** "Notas", "Notas e Jornada", "Notas, Você e Jornada" */
+function keptNames(paths: string[]) {
+  const names = paths.map(label);
+  return names.length < 2 ? names.join('') : `${names.slice(0, -1).join(', ')} e ${names[names.length - 1]}`;
+}
+
+/** Guardados (E17): os módulos desligados num lugar só, cada um com "Trazer de volta". */
+export function Guardados() {
+  const { data, update } = useStore();
+  const kept = LINKS.filter((l) => isHidden(data, l.path));
+  function bringBack(path: string) {
+    const next = toggleModule(visibleFrom(data.settings.hiddenModules), path);
+    update((d) => ({ ...d, settings: { ...d.settings, hiddenModules: hiddenFrom(next), ...(path === 'jornada' ? { journeyWanted: true } : {}) } }));
+    notify(label(path), 'De volta à vista.');
+  }
+  return (
+    <>
+      <PageHeader title="Guardados" />
+      <p className="muted small" style={{ marginTop: 0 }}>
+        Módulos desligados. Continuam abrindo normalmente, com tudo o que você já registrou. "Trazer de volta" põe o módulo à vista de novo.
+      </p>
+      {kept.length === 0 ? (
+        <section className="card">
+          <p className="muted" style={{ margin: 0 }}>Nenhum módulo guardado. Todos estão à vista no Mais.</p>
+        </section>
+      ) : (
+        <section className="card">
+          <ul className="list">
+            {kept.map((l) => {
+              const s = SECTIONS.find((x) => x.path === l.path)!;
+              return (
+                <li key={l.path} className="row kept-row">
+                  <a className="kept-open" href={`#/${l.path}`}>
+                    <span className="tile-icon">
+                      <Icon name={s.icon} />
+                    </span>
+                    <span className="row-body">
+                      <span className="row-title">{s.label}</span>
+                      <span className="row-meta">{l.hint}</span>
+                    </span>
+                  </a>
+                  <button type="button" className="btn soft small" onClick={() => bringBack(l.path)}>
+                    Trazer de volta
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
+        </section>
+      )}
     </>
   );
 }
