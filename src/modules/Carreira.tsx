@@ -1,7 +1,7 @@
 import { useEffect, useState, type ReactNode } from 'react';
 import { CardScreen } from '../Cards';
 import type { ViewProps } from '../App';
-import { go, useSubAction } from '../router';
+import { cleanAddress, go, useSubAction } from '../router';
 import { useStore } from '../store';
 import type { AppData, CareerChange, CareerChangeKind, JobApp, JobStage, Meeting, ProjectStatus, WorkProject } from '../types';
 import { addDays, formatDate, formatMoney, relativeDay, todayISO, uid } from '../utils';
@@ -135,7 +135,7 @@ export function CarreiraPage({ route }: ViewProps) {
     if (m[1] === 'm') setMeetingId(m[2]);
     else if (m[1] === 'j') setOpenId(m[2]);
     else setProjectId(m[2]);
-    window.history.replaceState(null, '', '#/carreira');
+    cleanAddress('carreira');
   }, [route.n, route.sub]);
   const projects = sortProjects(data.career.projects);
 

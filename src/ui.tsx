@@ -260,9 +260,11 @@ interface Overlay {
 }
 const overlays: Overlay[] = [];
 let ignorePops = 0;
+let lastPopWasOverlay = false;
 
 if (typeof window !== 'undefined') {
   window.addEventListener('popstate', () => {
+    lastPopWasOverlay = true;
     if (ignorePops > 0) {
       ignorePops--;
       return;
@@ -271,8 +273,23 @@ if (typeof window !== 'undefined') {
     if (top) {
       top.closedByBack = true;
       top.close();
+      return;
     }
+    lastPopWasOverlay = false;
   });
+}
+
+/** Para a navegação (router): o último "voltar" foi só para fechar uma janela? (lê e zera) */
+export function popWasOverlay(): boolean {
+  const v = lastPopWasOverlay;
+  lastPopWasOverlay = false;
+  return v;
+}
+
+/** Ao trocar de tela com janelas abertas: elas não voltam o histórico sozinhas; devolve quantas entradas ocupam. */
+export function releaseOverlays(): number {
+  overlays.forEach((o) => (o.closedByBack = true));
+  return overlays.length;
 }
 
 /**

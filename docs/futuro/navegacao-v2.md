@@ -17,6 +17,8 @@
 
 > **v0.25 (E10, E11, E12, E13):** o jeito da barra é escolhido em Configurações › Personalização (favorito no mesmo lugar, ao lado do Início ou no centro). O voltar do celular vai da ferramenta para a casa do módulo e depois para o Início; trocar de módulo pelos favoritos não empilha telas.
 
+> **v0.47 (E20):** o voltar **sobe um nível** em qualquer caminho: o app guarda só a trilha que interessa (Início › Mais › Finanças › Orçamento), não o histórico todo. Barra de baixo e menu ☰ põem a tela logo acima do Início (Mais → Início); links dentro das telas empilham (módulo aberto pelo Mais → Mais → Início); ferramenta fica sempre acima da casa do módulo; abrir uma tela que já está na trilha volta até ela (sem ciclo). Regra em `src/navStack.ts`, ligada em `src/router.ts`.
+
 > **v0.20.1 (E9):** o módulo favorito não muda de posição ao entrar nele; as ferramentas ocupam os outros dois espaços, na ordem (esquerda, direita). Módulo que não é favorito fica no centro.
 
 > Atualizado na v0.19 (E8): a barra não repete abas. Regra completa no `CLAUDE.md` ("Regra de navegação").

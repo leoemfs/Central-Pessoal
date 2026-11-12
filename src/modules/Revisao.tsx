@@ -1,4 +1,5 @@
 import { MoodWeek } from './Humor';
+import { go } from '../router';
 import { useMemo, useState } from 'react';
 import { useStore } from '../store';
 import { upsert } from '../actions';
@@ -192,7 +193,7 @@ export function Revisao() {
               <ul className="list">
                 {r.nextBills.slice(0, 5).map((b) => (
                   <li key={b.key}>
-                    <BillRow bill={b} today={today} categoryOf={categoryOf} onClick={() => (location.hash = '/financas')} />
+                    <BillRow bill={b} today={today} categoryOf={categoryOf} onClick={() => go('financas')} />
                   </li>
                 ))}
               </ul>
