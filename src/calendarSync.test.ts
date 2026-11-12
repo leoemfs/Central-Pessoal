@@ -9,10 +9,11 @@ function base(on = true): AppData {
   const d = emptyData();
   return {
     ...d,
-    settings: { ...d.settings, googleCalendar: { on, events: true, bills: true, tasks: true, calendarId: 'cal' } },
+    settings: { ...d.settings, googleCalendar: { on, events: true, bills: true, tasks: true, calendarId: 'cal', tasksList: null } },
     events: [
       { id: 'ev1', title: 'Dentista', date: '2026-11-12', time: '14:30', location: 'Centro', description: '' },
       { id: 'ev2', title: 'Aniversário', date: '2026-11-13', time: '', location: '', description: '' },
+      { id: 'ev3', title: 'Reunião', date: '2026-11-14', time: '09:30', location: '', description: '' },
       { id: 'velho', title: 'Passou', date: '2026-11-01', time: '10:00', location: '', description: '' },
       { id: 'longe', title: 'Longe', date: '2027-03-01', time: '10:00', location: '', description: '' },
     ],
@@ -40,15 +41,8 @@ test('compromisso com hora: na hora, 1 h, aviso 30 min antes; sem hora: 9h; só 
   assert.ok(!w.some((x) => x.id === eventId('e', 'velho') || x.id === eventId('e', 'longe')));
 });
 
-test('tarefa com data (não concluída) às 9h; cada tipo pode ser desligado', () => {
-  const w = wantedEvents(base(), TODAY);
-  const t = w.find((x) => x.id === eventId('t', 't1'))!;
-  assert.equal(t.summary, '☑️ Renovar CNH');
-  assert.equal(t.start, '2026-11-20T09:00:00');
-  assert.ok(!w.some((x) => x.id === eventId('t', 't2')));
-  const d = base();
-  d.settings.googleCalendar.tasks = false;
-  assert.ok(!wantedEvents(d, TODAY).some((x) => x.id.startsWith('t')));
+test('tarefas não vão para a agenda (vão para o Google Tarefas, N9.6)', () => {
+  assert.ok(!wantedEvents(base(), TODAY).some((x) => x.id.startsWith('t')));
 });
 
 test('id do evento: só letras a-v e números, fixo para o mesmo item', () => {

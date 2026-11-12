@@ -55,7 +55,7 @@ export function emptyData(): AppData {
     incomes: [],
     incomeSeries: [],
     incomeSources: [],
-    settings: { theme: 'dark', accent: null, favorites: [...DEFAULT_FAVORITES], cards: {}, barLayout: 'fixo', tapToFavorites: true, hideOnScroll: true, seededCategories: false, seededIncomeSources: false, lastBackupAt: null, activeDays: [], visitDays: [], journeyUnlockedAt: null, journeyChoice: null, hiddenModules: [], setup: 'novo', tutorialSeen: false, setupAreas: [], journeyWanted: null, journalRhythm: { ...DEFAULT_RHYTHM }, googleCalendar: { on: false, events: true, bills: true, tasks: true, calendarId: null } },
+    settings: { theme: 'dark', accent: null, favorites: [...DEFAULT_FAVORITES], cards: {}, barLayout: 'fixo', tapToFavorites: true, hideOnScroll: true, seededCategories: false, seededIncomeSources: false, lastBackupAt: null, activeDays: [], visitDays: [], journeyUnlockedAt: null, journeyChoice: null, hiddenModules: [], setup: 'novo', tutorialSeen: false, setupAreas: [], journeyWanted: null, journalRhythm: { ...DEFAULT_RHYTHM }, googleCalendar: { on: false, events: true, bills: true, tasks: true, calendarId: null, tasksList: null } },
     profile: emptyProfile('novo'),
     boxes: [],
     moods: {},
@@ -104,7 +104,7 @@ const strMap = (x: unknown): Record<string, string> =>
 /** N9.5: padrão desligado; com tudo marcado para quando ligar. */
 function normalizeGoogleCalendar(x: unknown): AppData['settings']['googleCalendar'] {
   const r = isRec(x) ? x : {};
-  return { on: r.on === true, events: r.events !== false, bills: r.bills !== false, tasks: r.tasks !== false, calendarId: typeof r.calendarId === 'string' && r.calendarId ? r.calendarId : null };
+  return { on: r.on === true, events: r.events !== false, bills: r.bills !== false, tasks: r.tasks !== false, calendarId: typeof r.calendarId === 'string' && r.calendarId ? r.calendarId : null, tasksList: typeof r.tasksList === 'string' && r.tasksList ? r.tasksList : null };
 }
 function list<T>(x: unknown): T[] {
   return Array.isArray(x) ? (x.filter((i) => isRec(i) && typeof i.id === 'string') as T[]) : [];
