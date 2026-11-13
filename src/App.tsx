@@ -398,7 +398,14 @@ export function App() {
             onTap={tapFor(it, i)}
           />
         ))}
-        <TabLink to="mais" label="Mais" icon="grid" active={!bar && section.path !== 'inicio' && !middle.some((it) => it.id === section.path)} />
+        {placed && (
+          // E21: dentro de um módulo, a ponta é o atalho para trocar de módulo (mostra os favoritos).
+          <button type="button" className="tb tb-favs" aria-label="Favoritos: trocar de módulo" onClick={() => setShowFavs(true)}>
+            <span className="tb-pill">
+              <Icon name="star" size={26} />
+            </span>
+          </button>
+        )}
         {showFavs && <span className="tb-hint">Escolha o módulo</span>}
       </nav>
 

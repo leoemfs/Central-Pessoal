@@ -22,7 +22,6 @@ import {
   MODULES,
   PROFILE_AREA,
   rhythmLabel,
-  BAR_LAYOUTS,
   SETUP_AREAS,
   tapFavorite,
   toggleModule,
@@ -133,7 +132,7 @@ function AccentRow({ value, onChange }: { value: string | null; onChange: (a: st
 
 /** Barra de baixo em miniatura, mostrando os favoritos ao vivo. */
 function MiniBar({ favorites }: { favorites: string[] }) {
-  const items = [0, 1, 2].map((i) => FAVORITABLE.find((f) => f.id === favorites[i]));
+  const items = [0, 1, 2, 3].map((i) => FAVORITABLE.find((f) => f.id === favorites[i]));
   return (
     <div className="mini-bar" aria-label="Prévia da barra de baixo">
       <span className="mb-item">
@@ -151,9 +150,6 @@ function MiniBar({ favorites }: { favorites: string[] }) {
           </span>
         ),
       )}
-      <span className="mb-item">
-        <Icon name="grid" size={22} />
-      </span>
     </div>
   );
 }
@@ -171,7 +167,6 @@ function Montagem({ mode, onClose }: { mode: SetupMode; onClose: () => void }) {
   const [visible, setVisible] = useState<string[]>(fresh ? modulesFromAreas([]) : now.visible.filter((m) => m !== 'jornada'));
   const [picked, setPicked] = useState<string[]>(fresh ? [] : now.favorites);
   const [rhythm, setRhythm] = useState<JournalRhythm>(now.rhythm);
-  const [layout, setLayout] = useState(now.barLayout);
   const [accent, setAccent] = useState<string | null>(now.accent);
   const [journey, setJourney] = useState<boolean | null>(fresh ? null : data.settings.journeyWanted ?? !data.settings.hiddenModules.includes('jornada'));
   const [touchedModules, setTouchedModules] = useState(!fresh);
@@ -207,7 +202,7 @@ function Montagem({ mode, onClose }: { mode: SetupMode; onClose: () => void }) {
         hiddenModules: hiddenFrom(finalVisible),
         favorites,
         journalRhythm: finalVisible.includes('diario') ? rhythm : d.settings.journalRhythm,
-        barLayout: layout,
+        barLayout: 'centro',
         accent,
         setupAreas: areas,
         journeyWanted: journey,
@@ -241,7 +236,7 @@ function Montagem({ mode, onClose }: { mode: SetupMode; onClose: () => void }) {
             <Icon name="grid" size={32} />
           </span>
           <h2>{fresh ? 'Vamos montar o app do seu jeito' : 'Monte o app do seu jeito'}</h2>
-          <p className="muted">{fresh ? 'Uns 2 minutos, só com toques. Você escolhe o que quer ver, os 3 favoritos da barra e a cor.' : 'Já está tudo preenchido com o que você usa hoje. É só ajustar.'}</p>
+          <p className="muted">{fresh ? 'Uns 2 minutos, só com toques. Você escolhe o que quer ver, os 4 favoritos da barra e a cor.' : 'Já está tudo preenchido com o que você usa hoje. É só ajustar.'}</p>
           <ul className="iv-points">
             <li>
               <Icon name="lock" size={18} /> Módulo desligado fica em Mais › Guardados. Nada é apagado.
@@ -376,7 +371,7 @@ function Montagem({ mode, onClose }: { mode: SetupMode; onClose: () => void }) {
       </ul>
     );
   } else if (at === 'favoritos') {
-    title = 'Seus 3 favoritos';
+    title = 'Seus 4 favoritos';
     sub = 'Toque na ordem em que quer ver na barra de baixo. Eles ficam no meio, entre o Início e o Mais.';
     canGo = picked.filter((f) => favChoices.some((c) => c.id === f)).length === 3;
     body = (
@@ -401,25 +396,10 @@ function Montagem({ mode, onClose }: { mode: SetupMode; onClose: () => void }) {
     sub = 'O app só convida nesse ritmo. Nunca conta como falta.';
     body = <RhythmPicker value={rhythm} onChange={setRhythm} />;
   } else if (at === 'barra') {
-    title = 'Barra e cor';
-    sub = 'Ao entrar num módulo, a barra de baixo mostra as ferramentas dele. Onde o módulo fica?';
+    title = 'Cor';
+    sub = 'A cor de destaque do app. Dá para trocar depois em Personalização.';
     body = (
       <>
-        <div className="pz-options" role="radiogroup" aria-label="Jeito da barra de baixo">
-          {BAR_LAYOUTS.map((o) => (
-            <button key={o.id} type="button" role="radio" aria-checked={layout === o.id} className={`option-card${layout === o.id ? ' on' : ''}`} onClick={() => setLayout(o.id)}>
-              <strong>{o.label}</strong>
-              <span className="muted small">{o.hint}</span>
-              <span className="pz-demo" aria-hidden="true">
-                {o.demo.map((dm, k) => (
-                  <i key={k} className={dm === 'M' ? 'mod' : dm === 'H' ? 'home' : ''}>
-                    {dm === 'M' ? 'Módulo' : dm === 'H' ? 'Início' : dm === '+' ? 'Mais' : 'ferr.'}
-                  </i>
-                ))}
-              </span>
-            </button>
-          ))}
-        </div>
         <span className="field-label" style={{ marginTop: 16, display: 'block' }}>
           Cor de destaque
         </span>
@@ -549,12 +529,12 @@ export function JournalRhythmCard() {
 // ---------- Tutorial da barra ----------
 
 const TUTORIAL: { title: string; text: string; focus: string }[] = [
-  { title: 'Estes são seus 3 favoritos', text: 'Os ícones do meio da barra levam aos módulos que você mais usa. Toque em um.', focus: 'favs' },
+  { title: 'Estes são seus 4 favoritos', text: 'Os ícones ao lado do Início levam aos módulos que você mais usa. Toque em um.', focus: 'favs' },
   { title: 'A barra virou a do módulo', text: 'Dentro de um módulo, a barra mostra as ferramentas dele. O ícone com contorno é a casa do módulo. Toque numa ferramenta ao lado.', focus: 'tools' },
   { title: 'Voltar leva ao módulo', text: 'Use o voltar do celular (ou toque na casa, com contorno). Você volta para a casa do módulo, não para o começo.', focus: 'home' },
-  { title: 'Trocar de módulo direto', text: 'Na casa do módulo, toque nela de novo: aparecem os favoritos, e dá para pular para outro módulo sem passar pelo Início.', focus: 'home' },
+  { title: 'Trocar de módulo direto', text: 'Toque na estrela, na ponta da barra: aparecem os favoritos, e dá para pular para outro módulo sem passar pelo Início.', focus: 'favbtn' },
   { title: 'Segure para ver o nome', text: 'Não lembra o que é um ícone? Segure o dedo em cima dele por um instante.', focus: 'all' },
-  { title: 'Tudo o mais fica no Mais', text: 'O último ícone abre todos os módulos (e os guardados). A barra, os favoritos e a cor mudam em Configurações › Personalização.', focus: 'mais' },
+  { title: 'Tudo o mais fica no Mais', text: 'Todos os módulos (e os guardados) ficam no Mais, no menu ☰ do canto de cima. Os favoritos e a cor mudam em Configurações › Personalização.', focus: 'all' },
 ];
 
 /** Fica no App. Avança sozinho quando a pessoa faz o passo de verdade; "Próximo" sempre funciona também. */

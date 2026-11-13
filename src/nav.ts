@@ -15,6 +15,8 @@ export const NAV_GROUPS: { title: string; items: NavItem[] }[] = [
     title: 'Geral',
     items: [
       { label: 'Página inicial', icon: 'home', to: 'inicio', section: 'inicio' },
+      // E21: o Mais saiu da barra de baixo (lá ficou o 4º favorito); aqui ele fica sempre à mão.
+      { label: 'Mais (todos os módulos)', icon: 'grid', to: 'mais', section: 'mais' },
       { label: 'Você', icon: 'user', to: 'voce', section: 'voce' },
       { label: 'Calendário', icon: 'calendar', to: 'agenda', section: 'agenda' },
       { label: 'Tarefas', icon: 'tasks', to: 'agenda/tarefas' },

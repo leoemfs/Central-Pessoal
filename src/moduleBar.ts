@@ -1,8 +1,8 @@
 /**
  * Barra de baixo (navegação 2.0, item A1 da Central).
  * - Início e Mais ficam sempre nas pontas.
- * - No Início (e em telas sem barra própria), os 3 do meio são os módulos favoritos.
- * - Dentro de um módulo, os 3 do meio são do próprio módulo, com a "casa" dele no centro.
+ * - No Início (e em telas sem barra própria), os 4 depois do Início são os módulos favoritos (E21).
+ * - Dentro de um módulo, os 3 do meio são do próprio módulo, com a "casa" dele no centro; a ponta é o botão Favoritos.
  *
  * Regra de navegação (vale para o app todo):
  * - Abas no topo: partes do mesmo conteúdo (Despesas · Receitas · Cartões · Caixinhas).
@@ -105,7 +105,7 @@ export const MODULE_BARS: ModuleBar[] = [
   },
 ];
 
-/** Módulos que podem ser favoritos (os 3 do meio da barra no Início). */
+/** Módulos que podem ser favoritos (os 4 da barra no Início). */
 export const FAVORITABLE: BarItem[] = [
   { id: 'financas', label: 'Finanças', icon: 'wallet', to: 'financas' },
   { id: 'diario', label: 'Diário', icon: 'journal', to: 'diario' },
@@ -120,26 +120,28 @@ export const FAVORITABLE: BarItem[] = [
   { id: 'jornada', label: 'Jornada', icon: 'sword', to: 'jornada' },
 ];
 
-export const DEFAULT_FAVORITES: [string, string, string] = ['financas', 'diario', 'agenda'];
+/** E21: 4 favoritos no Início (o lugar do Mais virou o 4º). */
+export const FAV_COUNT = 4;
+export const DEFAULT_FAVORITES: string[] = ['financas', 'diario', 'agenda', 'listas'];
 
 const isFav = (id: unknown): id is string => typeof id === 'string' && FAVORITABLE.some((f) => f.id === id);
 
-/** Sempre 3 favoritos válidos e diferentes; completa com os padrões se faltar. */
-export function normalizeFavorites(raw: unknown): [string, string, string] {
+/** Sempre 4 favoritos válidos e diferentes; completa com os padrões se faltar (quem tinha 3 ganha o 4º). */
+export function normalizeFavorites(raw: unknown): string[] {
   const out: string[] = [];
   for (const id of Array.isArray(raw) ? raw : []) if (isFav(id) && !out.includes(id)) out.push(id);
-  for (const id of DEFAULT_FAVORITES) if (out.length < 3 && !out.includes(id)) out.push(id);
-  for (const f of FAVORITABLE) if (out.length < 3 && !out.includes(f.id)) out.push(f.id);
-  return out.slice(0, 3) as [string, string, string];
+  for (const id of DEFAULT_FAVORITES) if (out.length < FAV_COUNT && !out.includes(id)) out.push(id);
+  for (const f of FAVORITABLE) if (out.length < FAV_COUNT && !out.includes(f.id)) out.push(f.id);
+  return out.slice(0, FAV_COUNT);
 }
 
 /**
  * Marca um módulo como favorito: entra no fim e o mais antigo sai.
- * Tocar num que já é favorito não muda nada (a barra precisa de 3).
+ * Tocar num que já é favorito não muda nada (a barra precisa de 4).
  */
-export function addFavorite(favs: [string, string, string], id: string): { favorites: [string, string, string]; removed: string | null } {
+export function addFavorite(favs: string[], id: string): { favorites: string[]; removed: string | null } {
   if (!isFav(id) || favs.includes(id)) return { favorites: favs, removed: null };
-  return { favorites: [favs[1], favs[2], id], removed: favs[0] };
+  return { favorites: [...favs.slice(1), id], removed: favs[0] };
 }
 
 export function favoriteItems(favs: string[]): BarItem[] {
@@ -163,15 +165,9 @@ export function activeIndex(bar: ModuleBar, section: string): number | null {
  */
 export type BarLayout = 'fixo' | 'lado' | 'centro';
 
-export function barItems(bar: ModuleBar, favorites: string[], layout: BarLayout = 'fixo'): { items: BarItem[]; home: number } {
-  const [left, home, right] = bar.items;
-  const fav = favorites.indexOf(bar.id);
-  // 'lado': sempre na 1ª posição do meio (ao lado do Início); 'centro': sempre no meio; 'fixo': no lugar do favorito (não favorito: centro).
-  const slot = layout === 'lado' ? 0 : layout === 'centro' ? 1 : fav;
-  if (slot < 0 || slot > 2) return { items: bar.items, home: 1 };
-  const tools = [left, right];
-  const items = [0, 1, 2].map((i) => (i === slot ? home : tools.shift()!));
-  return { items, home: slot };
+/** E21: o módulo fica sempre no centro (Início · ferramenta · módulo · ferramenta · Favoritos). `layout` ficou só por compatibilidade. */
+export function barItems(bar: ModuleBar, _favorites?: string[], _layout?: BarLayout): { items: BarItem[]; home: number } {
+  return { items: bar.items, home: 1 };
 }
 
 /** Texto do topo: "Finanças" na casa do módulo; "Finanças / Orçamento" nas outras abas. */

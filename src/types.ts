@@ -237,7 +237,7 @@ export interface Settings {
   /** Cor de destaque escolhida (id de ACCENTS em theme.ts); null = padrão do tema (escuro verde, claro azul). */
   accent: string | null;
   /** Os 3 módulos favoritos da barra de baixo no Início (ids de FAVORITABLE em moduleBar.ts). */
-  favorites: [string, string, string];
+  favorites: string[];
   /** Ordem e cartões ocultos de cada tela (lápis ao lado da lupa). */
   cards: Record<string, { order: string[]; hidden: string[] }>;
   /** Barra de baixo dentro do módulo: 'fixo' = o favorito fica no lugar dele; 'lado' = o módulo vai para o lado do Início; 'centro' = o módulo vai para o centro. */
