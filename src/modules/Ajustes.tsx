@@ -178,7 +178,7 @@ export function Ajustes() {
         </div>
 
         <h3 className="pz-title">Favoritos do Início</h3>
-        <p className="muted small">Os 4 ícones da barra de baixo ao lado do Início. Dentro de um módulo, a estrela na ponta da barra mostra os favoritos para trocar de módulo; o Mais fica no menu ☰.</p>
+        <p className="muted small">Os ícones da barra de baixo ao lado do Início (4, ou 3 com o botão Mais ligado). Dentro de um módulo, a estrela na ponta da barra mostra os favoritos para trocar de módulo.</p>
         <div className="fav-row">
           {favoriteItems(data.settings.favorites).map((f) => (
             <span key={f.id} className="fav-chip">
@@ -223,6 +223,13 @@ export function Ajustes() {
           </>
         )}
 
+        <div className="toggle-row">
+          <div>
+            <strong>Botão Mais na barra</strong>
+            <span className="muted small">Desligado: 4 favoritos no Início, e o Mais abre puxando a barra para cima (ou pelo menu ☰). Ligado: 3 favoritos e o Mais na ponta. Puxar funciona nos dois jeitos.</span>
+          </div>
+          <Toggle checked={data.settings.moreButton} onChange={(v) => setSetting({ moreButton: v })} label="Botão Mais na barra" />
+        </div>
         <div className="toggle-row">
           <div>
             <strong>Tocar de novo no módulo mostra os favoritos</strong>

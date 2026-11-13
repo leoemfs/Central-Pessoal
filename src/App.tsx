@@ -30,6 +30,7 @@ import { CiclosPage } from './modules/estudos/Ciclos';
 import { RoadmapsPage } from './modules/estudos/Roadmaps';
 import { CarreiraPage, MetasPage, VagasPage } from './modules/Carreira';
 import { useCardEditor } from './Cards';
+import { barDrag, PullToMais } from './BarPull';
 import { activeIndex, barFor, barItems, crumb, favoriteItems, type BarItem } from './moduleBar';
 
 export interface ViewProps {
@@ -105,6 +106,7 @@ function TabLink({ to, label, icon, active, center, onTap }: { to: string; label
     held.current = false;
     window.clearTimeout(timer.current);
     timer.current = window.setTimeout(() => {
+      if (barDrag.active) return; // está puxando a barra para cima, não segurando o ícone
       held.current = true;
       setTip(true);
     }, 420);
@@ -286,7 +288,10 @@ export function App() {
   const [showFavs, setShowFavs] = useState(false);
   useEffect(() => setShowFavs(false), [route.path, route.n]);
   const placed = bar && !showFavs ? barItems(bar, data.settings.favorites, data.settings.barLayout) : null;
-  const middle: BarItem[] = placed ? placed.items : favoriteItems(data.settings.favorites);
+  // E21.2: com o "Botão Mais na barra" ligado, o Início mostra 3 favoritos e o Mais na ponta.
+  const moreButton = data.settings.moreButton && !placed;
+  const middle: BarItem[] = placed ? placed.items : favoriteItems(data.settings.favorites).slice(0, moreButton && !showFavs ? 3 : 4);
+  const tabbarRef = useRef<HTMLElement>(null);
 
   /**
    * O que cada ícone faz ao ser tocado. O "voltar" sobe um nível (E20, navStack.ts): ferramenta → casa do módulo → Início.
@@ -385,7 +390,7 @@ export function App() {
         </button>
       )}
 
-      <nav className={`tabbar${barHidden ? ' hidden' : ''}`} aria-label="Atalhos">
+      <nav ref={tabbarRef} className={`tabbar${barHidden ? ' hidden' : ''}`} aria-label="Atalhos (puxe para cima para abrir o Mais)">
         <TabLink to="inicio" label="Início" icon="home" active={section.path === 'inicio'} />
         {middle.map((it, i) => (
           <TabLink
@@ -398,6 +403,7 @@ export function App() {
             onTap={tapFor(it, i)}
           />
         ))}
+        {moreButton && !showFavs && <TabLink to="mais" label="Mais" icon="grid" active={section.path === 'mais'} />}
         {placed && (
           // E21: dentro de um módulo, a ponta é o atalho para trocar de módulo (mostra os favoritos).
           <button type="button" className="tb tb-favs" aria-label="Favoritos: trocar de módulo" onClick={() => setShowFavs(true)}>
@@ -409,6 +415,7 @@ export function App() {
         {showFavs && <span className="tb-hint">Escolha o módulo</span>}
       </nav>
 
+      <PullToMais bar={tabbarRef} resetKey={`${route.path}:${route.n}`} />
       <SetupHost />
       <BarTutorial path={section.path} nav={`${section.path}:${route.n}:${location.hash}`} showFavs={showFavs} />
       <Toasts />

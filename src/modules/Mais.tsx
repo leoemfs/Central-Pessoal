@@ -1,5 +1,6 @@
 import { COMING_SOON, SECTIONS } from '../App';
 import { useStore } from '../store';
+import type { AppData } from '../types';
 import { addFavorite, FAVORITABLE } from '../moduleBar';
 import { Icon, notify, PageHeader, Sheet, type IconName } from '../ui';
 import { hiddenFrom, isHidden, toggleModule, visibleFrom } from '../setup';
@@ -93,10 +94,8 @@ function Entry({ it, grid, editing, first, last, onMove }: { it: Item; grid: boo
   );
 }
 
-export function Mais() {
-  const { data, update } = useStore();
-  const editing = useEditScreen('mais');
-  const grid = data.settings.moreLayout === 'grade';
+/** Módulos e atalhos do Mais, na ordem escolhida no lápis (a tela Mais e a gaveta usam os mesmos). */
+function maisItems(data: AppData, grid: boolean) {
   const kept = LINKS.filter((l) => isHidden(data, l.path));
   const modules: Item[] = LINKS.filter((l) => l.path !== 'ajustes' && !isHidden(data, l.path)).map((l) => {
     const s = SECTIONS.find((x) => x.path === l.path)!;
@@ -111,8 +110,29 @@ export function Mais() {
       : []),
   ];
   const layouts = data.settings.cards;
-  const mods = arrange(modules, layouts[KEY_MODULES]).shown;
-  const tools = arrange(shortcuts, layouts[KEY_SHORTCUTS]).shown;
+  return { modules, shortcuts, mods: arrange(modules, layouts[KEY_MODULES]).shown, tools: arrange(shortcuts, layouts[KEY_SHORTCUTS]).shown };
+}
+
+/** E21.2: o Mais dentro da gaveta que sobe ao puxar a barra (sempre em grade, sem lápis). */
+export function MaisPanel() {
+  const { data } = useStore();
+  const { mods, tools } = maisItems(data, true);
+  const row = (items: Item[]) => items.map((it) => <Entry key={it.id} it={it} grid editing={false} first last onMove={() => {}} />);
+  return (
+    <>
+      <div className="mg-grid">{row(mods)}</div>
+      <h2 className="section-title">Atalhos</h2>
+      <div className="mg-grid small">{row(tools)}</div>
+    </>
+  );
+}
+
+export function Mais() {
+  const { data, update } = useStore();
+  const editing = useEditScreen('mais');
+  const grid = data.settings.moreLayout === 'grade';
+  const { modules, shortcuts, mods, tools } = maisItems(data, grid);
+  const layouts = data.settings.cards;
   const save = (changes: Record<string, CardLayout | null>) =>
     update((d) => {
       const cards = { ...d.settings.cards };

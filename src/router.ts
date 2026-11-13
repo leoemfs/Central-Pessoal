@@ -117,8 +117,16 @@ export function startNavigation() {
   }
   remember();
 
-  window.addEventListener('popstate', () => {
+  window.addEventListener('popstate', (e: PopStateEvent) => {
     const overlay = popWasOverlay();
+    if (e.state === null && !pending) {
+      // Endereço trocado "por fora" (link colado, endereço digitado): o navegador avisa como se fosse voltar,
+      // mas é uma tela nova. Abre por cima da trilha, sem subir um nível.
+      trail = nextStack(trail, here(), 'open', homeOf);
+      remember();
+      history.replaceState({ nav: trail.length > 1 ? 'top' : 'root' }, '', window.location.hash);
+      return;
+    }
     if (pending) {
       const f = pending;
       pending = null;
