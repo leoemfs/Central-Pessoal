@@ -39,7 +39,7 @@ export function normalizeListData(r: Rec) {
     : DEFAULT_LIST_CATEGORIES.map((c) => ({ ...c }));
   const item = (i: Rec): ListItem => ({
     id: i.id as string, text: str(i.text, 'Item'), qty: numOrNull(i.qty), unit: str(i.unit), aisle: str(i.aisle), productId: typeof i.productId === 'string' ? i.productId : null,
-    price: numOrNull(i.price), store: str(i.store), done: i.done === true, launched: i.launched === true,
+    price: numOrNull(i.price), store: str(i.store), paid: numOrNull(i.paid), done: i.done === true, launched: i.launched === true,
   });
   const lists: UserList[] = recs(r.lists).map((l) => ({
     id: l.id as string, name: str(l.name, 'Lista'), categoryId: str(l.categoryId, listCategories[0]?.id ?? ''), pinned: l.pinned === true,
@@ -352,7 +352,7 @@ export function newList(name: string, categoryId: string): UserList {
 }
 
 export function newItem(p: Partial<ListItem> & { text: string }): ListItem {
-  return { id: uid(), qty: null, unit: '', aisle: '', productId: null, price: null, store: '', done: false, launched: false, ...p };
+  return { id: uid(), qty: null, unit: '', aisle: '', productId: null, price: null, store: '', paid: null, done: false, launched: false, ...p };
 }
 
 /** Mercado: adiciona um item a partir do texto ("2 kg tomate"), já ligado a um produto de Preços (o seu, do catálogo ou novo) e ao corredor. */
@@ -371,10 +371,10 @@ export function removeItem(listId: string, itemId: string) {
   return patchList(listId, (l) => ({ ...l, items: l.items.filter((i) => i.id !== itemId) }));
 }
 export function toggleItem(listId: string, itemId: string) {
-  return patchList(listId, (l) => ({ ...l, items: l.items.map((i) => (i.id === itemId ? { ...i, done: !i.done, launched: i.done ? false : i.launched } : i)) }));
+  return patchList(listId, (l) => ({ ...l, items: l.items.map((i) => (i.id === itemId ? { ...i, done: !i.done, launched: i.done ? false : i.launched, paid: i.done ? null : i.paid } : i)) }));
 }
 export function uncheckAll(listId: string) {
-  return patchList(listId, (l) => ({ ...l, items: l.items.map((i) => ({ ...i, done: false, launched: false })) }));
+  return patchList(listId, (l) => ({ ...l, items: l.items.map((i) => ({ ...i, done: false, launched: false, paid: null })) }));
 }
 export function updateList(id: string, patch: Partial<UserList>) {
   return patchList(id, (l) => ({ ...l, ...patch }));
@@ -386,7 +386,8 @@ export function finishShopping(listId: string, o: { total: number; storeName: st
     let next = d;
     const l = d.lists.find((x) => x.id === listId);
     const bought = l ? l.items.filter((i) => i.done).length : 0;
-    if (l && (o.total > 0 || bought > 0)) next = recordPurchase(next, { date: today, listId, listName: l.name, store: o.storeName, total: o.total, items: bought });
+    const lines = l ? l.items.filter((i) => i.done && (i.paid ?? 0) > 0).map((i) => ({ productId: i.productId, text: i.text, price: i.paid! })) : [];
+    if (l && (o.total > 0 || bought > 0)) next = recordPurchase(next, { date: today, listId, listName: l.name, store: o.storeName, total: o.total, items: bought, lines });
     if (o.categoryId && o.total > 0) {
       next = addExpense(next, { kind: 'avulsa', description: `Mercado · ${o.storeName}`, categoryId: o.categoryId, method: o.voucherId ? 'vale' : 'pix', cardId: null, date: today, amounts: [o.total], paidAt: today, voucherId: o.voucherId ?? null }, today);
     }
@@ -396,6 +397,43 @@ export function finishShopping(listId: string, o: { total: number; storeName: st
 
 function recordPurchase(d: AppData, p: Omit<Purchase, 'id'>): AppData {
   return { ...d, purchases: [...d.purchases, { id: uid(), ...p }] };
+}
+
+/** M3: quantas embalagens o item pede ("2 kg" de arroz em pacote de 1 kg = 2; "3 un" = 3; sem quantidade = 1). */
+export function packCount(it: Pick<ListItem, 'qty' | 'unit'>, product: Product | undefined, pack: { size: number; sizeUnit: ProductVariant['sizeUnit'] }): number {
+  const q = it.qty && it.qty > 0 ? it.qty : 1;
+  const u = it.unit.toLowerCase();
+  const amount = u === 'g' || u === 'ml' ? q / 1000 : q;
+  const measured = (u === 'kg' || u === 'g') && product?.unit === 'kg' ? true : (u === 'l' || u === 'ml') && product?.unit === 'L';
+  if (!measured) return q;
+  const f = unitFactor({ id: '', productId: '', brand: '', ...pack });
+  return f > 0 ? Math.max(1, Math.round((amount / f) * 100) / 100) : 1;
+}
+
+/**
+ * M3: "Quanto custou aqui?" ao marcar o item. Marca o item, guarda quanto pagou (embalagem × quantidade)
+ * e anota o preço da embalagem em Preços, na loja da compra.
+ */
+export function payItem(listId: string, itemId: string, o: { storeId: string; price: number; count: number; brand?: string; size: number; sizeUnit: ProductVariant['sizeUnit'] }, today: string = todayISO()) {
+  return (d: AppData): AppData => {
+    const it = d.lists.find((l) => l.id === listId)?.items.find((i) => i.id === itemId);
+    if (!it || !(o.price > 0)) return d;
+    let next = d;
+    if (it.productId) next = addPrice({ storeId: o.storeId, productId: it.productId, brand: o.brand ?? '', size: o.size, sizeUnit: o.sizeUnit, price: o.price, date: today })(next);
+    const paid = Math.round(o.price * (o.count > 0 ? o.count : 1) * 100) / 100;
+    return updateItem(listId, itemId, { done: true, paid })(next);
+  };
+}
+
+/** M3: soma do que foi anotado como pago nos itens marcados. */
+export function paidTotal(l: UserList): { total: number; count: number } {
+  const xs = l.items.filter((i) => i.done && (i.paid ?? 0) > 0);
+  return { total: Math.round(xs.reduce((a, i) => a + (i.paid ?? 0), 0) * 100) / 100, count: xs.length };
+}
+
+/** M3: a última compra concluída desta lista (para comparar com a de agora). */
+export function lastPurchase(d: Pick<AppData, 'purchases'>, listId: string): Purchase | undefined {
+  return d.purchases.filter((p) => p.listId === listId).sort((a, b) => b.date.localeCompare(a.date))[0];
 }
 
 export interface PurchaseRow {
@@ -429,7 +467,7 @@ export function launchBought(listId: string, categoryId: string, today: string =
     if (!l) return d;
     let next = d;
     const toLaunch = l.items.filter((i) => i.done && !i.launched && (i.price ?? 0) > 0);
-    if (toLaunch.length) next = recordPurchase(next, { date: today, listId, listName: l.name, store: '', total: toLaunch.reduce((a, i) => a + (i.price ?? 0), 0), items: toLaunch.length });
+    if (toLaunch.length) next = recordPurchase(next, { date: today, listId, listName: l.name, store: '', total: toLaunch.reduce((a, i) => a + (i.price ?? 0), 0), items: toLaunch.length, lines: [] });
     for (const it of toLaunch) {
       next = addExpense(next, { kind: 'avulsa', description: it.text, categoryId, method: 'pix', cardId: null, date: today, amounts: [it.price!], paidAt: today }, today);
     }

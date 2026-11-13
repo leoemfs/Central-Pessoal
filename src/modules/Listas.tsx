@@ -8,7 +8,7 @@ import {
   addItemFromText, addListCategory, addPrice, AISLES, bestPrice, categoryOf, deleteListCategory, finishShopping, kindOf, latestPrices, launchBought, LIST_COLORS,
   LIST_ICONS, LIST_KINDS, listEstimate, newItem, newList, perUnit, priceCheck, qtyText, removeItem, scaledQty, sendIngredients, sizeText, toggleItem, uncheckAll,
   updateItem, updateList, updateListCategory, variantLabel, itemCost, purchaseHistory, ensureProduct, findCatalog, marketEstimate, matchKey, parseItemText,
-  priceRange, productSuggestions, productsWithoutPrice, sizeOptions,
+  priceRange, productSuggestions, productsWithoutPrice, sizeOptions, packCount, payItem, paidTotal, lastPurchase,
 } from '../lists';
 import type { ListCategory, ListItem, ListKind, Product, ProductVariant, UserList } from '../types';
 import { formatDMY, formatMoney, todayISO, uid } from '../utils';
@@ -529,11 +529,11 @@ function AddRow({ placeholder, onAdd, withValue }: { placeholder: string; onAdd:
   );
 }
 
-function CheckRow({ l, it, meta, end, onOpen }: { l: UserList; it: ListItem; meta?: string; end?: ReactNode; onOpen: () => void }) {
+function CheckRow({ l, it, meta, end, onOpen, onCheck }: { l: UserList; it: ListItem; meta?: string; end?: ReactNode; onOpen: () => void; onCheck?: () => void }) {
   const { update } = useStore();
   return (
     <li className={`row check-row${it.done ? ' done' : ''}`}>
-      <button type="button" className={`check round${it.done ? ' on' : ''}`} aria-pressed={it.done} aria-label={`Marcar ${it.text}`} onClick={() => update(toggleItem(l.id, it.id))}>
+      <button type="button" className={`check round${it.done ? ' on' : ''}`} aria-pressed={it.done} aria-label={`Marcar ${it.text}`} onClick={() => (onCheck && !it.done ? onCheck() : update(toggleItem(l.id, it.id)))}>
         {it.done && <Icon name="check" size={14} />}
       </button>
       <button type="button" className="row-body link-row" onClick={onOpen}>
@@ -652,6 +652,12 @@ function MarketList({ l }: { l: UserList }) {
   const [product, setProduct] = useState<string | null>(null);
   const [finish, setFinish] = useState(false);
   const [fill, setFill] = useState<{ storeId: string; ids: string[] } | null>(null);
+  const [pay, setPay] = useState<ListItem | null>(null);
+  const [ask, setAskState] = useState(readAsk);
+  const setAsk = (v: boolean) => {
+    setAskState(v);
+    writeAsk(v);
+  };
   const latest = useMemo(() => latestPrices(data), [data]);
   const est = useMemo(() => marketEstimate(data, l), [data, l]);
   const storeName = (id: string) => data.stores.find((s) => s.id === id)?.name ?? '';
@@ -744,8 +750,11 @@ function MarketList({ l }: { l: UserList }) {
                       l={l}
                       it={it}
                       onOpen={() => setItem(it)}
+                      onCheck={ask ? () => setPay(it) : undefined}
                       meta={
-                        b
+                        it.done && it.paid
+                          ? `Pago: ${formatMoney(it.paid)}`
+                          : b
                           ? `Melhor: ${formatMoney(itemCost(it, b, prod))}${b.variant.brand ? ` ${b.variant.brand}` : ''} no ${storeName(b.storeId)}${isOld(b.date) ? ` · preço de ${formatDMY(b.date)}` : ''}`
                           : 'Sem preço anotado'
                       }
@@ -764,6 +773,13 @@ function MarketList({ l }: { l: UserList }) {
         ))
       )}
       <MarketAddRow l={l} />
+      <div className="toggle-row">
+        <div>
+          <strong>Perguntar o preço ao marcar</strong>
+          <span className="muted small">"Quanto custou aqui?" vira preço em Preços e soma o total da compra.</span>
+        </div>
+        <Toggle checked={ask} onChange={setAsk} label="Perguntar o preço ao marcar" />
+      </div>
       <ListFooter l={l}>
         <button type="button" className="btn primary" disabled={!l.items.some((i) => i.done)} onClick={() => setFinish(true)}>
           <Icon name="check" size={18} /> Concluir compra
@@ -772,8 +788,126 @@ function MarketList({ l }: { l: UserList }) {
       {item && <ItemSheet l={l} it={item} onClose={() => setItem(null)} />}
       {product && <ProductSheet productId={product} onClose={() => setProduct(null)} />}
       {finish && <FinishSheet l={l} onClose={() => setFinish(false)} />}
+      {pay && (
+        <PaySheet
+          l={l}
+          it={pay}
+          onClose={() => setPay(null)}
+          onStopAsking={() => {
+            setAsk(false);
+            notify('Não vou mais perguntar', 'Dá para ligar de novo no fim da lista.');
+          }}
+        />
+      )}
       {fill && fill.ids.length > 0 && <FillSheet productIds={fill.ids} storeId={fill.storeId} onClose={() => setFill(null)} />}
     </>
+  );
+}
+
+const ASK_KEY = 'central-pessoal:perguntar-preco';
+function readAsk(): boolean {
+  try {
+    return localStorage.getItem(ASK_KEY) !== '0';
+  } catch {
+    return true;
+  }
+}
+function writeAsk(v: boolean) {
+  try {
+    localStorage.setItem(ASK_KEY, v ? '1' : '0');
+  } catch {
+    /* ignora */
+  }
+}
+
+/** M3: "Quanto custou aqui?" ao marcar um item durante a compra. Opcional: "Só marcar" pula. */
+function PaySheet({ l, it, onClose, onStopAsking }: { l: UserList; it: ListItem; onClose: () => void; onStopAsking: () => void }) {
+  const { data, update } = useStore();
+  const day = readDayStore();
+  const [store, setStore] = useState(data.stores.some((s) => s.id === day) ? day : (data.stores[0]?.id ?? ''));
+  const [storeName, setStoreName] = useState('');
+  const p = data.products.find((x) => x.id === it.productId);
+  const sizes = p ? sizeOptions(data, p) : [{ size: 1, sizeUnit: 'un' as const }];
+  const [sizeKey, setSizeKey] = useState('0');
+  const pack = sizes[Number(sizeKey)] ?? sizes[0];
+  const [count, setCount] = useState(fmtNum(packCount(it, p, pack)));
+  const [price, setPrice] = useState('');
+  const v = parseNum(price);
+  const n = parseNum(count) ?? 1;
+  const justCheck = () => {
+    update(toggleItem(l.id, it.id));
+    onClose();
+  };
+  const save = () => {
+    if (!v) return justCheck();
+    let sid = store;
+    if (!sid) {
+      if (!storeName.trim()) return;
+      sid = uid();
+      const name = storeName.trim();
+      update((d) => ({ ...d, stores: [...d.stores, { id: sid, name }] }));
+    }
+    update(payItem(l.id, it.id, { storeId: sid, price: v, count: n, size: pack.size, sizeUnit: pack.sizeUnit }));
+    writeDayStore(sid);
+    onClose();
+  };
+  return (
+    <Sheet
+      title="Quanto custou aqui?"
+      onClose={onClose}
+      footer={
+        <div className="btn-row">
+          <button type="button" className="btn" onClick={justCheck}>
+            Só marcar
+          </button>
+          <button type="button" className="btn primary" disabled={!!v && !store && !storeName.trim()} onClick={save}>
+            <Icon name="check" size={18} /> Marcar
+          </button>
+        </div>
+      }
+    >
+      <h3 className="fill-name">
+        {it.text} {it.qty !== null && <small className="muted">{fmtNum(it.qty)} {it.unit}</small>}
+      </h3>
+      <div className="field">
+        <span className="field-label">Loja</span>
+        <Chips label="Loja" value={store} onChange={setStore} options={[...data.stores.map((s) => ({ value: s.id, label: s.name })), { value: '', label: '+ Nova' }]} />
+        {!store && <input className="input" value={storeName} onChange={(e) => setStoreName(e.target.value)} placeholder="Nome da loja" />}
+      </div>
+      {p && (
+        <div className="field">
+          <span className="field-label">Embalagem</span>
+          <Chips
+            label="Embalagem"
+            value={sizeKey}
+            onChange={(k) => {
+              setSizeKey(k);
+              setCount(fmtNum(packCount(it, p, sizes[Number(k)] ?? sizes[0])));
+            }}
+            options={sizes.map((x, k) => ({ value: String(k), label: sizeText({ size: x.size, sizeUnit: x.sizeUnit } as ProductVariant) }))}
+          />
+        </div>
+      )}
+      <div className="form-row">
+        <Field label="Preço da embalagem">
+          <input className="input money large" inputMode="decimal" value={price} onChange={(e) => setPrice(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && save()} placeholder="0,00" autoFocus />
+        </Field>
+        <Field label="Quantas">
+          <input className="input" inputMode="decimal" value={count} onChange={(e) => setCount(e.target.value)} />
+        </Field>
+      </div>
+      {v && n !== 1 ? <p className="muted small">Total do item: {formatMoney(Math.round(v * n * 100) / 100)}</p> : null}
+      <button
+        type="button"
+        className="btn ghost block"
+        onClick={() => {
+          onStopAsking();
+          justCheck();
+        }}
+      >
+        Não perguntar mais
+      </button>
+    </Sheet>
   );
 }
 
@@ -950,9 +1084,12 @@ const findCat = (cats: { id: string; name: string }[], names: string[]) => cats.
 function FinishSheet({ l, onClose }: { l: UserList; onClose: () => void }) {
   const { data, update } = useStore();
   const est = listEstimate(data, l, true);
-  const [store, setStore] = useState(est[0]?.storeId ?? data.stores[0]?.id ?? '');
+  const day = readDayStore();
+  const [store, setStore] = useState(l.items.some((i) => i.done && i.paid) && data.stores.some((s) => s.id === day) ? day : (est[0]?.storeId ?? data.stores[0]?.id ?? ''));
   const [newStore, setNewStore] = useState('');
-  const estFor = (id: string) => est.find((e) => e.storeId === id)?.total ?? 0;
+  const paid = paidTotal(l);
+  const last = lastPurchase(data, l.id);
+  const estFor = (id: string) => (paid.count ? paid.total : (est.find((e) => e.storeId === id)?.total ?? 0));
   const [total, setTotal] = useState(fmtNum(estFor(store) || null));
   const [launch, setLaunch] = useState(true);
   const [reset, setReset] = useState(true);
@@ -988,6 +1125,17 @@ function FinishSheet({ l, onClose }: { l: UserList; onClose: () => void }) {
       <Field label="Total pago">
         <input className="input money large" inputMode="decimal" value={total} onChange={(e) => setTotal(e.target.value)} placeholder="0,00" />
       </Field>
+      {paid.count > 0 && (
+        <p className="muted small">
+          Soma do que você anotou: {formatMoney(paid.total)} ({paid.count} {paid.count === 1 ? 'item' : 'itens'}). Confira com o cupom.
+        </p>
+      )}
+      {last && (
+        <p className="muted small">
+          Da última vez ({formatDMY(last.date)}{last.store ? `, ${last.store}` : ''}): {formatMoney(last.total)}
+          {parseNum(total) && last.total > 0 ? ` · ${parseNum(total)! >= last.total ? '+' : '−'}${formatMoney(Math.abs(parseNum(total)! - last.total))}` : ''}.
+        </p>
+      )}
       <div className="toggle-row">
         <div>
           <strong>Lançar em Finanças</strong>

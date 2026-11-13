@@ -1,6 +1,6 @@
 # Preços 2.0: lojas por tipo e listas ligadas aos preços
 
-> **Status: EM ANDAMENTO.** Anotado a partir do primeiro uso real no mercado (nov/2026). **Parte 1 pronta na v0.49 (M2 + M23):** itens 2, 3, 5 e 6, menos o que está em "Ficou para depois" abaixo. Próximo: M3 e M4.
+> **Status: EM ANDAMENTO.** Anotado a partir do primeiro uso real no mercado (nov/2026). **Parte 1 pronta na v0.49 (M2 + M23):** itens 2, 3, 5 e 6, menos o que está em "Ficou para depois" abaixo. **Parte 2 pronta na v0.50 (M3):** "Quanto custou aqui?" e histórico. Próximo: M4.
 
 ### Como ficou na v0.49
 - Todo item da lista de mercado se liga sozinho a um produto de Preços pelo nome (sem acento, sem plural). Os itens antigos são ligados na primeira abertura. Nome genérico ("Arroz") aproveita o parecido do catálogo ("Arroz branco": corredor, unidade e tamanhos), mas mantém o nome escrito.
@@ -8,7 +8,12 @@
 - Catálogo pronto: 311 produtos em `src/precosCatalogo.ts`.
 - "Quanto vai sair": cada loja soma os itens com preço ali + faixa dos que faltam ("≈ R$ 197–201"); melhor combinação e quanto economiza; itens sem preço nenhum à parte, fora da soma. Tocar numa loja abre o **Dar preço** já com aquela loja.
 - Item com preço de mais de 60 dias mostra a data.
-- **Ficou para depois (M3/M4):** escolher marca específica no item (hoje vale "qualquer marca", a mais barata); "Cadastrar em Preços" e "Ligar a um produto" deixaram de ser necessários (tudo já é ligado); editar nome, corredor e unidade do produto.
+### Como ficou na v0.50 (M3)
+- Ao marcar um item da lista de mercado, abre "Quanto custou aqui?": loja (a de hoje), embalagem (tamanhos do produto e do catálogo), preço da embalagem e quantas (calculado pelo item: "2 kg" em pacote de 1 kg = 2). "Só marcar" pula; "Não perguntar mais" desliga, e um botão no fim da lista liga de novo (vale por aparelho).
+- O preço vai para Preços e o item mostra "Pago: R$ X". Desmarcar apaga o pago.
+- "Concluir compra" já vem com a soma do que foi anotado e mostra a última compra da mesma lista, com a diferença. A compra guarda os itens com preço (`lines`).
+
+- **Ficou para depois (M4):** escolher marca específica no item (hoje vale "qualquer marca", a mais barata); "Cadastrar em Preços" e "Ligar a um produto" deixaram de ser necessários (tudo já é ligado); editar nome, corredor e unidade do produto.
 
 ## O que o uso real mostrou
 1. **Cadastrar é fácil, mas manual.** Isso continua por um tempo, até integrarmos a leitura de código de barras ou uma base de produtos (ver "Mais adiante").
