@@ -970,7 +970,15 @@ function MarketAddRow({ l }: { l: UserList }) {
         </button>
       </div>
       {open && sugs.length > 0 && (
-        <SuggestionPanel anchor={box} onClose={() => setOpen(false)}>
+        <SuggestionPanel
+          anchor={box}
+          onClose={() => setOpen(false)}
+          onPushPast={() => {
+            // Insistiu em rolar: fecha as sugestões e o teclado, para ver a lista.
+            setOpen(false);
+            input.current?.blur();
+          }}
+        >
           {sugs.map((sg) => {
             const r = sg.productId ? priceRange(data, sg.productId, latest) : null;
             const unit = data.products.find((p) => p.id === sg.productId)?.unit ?? '';
@@ -991,9 +999,55 @@ function MarketAddRow({ l }: { l: UserList }) {
 }
 
 /** Janela flutuante das sugestões: cabe entre a caixa e o teclado, rola sozinha e fecha com o voltar. */
-function SuggestionPanel({ anchor, onClose, children }: { anchor: RefObject<HTMLDivElement | null>; onClose: () => void; children: ReactNode }) {
+/** Quanto (em px) a pessoa precisa insistir depois do fim da lista de sugestões para ela fechar. */
+const OVERSCROLL_CLOSE = 90;
+
+function SuggestionPanel({ anchor, onClose, onPushPast, children }: { anchor: RefObject<HTMLDivElement | null>; onClose: () => void; onPushPast: () => void; children: ReactNode }) {
   useBackToClose(onClose);
   const [max, setMax] = useState(320);
+  const box = useRef<HTMLDivElement>(null);
+  const push = useRef(onPushPast);
+  push.current = onPushPast;
+  // Rolou de leve até o fim: a janela fica. Insistiu em rolar além do fim (no mesmo gesto): fecha, para a tela rolar.
+  useEffect(() => {
+    const el = box.current;
+    if (!el) return;
+    const atEnd = () => el.scrollTop + el.clientHeight >= el.scrollHeight - 2;
+    const atStart = () => el.scrollTop <= 0;
+    let lastY = 0;
+    let pushed = 0;
+    let idle: number | undefined;
+    const add = (dy: number, limit = OVERSCROLL_CLOSE) => {
+      // dy > 0 = quer descer a tela; dy < 0 = quer subir
+      if ((dy > 0 && atEnd()) || (dy < 0 && atStart())) {
+        pushed += Math.abs(dy);
+        if (pushed > limit) push.current();
+      } else pushed = 0;
+    };
+    const onStart = (e: TouchEvent) => {
+      lastY = e.touches[0].clientY;
+      pushed = 0;
+    };
+    const onMove = (e: TouchEvent) => {
+      const y = e.touches[0].clientY;
+      add(lastY - y);
+      lastY = y;
+    };
+    const onWheel = (e: WheelEvent) => {
+      add(e.deltaY, OVERSCROLL_CLOSE * 2); // roda do mouse: cerca de dois giros além do fim
+      window.clearTimeout(idle);
+      idle = window.setTimeout(() => (pushed = 0), 400);
+    };
+    el.addEventListener('touchstart', onStart, { passive: true });
+    el.addEventListener('touchmove', onMove, { passive: true });
+    el.addEventListener('wheel', onWheel, { passive: true });
+    return () => {
+      el.removeEventListener('touchstart', onStart);
+      el.removeEventListener('touchmove', onMove);
+      el.removeEventListener('wheel', onWheel);
+      window.clearTimeout(idle);
+    };
+  }, []);
   useEffect(() => {
     const vv = window.visualViewport;
     const fit = () => {
@@ -1012,7 +1066,7 @@ function SuggestionPanel({ anchor, onClose, children }: { anchor: RefObject<HTML
     };
   }, [anchor]);
   return (
-    <div className="sugbox floating" role="listbox" aria-label="Sugestões" style={{ maxHeight: max }}>
+    <div className="sugbox floating" role="listbox" aria-label="Sugestões" style={{ maxHeight: max }} ref={box}>
       {children}
     </div>
   );
