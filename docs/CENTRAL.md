@@ -159,7 +159,7 @@
 ## Feito
 | Versão | O que entrou | PR |
 |---|---|---|
-| v0.53.1 | E22 (ajuste): ícones da lista de Configurações iguais aos dos cartões do app (fundo do cartão e **cor de destaque escolhida**), no lugar dos quadradinhos coloridos fixos | — |
+| v0.53.1 | E22 (ajuste): ícones da lista de Configurações iguais aos dos cartões do app (fundo do cartão e **cor de destaque escolhida**), no lugar dos quadradinhos coloridos fixos | #78 |
 | v0.53 | E22: **Configurações por temas**: a tela abre com uma lista (Conta Google com a situação da sincronização; Aparência; Início e módulos; Barras e navegação; Backup; Armazenamento), cada tema numa página (`#/ajustes/<tema>`), título de cima "Configurações / Aparência" e voltar para a lista. Sem mudar nenhum ajuste; textos que apontavam para "Personalização" agora apontam para o tema certo | #77 |
 | v0.52 | E21.2: **puxar a barra para cima abre o Mais** numa gaveta em grade (alcinha que pisca nas 3 primeiras aberturas; fecha puxando para baixo, tocando fora ou no voltar); opção "Botão Mais na barra" em Personalização; passo novo no tutorial. Correção: endereço trocado por fora (link colado) abre a tela em vez de voltar um nível. Ícone de Configurações virou engrenagem (antes parecia o de brilho) | #76 |
 | v0.51 | E21.1: barra do Início com **4 favoritos** (o lugar do Mais virou o 4º); dentro do módulo, a casa fica **sempre no centro** e a ponta vira ⭐ **Favoritos** (troca de módulo); sai a escolha do jeito da barra em Personalização; Mais no menu ☰ | #75 |
