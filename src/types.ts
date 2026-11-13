@@ -248,6 +248,8 @@ export interface Settings {
   hideOnScroll: boolean;
   /** Tela Mais em lista (com a descrição de cada módulo) ou em grade (ícones, 3 por linha). */
   moreLayout: 'lista' | 'grade';
+  /** E21.2: Mais de volta na ponta da barra do Início (3 favoritos). Desligado = 4 favoritos e puxar a barra abre o Mais. */
+  moreButton: boolean;
   seededCategories: boolean;
   seededIncomeSources: boolean;
   lastBackupAt: string | null;

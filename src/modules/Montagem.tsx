@@ -534,7 +534,7 @@ const TUTORIAL: { title: string; text: string; focus: string }[] = [
   { title: 'Voltar leva ao módulo', text: 'Use o voltar do celular (ou toque na casa, com contorno). Você volta para a casa do módulo, não para o começo.', focus: 'home' },
   { title: 'Trocar de módulo direto', text: 'Toque na estrela, na ponta da barra: aparecem os favoritos, e dá para pular para outro módulo sem passar pelo Início.', focus: 'favbtn' },
   { title: 'Segure para ver o nome', text: 'Não lembra o que é um ícone? Segure o dedo em cima dele por um instante.', focus: 'all' },
-  { title: 'Tudo o mais fica no Mais', text: 'Todos os módulos (e os guardados) ficam no Mais, no menu ☰ do canto de cima. Os favoritos e a cor mudam em Configurações › Personalização.', focus: 'all' },
+  { title: 'Puxe a barra para cima', text: 'Arraste a barra de baixo para cima: abre o Mais, com todos os módulos (e os guardados). Ele também fica no menu ☰. Os favoritos e a cor mudam em Configurações › Personalização.', focus: 'all' },
 ];
 
 /** Fica no App. Avança sozinho quando a pessoa faz o passo de verdade; "Próximo" sempre funciona também. */

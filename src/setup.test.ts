@@ -68,3 +68,9 @@ test('Mais em lista ou grade: dados antigos e valores estranhos ficam em lista',
   assert.equal(normalize({ version: 2, settings: { moreLayout: 'mosaico' } }).settings.moreLayout, 'lista');
   assert.equal(normalize({ version: 2, settings: { moreLayout: 'grade' } }).settings.moreLayout, 'grade');
 });
+
+test('E21.2: botão Mais na barra vem desligado (dados antigos também)', () => {
+  assert.equal(normalize(undefined).settings.moreButton, false);
+  assert.equal(normalize({ version: 2, settings: {} }).settings.moreButton, false);
+  assert.equal(normalize({ version: 2, settings: { moreButton: true } }).settings.moreButton, true);
+});
