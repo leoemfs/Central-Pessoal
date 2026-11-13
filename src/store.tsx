@@ -6,7 +6,7 @@ import { FIXA_AHEAD, materialize } from './finance';
 import { checkUnlock, markActive, markVisit } from './journey';
 import { INCOME_AHEAD, materializeIncomes } from './incomes';
 import { materializeVouchers } from './vouchers';
-import { dbGet, dbSet, requestPersistence } from './db';
+import { dbGet, dbGetNewest, dbSet, requestPersistence } from './db';
 import { addMonths, monthKey, todayISO } from './utils';
 import { mergeData, pruneDeleted, trackChanges } from './sync';
 import { flushSave, scheduleSave, setDataSource, startCloud } from './cloud';
@@ -24,7 +24,8 @@ const generate = (d: AppData) =>
 const catchUp = (d: AppData) => trackChanges(d, generate(d));
 
 async function loadData(): Promise<AppData> {
-  let raw = await dbGet<unknown>(KEY);
+  // C4: se a última gravação foi para a reserva, ela é a mais nova e vale ela.
+  let { value: raw } = await dbGetNewest<unknown>(KEY);
   if (raw === undefined) {
     // Primeira vez nesta versão: traz os dados do protótipo (localStorage), se houver.
     try {
@@ -38,12 +39,14 @@ async function loadData(): Promise<AppData> {
 }
 
 type Updater = (d: AppData) => AppData;
+export type SaveProblem = null | 'reserva' | 'falhou';
 
 interface Store {
   data: AppData;
   update: (fn: Updater) => void;
   replace: (d: AppData) => void;
-  saveError: boolean;
+  /** C4: 'reserva' = salvo só na cópia de reserva; 'falhou' = não salvou em lugar nenhum. */
+  saveError: SaveProblem;
   persisted: boolean;
 }
 
@@ -52,7 +55,7 @@ const StoreContext = createContext<Store | null>(null);
 export function DataProvider({ children }: { children: ReactNode }) {
   const [data, setData] = useState<AppData | null>(null);
   const [loadError, setLoadError] = useState<Error | null>(null);
-  const [saveError, setSaveError] = useState(false);
+  const [saveError, setSaveError] = useState<SaveProblem>(null);
   const [persisted, setPersisted] = useState(false);
   const fromOtherTab = useRef(false);
   const pending = useRef<AppData | null>(null);
@@ -71,13 +74,13 @@ export function DataProvider({ children }: { children: ReactNode }) {
     if (!d) return;
     pending.current = null;
     dbSet(KEY, d)
-      .then(() => {
-        setSaveError(false);
+      .then((where) => {
+        setSaveError(where === 'reserva' ? 'reserva' : null);
         channel?.postMessage('saved');
         // N9.3: fotos excluídas saem do aparelho.
         cleanFiles(referencedFiles(d), d.deleted).catch(() => undefined);
       })
-      .catch(() => setSaveError(true));
+      .catch(() => setSaveError('falhou'));
   }, []);
 
   // Salva com um pequeno atraso para agrupar alterações seguidas (ex.: digitação numa nota).

@@ -76,7 +76,7 @@
 | E19 | **Lápis no Mais** (12/11, para o futuro): mudar a ordem dos módulos (na lista e na grade) e a ordem dos 4 atalhos dentro da linha deles (os 4 continuam sempre lá, só mudam de posição). É o "resto do E1: ordem no Mais", que já está na fila aprovada (item 5). Usar o mesmo lápis das outras telas (`Cards.tsx`). Afeta: Mais, Personalização, backup | EXP | P | média | pronto (v0.46) | — |
 | E20 | **Voltar em ciclo** (12/11): o voltar segue todo o histórico de telas; passando pelo Mais, ele fica indo e voltando entre telas já vistas. Proposta: voltar **sobe um nível**, sempre igual: tela dentro do módulo → casa do módulo → Início → sai do app; Mais → Início; módulo aberto pelo Mais → Mais → Início. Janelas (folhas, menu) continuam fechando com o voltar. No Android (N4, ponto A3) a mesma regra vale, e no Início o voltar minimiza o app. Afeta: navegação do app todo (`App.tsx`, `router.ts`) | EXP | P | alta | pronto (v0.47) | `futuro/navegacao-v2.md`, `futuro/app-android.md` (A3) |
 | C3 | **Registro defeituoso deixa o app em branco**: conferir os campos ao abrir os dados, tela de erro com saída (exportar, recarregar, Configurações) e "desfazer importação" | COR | M | **alta** | pronto (v0.30) | `auditoria-2026-11.md` |
-| C4 | Salvamento de reserva pode perder dados em silêncio (avisar e usar a cópia mais nova) | COR | P | média | ideia | `auditoria-2026-11.md` |
+| C4 | Salvamento de reserva pode perder dados em silêncio (avisar e usar a cópia mais nova) | COR | P | média | pronto (v0.50.3) | `auditoria-2026-11.md` |
 | C5 | Rodar os testes em todo PR e antes de publicar (hoje só compila) | COR | P | média | pronto (v0.29.1) | `auditoria-2026-11.md` |
 | C6 | Sequência de hábitos lenta para quem nunca falha (86 ms com 5 anos e 25 hábitos) | COR | P | média | ideia | `auditoria-2026-11.md` |
 | C7 | Gravar por coleção, só o que mudou (hoje regrava o banco inteiro a cada toque) | COR | M | média | ideia | `auditoria-2026-11.md` |
@@ -157,6 +157,7 @@
 ## Feito
 | Versão | O que entrou | PR |
 |---|---|---|
+| v0.50.3 | C4: se o aparelho não deixar salvar no lugar de sempre, as mudanças vão para uma cópia de reserva e aparece um aviso pedindo para exportar um backup; ao abrir, o app usa a cópia mais nova (antes a reserva era ignorada e as últimas mudanças sumiam) | #70 |
 | v0.50.2 | M24 (ajuste): nas sugestões da lista de mercado, rolar de leve até o fim deixa a janela aberta; insistir em rolar além do fim fecha a janela e o teclado, e a lista volta a rolar | — |
 | v0.50.1 | M24: lista de mercado com a caixa de adicionar no topo (presa ao rolar) e sugestões numa janela flutuante, com rolagem própria, que fecha com o voltar ou tocando fora | #66 |
 | v0.50 | M3 (Preços 2.0, parte 2): **"Quanto custou aqui?"** ao marcar o item (loja, embalagem, preço e quantas; "Só marcar" pula; dá para desligar no fim da lista); o preço vai para Preços e o item mostra "Pago"; "Concluir compra" já vem com a soma do que foi anotado e compara com a **última compra da lista**; a compra guarda os itens com preço | #64 |

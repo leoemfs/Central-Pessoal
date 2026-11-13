@@ -73,6 +73,7 @@ O endereço fica `https://<usuario>.github.io/Central-Pessoal/`. Para instalar n
 ## Dados e backup
 
 - Os dados ficam no IndexedDB do navegador. O app pede ao navegador armazenamento persistente.
+- **Cópia de reserva (C4):** se o navegador não deixar gravar no IndexedDB (ex.: espaço cheio), o app grava uma cópia de reserva (localStorage) e mostra um aviso vermelho pedindo para exportar um backup. Ao abrir, o app compara as duas cópias pelas datas de alteração e usa a mais nova; quando o IndexedDB volta a gravar, a reserva é apagada. Regra em `src/reserva.ts`.
 - Cada aparelho tem os seus próprios dados. Use **Ajustes → Exportar / Importar** para backup ou para levar os dados a outro aparelho. O Início avisa quando o último backup tem mais de 30 dias.
 - **Lembretes no Google Agenda (N9.5, Configurações › Conta Google):** com o interruptor ligado, o app cria a agenda **"Central Pessoal"** no Google Agenda (permissão `calendar.app.created`: só mexe nela) e põe os próximos 60 dias de **compromissos** (Agenda e Carreira; na hora, 1 h, aviso 30 min antes; sem hora, às 9h), **contas a pagar** ("💸 Pagar: … · R$", às 9h) e **tarefas com data** ("☑️ …", às 9h), cada tipo com seu interruptor. O celular avisa pelo app Google Agenda. Só de ida: mudou, pagou, concluiu ou excluiu no app, o evento muda ou sai na próxima sincronização; o que mudar no Google não volta. O id do evento é fixo pelo item (dois aparelhos não duplicam). Num aparelho sem a permissão da agenda aparece "Dar acesso à agenda neste aparelho". Desligar pergunta se apaga a agenda do Google. Regras em `src/calendarSync.ts`; chamadas em `src/gcal.ts`.
 - **Tarefas no Google Tarefas (N9.6, mesmo cartão, interruptor "Tarefas no Google Tarefas"):** as tarefas vão para a lista **"CP Hub"** do Google Tarefas (permissão `tasks`; o app só mexe nessa lista), **ida e volta**: concluir, mudar ou excluir lá muda no app, e o contrário também; tarefa criada direto na lista entra no app. Vale a mudança mais recente (data de alteração do app × `updated` do Google). Cada tarefa leva no fim das notas a marca `CP Hub #<id>`, que liga as duas (dois aparelhos não duplicam). O Google guarda só a **data**, sem hora. As tarefas saíram do Google Agenda. Regras em `src/tasksSync.ts`; chamadas em `src/gtasks.ts`.
@@ -127,7 +128,8 @@ src/
   incomes.ts         receitas, recorrência e balanço do mês
   incomes.test.ts    testes das receitas
   data.ts            formato dos dados, categorias padrão e migração
-  db.ts              IndexedDB
+  db.ts              IndexedDB (e cópia de reserva)
+  reserva.ts         escolhe a cópia mais nova ao abrir (C4)
   sync.ts            Datas de alteração e exclusões (N9.0)
   drive.ts           Chamadas à API do Google Drive, pasta escondida do app (N9.1)
   cloud.ts           Conta Google e sincronização automática (N9.1, N9.2)

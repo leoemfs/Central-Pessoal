@@ -27,6 +27,8 @@
   3. antes de **importar** um backup, guardar uma cópia dos dados atuais, com "Desfazer importação".
 
 ### C4. Salvamento de reserva pode perder dados em silêncio (média)
+> **Corrigido na v0.50.3** (`src/db.ts`, `src/reserva.ts`, aviso em `src/App.tsx`).
+
 - Em `src/db.ts`, se a gravação no banco falhar (por exemplo, espaço cheio), o app grava num lugar reserva e **não avisa**. Na próxima abertura, ele lê o banco principal (antigo) e ignora a reserva: as últimas mudanças somem.
 - **Correção proposta:** se a gravação principal falhar, mostrar o aviso que já existe ("Não foi possível salvar. Exporte um backup"); ao abrir, comparar as duas cópias e usar a mais nova.
 
