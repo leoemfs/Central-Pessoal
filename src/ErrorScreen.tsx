@@ -1,10 +1,10 @@
 import { Component, type ErrorInfo, type ReactNode } from 'react';
-import { dbGet } from './db';
+import { dbGetNewest } from './db';
 
 /** Baixa os dados guardados no aparelho do jeito que estão, sem passar pelas telas (funciona mesmo com erro). */
 export async function exportRawBackup(): Promise<boolean> {
   try {
-    const raw = await dbGet<unknown>('data');
+    const { value: raw } = await dbGetNewest<unknown>('data');
     if (raw === undefined) return false;
     const blob = new Blob([JSON.stringify(raw, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);

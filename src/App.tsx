@@ -369,7 +369,9 @@ export function App() {
       <main className="main">
         {saveError && (
           <div className="alert red" role="alert">
-            Não foi possível salvar neste aparelho. Exporte um backup em Ajustes.
+            {saveError === 'reserva'
+              ? 'Não deu para salvar no lugar de sempre. Suas mudanças estão numa cópia de reserva neste aparelho. Por garantia, exporte um backup em Configurações.'
+              : 'Não foi possível salvar neste aparelho. Exporte um backup em Configurações agora.'}
           </div>
         )}
         <ErrorBoundary scope="tela" resetKey={`${section.path}:${route.n}`}>
