@@ -225,7 +225,7 @@ function Montagem({ mode, onClose }: { mode: SetupMode; onClose: () => void }) {
       settings: { ...d.settings, setup: 'feito' },
     }));
     onClose();
-    notify('Tudo certo', 'Dá para montar o app quando quiser, em Configurações › Personalização.');
+    notify('Tudo certo', 'Dá para montar o app quando quiser, em Mais › Montar o app do seu jeito.');
   }
 
   if (at === 'boas') {
@@ -245,7 +245,7 @@ function Montagem({ mode, onClose }: { mode: SetupMode; onClose: () => void }) {
               <Icon name="right" size={18} /> Dá para pular a qualquer momento.
             </li>
             <li>
-              <Icon name="settings" size={18} /> Tudo muda depois em Configurações › Personalização.
+              <Icon name="settings" size={18} /> Tudo muda depois em Configurações.
             </li>
           </ul>
         </div>
@@ -295,7 +295,7 @@ function Montagem({ mode, onClose }: { mode: SetupMode; onClose: () => void }) {
             <li className="row">
               <div className="row-body">
                 <span className="row-title">Jornada</span>
-                <span className="row-meta">{journey === false ? 'Agora não (liga depois em Personalização)' : 'Quero: libera com 14 dias de uso'}</span>
+                <span className="row-meta">{journey === false ? 'Agora não (liga depois em Configurações › Início e módulos)' : 'Quero: libera com 14 dias de uso'}</span>
               </div>
             </li>
           </ul>
@@ -397,7 +397,7 @@ function Montagem({ mode, onClose }: { mode: SetupMode; onClose: () => void }) {
     body = <RhythmPicker value={rhythm} onChange={setRhythm} />;
   } else if (at === 'barra') {
     title = 'Cor';
-    sub = 'A cor de destaque do app. Dá para trocar depois em Personalização.';
+    sub = 'A cor de destaque do app. Dá para trocar depois em Configurações › Aparência.';
     body = (
       <>
         <span className="field-label" style={{ marginTop: 16, display: 'block' }}>
@@ -429,7 +429,7 @@ function Montagem({ mode, onClose }: { mode: SetupMode; onClose: () => void }) {
           </button>
           <button type="button" role="radio" aria-checked={journey === false} className={`option-card${journey === false ? ' on' : ''}`} onClick={() => setJourney(false)}>
             <strong>Agora não</strong>
-            <span className="muted small">O app fica sem jogo. A Jornada fica em Mais › Guardados e liga depois em Personalização.</span>
+            <span className="muted small">O app fica sem jogo. A Jornada fica em Mais › Guardados e liga depois em Configurações › Início e módulos.</span>
           </button>
         </div>
       </>
@@ -475,7 +475,7 @@ export function SetupInvite() {
   const close = (tutorial: boolean) => {
     update((d) => ({ ...d, settings: { ...d.settings, setup: 'feito' } }));
     if (tutorial) openTutorial();
-    else notify('Tudo bem', 'Dá para montar quando quiser, em Configurações › Personalização.');
+    else notify('Tudo bem', 'Dá para montar quando quiser, em Mais › Montar o app do seu jeito.');
   };
   return (
     <section className="card raised setup-invite">
@@ -534,7 +534,7 @@ const TUTORIAL: { title: string; text: string; focus: string }[] = [
   { title: 'Voltar leva ao módulo', text: 'Use o voltar do celular (ou toque na casa, com contorno). Você volta para a casa do módulo, não para o começo.', focus: 'home' },
   { title: 'Trocar de módulo direto', text: 'Toque na estrela, na ponta da barra: aparecem os favoritos, e dá para pular para outro módulo sem passar pelo Início.', focus: 'favbtn' },
   { title: 'Segure para ver o nome', text: 'Não lembra o que é um ícone? Segure o dedo em cima dele por um instante.', focus: 'all' },
-  { title: 'Puxe a barra para cima', text: 'Arraste a barra de baixo para cima: abre o Mais, com todos os módulos (e os guardados). Ele também fica no menu ☰. Os favoritos e a cor mudam em Configurações › Personalização.', focus: 'all' },
+  { title: 'Puxe a barra para cima', text: 'Arraste a barra de baixo para cima: abre o Mais, com todos os módulos (e os guardados). Ele também fica no menu ☰. Os favoritos e a cor mudam em Configurações.', focus: 'all' },
 ];
 
 /** Fica no App. Avança sozinho quando a pessoa faz o passo de verdade; "Próximo" sempre funciona também. */

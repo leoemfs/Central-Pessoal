@@ -3,15 +3,17 @@ import { useStore } from '../store';
 import { discardedCount, emptyData, normalize } from '../data';
 import { dbGet, dbSet } from '../db';
 import type { Theme } from '../types';
-import { formatDMY, toISO, todayISO } from '../utils';
+import { formatDateTime, formatDMY, toISO, todayISO } from '../utils';
 import { Icon, notify, PageHeader, Segmented, Toggle, type IconName } from '../ui';
 import { favoriteItems } from '../moduleBar';
 import { FavoritesSheet } from './Mais';
 import { ACCENTS, accentById } from '../theme';
 import { fitFavorites, hiddenFrom, MIN_VISIBLE, MODULES, rhythmLabel, toggleModule, visibleFrom } from '../setup';
-import { openSetup, openTutorial, RhythmPicker } from './Montagem';
+import { RhythmPicker } from './Montagem';
 import { GoogleCard } from './ContaGoogle';
-import { disconnect, useCloud } from '../cloud';
+import { disconnect, GOOGLE_CLIENT_ID, useCloud, type CloudStatus } from '../cloud';
+import type { ViewProps } from '../App';
+import { appearanceSummary, SETTINGS_GROUPS, SETTINGS_PAGES, settingsPage, type SettingsPageId } from '../settingsPages';
 
 
 const UNDO_KEY = 'antesDaImportacao';
@@ -21,8 +23,10 @@ interface Snapshot {
   data: unknown;
 }
 
-export function Ajustes() {
+export function Ajustes({ route }: ViewProps) {
   const { data, update, replace, persisted } = useStore();
+  const page = settingsPage(route.sub);
+  const at = page?.id ?? null;
   const fileRef = useRef<HTMLInputElement>(null);
   const [message, setMessage] = useState<{ tone: 'green' | 'red'; text: string } | null>(null);
   const [favPick, setFavPick] = useState(false);
@@ -33,6 +37,8 @@ export function Ajustes() {
   }, []);
   const broken = discardedCount(data);
   const cloud = useCloud();
+  // Cada página mostra só os avisos dela.
+  useEffect(() => setMessage(null), [at]);
 
   async function keepCopy(reason: Snapshot['reason']): Promise<boolean> {
     const snap: Snapshot = { at: new Date().toISOString(), reason, data };
@@ -115,10 +121,28 @@ export function Ajustes() {
     ['Hábitos', data.habits.length],
     ['Anotações', data.notes.length],
   ];
+  const backupSummary = data.settings.lastBackupAt ? `Último: ${formatDMY(toISO(new Date(data.settings.lastBackupAt)))}` : 'Nenhum backup ainda';
+  const summaries: Record<SettingsPageId, string> = {
+    conta: cloud ? cloudLine(cloud.status, cloud.lastSavedAt) : 'Entre para sincronizar entre aparelhos',
+    aparencia: appearanceSummary(data.settings.theme, accentById(data.settings.accent)?.name ?? null),
+    inicio: data.settings.hiddenModules.includes('diario') ? 'Favoritos e módulos à vista' : 'Favoritos, módulos à vista e ritmo do Diário',
+    barras: 'Botão Mais, rolagem e tela Mais',
+    backup: backupSummary,
+    armazenamento: `${persisted ? 'Protegido' : 'Proteção não garantida'} · dados e apagar tudo`,
+  };
 
   return (
     <>
-      <PageHeader title="Configurações" subtitle="Personalização, atalhos de categorias, backup e dados" />
+      {page ? (
+        <>
+          <a className="set-back" href="#/ajustes">
+            <Icon name="left" size={18} /> Configurações
+          </a>
+          <PageHeader title={page.label} />
+        </>
+      ) : (
+        <PageHeader title="Configurações" />
+      )}
 
       {message && (
         <div className={`alert ${message.tone}`} role="status">
@@ -126,11 +150,11 @@ export function Ajustes() {
         </div>
       )}
 
+      {!page && <SettingsList summaries={summaries} email={cloud?.email ?? null} />}
+
+      {at === 'aparencia' && (
       <section className="card">
-        <div className="card-head">
-          <h2>Personalização</h2>
-        </div>
-        <h3 className="pz-title">Tema</h3>
+        <h3 className="pz-title first">Tema</h3>
         <Segmented<Theme>
           label="Tema"
           value={data.settings.theme}
@@ -176,8 +200,12 @@ export function Ajustes() {
             {data.settings.accent ? `${accentById(data.settings.accent)?.name}, nos dois temas.` : 'Padrão: verde no tema escuro e azul no claro.'} Muda botões, abas e destaques. As cores de situação não mudam: pago é verde, pendente é laranja e atrasado é vermelho.
           </p>
         </div>
+      </section>
+      )}
 
-        <h3 className="pz-title">Favoritos do Início</h3>
+      {at === 'inicio' && (
+      <section className="card">
+        <h3 className="pz-title first">Favoritos do Início</h3>
         <p className="muted small">Os ícones da barra de baixo ao lado do Início (4, ou 3 com o botão Mais ligado). Dentro de um módulo, a estrela na ponta da barra mostra os favoritos para trocar de módulo.</p>
         <div className="fav-row">
           {favoriteItems(data.settings.favorites).map((f) => (
@@ -222,8 +250,12 @@ export function Ajustes() {
             <RhythmPicker value={data.settings.journalRhythm} onChange={(journalRhythm) => setSetting({ journalRhythm })} />
           </>
         )}
+      </section>
+      )}
 
-        <div className="toggle-row">
+      {at === 'barras' && (
+      <section className="card">
+        <div className="toggle-row first">
           <div>
             <strong>Botão Mais na barra</strong>
             <span className="muted small">Desligado: 4 favoritos no Início, e o Mais abre puxando a barra para cima (ou pelo menu ☰). Ligado: 3 favoritos e o Mais na ponta. Puxar funciona nos dois jeitos.</span>
@@ -255,24 +287,15 @@ export function Ajustes() {
             { value: 'grade', label: 'Grade' },
           ]}
         />
-        <div className="btn-row" style={{ marginTop: 14 }}>
-          <button type="button" className="btn soft small" onClick={() => openSetup('convite')}>
-            <Icon name="grid" size={16} /> Refazer a montagem do app
-          </button>
-          <button type="button" className="btn ghost small" onClick={openTutorial}>
-            Como usar a barra
-          </button>
-        </div>
       </section>
+      )}
       {favPick && <FavoritesSheet onClose={() => setFavPick(false)} />}
 
-      <GoogleCard onMessage={setMessage} />
+      {at === 'conta' && <GoogleCard onMessage={setMessage} />}
 
+      {at === 'backup' && (
       <section className="card">
-        <div className="card-head">
-          <h2>Backup</h2>
-          <span className="muted small">{data.settings.lastBackupAt ? `Último: ${formatDMY(toISO(new Date(data.settings.lastBackupAt)))}` : 'Nenhum ainda'}</span>
-        </div>
+        <p className="set-meta">{backupSummary}</p>
         <p className="muted">{cloud ? 'Além da cópia no Google Drive, você pode exportar um arquivo de backup de vez em quando.' : 'Seus dados ficam só neste aparelho. Exporte um backup de vez em quando — ele também serve para levar tudo para outro aparelho.'}</p>
         <div className="btn-row" style={{ marginTop: 14 }}>
           <button type="button" className="btn primary" onClick={exportBackup}>
@@ -299,11 +322,10 @@ export function Ajustes() {
           </p>
         )}
       </section>
+      )}
 
+      {at === 'armazenamento' && (
       <section className="card">
-        <div className="card-head">
-          <h2>Armazenamento</h2>
-        </div>
         <div className="info-box">
           <Icon name={persisted ? 'shield' : 'info'} />
           <div>
@@ -325,9 +347,59 @@ export function Ajustes() {
           <Icon name="trash" size={18} /> Apagar todos os dados
         </button>
       </section>
+      )}
 
-      <p className="muted small center">CP Hub · {cloud ? 'seus dados ficam no aparelho e no seu Google Drive' : 'seus dados não saem do seu aparelho'}</p>
+      {!page && <p className="muted small center">CP Hub · {cloud ? 'seus dados ficam no aparelho e no seu Google Drive' : 'seus dados não saem do seu aparelho'}</p>}
 
+    </>
+  );
+}
+
+/** Linha curta da conta Google na lista de temas. */
+function cloudLine(status: CloudStatus, lastSavedAt: string | null): string {
+  if (status === 'salvando') return 'Sincronizando…';
+  if (status === 'offline') return 'Sem internet: sincroniza quando voltar';
+  if (status === 'erro') return 'Não sincronizou da última vez';
+  if (status === 'reconectar') return 'Toque para continuar sincronizando';
+  return lastSavedAt ? `Sincronizado: ${formatDateTime(lastSavedAt)}` : 'Ainda não sincronizado';
+}
+
+/** E22: a tela de entrada das Configurações, com os temas em grupos (como nos ajustes do celular). */
+function SettingsList({ summaries, email }: { summaries: Record<SettingsPageId, string>; email: string | null }) {
+  const row = (id: SettingsPageId) => {
+    const p = SETTINGS_PAGES.find((x) => x.id === id)!;
+    return (
+      <a key={id} className="set-row" href={`#/ajustes/${id}`}>
+        <span className={`set-icon ${p.tone}`}>
+          <Icon name={p.icon as IconName} size={19} />
+        </span>
+        <span className="set-text">
+          <strong>{p.label}</strong>
+          <span>{summaries[id]}</span>
+        </span>
+        <Icon name="right" size={18} />
+      </a>
+    );
+  };
+  return (
+    <>
+      {GOOGLE_CLIENT_ID && (
+        <div className="set-group">
+          <a className="set-row set-account" href="#/ajustes/conta">
+            <span className="set-avatar">{email ? email[0].toUpperCase() : <Icon name="cloud" size={22} />}</span>
+            <span className="set-text">
+              <strong>{email ? 'Conta Google' : 'Entrar com Google'}</strong>
+              <span>{summaries.conta}</span>
+            </span>
+            <Icon name="right" size={18} />
+          </a>
+        </div>
+      )}
+      {SETTINGS_GROUPS.map((g) => (
+        <div key={g.join()} className="set-group">
+          {g.map(row)}
+        </div>
+      ))}
     </>
   );
 }

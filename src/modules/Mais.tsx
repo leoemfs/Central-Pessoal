@@ -21,7 +21,7 @@ const LINKS: { path: string; hint: string }[] = [
   { path: 'voce', hint: 'Perfil, metas e sugestões para você' },
   { path: 'revisao', hint: 'Resumo da semana e reflexão' },
   { path: 'jornada', hint: 'Desbloqueia com 14 dias de uso' },
-  { path: 'ajustes', hint: 'Personalização (temas, favoritos, barra), backup e dados' },
+  { path: 'ajustes', hint: 'Aparência, módulos, barras, conta Google, backup e dados' },
 ];
 
 interface Item {
@@ -102,7 +102,7 @@ function maisItems(data: AppData, grid: boolean) {
     return { id: l.path, label: s.label, short: SHORT[l.path] ?? s.label, icon: s.icon, hint: l.hint, href: `#/${l.path}` };
   });
   const shortcuts: Item[] = [
-    { id: 'ajustes', label: 'Configurações', short: 'Ajustes', icon: 'settings', hint: 'Personalização (temas, favoritos, barra), backup e dados', href: '#/ajustes' },
+    { id: 'ajustes', label: 'Configurações', short: 'Ajustes', icon: 'settings', hint: 'Aparência, módulos, barras, conta Google, backup e dados', href: '#/ajustes' },
     { id: 'barra', label: 'Como usar a barra', short: 'Usar a barra', icon: 'info', hint: 'Tutorial de 1 minuto: favoritos, ferramentas do módulo, voltar e trocar de módulo', onClick: openTutorial },
     { id: 'montar', label: 'Montar o app do seu jeito', short: 'Montar o app', icon: 'grid', hint: 'Escolher de novo os módulos à vista e os favoritos', onClick: () => openSetup('convite') },
     ...(kept.length > 0

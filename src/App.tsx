@@ -31,6 +31,7 @@ import { RoadmapsPage } from './modules/estudos/Roadmaps';
 import { CarreiraPage, MetasPage, VagasPage } from './modules/Carreira';
 import { useCardEditor } from './Cards';
 import { barDrag, PullToMais } from './BarPull';
+import { settingsPage } from './settingsPages';
 import { activeIndex, barFor, barItems, crumb, favoriteItems, type BarItem } from './moduleBar';
 
 export interface ViewProps {
@@ -284,6 +285,8 @@ export function App() {
   const barIndex = bar ? activeIndex(bar, section.path) : null;
   const editor = useCardEditor();
   const where = bar ? crumb(bar, barIndex) : null;
+  // E22: dentro de um tema das Configurações, o título mostra "Configurações / Aparência".
+  const settingsSub = section.path === 'ajustes' ? settingsPage(route.sub) : null;
   // Tocar de novo no módulo em que você já está mostra os favoritos, para trocar de módulo sem passar pelo Início.
   const [showFavs, setShowFavs] = useState(false);
   useEffect(() => setShowFavs(false), [route.path, route.n]);
@@ -342,6 +345,10 @@ export function App() {
           ) : where?.page ? (
             <>
               <span className="crumb">{where.module} /</span> {where.page}
+            </>
+          ) : settingsSub ? (
+            <>
+              <span className="crumb">{section.label} /</span> {settingsSub.label}
             </>
           ) : (
             (section.title ?? section.label)
