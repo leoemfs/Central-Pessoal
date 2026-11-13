@@ -370,8 +370,8 @@ function SettingsList({ summaries, email }: { summaries: Record<SettingsPageId, 
     const p = SETTINGS_PAGES.find((x) => x.id === id)!;
     return (
       <a key={id} className="set-row" href={`#/ajustes/${id}`}>
-        <span className={`set-icon ${p.tone}`}>
-          <Icon name={p.icon as IconName} size={19} />
+        <span className="set-icon">
+          <Icon name={p.icon as IconName} />
         </span>
         <span className="set-text">
           <strong>{p.label}</strong>
