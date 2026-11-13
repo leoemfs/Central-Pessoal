@@ -158,7 +158,7 @@
 ## Feito
 | Versão | O que entrou | PR |
 |---|---|---|
-| v0.52 | E21.2: **puxar a barra para cima abre o Mais** numa gaveta em grade (alcinha que pisca nas 3 primeiras aberturas; fecha puxando para baixo, tocando fora ou no voltar); opção "Botão Mais na barra" em Personalização; passo novo no tutorial. Correção: endereço trocado por fora (link colado) abre a tela em vez de voltar um nível | — |
+| v0.52 | E21.2: **puxar a barra para cima abre o Mais** numa gaveta em grade (alcinha que pisca nas 3 primeiras aberturas; fecha puxando para baixo, tocando fora ou no voltar); opção "Botão Mais na barra" em Personalização; passo novo no tutorial. Correção: endereço trocado por fora (link colado) abre a tela em vez de voltar um nível. Ícone de Configurações virou engrenagem (antes parecia o de brilho) | #76 |
 | v0.51 | E21.1: barra do Início com **4 favoritos** (o lugar do Mais virou o 4º); dentro do módulo, a casa fica **sempre no centro** e a ponta vira ⭐ **Favoritos** (troca de módulo); sai a escolha do jeito da barra em Personalização; Mais no menu ☰ | #75 |
 | v0.50.3 | C4: se o aparelho não deixar salvar no lugar de sempre, as mudanças vão para uma cópia de reserva e aparece um aviso pedindo para exportar um backup; ao abrir, o app usa a cópia mais nova (antes a reserva era ignorada e as últimas mudanças sumiam) | #70 |
 | v0.50.2 | M24 (ajuste): nas sugestões da lista de mercado, rolar de leve até o fim deixa a janela aberta; insistir em rolar além do fim fecha a janela e o teclado, e a lista volta a rolar | — |
