@@ -6791,3 +6791,97 @@ button.row:disabled {
     animation: none;
   }
 }
+
+/* ---------- E22: Configurações por temas ---------- */
+.set-group {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+  margin-bottom: 14px;
+}
+.set-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 60px;
+  padding: 10px 14px;
+  color: var(--text);
+  text-decoration: none;
+}
+.set-row + .set-row {
+  border-top: 1px solid var(--border);
+}
+.set-row:active {
+  background: var(--raised);
+}
+.set-row > .icon:last-child,
+.set-row > svg:last-child {
+  flex: none;
+  color: var(--faint);
+}
+.set-text {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.set-text strong {
+  font-weight: 600;
+}
+.set-text span {
+  color: var(--muted);
+  font-size: 0.82rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.set-icon {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  color: #fff;
+}
+.set-icon.violet { background: #8b5cf6; }
+.set-icon.green { background: #16a34a; }
+.set-icon.blue { background: #3b82f6; }
+.set-icon.pink { background: #db2777; }
+.set-icon.orange { background: #ea580c; }
+.set-icon.grey { background: var(--raised-2); color: var(--text); }
+.set-account {
+  min-height: 72px;
+}
+.set-avatar {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  background: var(--accent-soft);
+  color: var(--accent-text);
+  font-weight: 700;
+  font-size: 1.15rem;
+}
+.set-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  margin: 0 0 4px -4px;
+  padding: 6px 6px 2px 0;
+  color: var(--accent-text);
+  font-size: 0.95rem;
+  text-decoration: none;
+}
+.set-meta {
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+.pz-title.first {
+  margin-top: 0;
+}
