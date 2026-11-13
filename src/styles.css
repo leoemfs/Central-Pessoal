@@ -6839,20 +6839,16 @@ button.row:disabled {
   text-overflow: ellipsis;
 }
 .set-icon {
+  /* Igual ao ícone dos cartões do Mais: fundo do cartão e a cor de destaque escolhida. */
   flex: none;
   display: grid;
   place-items: center;
-  width: 34px;
-  height: 34px;
-  border-radius: 10px;
-  color: #fff;
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  background: var(--raised);
+  color: var(--accent-text);
 }
-.set-icon.violet { background: #8b5cf6; }
-.set-icon.green { background: #16a34a; }
-.set-icon.blue { background: #3b82f6; }
-.set-icon.pink { background: #db2777; }
-.set-icon.orange { background: #ea580c; }
-.set-icon.grey { background: var(--raised-2); color: var(--text); }
 .set-account {
   min-height: 72px;
 }

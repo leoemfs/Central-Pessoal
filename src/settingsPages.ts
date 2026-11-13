@@ -10,17 +10,15 @@ export interface SettingsPage {
   label: string;
   /** Nome do ícone (ui.tsx). */
   icon: string;
-  /** Cor do quadradinho do ícone na lista. */
-  tone: 'violet' | 'green' | 'blue' | 'pink' | 'orange' | 'grey';
 }
 
 export const SETTINGS_PAGES: SettingsPage[] = [
-  { id: 'conta', label: 'Contas e sincronização', icon: 'cloud', tone: 'pink' },
-  { id: 'aparencia', label: 'Aparência', icon: 'palette', tone: 'violet' },
-  { id: 'inicio', label: 'Início e módulos', icon: 'grid', tone: 'green' },
-  { id: 'barras', label: 'Barras e navegação', icon: 'sliders', tone: 'blue' },
-  { id: 'backup', label: 'Backup', icon: 'download', tone: 'orange' },
-  { id: 'armazenamento', label: 'Armazenamento', icon: 'shield', tone: 'grey' },
+  { id: 'conta', label: 'Contas e sincronização', icon: 'cloud' },
+  { id: 'aparencia', label: 'Aparência', icon: 'palette' },
+  { id: 'inicio', label: 'Início e módulos', icon: 'grid' },
+  { id: 'barras', label: 'Barras e navegação', icon: 'sliders' },
+  { id: 'backup', label: 'Backup', icon: 'download' },
+  { id: 'armazenamento', label: 'Armazenamento', icon: 'shield' },
 ];
 
 /** Grupos da lista (a conta Google fica sozinha no topo). */
