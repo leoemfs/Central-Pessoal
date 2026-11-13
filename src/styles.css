@@ -6638,3 +6638,45 @@ button.row:disabled {
   opacity: 1;
   cursor: default;
 }
+
+/* M24: caixa de adicionar da lista de mercado no topo, presa ao rolar, com sugestões flutuantes */
+.market-add {
+  position: sticky;
+  top: 66px;
+  z-index: 12;
+  padding: 8px 0;
+  margin: -8px 0;
+  background: var(--bg);
+}
+.bars-hidden .market-add {
+  top: 0;
+}
+.market-add .add-row {
+  margin-top: 0;
+}
+.sugbox.floating {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: calc(100% - 2px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  padding: 8px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-strong);
+  background: var(--surface);
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.45);
+}
+.sugbox.floating button {
+  flex: none;
+}
+.market-add {
+  transition: top 0.22s ease;
+  box-shadow: 0 -10px 0 16px var(--bg);
+}
+@media (min-width: 900px) {
+  .market-add {
+    top: 0;
+  }
+}
