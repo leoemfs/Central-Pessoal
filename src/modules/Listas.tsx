@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, type ReactNode } from 'react';
+import { useEffect, useMemo, useRef, useState, type ReactNode, type RefObject } from 'react';
 import { CardScreen } from '../Cards';
 import type { ViewProps } from '../App';
 import { useStore } from '../store';
@@ -12,7 +12,7 @@ import {
 } from '../lists';
 import type { ListCategory, ListItem, ListKind, Product, ProductVariant, UserList } from '../types';
 import { formatDMY, formatMoney, todayISO, uid } from '../utils';
-import { CategoryBadge, Chips, Empty, Field, Icon, notify, PageHeader, Pill, Progress, Sheet, Toggle, type IconName } from '../ui';
+import { CategoryBadge, Chips, Empty, Field, Icon, notify, PageHeader, Pill, Progress, Sheet, Toggle, useBackToClose, type IconName } from '../ui';
 
 const money0 = (v: number) => `R$ ${Math.round(v).toLocaleString('pt-BR')}`;
 const parseNum = (t: string) => {
@@ -727,6 +727,7 @@ function MarketList({ l }: { l: UserList }) {
           </ul>
         </section>
       )}
+      <MarketAddRow l={l} />
       {l.items.length === 0 ? (
         <section className="card">
           <Empty>Adicione itens como "2 kg tomate" ou "leite". Os itens com preço anotado mostram onde sai mais barato.</Empty>
@@ -772,7 +773,6 @@ function MarketList({ l }: { l: UserList }) {
           </section>
         ))
       )}
-      <MarketAddRow l={l} />
       <div className="toggle-row">
         <div>
           <strong>Perguntar o preço ao marcar</strong>
@@ -914,10 +914,17 @@ function PaySheet({ l, it, onClose, onStopAsking }: { l: UserList; it: ListItem;
 const isOld = (date: string) => date < new Date(Date.now() - 60 * 864e5).toISOString().slice(0, 10);
 const cents = (n: number) => n.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
-/** M2: campo da lista de mercado com sugestões dos seus produtos (com a faixa de preço) e do catálogo pronto. */
+/**
+ * M2 + M24: campo da lista de mercado, no topo (fica preso ao rolar), com sugestões dos seus produtos
+ * (com a faixa de preço) e do catálogo pronto numa janela flutuante, com rolagem própria.
+ * A janela fecha com o voltar do celular, tocando fora ou no Esc, e reabre ao tocar na caixa.
+ */
 function MarketAddRow({ l }: { l: UserList }) {
   const { data, update } = useStore();
   const [text, setText] = useState('');
+  const [open, setOpen] = useState(false);
+  const box = useRef<HTMLDivElement>(null);
+  const input = useRef<HTMLInputElement>(null);
   const latest = useMemo(() => latestPrices(data), [data]);
   const parsed = parseItemText(text);
   const sugs = text.trim() ? productSuggestions(data, parsed.text) : [];
@@ -925,17 +932,45 @@ function MarketAddRow({ l }: { l: UserList }) {
     if (!text.trim()) return;
     update(addItemFromText(l.id, name ? (parsed.qty !== null ? `${parsed.qty} ${parsed.unit} ${name}` : name) : text.trim()));
     setText('');
+    input.current?.focus();
   };
+  // Tocar fora da caixa e das sugestões fecha a janela.
+  useEffect(() => {
+    if (!open) return;
+    const onDown = (e: PointerEvent) => {
+      if (box.current && !box.current.contains(e.target as Node)) setOpen(false);
+    };
+    document.addEventListener('pointerdown', onDown);
+    return () => document.removeEventListener('pointerdown', onDown);
+  }, [open]);
   return (
-    <div className="field">
+    <div className="market-add" ref={box}>
       <div className="add-row">
-        <input className="input" value={text} onChange={(e) => setText(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && add()} placeholder='Ex.: "2 kg tomate"' aria-label="Novo item" autoComplete="off" />
+        <input
+          ref={input}
+          className="input"
+          value={text}
+          onChange={(e) => {
+            setText(e.target.value);
+            setOpen(true);
+          }}
+          onFocus={() => setOpen(true)}
+          onClick={() => setOpen(true)}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') add();
+            if (e.key === 'Escape') setOpen(false);
+          }}
+          placeholder='Adicionar: "2 kg tomate"'
+          aria-label="Novo item"
+          aria-expanded={open && sugs.length > 0}
+          autoComplete="off"
+        />
         <button type="button" className="btn" onClick={() => add()} aria-label="Adicionar">
           <Icon name="plus" size={18} />
         </button>
       </div>
-      {sugs.length > 0 && (
-        <div className="sugbox" role="listbox" aria-label="Sugestões">
+      {open && sugs.length > 0 && (
+        <SuggestionPanel anchor={box} onClose={() => setOpen(false)}>
           {sugs.map((sg) => {
             const r = sg.productId ? priceRange(data, sg.productId, latest) : null;
             const unit = data.products.find((p) => p.id === sg.productId)?.unit ?? '';
@@ -949,8 +984,36 @@ function MarketAddRow({ l }: { l: UserList }) {
               </button>
             );
           })}
-        </div>
+        </SuggestionPanel>
       )}
+    </div>
+  );
+}
+
+/** Janela flutuante das sugestões: cabe entre a caixa e o teclado, rola sozinha e fecha com o voltar. */
+function SuggestionPanel({ anchor, onClose, children }: { anchor: RefObject<HTMLDivElement | null>; onClose: () => void; children: ReactNode }) {
+  useBackToClose(onClose);
+  const [max, setMax] = useState(320);
+  useEffect(() => {
+    const vv = window.visualViewport;
+    const fit = () => {
+      const r = anchor.current?.getBoundingClientRect();
+      const visible = vv ? vv.height + vv.offsetTop : window.innerHeight;
+      if (r) setMax(Math.max(140, Math.round(visible - r.bottom - 16)));
+    };
+    fit();
+    vv?.addEventListener('resize', fit);
+    vv?.addEventListener('scroll', fit);
+    window.addEventListener('scroll', fit, { passive: true });
+    return () => {
+      vv?.removeEventListener('resize', fit);
+      vv?.removeEventListener('scroll', fit);
+      window.removeEventListener('scroll', fit);
+    };
+  }, [anchor]);
+  return (
+    <div className="sugbox floating" role="listbox" aria-label="Sugestões" style={{ maxHeight: max }}>
+      {children}
     </div>
   );
 }
