@@ -8,7 +8,7 @@ import { Icon, notify, PageHeader, Segmented, Toggle, type IconName } from '../u
 import { favoriteItems } from '../moduleBar';
 import { FavoritesSheet } from './Mais';
 import { ACCENTS, accentById } from '../theme';
-import { BAR_LAYOUTS, fitFavorites, hiddenFrom, MIN_VISIBLE, MODULES, rhythmLabel, toggleModule, visibleFrom } from '../setup';
+import { fitFavorites, hiddenFrom, MIN_VISIBLE, MODULES, rhythmLabel, toggleModule, visibleFrom } from '../setup';
 import { openSetup, openTutorial, RhythmPicker } from './Montagem';
 import { GoogleCard } from './ContaGoogle';
 import { disconnect, useCloud } from '../cloud';
@@ -178,7 +178,7 @@ export function Ajustes() {
         </div>
 
         <h3 className="pz-title">Favoritos do Início</h3>
-        <p className="muted small">Os 3 ícones do meio da barra de baixo quando você está no Início.</p>
+        <p className="muted small">Os 4 ícones da barra de baixo ao lado do Início. Dentro de um módulo, a estrela na ponta da barra mostra os favoritos para trocar de módulo; o Mais fica no menu ☰.</p>
         <div className="fav-row">
           {favoriteItems(data.settings.favorites).map((f) => (
             <span key={f.id} className="fav-chip">
@@ -223,25 +223,6 @@ export function Ajustes() {
           </>
         )}
 
-        <h3 className="pz-title">Barra de baixo dentro de um módulo</h3>
-        <div className="pz-options" role="radiogroup" aria-label="Jeito da barra de baixo">
-          {BAR_LAYOUTS.map((o) => (
-            <button key={o.id} type="button" role="radio" aria-checked={data.settings.barLayout === o.id} className={`option-card${data.settings.barLayout === o.id ? ' on' : ''}`} onClick={() => {
-                setSetting({ barLayout: o.id });
-                notify('Barra de baixo', o.label);
-              }}>
-              <strong>{o.label}</strong>
-              <span className="muted small">{o.hint}</span>
-              <span className="pz-demo" aria-hidden="true">
-                {o.demo.map((d, k) => (
-                  <i key={k} className={d === 'M' ? 'mod' : d === 'H' ? 'home' : ''}>
-                    {d === 'H' ? '⌂' : d === 'M' ? 'Agenda' : d === '+' ? '⋯' : 'ferr.'}
-                  </i>
-                ))}
-              </span>
-            </button>
-          ))}
-        </div>
         <div className="toggle-row">
           <div>
             <strong>Tocar de novo no módulo mostra os favoritos</strong>

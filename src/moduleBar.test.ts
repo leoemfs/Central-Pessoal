@@ -2,16 +2,17 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { activeIndex, addFavorite, barItems, barFor, crumb, DEFAULT_FAVORITES, favoriteItems, MODULE_BARS, normalizeFavorites } from './moduleBar.ts';
 
-test('favoritos: sempre 3, válidos e sem repetir', () => {
+test('favoritos: sempre 4, válidos e sem repetir (quem tinha 3 ganha o 4º)', () => {
   assert.deepEqual(normalizeFavorites(undefined), DEFAULT_FAVORITES);
-  assert.deepEqual(normalizeFavorites(['listas', 'listas', 'xyz']), ['listas', 'financas', 'diario']);
-  assert.deepEqual(normalizeFavorites(['nucleo', 'listas', 'voce', 'jornada']), ['nucleo', 'listas', 'voce']);
+  assert.deepEqual(normalizeFavorites(['listas', 'listas', 'xyz']), ['listas', 'financas', 'diario', 'agenda']);
+  assert.deepEqual(normalizeFavorites(['financas', 'diario', 'agenda']), ['financas', 'diario', 'agenda', 'listas']);
+  assert.deepEqual(normalizeFavorites(['nucleo', 'listas', 'voce', 'jornada', 'diario']), ['nucleo', 'listas', 'voce', 'jornada']);
   assert.deepEqual(normalizeFavorites('lixo'), DEFAULT_FAVORITES);
 });
 
 test('marcar favorito: entra no fim e o mais antigo sai', () => {
-  const r = addFavorite(['financas', 'diario', 'agenda'], 'nucleo');
-  assert.deepEqual(r.favorites, ['diario', 'agenda', 'nucleo']);
+  const r = addFavorite(['financas', 'diario', 'agenda', 'listas'], 'nucleo');
+  assert.deepEqual(r.favorites, ['diario', 'agenda', 'listas', 'nucleo']);
   assert.equal(r.removed, 'financas');
   const same = addFavorite(['financas', 'diario', 'agenda'], 'diario');
   assert.equal(same.removed, null);
@@ -61,22 +62,11 @@ test('regra: cada item da barra é uma tela diferente, e nenhuma tela se repete 
   }
 });
 
-test('o módulo favorito fica na mesma posição; as ferramentas ocupam os outros espaços', () => {
-  const favs = ['financas', 'diario', 'agenda'];
+test('E21: dentro do módulo, a casa fica sempre no centro (o jeito antigo da barra é ignorado)', () => {
+  const favs = ['financas', 'diario', 'agenda', 'listas'];
   const ids = (x: { items: { id: string }[]; home: number }) => [x.items.map((i) => i.id), x.home];
-  assert.deepEqual(ids(barItems(barFor('financas')!, favs)), [['financas', 'orcamento', 'relatorios'], 0]);
-  assert.deepEqual(ids(barItems(barFor('relatorios')!, favs)), [['financas', 'orcamento', 'relatorios'], 0]);
-  assert.deepEqual(ids(barItems(barFor('diario')!, favs)), [['humor', 'diario', 'revisao'], 1]);
-  assert.deepEqual(ids(barItems(barFor('agenda')!, favs)), [['hoje', 'proximos', 'agenda'], 2]);
-  // Não é favorito: casa no centro.
+  assert.deepEqual(ids(barItems(barFor('financas')!, favs)), [['orcamento', 'financas', 'relatorios'], 1]);
+  assert.deepEqual(ids(barItems(barFor('relatorios')!, favs, 'fixo')), [['orcamento', 'financas', 'relatorios'], 1]);
+  assert.deepEqual(ids(barItems(barFor('agenda')!, favs, 'lado')), [['hoje', 'agenda', 'proximos'], 1]);
   assert.deepEqual(ids(barItems(barFor('listas')!, favs)), [['compras', 'listas', 'precos'], 1]);
-});
-
-test('jeito da barra escolhido em Personalização', () => {
-  const favs = ['financas', 'diario', 'agenda'];
-  const ids = (x: { items: { id: string }[]; home: number }) => [x.items.map((i) => i.id), x.home];
-  assert.deepEqual(ids(barItems(barFor('agenda')!, favs, 'lado')), [['agenda', 'hoje', 'proximos'], 0]);
-  assert.deepEqual(ids(barItems(barFor('diario')!, favs, 'lado')), [['diario', 'humor', 'revisao'], 0]);
-  assert.deepEqual(ids(barItems(barFor('financas')!, favs, 'centro')), [['orcamento', 'financas', 'relatorios'], 1]);
-  assert.deepEqual(ids(barItems(barFor('listas')!, favs, 'lado')), [['listas', 'compras', 'precos'], 0]);
 });

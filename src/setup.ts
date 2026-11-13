@@ -4,7 +4,7 @@
  * - Ritmo do Diário: o app só convida a escrever no ritmo escolhido, sem nunca cobrar falta.
  */
 import type { AppData, JournalRhythm } from './types.ts';
-import { DEFAULT_FAVORITES } from './moduleBar.ts';
+import { DEFAULT_FAVORITES, FAV_COUNT } from './moduleBar.ts';
 
 export interface ModuleInfo {
   id: string;
@@ -62,17 +62,18 @@ export function toggleModule(visible: string[], id: string): string[] {
 }
 
 /** Favoritos possíveis: só módulos à vista (Jornada também pode). Mantém a ordem dos toques. */
-export function fitFavorites(favs: string[], visible: string[]): [string, string, string] {
+export function fitFavorites(favs: string[], visible: string[]): string[] {
   const out = favs.filter((f) => visible.includes(f) || (f === 'revisao' && visible.includes('diario')));
-  for (const id of [...DEFAULT_FAVORITES, ...visible]) if (out.length < 3 && !out.includes(id) && visible.includes(id)) out.push(id);
-  for (const m of MODULES) if (out.length < 3 && !out.includes(m.id)) out.push(m.id);
-  return out.slice(0, 3) as [string, string, string];
+  for (const id of [...DEFAULT_FAVORITES, ...visible]) if (out.length < FAV_COUNT && !out.includes(id) && visible.includes(id)) out.push(id);
+  if (out.length < FAV_COUNT && visible.includes('diario') && !out.includes('revisao')) out.push('revisao');
+  for (const m of MODULES) if (out.length < FAV_COUNT && !out.includes(m.id)) out.push(m.id);
+  return out.slice(0, FAV_COUNT);
 }
 
 /** Tocar num favorito: entra no fim (o mais antigo sai); tocar num que já está tira ele. */
 export function tapFavorite(picked: string[], id: string): string[] {
   if (picked.includes(id)) return picked.filter((x) => x !== id);
-  return [...picked, id].slice(-3);
+  return [...picked, id].slice(-FAV_COUNT);
 }
 
 export const hiddenFrom = (visible: string[]): string[] => MODULES.map((m) => m.id).filter((id) => !visible.includes(id));

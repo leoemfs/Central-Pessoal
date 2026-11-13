@@ -232,12 +232,12 @@ export function Guardados() {
   );
 }
 
-/** Escolher os 3 favoritos: tocar num módulo coloca na barra; o mais antigo sai. */
+/** Escolher os 4 favoritos: tocar num módulo coloca na barra; o mais antigo sai. */
 export function FavoritesSheet({ onClose }: { onClose: () => void }) {
   const { data, update } = useStore();
   const favs = data.settings.favorites;
   function toggle(id: string) {
-    if (favs.includes(id)) return notify('A barra tem 3 favoritos', 'Toque em outro módulo para ele entrar no lugar do mais antigo.');
+    if (favs.includes(id)) return notify('A barra tem 4 favoritos', 'Toque em outro módulo para ele entrar no lugar do mais antigo.');
     const r = addFavorite(favs, id);
     update((d) => ({ ...d, settings: { ...d.settings, favorites: r.favorites } }));
     const name = (x: string | null) => FAVORITABLE.find((f) => f.id === x)?.label ?? '';
@@ -246,7 +246,7 @@ export function FavoritesSheet({ onClose }: { onClose: () => void }) {
   return (
     <Sheet title="Favoritos do Início" onClose={onClose}>
       <p className="muted small" style={{ marginTop: 0 }}>
-        Escolha 3. Ao marcar um novo, o mais antigo sai. Os outros módulos continuam no Mais e no menu ☰.
+        Escolha 4. Ao marcar um novo, o mais antigo sai. Os outros módulos continuam no Mais e no menu ☰.
       </p>
       <ul className="list">
         {FAVORITABLE.filter((f) => !isHidden(data, f.id)).map((f) => {

@@ -6314,11 +6314,11 @@ body.tutorial-on .tabbar.hidden {
   0%, 100% { box-shadow: 0 0 0 0 var(--accent); }
   50% { box-shadow: 0 0 0 4px var(--accent-soft); }
 }
-body[data-coach='favs'] .tabbar a:not(:first-child):not(:last-of-type) .tb-pill,
-body[data-coach='tools'] .tabbar a:not(:first-child):not(:last-of-type):not(.center) .tb-pill,
+body[data-coach='favs'] .tabbar a:not(:first-child) .tb-pill,
+body[data-coach='tools'] .tabbar a:not(:first-child):not(.center) .tb-pill,
 body[data-coach='home'] .tabbar a.center .tb-pill,
-body[data-coach='all'] .tabbar a .tb-pill,
-body[data-coach='mais'] .tabbar a:last-of-type .tb-pill {
+body[data-coach='favbtn'] .tabbar .tb-favs .tb-pill,
+body[data-coach='all'] .tabbar .tb .tb-pill {
   outline: 2px solid var(--accent);
   outline-offset: 2px;
   animation: coach-pulse 1.4s ease-in-out infinite;
@@ -6679,4 +6679,23 @@ button.row:disabled {
   .market-add {
     top: 0;
   }
+}
+
+/* E21: botão Favoritos (ponta da barra dentro de um módulo), igual aos links da barra */
+.tabbar button.tb {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  padding: 0;
+  border: 0;
+  border-radius: 14px;
+  background: transparent;
+  color: var(--faint);
+  font: inherit;
+  cursor: pointer;
+  touch-action: manipulation;
 }
