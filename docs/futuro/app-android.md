@@ -41,6 +41,7 @@ Transformar a Central Pessoal num app Android instalável (APK e, se quiser, Pla
 - **Atualização automática das telas:** ao mesclar um PR, o GitHub Actions gera um pacote só das telas (guardado no GitHub, sem custo). O app verifica ao abrir, baixa em segundo plano e usa na próxima abertura. Plugin de "atualização ao vivo" (ex.: Capawesome Live Update). A confirmar na hora de construir.
 - APK novo só quando mudar a parte nativa (plugins, ícone, permissões). O GitHub Actions monta o APK; o Leonardo baixa e instala por cima, sem perder dados.
 - **Notificações (N3) junto com o N4:** notificações locais de verdade (app fechado, tela bloqueada, sem internet), com botões ("Feito", "Guardei"). Ao abrir o app ou mudar algo, ele agenda no Android os avisos das próximas semanas. Atalho na tela de Notificações para "alarmes e lembretes" e economia de bateria.
+- **Requisito: o PWA não pode parar.** Leonardo usa no computador e um amigo usa no iPhone. Todo recurso do Android precisa checar se está no app (`Capacitor.isNativePlatform()`) e, no site, simplesmente não aparecer ou usar a versão web. Antes de cada PR, testar o site também.
 - **O PWA continua:** o site segue funcionando no navegador e é o mesmo código do app. Os dados de cada um são separados (importar backup na primeira abertura do app); a sincronização entre os dois é o N8.
 - Ordem: Parte 1 = APK instalável + atualização automática (M) · Parte 2 = notificações + Configurações › Notificações (M).
 
