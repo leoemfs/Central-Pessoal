@@ -7950,3 +7950,23 @@ body.bar-labels .tabbar .tb-label {
     display: none;
   }
 }
+
+/* E28: itens "em breve" no menu da gaveta */
+.menu-row.off,
+.mg-cell.off {
+  opacity: 0.5;
+  cursor: default;
+}
+.soon-tag {
+  flex: none;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--raised-2);
+  color: var(--muted);
+  font-size: 0.68rem;
+  font-style: normal;
+}
+.mg-cell .soon-tag {
+  padding: 1px 6px;
+  font-size: 0.6rem;
+}
