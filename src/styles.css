@@ -7666,7 +7666,7 @@ body.scrolling .fab {
   display: none;
 }
 body.bar-labels {
-  --tabbar-h: 78px;
+  --tabbar-h: 82px;
 }
 body.bar-labels .tabbar .tb-label {
   display: block;
@@ -7686,6 +7686,16 @@ body.bar-labels .tabbar .tb.center .tb-label {
 }
 body.bar-labels .tabbar .tb-pill {
   height: 38px;
+  flex: none;
+}
+/* Ícone em cima; o nome no meio do espaço entre o ícone e o fim da barra (não grudado no destaque). */
+body.bar-labels .tabbar .tb {
+  justify-content: flex-start;
+  padding-top: 2px;
+}
+body.bar-labels .tabbar .tb-label {
+  margin: auto 0;
+  transform: translateY(3px); /* compensa a margem de baixo da barra */
 }
 /* N2.4: Arsenal, provador e tela cheia do personagem */
 .jn-scene-btn {

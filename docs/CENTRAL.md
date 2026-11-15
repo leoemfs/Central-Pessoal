@@ -167,7 +167,7 @@
 ## Feito
 | Versão | O que entrou | PR |
 |---|---|---|
-| v0.60.2 | E26 (ajuste): o **nome embaixo dos ícones da barra aparece por padrão** para todos; a opção virou "Esconder o nome embaixo dos ícones" | — |
+| v0.60.2 | E26 (ajuste): o **nome embaixo dos ícones da barra aparece por padrão** para todos; a opção virou "Esconder o nome embaixo dos ícones"; o nome fica no meio do espaço entre o ícone (com o destaque) e o fim da barra, sem grudar | — |
 | v0.60.1 | E26: opção **"Mostrar o nome embaixo dos ícones"** da barra de baixo (desligada por padrão). Correção: a junção do #95 deixou um bloco de estilo aberto, e os estilos da Jornada que vinham depois só valiam com "menos movimento" ligado; fechado, com teste novo que confere o arquivo de estilos | #98 |
 | v0.60 | N2.4: **Arsenal** na Jornada (Elmo · Roupa · Botas · Arma · Artefato; os seus primeiro, com raridade e preço), **provador** (vê o personagem com o item antes de comprar), **comprar com ouro**, pegar o que o atributo libera, **vestir e tirar**; tocar na cena abre o **personagem em tela cheia** com os espaços de equipamento | #97 |
 | v0.59.1 | E24: o **botão +** fica transparente e um pouco menor enquanto a tela rola (qualquer direção) e volta inteiro meio segundo depois de parar; tocar nele continua funcionando | — |
