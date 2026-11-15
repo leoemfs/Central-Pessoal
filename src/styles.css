@@ -7970,3 +7970,96 @@ body.bar-labels .tabbar .tb-label {
   padding: 1px 6px;
   font-size: 0.6rem;
 }
+
+/* M30: mapa mental em tela cheia */
+.fullscreen ~ .sheet-backdrop {
+  z-index: 130;
+}
+.mm-full {
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+.mm-full > * {
+  max-width: none;
+}
+.mm-full-top {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--border);
+}
+.mm-full-title {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+.mm-full-title strong {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.mm-full-title small {
+  font-size: 12px;
+}
+.mm-canvas.mm-full-canvas {
+  flex: 1;
+  height: auto;
+  min-height: 0;
+  border: 0;
+  border-radius: 0;
+}
+.mm-full-bar {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 10px 12px 12px;
+  border-top: 1px solid var(--border);
+  background: var(--bg);
+}
+.mm-full-actions {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.mm-act {
+  flex: none;
+  min-width: 64px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 8px;
+  border: 0;
+  border-radius: 12px;
+  background: var(--surface);
+  color: var(--text);
+  font: 500 12px var(--font, inherit);
+  cursor: pointer;
+}
+.mm-act.primary {
+  background: var(--accent);
+  color: var(--on-accent, #fff);
+}
+.mm-act.danger {
+  color: var(--red, #ef4444);
+}
+.mm-act:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+.mm-inline {
+  width: 100%;
+  height: 100%;
+  border: 0;
+  outline: 0;
+  border-radius: 999px;
+  background: var(--raised, var(--surface));
+  color: var(--text);
+  box-shadow: inset 0 0 0 2px var(--accent);
+  font: 600 13px var(--font, inherit);
+  text-align: center;
+  padding: 0 10px;
+}

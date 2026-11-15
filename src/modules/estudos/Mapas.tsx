@@ -1,10 +1,10 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { go } from '../../router';
 import { SUGGESTED_MAPS } from '../../estudosCatalogo';
 import { mapFromSuggestion } from '../../estudos';
 import { addChild, addSibling, countNodes, findNode, fromBranches, layoutMap, MAP_COLORS, moveSibling, parentOf, removeNode, reparent, updateNode, validParents, type LaidNode, type MapLayout } from '../../mapas';
 import type { MapNode, StudyMap } from '../../types';
-import { Field, Icon, notify, PageHeader, Sheet } from '../../ui';
+import { Field, Fullscreen, Icon, notify, PageHeader, Sheet } from '../../ui';
 import { Missing } from './Biblioteca';
 import { nowISO, Path, useStudy } from './shared';
 
@@ -13,7 +13,7 @@ const plural = (n: number, one: string, many: string) => `${n} ${n === 1 ? one :
 // ---------- Desenho ----------
 
 /** As ideias e as ligações entre elas. Serve para o mapa aberto e para as miniaturas. */
-function MapShapes({ layout, selected, interactive }: { layout: MapLayout; selected?: string | null; interactive?: boolean }) {
+function MapShapes({ layout, selected, interactive, editing, editor }: { layout: MapLayout; selected?: string | null; interactive?: boolean; editing?: string | null; editor?: (n: LaidNode) => ReactNode }) {
   const byId = new Map(layout.nodes.map((n) => [n.id, n]));
   return (
     <>
@@ -39,9 +39,13 @@ function MapShapes({ layout, selected, interactive }: { layout: MapLayout; selec
               className="mm-box"
               style={root ? undefined : { fill: n.color, fillOpacity: n.depth === 1 ? 0.22 : 0.1, stroke: on ? undefined : n.color, strokeOpacity: n.depth === 1 ? 0.9 : 0.45 }}
             />
-            <text x={n.x} y={n.y} dy="0.35em" textAnchor="middle" className="mm-text" style={{ fontSize: root ? 15 : n.depth === 1 ? 13.5 : 12.5, fontWeight: n.depth <= 1 ? 700 : 500 }}>
-              {n.label}
-            </text>
+            {editing === n.id && editor ? (
+              editor(n)
+            ) : (
+              <text x={n.x} y={n.y} dy="0.35em" textAnchor="middle" className="mm-text" style={{ fontSize: root ? 15 : n.depth === 1 ? 13.5 : 12.5, fontWeight: n.depth <= 1 ? 700 : 500 }}>
+                {n.label}
+              </text>
+            )}
             {!root && n.children > 0 && (interactive || n.collapsed) && <Toggle n={n} interactive={interactive} />}
           </g>
         );
@@ -87,7 +91,27 @@ const clampK = (k: number) => Math.min(2.5, Math.max(0.25, k));
  * Mapa aberto: arrastar move, dois dedos (ou a rodinha do mouse) aproximam, tocar numa ideia seleciona.
  * O toque é resolvido aqui (e não em cada ideia) para arrastar e tocar não se confundirem.
  */
-function MapCanvas({ layout, selected, onPick, onToggle, onKey }: { layout: MapLayout; selected: string; onPick: (id: string) => void; onToggle: (id: string) => void; onKey: (e: React.KeyboardEvent) => void }) {
+function MapCanvas({
+  layout,
+  selected,
+  onPick,
+  onToggle,
+  onKey,
+  onBackground,
+  editing,
+  editor,
+  className = '',
+}: {
+  layout: MapLayout;
+  selected: string | null;
+  onPick: (id: string) => void;
+  onToggle: (id: string) => void;
+  onKey: (e: React.KeyboardEvent) => void;
+  onBackground?: () => void;
+  editing?: string | null;
+  editor?: (n: LaidNode) => ReactNode;
+  className?: string;
+}) {
   const box = useRef<HTMLDivElement>(null);
   const [size, setSize] = useState<{ w: number; h: number } | null>(null);
   const [view, setView] = useState<View | null>(null);
@@ -203,6 +227,7 @@ function MapCanvas({ layout, selected, onPick, onToggle, onKey }: { layout: MapL
       if (!g.moved) {
         if (g.target.toggle) onToggle(g.target.toggle);
         else if (g.target.node) onPick(g.target.node);
+        else onBackground?.();
       }
     } else {
       // Sobrou um dedo depois da pinça: continua arrastando a partir daqui.
@@ -213,11 +238,11 @@ function MapCanvas({ layout, selected, onPick, onToggle, onKey }: { layout: MapL
   }
 
   return (
-    <div className="mm-canvas" ref={box} tabIndex={0} onKeyDown={onKey} aria-label="Mapa mental. Enter cria uma ideia ao lado, Tab cria dentro, Delete exclui.">
+    <div className={`mm-canvas ${className}`} ref={box} tabIndex={0} onKeyDown={onKey} aria-label="Mapa mental. Enter cria uma ideia ao lado, Tab cria dentro, Delete exclui.">
       <svg width="100%" height="100%" onPointerDown={down} onPointerMove={move} onPointerUp={up} onPointerCancel={up} role="img" aria-label="Desenho do mapa">
         {view && (
           <g transform={`translate(${view.x} ${view.y}) scale(${view.k})`}>
-            <MapShapes layout={layout} selected={selected} interactive />
+            <MapShapes layout={layout} selected={selected} interactive editing={editing} editor={editor} />
           </g>
         )}
       </svg>
@@ -291,26 +316,10 @@ export function MapaPage({ id }: { id: string }) {
   const m = study.maps.find((x) => x.id === id);
   const [sel, setSel] = useState(m?.root.id ?? '');
   const [settings, setSettings] = useState(false);
-  const [moving, setMoving] = useState(false);
-  const [confirm, setConfirm] = useState(false);
-  const input = useRef<HTMLInputElement>(null);
-  // Depois de criar uma ideia, o cursor vai para o texto dela, já selecionado para digitar por cima.
-  const [focusTick, setFocusTick] = useState(0);
-  useEffect(() => {
-    if (!focusTick) return;
-    input.current?.focus({ preventScroll: true });
-    input.current?.select();
-  }, [focusTick]);
-  useEffect(() => setConfirm(false), [sel]);
+  const [full, setFull] = useState(false);
   const layout = useMemo(() => (m ? layoutMap(m.root) : null), [m?.root]);
   if (!m || !layout) return <Missing what="Mapa" />;
 
-  const node = findNode(m.root, sel) ?? m.root;
-  const isRoot = node.id === m.root.id;
-  const parent = parentOf(m.root, node.id);
-  const sibs = parent?.children ?? [];
-  const at = sibs.findIndex((c) => c.id === node.id);
-  const laid = layout.nodes.find((n) => n.id === node.id);
   const nb = m.notebookId ? study.notebooks.find((n) => n.id === m.notebookId) : undefined;
   const page = nb && m.pageId ? nb.pages.find((p) => p.id === m.pageId) : undefined;
 
@@ -318,32 +327,6 @@ export function MapaPage({ id }: { id: string }) {
   const apply = (root: MapNode) => {
     if (root !== m.root) set((s) => ({ ...s, maps: s.maps.map((x) => (x.id === m.id ? { ...x, root, updatedAt: nowISO() } : x)) }));
   };
-  function add(kind: 'child' | 'sibling') {
-    const r = kind === 'child' || isRoot ? addChild(m!.root, node.id) : addSibling(m!.root, node.id);
-    if (!r.id) return notify('Este ramo já está bem fundo', 'Crie a ideia ao lado ou num ramo mais perto do centro.');
-    apply(r.root);
-    setSel(r.id);
-    setFocusTick((t) => t + 1);
-  }
-  function del() {
-    if (isRoot) return;
-    if (node.children.length && !confirm) return setConfirm(true);
-    const next = sibs[at + 1] ?? sibs[at - 1] ?? parent!;
-    apply(removeNode(m!.root, node.id));
-    setSel(next.id);
-  }
-  function onKey(e: React.KeyboardEvent) {
-    if (e.key === 'Tab') {
-      e.preventDefault();
-      add('child');
-    } else if (e.key === 'Enter') {
-      e.preventDefault();
-      add('sibling');
-    } else if ((e.key === 'Delete' || e.key === 'Backspace') && e.target === e.currentTarget) {
-      e.preventDefault();
-      del();
-    }
-  }
 
   return (
     <>
@@ -361,62 +344,246 @@ export function MapaPage({ id }: { id: string }) {
           ) : undefined
         }
       />
-      <MapCanvas layout={layout} selected={node.id} onPick={setSel} onToggle={(nid) => apply(updateNode(m.root, nid, { collapsed: !findNode(m.root, nid)?.collapsed }))} onKey={onKey} />
+      <MapCanvas
+        layout={layout}
+        selected={null}
+        onPick={(nid) => {
+          setSel(nid);
+          setFull(true);
+        }}
+        onToggle={(nid) => apply(updateNode(m.root, nid, { collapsed: !findNode(m.root, nid)?.collapsed }))}
+        onKey={(e) => {
+          if (e.key === 'Enter') {
+            e.preventDefault();
+            setFull(true);
+          }
+        }}
+      />
+      <button type="button" className="btn primary block" onClick={() => setFull(true)}>
+        <Icon name="edit" size={16} /> Editar em tela cheia
+      </button>
+      <p className="muted small mm-tip">Toque numa ideia para editar o mapa em tela cheia. Arraste para mover e use dois dedos (ou a rodinha do mouse) para aproximar.</p>
 
-      <section className="card mm-panel">
-        <label className="field">
-          <span className="field-label">{isRoot ? 'Ideia central' : `Ideia selecionada${parent ? ` (dentro de ${parent.text || 'ideia'})` : ''}`}</span>
-          <input ref={input} className="input" value={node.text} onChange={(e) => apply(updateNode(m.root, node.id, { text: e.target.value }))} onKeyDown={onKey} placeholder="Escreva a ideia" enterKeyHint="next" />
-        </label>
-        <div className="mm-actions">
-          <button type="button" className="btn primary small" onClick={() => add('child')}>
-            <Icon name="plus" size={16} /> {isRoot ? 'Ramo' : 'Dentro'}
-          </button>
-          {!isRoot && (
-            <button type="button" className="btn soft small" onClick={() => add('sibling')}>
-              <Icon name="plus" size={16} /> Ao lado
-            </button>
-          )}
-          {!isRoot && node.children.length > 0 && (
-            <button type="button" className="btn soft small" onClick={() => apply(updateNode(m.root, node.id, { collapsed: !node.collapsed }))}>
-              {node.collapsed ? `Expandir (${laid?.hidden ?? 0})` : 'Recolher'}
-            </button>
-          )}
-        </div>
-        {!isRoot && (
-          <>
-            <div className="mm-actions">
-              <button type="button" className="btn soft small" disabled={at <= 0} onClick={() => apply(moveSibling(m.root, node.id, -1))}>
-                <Icon name="up" size={16} /> Subir
-              </button>
-              <button type="button" className="btn soft small" disabled={at >= sibs.length - 1} onClick={() => apply(moveSibling(m.root, node.id, 1))}>
-                <Icon name="down" size={16} /> Descer
-              </button>
-              <button type="button" className="btn soft small" onClick={() => setMoving(true)}>
-                Mudar de ramo
-              </button>
-              <button type="button" className="btn danger small" onClick={del}>
-                {confirm ? `Excluir com ${plural(countNodes(node) - 1, 'ideia', 'ideias')} dentro` : 'Excluir'}
-              </button>
-            </div>
-            <div className="mm-colors" role="group" aria-label="Cor da ideia">
-              <button type="button" className={`mm-swatch auto${node.color ? '' : ' on'}`} onClick={() => apply(updateNode(m.root, node.id, { color: null }))} aria-label="Cor do ramo" title="Cor do ramo">
-                A
-              </button>
-              {MAP_COLORS.map((c) => (
-                <button key={c} type="button" className={`mm-swatch${node.color === c ? ' on' : ''}`} style={{ background: c }} onClick={() => apply(updateNode(m.root, node.id, { color: c }))} aria-label={`Cor ${c}`} />
-              ))}
-            </div>
-          </>
-        )}
-        <p className="muted small mm-tip">
-          Toque numa ideia para escolher. Arraste para mover o mapa e use dois dedos (ou a rodinha do mouse) para aproximar. No teclado: Enter cria ao lado, Tab cria dentro.
-        </p>
-      </section>
+      {full && <MapFullscreen id={m.id} start={sel} onClose={() => setFull(false)} />}
 
       <button type="button" className="btn ghost" onClick={() => setSettings(true)}>
         <Icon name="edit" size={16} /> Nome, notebook ou excluir o mapa
       </button>
+
+      {settings && <MapSettings map={m} onClose={() => setSettings(false)} />}
+    </>
+  );
+}
+
+/**
+ * M30: mapa em tela cheia. Tocar seleciona; tocar de novo escreve direto na ideia.
+ * A barra de baixo cria, recolhe, move, colore e exclui. Desfazer volta a última mudança.
+ */
+function MapFullscreen({ id, start, onClose }: { id: string; start: string; onClose: () => void }) {
+  const { study, set } = useStudy();
+  const m = study.maps.find((x) => x.id === id);
+  const [sel, setSel] = useState(start);
+  const [editing, setEditing] = useState<string | null>(null);
+  const [moving, setMoving] = useState(false);
+  const [confirm, setConfirm] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const history = useRef<MapNode[]>([]);
+  const [canUndo, setCanUndo] = useState(false);
+  const layout = useMemo(() => (m ? layoutMap(m.root) : null), [m?.root]);
+  useEffect(() => setConfirm(false), [sel]);
+  useEffect(() => {
+    if (!saving) return;
+    const t = window.setTimeout(() => setSaving(false), 600);
+    return () => window.clearTimeout(t);
+  }, [saving, m?.root]);
+  if (!m || !layout) return null;
+
+  const node = findNode(m.root, sel) ?? m.root;
+  const isRoot = node.id === m.root.id;
+  const parent = parentOf(m.root, node.id);
+  const sibs = parent?.children ?? [];
+  const at = sibs.findIndex((c) => c.id === node.id);
+  const laid = layout.nodes.find((n) => n.id === node.id);
+
+  const save = (root: MapNode) => {
+    set((s) => ({ ...s, maps: s.maps.map((x) => (x.id === m.id ? { ...x, root, updatedAt: nowISO() } : x)) }));
+    setSaving(true);
+  };
+  /** Mudança que entra no Desfazer. */
+  const apply = (root: MapNode) => {
+    if (root === m.root) return;
+    history.current = [...history.current.slice(-39), m.root];
+    setCanUndo(true);
+    save(root);
+  };
+  function undo() {
+    const prev = history.current.pop();
+    if (!prev) return;
+    setCanUndo(history.current.length > 0);
+    setEditing(null);
+    save(prev);
+    if (!findNode(prev, sel)) setSel(prev.id);
+  }
+  /** A árvore de agora, com a ideia que estava sendo escrita vazia virando "Nova ideia". */
+  function settled(): MapNode {
+    const n = editing ? findNode(m!.root, editing) : undefined;
+    return n && !n.text.trim() ? updateNode(m!.root, n.id, { text: 'Nova ideia' }) : m!.root;
+  }
+  function finishEdit() {
+    const r = settled();
+    if (r !== m!.root) save(r);
+    setEditing(null);
+  }
+  function add(kind: 'child' | 'sibling') {
+    const base = settled();
+    setEditing(null);
+    const r = kind === 'child' || isRoot ? addChild(base, node.id, '') : addSibling(base, node.id, '');
+    if (!r.id) return notify('Este ramo já está bem fundo', 'Crie a ideia ao lado ou num ramo mais perto do centro.');
+    apply(r.root);
+    setSel(r.id);
+    setEditing(r.id);
+  }
+  function del() {
+    if (isRoot) return;
+    if (node.children.length && !confirm) return setConfirm(true);
+    const next = sibs[at + 1] ?? sibs[at - 1] ?? parent!;
+    setEditing(null);
+    apply(removeNode(m!.root, node.id));
+    setSel(next.id);
+  }
+  function pick(nid: string) {
+    if (nid === sel && editing !== nid) {
+      history.current = [...history.current.slice(-39), m!.root];
+      setCanUndo(true);
+      setEditing(nid);
+      return;
+    }
+    finishEdit();
+    setSel(nid);
+  }
+  function onKey(e: React.KeyboardEvent) {
+    if (editing) return;
+    if (e.key === 'Tab') {
+      e.preventDefault();
+      add('child');
+    } else if (e.key === 'Enter') {
+      e.preventDefault();
+      pick(node.id);
+    } else if (e.key === 'Delete' || e.key === 'Backspace') {
+      e.preventDefault();
+      del();
+    }
+  }
+
+  const editor = (n: LaidNode) => (
+    <foreignObject x={n.x - Math.max(n.w, 120) / 2} y={n.y - n.h / 2} width={Math.max(n.w, 120)} height={n.h}>
+      <input
+        className="mm-inline"
+        autoFocus
+        value={findNode(m.root, n.id)?.text ?? ''}
+        placeholder="Escreva a ideia"
+        enterKeyHint="next"
+        aria-label="Texto da ideia"
+        onPointerDown={(e) => e.stopPropagation()}
+        onFocus={(e) => e.currentTarget.select()}
+        onChange={(e) => save(updateNode(m.root, n.id, { text: e.target.value }))}
+        onKeyDown={(e) => {
+          e.stopPropagation();
+          if (e.key === 'Enter') {
+            e.preventDefault();
+            add(n.depth === 0 ? 'child' : 'sibling');
+          } else if (e.key === 'Escape') {
+            e.preventDefault();
+            finishEdit();
+          }
+        }}
+      />
+    </foreignObject>
+  );
+
+  const cur = node.color;
+  return (
+    <Fullscreen label={`Mapa mental: ${m.name}`} className="mm-full" onClose={onClose}>
+      <div className="mm-full-top">
+        <button type="button" className="icon-btn" onClick={onClose} aria-label="Fechar a tela cheia">
+          <Icon name="x" />
+        </button>
+        <div className="mm-full-title">
+          <strong>{m.name}</strong>
+          <small className="muted">{saving ? 'Salvando…' : 'Salvo sozinho'}</small>
+        </div>
+        <button type="button" className="icon-btn" onClick={undo} disabled={!canUndo} aria-label="Desfazer">
+          <Icon name="undo" />
+        </button>
+      </div>
+
+      <MapCanvas
+        className="mm-full-canvas"
+        layout={layout}
+        selected={node.id}
+        editing={editing}
+        editor={editor}
+        onPick={pick}
+        onBackground={finishEdit}
+        onToggle={(nid) => apply(updateNode(m.root, nid, { collapsed: !findNode(m.root, nid)?.collapsed }))}
+        onKey={onKey}
+      />
+
+      <div className="mm-full-bar">
+        <div className="mm-full-actions">
+          <button type="button" className="mm-act primary" onPointerDown={(e) => e.preventDefault()} onClick={() => add('child')}>
+            <Icon name="plus" size={20} />
+            {isRoot ? 'Ramo' : 'Filho'}
+          </button>
+          {!isRoot && (
+            <button type="button" className="mm-act" onPointerDown={(e) => e.preventDefault()} onClick={() => add('sibling')}>
+              <Icon name="plus" size={20} />
+              Irmão
+            </button>
+          )}
+          <button type="button" className="mm-act" onClick={() => (editing === node.id ? finishEdit() : pick(node.id))}>
+            <Icon name="edit" size={20} />
+            {editing === node.id ? 'Pronto' : 'Escrever'}
+          </button>
+          {!isRoot && node.children.length > 0 && (
+            <button type="button" className="mm-act" onClick={() => apply(updateNode(m.root, node.id, { collapsed: !node.collapsed }))}>
+              <Icon name={node.collapsed ? 'right' : 'down'} size={20} />
+              {node.collapsed ? `Abrir (${laid?.hidden ?? 0})` : 'Recolher'}
+            </button>
+          )}
+          {!isRoot && (
+            <>
+              <button type="button" className="mm-act" disabled={at <= 0} onClick={() => apply(moveSibling(m.root, node.id, -1))}>
+                <Icon name="up" size={20} />
+                Subir
+              </button>
+              <button type="button" className="mm-act" disabled={at >= sibs.length - 1} onClick={() => apply(moveSibling(m.root, node.id, 1))}>
+                <Icon name="down" size={20} />
+                Descer
+              </button>
+              <button type="button" className="mm-act" onClick={() => setMoving(true)}>
+                <Icon name="repeat" size={20} />
+                Mover
+              </button>
+              <button type="button" className="mm-act danger" onClick={del}>
+                <Icon name="trash" size={20} />
+                {confirm ? `Com ${countNodes(node) - 1} dentro?` : 'Excluir'}
+              </button>
+            </>
+          )}
+        </div>
+        {!isRoot && (
+          <div className="mm-colors" role="group" aria-label="Cor da ideia">
+            <button type="button" className={`mm-swatch auto${cur ? '' : ' on'}`} onClick={() => apply(updateNode(m.root, node.id, { color: null }))} aria-label="Cor do ramo" title="Cor do ramo">
+              A
+            </button>
+            {MAP_COLORS.map((c) => (
+              <button key={c} type="button" className={`mm-swatch${cur === c ? ' on' : ''}`} style={{ background: c }} onClick={() => apply(updateNode(m.root, node.id, { color: c }))} aria-label={`Cor ${c}`} />
+            ))}
+          </div>
+        )}
+        <p className="muted small mm-tip">{editing ? 'Enter salva e cria a próxima ideia.' : 'Toque numa ideia para escolher; toque de novo para escrever.'}</p>
+      </div>
 
       {moving && (
         <MoveSheet
@@ -429,8 +596,7 @@ export function MapaPage({ id }: { id: string }) {
           }}
         />
       )}
-      {settings && <MapSettings map={m} onClose={() => setSettings(false)} />}
-    </>
+    </Fullscreen>
   );
 }
 
