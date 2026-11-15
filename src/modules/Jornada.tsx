@@ -2,7 +2,7 @@ import { useStore } from '../store';
 import { journeyStats, UNLOCK_DAYS, unlockProgress } from '../journey';
 import { formatDMY, fromISO, todayISO, WEEKDAYS } from '../utils';
 import { Icon, PageHeader, Pill, Pixels, Progress } from '../ui';
-import { JornadaHome } from './JornadaHome';
+import { JornadaHome, JornadaUnlock } from './JornadaHome';
 
 const HERO = ['....HHHH....', '...HHHHHH...', '...HSSSSH...', '...SESSES...', '...SSSSSS...', '....SSSS....', '..DGGGGGGD..', '.SDGGGGGGDS.', '.S.GGBBGG.S.', '...GGGGGG...', '...PPPPPP...', '...PP..PP...', '...PP..PP...', '..KKK..KKK..'];
 const HERO_PAL = { H: '#7c4a2d', S: '#f1c27d', E: '#141414', G: '#22c55e', D: '#15803d', B: '#8b5a2b', P: '#3b3f5c', K: '#27272a' };
@@ -64,6 +64,14 @@ export function Jornada() {
       </>
     );
   }
+
+  if (choice === null)
+    return (
+      <>
+        <PageHeader title="Jornada" />
+        <JornadaUnlock />
+      </>
+    );
 
   if (choice === 'quero')
     return (

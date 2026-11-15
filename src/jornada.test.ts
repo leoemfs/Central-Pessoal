@@ -25,6 +25,7 @@ import {
   visitGift,
   visitStats,
   wallet,
+  welcomeState,
   type ShopContext,
 } from './jornada/rules.ts';
 import { phaseAt, rainWindow, skyAt, starPositions, starsTonight } from './jornada/sky.ts';
@@ -308,7 +309,21 @@ test('N2.1: dados antigos ganham a Jornada vazia; avatar e clima vêm do backup'
   assert.equal(old.journey.avatar, null);
   assert.equal(old.journey.equipped.morada, 'cabana');
   const back = normalize({ ...emptyData(), journey: { avatar: { gender: 'm', skin: 'escura', hair: 'preto' }, weather: 'limpo' } });
-  assert.deepEqual(back.journey.avatar, { gender: 'm', skin: 'escura', hair: 'preto' });
+  assert.deepEqual(back.journey.avatar, { gender: 'm', skin: 'escura', hair: 'preto', name: '' });
   assert.equal(back.journey.weather, 'limpo');
   assert.ok(back.journey.owned.includes('aprendiz'));
+});
+
+test('N2.1: boas-vindas dá botas, pet, 50 de ouro e 1 cristal', () => {
+  const d = { ...emptyData(), settings: { ...emptyData().settings, journeyUnlockedAt: '2026-11-16' } };
+  const st = welcomeState(d.journey, { gender: 'f', skin: 'clara', hair: 'ruivo', name: '  Lia ' }, 'gato', '2026-11-16');
+  assert.equal(st.avatar?.name, 'Lia');
+  assert.equal(st.equipped.pet, 'gato');
+  assert.equal(st.equipped.botas, 'couro');
+  assert.ok(st.owned.includes('couro') && st.owned.includes('gato'));
+  const w0 = wallet(d, d.journey, '2026-11-16');
+  const w1 = wallet(d, st, '2026-11-16');
+  assert.equal(w1.gold - w0.gold, 50);
+  assert.equal(w1.crystals - w0.crystals, 1);
+  assert.equal(welcomeState(st, st.avatar!, 'cao', '2026-11-17').chests.length, 1, 'boas-vindas só uma vez');
 });

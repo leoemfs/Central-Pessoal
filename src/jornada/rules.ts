@@ -30,7 +30,7 @@ export interface ChestRecord {
 
 export interface JourneyState {
   /** null enquanto a pessoa não criou o avatar. */
-  avatar: { gender: 'f' | 'm'; skin: string; hair: string } | null;
+  avatar: { gender: 'f' | 'm'; skin: string; hair: string; name: string } | null;
   owned: string[];
   equipped: { elmo: string | null; armadura: string; botas: string; arma: string | null; artefato: string | null; artefato2: string | null; pet: string | null; morada: string };
   goldSpent: number;
@@ -60,7 +60,7 @@ export function normalizeJourney(raw: unknown): JourneyState {
   const r = raw as Partial<JourneyState>;
   const num = (v: unknown) => (typeof v === 'number' && Number.isFinite(v) && v >= 0 ? v : 0);
   return {
-    avatar: r.avatar && (r.avatar.gender === 'f' || r.avatar.gender === 'm') ? { gender: r.avatar.gender, skin: String(r.avatar.skin ?? 'media'), hair: String(r.avatar.hair ?? 'castanho') } : null,
+    avatar: r.avatar && (r.avatar.gender === 'f' || r.avatar.gender === 'm') ? { gender: r.avatar.gender, skin: String(r.avatar.skin ?? 'media'), hair: String(r.avatar.hair ?? 'castanho'), name: typeof r.avatar.name === 'string' ? r.avatar.name.slice(0, 14) : '' } : null,
     owned: Array.from(new Set([...base.owned, ...(Array.isArray(r.owned) ? r.owned.filter((x): x is string => typeof x === 'string') : [])])),
     equipped: { ...base.equipped, ...(r.equipped ?? {}) },
     goldSpent: num(r.goldSpent),
@@ -551,4 +551,22 @@ export function visitStats(visitDays: string[], today: string = todayISO()) {
 export function visitGift(n: number): { gold: number; chest: ChestKind | null; milestone: (typeof VISIT_MILESTONES)[number] | null } {
   const pos = ((n - 1) % 7) + 1;
   return { gold: pos === 7 ? 0 : VISIT_GIFTS[pos - 1], chest: pos === 7 ? 'bronze' : null, milestone: VISIT_MILESTONES[n] ?? null };
+}
+
+// ---------- Boas-vindas (N2.1) ----------
+
+export const WELCOME_KEY = 'boas-vindas';
+export const welcomed = (state: JourneyState) => state.avatar !== null && state.chests.some((c) => c.key === WELCOME_KEY);
+
+/** Fim da chegada: avatar com nome, baú de boas-vindas (botas de couro, 50 de ouro, 1 cristal) e o pet escolhido. */
+export function welcomeState(state: JourneyState, avatar: { gender: 'f' | 'm'; skin: string; hair: string; name: string }, pet: 'gato' | 'cao', today: string): JourneyState {
+  const look = { ...avatar, name: avatar.name.trim().slice(0, 14) };
+  if (state.chests.some((c) => c.key === WELCOME_KEY)) return { ...state, avatar: look };
+  return {
+    ...state,
+    avatar: look,
+    owned: Array.from(new Set([...state.owned, 'couro', pet])),
+    equipped: { ...state.equipped, botas: 'couro', pet },
+    chests: [...state.chests, { key: WELCOME_KEY, kind: 'dourado', openedAt: today, gold: 50, crystals: 1, item: 'couro' }],
+  };
 }
