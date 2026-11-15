@@ -19,6 +19,8 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('fetch', (event) => {
   const req = event.request;
   if (req.method !== 'GET' || new URL(req.url).origin !== self.location.origin) return;
+  // Pacotes de estudo mudam sem trocar de nome: sempre da rede.
+  if (/\/estudos\/[^/]+\.json$/.test(new URL(req.url).pathname)) return;
 
   // Páginas: rede primeiro (para pegar atualizações), cache se estiver offline.
   if (req.mode === 'navigate') {
