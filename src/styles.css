@@ -7549,6 +7549,7 @@ body.scrolling .fab {
   body.scrolling .fab {
     transform: none;
   }
+}
 /* N2.2: cartão da Jornada no Início */
 .journey-card {
   display: flex;
@@ -7660,6 +7661,32 @@ body.scrolling .fab {
   min-width: 0;
 }
 
+/* E26: nome embaixo dos ícones da barra (opcional) */
+.tb-label {
+  display: none;
+}
+body.bar-labels {
+  --tabbar-h: 78px;
+}
+body.bar-labels .tabbar .tb-label {
+  display: block;
+  max-width: 100%;
+  margin-top: 1px;
+  overflow: hidden;
+  font-size: 0.64rem;
+  font-weight: 500;
+  line-height: 1.1;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--faint);
+}
+body.bar-labels .tabbar .tb.active .tb-label,
+body.bar-labels .tabbar .tb.center .tb-label {
+  color: var(--accent-text);
+}
+body.bar-labels .tabbar .tb-pill {
+  height: 38px;
+}
 /* N2.4: Arsenal, provador e tela cheia do personagem */
 .jn-scene-btn {
   display: block;
