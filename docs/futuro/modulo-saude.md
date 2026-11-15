@@ -44,9 +44,9 @@ A ideia é ter a dieta **dentro** do módulo, para seguir no dia a dia.
 - Calorias e macros (proteína, carboidrato, gordura) ficam **fora da primeira versão**; se entrarem depois, ficam escondidos por padrão, como o peso.
 - "Fugi" não tem cor de erro nem aviso: é só registro.
 
-**A decidir antes de construir** (perguntar ao Leonardo):
-1. A dieta vem de nutricionista (copiar o plano pronto) ou é montada por você?
-2. Precisa de dias diferentes (ex.: dia de treino × dia de descanso) já na primeira versão?
+**Decidido em 15/11 (Leonardo: "opcional para ambos os casos"):**
+1. **Origem do plano:** as duas. Ao criar o plano, escolher "Da nutricionista" (copiar o plano pronto; campo opcional com nome e data da consulta) ou "Montei eu". Muda só o rótulo e a dica; a tela é a mesma.
+2. **Dias diferentes:** opcional. O padrão é "igual todos os dias"; quem quiser liga "dias diferentes" e cria variações (ex.: dia de treino × dia de descanso), escolhendo quais dias da semana usam cada uma. No "Hoje", o app mostra a variação do dia e deixa trocar com um toque.
 
 ## Divisão para construir
 Ordem sugerida (cada parte com versão, testes e PR próprios):
