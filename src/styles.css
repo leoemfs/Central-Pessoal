@@ -8063,3 +8063,20 @@ body.bar-labels .tabbar .tb-label {
   text-align: center;
   padding: 0 10px;
 }
+
+/* Saúde › Dieta (N1.2) */
+.diet-list .diet-meal {
+  display: grid;
+  gap: 8px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border);
+  min-width: 0;
+}
+.diet-list .diet-meal:last-child {
+  border-bottom: none;
+}
+.diet-edit {
+  display: grid;
+  gap: 10px;
+  margin-bottom: 10px;
+}

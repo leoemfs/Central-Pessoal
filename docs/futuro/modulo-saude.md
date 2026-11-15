@@ -52,7 +52,7 @@ A ideia é ter a dieta **dentro** do módulo, para seguir no dia a dia.
 Ordem sugerida (cada parte com versão, testes e PR próprios):
 1. **N1.0 Prévia visual:** versão P feita em 11/11 (Hoje, Consultas e check-ups, Dieta): https://claude.ai/artifact/LJRc3AgwWsTmuA8ymQCqEv. Aprovada pelo Leonardo; o resto (Histórico, menu do +, cartão no Início, Remédios, Medidas e selo no hábito) segue o documento.
 2. **N1.1 Água e Sono:** pronto na v0.66 (15/11). Barra Hoje · Saúde · Histórico; + registra sono. Ficou para depois: hábito "dormir no horário" marcado pelo sono e cartão da Saúde no Início.
-3. **N1.2 Dieta:** plano alimentar e "Hoje" com segui · em parte · fugi (M).
+3. **N1.2 Dieta:** pronto na v0.67 (15/11). Ficou para depois: hábito "Seguir a dieta" marcado sozinho, linha na Revisão semanal, lista de compras em Listas, lembretes das refeições e ponto na Jornada.
 4. **N1.3 Remédios:** horários, "tomei" e lembrete (M).
 5. **N1.4 Consultas, exames e check-ups:** entram e se atualizam sozinhos na Agenda, como Carreira; intervalo de check-up e cartão "Próximos check-ups" (M).
 6. **N1.5 Peso e medidas:** com gráfico, escondido por padrão (P).

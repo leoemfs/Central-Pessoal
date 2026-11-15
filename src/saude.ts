@@ -8,6 +8,7 @@
 import type { AppData, Habit, HealthData, SleepEntry, SleepFeel } from './types.ts';
 import { setAmount } from './habits.ts';
 import { addDays } from './utils.ts';
+import { dietCount, emptyDiet, normalizeDiet, type DietCount } from './dieta.ts';
 
 export const WATER_GOAL = 2000;
 export const WATER_STEP = 250;
@@ -19,7 +20,7 @@ export const FEELS: { id: SleepFeel; label: string }[] = [
 ];
 
 export function emptyHealth(): HealthData {
-  return { water: { goal: WATER_GOAL, step: WATER_STEP, days: {}, habitId: null, asked: false }, sleep: {} };
+  return { diet: emptyDiet(), water: { goal: WATER_GOAL, step: WATER_STEP, days: {}, habitId: null, asked: false }, sleep: {} };
 }
 
 type Rec = Record<string, unknown>;
@@ -42,6 +43,7 @@ export function normalizeHealth(raw: unknown): HealthData {
       sleep[k] = { bed: v.bed, wake: v.wake, feel: FEELS.some((f) => f.id === v.feel) ? (v.feel as SleepFeel) : null };
     }
   return {
+    diet: normalizeDiet(raw.diet),
     water: {
       goal: posNum(w.goal, WATER_GOAL),
       step: posNum(w.step, WATER_STEP),
@@ -205,6 +207,8 @@ export interface HealthWeek {
   sleepAvg: number | null;
   nights: number;
   feels: Record<SleepFeel, number>;
+  /** Dieta da semana (até hoje). */
+  diet: DietCount;
 }
 
 /** Segunda-feira da semana de `day`. */
@@ -237,7 +241,8 @@ export function healthWeeks(d: Pick<AppData, 'health' | 'habits'>, today: string
         if (s.feel) feels[s.feel]++;
       }
     }
-    out.push({ start, end, waterAvg: wDays ? Math.round(wSum / wDays) : null, waterDays: wDays, waterMet: wMet, sleepAvg: nights ? Math.round(sSum / nights) : null, nights, feels });
+    const last = end > today ? today : end;
+    out.push({ diet: dietCount(d, start, last), start, end, waterAvg: wDays ? Math.round(wSum / wDays) : null, waterDays: wDays, waterMet: wMet, sleepAvg: nights ? Math.round(sSum / nights) : null, nights, feels });
   }
   return out;
 }
