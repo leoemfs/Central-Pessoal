@@ -107,7 +107,9 @@
 | M26 | **Mesmo padrão de caixa em todas as listas** (13/11, especulação, só depois de testar o M24): levar a caixa de adicionar no topo (presa ao rolar) e as sugestões flutuantes da lista de mercado também para as outras listas (compras, checklist, receitas…), por coerência visual. **Não construir antes do teste do Leonardo.** Afeta: só Listas | MOD | P | baixa | ideia (aguardando teste do M24) | — |
 | M27 | **Agenda: escrever do seu jeito** (13/11, escolhida entre as "sugestões inteligentes"): escrever "dentista sexta 15h" e o app preenche título, data, hora e local na folha de novo compromisso ou tarefa; você confere e salva. Repetição ("toda segunda") fica para o M5. Afeta: Agenda, Google Agenda/Tarefas, Busca | MOD | M | média | ideia | `futuro/agenda-escrever-rapido.md` |
 | M3 | Preços 2.0, parte 2: "quanto custou aqui?" ao marcar o item e histórico de compras | MOD | M | média | pronto (v0.50), falta o Leonardo testar | `futuro/precos-v2.md` (item 4) |
-| M4 | Preços 2.0, parte 3: tipos de loja e filtro; editar, excluir e juntar produtos, marcas e lojas | MOD | M | média | especificado | `futuro/precos-v2.md` (itens 1 e 4) |
+| M24 | **Pré-lista ao criar lista de mercado** (15/11): o catálogo por corredor, marcar vários itens e criar a lista com eles; busca no catálogo; continua dando para escrever item à mão. Afeta: Listas | MOD | M | média | prévia feita (15/11), aguardando aprovação | `futuro/precos-v2.md` |
+| M25 | **Itens marcados descem para "No carrinho"** (15/11), abaixo de "Concluir compra", riscados; ao desmarcar voltam ao corredor deles. Afeta: Listas | MOD | P | média | prévia feita (15/11), aguardando aprovação | `futuro/precos-v2.md` |
+| M4 | Preços 2.0, parte 3: **categorias em Preços iguais às das Listas (Mercado · Roupas · Casa · Viagem)**, cada uma com suas lojas e produtos; **editar produto** (nome, categoria, corredor, unidade) e **cada preço** (marca, loja, quantidade, peso/tamanho, valor, apagar); juntar duplicados. Card "Sem preço" e caminho Preços → Mercado → Sem preço → Produtos **ficam iguais** (pedido de 15/11). Afeta: Preços, Listas | MOD | M | média | prévia feita (15/11), aguardando aprovação | `futuro/precos-v2.md` (itens 1 e 4) |
 | M5 | Agenda: repetição (toda semana, mês, ano) e aniversários | MOD | M | média | ideia | — (especificar antes) |
 | M6 | Núcleo: fichas de treino próprias (exercícios, séries, descanso). Pode entrar depois no M21 ("crie o seu próprio") | MOD | M | média | especificado | `futuro/nucleo-mente-corpo.md` |
 | M7 | Revisão semanal mais completa: autocuidado, caixinhas e vales da semana | MOD | P | baixa | pronto (v0.38) | `futuro/nucleo-mente-corpo.md`, `futuro/caixinhas.md` |
@@ -240,6 +242,7 @@ Documentos sem código: Mapa dos módulos (08/11), módulos personalizáveis, pa
 | Objetivos (N10.0): metas de todo o app, objetivos grandes, concluídos e cartão no Início | https://claude.ai/artifact/TEPSkVaKWYhuxBcoZvkZA4 |
 | Central Pessoal (prévia geral antiga) | https://claude.ai/artifact/WHbDkKXN4LArCQ8sjuQqVt |
 | E18 Mais em lista ou em grade (12/11) | https://claude.ai/artifact/QnCrHxcUu1HFwLRDgFDyth |
+| M24 + M25 + M4 Listas e Preços (15/11) | https://claude.ai/artifact/V3rRXDEAvFmCWSJYcgeEzw |
 | Ícone do CP Hub na cor de destaque (A11 do Android, 12/11; ícone tradicional aprovado) | https://claude.ai/artifact/8vX7j7jSvnLkRuEFDAuA9t |
 | Ícone da Jornada em pixel art, 4 estilos com cantos arredondados (A11, 12/11: os 4 aprovados; a pessoa escolhe ao desbloquear a Jornada) | https://claude.ai/artifact/UYe1Nhm59RYRVKnuojcTXN |
 | E21 Puxar a barra para cima abre o Mais (13/11) | https://claude.ai/artifact/8Ndo7c2PYfWbd9e7AUJwXr |
