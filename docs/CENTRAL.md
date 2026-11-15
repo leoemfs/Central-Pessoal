@@ -114,7 +114,7 @@
 | M6 | Núcleo: fichas de treino próprias (exercícios, séries, descanso). Pode entrar depois no M21 ("crie o seu próprio") | MOD | M | média | especificado | `futuro/nucleo-mente-corpo.md` |
 | M7 | Revisão semanal mais completa: autocuidado, caixinhas e vales da semana | MOD | P | baixa | pronto (v0.38) | `futuro/nucleo-mente-corpo.md`, `futuro/caixinhas.md` |
 | N1 | Módulo Saúde, à parte (água, sono, **dieta**, remédios, consultas, dentista e check-ups, peso), dividido em N1.0 a N1.5. Afeta: Agenda, Listas, Você, Núcleo, Início, Revisão, backup | NOVO | G | média | especificado, prévia aprovada (11/11); não adiantado na fila | `futuro/modulo-saude.md` |
-| N2 | Jornada completa (pixel art): missões no ritmo da pessoa, recompensas por módulo, raridades (comum a místico), Forja e Codex por coleções | NOVO | G | baixa | especificado | `futuro/modulo-rpg.md`, `futuro/jornada-recompensas.md`, `futuro/jornada-raridades.md` |
+| N2 | Jornada completa (pixel art): missões no ritmo da pessoa, recompensas por módulo, raridades (comum a místico), Forja e Codex por coleções. **Revisto em 15/11** (desbloqueia em 16/11; só existiam regras e artes, sem telas): dividido em 10 partes, da mais simples à conclusão (ver `modulo-rpg.md`, B.13). Afeta: Jornada, Início, Configurações, backup | NOVO | G | **alta** | aprovado (15/11), em partes | `futuro/modulo-rpg.md`, `futuro/jornada-recompensas.md`, `futuro/jornada-raridades.md` |
 | N3 | Notificações e **lembretes** (tarefa ou compromisso com "me lembrar"; sai o "Lembretes, em breve" do menu). Afeta: Agenda, Carreira | NOVO | M | baixa | especificado | `futuro/notificacoes.md` |
 | N3.1 | Notificações já no app (sem servidor): **"Lembrar no celular"** (a parte da agenda passa a ser o **N9.5**, pelo Google Agenda) (compromisso, conta, revisão → agenda do celular, hora certa, Android e iPhone) e **bolinha no ícone** do app com o que está pendente hoje | NOVO | P | média | ideia | `futuro/notificacoes.md` |
 | N3.2 | **Resumo do dia** no Android (Chrome, app instalado): o celular acorda o app ~1 vez por dia e avisa "2 contas vencem amanhã" (sem hora certa) | NOVO | M | baixa | ideia | `futuro/notificacoes.md` |
@@ -149,13 +149,14 @@
 **Aprovado em 11/11 ("pode fazer", fila toda).** Feito nesta sessão, tudo no PR #38: C5 (v0.29.1), C3 (v0.30), E14 + resto do E1 (v0.31), M1 (v0.32), M11 (v0.33), lápis E3 + M12 (v0.34), busca E6 + M13 (v0.35), M8 (v0.36), N8.3 Currículo (v0.37) e M7 (v0.38).
 
 **O que continua aprovado, na ordem:**
+- **N2 Jornada, na frente da fila (aprovado em 15/11: "vamos dar início, do mais simples até a conclusão")**, porque a Jornada desbloqueia em 16/11 e não tinha telas. Uma parte por vez, conforme o uso do dia: N2.1 personagem e cena → N2.2 cartão no Início e Modo Jornada → N2.3 baús, cristais e "Desde a sua última visita" → N2.4 Arsenal e loja → N2.5 títulos, forja e classes → N2.6 pets, moradas e visitas → N2.7 Codex e bônus por raridade → N2.8 efeitos dos místicos → N2.9 missões no ritmo da pessoa → N2.10 campanha (dividir antes). Depois vem o N7. Ver `futuro/modulo-rpg.md`, B.13.
 0. **N9 Sincronizar com o Google Drive** (G, aprovado em 11/11: "pode começar"), em partes: ~~N9.0 preparar os dados~~ (v0.39) → ~~N9.1 conta Google e cópia na nuvem~~ (v0.40) → ~~N9.2 sincronizar~~ (v0.41) → N9.3 fotos e PDFs (~~N9.3a fotos no Diário~~ v0.42; N9.3b PDFs) → N9.4 exportar. Uma parte por vez, conforme o uso do dia. Ver `futuro/sincronizar-google.md`.
 1. **~~M2 + M23~~ (v0.49) → ~~M3~~ (v0.50) → M4 Preços 2.0** (M cada, já especificados). **Subiu para antes do N10 (aprovado em 12/11: "pode fazer")**, porque trava o uso: a lista com 64 itens não tinha como receber preço. M2 = itens da lista viram produtos + "Sem preço" para preencher em sequência; M23 = catálogo pronto de produtos.
 2. **N10 Objetivos** (G): ~~prévia N10.0~~ (aprovada em 11/11) → N10.1 central de metas (inclui as metas de carreira, antigo N8.4) → N10.2 objetivos grandes.
 3. **M6** fichas de treino próprias (M).
 4. **M5** Agenda com repetição e aniversários (especificar antes).
 5. ~~Resto do E1: ordem dos módulos no Mais~~ feito na v0.46 (E19).
-6. Depois: N7, N1, N2, N3, N4, N5 (M14 vai junto com o N9.3).
+6. Depois: N7, N1, N3, N4, N5 (M14 vai junto com o N9.3).
 
 **Pacotes** (histórico): B (Finanças) v0.16; A (Navegação) v0.18, v0.20, v0.31 e v0.34; D (Temas) v0.17; E6 na v0.35.
 

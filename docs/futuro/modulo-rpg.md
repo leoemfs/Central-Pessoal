@@ -619,6 +619,27 @@ interface JourneyState {
 
 ---
 
+### B.13. Partes da construção (revisto em 15/11)
+
+A Jornada desbloqueia em 16/11. Até aqui existiam só as regras e as artes (passos 1 a 3 do B.12); a tela do desbloqueio mostra nível, XP, ouro, "De onde veio" e a escolha "Quero a Jornada" ou "Agora não". A construção segue em partes, **da mais simples à conclusão**, uma por dia conforme o uso. Cada parte só aparece com a Jornada desbloqueada e no Modo Jornada ligado.
+
+| Parte | O que entrega | Tamanho |
+|---|---|---|
+| **N2.1** Personagem e cena | `<PixelSprite>`; avatar com os itens iniciais na cena; céu pelo horário, estrelas pelos dias de uso e chuva pela data (B.9); nível, XP e ouro; **Ficha** com os 6 atributos e a classe (B.7) | M |
+| **N2.2** Cartão no Início e Modo Jornada | cartão compacto no Início (E.1); Configurações: "Mostrar a Jornada no Início" e "Modo Jornada" (F.1); "Agora não" deixa tudo guardado em silêncio | P |
+| **N2.3** Baús e "Desde a sua última visita" | baús de rotina e cristais (B.4) com abertura animada; resumo da diferença desde a última visita (E.2) | M |
+| **N2.4** Arsenal e loja | inventário, provador, vestir e tirar, comprar com ouro (B.2, B.3); avatar em tela cheia (B.10) | M |
+| **N2.5** Títulos, forja e classes | lista de títulos e título em uso (B.6); forja mística com requisitos de atributo (B.5); classes e híbridas (B.7) | M |
+| **N2.6** Pets, moradas e visitas | pets e moradas (B.8, F.3); presentes por sequência de visitas (F.2) | M |
+| **N2.7** Codex e raridades | Codex por coleções, silhuetas com a dica (F.5); bônus por raridade (`jornada-raridades.md`) | M |
+| **N2.8** Efeitos dos místicos | escudo semanal, XP em dobro depois da recaída, cristal por revisão e por mês em dia, baú extra por nível, ouro extra por estudo (ver "Ainda não programado" no B.12) | M |
+| **N2.9** Missões no ritmo da pessoa | missões do dia e da semana (5.1 a 5.4), sem punição | M |
+| **N2.10** Campanha | mapa, chefes, história e entrevista (Anexos C e D); **dividir antes de construir** | G |
+
+Depois: N7 (Estudos × Jornada, `estudos-jornada.md`).
+
+**Correção do que foi dito em 15/11:** o aviso "+XP" **não** aparece fora da Jornada (regra do Anexo E). As recompensas aparecem juntas no "Desde a sua última visita" (N2.3).
+
 ## Anexo C — Modo campanha
 
 *Acrescentado em novembro de 2026. Prévia jogável na "Prévia da Jornada" (aba Campanha).*
