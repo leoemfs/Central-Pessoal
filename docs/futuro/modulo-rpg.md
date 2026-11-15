@@ -628,7 +628,7 @@ A Jornada desbloqueia em 16/11. Até aqui existiam só as regras e as artes (pas
 | **N2.1** Personagem e cena (**feito: v0.55 simples, v0.57 seguindo a prévia**) | `<PixelSprite>`; avatar com os itens iniciais na cena; céu pelo horário, estrelas pelos dias de uso e chuva pela data (B.9); nível, XP e ouro; **Ficha** com os 6 atributos e a classe (B.7) | M |
 | **N2.2** Cartão no Início e Modo Jornada (**feito: v0.58**; novidades e chefe na linha de status entram com a N2.3 e a campanha) | cartão compacto no Início (E.1); Configurações: "Mostrar a Jornada no Início" e "Modo Jornada" (F.1); "Agora não" deixa tudo guardado em silêncio | P |
 | **N2.3** Baús e "Desde a sua última visita" (**feito: v0.59**; os acontecimentos guardados depois do resumo, como títulos e chefe, entram com a N2.5 e a campanha) | baús de rotina e cristais (B.4) com abertura animada; resumo da diferença desde a última visita (E.2) | M |
-| **N2.4** Arsenal e loja | inventário, provador, vestir e tirar, comprar com ouro (B.2, B.3); avatar em tela cheia (B.10) | M |
+| **N2.4** Arsenal e loja (**feito: v0.60**; os místicos ficam para a Forja, N2.5; pets e moradas, N2.6) | inventário, provador, vestir e tirar, comprar com ouro (B.2, B.3); avatar em tela cheia (B.10) | M |
 | **N2.5** Títulos, forja e classes | lista de títulos e título em uso (B.6); forja mística com requisitos de atributo (B.5); classes e híbridas (B.7) | M |
 | **N2.6** Pets, moradas e visitas | pets e moradas (B.8, F.3); presentes por sequência de visitas (F.2) | M |
 | **N2.7** Codex e raridades | Codex por coleções, silhuetas com a dica (F.5); bônus por raridade (`jornada-raridades.md`) | M |
