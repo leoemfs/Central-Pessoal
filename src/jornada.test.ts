@@ -17,7 +17,9 @@ import {
   earnedChests,
   equip,
   equipmentBonus,
+  arsenalItems,
   homeCard,
+  shopContext,
   newsLine,
   sinceLastVisit,
   snapshot,
@@ -383,4 +385,23 @@ test('N2.3: "Desde a sua última visita" mostra só o que subiu, e o Início avi
   // Backup antigo: sem retrato.
   assert.equal(normalize({ ...d, journey: { ...d.journey, lastSeen: undefined } } as never).journey.lastSeen, null);
   assert.deepEqual(normalize(d).journey.lastSeen, d.journey.lastSeen);
+});
+
+test('N2.4: Arsenal mostra os seus primeiro e sem místicos; comprar gasta ouro e vestir troca o item', () => {
+  const today = '2026-11-16';
+  const d = emptyData();
+  d.settings.journeyUnlockedAt = today;
+  d.journey = welcomeState(d.journey, { gender: 'f', skin: 'media', hair: 'castanho', name: 'Lia' }, 'gato', today);
+  const elmos = arsenalItems('elmo', d.journey);
+  assert.ok(elmos.every((i) => i.rarity !== 'mistico'));
+  assert.deepEqual(arsenalItems('botas', d.journey).slice(0, 2).map((i) => i.id).sort(), ['couro', 'sapatos']);
+  const poor = shopContext(d, d.journey, today);
+  assert.match(acquire(d.journey, 'capuz', poor) as string, /^Faltam /);
+  const rich = { ...poor, gold: 1000 };
+  const bought = acquire(d.journey, 'capuz', rich);
+  assert.ok(typeof bought !== 'string');
+  assert.equal(bought.goldSpent, d.journey.goldSpent + 150);
+  assert.equal(arsenalItems('elmo', bought)[0].id, 'capuz');
+  const worn = equip(bought, 'elmo', 'capuz', 1);
+  assert.ok(typeof worn !== 'string' && worn.equipped.elmo === 'capuz');
 });

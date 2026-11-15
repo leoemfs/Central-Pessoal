@@ -674,3 +674,19 @@ export function newsLine(n: SinceVisit): string {
   if (!parts.length && n.crystals) parts.push(n.crystals === 1 ? '+1 cristal' : `+${n.crystals} cristais`);
   return `Novidades: ${parts.join(' · ')}`;
 }
+
+// ---------- N2.4: Arsenal e loja ----------
+
+/** Tudo o que a loja precisa saber de uma vez: atributos, ouro, cristais, nível e período limpo. */
+export function shopContext(d: AppData, state: JourneyState, today: string = todayISO()): ShopContext {
+  const w = wallet(d, state, today);
+  return { attrs: w.attrs, gold: w.gold, crystals: w.crystals, level: w.level, cleanAfterSlip: cleanAfterSlip(d, today) };
+}
+
+/** Itens de um espaço para o Arsenal, sem os místicos (esses ficam na Forja): os seus primeiro, depois por raridade e preço. */
+export function arsenalItems(slot: Slot, state: JourneyState): Item[] {
+  const rank: Record<Rarity, number> = { comum: 0, raro: 1, epico: 2, mistico: 3 };
+  return ITEMS.filter((i) => i.slot === slot && i.rarity !== 'mistico').sort(
+    (a, b) => Number(state.owned.includes(b.id)) - Number(state.owned.includes(a.id)) || rank[a.rarity] - rank[b.rarity] || (a.price ?? 0) - (b.price ?? 0),
+  );
+}

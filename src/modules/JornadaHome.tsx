@@ -9,9 +9,11 @@ import { useStore } from '../store';
 import { journeyStats, unlockProgress, UNLOCK_DAYS, UNLOCK_WINDOW } from '../journey';
 import { ATTRIBUTES } from '../habits';
 import { formatDMY, todayISO } from '../utils';
-import { Sheet, Toggle } from '../ui';
+import { Fullscreen, notify, Segmented, Sheet, Toggle } from '../ui';
 import { avatarIcon, chestIcon, COIN_ICON, GEM_ICON, homeIcon, itemById, itemIcon, petIcon, PETS, RARITY, treeIcon, skyPalette, ATTR_CODES, type AvatarLook } from '../jornada/catalog';
 import { HAIRS, SKINS } from '../jornada/artData';
+import { acquire, arsenalItems, availability, equip, shopContext, type Availability, type EquipSlot } from '../jornada/rules';
+import type { Item, Slot } from '../jornada/catalog';
 import { classOf, openChest, pendingChests, recentAttributes, sinceLastVisit, snapshot, TITLES, wallet, welcomed, welcomeState, type Chest, type ChestRecord, type JourneyState, type SinceVisit } from '../jornada/rules';
 import { skyAt, starPositions } from '../jornada/sky';
 
@@ -385,6 +387,10 @@ export function JornadaHome() {
   // N2.3: o resumo usa o retrato da visita anterior; logo ao entrar, o retrato passa a ser o de agora.
   const [since, setSince] = useState<SinceVisit | null>(() => (welcomed(state) ? sinceLastVisit(state.lastSeen, snapshot(data, state, today)) : null));
   const [opening, setOpening] = useState<Chest | null>(null);
+  const [slot, setSlot] = useState<Slot>('armadura');
+  const [trying, setTrying] = useState<Item | null>(null);
+  const [full, setFull] = useState(false);
+  const arsenalRef = useRef<HTMLElement>(null);
   const chestsRef = useRef<HTMLElement>(null);
   const isWelcomed = welcomed(state);
   useEffect(() => {
@@ -452,7 +458,9 @@ export function JornadaHome() {
         />
       )}
       <section className="card raised journey-hero">
-        <JourneyScene look={look} state={state} activeDays={data.settings.activeDays} now={now} />
+        <button type="button" className="jn-scene-btn" aria-label="Ver o personagem em tela cheia" onClick={() => setFull(true)}>
+          <JourneyScene look={look} state={state} activeDays={data.settings.activeDays} now={now} />
+        </button>
         <div className="journey-info">
           <div className="toggle-row">
             <div>
@@ -520,6 +528,97 @@ export function JornadaHome() {
           </ul>
         )}
       </section>
+
+      <section className="card" ref={arsenalRef}>
+        <div className="card-head">
+          <h2>Arsenal</h2>
+          <span className="muted small">
+            <img alt="" src={COIN_ICON} className="jn-inline-icon" /> {fmt(w.gold)}
+          </span>
+        </div>
+        <Segmented<Slot> label="Espaço" value={slot} onChange={setSlot} options={SLOTS.map((x) => ({ value: x, label: SLOT_NAMES[x] }))} />
+        <div className="jn-arsenal">
+          {arsenalItems(slot, state).map((it) => {
+            const a = availability(it, state, shopContext(data, state, today));
+            const on = Object.values(state.equipped).includes(it.id);
+            return (
+              <button key={it.id} type="button" className={`jn-item${on ? ' on' : ''}${a.status === 'tem' ? '' : ' locked'}`} onClick={() => setTrying(it)}>
+                <img alt="" src={itemIcon(it)} />
+                <strong>{it.name}</strong>
+                <span style={{ color: RARITY[it.rarity].color }}>{RARITY[it.rarity].label}</span>
+                <span className="jn-item-status">{on ? 'Vestindo' : statusText(a)}</span>
+              </button>
+            );
+          })}
+        </div>
+        {slot === 'artefato' && <p className="muted small" style={{ marginTop: 10 }}>Cada artefato dá +10% de XP nos hábitos do seu atributo. O segundo espaço de artefato abre no nível 20.</p>}
+      </section>
+
+      {trying && (
+        <TrySheet
+          item={trying}
+          look={look}
+          state={state}
+          avail={availability(trying, state, shopContext(data, state, today))}
+          level={s.level}
+          gold={w.gold}
+          onAct={(fn) => {
+            let msg: string | null = null;
+            update((d) => {
+              const r = fn(d.journey, shopContext(d, d.journey, todayISO()), journeyStats(d, todayISO()).level);
+              if (typeof r === 'string') {
+                msg = r;
+                return d;
+              }
+              return { ...d, journey: r };
+            });
+            if (msg) notify('Não deu', msg);
+            else setTrying(null);
+          }}
+          onClose={() => setTrying(null)}
+        />
+      )}
+
+      {full && (
+        <Fullscreen label="Personagem" className="jn-full" onClose={() => setFull(false)}>
+          <div className="jn-full-head">
+            <strong className="jn-px jn-name">{look.name || cls[gk]}</strong>
+            <span className="muted small">
+              LV {s.level} · {title ? title[gk] : 'Sem título'} · {cls[gk]}
+            </span>
+          </div>
+          <div className="jn-full-scene">
+            <JourneyScene look={look} state={state} activeDays={data.settings.activeDays} now={now} />
+          </div>
+          <ul className="jn-full-slots">
+            {SLOTS.map((x) => {
+              const id = state.equipped[x];
+              const it = id ? itemById(id) : null;
+              return (
+                <li key={x}>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSlot(x);
+                      setFull(false);
+                      window.setTimeout(() => arsenalRef.current?.scrollIntoView({ behavior: reduced() ? 'auto' : 'smooth', block: 'start' }), 50);
+                    }}
+                  >
+                    {it ? <img alt="" src={itemIcon(it)} /> : <span className="jn-empty-slot" aria-hidden="true" />}
+                    <span>
+                      <small className="muted">{SLOT_NAMES[x]}</small>
+                      <strong>{it ? it.name : 'Vazio'}</strong>
+                    </span>
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
+          <button type="button" className="btn block" onClick={() => setFull(false)}>
+            Voltar
+          </button>
+        </Fullscreen>
+      )}
 
       {opening && (
         <ChestSheet
@@ -748,6 +847,74 @@ function ChestSheet({ chest, onOpen, onClose }: { chest: Chest; onOpen: (c: Ches
           )}
         </div>
       )}
+    </Sheet>
+  );
+}
+
+// ---------- N2.4: Arsenal, provador e loja ----------
+
+const SLOTS: Slot[] = ['elmo', 'armadura', 'botas', 'arma', 'artefato'];
+const SLOT_NAMES: Record<Slot, string> = { elmo: 'Elmo', armadura: 'Roupa', botas: 'Botas', arma: 'Arma', artefato: 'Artefato' };
+
+function reqText(a: Extract<Availability, { status: 'bau' }>): string {
+  const miss = a.unlock.filter((r) => !r.ok);
+  return miss.length ? `Vem em baús ou com ${miss.map((r) => `${r.code} ${r.need}`).join(' e ')}` : 'Vem em baús';
+}
+
+function statusText(a: Availability): string {
+  if (a.status === 'tem') return 'Seu';
+  if (a.status === 'comprar') return `${fmt(a.price)} ouro`;
+  if (a.status === 'liberar') return 'Liberado!';
+  if (a.status === 'bau') return a.unlock.length ? `Baú ou ${a.unlock.map((r) => `${r.code} ${r.need}`).join(' + ')}` : 'Em baús';
+  return 'Forja';
+}
+
+type Act = (state: JourneyState, c: ReturnType<typeof shopContext>, level: number) => JourneyState | string;
+
+function TrySheet({ item, look, state, avail, level, gold, onAct, onClose }: { item: Item; look: AvatarLook; state: JourneyState; avail: Availability; level: number; gold: number; onAct: (fn: Act) => void; onClose: () => void }) {
+  const isArtifact = item.slot === 'artefato';
+  const target: EquipSlot = isArtifact && state.equipped.artefato && state.equipped.artefato !== item.id && level >= 20 && !state.equipped.artefato2 ? 'artefato2' : item.slot;
+  const wearing = Object.entries(state.equipped).find(([, v]) => v === item.id)?.[0] as EquipSlot | undefined;
+  const outfit = { elmo: state.equipped.elmo, armadura: state.equipped.armadura, botas: state.equipped.botas, arma: state.equipped.arma };
+  const tried = isArtifact ? outfit : { ...outfit, [item.slot]: item.id };
+  const canRemove = wearing && wearing !== 'armadura' && wearing !== 'botas';
+  let action: { label: string; fn: Act; disabled?: boolean } | null = null;
+  if (avail.status === 'tem') action = wearing ? (canRemove ? { label: 'Tirar', fn: (st) => equip(st, wearing!, null, level) } : null) : { label: 'Vestir', fn: (st, _c, lv) => equip(st, target, item.id, lv) };
+  else if (avail.status === 'comprar')
+    action = { label: avail.canAfford ? `Comprar por ${fmt(avail.price)} ouro` : `Faltam ${fmt(avail.price - gold)} de ouro`, fn: (st, c) => acquire(st, item.id, c), disabled: !avail.canAfford };
+  else if (avail.status === 'liberar') action = { label: 'Pegar (liberado pelo atributo)', fn: (st, c) => acquire(st, item.id, c) };
+  return (
+    <Sheet
+      title={item.name}
+      onClose={onClose}
+      footer={
+        action ? (
+          <button type="button" className="btn primary block" disabled={action.disabled} onClick={() => onAct(action!.fn)}>
+            {action.label}
+          </button>
+        ) : (
+          <button type="button" className="btn block" onClick={onClose}>
+            Fechar
+          </button>
+        )
+      }
+    >
+      <div className="jn-try">
+        <div className="jn-try-stage">
+          <img className="jn-try-avatar" alt={`Provador: ${item.name}`} src={avatarIcon(look, tried)} />
+          {isArtifact && <img className="jn-try-artifact" alt="" src={itemIcon(item)} />}
+        </div>
+        <p>
+          <strong style={{ color: RARITY[item.rarity].color }}>{RARITY[item.rarity].label}</strong>
+          {' · '}
+          {SLOT_NAMES[item.slot]}
+          {item.weapon ? ` (${item.weapon})` : ''}
+        </p>
+        {item.boosts && <p className="muted small">+10% de XP nos hábitos de {ATTRIBUTES.find((a) => a.code === item.boosts)!.name}.</p>}
+        {avail.status === 'bau' && <p className="muted small">{reqText(avail)}.</p>}
+        {avail.status === 'comprar' && !avail.canAfford && <p className="muted small">Junte mais ouro com a rotina e os baús. O provador deixa ver como fica antes.</p>}
+        {avail.status === 'tem' && !wearing && <p className="muted small">Você já tem. Vestir troca o que está no espaço {SLOT_NAMES[item.slot].toLowerCase()}.</p>}
+      </div>
     </Sheet>
   );
 }
