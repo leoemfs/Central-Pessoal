@@ -113,6 +113,16 @@ export const MODULE_BARS: ModuleBar[] = [
       { id: 'concluidos', label: 'Concluídos', icon: 'check', to: 'concluidos', section: 'concluidos' },
     ],
   },
+  {
+    id: 'saude',
+    name: 'Saúde',
+    sections: ['saude', 'saudehoje', 'saudehist'],
+    items: [
+      { id: 'saudehoje', label: 'Hoje', icon: 'sun', to: 'saudehoje', section: 'saudehoje' },
+      { id: 'saude', label: 'Saúde', icon: 'heartPulse', to: 'saude', section: 'saude' },
+      { id: 'saudehist', label: 'Histórico', icon: 'clock', to: 'saudehist', section: 'saudehist' },
+    ],
+  },
 ];
 
 /** Módulos que podem ser favoritos (os 4 da barra no Início). */
@@ -125,6 +135,7 @@ export const FAVORITABLE: BarItem[] = [
   { id: 'estudos', label: 'Estudos', icon: 'cap', to: 'estudos' },
   { id: 'carreira', label: 'Carreira', icon: 'briefcase', to: 'carreira' },
   { id: 'objetivos', label: 'Objetivos', icon: 'flag', to: 'objetivos' },
+  { id: 'saude', label: 'Saúde', icon: 'heartPulse', to: 'saude' },
   { id: 'arquivo', label: 'Notas', icon: 'note', to: 'arquivo' },
   { id: 'voce', label: 'Você', icon: 'user', to: 'voce' },
   { id: 'revisao', label: 'Revisão', icon: 'calendarCheck', to: 'revisao' },

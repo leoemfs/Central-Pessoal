@@ -19,6 +19,7 @@ const LINKS: { path: string; hint: string }[] = [
   { path: 'estudos', hint: 'Biblioteca, ciclos de estudo, notebooks, fontes e mapas mentais' },
   { path: 'carreira', hint: 'Trabalho atual, reuniões, projetos, currículo e vagas' },
   { path: 'objetivos', hint: 'Todas as metas do app num lugar só' },
+  { path: 'saude', hint: 'Água e sono; em breve dieta, remédios e consultas' },
   { path: 'arquivo', hint: 'Anotações rápidas e informações importantes' },
   { path: 'voce', hint: 'Perfil, metas e sugestões para você' },
   { path: 'revisao', hint: 'Resumo da semana e reflexão' },

@@ -694,12 +694,41 @@ export interface AppData {
   exerciseVideos: Record<string, string>;
   /** Jornada (N2): avatar, itens, o que está vestido e gastos (o resto é calculado). */
   journey: JourneyState;
+  /** Saúde (N1): água e sono (as outras partes vêm depois). */
+  health: HealthData;
   /** Itens excluídos (id → data), para uma futura sincronização entre aparelhos. */
   deleted: Record<string, string>;
   /** N9.0: data da última alteração de cada item (id → data) e de cada parte (`@chave` → data). */
   stamps: Record<string, string>;
   /** Dados da versão anterior que ainda não têm tela (ex.: receitas). */
   legacy: Record<string, unknown>;
+}
+
+// ---------- Saúde (N1) ----------
+export type SleepFeel = 'bem' | 'medio' | 'cansado';
+
+/** Uma noite de sono, guardada pelo dia em que acordou. */
+export interface SleepEntry {
+  /** Hora de dormir e de acordar (HH:MM). */
+  bed: string;
+  wake: string;
+  feel: SleepFeel | null;
+}
+
+export interface HealthData {
+  water: {
+    /** Meta do dia e quanto soma cada toque (ml). Valem só sem hábito ligado. */
+    goal: number;
+    step: number;
+    /** Quanto bebeu por dia (AAAA-MM-DD → ml), sem hábito ligado. */
+    days: Record<string, number>;
+    /** Hábito do Núcleo ligado: o número mora nele (um lugar só). */
+    habitId: string | null;
+    /** Já perguntou se quer ligar o hábito de água que existia. */
+    asked: boolean;
+  };
+  /** Sono por dia em que acordou (AAAA-MM-DD). */
+  sleep: Record<string, SleepEntry>;
 }
 
 export type Collection = 'tasks' | 'events' | 'habits' | 'notes' | 'journal' | 'categories' | 'cards' | 'incomeSources' | 'boxes' | 'lists' | 'listCategories' | 'stores' | 'vouchers';

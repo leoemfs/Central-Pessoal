@@ -30,6 +30,7 @@ import { Estudos } from './modules/estudos/Estudos';
 import { CiclosPage } from './modules/estudos/Ciclos';
 import { RoadmapsPage } from './modules/estudos/Roadmaps';
 import { CarreiraPage, VagasPage } from './modules/Carreira';
+import { SaudeHistorico, SaudeHoje, SaudePage } from './modules/Saude';
 import { CareerGoalsList, ConcluidosPage, GrandesPage, ObjetivosPage } from './modules/Objetivos';
 import { useCardEditor } from './Cards';
 import { barDrag, PullToMais } from './BarPull';
@@ -85,10 +86,13 @@ export const SECTIONS: Section[] = [
   { path: 'objetivos', label: 'Objetivos', icon: 'flag', view: ObjetivosPage, fab: 'objetivos/menu' },
   { path: 'grandes', label: 'Grandes', icon: 'target', view: GrandesPage, fab: 'objetivos/menu' },
   { path: 'concluidos', label: 'Concluídos', icon: 'check', view: ConcluidosPage, fab: 'objetivos/menu' },
+  // Saúde (N1.1): o + registra uma noite de sono; a água soma com um toque nos cartões.
+  { path: 'saude', label: 'Saúde', icon: 'heartPulse', view: SaudePage, fab: 'saude/sono' },
+  { path: 'saudehoje', label: 'Hoje', icon: 'sun', view: SaudeHoje, fab: 'saudehoje/sono' },
+  { path: 'saudehist', label: 'Histórico', icon: 'clock', view: SaudeHistorico, fab: 'saudehist/sono' },
 ];
 
 export const COMING_SOON: { label: string; icon: IconName; hint: string }[] = [
-  { label: 'Saúde', icon: 'heartPulse', hint: 'Água, sono, remédios, consultas e peso' },
   { label: 'Foco', icon: 'timer', hint: 'Temporizador e sessões' },
   { label: 'Banco de ideias', icon: 'bulb', hint: 'Guarde ideias para depois' },
 ];
