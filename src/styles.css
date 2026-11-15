@@ -8080,3 +8080,9 @@ body.bar-labels .tabbar .tb-label {
   gap: 10px;
   margin-bottom: 10px;
 }
+a.chip-btn {
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}

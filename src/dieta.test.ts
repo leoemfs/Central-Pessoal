@@ -2,10 +2,11 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { normalize } from './data.ts';
 import {
-  activePlan, dayLine, DEFAULT_MEALS, dietCount, emptyDiet, markMeal, mealsOf, newPlan, normalizeDiet, pickOption, removePlan, savePlan, setDayVariant, setExtra,
+  activePlan, allRecipes, dayLine, newMeal, recipesOf, toggleRecipe, DEFAULT_MEALS, dietCount, emptyDiet, markMeal, mealsOf, newPlan, normalizeDiet, pickOption, removePlan, savePlan, setDayVariant, setExtra,
   setSplit, toggleVariantDay, choosePlan, variantFor,
 } from './dieta.ts';
 import { healthWeeks } from './saude.ts';
+import { newList } from './lists.ts';
 import type { AppData } from './types.ts';
 
 const SUN = '2026-11-15'; // domingo
@@ -37,7 +38,7 @@ test('dados antigos ganham Dieta vazia; lixo é limpo', () => {
   assert.equal(d.plans[0].name, 'Minha dieta');
   assert.equal(d.plans[0].split, false); // dias diferentes precisa de 2 variações
   assert.deepEqual(d.plans[0].variants[0].days, [1]);
-  assert.deepEqual(d.plans[0].variants[0].meals[0], { id: 'm', name: 'Refeição', time: '', food: '', alts: ['ok'] });
+  assert.deepEqual(d.plans[0].variants[0].meals[0], { id: 'm', name: 'Refeição', time: '', food: '', alts: ['ok'], recipes: [] });
   assert.equal(d.activeId, null);
   assert.deepEqual(d.log, { '2026-11-15': { m: { mark: 'segui', option: 0 } } });
   assert.deepEqual(d.extras, { '2026-11-15': 'pizza' });
@@ -107,4 +108,26 @@ test('resumo da semana conta as marcações e as refeições previstas', () => {
   assert.deepEqual(w.diet, { segui: 2, parte: 0, fugi: 1, planned: 9 });
   // antes de o plano existir, não há refeições previstas
   assert.equal(dietCount(d, '2026-11-01', '2026-11-14').planned, 0);
+});
+
+test('receitas ligadas: moram em Listas; a refeição só aponta; apagada some sozinha', () => {
+  const base = normalize({});
+  const recipeCat = base.listCategories.find((c) => c.kind === 'receita')!.id;
+  const otherCat = base.listCategories.find((c) => c.kind !== 'receita')!.id;
+  const omelete = { ...newList('Omelete de legumes', recipeCat), id: 'r1' };
+  const bolo = { ...newList('Bolo de banana', recipeCat), id: 'r2' };
+  const mercado = { ...newList('Mercado', otherCat), id: 'm1' };
+  const d = { ...base, lists: [omelete, mercado, bolo] };
+  assert.deepEqual(allRecipes(d).map((r) => r.name), ['Bolo de banana', 'Omelete de legumes']);
+  let meal = newMeal('x', 'Jantar');
+  meal = toggleRecipe(toggleRecipe(meal, 'r1'), 'r2');
+  assert.deepEqual(recipesOf(d, meal).map((r) => r.id), ['r1', 'r2']);
+  assert.deepEqual(toggleRecipe(meal, 'r1').recipes, ['r2']);
+  // apagada em Listas: some da refeição, sem erro
+  assert.deepEqual(recipesOf({ ...d, lists: [mercado, bolo] }, meal).map((r) => r.id), ['r2']);
+  // lista que não é receita não conta
+  assert.deepEqual(recipesOf(d, { recipes: ['m1'] }), []);
+  // dados antigos ganham recipes vazio; repetidos e lixo saem
+  const n = normalizeDiet({ plans: [{ id: 'p', variants: [{ id: 'v', meals: [{ id: 'a' }, { id: 'b', recipes: ['r1', 'r1', 3, ''] }] }] }] });
+  assert.deepEqual(n.plans[0].variants[0].meals.map((m) => m.recipes), [[], ['r1']]);
 });
