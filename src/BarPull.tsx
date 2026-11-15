@@ -189,6 +189,32 @@ export function PullToMais({ bar, resetKey }: { bar: RefObject<HTMLElement | nul
     };
   }, [bar]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  // C14: logo depois do gesto de puxar, o celular às vezes não gera o "clique" do primeiro toque
+  // (o dedo encosta e solta no módulo, mas nada acontece). Na gaveta, o toque é reconhecido aqui:
+  // encostou e soltou no mesmo item, sem arrastar → abre; o clique do navegador que vier depois é ignorado.
+  const tap = useRef<{ x: number; y: number; t: number; target: HTMLElement } | null>(null);
+  const tapAt = useRef(0);
+  const bodyDown = (e: React.PointerEvent) => {
+    const target = (e.target as Element).closest('a, button') as HTMLElement | null;
+    tap.current = target && e.pointerType !== 'mouse' ? { x: e.clientX, y: e.clientY, t: performance.now(), target } : null;
+  };
+  const bodyUp = (e: React.PointerEvent) => {
+    const t = tap.current;
+    tap.current = null;
+    if (!t) return;
+    const same = (e.target as Element).closest('a, button') === t.target;
+    if (!same || Math.hypot(e.clientX - t.x, e.clientY - t.y) > 10 || performance.now() - t.t > 600) return;
+    tapAt.current = performance.now();
+    t.target.click(); // abre o módulo (ou o atalho) pelo mesmo caminho do clique normal
+  };
+  const bodyClickCapture = (e: React.MouseEvent) => {
+    // O clique "de verdade" que às vezes chega depois do toque já tratado: não abre duas vezes.
+    if (e.nativeEvent.isTrusted && performance.now() - tapAt.current < 700) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+  };
+
   // Puxar a alcinha da gaveta para baixo fecha.
   const head = useRef<{ y: number } | null>(null);
   const headDown = (e: React.PointerEvent) => {
@@ -224,7 +250,14 @@ export function PullToMais({ bar, resetKey }: { bar: RefObject<HTMLElement | nul
           <span className="pull-grab" aria-hidden="true" />
           <strong>Mais</strong>
         </div>
-        <div className="pull-body" onClick={(e) => (e.target as Element).closest('button') && close()}>
+        <div
+          className="pull-body"
+          onPointerDown={bodyDown}
+          onPointerUp={bodyUp}
+          onPointerCancel={() => (tap.current = null)}
+          onClickCapture={bodyClickCapture}
+          onClick={(e) => (e.target as Element).closest('button') && close()}
+        >
           <MaisPanel />
         </div>
         {open && <BackCloser onClose={close} />}
