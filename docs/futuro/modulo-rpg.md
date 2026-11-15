@@ -625,7 +625,7 @@ A Jornada desbloqueia em 16/11. Até aqui existiam só as regras e as artes (pas
 
 | Parte | O que entrega | Tamanho |
 |---|---|---|
-| **N2.1** Personagem e cena | `<PixelSprite>`; avatar com os itens iniciais na cena; céu pelo horário, estrelas pelos dias de uso e chuva pela data (B.9); nível, XP e ouro; **Ficha** com os 6 atributos e a classe (B.7) | M |
+| **N2.1** Personagem e cena (**feito, v0.55**) | `<PixelSprite>`; avatar com os itens iniciais na cena; céu pelo horário, estrelas pelos dias de uso e chuva pela data (B.9); nível, XP e ouro; **Ficha** com os 6 atributos e a classe (B.7) | M |
 | **N2.2** Cartão no Início e Modo Jornada | cartão compacto no Início (E.1); Configurações: "Mostrar a Jornada no Início" e "Modo Jornada" (F.1); "Agora não" deixa tudo guardado em silêncio | P |
 | **N2.3** Baús e "Desde a sua última visita" | baús de rotina e cristais (B.4) com abertura animada; resumo da diferença desde a última visita (E.2) | M |
 | **N2.4** Arsenal e loja | inventário, provador, vestir e tirar, comprar com ouro (B.2, B.3); avatar em tela cheia (B.10) | M |

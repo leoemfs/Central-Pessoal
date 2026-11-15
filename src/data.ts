@@ -10,6 +10,7 @@ import { DEFAULT_FAVORITES, normalizeFavorites } from './moduleBar.ts';
 import { normalizeLayouts } from './cardLayout.ts';
 import { DEFAULT_LIST_CATEGORIES, linkMarketItems, normalizeListData } from './lists.ts';
 import { emptyStudy, normalizeStudy } from './estudos.ts';
+import { defaultJourneyState, normalizeJourney } from './jornada/rules.ts';
 import { emptyCareer, normalizeCareer } from './carreira.ts';
 import { DEFAULT_RHYTHM, MODULES, normalizeRhythm, SETUP_AREAS } from './setup.ts';
 import { fixCard, fixCategory, fixEvent, fixExpense, fixExpenseSeries, fixIncome, fixIncomeSeries, fixJournal, fixNote, fixTask, sanitizeList } from './sanitize.ts';
@@ -71,6 +72,7 @@ export function emptyData(): AppData {
     study: emptyStudy(),
     career: emptyCareer(),
     lastLoads: {},
+    journey: defaultJourneyState(),
     workoutGoal: 3,
     exerciseVideos: {},
     deleted: {},
@@ -192,6 +194,7 @@ export function normalize(raw: unknown): AppData {
         lines: Array.isArray(p.lines) ? (p.lines as Record<string, unknown>[]).filter((x) => isRec(x) && typeof x.price === 'number').map((x) => ({ productId: typeof x.productId === 'string' ? x.productId : null, text: String(x.text ?? ''), price: x.price as number })) : [] })),
     study: normalizeStudy(r.study),
     career: normalizeCareer(r.career),
+    journey: normalizeJourney(r.journey),
     lastLoads: isRec(r.lastLoads) ? Object.fromEntries(Object.entries(r.lastLoads).filter((e): e is [string, number] => typeof e[1] === 'number')) : {},
     workoutGoal: typeof r.workoutGoal === 'number' && Number.isFinite(r.workoutGoal) ? Math.min(7, Math.max(1, Math.round(r.workoutGoal))) : 3,
     exerciseVideos: isRec(r.exerciseVideos) ? Object.fromEntries(Object.entries(r.exerciseVideos).filter((e): e is [string, string] => typeof e[1] === 'string' && e[1] !== '')) : {},

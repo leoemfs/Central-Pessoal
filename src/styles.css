@@ -6885,3 +6885,177 @@ button.row:disabled {
 .check.sq {
   border-radius: 7px;
 }
+
+/* ---------- Jornada N2.1: cena, avatar e ficha ---------- */
+.value.crystal {
+  color: #38bdf8;
+}
+.jn-scene {
+  position: relative;
+  height: 170px;
+  overflow: hidden;
+}
+.jn-scene.tall {
+  height: 200px;
+}
+.jn-scene img {
+  position: absolute;
+  image-rendering: pixelated;
+}
+.jn-ground {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 34px;
+  border-top: 4px solid;
+}
+.jn-home {
+  left: 6%;
+  bottom: 26px;
+  width: 88px;
+}
+.jn-tree {
+  right: 7%;
+  bottom: 28px;
+  width: 50px;
+}
+.jn-avatar {
+  left: 50%;
+  bottom: 18px;
+  width: 112px;
+  transform: translateX(-46%);
+  animation: jn-breathe 2.4s steps(2) infinite;
+}
+@keyframes jn-breathe {
+  50% {
+    transform: translateX(-46%) translateY(-2px);
+  }
+}
+.jn-sun {
+  position: absolute;
+  right: 12%;
+  top: 14%;
+  width: 26px;
+  height: 26px;
+  box-shadow: 0 0 0 4px rgb(255 255 255 / 0.15);
+}
+.jn-sun.moon {
+  width: 18px;
+  height: 18px;
+  box-shadow: -5px 0 0 0 #0b1020 inset;
+}
+.jn-cloud {
+  position: absolute;
+  width: 46px;
+  height: 10px;
+  box-shadow: 8px -8px 0 -1px currentColor;
+  color: inherit;
+  opacity: 0.9;
+}
+.jn-cloud.small {
+  width: 32px;
+  height: 8px;
+}
+.jn-star {
+  position: absolute;
+  width: 2px;
+  height: 2px;
+  background: #fef9c3;
+  animation: jn-twinkle 3s steps(2) infinite;
+}
+.jn-star.big {
+  width: 3px;
+  height: 3px;
+}
+@keyframes jn-twinkle {
+  50% {
+    opacity: 0.35;
+  }
+}
+.jn-rain {
+  position: absolute;
+  inset: 0;
+  background-image: linear-gradient(transparent 60%, rgb(191 219 254 / 0.7) 60%);
+  background-size: 3px 14px;
+  mask-image: repeating-linear-gradient(90deg, #000 0 1px, transparent 1px 9px);
+  animation: jn-fall 0.5s linear infinite;
+}
+@keyframes jn-fall {
+  to {
+    background-position: 0 14px;
+  }
+}
+.jn-rainbow {
+  position: absolute;
+  left: 20%;
+  top: 30%;
+  width: 60%;
+  height: 120px;
+  border-radius: 50% 50% 0 0;
+  border: 4px solid transparent;
+  box-shadow: 0 0 0 4px #f87171, 0 0 0 8px #facc15, 0 0 0 12px #4ade80, 0 0 0 16px #60a5fa;
+  opacity: 0.45;
+}
+@media (prefers-reduced-motion: reduce) {
+  .jn-avatar,
+  .jn-star,
+  .jn-rain {
+    animation: none;
+  }
+}
+.jn-swatches {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.jn-swatches > div {
+  display: flex;
+  gap: 10px;
+}
+.jn-swatch {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: 2px solid var(--border-strong);
+  padding: 0;
+}
+.jn-swatch.on {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+}
+.jn-attrs {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.jn-attrs li {
+  display: grid;
+  grid-template-columns: 38px 92px 1fr 40px;
+  align-items: center;
+  gap: 8px;
+}
+.jn-attr-code {
+  font-family: ui-monospace, 'SF Mono', 'Roboto Mono', Menlo, Consolas, monospace;
+  font-weight: 800;
+}
+.jn-attr-name {
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+.jn-attr-bar {
+  height: 10px;
+  background: var(--raised-2);
+}
+.jn-attr-bar > span {
+  display: block;
+  height: 100%;
+}
+.jn-attr-val {
+  text-align: right;
+  font-size: 0.9rem;
+}
