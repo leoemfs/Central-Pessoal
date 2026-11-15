@@ -59,6 +59,7 @@ export function Financas({ route }: ViewProps) {
     nova: () => (tab === 'cartoes' ? setCardForm(true) : tab === 'receitas' ? setIncomeForm(true) : tab === 'caixinhas' ? setBoxForm(true) : setFormOpen(true)),
     cartoes: () => setTab('cartoes'),
     caixinhas: () => setTab('caixinhas'),
+    'nova-caixinha': () => { setTab('caixinhas'); setBoxForm(true); },
     receitas: () => setTab('receitas'),
     menu: () => setAddMenu(true),
     categorias: () => setCatsOpen(true),
