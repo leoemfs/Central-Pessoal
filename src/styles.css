@@ -7536,6 +7536,19 @@ button.row:disabled {
 .goal-row { width: 100%; background: none; border: 0; color: inherit; font: inherit; text-align: left; cursor: pointer; align-items: flex-start; }
 .goal-row .row-body { display: flex; flex-direction: column; gap: 4px; }
 
+/* E24: botão + transparente enquanto a tela rola */
+.fab {
+  transition: opacity 0.22s ease, transform 0.22s ease, box-shadow 0.22s ease;
+}
+body.scrolling .fab {
+  opacity: 0.22;
+  transform: scale(0.9);
+  box-shadow: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  body.scrolling .fab {
+    transform: none;
+  }
 /* N2.2: cartão da Jornada no Início */
 .journey-card {
   display: flex;

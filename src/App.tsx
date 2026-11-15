@@ -219,6 +219,27 @@ function Drawer({ current, onClose }: { current: string; onClose: () => void }) 
   );
 }
 
+/**
+ * E24: enquanto a tela rola (qualquer direção), o botão + fica transparente e um pouco menor,
+ * para dar para ler o que está por trás; parou de rolar, em meio segundo volta inteiro.
+ */
+function useScrollingClass() {
+  useEffect(() => {
+    let idle: number | undefined;
+    const onScroll = () => {
+      document.body.classList.add('scrolling');
+      window.clearTimeout(idle);
+      idle = window.setTimeout(() => document.body.classList.remove('scrolling'), 500);
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => {
+      window.removeEventListener('scroll', onScroll);
+      window.clearTimeout(idle);
+      document.body.classList.remove('scrolling');
+    };
+  }, []);
+}
+
 /** Barra superior que some ao rolar para baixo e volta ao rolar para cima. */
 function useHideOnScroll(resetKey: string): boolean {
   const [hidden, setHidden] = useState(false);
@@ -286,6 +307,7 @@ export function App() {
   const barHidden = data.settings.hideOnScroll && scrollHidden;
   const bar = barFor(section.path);
   const barIndex = bar ? activeIndex(bar, section.path) : null;
+  useScrollingClass();
   const editor = useCardEditor();
   const where = bar ? crumb(bar, barIndex) : null;
   // E22: dentro de um tema das Configurações, o título mostra "Configurações / Aparência".
