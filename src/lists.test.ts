@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import { emptyData, normalize, seedCategories } from './data.ts';
 import { addExpense } from './finance.ts';
 import {
+  catalogByAisle, createListWithItems,
   lastPurchase, packCount, paidTotal, payItem,
   ensureProduct, linkMarketItems, marketEstimate, matchKey, priceRange, productSuggestions, productsWithoutPrice, sizeOptions,
   addItemFromText, addListCategory, addPrice, bestPrice, deleteListCategory, finishShopping, kindOf, launchBought, listEstimate, newItem, newList, purchaseHistory,
@@ -243,4 +244,17 @@ test('M3: "Quanto custou aqui?" marca o item, anota em Preços e vira o total re
   const p = lastPurchase(d, l.id)!;
   assert.deepEqual(p.lines.map((x) => [x.text, x.price]), [['Feijão carioca', 15.98], ['Sabonete', 7.5]]);
   assert.equal(d.lists[0].items.every((i) => i.paid === null && !i.done), true);
+});
+
+test('M24: catálogo por corredor com busca e lista criada já com os itens escolhidos', () => {
+  const all = catalogByAisle();
+  assert.equal(all[0].aisle, 'Hortifrúti');
+  assert.ok(all.reduce((a, g) => a + g.names.length, 0) >= 300);
+  assert.deepEqual(catalogByAisle('arroz').map((g) => [g.aisle, g.names]), [['Mercearia', ['Arroz branco', 'Arroz integral']]]);
+  let d = withPrices();
+  const l = newList('Semana', 'lc-mercado');
+  d = createListWithItems(l, ['Banana', 'Arroz branco', '2 kg tomate'])(d);
+  const items = d.lists.find((x) => x.id === l.id)!.items;
+  assert.deepEqual(items.map((i) => [i.text, i.aisle, i.qty]), [['Banana', 'Hortifrúti', null], ['Arroz branco', 'Mercearia', null], ['Tomate', 'Hortifrúti', 2]]);
+  assert.ok(items.every((i) => i.productId));
 });
