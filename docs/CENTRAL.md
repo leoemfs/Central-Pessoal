@@ -46,7 +46,7 @@
 | N1 | Módulo Saúde (água, sono, remédios, consultas, peso) | NOVO | G | média | especificado | `futuro/modulo-saude.md` |
 | N2 | Jornada completa (pixel art): missões no ritmo da pessoa, recompensas por módulo, raridades (comum a místico), Forja e Codex por coleções | NOVO | G | baixa | especificado | `futuro/modulo-rpg.md`, `futuro/jornada-recompensas.md`, `futuro/jornada-raridades.md` |
 | N3 | Notificações (feitas junto com o N4, no Android) | NOVO | M | alta | especificado | `futuro/notificacoes.md` |
-| N4 | App Android: casca que abre o site (atualiza sozinho), com notificações de verdade (N3 junto). Parte 1 APK (M) · Parte 2 notificações (M) | NOVO | G | alta | especificado | `futuro/app-android.md` |
+| N4 | App Android: APK independente com atualização automática das telas, com notificações de verdade (N3 junto). Parte 1 APK (M) · Parte 2 notificações (M) | NOVO | G | alta | especificado | `futuro/app-android.md` |
 | N8 | Sincronizar com a conta Google (pasta escondida do Drive; site e Android com os mesmos dados). Depois do N4 | NOVO | M | baixa | ideia | `futuro/app-android.md` ("Sincronização") |
 | N5 | Código de barras, base de produtos e nota fiscal | NOVO | G | baixa | ideia | `futuro/precos-v2.md` ("Mais adiante") |
 | N6 | Módulo Estudos e Carreira: Biblioteca (áreas, trilhas, tópicos de referência), Ciclos pessoais, Meus notebooks, Fontes, Mapas mentais e Roadmaps | NOVO | G | média | pronto (v0.21), em teste por 3 dias | `futuro/modulo-estudos.md` |
