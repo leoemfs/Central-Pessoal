@@ -54,7 +54,7 @@ export const NAV_GROUPS: { title: string; items: NavItem[] }[] = [
       { label: 'Treinos e alongamentos', icon: 'dumbbell', to: 'nucleo/corpo' },
       { label: 'Progresso', icon: 'bars', to: 'progresso', section: 'progresso' },
       { label: 'Histórico de práticas', icon: 'clock', to: 'historico', section: 'historico' },
-      { label: 'Saúde', icon: 'heartPulse' },
+      { label: 'Saúde', icon: 'heartPulse', to: 'saude', section: 'saude' },
     ],
   },
   {

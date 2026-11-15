@@ -37,11 +37,12 @@
 | **Carreira** (vagas, trabalho atual, reuniões, projetos, currículo) | carreira (vagas, cargos, salários, reuniões, projetos, currículo) | Estudos (ciclos concluídos, só leitura) | Agenda (tudo com data entra sozinho e se atualiza), Finanças (aumento atualiza o salário, se você quiser) | `carreira.ts` |
 | **Você** | perfil | Núcleo (hábitos) e Caixinhas (para sugerir) | Núcleo (hábito), Agenda (compromissos), Finanças (caixinha), Início | `profile.ts` |
 | **Notas** | notas | nada | Busca | — |
+| **Saúde** (água e sono; dieta, remédios, consultas e peso depois) | `health` (meta e dias de água, sono por noite, hábito ligado) | Núcleo (hábito de água ligado: o número mora nele), Você (horários de dormir e acordar como sugestão) | Núcleo (marca o hábito ligado ao bater a meta), Jornada (+3 RES por dia na meta, sem hábito ligado) | `saude.ts` |
 | **Jornada** (bloqueada até 14 dias; com telas desde a v0.55) | avatar e ajustes da Jornada (`journey`) | Finanças, Agenda, Diário, Núcleo (dias de uso, XP, ouro) | nada por enquanto | `journey.ts`, `jornada/` |
 
 **Telas que juntam tudo** (mexeu num módulo, conferir estas): **Início** (quase todos), **Revisão semanal** (Finanças, caixinhas, vales, Agenda, Diário, Núcleo e práticas, humor, Estudos), **Busca** (todos os módulos; dentro de um módulo, busca só nele).
 **Partes do app todo:** barra de baixo (`moduleBar.ts`), lápis dos cartões (`cardLayout.ts`), temas (`theme.ts`), backup (`data.ts`).
-**Em breve** (sem código): Saúde (N1, módulo próprio). Objetivos (N10) ganhou o módulo na v0.56. Lembretes, Foco e Banco de ideias **não viram módulos**: Lembretes = Agenda + Notificações (N3); Foco = Núcleo › Mente (M16); Ideias = Notas (M17).
+**Em breve** (sem código): nada de módulo novo; Saúde (N1) ganhou o módulo na v0.66 (Água e Sono). Objetivos (N10) ganhou o módulo na v0.56. Lembretes, Foco e Banco de ideias **não viram módulos**: Lembretes = Agenda + Notificações (N3); Foco = Núcleo › Mente (M16); Ideias = Notas (M17).
 
 ## Caixa de entrada
 *Ideias e problemas ainda sem classificar. Uma linha cada, com a data.*
@@ -123,7 +124,7 @@
 | M5 | Agenda: repetição (toda semana, mês, ano) e aniversários | MOD | M | média | ideia | — (especificar antes) |
 | M6 | Núcleo: fichas de treino próprias (exercícios, séries, descanso). Pode entrar depois no M21 ("crie o seu próprio") | MOD | M | média | especificado | `futuro/nucleo-mente-corpo.md` |
 | M7 | Revisão semanal mais completa: autocuidado, caixinhas e vales da semana | MOD | P | baixa | pronto (v0.38) | `futuro/nucleo-mente-corpo.md`, `futuro/caixinhas.md` |
-| N1 | Módulo Saúde, à parte (água, sono, **dieta**, remédios, consultas, dentista e check-ups, peso), dividido em N1.0 a N1.5. Afeta: Agenda, Listas, Você, Núcleo, Início, Revisão, backup | NOVO | G | média | especificado, prévia aprovada (11/11); não adiantado na fila | `futuro/modulo-saude.md` |
+| N1 | Módulo Saúde, à parte (água, sono, **dieta**, remédios, consultas, dentista e check-ups, peso), dividido em N1.0 a N1.5. Afeta: Agenda, Listas, Você, Núcleo, Início, Revisão, backup | NOVO | G | média | parte pronta: N1.1 Água e Sono (v0.66); faltam N1.2 Dieta, N1.3 Remédios, N1.4 Consultas e check-ups, N1.5 Peso e medidas | `futuro/modulo-saude.md` |
 | N2 | Jornada completa (pixel art): missões no ritmo da pessoa, recompensas por módulo, raridades (comum a místico), Forja e Codex por coleções. **Revisto em 15/11** (desbloqueia em 16/11; só existiam regras e artes, sem telas): dividido em 10 partes, da mais simples à conclusão (ver `modulo-rpg.md`, B.13). Afeta: Jornada, Início, Configurações, backup | NOVO | G | **alta** | aprovado (15/11), em partes | `futuro/modulo-rpg.md`, `futuro/jornada-recompensas.md`, `futuro/jornada-raridades.md` |
 | N3 | Notificações e **lembretes** (tarefa ou compromisso com "me lembrar"; sai o "Lembretes, em breve" do menu). Afeta: Agenda, Carreira | NOVO | M | baixa | especificado | `futuro/notificacoes.md` |
 | N3.1 | Notificações já no app (sem servidor): **"Lembrar no celular"** (a parte da agenda passa a ser o **N9.5**, pelo Google Agenda) (compromisso, conta, revisão → agenda do celular, hora certa, Android e iPhone) e **bolinha no ícone** do app com o que está pendente hoje | NOVO | P | média | ideia | `futuro/notificacoes.md` |
@@ -173,6 +174,7 @@
 ## Feito
 | Versão | O que entrou | PR |
 |---|---|---|
+| v0.66 | N1.1: módulo **Saúde** com Água (meta, +250 ml, ligação com o hábito de água sem perder histórico, selo "💧 Saúde" no Núcleo) e Sono (dormir, acordar, como acordou); barra Hoje · Saúde · Histórico; +3 RES na Jornada por dia na meta de água | — |
 | v0.65 | M33 (parte 1): **Curso de GitHub completo**, trilha **"Git do zero"** (9 tópicos: Git × GitHub, instalar e configurar, repositório, as três áreas, commits, histórico e diferenças, desfazer com segurança, .gitignore, o caminho de uma mudança no Central Pessoal); 10 fontes, mapa e ciclo. Pacote pessoal em Desenvolvimento de software. Link: `https://leoemfs.github.io/Central-Pessoal/#/estudos/importar/curso-github` | #110 |
 | v0.64 | M32 (parte 1): **Curso de Claude para desenvolvimento**, trilha **"Claude Code na prática"** (16 tópicos: onde usar, instalar, como pedir, CLAUDE.md, permissões, modo plano, comandos, skills, criar sua skill, subagentes, hooks, MCP, Git e PRs, nuvem, economizar uso, configurações), conferida com a documentação oficial; 15 fontes, mapa e ciclo. Pacote pessoal na área Inteligência artificial. Link: `https://leoemfs.github.io/Central-Pessoal/#/estudos/importar/curso-claude` | #108 |
 | v0.63.1 | M31 (ajuste): a descrição da trilha do pacote aparecia com as marcas do texto (##, **) na Biblioteca. Agora é uma frase curta; o texto completo fica na página de abertura do notebook. Quem já importou: importe de novo pelo mesmo link para limpar | #107 |

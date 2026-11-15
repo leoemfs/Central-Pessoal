@@ -23,6 +23,7 @@ export const MODULES: ModuleInfo[] = [
   { id: 'estudos', label: 'Estudos', icon: 'cap', hint: 'Trilhas, notebooks e mapas' },
   { id: 'carreira', label: 'Carreira', icon: 'briefcase', hint: 'Vagas, trabalho e reuniões' },
   { id: 'objetivos', label: 'Objetivos', icon: 'flag', hint: 'Todas as metas num lugar só' },
+  { id: 'saude', label: 'Saúde', icon: 'heartPulse', hint: 'Água e sono (e, em breve, dieta e consultas)' },
   { id: 'arquivo', label: 'Notas', icon: 'note', hint: 'Anotações rápidas' },
   { id: 'voce', label: 'Você', icon: 'user', hint: 'Perfil e sugestões' },
   { id: 'jornada', label: 'Jornada', icon: 'sword', hint: 'Modo jogo (opcional)' },
@@ -41,6 +42,7 @@ export const SETUP_AREAS: { id: string; label: string; icon: string; modules: st
   { id: 'estudos', label: 'Estudos', icon: 'cap', modules: ['estudos'] },
   { id: 'carreira', label: 'Trabalho e carreira', icon: 'briefcase', modules: ['carreira'] },
   { id: 'metas', label: 'Metas e objetivos', icon: 'flag', modules: ['objetivos'] },
+  { id: 'saude', label: 'Saúde', icon: 'heartPulse', modules: ['saude'] },
 ];
 
 /** Áreas da entrevista do Você que correspondem às escolhas daqui (para não perguntar duas vezes). */
@@ -91,6 +93,7 @@ const SECTION_MODULE: Record<string, string> = {
   estudos: 'estudos', ciclos: 'estudos', roadmaps: 'estudos',
   carreira: 'carreira', vagas: 'carreira', metas: 'carreira',
   objetivos: 'objetivos', grandes: 'objetivos', concluidos: 'objetivos',
+  saude: 'saude', saudehoje: 'saude', saudehist: 'saude',
   arquivo: 'arquivo', voce: 'voce', jornada: 'jornada',
 };
 export function moduleOf(path: string): string | null {
