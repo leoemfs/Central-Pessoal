@@ -89,3 +89,11 @@ settings: {
 
 ## Lápis nos outros módulos (v0.34)
 Agenda (calendário fixo + Próximos compromissos), Núcleo › Rituais (Hoje fixo, um cartão por período, Em outros dias, Pausados e arquivados), Listas (um cartão por categoria, na visão "Todas"), Estudos (bloco principal fixo, Estudando agora, Continuar, Como funciona, Sugestões) e Carreira (Trabalho atual fixo e as demais seções). Mesmo componente `CardScreen` (`src/Cards.tsx`); a ordem fica em `settings.cards[tela]`.
+
+
+## Caminho no computador (E27, 15/11 — documentado, ainda não construído)
+- **Onde:** só no computador (tela larga), na primeira linha da área do conteúdo, acima do título da tela.
+- **O quê:** o caminho percorrido, completo e clicável: `Início › Finanças › Orçamento`; `Início › Estudos › Biblioteca › Idiomas › Inglês`. A última parte é a tela atual (sem link).
+- **Por quê:** como em muitos sites, mostra onde a pessoa está e deixa voltar a qualquer nível com um clique. No computador sobra espaço, então não há limite de dois níveis.
+- **Celular não muda:** topo com a seta ‹ e no máximo dois níveis (E25).
+- **De onde vêm os nomes:** a trilha do voltar (`navStack.ts`) e o que as telas já informam (`usePageTitle` / `usePagePath`). Com isso, o caminho próprio de Estudos (`Path`) e os voltares de dentro das telas (classe `desk-only`) podem sair também no computador.

@@ -3,6 +3,7 @@ import { CardScreen } from '../Cards';
 import type { ViewProps } from '../App';
 import { useStore } from '../store';
 import { go, goReplace, useSubAction } from '../router';
+import { usePageTitle } from '../pageTitle';
 import { remove, upsert } from '../actions';
 import {
   addItemFromText, addListCategory, addPrice, AISLES, bestPrice, categoryOf, deleteListCategory, finishShopping, kindOf, latestPrices, launchBought, LIST_COLORS,
@@ -489,6 +490,7 @@ function CategorySheet({ cat, onClose }: { cat: ListCategory | null; onClose: ()
 // ---------- Uma lista ----------
 
 function ListPage({ list: l }: { list: UserList }) {
+  usePageTitle(l.name);
   const { data, update } = useStore();
   const k = kindOf(data, l);
   const c = categoryOf(data, l);
@@ -496,7 +498,7 @@ function ListPage({ list: l }: { list: UserList }) {
   return (
     <>
       <div className="list-head">
-        <button type="button" className="icon-btn" aria-label="Voltar para as listas" onClick={() => (history.length > 1 ? history.back() : goReplace('listas'))}>
+        <button type="button" className="icon-btn desk-only" aria-label="Voltar para as listas" onClick={() => (history.length > 1 ? history.back() : goReplace('listas'))}>
           <Icon name="left" />
         </button>
         <div className="list-head-title">

@@ -253,6 +253,8 @@ export interface Settings {
   moreButton: boolean;
   /** E26: esconder o nome pequeno embaixo de cada ícone da barra de baixo (o padrão é mostrar). */
   hideBarLabels: boolean;
+  /** E25: jeito do menu na gaveta: Misto (grade em cima, lista por módulo embaixo), Grade ou Lista. */
+  drawerView: 'misto' | 'grade' | 'lista';
   seededCategories: boolean;
   seededIncomeSources: boolean;
   lastBackupAt: string | null;

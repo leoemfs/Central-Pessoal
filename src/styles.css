@@ -7859,3 +7859,94 @@ body.bar-labels .tabbar .tb-label {
   flex-direction: column;
   min-width: 0;
 }
+
+/* E25: sem menu ☰ — seta ‹ no topo e o menu inteiro na gaveta */
+.topbar-spacer {
+  width: 8px;
+  flex: none;
+}
+.topbar-back {
+  color: var(--accent-text);
+}
+@media (max-width: 899px) {
+  .desk-only {
+    display: none !important;
+  }
+}
+.pull-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.pull-title strong {
+  flex: 1;
+}
+.pull-views {
+  display: inline-flex;
+  gap: 3px;
+  padding: 3px;
+  border-radius: 10px;
+  background: var(--raised);
+}
+.pull-views button {
+  padding: 5px 9px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--muted);
+  font: inherit;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+.pull-views button[aria-pressed='true'] {
+  background: var(--raised-2);
+  color: var(--text);
+}
+.mais-edit-hint {
+  margin: 0 2px 4px;
+  color: var(--accent-text);
+}
+.menu-list {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--bg);
+  overflow: hidden;
+}
+.menu-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 9px 12px;
+  border-bottom: 1px solid var(--border);
+  color: var(--text);
+  text-decoration: none;
+}
+.menu-row:last-child {
+  border-bottom: 0;
+}
+.menu-row .tile-icon {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+}
+.menu-row-name {
+  flex: 1;
+  min-width: 0;
+  font-size: 0.92rem;
+}
+.menu-row > .icon:last-child {
+  color: var(--faint);
+}
+.menu-group {
+  display: flex;
+  flex-direction: column;
+}
+@media (max-width: 899px) {
+  /* E25: o caminho de Estudos sobe para a barra de cima (dois níveis, com a seta ‹). */
+  .st-path {
+    display: none;
+  }
+}

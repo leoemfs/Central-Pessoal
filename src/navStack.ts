@@ -3,7 +3,7 @@
  * O app guarda só a "trilha" que interessa (ex.: Início › Mais › Finanças › Orçamento), não todo o histórico.
  * - Voltar tira a última tela da trilha; no Início, sai do app.
  * - Abrir uma tela que já está na trilha volta até ela (nunca cria ciclo).
- * - Barra de baixo e menu ☰ ("switch"): a tela fica logo acima do Início (Mais → Início; módulo → Início).
+ * - Barra de baixo e gaveta ("switch"): a tela fica logo acima do Início (Mais → Início; módulo → Início).
  * - Links dentro das telas ("open"): a tela entra em cima da atual (módulo aberto pelo Mais → Mais → Início).
  * - Ferramenta de um módulo (Orçamento, Humor…): fica sempre logo acima da casa do módulo.
  */
