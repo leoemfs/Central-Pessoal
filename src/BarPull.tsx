@@ -232,6 +232,37 @@ export function PullToMais({ bar, resetKey }: { bar: RefObject<HTMLElement | nul
     }
   };
 
+  // E28: rolou até o começo da lista e continuou puxando para baixo: a gaveta desce junto e fecha (como no celular).
+  const body = useRef<HTMLDivElement>(null);
+  const pullDown = useRef<{ y: number; armed: boolean } | null>(null);
+  const bodyTouchStart = (e: React.TouchEvent) => {
+    pullDown.current = { y: e.touches[0].clientY, armed: (body.current?.scrollTop ?? 0) <= 0 };
+  };
+  const bodyTouchMove = (e: React.TouchEvent) => {
+    const g = pullDown.current;
+    if (!g) return;
+    const dy = e.touches[0].clientY - g.y;
+    if (!g.armed) {
+      // começou rolando no meio da lista: só "arma" quando chegar ao topo, contando dali
+      if ((body.current?.scrollTop ?? 0) <= 0) pullDown.current = { y: e.touches[0].clientY, armed: true };
+      return;
+    }
+    if (dy > 6) {
+      setDragging(true);
+      setShown(height() - dy);
+    }
+  };
+  const bodyTouchEnd = (e: React.TouchEvent) => {
+    const g = pullDown.current;
+    pullDown.current = null;
+    if (!g?.armed) return;
+    const dy = (e.changedTouches[0]?.clientY ?? g.y) - g.y;
+    if (dy <= 6) return;
+    setDragging(false);
+    if (dy > height() * OPEN_SHARE) close();
+    else setOpen(true);
+  };
+
   // Puxar a alcinha da gaveta para baixo fecha.
   const head = useRef<{ y: number } | null>(null);
   const headDown = (e: React.PointerEvent) => {
@@ -282,6 +313,10 @@ export function PullToMais({ bar, resetKey }: { bar: RefObject<HTMLElement | nul
         </div>
         <div
           className="pull-body"
+          ref={body}
+          onTouchStart={bodyTouchStart}
+          onTouchMove={bodyTouchMove}
+          onTouchEnd={bodyTouchEnd}
           onPointerDown={bodyDown}
           onPointerUp={bodyUp}
           onPointerCancel={() => (tap.current = null)}

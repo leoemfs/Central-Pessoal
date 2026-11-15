@@ -3,7 +3,7 @@ import { useStore } from '../store';
 import type { AppData } from '../types';
 import { addFavorite, FAVORITABLE } from '../moduleBar';
 import { Icon, notify, PageHeader, Sheet, type IconName } from '../ui';
-import { hiddenFrom, isHidden, moduleOf, toggleModule, visibleFrom } from '../setup';
+import { hiddenFrom, isHidden, toggleModule, visibleFrom } from '../setup';
 import { NAV_GROUPS } from '../nav';
 import { openSetup, openTutorial } from './Montagem';
 import { EditBar, useEditScreen } from '../Cards';
@@ -116,19 +116,16 @@ function maisItems(data: AppData, grid: boolean) {
 }
 
 /** E21.2: o Mais dentro da gaveta que sobe ao puxar a barra (sempre em grade, sem lápis). */
-/** E25: as telas de dentro de cada módulo (o que ficava no menu lateral), agrupadas pelo módulo. */
-function insideGroups(data: AppData): { title: string; items: { to: string; label: string; icon: IconName }[] }[] {
-  const homes = new Set(['inicio', 'mais', ...LINKS.map((l) => l.path)]);
-  const groups = new Map<string, { to: string; label: string; icon: IconName }[]>();
-  for (const g of NAV_GROUPS)
-    for (const it of g.items) {
-      if (!it.to || homes.has(it.to) || isHidden(data, it.to)) continue;
-      const mod = moduleOf(it.to);
-      const title = (mod && SECTIONS.find((x) => x.path === mod)?.label) || g.title;
-      if (!groups.has(title)) groups.set(title, []);
-      groups.get(title)!.push({ to: it.to, label: it.label, icon: it.icon });
-    }
-  return [...groups.entries()].map(([title, items]) => ({ title, items }));
+/**
+ * E28: o menu da gaveta usa as categorias do antigo menu lateral (Geral, Organização pessoal, Financeiro,
+ * Bem-estar, Estudos, Carreira, Planejamento) — as mesmas da barra lateral do computador (NAV_GROUPS).
+ * Cada uma traz os módulos e as telas de dentro; o que ainda não existe aparece apagado, com "em breve".
+ */
+function menuGroups(data: AppData): { title: string; items: { to?: string; label: string; icon: IconName }[] }[] {
+  return NAV_GROUPS.map((g) => ({
+    title: g.title,
+    items: g.items.filter((it) => it.to !== 'inicio' && it.to !== 'mais' && !(it.to && isHidden(data, it.to))),
+  })).filter((g) => g.items.some((it) => it.to));
 }
 
 /** E21.2 + E25: o menu inteiro na gaveta que sobe ao puxar a barra (Misto, Grade ou Lista; lápis muda a ordem). */
@@ -149,31 +146,51 @@ export function MaisPanel({ editing = false }: { editing?: boolean }) {
       <h2 className="section-title">Atalhos</h2>
       <div className={grid ? 'mg-grid small' : 'tile-grid'}>{row(tools, shortcuts, KEY_SHORTCUTS)}</div>
       {!editing &&
-        insideGroups(data).map((g) => (
+        menuGroups(data).map((g) => (
           <section key={g.title} className="menu-group">
             <h2 className="section-title">{g.title}</h2>
             {view === 'grade' ? (
               <div className="mg-grid small">
-                {g.items.map((it) => (
-                  <a key={it.to} className="mg-cell" href={`#/${it.to}`}>
-                    <span className="mg-icon">
-                      <Icon name={it.icon} size={22} />
+                {g.items.map((it) =>
+                  it.to ? (
+                    <a key={it.label} className="mg-cell" href={`#/${it.to}`}>
+                      <span className="mg-icon">
+                        <Icon name={it.icon} size={22} />
+                      </span>
+                      <span className="mg-name">{it.label}</span>
+                    </a>
+                  ) : (
+                    <span key={it.label} className="mg-cell off" aria-disabled="true">
+                      <span className="mg-icon">
+                        <Icon name={it.icon} size={22} />
+                      </span>
+                      <span className="mg-name">{it.label}</span>
+                      <em className="soon-tag">em breve</em>
                     </span>
-                    <span className="mg-name">{it.label}</span>
-                  </a>
-                ))}
+                  ),
+                )}
               </div>
             ) : (
               <div className="menu-list">
-                {g.items.map((it) => (
-                  <a key={it.to} className="menu-row" href={`#/${it.to}`}>
-                    <span className="tile-icon">
-                      <Icon name={it.icon} size={18} />
+                {g.items.map((it) =>
+                  it.to ? (
+                    <a key={it.label} className="menu-row" href={`#/${it.to}`}>
+                      <span className="tile-icon">
+                        <Icon name={it.icon} size={18} />
+                      </span>
+                      <span className="menu-row-name">{it.label}</span>
+                      <Icon name="right" size={16} />
+                    </a>
+                  ) : (
+                    <span key={it.label} className="menu-row off" aria-disabled="true">
+                      <span className="tile-icon">
+                        <Icon name={it.icon} size={18} />
+                      </span>
+                      <span className="menu-row-name">{it.label}</span>
+                      <em className="soon-tag">em breve</em>
                     </span>
-                    <span className="menu-row-name">{it.label}</span>
-                    <Icon name="right" size={16} />
-                  </a>
-                ))}
+                  ),
+                )}
               </div>
             )}
           </section>
