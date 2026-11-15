@@ -103,6 +103,16 @@ export const MODULE_BARS: ModuleBar[] = [
       { id: 'vagas', label: 'Vagas', icon: 'send', to: 'vagas', section: 'vagas' },
     ],
   },
+  {
+    id: 'objetivos',
+    name: 'Objetivos',
+    sections: ['objetivos', 'grandes', 'concluidos'],
+    items: [
+      { id: 'grandes', label: 'Grandes', icon: 'target', to: 'grandes', section: 'grandes' },
+      { id: 'objetivos', label: 'Objetivos', icon: 'flag', to: 'objetivos', section: 'objetivos' },
+      { id: 'concluidos', label: 'Concluídos', icon: 'check', to: 'concluidos', section: 'concluidos' },
+    ],
+  },
 ];
 
 /** Módulos que podem ser favoritos (os 4 da barra no Início). */
@@ -114,6 +124,7 @@ export const FAVORITABLE: BarItem[] = [
   { id: 'listas', label: 'Listas', icon: 'cart', to: 'listas' },
   { id: 'estudos', label: 'Estudos', icon: 'cap', to: 'estudos' },
   { id: 'carreira', label: 'Carreira', icon: 'briefcase', to: 'carreira' },
+  { id: 'objetivos', label: 'Objetivos', icon: 'flag', to: 'objetivos' },
   { id: 'arquivo', label: 'Notas', icon: 'note', to: 'arquivo' },
   { id: 'voce', label: 'Você', icon: 'user', to: 'voce' },
   { id: 'revisao', label: 'Revisão', icon: 'calendarCheck', to: 'revisao' },

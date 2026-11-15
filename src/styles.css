@@ -7528,3 +7528,10 @@ button.row:disabled {
     animation: none !important;
   }
 }
+
+/* ---------- Objetivos (N10.1) ---------- */
+.summary.three { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.summary.three .summary-box { border: 1px solid transparent; text-align: left; color: inherit; font: inherit; cursor: pointer; text-decoration: none; display: flex; flex-direction: column; gap: 4px; padding: 12px 10px; }
+.summary.three .summary-box.on { border-color: var(--green, #22c55e); }
+.goal-row { width: 100%; background: none; border: 0; color: inherit; font: inherit; text-align: left; cursor: pointer; align-items: flex-start; }
+.goal-row .row-body { display: flex; flex-direction: column; gap: 4px; }

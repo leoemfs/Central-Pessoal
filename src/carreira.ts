@@ -4,7 +4,7 @@
  * Encerrar: contratado, não passei ou desisti (a vaga vai para "Encerradas").
  */
 import type { ResumeItem, ResumeKind } from './types';
-import type { AppData, CalendarEvent, CareerChange, CareerChangeKind, CareerData, JobApp, JobOutcome, JobStage, Meeting, MeetingKind, ProjectStatus, WorkProject } from './types';
+import type { AppData, CalendarEvent, CareerChange, CareerGoal, CareerChangeKind, CareerData, JobApp, JobOutcome, JobStage, Meeting, MeetingKind, ProjectStatus, WorkProject } from './types';
 import { editIncome } from './incomes.ts';
 import { addDays } from './utils.ts';
 
@@ -28,7 +28,7 @@ export const stageLabel = (s: JobStage | JobOutcome) => STAGES.find((x) => x.id 
 export const stageIndex = (s: JobStage) => STAGE_IDS.indexOf(s);
 
 export function emptyCareer(): CareerData {
-  return { jobs: [], changes: [], meetings: [], projects: [], resume: [] };
+  return { jobs: [], changes: [], meetings: [], projects: [], resume: [], goals: [] };
 }
 
 const isRec = (v: unknown): v is Record<string, unknown> => typeof v === 'object' && v !== null && !Array.isArray(v);
@@ -88,6 +88,16 @@ function normalizeProject(p: Record<string, unknown>): WorkProject {
 
 const withIdDate = (v: unknown): Record<string, unknown>[] => (Array.isArray(v) ? v : []).filter(isRec).filter((x) => typeof x.id === 'string' && isDate(x.date));
 
+/** N10.1: metas de carreira (moram em Objetivos). */
+export function normalizeCareerGoal(r: Record<string, unknown>): CareerGoal {
+  const str = (v: unknown) => (typeof v === 'string' ? v : '');
+  const date = (v: unknown) => (typeof v === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(v) ? v : null);
+  const steps = (Array.isArray(r.steps) ? r.steps : [])
+    .filter((s): s is Record<string, unknown> => typeof s === 'object' && s !== null && typeof (s as Record<string, unknown>).id === 'string')
+    .map((s) => ({ id: s.id as string, text: str(s.text), done: s.done === true }));
+  return { id: r.id as string, title: str(r.title), note: str(r.note), deadline: date(r.deadline), steps, doneAt: date(r.doneAt), createdAt: str(r.createdAt) };
+}
+
 export function normalizeCareer(raw: unknown): CareerData {
   const r = isRec(raw) ? raw : {};
   const changes = withIdDate(r.changes).map(normalizeChange);
@@ -98,6 +108,7 @@ export function normalizeCareer(raw: unknown): CareerData {
     changes,
     meetings,
     projects,
+    goals: (Array.isArray(r.goals) ? r.goals : []).filter(isRec).filter((x) => typeof x.id === 'string').map(normalizeCareerGoal),
     resume: (Array.isArray(r.resume) ? r.resume : []).filter(isRec).filter((x) => typeof x.id === 'string').map(normalizeResumeItem),
     jobs: jobs.map((j): JobApp => {
       const stage = STAGE_IDS.includes(j.stage as JobStage) ? (j.stage as JobStage) : 'interesse';

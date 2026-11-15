@@ -26,6 +26,7 @@ import { useCategoryOf } from './financas/shared';
 import { JournalRhythmCard, SetupInvite } from './Montagem';
 import { isHidden } from '../setup';
 import { activeCycles, cycleCounts, library } from '../estudos';
+import { GoalsCard } from './Objetivos';
 
 function SeeAll({ href, label = 'Ver tudo' }: { href: string; label?: string }) {
   return (
@@ -42,7 +43,7 @@ function greetingEmoji(): string {
 }
 
 /** Cartões do Início que pertencem a um módulo (somem se ele estiver guardado). */
-const OF_MODULE: Record<string, string> = { estudos: 'estudos', guardar: 'financas', orcamento: 'financas', vale: 'financas', listas: 'listas', ritmo: 'diario', revisao: 'diario', paravoce: 'voce' };
+const OF_MODULE: Record<string, string> = { objetivos: 'objetivos', estudos: 'estudos', guardar: 'financas', orcamento: 'financas', vale: 'financas', listas: 'listas', ritmo: 'diario', revisao: 'diario', paravoce: 'voce' };
 
 const plural = (n: number, one: string, many: string) => `${n} ${n === 1 ? one : many}`;
 
@@ -176,6 +177,9 @@ export function Dashboard() {
     ) },
     { id: 'listas', label: 'Listas fixadas', node: (
       <PinnedLists />
+    ) },
+    { id: 'objetivos', label: 'Objetivos', node: (
+      <GoalsCard />
     ) },
     { id: 'estudos', label: 'Estudando agora', node: (
       <StudyNow />

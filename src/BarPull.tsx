@@ -56,6 +56,7 @@ function barFall(el: HTMLElement) {
   el.getAnimations().forEach((a) => a.cancel());
   el.style.transition = 'none';
   el.style.zIndex = '112';
+  el.style.pointerEvents = '';
   el.style.transform = '';
   el.style.opacity = '';
   if (reduceMotion()) return barClear(el);
@@ -130,10 +131,12 @@ export function PullToMais({ bar, resetKey }: { bar: RefObject<HTMLElement | nul
   useEffect(() => {
     const el = bar.current;
     if (!el) return;
-    let g: { y: number; t: number; id: number; drag: boolean } | null = null;
+    let g: { x: number; y: number; t: number; id: number; drag: boolean; target: HTMLElement | null; touch: boolean } | null = null;
+    let synthAt = 0;
     const down = (e: PointerEvent) => {
       if (e.button !== 0) return;
-      g = { y: e.clientY, t: performance.now(), id: e.pointerId, drag: false };
+      const target = (e.target as Element).closest('a, button') as HTMLElement | null;
+      g = { x: e.clientX, y: e.clientY, t: performance.now(), id: e.pointerId, drag: false, target, touch: e.pointerType !== 'mouse' };
     };
     const move = (e: PointerEvent) => {
       if (!g) return;
@@ -159,7 +162,16 @@ export function PullToMais({ bar, resetKey }: { bar: RefObject<HTMLElement | nul
       const was = g;
       g = null;
       barDrag.active = false;
-      if (!was.drag) return;
+      if (!was.drag) {
+        // C14: depois de um gesto (abrir/fechar o Mais), o celular às vezes não gera o clique do toque seguinte
+        // na barra. Toque curto, sem arrastar, no mesmo ícone: a barra mesma faz o clique.
+        const same = was.target && (e.target as Element).closest('a, button') === was.target;
+        if (was.touch && same && Math.hypot(e.clientX - was.x, e.clientY - was.y) <= 10 && performance.now() - was.t <= 600) {
+          synthAt = performance.now();
+          was.target!.click();
+        }
+        return;
+      }
       barDrag.until = performance.now() + 400; // o "soltar" não vale como toque num ícone
       const dy = was.y - e.clientY;
       const v = dy / Math.max(1, performance.now() - was.t);
@@ -170,7 +182,8 @@ export function PullToMais({ bar, resetKey }: { bar: RefObject<HTMLElement | nul
       } else close();
     };
     const click = (e: MouseEvent) => {
-      if (performance.now() < barDrag.until) {
+      // Bloqueia só cliques "de verdade": o "soltar" do arrasto e o clique repetido depois do toque já tratado.
+      if (e.isTrusted && (performance.now() < barDrag.until || performance.now() - synthAt < 700)) {
         e.preventDefault();
         e.stopPropagation();
       }
@@ -188,6 +201,32 @@ export function PullToMais({ bar, resetKey }: { bar: RefObject<HTMLElement | nul
       el.removeEventListener('click', click, true);
     };
   }, [bar]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // C14: logo depois do gesto de puxar, o celular às vezes não gera o "clique" do primeiro toque
+  // (o dedo encosta e solta no módulo, mas nada acontece). Na gaveta, o toque é reconhecido aqui:
+  // encostou e soltou no mesmo item, sem arrastar → abre; o clique do navegador que vier depois é ignorado.
+  const tap = useRef<{ x: number; y: number; t: number; target: HTMLElement } | null>(null);
+  const tapAt = useRef(0);
+  const bodyDown = (e: React.PointerEvent) => {
+    const target = (e.target as Element).closest('a, button') as HTMLElement | null;
+    tap.current = target && e.pointerType !== 'mouse' ? { x: e.clientX, y: e.clientY, t: performance.now(), target } : null;
+  };
+  const bodyUp = (e: React.PointerEvent) => {
+    const t = tap.current;
+    tap.current = null;
+    if (!t) return;
+    const same = (e.target as Element).closest('a, button') === t.target;
+    if (!same || Math.hypot(e.clientX - t.x, e.clientY - t.y) > 10 || performance.now() - t.t > 600) return;
+    tapAt.current = performance.now();
+    t.target.click(); // abre o módulo (ou o atalho) pelo mesmo caminho do clique normal
+  };
+  const bodyClickCapture = (e: React.MouseEvent) => {
+    // O clique "de verdade" que às vezes chega depois do toque já tratado: não abre duas vezes.
+    if (e.nativeEvent.isTrusted && performance.now() - tapAt.current < 700) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+  };
 
   // Puxar a alcinha da gaveta para baixo fecha.
   const head = useRef<{ y: number } | null>(null);
@@ -218,13 +257,20 @@ export function PullToMais({ bar, resetKey }: { bar: RefObject<HTMLElement | nul
   const shade = dragging ? Math.min(1, shown / h) * 0.55 : open ? 0.55 : 0;
   return createPortal(
     <>
-      <div className={`pull-shade${dragging ? '' : ' anim'}`} style={{ opacity: shade }} onClick={close} />
+      <div className={`pull-shade${dragging ? '' : ' anim'}`} style={{ opacity: shade }} onPointerUp={() => openRef.current && close()} onClick={() => openRef.current && close()} />
       <section ref={panel} className={`pull-drawer${dragging ? '' : ' anim'}`} style={{ transform }} role="dialog" aria-modal="true" aria-label="Mais">
         <div className="pull-head" onPointerDown={headDown} onPointerMove={headMove} onPointerUp={headUp}>
           <span className="pull-grab" aria-hidden="true" />
           <strong>Mais</strong>
         </div>
-        <div className="pull-body" onClick={(e) => (e.target as Element).closest('button') && close()}>
+        <div
+          className="pull-body"
+          onPointerDown={bodyDown}
+          onPointerUp={bodyUp}
+          onPointerCancel={() => (tap.current = null)}
+          onClickCapture={bodyClickCapture}
+          onClick={(e) => (e.target as Element).closest('button') && close()}
+        >
           <MaisPanel />
         </div>
         {open && <BackCloser onClose={close} />}

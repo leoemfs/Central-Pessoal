@@ -805,4 +805,19 @@ export interface CareerData {
   meetings: Meeting[];
   projects: WorkProject[];
   resume: ResumeItem[];
+  /** Metas de carreira (N10.1): moram em Objetivos, área Carreira. */
+  goals: CareerGoal[];
+}
+
+/** Meta de carreira: onde quer chegar, com prazo opcional e passos. */
+export interface CareerGoal {
+  id: string;
+  title: string;
+  note: string;
+  /** AAAA-MM-DD */
+  deadline: string | null;
+  steps: { id: string; text: string; done: boolean }[];
+  /** AAAA-MM-DD */
+  doneAt: string | null;
+  createdAt: string;
 }

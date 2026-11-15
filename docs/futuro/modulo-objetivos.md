@@ -1,6 +1,6 @@
 # Módulo Objetivos (N10)
 
-> Situação: **prévia feita e decisões tomadas (11/11)**; pronto para construir o N10.1. Tamanho **G**, dividido em N10.1 e N10.2. Prévia visual antes de construir.
+> Situação: **N10.1 pronto (v0.56, 15/11)**. Falta o N10.2 (objetivos grandes). Tamanho **G**, dividido em N10.1 e N10.2.
 
 ## Para que serve
 Ser a **central de todas as metas do app**: ver, criar e gerenciar num lugar só, e juntar metas em **objetivos grandes** (ex.: "Viajar em julho").
@@ -46,3 +46,15 @@ https://claude.ai/artifact/TEPSkVaKWYhuxBcoZvkZA4
 1. **Orçamento conta como meta:** os limites de cada categoria aparecem em Objetivos (sem chave para esconder). "Tudo deve ser contabilizado; isso motiva."
 2. **Barra:** Grandes · Objetivos · Concluídos.
 3. **Favorito:** quem escolher metas na entrevista inicial (E14) ganha Objetivos nos favoritos.
+
+## Como ficou o N10.1 (v0.56, 15/11/2026)
+- **Objetivos** (`#/objetivos`): resumo (andando, atrasadas, concluídas no ano; tocar em andando/atrasadas filtra), chips por área (só as áreas que têm metas, Carreira sempre) e a lista: atrasadas primeiro, depois prazo mais perto. Cada meta mostra progresso, valor, prazo e onde mora.
+- Tocar numa meta: **Guardar** (caixinha), **Marcar hoje** (hábito), **Concluir/Reabrir** (Você), **Abrir no módulo** e **Editar meta** (meta e prazo da caixinha, limite do orçamento, dias do hábito a construir ou quantidade por dia). A mudança vale no módulo de origem.
+- **Atrasada** = caixinha ou meta de carreira com prazo vencido, hábito que falhou no último dia (regra "não falhar duas vezes"), limite do orçamento estourado no mês.
+- **Concluída** = caixinha cheia (ou realizada), hábito que chegou aos dias para virar ritual, ciclo com todos os tópicos feitos, meta de carreira ou do Você concluída.
+- **Metas de carreira** moram em `career.goals` (nome, prazo, anotação, passos com check, concluída em). Aparecem também em Carreira › Metas (mesma lista).
+- **Botão +:** meta de carreira, caixinha (abre Finanças › nova caixinha), hábito, ciclo de estudo, limite de gasto; "Objetivo grande" aparece como em breve.
+- **Grandes** (`#/grandes`): por enquanto avisa "em breve" (N10.2). **Concluídos** (`#/concluidos`): histórico por ano.
+- **Início:** cartão Objetivos com atrasadas e prazos dos próximos 30 dias (some se não houver); pode ser movido ou ocultado no lápis.
+- **Montagem:** área nova "Metas e objetivos"; quem marca ganha o módulo e o favorito.
+- Regras em `src/objetivos.ts` (testes em `src/objetivos.test.ts`); tela em `src/modules/Objetivos.tsx`.
