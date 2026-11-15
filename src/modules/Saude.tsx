@@ -4,12 +4,14 @@ import { useSubAction } from '../router';
 import { useStore } from '../store';
 import type { SleepEntry, SleepFeel } from '../types';
 import { formatDate, relativeDay, todayISO, uid } from '../utils';
+import { go } from '../router';
+import { qtyText as recipeQty } from '../lists';
 import { fmtQty } from '../habits';
 import { newList } from '../lists';
 import { Chips, Empty, Field, Icon, notify, PageHeader, Pill, Progress, Segmented, Sheet, Toggle } from '../ui';
 import type { DietLog, DietMeal, DietPlan, DietSource } from '../types';
 import {
-  activePlan, allRecipes, dayLine, MARKS, recipesOf, toggleRecipe, markMeal, mealsOf, newMeal, newPlan, pickOption, removePlan, savePlan, setDayVariant, setExtra, setSplit, toggleVariantDay, choosePlan,
+  activePlan, allRecipes, dayLine, MARKS, marketLists, recipesOf, sendShopping, shoppingLines, toggleRecipe, weekRecipes, markMeal, mealsOf, newMeal, newPlan, pickOption, removePlan, savePlan, setDayVariant, setExtra, setSplit, toggleVariantDay, choosePlan,
 } from '../dieta';
 import {
   addWater, dismissLink, FEELS, fmtDuration, healthWeeks, lastDays, linkWaterHabit, removeSleep, saveSleep, setWater, setWaterGoal, shouldAskLink,
@@ -446,6 +448,7 @@ function DietTab({ onEdit, onCreate }: { onEdit: (p: DietPlan) => void; onCreate
   const { data, update } = useStore();
   const p = activePlan(data);
   const others = data.health.diet.plans.filter((x) => x.id !== p?.id);
+  const [shop, setShop] = useState(false);
   if (!p) {
     return (
       <section className="card">
@@ -493,6 +496,12 @@ function DietTab({ onEdit, onCreate }: { onEdit: (p: DietPlan) => void; onCreate
           )}
         </section>
       ))}
+      <section className="card" aria-label="Lista de compras da semana">
+        <div className="card-head"><h2><Icon name="cart" size={18} /> Compras da semana</h2></div>
+        <p className="muted small">Junta os ingredientes das receitas ligadas às refeições dos próximos 7 dias e manda para uma lista de mercado.</p>
+        <button type="button" className="btn soft block" onClick={() => setShop(true)}>Montar lista de compras</button>
+      </section>
+      {shop && <ShoppingSheet onClose={() => setShop(false)} />}
       {others.length > 0 && (
         <section className="card" aria-label="Outros planos">
           <div className="card-head"><h2>Outros planos</h2></div>
@@ -683,6 +692,98 @@ function RecipePicker({ meal, onToggle, onClose }: { meal: DietMeal; onToggle: (
         <button type="button" className="btn soft block" onClick={create}>
           <Icon name="plusCircle" size={18} /> Nova receita "{meal.name.trim() || 'Nova receita'}"
         </button>
+      )}
+    </Sheet>
+  );
+}
+
+// ---------- Lista de compras da semana (N1.2b) ----------
+
+/** Receitas dos próximos 7 dias (vezes ajustáveis) → ingredientes somados → lista de mercado. */
+function ShoppingSheet({ onClose }: { onClose: () => void }) {
+  const { data, update } = useStore();
+  const today = todayISO();
+  const [week] = useState(() => weekRecipes(data, today));
+  const [times, setTimes] = useState<Record<string, number>>(() => Object.fromEntries(week.map((w) => [w.recipe.id, w.times])));
+  const lines = shoppingLines(week.map((w) => ({ recipe: w.recipe, times: times[w.recipe.id] ?? 0 })));
+  const [off, setOff] = useState<string[]>([]);
+  const targets = marketLists(data);
+  const [target, setTarget] = useState<string>(targets[0]?.id ?? 'nova');
+  const chosen = lines.filter((l) => !off.includes(l.key));
+  const send = () => {
+    const cat = data.listCategories.find((c) => c.kind === 'mercado')?.id;
+    if (target === 'nova') {
+      if (!cat) return;
+      const l = newList('Mercado da semana', cat);
+      update((d) => sendShopping(chosen, l.id)({ ...d, lists: [...d.lists, l] }));
+      onClose();
+      go(`listas/${l.id}`);
+    } else {
+      update(sendShopping(chosen, target));
+      onClose();
+      go(`listas/${target}`);
+    }
+    notify('Lista de compras pronta', `${chosen.length} ${chosen.length === 1 ? 'item' : 'itens'} na lista de mercado.`);
+  };
+  return (
+    <Sheet
+      title="Compras da semana"
+      size="wide"
+      onClose={onClose}
+      footer={week.length ? <button type="button" className="btn primary block" disabled={!chosen.length} onClick={send}>Mandar {chosen.length} {chosen.length === 1 ? 'item' : 'itens'}</button> : undefined}
+    >
+      {!week.length ? (
+        <Empty>Nenhuma refeição dos próximos 7 dias tem receita ligada. No editor do plano, use o botão "Receita" em cada refeição.</Empty>
+      ) : (
+        <>
+          <h3 className="section-title">Receitas da semana</h3>
+          <p className="muted small">Quantas vezes cada uma vai ser feita. Ajuste se uma refeição tem receitas que são opções (uma ou outra).</p>
+          <ul className="list">
+            {week.map((w) => {
+              const n = times[w.recipe.id] ?? 0;
+              return (
+                <li key={w.recipe.id} className="row">
+                  <span className="row-body">
+                    <span className="row-title">{w.recipe.name}</span>
+                    <span className="row-meta">{w.recipe.serves} {w.recipe.serves === 1 ? 'porção' : 'porções'} por vez</span>
+                  </span>
+                  <span className="qty-adjust">
+                    <button type="button" aria-label={`Menos uma vez ${w.recipe.name}`} disabled={n <= 0} onClick={() => setTimes({ ...times, [w.recipe.id]: n - 1 })}>−</button>
+                    <span className="tabular" aria-label={`${n} vezes`}>{n}×</span>
+                    <button type="button" aria-label={`Mais uma vez ${w.recipe.name}`} onClick={() => setTimes({ ...times, [w.recipe.id]: n + 1 })}>+</button>
+                  </span>
+                </li>
+              );
+            })}
+          </ul>
+          <h3 className="section-title">Ingredientes</h3>
+          {lines.length ? (
+            <ul className="list">
+              {lines.map((l) => {
+                const on = !off.includes(l.key);
+                return (
+                  <li key={l.key}>
+                    <button type="button" className="row" aria-pressed={on} onClick={() => setOff(on ? [...off, l.key] : off.filter((k) => k !== l.key))}>
+                      <span className={`check round${on ? ' on' : ''}`} aria-hidden="true">{on && <Icon name="check" size={14} />}</span>
+                      <span className="row-body">
+                        <span className="row-title">{l.text}</span>
+                        <span className="row-meta">{l.from.join(', ')}</span>
+                      </span>
+                      <span className="small tabular">{l.qty !== null ? `${recipeQty(l.qty)} ${l.unit}`.trim() : ''}</span>
+                    </button>
+                  </li>
+                );
+              })}
+            </ul>
+          ) : (
+            <Empty>As receitas escolhidas ainda não têm ingredientes. Escreva-os em Listas.</Empty>
+          )}
+          <div className="field">
+            <span className="field-label">Mandar para</span>
+            <Chips<string> label="Mandar para" value={target} onChange={setTarget} options={[...targets.map((l) => ({ value: l.id, label: l.name })), { value: 'nova', label: '+ Nova lista' }]} />
+          </div>
+          <p className="muted small">Se o item já está na lista e ainda não foi comprado, a quantidade é somada.</p>
+        </>
       )}
     </Sheet>
   );

@@ -8086,3 +8086,12 @@ a.chip-btn {
   align-items: center;
   gap: 6px;
 }
+.row .qty-adjust {
+  margin-top: 0;
+  grid-template-columns: 40px 36px 40px;
+  gap: 6px;
+  text-align: center;
+}
+.row .qty-adjust > button {
+  height: 40px;
+}

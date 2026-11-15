@@ -48,7 +48,7 @@ A ideia é ter a dieta **dentro** do módulo, para seguir no dia a dia.
 1. **Origem do plano:** as duas. Ao criar o plano, escolher "Da nutricionista" (copiar o plano pronto; campo opcional com nome e data da consulta) ou "Montei eu". Muda só o rótulo e a dica; a tela é a mesma.
 2. **Dias diferentes:** opcional. O padrão é "igual todos os dias"; quem quiser liga "dias diferentes" e cria variações (ex.: dia de treino × dia de descanso), escolhendo quais dias da semana usam cada uma. No "Hoje", o app mostra a variação do dia e deixa trocar com um toque.
 
-## Dieta × Receitas (15/11; N1.2a pronta na v0.68, N1.2b aguardando aprovação)
+## Dieta × Receitas (15/11; N1.2a pronta na v0.68, N1.2b na v0.69)
 **Regra:** a receita continua morando em **Listas** (tipo "receita", com porções, ingredientes e preparo); a Dieta só **aponta** para ela. Nada duplicado.
 - **No editor do plano:** em cada refeição (e em cada opção "ou isto"), botão "Ligar receita", que escolhe uma receita de Listas. Pode ter mais de uma.
 - **No Hoje e na aba Dieta:** a refeição mostra "📖 Receita: Omelete de legumes"; tocar abre a receita em Listas (porções, ingredientes, preparo).
