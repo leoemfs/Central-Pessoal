@@ -16,6 +16,68 @@ const OPEN_SHARE = 0.25;
 const FLICK = 0.6; // px por ms
 const HINT_KEY = 'cp-puxar-dica';
 
+/**
+ * E22: a barra de baixo inteira se move com a gaveta (só visual; a barra continua a mesma).
+ * - Puxando: acompanha o dedo, subindo e sumindo aos poucos.
+ * - Abriu: impulso curto para baixo e é lançada para cima, por cima da gaveta.
+ * - Fechou: cai de cima e assenta no lugar original. Soltou antes de abrir: só volta.
+ * Com "menos movimento" no celular, só some e volta.
+ */
+const reduceMotion = () => typeof matchMedia !== 'undefined' && matchMedia('(prefers-reduced-motion: reduce)').matches;
+function barFollow(el: HTMLElement, p: number) {
+  el.getAnimations().forEach((a) => a.cancel());
+  el.style.transition = 'none';
+  el.style.zIndex = '112';
+  el.style.pointerEvents = 'none';
+  el.style.transform = `translateY(${-p * 70}px) scale(${1 - p * 0.04})`;
+  el.style.opacity = String(Math.max(0, 1 - p * 1.3));
+}
+function barClear(el: HTMLElement) {
+  el.getAnimations().forEach((a) => a.cancel());
+  for (const k of ['transition', 'zIndex', 'pointerEvents', 'transform', 'opacity'] as const) el.style[k] = '';
+}
+function barLaunch(el: HTMLElement) {
+  const from = { transform: el.style.transform || 'none', opacity: el.style.opacity || '1' };
+  el.style.transition = 'none';
+  el.style.zIndex = '112';
+  el.style.pointerEvents = 'none';
+  el.style.opacity = '0';
+  if (reduceMotion()) return;
+  el.animate(
+    [
+      from,
+      { transform: 'translateY(6px) scale(0.98)', opacity: 1, offset: 0.22 }, // impulso
+      { transform: 'translateY(-260px) scale(0.96)', opacity: 0 }, // lançada
+    ],
+    { duration: 380, easing: 'cubic-bezier(0.25, 0.7, 0.3, 1)', fill: 'forwards' },
+  );
+}
+function barFall(el: HTMLElement) {
+  el.getAnimations().forEach((a) => a.cancel());
+  el.style.transition = 'none';
+  el.style.zIndex = '112';
+  el.style.transform = '';
+  el.style.opacity = '';
+  if (reduceMotion()) return barClear(el);
+  const a = el.animate(
+    [
+      { transform: 'translateY(-160px) scale(0.97)', opacity: 0 },
+      { transform: 'translateY(5px) scale(1)', opacity: 1, offset: 0.74 }, // passa um pouquinho
+      { transform: 'none', opacity: 1 }, // assenta no lugar
+    ],
+    { duration: 420, easing: 'cubic-bezier(0.35, 0, 0.25, 1)' },
+  );
+  a.onfinish = () => barClear(el);
+}
+function barSettle(el: HTMLElement) {
+  const from = { transform: el.style.transform || 'none', opacity: el.style.opacity || '1' };
+  el.style.transform = '';
+  el.style.opacity = '';
+  if (reduceMotion()) return barClear(el);
+  const a = el.animate([from, { transform: 'none', opacity: 1 }], { duration: 280, easing: 'ease-out' });
+  a.onfinish = () => barClear(el);
+}
+
 function BackCloser({ onClose }: { onClose: () => void }) {
   useBackToClose(onClose);
   return null;
@@ -29,7 +91,10 @@ export function PullToMais({ bar, resetKey }: { bar: RefObject<HTMLElement | nul
   const panel = useRef<HTMLElement>(null);
   const height = () => panel.current?.offsetHeight ?? window.innerHeight * 0.8;
 
+  const openRef = useRef(false);
+  openRef.current = open;
   const close = () => {
+    if (bar.current) (openRef.current ? barFall : barSettle)(bar.current);
     setDragging(false);
     setOpen(false);
     setShown(0);
@@ -38,10 +103,11 @@ export function PullToMais({ bar, resetKey }: { bar: RefObject<HTMLElement | nul
   };
   // Trocou de tela (escolheu um módulo na gaveta, voltou etc.): fecha.
   useEffect(() => {
+    if (openRef.current && bar.current) barFall(bar.current);
     setOpen(false);
     setShown(0);
     setDragging(false);
-  }, [resetKey]);
+  }, [resetKey]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // A alcinha pisca nas 3 primeiras vezes que o app abre.
   useEffect(() => {
@@ -83,7 +149,10 @@ export function PullToMais({ bar, resetKey }: { bar: RefObject<HTMLElement | nul
         setClosing(false);
         setDragging(true);
       }
-      if (g.drag) setShown(Math.max(0, dy));
+      if (g.drag) {
+        setShown(Math.max(0, dy));
+        barFollow(el, Math.min(1, Math.max(0, dy) / height()));
+      }
     };
     const up = (e: PointerEvent) => {
       if (!g) return;
@@ -95,8 +164,10 @@ export function PullToMais({ bar, resetKey }: { bar: RefObject<HTMLElement | nul
       const dy = was.y - e.clientY;
       const v = dy / Math.max(1, performance.now() - was.t);
       setDragging(false);
-      if (dy > height() * OPEN_SHARE || v > FLICK) setOpen(true);
-      else close();
+      if (dy > height() * OPEN_SHARE || v > FLICK) {
+        barLaunch(el);
+        setOpen(true);
+      } else close();
     };
     const click = (e: MouseEvent) => {
       if (performance.now() < barDrag.until) {
