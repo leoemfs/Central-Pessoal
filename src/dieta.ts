@@ -4,7 +4,7 @@
  * - Um ou mais planos; um fica em uso. "Dias diferentes" é opcional (variações por dia da semana).
  * - No dia a dia: cada refeição é marcada como segui · em parte · fugi. "Fugi" é só registro, sem cor de erro.
  */
-import type { AppData, DietData, DietLog, DietMark, DietMeal, DietPlan, DietSource, DietVariant } from './types.ts';
+import type { AppData, UserList, DietData, DietLog, DietMark, DietMeal, DietPlan, DietSource, DietVariant } from './types.ts';
 import { addDays } from './utils.ts';
 
 export const MARKS: { id: DietMark; label: string }[] = [
@@ -43,6 +43,7 @@ function normMeal(raw: Rec): DietMeal {
     time: HHMM.test(str(raw.time)) ? str(raw.time) : '',
     food: str(raw.food),
     alts: Array.isArray(raw.alts) ? raw.alts.filter((a): a is string => typeof a === 'string' && a.trim() !== '') : [],
+    recipes: Array.isArray(raw.recipes) ? [...new Set(raw.recipes.filter((r): r is string => typeof r === 'string' && r !== ''))] : [],
   };
 }
 
@@ -90,7 +91,7 @@ export function normalizeDiet(raw: unknown): DietData {
 // ---------- Criar e editar ----------
 
 export function newMeal(id: string, name = 'Refeição', time = ''): DietMeal {
-  return { id, name, time, food: '', alts: [] };
+  return { id, name, time, food: '', alts: [], recipes: [] };
 }
 
 /** Plano novo com as refeições comuns (vazias). `ids` gera ids únicos. */
@@ -254,4 +255,24 @@ export function dayLine(d: Pick<AppData, 'health'>, day: string): string | null 
   const marks = d.health.diet.log[day] ?? {};
   const segui = t.meals.filter((m) => marks[m.id]?.mark === 'segui').length;
   return `${segui} de ${t.meals.length} seguidas`;
+}
+
+// ---------- Receitas (N1.2a) ----------
+// A receita mora em Listas (lista do tipo "receita"); a refeição só guarda o id.
+
+/** Todas as receitas de Listas, em ordem alfabética. */
+export function allRecipes(d: Pick<AppData, 'lists' | 'listCategories'>): UserList[] {
+  const cats = new Set(d.listCategories.filter((c) => c.kind === 'receita').map((c) => c.id));
+  return d.lists.filter((l) => cats.has(l.categoryId)).sort((a, b) => a.name.localeCompare(b.name, 'pt-BR'));
+}
+
+/** Receitas ligadas à refeição que ainda existem (apagada em Listas some sozinha). */
+export function recipesOf(d: Pick<AppData, 'lists' | 'listCategories'>, m: Pick<DietMeal, 'recipes'>): UserList[] {
+  const all = allRecipes(d);
+  return m.recipes.map((id) => all.find((r) => r.id === id)).filter((r): r is UserList => !!r);
+}
+
+/** Liga ou desliga uma receita numa refeição (usado no editor, sobre o rascunho). */
+export function toggleRecipe(m: DietMeal, recipeId: string): DietMeal {
+  return { ...m, recipes: m.recipes.includes(recipeId) ? m.recipes.filter((r) => r !== recipeId) : [...m.recipes, recipeId] };
 }

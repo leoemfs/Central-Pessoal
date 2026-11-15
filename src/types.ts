@@ -729,6 +729,8 @@ export interface DietMeal {
   food: string;
   /** Outras opções ("ou isto"). */
   alts: string[];
+  /** Receitas de Listas ligadas a esta refeição (ids). A receita mora em Listas. */
+  recipes: string[];
 }
 
 /** Variação do plano (ex.: dia de treino). Sem "dias diferentes", o plano tem uma só. */

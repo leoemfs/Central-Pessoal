@@ -5,10 +5,11 @@ import { useStore } from '../store';
 import type { SleepEntry, SleepFeel } from '../types';
 import { formatDate, relativeDay, todayISO, uid } from '../utils';
 import { fmtQty } from '../habits';
+import { newList } from '../lists';
 import { Chips, Empty, Field, Icon, notify, PageHeader, Pill, Progress, Segmented, Sheet, Toggle } from '../ui';
 import type { DietLog, DietMeal, DietPlan, DietSource } from '../types';
 import {
-  activePlan, dayLine, MARKS, markMeal, mealsOf, newMeal, newPlan, pickOption, removePlan, savePlan, setDayVariant, setExtra, setSplit, toggleVariantDay, choosePlan,
+  activePlan, allRecipes, dayLine, MARKS, recipesOf, toggleRecipe, markMeal, mealsOf, newMeal, newPlan, pickOption, removePlan, savePlan, setDayVariant, setExtra, setSplit, toggleVariantDay, choosePlan,
 } from '../dieta';
 import {
   addWater, dismissLink, FEELS, fmtDuration, healthWeeks, lastDays, linkWaterHabit, removeSleep, saveSleep, setWater, setWaterGoal, shouldAskLink,
@@ -401,6 +402,7 @@ function MealRow({ day, m }: { day: string; m: DietMeal }) {
       ) : options.length === 1 ? (
         <span className="muted small">{options[0]}</span>
       ) : null}
+      <RecipeLinks m={m} />
       <Chips<string> label={`Como foi o ${m.name}`} value={log?.mark ?? null} onChange={(v) => update(markMeal(day, m.id, v as DietLog['mark'], log?.option ?? 0))} options={MARKS.map((x) => ({ value: x.id, label: x.label }))} />
     </li>
   );
@@ -481,6 +483,7 @@ function DietTab({ onEdit, onCreate }: { onEdit: (p: DietPlan) => void; onCreate
                     <span className="row-title">{m.name}{m.time ? <span className="muted small tabular"> · {m.time}</span> : null}</span>
                     {m.food && <span className="row-meta">{m.food}</span>}
                     {m.alts.map((a, i) => <span key={i} className="muted small">ou {a}</span>)}
+                    <RecipeLinks m={m} />
                   </span>
                 </li>
               ))}
@@ -520,6 +523,8 @@ function PlanEditor({ initial, onClose }: { initial: DietPlan; onClose: () => vo
   const v = p.variants[Math.min(vi, p.variants.length - 1)];
   const setMeals = (fn: (ms: DietMeal[]) => DietMeal[]) => setP({ ...p, variants: p.variants.map((x) => (x.id === v.id ? { ...x, meals: fn(x.meals) } : x)) });
   const setMeal = (id: string, patch: Partial<DietMeal>) => setMeals((ms) => ms.map((m) => (m.id === id ? { ...m, ...patch } : m)));
+  const [picker, setPicker] = useState<string | null>(null);
+  const pickMeal = picker ? v.meals.find((m) => m.id === picker) ?? null : null;
   const save = () => {
     update(savePlan({ ...p, name: p.name.trim() || initial.name, variants: p.variants.map((x) => ({ ...x, meals: x.meals.map((m) => ({ ...m, alts: m.alts.filter((a) => a.trim()) })) })) }));
     notify(isNew ? 'Plano criado' : 'Plano salvo', p.name);
@@ -591,7 +596,17 @@ function PlanEditor({ initial, onClose }: { initial: DietPlan; onClose: () => vo
               <input className="input" value={a} onChange={(e) => setMeal(m.id, { alts: m.alts.map((x, j) => (j === k ? e.target.value : x)) })} placeholder="Ex.: iogurte natural + aveia" />
             </Field>
           ))}
+          {recipesOf(data, m).length > 0 && (
+            <div className="chips" aria-label={`Receitas do ${m.name}`}>
+              {recipesOf(data, m).map((r) => (
+                <button key={r.id} type="button" className="chip-btn on" aria-label={`Desligar a receita ${r.name}`} onClick={() => setMeal(m.id, toggleRecipe(m, r.id))}>
+                  <Icon name="pot" size={14} /> {r.name} ×
+                </button>
+              ))}
+            </div>
+          )}
           <div className="btn-row">
+            <button type="button" className="btn soft small" onClick={() => setPicker(m.id)}><Icon name="pot" size={14} /> Receita</button>
             <button type="button" className="btn soft small" onClick={() => setMeal(m.id, { alts: [...m.alts, ''] })}>+ Opção</button>
             <button type="button" className="btn soft small" disabled={i === 0} aria-label={`Subir ${m.name}`} onClick={() => setMeals((ms) => { const c = [...ms]; [c[i - 1], c[i]] = [c[i], c[i - 1]]; return c; })}>↑</button>
             <button type="button" className="btn soft small danger" onClick={() => setMeals((ms) => ms.filter((x) => x.id !== m.id))}>Tirar</button>
@@ -601,9 +616,72 @@ function PlanEditor({ initial, onClose }: { initial: DietPlan; onClose: () => vo
       <button type="button" className="btn soft block" onClick={() => setMeals((ms) => [...ms, newMeal(uid())])}>
         <Icon name="plusCircle" size={18} /> Adicionar refeição
       </button>
+      {pickMeal && <RecipePicker meal={pickMeal} onToggle={(id) => setMeal(pickMeal.id, toggleRecipe(pickMeal, id))} onClose={() => setPicker(null)} />}
       {!isNew && (
         <button type="button" className="btn soft block danger" onClick={() => { update(removePlan(p.id)); notify('Plano apagado', 'As marcações antigas continuam no Histórico.'); onClose(); }}>
           Apagar este plano
+        </button>
+      )}
+    </Sheet>
+  );
+}
+
+// ---------- Receitas ligadas (N1.2a) ----------
+
+/** Receitas da refeição: tocar abre a receita em Listas (porções, ingredientes e preparo). */
+function RecipeLinks({ m }: { m: DietMeal }) {
+  const { data } = useStore();
+  const list = recipesOf(data, m);
+  if (!list.length) return null;
+  return (
+    <div className="chips" aria-label={`Receitas do ${m.name}`}>
+      {list.map((r) => (
+        <a key={r.id} className="chip-btn" href={`#/listas/${r.id}`}>
+          <Icon name="pot" size={14} /> {r.name}
+        </a>
+      ))}
+    </div>
+  );
+}
+
+/** Escolher receitas de Listas para a refeição, ou criar uma nova com o nome da refeição. */
+function RecipePicker({ meal, onToggle, onClose }: { meal: DietMeal; onToggle: (id: string) => void; onClose: () => void }) {
+  const { data, update } = useStore();
+  const recipes = allRecipes(data);
+  const cat = data.listCategories.find((c) => c.kind === 'receita')?.id ?? null;
+  const create = () => {
+    if (!cat) return;
+    const r = newList(meal.name.trim() || 'Nova receita', cat);
+    update((d) => ({ ...d, lists: [...d.lists, r] }));
+    onToggle(r.id);
+    notify('Receita criada em Listas', 'Depois é só abrir e escrever ingredientes e preparo.');
+  };
+  return (
+    <Sheet title={`Receitas · ${meal.name}`} onClose={onClose} footer={<button type="button" className="btn primary block" onClick={onClose}>Pronto</button>}>
+      <p className="muted small">As receitas ficam em Listas. Aqui você só escolhe quais servem para esta refeição.</p>
+      {recipes.length ? (
+        <ul className="list">
+          {recipes.map((r) => {
+            const on = meal.recipes.includes(r.id);
+            return (
+              <li key={r.id}>
+                <button type="button" className="row" aria-pressed={on} onClick={() => onToggle(r.id)}>
+                  <span className={`check round${on ? ' on' : ''}`} aria-hidden="true">{on && <Icon name="check" size={14} />}</span>
+                  <span className="row-body">
+                    <span className="row-title">{r.name}</span>
+                    <span className="row-meta">{r.items.length} {r.items.length === 1 ? 'ingrediente' : 'ingredientes'}{r.minutes ? ` · ${r.minutes} min` : ''}</span>
+                  </span>
+                </button>
+              </li>
+            );
+          })}
+        </ul>
+      ) : (
+        <Empty>Você ainda não tem receitas em Listas.</Empty>
+      )}
+      {cat && (
+        <button type="button" className="btn soft block" onClick={create}>
+          <Icon name="plusCircle" size={18} /> Nova receita "{meal.name.trim() || 'Nova receita'}"
         </button>
       )}
     </Sheet>
