@@ -164,7 +164,7 @@
 ## Feito
 | Versão | O que entrou | PR |
 |---|---|---|
-| v0.55 | N2.1: Jornada com **personagem e cena** (criar avatar; céu pela hora, estrelas, chuva; classe, título, nível, XP, ouro, cristais) e **Ficha** com os 6 atributos; avatar guardado nos dados e no backup | — |
+| v0.55 | N2.1: Jornada com **personagem e cena** (criar avatar; céu pela hora, estrelas, chuva; classe, título, nível, XP, ouro, cristais) e **Ficha** com os 6 atributos; avatar guardado nos dados e no backup | #87 |
 | v0.54.1 | E23: ao puxar o Mais, a **barra de baixo inteira** acompanha o puxão, toma um impulso e é **lançada para cima** por cima da gaveta; ao fechar, **cai de volta** e assenta no lugar (só visual; com "menos movimento", só some e volta) | — |
 | v0.54 | M29 + M28: itens marcados descem para **No carrinho** (abaixo de "Concluir compra") e voltam ao corredor ao desmarcar; **Nova lista de mercado** com o catálogo por corredor para marcar vários itens, busca e item escrito à mão no mesmo campo | — |
 | v0.53.1 | E22 (ajuste): ícones da lista de Configurações iguais aos dos cartões do app (fundo do cartão e **cor de destaque escolhida**), no lugar dos quadradinhos coloridos fixos | #78 |
