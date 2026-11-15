@@ -7535,3 +7535,114 @@ button.row:disabled {
 .summary.three .summary-box.on { border-color: var(--green, #22c55e); }
 .goal-row { width: 100%; background: none; border: 0; color: inherit; font: inherit; text-align: left; cursor: pointer; align-items: flex-start; }
 .goal-row .row-body { display: flex; flex-direction: column; gap: 4px; }
+
+/* N2.2: cartão da Jornada no Início */
+.journey-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  text-decoration: none;
+  color: inherit;
+}
+.journey-card-face {
+  width: 48px;
+  height: 48px;
+  flex: none;
+  display: grid;
+  place-items: center;
+  border-radius: 12px;
+  background: var(--raised-2);
+  color: var(--accent-text);
+  overflow: hidden;
+}
+.journey-card-face img {
+  width: 40px;
+  height: 40px;
+  image-rendering: pixelated;
+  object-fit: contain;
+}
+.journey-card-body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.xp-bar.thin {
+  display: block;
+  height: 6px;
+  margin-top: 2px;
+  padding: 0;
+  border: 0;
+  border-radius: 3px;
+  overflow: hidden;
+}
+.xp-bar.thin > span {
+  display: block;
+  height: 100%;
+  background: var(--accent);
+}
+.journey-card-status {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.dot-new {
+  width: 8px;
+  height: 8px;
+  flex: none;
+  border-radius: 50%;
+  background: var(--green);
+}
+
+/* N2.3: baús e "Desde a sua última visita" */
+.jn-since {
+  border-color: var(--accent);
+}
+.jn-since-dot {
+  width: 10px;
+  height: 10px;
+  margin: 0 7px;
+  border-radius: 2px;
+  background: var(--accent);
+  flex: none;
+}
+.jn-since-attrs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+.jn-since-attr {
+  padding: 4px 10px;
+  border: 1px solid;
+  border-radius: 999px;
+  font-size: 14px;
+}
+.jn-chest-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.jn-chest-row {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: none;
+  border: 0;
+  color: inherit;
+  text-align: left;
+  font: inherit;
+  cursor: pointer;
+}
+.jn-chest-row > img {
+  width: 40px;
+  height: 40px;
+  image-rendering: pixelated;
+  flex: none;
+}
+.jn-chest-row .row-body {
+  flex: 1;
+  min-width: 0;
+}
