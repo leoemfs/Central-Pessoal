@@ -167,7 +167,7 @@
 ## Feito
 | Versão | O que entrou | PR |
 |---|---|---|
-| v0.60 | N2.4: **Arsenal** na Jornada (Elmo · Roupa · Botas · Arma · Artefato; os seus primeiro, com raridade e preço), **provador** (vê o personagem com o item antes de comprar), **comprar com ouro**, pegar o que o atributo libera, **vestir e tirar**; tocar na cena abre o **personagem em tela cheia** com os espaços de equipamento | — |
+| v0.60 | N2.4: **Arsenal** na Jornada (Elmo · Roupa · Botas · Arma · Artefato; os seus primeiro, com raridade e preço), **provador** (vê o personagem com o item antes de comprar), **comprar com ouro**, pegar o que o atributo libera, **vestir e tirar**; tocar na cena abre o **personagem em tela cheia** com os espaços de equipamento | #97 |
 | v0.59.1 | E24: o **botão +** fica transparente e um pouco menor enquanto a tela rola (qualquer direção) e volta inteiro meio segundo depois de parar; tocar nele continua funcionando | — |
 | v0.59 | N2.3: **Baús** na Jornada (lista dos baús esperando, com o motivo; tocar abre o baú com animação e mostra ouro, cristais e o item, que vai para o arsenal) e **"Desde a sua última visita"** (XP, ouro e cristais contando, nível, atributos que subiram e baús novos, com "Ver os baús novos"). O cartão do Início mostra "Novidades: +80 XP · 1 baú" até você abrir a Jornada | #92 |
 | v0.58 | N2.2: **cartão da Jornada no Início** (rosto do personagem, "Jornada · nome · nível", barra fina de XP e uma linha: criar personagem, baús esperando ou quanto falta para o próximo nível); em Configurações › Início e módulos, **Modo Jornada** e **Mostrar a Jornada no Início**. Com o Modo Jornada desligado, nada de jogo no Início; "Seu dia" deixa de repetir a Jornada | #92 |
