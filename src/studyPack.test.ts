@@ -74,3 +74,13 @@ test('pacote: descrição da trilha sai sem marcas e a antiga (v0.63) é limpa a
   const old = { ...a.study, tracks: a.study.tracks.map((t) => ({ ...t, desc: '## Sobre O app **por dentro**.' })) };
   assert.equal(applyPack(old, md, now).study.tracks[0].desc, 'O app por dentro.');
 });
+
+test('pacote Curso de Claude: o arquivo publicado é válido e entra na área de IA', () => {
+  const raw = readFileSync(new URL('../public/estudos/curso-claude.json', import.meta.url), 'utf8');
+  const p = parsePack(raw);
+  assert.equal(typeof p, 'object', String(p));
+  const r = applyPack(emptyStudy(), p as StudyPack, '2026-11-16T10:00:00.000Z');
+  assert.ok(r.added.topicos >= 15);
+  assert.equal(r.study.areas.length, 0, 'usa a área do catálogo');
+  assert.equal(r.study.themes[0].areaId, 'ia');
+});
