@@ -147,6 +147,7 @@ function TabLink({ to, label, icon, active, center, onTap }: { to: string; label
       <span className="tb-pill">
         <Icon name={icon as IconName} size={26} />
       </span>
+      <span className="tb-label" aria-hidden="true">{label}</span>
       {tip && <span className="tb-tip">{label}</span>}
     </a>
   );
@@ -308,6 +309,10 @@ export function App() {
   const bar = barFor(section.path);
   const barIndex = bar ? activeIndex(bar, section.path) : null;
   useScrollingClass();
+  // E26: nome embaixo dos ícones da barra (opcional).
+  useEffect(() => {
+    document.body.classList.toggle('bar-labels', data.settings.barLabels);
+  }, [data.settings.barLabels]);
   const editor = useCardEditor();
   const where = bar ? crumb(bar, barIndex) : null;
   // E22: dentro de um tema das Configurações, o título mostra "Configurações / Aparência".
@@ -442,6 +447,7 @@ export function App() {
             <span className="tb-pill">
               <Icon name="star" size={26} />
             </span>
+            <span className="tb-label" aria-hidden="true">Favoritos</span>
           </button>
         )}
         {showFavs && <span className="tb-hint">Escolha o módulo</span>}
