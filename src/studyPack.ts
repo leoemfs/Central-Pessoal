@@ -27,7 +27,8 @@ export interface StudyPack {
   nome: string;
   /** `catalogo`: id de uma área do catálogo (ex.: "dev") para os temas entrarem nela; sem isso, cria uma área própria. */
   area: { nome: string; descricao?: string; catalogo?: string };
-  temas: { nome: string; trilhas: { nome: string; descricao?: string; topicos: PackTopic[] }[] }[];
+  /** `descricao`: frase curta (aparece na Biblioteca); `pagina`: texto da página de abertura da trilha no notebook (markdown simples). */
+  temas: { nome: string; trilhas: { nome: string; descricao?: string; pagina?: string; topicos: PackTopic[] }[] }[];
   notebook?: { nome: string; descricao?: string };
   fontes?: { titulo: string; url: string; tipo?: SourceKind; nota?: string }[];
   mapas?: { nome: string; raiz: PackNode }[];
@@ -137,6 +138,16 @@ export function mdToDoc(md: string): RichNode {
   return { type: 'doc', content: content.length ? content : [{ type: 'paragraph' }] };
 }
 
+/** Texto corrido, sem marcas de markdown (para descrições curtas). */
+export function plainText(md: string): string {
+  return md
+    .split('\n')
+    .filter((l) => l.trim() && !/^#{1,3}\s/.test(l) && !l.startsWith('```'))
+    .map((l) => l.replace(/^>\s?|^[-*]\s+|^\d+\.\s+/, '').replace(/\*\*([^*]+)\*\*/g, '$1').replace(/`([^`]+)`/g, '$1').trim())
+    .join(' ')
+    .trim();
+}
+
 // ---------- Importar ----------
 
 export interface PackResult {
@@ -194,8 +205,9 @@ export function applyPack(study: StudyData, pack: StudyPack, now: string): PackR
       trackIdByName.set(tr.nome.trim(), trackId);
       const topics = tr.topicos.map((x) => ({ id: `${trackId}-${slug(x.nome)}`, name: x.nome.trim() }));
       const i = s.tracks.findIndex((x) => x.id === trackId);
+      const desc = plainText(tr.descricao ?? '');
       if (i < 0) {
-        s.tracks.push({ id: trackId, themeId, name: tr.nome.trim(), desc: (tr.descricao ?? '').trim(), topics });
+        s.tracks.push({ id: trackId, themeId, name: tr.nome.trim(), desc, topics });
         added.trilhas++;
         added.topicos += topics.length;
       } else {
@@ -203,11 +215,13 @@ export function applyPack(study: StudyData, pack: StudyPack, now: string): PackR
         const have = new Set(s.tracks[i].topics.map((x) => x.id));
         const extra = topics.filter((x) => !have.has(x.id));
         if (extra.length) s.tracks[i] = { ...s.tracks[i], topics: [...s.tracks[i].topics, ...extra] };
+        // Descrição antiga com marcas de markdown (v0.63): troca pela frase limpa.
+        if (/(^|\s)##\s|\*\*/.test(s.tracks[i].desc)) s.tracks[i] = { ...s.tracks[i], desc };
         added.topicos += extra.length;
       }
       const trackPageId = `pk-${pre}-pg-${slug(tr.nome)}`;
       const pageIds = new Set(nb?.pages.map((x) => x.id) ?? []);
-      if (!pageIds.has(trackPageId)) newPages.push({ id: trackPageId, parentId: null, name: tr.nome.trim(), topicId: null, doc: mdToDoc(tr.descricao ?? tr.nome), sourceIds: [], updatedAt: now });
+      if (!pageIds.has(trackPageId)) newPages.push({ id: trackPageId, parentId: null, name: tr.nome.trim(), topicId: null, doc: mdToDoc(tr.pagina ?? tr.descricao ?? tr.nome), sourceIds: [], updatedAt: now });
       tr.topicos.forEach((x, k) => {
         const pid = `${trackPageId}-${slug(x.nome)}`;
         if (pageIds.has(pid)) return;

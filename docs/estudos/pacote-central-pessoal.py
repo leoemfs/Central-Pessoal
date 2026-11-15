@@ -85,7 +85,8 @@ pack = {
  "area": {"nome": "Desenvolvimento de software", "catalogo": "dev"},
  "temas": [{"nome": "Como o Central Pessoal foi feito", "trilhas": [{
    "nome": "Parte 1: fundamentos e arquitetura",
-   "descricao": "## Sobre esta trilha\nO app que você usa todo dia, explicado por dentro: do toque na tela até o dado salvo e publicado. Cada página tem **para que serve**, **onde ver no código** (github.com/leoemfs/Central-Pessoal), ideias-chave, um **exercício** e um **prompt** para estudar com IA.\n\n> Próximas partes: Parte 2, tecnologias e APIs (Google, GitHub, testes); Parte 3, desenvolver com IA (Claude Code, CLAUDE.md, prompts). Importe o pacote de novo quando saírem: só o que é novo entra.",
+   "descricao": "O app por dentro: do toque na tela até o dado salvo e publicado.",
+   "pagina": "## Sobre esta trilha\nO app que você usa todo dia, explicado por dentro: do toque na tela até o dado salvo e publicado. Cada página tem **para que serve**, **onde ver no código** (github.com/leoemfs/Central-Pessoal), ideias-chave, um **exercício** e um **prompt** para estudar com IA.\n\n> Próximas partes: Parte 2, tecnologias e APIs (Google, GitHub, testes); Parte 3, desenvolver com IA (Claude Code, CLAUDE.md, prompts). Importe o pacote de novo quando saírem: só o que é novo entra.",
    "topicos": [{"nome": n, "pagina": md} for n, md in topicos]}]}],
  "notebook": {"nome": "Como o Central Pessoal foi feito", "descricao": "Estudo pessoal do próprio app: arquitetura, tecnologias e desenvolvimento com IA."},
  "fontes": [{"titulo": v[0], "url": v[1], "tipo": v[2], "nota": v[3]} for v in F.values()],

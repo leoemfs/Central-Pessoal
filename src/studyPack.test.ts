@@ -65,3 +65,12 @@ test('pacote do Central Pessoal: o arquivo publicado é válido', () => {
   assert.ok(r.added.topicos >= 8);
   assert.equal(r.added.ciclos, 1);
 });
+
+test('pacote: descrição da trilha sai sem marcas e a antiga (v0.63) é limpa ao importar de novo', () => {
+  const now = '2026-11-16T10:00:00.000Z';
+  const md: StudyPack = { ...pack, temas: [{ nome: 'Base', trilhas: [{ ...pack.temas[0].trilhas[0], descricao: '## Sobre\nO app **por dentro**.' }] }] };
+  const a = applyPack(emptyStudy(), md, now);
+  assert.equal(a.study.tracks[0].desc, 'O app por dentro.');
+  const old = { ...a.study, tracks: a.study.tracks.map((t) => ({ ...t, desc: '## Sobre O app **por dentro**.' })) };
+  assert.equal(applyPack(old, md, now).study.tracks[0].desc, 'O app por dentro.');
+});
