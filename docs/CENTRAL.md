@@ -113,6 +113,7 @@
 | M3 | Preços 2.0, parte 2: "quanto custou aqui?" ao marcar o item e histórico de compras | MOD | M | média | pronto (v0.50), falta o Leonardo testar | `futuro/precos-v2.md` (item 4) |
 | M28 | **Pré-lista ao criar lista de mercado** (15/11; anotado antes como M24 repetido, no código aparece como M24): o catálogo por corredor, marcar vários itens e criar a lista com eles; busca no catálogo; continua dando para escrever item à mão. Afeta: Listas | MOD | M | média | pronto (v0.54), falta o Leonardo testar | `futuro/precos-v2.md` |
 | M29 | **Itens marcados descem para "No carrinho"** (15/11; anotado antes como M25 repetido, no código aparece como M25), abaixo de "Concluir compra", riscados; ao desmarcar voltam ao corredor deles. Afeta: Listas | MOD | P | média | pronto (v0.54), falta o Leonardo testar | `futuro/precos-v2.md` |
+| M30 | **Mapa mental em tela cheia** (15/11): botão "Tela cheia" no mapa; tocar seleciona, tocar de novo escreve direto na ideia; barra de baixo com Filho, Irmão, Escrever, Recolher, Excluir e cores; Desfazer; Enter salva e cria a próxima. Sai o painel de edição embaixo do mapa. Afeta: só Estudos | MOD | M | média | ideia (prévia feita) | `futuro/estudos-v2.md` |
 | M4 | Preços 2.0, parte 3: **categorias em Preços iguais às das Listas (Mercado · Roupas · Casa · Viagem)**, cada uma com suas lojas e produtos; **editar produto** (nome, categoria, corredor, unidade) e **cada preço** (marca, loja, quantidade, peso/tamanho, valor, apagar); juntar duplicados. Card "Sem preço" e caminho Preços → Mercado → Sem preço → Produtos **ficam iguais** (pedido de 15/11). Afeta: Preços, Listas | MOD | M | média | aprovado (15/11), próximo (outro dia) | `futuro/precos-v2.md` (itens 1 e 4) |
 | M5 | Agenda: repetição (toda semana, mês, ano) e aniversários | MOD | M | média | ideia | — (especificar antes) |
 | M6 | Núcleo: fichas de treino próprias (exercícios, séries, descanso). Pode entrar depois no M21 ("crie o seu próprio") | MOD | M | média | especificado | `futuro/nucleo-mente-corpo.md` |
@@ -251,6 +252,7 @@ Documentos sem código: Mapa dos módulos (08/11), módulos personalizáveis, pa
 | Jornada RPG (avatar, arsenal, forja) | https://claude.ai/artifact/62xbF4H9CfYjaz7RaX554h |
 | Navegação 2.0: barra só com ícones, favoritos e lápis (E1, E2, E3) | https://claude.ai/artifact/4hm9BrHkSWd1nEwLz5p2j7 |
 | Estudos e Carreira (N6.0): Biblioteca, trilhas, ciclos, notebooks, fontes, mapas e roadmaps | https://claude.ai/artifact/WJ3kw4zvwtdDKTiUVUB3rD |
+| Mapa mental em tela cheia (M30, 15/11) | https://claude.ai/artifact/1w6fpcEJfdhuvuh8rmEzXN |
 | Carreira (N8.0): Trabalho, Currículo, Vagas com etapas, Metas, botão + e cartão no Início | https://claude.ai/artifact/3DxpiHU7f6merD3dk6Hqmp |
 | Três jeitos da barra de baixo (centro, favorito fixo, ao lado do Início) — E9/E10 | https://claude.ai/artifact/BYyRT9QPSLYnNUJr2Ga5pN |
 | Saúde (N1.0, versão P): telas Hoje, Consultas e check-ups e Dieta | https://claude.ai/artifact/LJRc3AgwWsTmuA8ymQCqEv |
