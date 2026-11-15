@@ -269,6 +269,18 @@ export function productsWithoutPrice(d: Pick<AppData, 'lists' | 'listCategories'
   return out;
 }
 
+/** M24: o catálogo pronto por corredor (na ordem dos corredores), filtrado pela busca. */
+export function catalogByAisle(query = ''): { aisle: string; names: string[] }[] {
+  const q = matchKey(query);
+  const hit = (n: string) => !q || matchKey(n).startsWith(q) || matchKey(n).includes(` ${q}`);
+  return AISLES.map((aisle) => ({ aisle, names: CATALOG.filter((c) => c.aisle === aisle && hit(c.name)).map((c) => c.name) })).filter((g) => g.names.length > 0);
+}
+
+/** M24: cria a lista já com os itens escolhidos (cada um ligado ao produto de Preços). */
+export function createListWithItems(l: UserList, names: string[]) {
+  return (d: AppData): AppData => names.reduce((acc, n) => addItemFromText(l.id, n)(acc), { ...d, lists: [...d.lists, l] });
+}
+
 export interface StoreQuote {
   storeId: string;
   /** Soma dos itens com preço nesta loja. */

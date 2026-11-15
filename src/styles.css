@@ -6881,3 +6881,7 @@ button.row:disabled {
 .pz-title.first {
   margin-top: 0;
 }
+
+.check.sq {
+  border-radius: 7px;
+}
