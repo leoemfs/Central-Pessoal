@@ -6886,17 +6886,485 @@ button.row:disabled {
   border-radius: 7px;
 }
 
-/* ---------- Jornada N2.1: cena, avatar e ficha ---------- */
-.value.crystal {
-  color: #38bdf8;
+/* ---------- Jornada N2.1 (seguindo a "Prévia da Jornada") ---------- */
+:root {
+  --jn-pixel: 'Pixelify Sans', 'Courier New', ui-monospace, monospace;
+  --jn-gold: #facc15;
+  --jn-crystal: #67e8f9;
+  --jn-xp: #a78bfa;
 }
-.jn-scene {
+.jn-px {
+  font-family: var(--jn-pixel);
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+.jn-h1 {
+  font-size: 26px;
+  line-height: 1.15;
+  margin: 0;
+}
+.jn-eyebrow {
+  font-family: var(--jn-pixel);
+  font-size: 12px;
+  color: var(--green-text);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+.jn-flow {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding-bottom: 8px;
+}
+.jn-flow p {
+  margin: 0;
+  line-height: 1.5;
+}
+.jn-col {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.jn-foot {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.jn-cal {
+  max-width: 300px;
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 6px;
+}
+.jn-cal i {
+  aspect-ratio: 1;
+  border-radius: 6px;
+  background: var(--raised-2);
+  border: 1px solid var(--border);
+}
+.jn-cal i.on {
+  background: var(--green);
+  border-color: var(--green);
+  animation: jn-day-on 0.3s ease both;
+}
+@keyframes jn-day-on {
+  0% {
+    transform: scale(0.6);
+  }
+  60% {
+    transform: scale(1.15);
+  }
+  100% {
+    background: var(--green);
+    border-color: var(--green);
+    transform: none;
+  }
+}
+.jn-retro {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+.jn-retro div {
+  background: var(--raised-2);
+  border-radius: 14px;
+  padding: 12px 8px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.jn-retro strong {
+  font-family: var(--jn-pixel);
+  font-size: 24px;
+  font-variant-numeric: tabular-nums;
+}
+.jn-retro span {
+  font-size: 11px;
+  color: var(--muted);
+}
+.jn-sources {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 14px 0 0;
+  padding: 0;
+  list-style: none;
+  font-size: 13px;
+}
+.jn-sources li {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+}
+.jn-sources li span:last-child {
+  color: var(--jn-xp);
+  font-weight: 700;
+}
+.jn-promises {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 13px;
+  color: var(--muted);
+}
+.jn-promises li {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+}
+.jn-promises li::before {
+  content: '';
+  flex: none;
+  width: 8px;
+  height: 8px;
+  margin-top: 5px;
+  background: var(--green);
+}
+.jn-steps {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.jn-steps span {
+  font-size: 12px;
+  color: var(--muted);
+}
+.jn-dots {
+  display: flex;
+  gap: 6px;
+}
+.jn-dots i {
+  width: 22px;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--raised-2);
+}
+.jn-dots i.on {
+  background: var(--green);
+}
+.jn-pedestal {
   position: relative;
-  height: 170px;
+  height: 250px;
+  border-radius: 22px;
+  overflow: hidden;
+  background: linear-gradient(#7dd3fc, #bae6fd 70%);
+}
+.jn-pedestal::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 54px;
+  background: #16a34a;
+  border-top: 10px solid #22c55e;
+}
+.jn-hero {
+  position: absolute;
+  left: 50%;
+  bottom: 36px;
+  width: 224px;
+  margin-left: -100px;
+  z-index: 1;
+  image-rendering: pixelated;
+  animation: jn-bob 2.4s ease-in-out infinite;
+}
+.jn-hero.pop {
+  animation: jn-pop 0.4s cubic-bezier(0.3, 1.6, 0.5, 1), jn-bob 2.4s ease-in-out 0.4s infinite;
+}
+.jn-tag {
+  position: absolute;
+  left: 50%;
+  bottom: 10px;
+  transform: translateX(-50%);
+  z-index: 2;
+  padding: 4px 10px;
+  background: rgb(0 0 0 / 0.6);
+  color: #fff;
+  font-family: var(--jn-pixel);
+  font-size: 14px;
+  white-space: nowrap;
+}
+.jn-pcloud {
+  position: absolute;
+  height: 12px;
+  background: #fff;
+  animation: jn-drift 14s ease-in-out infinite alternate;
+}
+.jn-pcloud::before {
+  content: '';
+  position: absolute;
+  left: 22%;
+  top: -8px;
+  width: 45%;
+  height: 8px;
+  background: inherit;
+}
+@keyframes jn-drift {
+  from {
+    transform: translateX(-20px);
+  }
+  to {
+    transform: translateX(20px);
+  }
+}
+@keyframes jn-bob {
+  50% {
+    transform: translateY(-6px);
+  }
+}
+@keyframes jn-pop {
+  0% {
+    transform: scale(1);
+  }
+  40% {
+    transform: scale(1.18) translateY(-10px);
+  }
+  100% {
+    transform: none;
+  }
+}
+.jn-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.jn-field > label,
+.jn-field > span {
+  font-size: 13px;
+  font-weight: 700;
+}
+.jn-seg {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+  padding: 4px;
+  border-radius: 14px;
+  background: var(--raised-2);
+}
+.jn-seg button {
+  min-height: 42px;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--muted);
+  font: inherit;
+  font-weight: 700;
+}
+.jn-seg button[aria-pressed='true'] {
+  background: var(--green);
+  color: var(--on-green);
+}
+.jn-swatches {
+  display: flex;
+  gap: 10px;
+}
+.jn-swatches button {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  border: 2px solid var(--border);
+  padding: 0;
+}
+.jn-swatches button[aria-pressed='true'] {
+  border-color: var(--text);
+  box-shadow: 0 0 0 3px var(--bg), 0 0 0 5px var(--green);
+}
+.jn-chest-stage {
+  position: relative;
+  height: 300px;
+  display: grid;
+  place-items: center;
   overflow: hidden;
 }
-.jn-scene.tall {
-  height: 200px;
+.jn-rays {
+  position: absolute;
+  width: 420px;
+  height: 420px;
+  background: repeating-conic-gradient(from 0deg, rgb(253 224 71 / 0.22) 0 10deg, transparent 10deg 30deg);
+  border-radius: 50%;
+  mask: radial-gradient(circle, #000 25%, transparent 68%);
+  -webkit-mask: radial-gradient(circle, #000 25%, transparent 68%);
+  opacity: 0;
+  transform: scale(0.4);
+  transition: opacity 0.5s ease, transform 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.jn-chest-stage.open .jn-rays {
+  opacity: 1;
+  transform: scale(1);
+  animation: jn-spin 14s linear infinite;
+}
+@keyframes jn-spin {
+  to {
+    rotate: 360deg;
+  }
+}
+.jn-chest {
+  position: relative;
+  border: 0;
+  background: transparent;
+  padding: 0;
+  z-index: 1;
+}
+.jn-chest img {
+  width: 176px;
+  display: block;
+  image-rendering: pixelated;
+}
+.jn-chest.idle {
+  animation: jn-wiggle 2.2s ease-in-out infinite;
+}
+.jn-chest.shake {
+  animation: jn-shake 0.09s linear 7;
+}
+.jn-chest.pop {
+  animation: jn-pop 0.45s cubic-bezier(0.3, 1.6, 0.5, 1);
+}
+@keyframes jn-wiggle {
+  0%,
+  70%,
+  100% {
+    transform: none;
+  }
+  75% {
+    transform: rotate(-5deg);
+  }
+  80% {
+    transform: rotate(5deg);
+  }
+  85% {
+    transform: rotate(-4deg);
+  }
+  90% {
+    transform: rotate(3deg);
+  }
+}
+@keyframes jn-shake {
+  0%,
+  100% {
+    transform: translate(0, 0);
+  }
+  25% {
+    transform: translate(-5px, 2px) rotate(-3deg);
+  }
+  75% {
+    transform: translate(5px, -2px) rotate(3deg);
+  }
+}
+.jn-hint {
+  position: absolute;
+  bottom: 18px;
+  font-size: 14px;
+  color: var(--jn-gold);
+  animation: jn-blink 1.2s steps(2) infinite;
+}
+@keyframes jn-blink {
+  50% {
+    opacity: 0.25;
+  }
+}
+.jn-sparks {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.jn-sparks i {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 6px;
+  height: 6px;
+  background: var(--c, var(--jn-gold));
+  animation: jn-spark 0.9s cubic-bezier(0.1, 0.7, 0.3, 1) forwards;
+}
+@keyframes jn-spark {
+  to {
+    transform: translate(var(--x), var(--y));
+    opacity: 0;
+  }
+}
+.jn-loot {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.jn-loot-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: 16px;
+  background: var(--raised);
+  border: 2px solid var(--border);
+  animation: jn-loot-in 0.45s cubic-bezier(0.3, 1.4, 0.5, 1) both;
+}
+.jn-loot-row img {
+  width: 44px;
+  height: 44px;
+  flex: none;
+  image-rendering: pixelated;
+}
+.jn-loot-row div {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 13px;
+}
+@keyframes jn-loot-in {
+  from {
+    opacity: 0;
+    transform: translateY(24px) scale(0.9);
+  }
+}
+.jn-pet-pick {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+.jn-pet-pick button {
+  border: 2px solid var(--border);
+  background: var(--raised);
+  color: var(--text);
+  border-radius: 20px;
+  padding: 0 0 12px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  text-align: center;
+  font: inherit;
+  transition: border-color 0.2s, transform 0.15s;
+}
+.jn-pet-pick button[aria-pressed='true'] {
+  border-color: var(--green);
+  transform: translateY(-3px);
+}
+.jn-meadow {
+  height: 120px;
+  display: grid;
+  place-items: end center;
+  padding-bottom: 12px;
+  background: linear-gradient(#bae6fd 0 64%, #22c55e 64% 70%, #16a34a 70%);
+}
+.jn-meadow img {
+  width: 96px;
+  image-rendering: pixelated;
+  animation: jn-bob 1s ease-in-out infinite;
+  animation-play-state: paused;
+}
+.jn-pet-pick button[aria-pressed='true'] .jn-meadow img {
+  animation-play-state: running;
+}
+
+/* Cena */
+.jn-scene {
+  position: relative;
+  height: 210px;
+  overflow: hidden;
 }
 .jn-scene img {
   position: absolute;
@@ -6907,30 +7375,32 @@ button.row:disabled {
   left: 0;
   right: 0;
   bottom: 0;
-  height: 34px;
-  border-top: 4px solid;
+  height: 40px;
+  border-top: 8px solid;
 }
 .jn-home {
-  left: 6%;
-  bottom: 26px;
-  width: 88px;
+  left: 4%;
+  bottom: 34px;
+  width: 92px;
 }
 .jn-tree {
-  right: 7%;
-  bottom: 28px;
-  width: 50px;
+  right: 5%;
+  bottom: 36px;
+  width: 52px;
 }
 .jn-avatar {
   left: 50%;
-  bottom: 18px;
-  width: 112px;
-  transform: translateX(-46%);
-  animation: jn-breathe 2.4s steps(2) infinite;
+  bottom: 24px;
+  width: 120px;
+  margin-left: -54px;
+  animation: jn-bob 2.4s ease-in-out infinite;
 }
-@keyframes jn-breathe {
-  50% {
-    transform: translateX(-46%) translateY(-2px);
-  }
+.jn-pet {
+  left: 50%;
+  bottom: 30px;
+  width: 48px;
+  margin-left: 70px;
+  animation: jn-bob 1s ease-in-out infinite;
 }
 .jn-sun {
   position: absolute;
@@ -6944,18 +7414,6 @@ button.row:disabled {
   width: 18px;
   height: 18px;
   box-shadow: -5px 0 0 0 #0b1020 inset;
-}
-.jn-cloud {
-  position: absolute;
-  width: 46px;
-  height: 10px;
-  box-shadow: 8px -8px 0 -1px currentColor;
-  color: inherit;
-  opacity: 0.9;
-}
-.jn-cloud.small {
-  width: 32px;
-  height: 8px;
 }
 .jn-star {
   position: absolute;
@@ -6993,37 +7451,32 @@ button.row:disabled {
   width: 60%;
   height: 120px;
   border-radius: 50% 50% 0 0;
-  border: 4px solid transparent;
   box-shadow: 0 0 0 4px #f87171, 0 0 0 8px #facc15, 0 0 0 12px #4ade80, 0 0 0 16px #60a5fa;
   opacity: 0.45;
 }
-@media (prefers-reduced-motion: reduce) {
-  .jn-avatar,
-  .jn-star,
-  .jn-rain {
-    animation: none;
-  }
+.jn-name {
+  font-size: 20px;
+  display: block;
 }
-.jn-swatches {
+.jn-level {
+  font-size: 20px;
+  color: var(--green-text);
+}
+.jn-purse {
+  display: flex;
+  gap: 22px;
+}
+.jn-purse span {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 12px;
+  gap: 8px;
 }
-.jn-swatches > div {
-  display: flex;
-  gap: 10px;
+.jn-purse img {
+  width: 22px;
+  image-rendering: pixelated;
 }
-.jn-swatch {
-  width: 34px;
-  height: 34px;
-  border-radius: 50%;
-  border: 2px solid var(--border-strong);
-  padding: 0;
-}
-.jn-swatch.on {
-  outline: 3px solid var(--accent);
-  outline-offset: 2px;
+.jn-purse strong {
+  font-size: 20px;
 }
 .jn-attrs {
   list-style: none;
@@ -7040,8 +7493,8 @@ button.row:disabled {
   gap: 8px;
 }
 .jn-attr-code {
-  font-family: ui-monospace, 'SF Mono', 'Roboto Mono', Menlo, Consolas, monospace;
-  font-weight: 800;
+  font-family: var(--jn-pixel);
+  font-weight: 600;
 }
 .jn-attr-name {
   font-size: 0.85rem;
@@ -7058,6 +7511,22 @@ button.row:disabled {
 .jn-attr-val {
   text-align: right;
   font-size: 0.9rem;
+}
+@media (prefers-reduced-motion: reduce) {
+  .jn-hero,
+  .jn-pcloud,
+  .jn-avatar,
+  .jn-pet,
+  .jn-star,
+  .jn-rain,
+  .jn-chest,
+  .jn-hint,
+  .jn-meadow img,
+  .jn-rays,
+  .jn-cal i.on,
+  .jn-loot-row {
+    animation: none !important;
+  }
 }
 
 /* ---------- Objetivos (N10.1) ---------- */

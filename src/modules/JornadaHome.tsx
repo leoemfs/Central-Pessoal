@@ -1,22 +1,26 @@
 /**
- * Jornada (N2.1): personagem e cena. Aparece depois do desbloqueio, com "Quero a Jornada".
- * Primeiro a pessoa cria o avatar; depois vê a cena (céu pelo horário, estrelas pelos dias
- * de uso, chuva pela data), nível, XP, ouro e a Ficha com os atributos e a classe.
+ * Jornada (N2.1), seguindo a "Prévia da Jornada": desbloqueio animado → criar personagem
+ * (passo 1 de 2) → presente de boas-vindas e escolha do pet (passo 2 de 2) → cena com o pet,
+ * nível, XP, ouro, cristais e a Ficha com os atributos e a classe.
  */
-import { useEffect, useState } from 'react';
+import '@fontsource/pixelify-sans/latin-600.css';
+import { useEffect, useRef, useState } from 'react';
 import { useStore } from '../store';
-import { journeyStats } from '../journey';
+import { journeyStats, unlockProgress, UNLOCK_DAYS, UNLOCK_WINDOW } from '../journey';
 import { ATTRIBUTES } from '../habits';
 import { todayISO } from '../utils';
-import { Segmented, Toggle } from '../ui';
-import { avatarIcon, homeIcon, treeIcon, skyPalette, ATTR_CODES, type AvatarLook } from '../jornada/catalog';
+import { Toggle } from '../ui';
+import { avatarIcon, chestIcon, COIN_ICON, GEM_ICON, homeIcon, itemById, itemIcon, petIcon, PETS, RARITY, treeIcon, skyPalette, ATTR_CODES, type AvatarLook } from '../jornada/catalog';
 import { HAIRS, SKINS } from '../jornada/artData';
-import { classOf, recentAttributes, TITLES, wallet, type JourneyState } from '../jornada/rules';
+import { classOf, recentAttributes, TITLES, wallet, welcomed, welcomeState, type JourneyState } from '../jornada/rules';
 import { skyAt, starPositions } from '../jornada/sky';
 
+type Look = { gender: 'f' | 'm'; skin: string; hair: string; name: string };
 const fmt = (n: number) => n.toLocaleString('pt-BR');
-const SKIN_NAMES: Record<string, string> = { clara: 'Clara', media: 'Média', escura: 'Escura' };
-const HAIR_NAMES: Record<string, string> = { castanho: 'Castanho', preto: 'Preto', loiro: 'Loiro', ruivo: 'Ruivo' };
+const SKIN_NAMES: Record<string, string> = { clara: 'Pele clara', media: 'Pele média', escura: 'Pele escura' };
+const HAIR_NAMES: Record<string, string> = { castanho: 'Cabelo castanho', preto: 'Cabelo preto', loiro: 'Cabelo loiro', ruivo: 'Cabelo ruivo' };
+const reduced = () => typeof window !== 'undefined' && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+const g = (look: { gender: 'f' | 'm' }, f: string, m: string) => (look.gender === 'f' ? f : m);
 
 /** Relógio que muda a cada minuto (o céu acompanha a hora). */
 function useNow(): Date {
@@ -28,7 +32,315 @@ function useNow(): Date {
   return now;
 }
 
-export function JourneyScene({ look, state, activeDays, now, tall }: { look: AvatarLook; state: JourneyState; activeDays: string[]; now: Date; tall?: boolean }) {
+/** Número que sobe contando até o valor (sem animação com "menos movimento"). */
+function CountUp({ to, delay = 0 }: { to: number; delay?: number }) {
+  const [v, setV] = useState(() => (reduced() ? to : 0));
+  useEffect(() => {
+    if (reduced()) return setV(to);
+    let raf = 0;
+    const start = window.setTimeout(() => {
+      const t0 = performance.now();
+      const step = (now: number) => {
+        const k = Math.min(1, (now - t0) / 1100);
+        setV(Math.round(to * (1 - Math.pow(1 - k, 3))));
+        if (k < 1) raf = requestAnimationFrame(step);
+      };
+      raf = requestAnimationFrame(step);
+    }, delay);
+    return () => {
+      window.clearTimeout(start);
+      cancelAnimationFrame(raf);
+    };
+  }, [to, delay]);
+  return <>{fmt(v)}</>;
+}
+
+// ---------- Desbloqueio ----------
+
+/** Tela do desbloqueio: os dias de uso acendem, os números sobem contando e a pessoa escolhe. */
+export function JornadaUnlock() {
+  const { data, update } = useStore();
+  const today = todayISO();
+  const prog = unlockProgress(data, today);
+  const s = journeyStats(data, today);
+  const active = prog.days.map((d, i) => (d.active ? i : -1)).filter((i) => i >= 0);
+  const [lit, setLit] = useState(() => (reduced() ? active.length : 0));
+  const [later, setLater] = useState(false);
+  useEffect(() => {
+    if (reduced()) return;
+    const t = window.setInterval(() => setLit((n) => (n >= active.length ? n : n + 1)), 70);
+    return () => window.clearInterval(t);
+  }, [active.length]);
+  const on = new Set(active.slice(0, lit));
+  const choose = (c: 'quero' | 'depois') => update((d) => ({ ...d, settings: { ...d.settings, journeyChoice: c } }));
+  return (
+    <div className="jn-flow">
+      <div className="jn-col">
+        <span className="jn-eyebrow">
+          {prog.active} de {UNLOCK_WINDOW} dias
+        </span>
+        <h1 className="jn-px jn-h1">Jornada desbloqueada!</h1>
+        <p className="muted">
+          Você registrou algo em {prog.active} dos últimos {UNLOCK_WINDOW} dias (eram precisos {UNLOCK_DAYS}). Esse é o seu calendário:
+        </p>
+      </div>
+      <div className="jn-cal" aria-label={`${prog.active} dias com uso nos últimos ${UNLOCK_WINDOW}`}>
+        {prog.days.map((d, i) => (
+          <i key={d.day} className={on.has(i) ? 'on' : ''} />
+        ))}
+      </div>
+      <section className="card">
+        <div className="card-head">
+          <h2>Com o que você já fez, {g(data.journey.avatar ?? { gender: 'f' }, 'sua personagem', 'seu personagem')} teria</h2>
+        </div>
+        <div className="jn-retro">
+          <div>
+            <strong style={{ color: 'var(--jn-xp)' }}>
+              <CountUp to={s.xp} delay={1200} />
+            </strong>
+            <span>XP</span>
+          </div>
+          <div>
+            <strong style={{ color: 'var(--green)' }}>
+              <CountUp to={s.level} delay={1200} />
+            </strong>
+            <span>nível</span>
+          </div>
+          <div>
+            <strong style={{ color: 'var(--jn-gold)' }}>
+              <CountUp to={s.gold} delay={1200} />
+            </strong>
+            <span>ouro</span>
+          </div>
+        </div>
+        {s.sources.length > 0 && (
+          <ul className="jn-sources">
+            {s.sources.map((src) => (
+              <li key={src.id}>
+                <span>
+                  {src.label} · {src.count}×
+                </span>
+                <span>+{fmt(src.xp)} XP</span>
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
+      <ul className="jn-promises">
+        <li>Faltar nunca tira XP, ouro ou itens.</li>
+        <li>Gastar dinheiro não dá pontos. Pagar conta no prazo, sim.</li>
+        <li>Dá para pausar a Jornada quando quiser.</li>
+      </ul>
+      {later && <p className="muted small">Tudo bem! A Jornada fica aqui quando você quiser. Nada do que você fez se perde.</p>}
+      <div className="jn-foot">
+        <button type="button" className="btn primary block" onClick={() => choose('quero')}>
+          Quero a Jornada
+        </button>
+        <button
+          type="button"
+          className="btn ghost block"
+          onClick={() => {
+            setLater(true);
+            choose('depois');
+          }}
+        >
+          Agora não
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// ---------- Criar personagem ----------
+
+function Swatches({ label, names, colors, value, onChange }: { label: string; names: Record<string, string>; colors: Record<string, string>; value: string; onChange: (v: string) => void }) {
+  return (
+    <div className="jn-field">
+      <span>{label}</span>
+      <div className="jn-swatches" role="group" aria-label={label}>
+        {Object.keys(colors).map((k) => (
+          <button key={k} type="button" aria-pressed={value === k} aria-label={names[k] ?? k} style={{ background: colors[k] }} onClick={() => onChange(k)} />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function Steps({ n }: { n: 1 | 2 }) {
+  return (
+    <div className="jn-steps">
+      <span>Passo {n} de 2</span>
+      <div className="jn-dots">
+        <i className="on" />
+        <i className={n === 2 ? 'on' : ''} />
+      </div>
+    </div>
+  );
+}
+
+function CreateStep({ look, setLook, step, onNext, nextLabel, onCancel }: { look: Look; setLook: (l: Look) => void; step?: 1; onNext: () => void; nextLabel: string; onCancel?: () => void }) {
+  const hero = useRef<HTMLImageElement>(null);
+  const change = (l: Look) => {
+    setLook(l);
+    const el = hero.current;
+    if (!el || reduced()) return;
+    el.classList.remove('pop');
+    void el.offsetWidth;
+    el.classList.add('pop');
+  };
+  return (
+    <div className="jn-flow">
+      {step && <Steps n={1} />}
+      <h1 className="jn-px jn-h1">{onCancel ? 'Mudar aparência' : g(look, 'Crie sua personagem', 'Crie seu personagem')}</h1>
+      <div className="jn-pedestal">
+        <i className="jn-pcloud" style={{ left: '10%', top: '16%', width: 70 }} />
+        <i className="jn-pcloud" style={{ left: '62%', top: '30%', width: 90, animationDelay: '-5s' }} />
+        <img ref={hero} className="jn-hero" alt="Prévia do avatar" src={avatarIcon(look, {})} />
+        {look.name.trim() && <span className="jn-tag">{look.name.trim()}</span>}
+      </div>
+      <div className="jn-field">
+        <span>Corpo</span>
+        <div className="jn-seg" role="group" aria-label="Corpo">
+          {(['f', 'm'] as const).map((x) => (
+            <button key={x} type="button" aria-pressed={look.gender === x} onClick={() => change({ ...look, gender: x })}>
+              {x === 'f' ? 'Feminino' : 'Masculino'}
+            </button>
+          ))}
+        </div>
+      </div>
+      <Swatches label="Pele" names={SKIN_NAMES} colors={Object.fromEntries(Object.entries(SKINS).map(([k, v]) => [k, v[0]]))} value={look.skin} onChange={(skin) => change({ ...look, skin })} />
+      <Swatches label="Cabelo" names={HAIR_NAMES} colors={HAIRS} value={look.hair} onChange={(hair) => change({ ...look, hair })} />
+      <div className="jn-field">
+        <label htmlFor="jn-nome">Nome</label>
+        <input id="jn-nome" className="input" maxLength={14} autoComplete="off" placeholder={g(look, 'Como quer ser chamada?', 'Como quer ser chamado?')} value={look.name} onChange={(e) => setLook({ ...look, name: e.target.value })} />
+      </div>
+      {!onCancel && <p className="muted small">Roupa, armas, pet e casa você conquista usando o app. Dá para mudar o visual depois.</p>}
+      <div className="jn-foot">
+        <button type="button" className="btn primary block" onClick={onNext}>
+          {nextLabel}
+        </button>
+        {onCancel && (
+          <button type="button" className="btn ghost block" onClick={onCancel}>
+            Cancelar
+          </button>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ---------- Presente de boas-vindas e pet ----------
+
+const SPARK_COLORS = ['#fde047', '#facc15', '#fff7ed', '#4ade80'];
+
+function WelcomeStep({ onDone }: { onDone: (pet: 'gato' | 'cao') => void }) {
+  const [phase, setPhase] = useState<'idle' | 'shake' | 'open'>('idle');
+  const [showPets, setShowPets] = useState(false);
+  const [pet, setPet] = useState<'gato' | 'cao' | null>(null);
+  const [sparks, setSparks] = useState<{ x: number; y: number; c: string }[]>([]);
+  const petsRef = useRef<HTMLDivElement>(null);
+  const timers = useRef<number[]>([]);
+  useEffect(() => () => timers.current.forEach((t) => window.clearTimeout(t)), []);
+  const later = (fn: () => void, ms: number) => {
+    if (reduced()) return fn();
+    timers.current.push(window.setTimeout(fn, ms));
+  };
+  const open = () => {
+    if (phase !== 'idle') return;
+    setPhase('shake');
+    later(() => {
+      setPhase('open');
+      if (!reduced())
+        setSparks(
+          Array.from({ length: 28 }, (_, i) => {
+            const a = Math.random() * Math.PI * 2;
+            const d = 70 + Math.random() * 110;
+            return { x: Math.cos(a) * d, y: Math.sin(a) * d, c: SPARK_COLORS[i % SPARK_COLORS.length] };
+          }),
+        );
+      later(() => setSparks([]), 1000);
+      later(() => {
+        setShowPets(true);
+        later(() => petsRef.current?.scrollIntoView({ behavior: reduced() ? 'auto' : 'smooth', block: 'center' }), 50);
+      }, 1300);
+    }, 650);
+  };
+  const boots = itemById('couro')!;
+  const petName = (id: string) => PETS.find((p) => p.id === id)!.name;
+  return (
+    <div className="jn-flow">
+      <Steps n={2} />
+      <div className="jn-col">
+        <h1 className="jn-px jn-h1">Presente de boas-vindas</h1>
+        <p className="muted">Toque no baú para abrir.</p>
+      </div>
+      <div className={`jn-chest-stage${phase === 'open' ? ' open' : ''}`}>
+        <i className="jn-rays" />
+        <button type="button" className={`jn-chest ${phase === 'idle' ? 'idle' : phase === 'shake' ? 'shake' : 'pop'}`} aria-label="Abrir o baú de boas-vindas" onClick={open}>
+          <img alt="" src={chestIcon('dourado', phase === 'open')} />
+        </button>
+        {phase === 'idle' && <span className="jn-hint jn-px">TOQUE!</span>}
+        <div className="jn-sparks">
+          {sparks.map((s, i) => (
+            <i key={i} style={{ '--x': `${s.x}px`, '--y': `${s.y}px`, '--c': s.c } as React.CSSProperties} />
+          ))}
+        </div>
+      </div>
+      {phase === 'open' && (
+        <div className="jn-loot">
+          <div className="jn-loot-row" style={{ animationDelay: '0s' }}>
+            <img alt="" src={itemIcon(boots)} />
+            <div>
+              <strong>{boots.name}</strong>
+              <span style={{ color: RARITY[boots.rarity].color }}>{RARITY[boots.rarity].label}</span>
+            </div>
+          </div>
+          <div className="jn-loot-row" style={{ animationDelay: '0.18s' }}>
+            <img alt="" src={COIN_ICON} />
+            <div>
+              <strong>+50 ouro</strong>
+              <span className="muted small">Para gastar na loja</span>
+            </div>
+          </div>
+          <div className="jn-loot-row" style={{ animationDelay: '0.36s' }}>
+            <img alt="" src={GEM_ICON} />
+            <div>
+              <strong>+1 cristal</strong>
+              <span className="muted small">Moeda da forja mística</span>
+            </div>
+          </div>
+        </div>
+      )}
+      {showPets && (
+        <div ref={petsRef} className="jn-col">
+          <h2 className="jn-px" style={{ fontSize: 22 }}>
+            Escolha seu pet
+          </h2>
+          <p className="muted small">Ele passeia na sua cena e fica feliz nos dias em que você registra algo. Nunca fica triste nem some.</p>
+          <div className="jn-pet-pick">
+            {(['gato', 'cao'] as const).map((id) => (
+              <button key={id} type="button" aria-pressed={pet === id} onClick={() => setPet(id)}>
+                <span className="jn-meadow">
+                  <img alt="" src={petIcon(id)} />
+                </span>
+                <strong>{petName(id)}</strong>
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+      <div className="jn-foot">
+        <button type="button" className="btn primary block" disabled={!pet} onClick={() => pet && onDone(pet)}>
+          {pet ? `Começar a Jornada com o ${petName(pet).toLowerCase()}` : phase === 'open' ? 'Escolha um pet' : 'Abra o baú'}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// ---------- Cena ----------
+
+export function JourneyScene({ look, state, activeDays, now }: { look: AvatarLook; state: JourneyState; activeDays: string[]; now: Date }) {
   const sky = skyAt(now, activeDays, state.weather);
   const phase = sky.rain ? 'chuva' : sky.phase;
   const t = skyPalette(phase);
@@ -36,7 +348,7 @@ export function JourneyScene({ look, state, activeDays, now, tall }: { look: Ava
   const outfit = { elmo: state.equipped.elmo, armadura: state.equipped.armadura, botas: state.equipped.botas, arma: state.equipped.arma };
   const label = `${night ? 'Noite' : sky.phase === 'tarde' ? 'Fim de tarde' : 'Manhã'}${sky.rain ? ' com chuva' : ''}${sky.rainbow ? ' com arco-íris' : ''}${night ? `, ${sky.stars} ${sky.stars === 1 ? 'estrela' : 'estrelas'}` : ''}`;
   return (
-    <div className={`jn-scene${tall ? ' tall' : ''}`} role="img" aria-label={`Cena da Jornada: ${label}`} style={{ background: `linear-gradient(${t.sky1}, ${t.sky2})` }}>
+    <div className="jn-scene" role="img" aria-label={`Cena da Jornada: ${label}`} style={{ background: `linear-gradient(${t.sky1}, ${t.sky2})` }}>
       {night &&
         starPositions(sky.stars).map((s, i) => (
           <span key={i} className={`jn-star${s.big ? ' big' : ''}`} style={{ left: `${s.x}%`, top: `${s.y * 0.7}%`, animationDelay: `${s.delay}s` }} />
@@ -44,108 +356,97 @@ export function JourneyScene({ look, state, activeDays, now, tall }: { look: Ava
       {!sky.rain && <span className={`jn-sun${night ? ' moon' : ''}`} style={{ background: t.sun }} />}
       {!night && (
         <>
-          <span className="jn-cloud" style={{ background: t.cloud, color: t.cloud, left: '14%', top: '16%' }} />
-          <span className="jn-cloud small" style={{ background: t.cloud, color: t.cloud, left: '58%', top: '28%' }} />
+          <i className="jn-pcloud" style={{ background: t.cloud, left: '12%', top: '14%', width: 60 }} />
+          <i className="jn-pcloud" style={{ background: t.cloud, left: '56%', top: '26%', width: 80, animationDelay: '-5s' }} />
         </>
       )}
       {sky.rainbow && <span className="jn-rainbow" />}
-      <div className="jn-ground" style={{ background: t.grass, borderTopColor: t.ground }} />
+      <div className="jn-ground" style={{ background: t.ground, borderTopColor: t.grass }} />
       <img className="jn-home" src={homeIcon(state.equipped.morada, phase)} alt="" />
       <img className="jn-tree" src={treeIcon(phase)} alt="" />
       <img className="jn-avatar" src={avatarIcon(look, outfit)} alt="" />
+      {state.equipped.pet && <img className="jn-pet" src={petIcon(state.equipped.pet)} alt="" />}
       {sky.rain && <div className="jn-rain" />}
     </div>
   );
 }
 
-/** Criar (ou mudar) a aparência do avatar, com a cena ao vivo. */
-function AvatarEditor({ initial, onSave, onCancel }: { initial: AvatarLook; onSave: (a: AvatarLook) => void; onCancel?: () => void }) {
-  const { data } = useStore();
-  const now = useNow();
-  const [look, setLook] = useState<AvatarLook>(initial);
-  return (
-    <>
-      <section className="card raised journey-hero">
-        <JourneyScene look={look} state={data.journey} activeDays={data.settings.activeDays} now={now} />
-        <div className="journey-info">
-          <div>
-            <strong>{onCancel ? 'Mudar aparência' : 'Crie seu personagem'}</strong>
-            <p className="muted small">{onCancel ? 'Os itens e o progresso continuam os mesmos.' : 'Ele evolui com o que você já faz no app. Dá para mudar depois.'}</p>
-          </div>
-          <Segmented
-            label="Corpo"
-            options={[
-              { value: 'f', label: 'Feminino' },
-              { value: 'm', label: 'Masculino' },
-            ]}
-            value={look.gender}
-            onChange={(g) => setLook({ ...look, gender: g })}
-          />
-          <Swatches label="Pele" names={SKIN_NAMES} colors={Object.fromEntries(Object.entries(SKINS).map(([k, v]) => [k, v[0]]))} value={look.skin} onChange={(skin) => setLook({ ...look, skin })} />
-          <Swatches label="Cabelo" names={HAIR_NAMES} colors={HAIRS} value={look.hair} onChange={(hair) => setLook({ ...look, hair })} />
-          <div className="btn-row">
-            {onCancel && (
-              <button type="button" className="btn" onClick={onCancel}>
-                Cancelar
-              </button>
-            )}
-            <button type="button" className="btn primary" onClick={() => onSave(look)}>
-              {onCancel ? 'Salvar' : 'Começar a Jornada'}
-            </button>
-          </div>
-        </div>
-      </section>
-    </>
-  );
-}
-
-function Swatches({ label, names, colors, value, onChange }: { label: string; names: Record<string, string>; colors: Record<string, string>; value: string; onChange: (v: string) => void }) {
-  return (
-    <div className="jn-swatches" role="radiogroup" aria-label={label}>
-      <span className="small muted">{label}</span>
-      <div>
-        {Object.keys(colors).map((k) => (
-          <button key={k} type="button" role="radio" aria-checked={value === k} aria-label={names[k] ?? k} title={names[k] ?? k} className={`jn-swatch${value === k ? ' on' : ''}`} style={{ background: colors[k] }} onClick={() => onChange(k)} />
-        ))}
-      </div>
-    </div>
-  );
-}
+// ---------- Jornada ----------
 
 export function JornadaHome() {
   const { data, update } = useStore();
   const now = useNow();
   const today = todayISO();
-  const [editing, setEditing] = useState(false);
   const state = data.journey;
-  const saveLook = (a: AvatarLook) => {
-    update((d) => ({ ...d, journey: { ...d.journey, avatar: { gender: a.gender, skin: String(a.skin), hair: String(a.hair) } } }));
-    setEditing(false);
-  };
+  const [draft, setDraft] = useState<Look>(() => state.avatar ?? { gender: 'f', skin: 'media', hair: 'castanho', name: '' });
+  const [step, setStep] = useState<'create' | 'welcome'>('create');
+  const [editing, setEditing] = useState(false);
+  const top = () => window.scrollTo({ top: 0 });
 
-  if (!state.avatar || editing) {
-    return <AvatarEditor initial={state.avatar ?? { gender: 'f', skin: 'media', hair: 'castanho' }} onSave={saveLook} onCancel={state.avatar ? () => setEditing(false) : undefined} />;
+  if (!welcomed(state)) {
+    if (step === 'create')
+      return (
+        <CreateStep
+          look={draft}
+          setLook={setDraft}
+          step={1}
+          nextLabel="Continuar"
+          onNext={() => {
+            setStep('welcome');
+            top();
+          }}
+        />
+      );
+    return (
+      <WelcomeStep
+        onDone={(pet) => {
+          update((d) => ({ ...d, journey: welcomeState(d.journey, draft, pet, today) }));
+          top();
+        }}
+      />
+    );
   }
 
-  const look = state.avatar;
+  const look = state.avatar!;
+  if (editing)
+    return (
+      <CreateStep
+        look={draft}
+        setLook={setDraft}
+        nextLabel="Salvar"
+        onNext={() => {
+          update((d) => ({ ...d, journey: { ...d.journey, avatar: { ...draft, name: draft.name.trim().slice(0, 14) } } }));
+          setEditing(false);
+          top();
+        }}
+        onCancel={() => {
+          setEditing(false);
+          top();
+        }}
+      />
+    );
+
   const s = journeyStats(data, today);
   const w = wallet(data, state, today);
   const cls = classOf(w.attrs, recentAttributes(data, today));
   const title = TITLES.find((x) => x.id === state.title);
-  const top = Math.max(10, ...ATTR_CODES.map((c) => w.attrs[c]));
-  const g = look.gender;
+  const maxAttr = Math.max(10, ...ATTR_CODES.map((c) => w.attrs[c]));
+  const gk = look.gender;
 
   return (
     <>
       <section className="card raised journey-hero">
-        <JourneyScene look={look} state={state} activeDays={data.settings.activeDays} now={now} tall />
+        <JourneyScene look={look} state={state} activeDays={data.settings.activeDays} now={now} />
         <div className="journey-info">
           <div className="toggle-row">
             <div>
-              <strong>{cls[g]}</strong>
-              <span className="muted small">{title ? title[g] : 'Sem título'}</span>
+              <strong className="jn-px jn-name">{look.name || cls[gk]}</strong>
+              <span className="muted small">
+                {look.name ? `${cls[gk]} · ` : ''}
+                {title ? title[gk] : 'Sem título'}
+              </span>
             </div>
-            <span className="pixel-num small-num">LV {s.level}</span>
+            <span className="jn-px jn-level">LV {s.level}</span>
           </div>
           <div>
             <div className="toggle-row small muted">
@@ -158,15 +459,21 @@ export function JornadaHome() {
               <div style={{ width: `${(s.xpInLevel / s.xpForNext) * 100}%` }} />
             </div>
           </div>
-          <div className="summary">
-            <div className="summary-box">
-              <span className="label">Ouro</span>
-              <span className="value gold">{fmt(w.gold)}</span>
-            </div>
-            <div className="summary-box">
-              <span className="label">Cristais</span>
-              <span className="value crystal">{fmt(w.crystals)}</span>
-            </div>
+          <div className="jn-purse">
+            <span>
+              <img alt="" src={COIN_ICON} />
+              <strong className="jn-px" style={{ color: 'var(--jn-gold)' }}>
+                {fmt(w.gold)}
+              </strong>
+              <small className="muted">ouro</small>
+            </span>
+            <span>
+              <img alt="" src={GEM_ICON} />
+              <strong className="jn-px" style={{ color: 'var(--jn-crystal)' }}>
+                {fmt(w.crystals)}
+              </strong>
+              <small className="muted">{w.crystals === 1 ? 'cristal' : 'cristais'}</small>
+            </span>
           </div>
         </div>
       </section>
@@ -186,7 +493,7 @@ export function JornadaHome() {
                 </span>
                 <span className="jn-attr-name">{a.name}</span>
                 <span className="jn-attr-bar" aria-hidden="true">
-                  <span style={{ width: `${(v / top) * 100}%`, background: a.color }} />
+                  <span style={{ width: `${(v / maxAttr) * 100}%`, background: a.color }} />
                 </span>
                 <span className="tabular jn-attr-val">{fmt(v)}</span>
               </li>
@@ -240,7 +547,15 @@ export function JornadaHome() {
           <Toggle checked={state.weather === 'aleatorio'} label="Chuva de vez em quando" onChange={(on) => update((d) => ({ ...d, journey: { ...d.journey, weather: on ? 'aleatorio' : 'limpo' } }))} />
         </div>
         <div className="btn-row" style={{ marginTop: 14 }}>
-          <button type="button" className="btn" onClick={() => setEditing(true)}>
+          <button
+            type="button"
+            className="btn"
+            onClick={() => {
+              setDraft(look);
+              setEditing(true);
+              top();
+            }}
+          >
             Mudar aparência
           </button>
           <button type="button" className="btn ghost" onClick={() => update((d) => ({ ...d, settings: { ...d.settings, journeyChoice: 'depois' } }))}>

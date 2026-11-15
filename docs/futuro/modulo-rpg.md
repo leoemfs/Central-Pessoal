@@ -625,7 +625,7 @@ A Jornada desbloqueia em 16/11. Até aqui existiam só as regras e as artes (pas
 
 | Parte | O que entrega | Tamanho |
 |---|---|---|
-| **N2.1** Personagem e cena (**feito, v0.55**) | `<PixelSprite>`; avatar com os itens iniciais na cena; céu pelo horário, estrelas pelos dias de uso e chuva pela data (B.9); nível, XP e ouro; **Ficha** com os 6 atributos e a classe (B.7) | M |
+| **N2.1** Personagem e cena (**feito: v0.55 simples, v0.57 seguindo a prévia**) | `<PixelSprite>`; avatar com os itens iniciais na cena; céu pelo horário, estrelas pelos dias de uso e chuva pela data (B.9); nível, XP e ouro; **Ficha** com os 6 atributos e a classe (B.7) | M |
 | **N2.2** Cartão no Início e Modo Jornada | cartão compacto no Início (E.1); Configurações: "Mostrar a Jornada no Início" e "Modo Jornada" (F.1); "Agora não" deixa tudo guardado em silêncio | P |
 | **N2.3** Baús e "Desde a sua última visita" | baús de rotina e cristais (B.4) com abertura animada; resumo da diferença desde a última visita (E.2) | M |
 | **N2.4** Arsenal e loja | inventário, provador, vestir e tirar, comprar com ouro (B.2, B.3); avatar em tela cheia (B.10) | M |
@@ -637,6 +637,16 @@ A Jornada desbloqueia em 16/11. Até aqui existiam só as regras e as artes (pas
 | **N2.10** Campanha | mapa, chefes, história e entrevista (Anexos C e D); **dividir antes de construir** | G |
 
 Depois: N7 (Estudos × Jornada, `estudos-jornada.md`).
+
+**N2.1 refeita seguindo a prévia (feita em 15/11, v0.57).** A primeira versão (PR #87) ficou simples demais: não seguiu a prévia "Jornada (pets, Codex, acessórios, visitas)" (`app.js`: telas `unlock`, `create`, `welcome`). A nova N2.1 é uma chegada em **tela cheia**, com a fonte Pixelify Sans e animações (com "menos movimento", sem elas):
+1. **Desbloqueio animado:** os dias de uso acendem um a um no calendário; XP, nível e ouro sobem contando; promessas (faltar não tira nada; gastar não dá pontos; dá para desligar).
+2. **Criar personagem (passo 1 de 2):** pedestal com céu e nuvens, avatar que pula a cada escolha, corpo, pele, cabelo e **nome** ("Como quer ser chamada/chamado?"), com o nome numa plaquinha.
+3. **Presente de boas-vindas (passo 2 de 2):** baú dourado "TOQUE!", treme, abre com brilho e solta Botas de couro, +50 ouro e +1 cristal, um por um.
+4. **Escolha do pet:** gato ou cão, cada um no seu campinho; botão "Começar a Jornada com o gato".
+5. **Cena** com o pet passeando, mais o que já existe na v0.55 (classe, título, nível, XP, ouro, cristais, Ficha).
+- A **entrevista da Mestra Lume** fica para a N2.9 (missões), porque as respostas montam missões, campanha e caixinha.
+- Trazer da prévia as artes que faltam no app: baú (fechado e aberto), moeda e cristal (`sprites.js`), e o nome do personagem nos dados (`journey.avatar.name`, padrão vazio).
+- Tamanho: M puxando para G.
 
 **Correção do que foi dito em 15/11:** o aviso "+XP" **não** aparece fora da Jornada (regra do Anexo E). As recompensas aparecem juntas no "Desde a sua última visita" (N2.3).
 

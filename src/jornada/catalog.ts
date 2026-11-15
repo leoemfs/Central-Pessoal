@@ -395,3 +395,17 @@ export function avatarGrid(look: AvatarLook, outfit: Outfit): Grid {
 }
 export const avatarIcon = (look: AvatarLook, outfit: Outfit) => toSvg(avatarGrid(look, outfit));
 
+
+// ---------- Baús, moeda e cristal (da prévia da Jornada) ----------
+
+const CHEST_CLOSED = ['..OOOOOOOOOOOO..', '.OLLLLLLLLLLLLO.', 'OLWLLLLLLLLLLLLO', 'OLLLLLLLLLLLLLLO', 'OMMMMMMMMMMMMMMO', 'OOOOOOOGGOOOOOOO', 'OBBBBBOGGOBBBBBO', 'OBbBBBOKKOBBBbBO', 'OBBBBBBOOBBBBBBO', 'OMMMMMMMMMMMMMMO', 'OBBBBBBBBBBBBBBO', 'ObbbbbbbbbbbbbbO', 'OOOOOOOOOOOOOOOO'];
+const CHEST_OPEN = ['..OOOOOOOOOOOO..', '.OLLLLLLLLLLLLO.', '.OLWLLLLLLLLLLO.', '.OMMMMMMMMMMMMO.', 'OOOOOOOOOOOOOOOO', 'OYYYWYYYYYYWYYYO', 'OBYYYYYYYYYYYYBO', 'OBBBBBOGGOBBBBBO', 'OBbBBBOKKOBBBbBO', 'OBBBBBBOOBBBBBBO', 'OMMMMMMMMMMMMMMO', 'OBBBBBBBBBBBBBBO', 'ObbbbbbbbbbbbbbO', 'OOOOOOOOOOOOOOOO'];
+const CHEST_PAL: Record<string, Palette> = {
+  bronze: { L: '#c2410c', B: '#9a3412', b: '#7c2d12', M: '#f59e0b', G: '#fde68a', K: '#1a1a1f', W: '#fdba74', Y: '#fde68a' },
+  prata: { L: '#cbd5e1', B: '#94a3b8', b: '#64748b', M: '#f1f5f9', G: '#facc15', K: '#1a1a1f', W: '#ffffff', Y: '#e0f2fe' },
+  dourado: { L: '#facc15', B: '#ca8a04', b: '#a16207', M: '#fef08a', G: '#fff7ed', K: '#1a1a1f', W: '#fffbeb', Y: '#fef9c3' },
+  cristal: { L: '#67e8f9', B: '#0891b2', b: '#0e7490', M: '#cffafe', G: '#f0abfc', K: '#1a1a1f', W: '#ecfeff', Y: '#f5d0fe' },
+};
+export const chestIcon = (kind: string, open: boolean) => sprite(open ? CHEST_OPEN : CHEST_CLOSED, CHEST_PAL[kind] ?? CHEST_PAL.bronze, 16);
+export const COIN_ICON = sprite(['..OOOO..', '.OYYYYO.', 'OYWYYyYO', 'OYYYYyYO', 'OYYYYyYO', 'OYyyyyYO', '.OYYYYO.', '..OOOO..'], { Y: '#facc15', y: '#ca8a04', W: '#fff7ed' }, 8);
+export const GEM_ICON = sprite(['...OO...', '..OCWO..', '.OCCWcO.', 'OCCCWccO', '.OCCWcO.', '..OCcO..', '...OO...'], { C: '#67e8f9', c: '#0e7490', W: '#ecfeff' }, 8);

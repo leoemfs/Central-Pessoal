@@ -1,7 +1,7 @@
 {
   "name": "central-pessoal",
   "private": true,
-  "version": "0.56.0",
+  "version": "0.57.0",
   "type": "module",
   "description": "Central Pessoal — finanças, diário, agenda e organização pessoal em um só lugar.",
   "scripts": {
@@ -12,6 +12,7 @@
     "test": "node --test --experimental-strip-types --no-warnings src/*.test.ts"
   },
   "dependencies": {
+    "@fontsource/pixelify-sans": "^5.3.0",
     "@tiptap/extension-details": "3.33.1",
     "@tiptap/extension-highlight": "3.33.1",
     "@tiptap/extension-image": "3.33.1",
