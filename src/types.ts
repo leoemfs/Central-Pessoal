@@ -251,6 +251,10 @@ export interface Settings {
   moreLayout: 'lista' | 'grade';
   /** E21.2: Mais de volta na ponta da barra do Início (3 favoritos). Desligado = 4 favoritos e puxar a barra abre o Mais. */
   moreButton: boolean;
+  /** E26: esconder o nome pequeno embaixo de cada ícone da barra de baixo (o padrão é mostrar). */
+  hideBarLabels: boolean;
+  /** E25: jeito do menu na gaveta: Misto (grade em cima, lista por módulo embaixo), Grade ou Lista. */
+  drawerView: 'misto' | 'grade' | 'lista';
   seededCategories: boolean;
   seededIncomeSources: boolean;
   lastBackupAt: string | null;

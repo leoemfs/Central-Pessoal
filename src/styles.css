@@ -7549,6 +7549,7 @@ body.scrolling .fab {
   body.scrolling .fab {
     transform: none;
   }
+}
 /* N2.2: cartão da Jornada no Início */
 .journey-card {
   display: flex;
@@ -7660,6 +7661,42 @@ body.scrolling .fab {
   min-width: 0;
 }
 
+/* E26: nome embaixo dos ícones da barra (opcional) */
+.tb-label {
+  display: none;
+}
+body.bar-labels {
+  --tabbar-h: 82px;
+}
+body.bar-labels .tabbar .tb-label {
+  display: block;
+  max-width: 100%;
+  margin-top: 1px;
+  overflow: hidden;
+  font-size: 0.64rem;
+  font-weight: 500;
+  line-height: 1.1;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--faint);
+}
+body.bar-labels .tabbar .tb.active .tb-label,
+body.bar-labels .tabbar .tb.center .tb-label {
+  color: var(--accent-text);
+}
+body.bar-labels .tabbar .tb-pill {
+  height: 38px;
+  flex: none;
+}
+/* Ícone em cima; o nome no meio do espaço entre o ícone e o fim da barra (não grudado no destaque). */
+body.bar-labels .tabbar .tb {
+  justify-content: flex-start;
+  padding-top: 2px;
+}
+body.bar-labels .tabbar .tb-label {
+  margin: auto 0;
+  transform: translateY(3px); /* compensa a margem de baixo da barra */
+}
 /* N2.4: Arsenal, provador e tela cheia do personagem */
 .jn-scene-btn {
   display: block;
@@ -7821,4 +7858,115 @@ body.scrolling .fab {
   display: flex;
   flex-direction: column;
   min-width: 0;
+}
+
+/* E25: sem menu ☰ — seta ‹ no topo e o menu inteiro na gaveta */
+.topbar-spacer {
+  width: 8px;
+  flex: none;
+}
+.topbar-back {
+  color: var(--accent-text);
+}
+@media (max-width: 899px) {
+  .desk-only {
+    display: none !important;
+  }
+}
+.pull-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.pull-title strong {
+  flex: 1;
+}
+.pull-views {
+  display: inline-flex;
+  gap: 3px;
+  padding: 3px;
+  border-radius: 10px;
+  background: var(--raised);
+}
+.pull-views button {
+  padding: 5px 9px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--muted);
+  font: inherit;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+.pull-views button[aria-pressed='true'] {
+  background: var(--raised-2);
+  color: var(--text);
+}
+.mais-edit-hint {
+  margin: 0 2px 4px;
+  color: var(--accent-text);
+}
+.menu-list {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--bg);
+  overflow: hidden;
+}
+.menu-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 9px 12px;
+  border-bottom: 1px solid var(--border);
+  color: var(--text);
+  text-decoration: none;
+}
+.menu-row:last-child {
+  border-bottom: 0;
+}
+.menu-row .tile-icon {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+}
+.menu-row-name {
+  flex: 1;
+  min-width: 0;
+  font-size: 0.92rem;
+}
+.menu-row > .icon:last-child {
+  color: var(--faint);
+}
+.menu-group {
+  display: flex;
+  flex-direction: column;
+}
+@media (max-width: 899px) {
+  /* E25: o caminho de Estudos sobe para a barra de cima (dois níveis, com a seta ‹). */
+  .st-path {
+    display: none;
+  }
+}
+
+/* E28: itens "em breve" no menu da gaveta */
+.menu-row.off,
+.mg-cell.off {
+  opacity: 0.5;
+  cursor: default;
+}
+.soon-tag {
+  flex: none;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--raised-2);
+  color: var(--muted);
+  font-size: 0.68rem;
+  font-style: normal;
+}
+.mg-cell .soon-tag {
+  padding: 1px 6px;
+  font-size: 0.6rem;
 }

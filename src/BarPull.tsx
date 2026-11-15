@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState, type RefObject } from 'react';
 import { createPortal } from 'react-dom';
 import { MaisPanel } from './modules/Mais';
-import { useBackToClose } from './ui';
+import { Icon, useBackToClose } from './ui';
+import { useStore } from './store';
 
 /**
  * E21.2: puxar a barra de baixo para cima abre o Mais como uma gaveta.
@@ -89,12 +90,15 @@ export function PullToMais({ bar, resetKey }: { bar: RefObject<HTMLElement | nul
   const [open, setOpen] = useState(false);
   const [dragging, setDragging] = useState(false);
   const [closing, setClosing] = useState(false);
+  const [editing, setEditing] = useState(false);
+  const { data, update } = useStore();
   const panel = useRef<HTMLElement>(null);
   const height = () => panel.current?.offsetHeight ?? window.innerHeight * 0.8;
 
   const openRef = useRef(false);
   openRef.current = open;
   const close = () => {
+    setEditing(false);
     if (bar.current) (openRef.current ? barFall : barSettle)(bar.current);
     setDragging(false);
     setOpen(false);
@@ -228,9 +232,41 @@ export function PullToMais({ bar, resetKey }: { bar: RefObject<HTMLElement | nul
     }
   };
 
+  // E28: rolou até o começo da lista e continuou puxando para baixo: a gaveta desce junto e fecha (como no celular).
+  const body = useRef<HTMLDivElement>(null);
+  const pullDown = useRef<{ y: number; armed: boolean } | null>(null);
+  const bodyTouchStart = (e: React.TouchEvent) => {
+    pullDown.current = { y: e.touches[0].clientY, armed: (body.current?.scrollTop ?? 0) <= 0 };
+  };
+  const bodyTouchMove = (e: React.TouchEvent) => {
+    const g = pullDown.current;
+    if (!g) return;
+    const dy = e.touches[0].clientY - g.y;
+    if (!g.armed) {
+      // começou rolando no meio da lista: só "arma" quando chegar ao topo, contando dali
+      if ((body.current?.scrollTop ?? 0) <= 0) pullDown.current = { y: e.touches[0].clientY, armed: true };
+      return;
+    }
+    if (dy > 6) {
+      setDragging(true);
+      setShown(height() - dy);
+    }
+  };
+  const bodyTouchEnd = (e: React.TouchEvent) => {
+    const g = pullDown.current;
+    pullDown.current = null;
+    if (!g?.armed) return;
+    const dy = (e.changedTouches[0]?.clientY ?? g.y) - g.y;
+    if (dy <= 6) return;
+    setDragging(false);
+    if (dy > height() * OPEN_SHARE) close();
+    else setOpen(true);
+  };
+
   // Puxar a alcinha da gaveta para baixo fecha.
   const head = useRef<{ y: number } | null>(null);
   const headDown = (e: React.PointerEvent) => {
+    if ((e.target as Element).closest('button')) return; // botões do cabeçalho (jeito, lápis) não puxam a gaveta
     head.current = { y: e.clientY };
     (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
   };
@@ -261,17 +297,33 @@ export function PullToMais({ bar, resetKey }: { bar: RefObject<HTMLElement | nul
       <section ref={panel} className={`pull-drawer${dragging ? '' : ' anim'}`} style={{ transform }} role="dialog" aria-modal="true" aria-label="Mais">
         <div className="pull-head" onPointerDown={headDown} onPointerMove={headMove} onPointerUp={headUp}>
           <span className="pull-grab" aria-hidden="true" />
-          <strong>Mais</strong>
+          <div className="pull-title">
+            <strong>Menu</strong>
+            <span className="pull-views" role="group" aria-label="Jeito do menu">
+              {(['misto', 'grade', 'lista'] as const).map((v) => (
+                <button key={v} type="button" aria-pressed={data.settings.drawerView === v} onClick={() => update((d) => ({ ...d, settings: { ...d.settings, drawerView: v } }))}>
+                  {v === 'misto' ? 'Misto' : v === 'grade' ? 'Grade' : 'Lista'}
+                </button>
+              ))}
+            </span>
+            <button type="button" className={`icon-btn${editing ? ' on' : ''}`} aria-pressed={editing} aria-label={editing ? 'Terminar de mudar a ordem' : 'Mudar a ordem'} onClick={() => setEditing((x) => !x)}>
+              <Icon name="edit" size={18} />
+            </button>
+          </div>
         </div>
         <div
           className="pull-body"
+          ref={body}
+          onTouchStart={bodyTouchStart}
+          onTouchMove={bodyTouchMove}
+          onTouchEnd={bodyTouchEnd}
           onPointerDown={bodyDown}
           onPointerUp={bodyUp}
           onPointerCancel={() => (tap.current = null)}
           onClickCapture={bodyClickCapture}
-          onClick={(e) => (e.target as Element).closest('button') && close()}
+          onClick={(e) => !editing && (e.target as Element).closest('button') && close()}
         >
-          <MaisPanel />
+          <MaisPanel editing={editing} />
         </div>
         {open && <BackCloser onClose={close} />}
       </section>

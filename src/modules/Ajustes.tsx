@@ -135,7 +135,7 @@ export function Ajustes({ route }: ViewProps) {
     <>
       {page ? (
         <>
-          <a className="set-back" href="#/ajustes">
+          <a className="set-back desk-only" href="#/ajustes">
             <Icon name="left" size={18} /> Configurações
           </a>
           <PageHeader title={page.label} />
@@ -280,9 +280,16 @@ export function Ajustes({ route }: ViewProps) {
         <div className="toggle-row first">
           <div>
             <strong>Botão Mais na barra</strong>
-            <span className="muted small">Desligado: 4 favoritos no Início, e o Mais abre puxando a barra para cima (ou pelo menu ☰). Ligado: 3 favoritos e o Mais na ponta. Puxar funciona nos dois jeitos.</span>
+            <span className="muted small">Desligado: 4 favoritos no Início, e o menu abre puxando a barra para cima. Ligado: 3 favoritos e o Mais na ponta. Puxar funciona nos dois jeitos.</span>
           </div>
           <Toggle checked={data.settings.moreButton} onChange={(v) => setSetting({ moreButton: v })} label="Botão Mais na barra" />
+        </div>
+        <div className="toggle-row">
+          <div>
+            <strong>Esconder o nome embaixo dos ícones</strong>
+            <span className="muted small">Para quem já conhece os ícones: a barra fica mais baixa, só com os desenhos. Segurar o ícone continua mostrando o nome.</span>
+          </div>
+          <Toggle checked={data.settings.hideBarLabels} onChange={(v) => setSetting({ hideBarLabels: v })} label="Esconder o nome embaixo dos ícones" />
         </div>
         <div className="toggle-row">
           <div>

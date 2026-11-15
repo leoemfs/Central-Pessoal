@@ -9,7 +9,7 @@ export interface NavItem {
   section?: string;
 }
 
-/** Menu completo (menu ☰ no celular e barra lateral no computador). */
+/** Menu completo: barra lateral no computador; no celular, o mesmo conteúdo fica na gaveta (puxar a barra). */
 export const NAV_GROUPS: { title: string; items: NavItem[] }[] = [
   {
     title: 'Geral',
