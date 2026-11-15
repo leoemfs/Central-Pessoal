@@ -28,7 +28,8 @@ import { HumorPage } from './modules/Humor';
 import { Estudos } from './modules/estudos/Estudos';
 import { CiclosPage } from './modules/estudos/Ciclos';
 import { RoadmapsPage } from './modules/estudos/Roadmaps';
-import { CarreiraPage, MetasPage, VagasPage } from './modules/Carreira';
+import { CarreiraPage, VagasPage } from './modules/Carreira';
+import { CareerGoalsList, ConcluidosPage, GrandesPage, ObjetivosPage } from './modules/Objetivos';
 import { useCardEditor } from './Cards';
 import { barDrag, PullToMais } from './BarPull';
 import { settingsPage } from './settingsPages';
@@ -79,12 +80,14 @@ export const SECTIONS: Section[] = [
   { path: 'roadmaps', label: 'Roadmaps', icon: 'route', view: RoadmapsPage },
   { path: 'carreira', label: 'Carreira', icon: 'briefcase', view: CarreiraPage, fab: 'carreira/menu' },
   { path: 'vagas', label: 'Vagas', icon: 'send', view: VagasPage, fab: 'vagas/nova' },
-  { path: 'metas', label: 'Metas', icon: 'target', view: MetasPage, fab: 'carreira/menu' },
+  { path: 'metas', label: 'Metas', icon: 'target', view: CareerGoalsList, fab: 'objetivos/carreira' },
+  { path: 'objetivos', label: 'Objetivos', icon: 'flag', view: ObjetivosPage, fab: 'objetivos/menu' },
+  { path: 'grandes', label: 'Grandes', icon: 'target', view: GrandesPage, fab: 'objetivos/menu' },
+  { path: 'concluidos', label: 'Concluídos', icon: 'check', view: ConcluidosPage, fab: 'objetivos/menu' },
 ];
 
 export const COMING_SOON: { label: string; icon: IconName; hint: string }[] = [
   { label: 'Saúde', icon: 'heartPulse', hint: 'Água, sono, remédios, consultas e peso' },
-  { label: 'Objetivos', icon: 'flag', hint: 'Metas e acompanhamento' },
   { label: 'Foco', icon: 'timer', hint: 'Temporizador e sessões' },
   { label: 'Banco de ideias', icon: 'bulb', hint: 'Guarde ideias para depois' },
 ];

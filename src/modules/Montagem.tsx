@@ -182,6 +182,8 @@ function Montagem({ mode, onClose }: { mode: SetupMode; onClose: () => void }) {
 
   function next() {
     if (at === 'areas' && !touchedModules) setVisible(modulesFromAreas(areas));
+    // N10: quem escolhe metas ganha Objetivos nos favoritos.
+    if (at === 'areas' && areas.includes('metas')) setPicked((p) => (p.includes('objetivos') ? p : tapFavorite(p, 'objetivos')));
     if (at === 'modulos') setPicked((p) => p.filter((f) => visible.includes(f) || f === 'jornada'));
     setAt(steps[Math.min(idx + 1, steps.length - 1)]);
   }

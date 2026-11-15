@@ -10,7 +10,7 @@ const TODAY = '2026-11-08';
 const job = (id: string, extra = {}) => ({ ...newJob(id, '2026-11-01', '2026-11-01T10:00:00Z'), company: 'Acme', role: 'Analista', ...extra });
 
 test('dados antigos e backups ganham Carreira vazia; lixo é limpo', () => {
-  assert.deepEqual(normalize({}).career, { jobs: [], changes: [], meetings: [], projects: [], resume: [] });
+  assert.deepEqual(normalize({}).career, { jobs: [], changes: [], meetings: [], projects: [], resume: [], goals: [] });
   assert.deepEqual(normalize({ career: { jobs: [] } }).career.meetings, []);
   const c = normalizeCareer({ jobs: [{ id: 'a', stage: 'xpto', outcome: 'talvez', nextDate: '12/11', history: [{ stage: 'enviei', date: '2026-11-02' }, { stage: 'nada', date: '2026-11-03' }] }, { sem: 'id' }] });
   assert.equal(c.jobs.length, 1);

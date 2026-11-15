@@ -51,7 +51,7 @@ import {
 /**
  * Carreira (N8). Endereços:
  * #/carreira (casa: trabalho atual, reuniões, próximos passos) · #/carreira/menu · #/carreira/reuniao · #/carreira/mudanca
- * #/vagas (lista com etapas) · #/vagas/nova · #/metas (em breve). Currículo e Metas chegam na N8.3 e N8.4.
+ * #/vagas (lista com etapas) · #/vagas/nova · #/metas (metas de carreira, que moram em Objetivos: N10.1).
  */
 
 const STAGE_TONE: Record<JobStage, 'gray' | 'blue' | 'orange' | 'green'> = { interesse: 'gray', enviei: 'blue', entrevista: 'orange', proposta: 'green' };
@@ -364,29 +364,6 @@ export function CarreiraPage({ route }: ViewProps) {
         ) : (
           <Empty>{open.length ? `${open.length} vaga(s) em andamento, nenhuma com passo marcado.` : 'Nenhuma vaga em andamento.'}</Empty>
         )}
-      </section>
-      ) },
-          { id: 'breve', label: 'Chegando em breve', node: (
-      <section className="card">
-        <div className="card-head">
-          <h2>Chegando em breve</h2>
-        </div>
-        <ul className="list">
-          <li className="row">
-            <Icon name="star" />
-            <span className="row-body">
-              <span className="row-title">Currículo e conquistas</span>
-              <span className="muted small">Experiências, cursos, certificados e o que você conquistou</span>
-            </span>
-          </li>
-          <li className="row">
-            <Icon name="target" />
-            <span className="row-body">
-              <span className="row-title">Metas de carreira</span>
-              <span className="muted small">Onde quer chegar, com passos ligados a Estudos e Vagas</span>
-            </span>
-          </li>
-        </ul>
       </section>
       ) },
         ]}
@@ -1012,20 +989,6 @@ function JobSheet({ id, onClose }: { id: string; onClose: () => void }) {
         )}
       </div>
     </Sheet>
-  );
-}
-
-/** Metas de carreira chegam na N8.4. */
-export function MetasPage() {
-  return (
-    <>
-      <PageHeader title="Metas" />
-      <section className="card">
-        <Empty>
-          Em breve: onde você quer chegar (cargo, área, salário), com prazo e passos ligados às trilhas de Estudos e às suas vagas.
-        </Empty>
-      </section>
-    </>
   );
 }
 
