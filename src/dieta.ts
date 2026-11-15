@@ -6,6 +6,7 @@
  */
 import type { AppData, UserList, DietData, DietLog, DietMark, DietMeal, DietPlan, DietSource, DietVariant } from './types.ts';
 import { addDays } from './utils.ts';
+import { addItemFromText, newList, scaledQty } from './lists.ts';
 
 export const MARKS: { id: DietMark; label: string }[] = [
   { id: 'segui', label: 'Segui' },
@@ -275,4 +276,84 @@ export function recipesOf(d: Pick<AppData, 'lists' | 'listCategories'>, m: Pick<
 /** Liga ou desliga uma receita numa refeição (usado no editor, sobre o rascunho). */
 export function toggleRecipe(m: DietMeal, recipeId: string): DietMeal {
   return { ...m, recipes: m.recipes.includes(recipeId) ? m.recipes.filter((r) => r !== recipeId) : [...m.recipes, recipeId] };
+}
+
+// ---------- Lista de compras da semana (N1.2b) ----------
+
+/** Quantas vezes cada receita ligada aparece nas refeições dos próximos `days` dias (a partir de `from`). */
+export function weekRecipes(d: Pick<AppData, 'health' | 'lists' | 'listCategories'>, from: string, days = 7): { recipe: UserList; times: number }[] {
+  const count = new Map<string, number>();
+  for (let i = 0; i < days; i++) {
+    const t = mealsOf(d, addDays(from, i));
+    if (!t) continue;
+    for (const m of t.meals) for (const r of recipesOf(d, m)) count.set(r.id, (count.get(r.id) ?? 0) + 1);
+  }
+  return allRecipes(d).filter((r) => count.has(r.id)).map((recipe) => ({ recipe, times: count.get(recipe.id)! }));
+}
+
+export interface ShopLine {
+  /** Chave para juntar iguais: nome sem acento + unidade. */
+  key: string;
+  text: string;
+  qty: number | null;
+  unit: string;
+  /** De quais receitas veio. */
+  from: string[];
+}
+
+const plainKey = (s: string) => s.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
+
+/** Junta os ingredientes: cada receita nas porções dela, vezes quantas vezes aparece; iguais somam. */
+export function shoppingLines(picks: { recipe: UserList; times: number }[]): ShopLine[] {
+  const out = new Map<string, ShopLine>();
+  for (const { recipe, times } of picks) {
+    if (times <= 0) continue;
+    const f = (recipe.serves / (recipe.baseServes || 1)) * times;
+    for (const it of recipe.items) {
+      if (!it.text.trim()) continue;
+      const key = `${plainKey(it.text)}|${it.unit}`;
+      const qty = it.qty ? scaledQty(it.qty, it.unit, f) : null;
+      const cur = out.get(key);
+      if (cur) {
+        cur.qty = cur.qty === null && qty === null ? null : (cur.qty ?? 0) + (qty ?? 0);
+        if (!cur.from.includes(recipe.name)) cur.from.push(recipe.name);
+      } else out.set(key, { key, text: it.text.trim(), qty, unit: it.unit, from: [recipe.name] });
+    }
+  }
+  return [...out.values()].sort((a, b) => a.text.localeCompare(b.text, 'pt-BR'));
+}
+
+/**
+ * Manda as linhas para uma lista de mercado (`listId`) ou cria uma nova (`listId` = null, com `newName`).
+ * Item igual que já está na lista e ainda não foi comprado soma a quantidade, sem repetir.
+ */
+export function sendShopping(lines: ShopLine[], listId: string | null, newName = 'Mercado da semana') {
+  return (d: AppData): AppData => {
+    let next = d;
+    let target = listId ? next.lists.find((l) => l.id === listId) : undefined;
+    if (!target) {
+      const cat = next.listCategories.find((c) => c.kind === 'mercado')?.id;
+      if (!cat) return d;
+      target = newList(newName, cat);
+      next = { ...next, lists: [...next.lists, target] };
+    }
+    const id = target.id;
+    for (const ln of lines) {
+      const l = next.lists.find((x) => x.id === id)!;
+      const same = l.items.find((i) => !i.done && plainKey(i.text) === plainKey(ln.text) && i.unit === ln.unit);
+      if (same) {
+        const qty = same.qty === null && ln.qty === null ? null : (same.qty ?? 0) + (ln.qty ?? 0);
+        next = { ...next, lists: next.lists.map((x) => (x.id === id ? { ...x, items: x.items.map((i) => (i.id === same.id ? { ...i, qty } : i)) } : x)) };
+      } else {
+        next = addItemFromText(id, ln.text, { qty: ln.qty, unit: ln.unit })(next);
+      }
+    }
+    return next;
+  };
+}
+
+/** Listas de mercado com itens a comprar ou vazias (destinos possíveis). */
+export function marketLists(d: Pick<AppData, 'lists' | 'listCategories'>): UserList[] {
+  const cats = new Set(d.listCategories.filter((c) => c.kind === 'mercado').map((c) => c.id));
+  return d.lists.filter((l) => cats.has(l.categoryId));
 }

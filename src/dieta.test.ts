@@ -2,11 +2,11 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { normalize } from './data.ts';
 import {
-  activePlan, allRecipes, dayLine, newMeal, recipesOf, toggleRecipe, DEFAULT_MEALS, dietCount, emptyDiet, markMeal, mealsOf, newPlan, normalizeDiet, pickOption, removePlan, savePlan, setDayVariant, setExtra,
+  activePlan, allRecipes, dayLine, marketLists, newMeal, recipesOf, sendShopping, shoppingLines, toggleRecipe, weekRecipes, DEFAULT_MEALS, dietCount, emptyDiet, markMeal, mealsOf, newPlan, normalizeDiet, pickOption, removePlan, savePlan, setDayVariant, setExtra,
   setSplit, toggleVariantDay, choosePlan, variantFor,
 } from './dieta.ts';
 import { healthWeeks } from './saude.ts';
-import { newList } from './lists.ts';
+import { newItem, newList } from './lists.ts';
 import type { AppData } from './types.ts';
 
 const SUN = '2026-11-15'; // domingo
@@ -130,4 +130,40 @@ test('receitas ligadas: moram em Listas; a refeição só aponta; apagada some s
   // dados antigos ganham recipes vazio; repetidos e lixo saem
   const n = normalizeDiet({ plans: [{ id: 'p', variants: [{ id: 'v', meals: [{ id: 'a' }, { id: 'b', recipes: ['r1', 'r1', 3, ''] }] }] }] });
   assert.deepEqual(n.plans[0].variants[0].meals.map((m) => m.recipes), [[], ['r1']]);
+});
+
+test('lista de compras da semana: conta receitas nos próximos 7 dias, junta ingredientes e manda para o mercado', () => {
+  const base = normalize({});
+  const rc = base.listCategories.find((c) => c.kind === 'receita')!.id;
+  const mk = base.listCategories.find((c) => c.kind === 'mercado')!.id;
+  const it = (text: string, qty: number | null, unit: string) => newItem({ text, qty, unit });
+  const omelete = { ...newList('Omelete', rc), id: 'r1', serves: 1, baseServes: 1, items: [it('Ovos', 3, 'un'), it('Tomate', 1, 'un'), it('Sal', null, '')] };
+  const salada = { ...newList('Salada', rc), id: 'r2', serves: 2, baseServes: 1, items: [it('tomate', 1, 'un'), it('Alface', 1, 'un')] };
+  const mercado = { ...newList('Mercado', mk), id: 'm1', items: [it('Ovos', 6, 'un'), { ...it('Alface', 1, 'un'), done: true }] };
+  let p = newPlan(counter(), 'eu', '2026-11-10T10:00:00Z');
+  const meals = p.variants[0].meals;
+  p = { ...p, variants: [{ ...p.variants[0], meals: [{ ...meals[0], recipes: ['r1'] }, { ...meals[2], recipes: ['r2'] }, { ...meals[4], recipes: ['r1'] }] }] };
+  const d = savePlan(p)({ ...base, lists: [omelete, salada, mercado] });
+
+  const week = weekRecipes(d, SUN);
+  assert.deepEqual(week.map((w) => [w.recipe.name, w.times]), [['Omelete', 14], ['Salada', 7]]);
+
+  const lines = shoppingLines([{ recipe: omelete, times: 2 }, { recipe: salada, times: 1 }]);
+  // tomate da omelete (2) + salada (1 × 2 porções = 2) somam, sem diferenciar maiúscula
+  assert.deepEqual(lines.map((l) => [l.text, l.qty, l.unit]), [['Alface', 2, 'un'], ['Ovos', 6, 'un'], ['Sal', null, ''], ['Tomate', 4, 'un']]);
+  assert.deepEqual(lines.find((l) => l.text === 'Tomate')!.from, ['Omelete', 'Salada']);
+  assert.deepEqual(shoppingLines([{ recipe: omelete, times: 0 }]), []);
+
+  // na lista existente: ovos somam (6 + 6); alface já comprada vira item novo
+  const sent = sendShopping(lines, 'm1')(d);
+  const m = sent.lists.find((l) => l.id === 'm1')!;
+  assert.equal(m.items.find((i) => i.text === 'Ovos')!.qty, 12);
+  assert.equal(m.items.filter((i) => i.text === 'Alface').length, 2);
+  assert.ok(m.items.some((i) => i.text === 'Tomate' && i.qty === 4));
+  // lista nova
+  const novo = sendShopping(lines, null, 'Mercado da semana')(d);
+  const nova = novo.lists.find((l) => l.name === 'Mercado da semana')!;
+  assert.equal(nova.categoryId, mk);
+  assert.equal(nova.items.length, 4);
+  assert.deepEqual(marketLists(novo).map((l) => l.name).sort(), ['Mercado', 'Mercado da semana']);
 });

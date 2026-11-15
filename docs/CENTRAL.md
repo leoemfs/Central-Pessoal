@@ -37,7 +37,7 @@
 | **Carreira** (vagas, trabalho atual, reuniões, projetos, currículo) | carreira (vagas, cargos, salários, reuniões, projetos, currículo) | Estudos (ciclos concluídos, só leitura) | Agenda (tudo com data entra sozinho e se atualiza), Finanças (aumento atualiza o salário, se você quiser) | `carreira.ts` |
 | **Você** | perfil | Núcleo (hábitos) e Caixinhas (para sugerir) | Núcleo (hábito), Agenda (compromissos), Finanças (caixinha), Início | `profile.ts` |
 | **Notas** | notas | nada | Busca | — |
-| **Saúde** (água e sono; dieta, remédios, consultas e peso depois) | `health` (meta e dias de água, sono por noite, hábito ligado, dieta: planos, marcações e "fora do plano") | Núcleo (hábito de água ligado: o número mora nele), Você (horários de dormir e acordar como sugestão), Listas (receitas ligadas às refeições) | Núcleo (marca o hábito ligado ao bater a meta), Jornada (+3 RES por dia na meta, sem hábito ligado) | `saude.ts` |
+| **Saúde** (água e sono; dieta, remédios, consultas e peso depois) | `health` (meta e dias de água, sono por noite, hábito ligado, dieta: planos, marcações e "fora do plano") | Núcleo (hábito de água ligado: o número mora nele), Você (horários de dormir e acordar como sugestão), Listas (receitas ligadas às refeições) | Núcleo (marca o hábito ligado ao bater a meta), Jornada (+3 RES por dia na meta, sem hábito ligado), Listas (compras da semana na lista de mercado) | `saude.ts` |
 | **Jornada** (bloqueada até 14 dias; com telas desde a v0.55) | avatar e ajustes da Jornada (`journey`) | Finanças, Agenda, Diário, Núcleo (dias de uso, XP, ouro) | nada por enquanto | `journey.ts`, `jornada/` |
 
 **Telas que juntam tudo** (mexeu num módulo, conferir estas): **Início** (quase todos), **Revisão semanal** (Finanças, caixinhas, vales, Agenda, Diário, Núcleo e práticas, humor, Estudos), **Busca** (todos os módulos; dentro de um módulo, busca só nele).
@@ -47,7 +47,7 @@
 ## Caixa de entrada
 *Ideias e problemas ainda sem classificar. Uma linha cada, com a data.*
 
-- 15/11: Dieta × Receitas: ligar receitas de Listas às refeições do plano, abrir a receita pela refeição e gerar a lista de compras da semana. Anotado no N1: N1.2a pronta (v0.68); N1.2b (lista de compras da semana, M) aguardando aprovação.
+- 15/11: Dieta × Receitas: ligar receitas de Listas às refeições do plano, abrir a receita pela refeição e gerar a lista de compras da semana. Anotado no N1: N1.2a (v0.68) e N1.2b (v0.69) prontas.
 - 09/11: Saúde com **dieta dentro** (plano alimentar e "segui · em parte · fugi" no dia a dia). Já anotado no N1 (parte N1.2).
 - 09/11: Saúde e treinos ligados aos hábitos sem trocar de módulo (ex.: beber água). Anotado no N1, seção "Ligação com Hábitos e Treinos".
 - 09/11: Saúde é módulo à parte (decidido). Marcar check-up, consultas e dentista, com intervalo para repetir e lembrete do próximo. Anotado no N1 (parte N1.4).
@@ -125,7 +125,7 @@
 | M5 | Agenda: repetição (toda semana, mês, ano) e aniversários | MOD | M | média | ideia | — (especificar antes) |
 | M6 | Núcleo: fichas de treino próprias (exercícios, séries, descanso). Pode entrar depois no M21 ("crie o seu próprio") | MOD | M | média | especificado | `futuro/nucleo-mente-corpo.md` |
 | M7 | Revisão semanal mais completa: autocuidado, caixinhas e vales da semana | MOD | P | baixa | pronto (v0.38) | `futuro/nucleo-mente-corpo.md`, `futuro/caixinhas.md` |
-| N1 | Módulo Saúde, à parte (água, sono, **dieta**, remédios, consultas, dentista e check-ups, peso), dividido em N1.0 a N1.5. Afeta: Agenda, Listas, Você, Núcleo, Início, Revisão, backup | NOVO | G | média | parte pronta: N1.1 Água e Sono (v0.66), N1.2 Dieta (v0.67), N1.2a receitas ligadas (v0.68); faltam N1.2b lista de compras da dieta, N1.3 Remédios, N1.4 Consultas e check-ups, N1.5 Peso e medidas | `futuro/modulo-saude.md` |
+| N1 | Módulo Saúde, à parte (água, sono, **dieta**, remédios, consultas, dentista e check-ups, peso), dividido em N1.0 a N1.5. Afeta: Agenda, Listas, Você, Núcleo, Início, Revisão, backup | NOVO | G | média | parte pronta: N1.1 Água e Sono (v0.66), N1.2 Dieta (v0.67), N1.2a receitas ligadas (v0.68), N1.2b compras da semana (v0.69); faltam N1.3 Remédios, N1.4 Consultas e check-ups, N1.5 Peso e medidas | `futuro/modulo-saude.md` |
 | N2 | Jornada completa (pixel art): missões no ritmo da pessoa, recompensas por módulo, raridades (comum a místico), Forja e Codex por coleções. **Revisto em 15/11** (desbloqueia em 16/11; só existiam regras e artes, sem telas): dividido em 10 partes, da mais simples à conclusão (ver `modulo-rpg.md`, B.13). Afeta: Jornada, Início, Configurações, backup | NOVO | G | **alta** | aprovado (15/11), em partes | `futuro/modulo-rpg.md`, `futuro/jornada-recompensas.md`, `futuro/jornada-raridades.md` |
 | N3 | Notificações e **lembretes** (tarefa ou compromisso com "me lembrar"; sai o "Lembretes, em breve" do menu). Afeta: Agenda, Carreira | NOVO | M | baixa | especificado | `futuro/notificacoes.md` |
 | N3.1 | Notificações já no app (sem servidor): **"Lembrar no celular"** (a parte da agenda passa a ser o **N9.5**, pelo Google Agenda) (compromisso, conta, revisão → agenda do celular, hora certa, Android e iPhone) e **bolinha no ícone** do app com o que está pendente hoje | NOVO | P | média | ideia | `futuro/notificacoes.md` |
@@ -175,7 +175,8 @@
 ## Feito
 | Versão | O que entrou | PR |
 |---|---|---|
-| v0.68 | N1.2a: **Dieta × Receitas**: cada refeição liga receitas de Listas (escolher ou criar com o nome da refeição); selo da receita no Hoje e na aba Dieta abre a receita em Listas | — |
+| v0.69 | N1.2b: **Compras da semana** na Dieta: ingredientes das receitas dos próximos 7 dias (vezes ajustáveis, iguais somam) vão para uma lista de mercado (existente ou nova), somando com o que já está lá | — |
+| v0.68 | N1.2a: **Dieta × Receitas**: cada refeição liga receitas de Listas (escolher ou criar com o nome da refeição); selo da receita no Hoje e na aba Dieta abre a receita em Listas | #113 |
 | v0.67 | N1.2: **Dieta** na Saúde: planos (da nutricionista ou seu), refeições com horário e opções, dias diferentes opcionais (treino × descanso), Hoje com segui · em parte · fugi e "fora do plano", semana no Histórico; botão + com sono ou plano | #112 |
 | v0.66 | N1.1: módulo **Saúde** com Água (meta, +250 ml, ligação com o hábito de água sem perder histórico, selo "💧 Saúde" no Núcleo) e Sono (dormir, acordar, como acordou); barra Hoje · Saúde · Histórico; +3 RES na Jornada por dia na meta de água | #111 |
 | v0.65 | M33 (parte 1): **Curso de GitHub completo**, trilha **"Git do zero"** (9 tópicos: Git × GitHub, instalar e configurar, repositório, as três áreas, commits, histórico e diferenças, desfazer com segurança, .gitignore, o caminho de uma mudança no Central Pessoal); 10 fontes, mapa e ciclo. Pacote pessoal em Desenvolvimento de software. Link: `https://leoemfs.github.io/Central-Pessoal/#/estudos/importar/curso-github` | #110 |
