@@ -10,7 +10,7 @@
  */
 import type { AppData, Habit } from '../types.ts';
 import { attributeTotals, diffDays, isScheduled, startOf } from '../habits.ts';
-import { journeyStats } from '../journey.ts';
+import { journeyStats, unlockProgress } from '../journey.ts';
 import { monthBills } from '../finance.ts';
 import { monthBalance } from '../incomes.ts';
 import { defaultReviewWeek, weekReview, weekStart } from '../review.ts';
@@ -569,4 +569,35 @@ export function welcomeState(state: JourneyState, avatar: { gender: 'f' | 'm'; s
     equipped: { ...state.equipped, botas: 'couro', pet },
     chests: [...state.chests, { key: WELCOME_KEY, kind: 'dourado', openedAt: today, gold: 50, crystals: 1, item: 'couro' }],
   };
+}
+
+// ---------- N2.2: cartão no Início ----------
+
+export interface HomeCard {
+  name: string;
+  level: number;
+  /** Barra fina de XP (0–100). */
+  pct: number;
+  /** Uma linha só, com a coisa mais importante agora. */
+  status: string;
+  /** Pede atenção (baú esperando ou personagem por criar): ponto verde. */
+  dot: boolean;
+}
+
+/**
+ * O cartão da Jornada no Início (Anexo E.1). Só aparece com a Jornada desbloqueada, o Modo Jornada ligado
+ * ("Quero a Jornada") e "Mostrar a Jornada no Início" ligado. Por enquanto o status mostra, nesta ordem:
+ * personagem por criar, baús esperando, quanto falta para o próximo nível. Novidades e chefe entram com a N2.3 e a campanha.
+ */
+export function homeCard(d: AppData, today: string = todayISO()): HomeCard | null {
+  if (!unlockProgress(d, today).unlocked) return null;
+  if (d.settings.journeyChoice !== 'quero' || !d.settings.journeyCard) return null;
+  const s = journeyStats(d, today);
+  const state = d.journey;
+  const base = { name: state.avatar?.name.trim() ?? '', level: s.level, pct: Math.round((s.xpInLevel / s.xpForNext) * 100) };
+  if (!welcomed(state)) return { ...base, status: 'Crie seu personagem para começar', dot: true };
+  const chests = pendingChests(d, state, today, s.level).length;
+  if (chests) return { ...base, status: chests === 1 ? '1 baú esperando' : `${chests} baús esperando`, dot: true };
+  const left = s.xpForNext - s.xpInLevel;
+  return { ...base, status: `Faltam ${left.toLocaleString('pt-BR')} XP para o nível ${s.level + 1}`, dot: false };
 }

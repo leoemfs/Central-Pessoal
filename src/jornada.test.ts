@@ -17,6 +17,7 @@ import {
   earnedChests,
   equip,
   equipmentBonus,
+  homeCard,
   monthsAllOnTime,
   normalizeJourney,
   openChest,
@@ -326,4 +327,27 @@ test('N2.1: boas-vindas dá botas, pet, 50 de ouro e 1 cristal', () => {
   assert.equal(w1.gold - w0.gold, 50);
   assert.equal(w1.crystals - w0.crystals, 1);
   assert.equal(welcomeState(st, st.avatar!, 'cao', '2026-11-17').chests.length, 1, 'boas-vindas só uma vez');
+});
+
+test('N2.2: cartão no Início só com a Jornada desbloqueada, o Modo Jornada e a opção ligada', () => {
+  const today = '2026-11-16';
+  const d = emptyData();
+  assert.equal(homeCard(d, today), null, 'bloqueada');
+  d.settings.journeyUnlockedAt = today;
+  assert.equal(homeCard(d, today), null, 'sem escolha ainda');
+  d.settings.journeyChoice = 'depois';
+  assert.equal(homeCard(d, today), null, 'Modo Jornada desligado');
+  d.settings.journeyChoice = 'quero';
+  const first = homeCard(d, today)!;
+  assert.equal(first.status, 'Crie seu personagem para começar');
+  assert.ok(first.dot);
+  d.journey = welcomeState(d.journey, { gender: 'f', skin: 'media', hair: 'castanho', name: ' Lia ' }, 'gato', today);
+  const card = homeCard(d, today)!;
+  assert.equal(card.name, 'Lia');
+  assert.equal(card.level, 1);
+  assert.match(card.status, /^Faltam .* XP para o nível 2$/);
+  assert.ok(card.pct >= 0 && card.pct <= 100);
+  d.settings.journeyCard = false;
+  assert.equal(homeCard(d, today), null, 'cartão desligado em Configurações');
+  assert.equal(normalize({ ...d, settings: { ...d.settings, journeyCard: undefined } } as never).settings.journeyCard, true, 'dados antigos: ligado');
 });

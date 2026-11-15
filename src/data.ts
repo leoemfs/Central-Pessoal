@@ -56,7 +56,7 @@ export function emptyData(): AppData {
     incomes: [],
     incomeSeries: [],
     incomeSources: [],
-    settings: { theme: 'dark', accent: null, favorites: [...DEFAULT_FAVORITES], cards: {}, barLayout: 'fixo', tapToFavorites: true, hideOnScroll: true, moreLayout: 'lista', moreButton: false, seededCategories: false, seededIncomeSources: false, lastBackupAt: null, activeDays: [], visitDays: [], journeyUnlockedAt: null, journeyChoice: null, hiddenModules: [], setup: 'novo', tutorialSeen: false, setupAreas: [], journeyWanted: null, journalRhythm: { ...DEFAULT_RHYTHM }, googleCalendar: { on: false, events: true, bills: true, tasks: true, calendarId: null, tasksList: null } },
+    settings: { theme: 'dark', accent: null, favorites: [...DEFAULT_FAVORITES], cards: {}, barLayout: 'fixo', tapToFavorites: true, hideOnScroll: true, moreLayout: 'lista', moreButton: false, seededCategories: false, seededIncomeSources: false, lastBackupAt: null, activeDays: [], visitDays: [], journeyUnlockedAt: null, journeyChoice: null, journeyCard: true, hiddenModules: [], setup: 'novo', tutorialSeen: false, setupAreas: [], journeyWanted: null, journalRhythm: { ...DEFAULT_RHYTHM }, googleCalendar: { on: false, events: true, bills: true, tasks: true, calendarId: null, tasksList: null } },
     profile: emptyProfile('novo'),
     boxes: [],
     moods: {},
@@ -172,6 +172,7 @@ export function normalize(raw: unknown): AppData {
       visitDays: strings(settings.visitDays),
       journeyUnlockedAt: typeof settings.journeyUnlockedAt === 'string' ? settings.journeyUnlockedAt : null,
       journeyChoice: settings.journeyChoice === 'quero' || settings.journeyChoice === 'depois' ? settings.journeyChoice : null,
+      journeyCard: settings.journeyCard !== false,
       hiddenModules: strings(settings.hiddenModules).filter((id, i, a) => MODULES.some((m) => m.id === id) && a.indexOf(id) === i).slice(0, MODULES.length - 3),
       // Quem já tinha dados recebe o convite no Início; instalação nova abre a montagem sozinha.
       setup: settings.setup === 'novo' || settings.setup === 'convite' || settings.setup === 'feito' ? settings.setup : Object.keys(r).length > 0 ? 'convite' : 'novo',
