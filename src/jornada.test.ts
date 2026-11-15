@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { emptyData, normalizeHabit } from './data.ts';
+import { emptyData, normalize, normalizeHabit } from './data.ts';
 import { addExpense, type ExpenseInput } from './finance.ts';
 import { addDays } from './utils.ts';
 import type { AppData, Habit, JournalEntry } from './types.ts';
@@ -301,4 +301,14 @@ test('presente do dia: ouro crescente, baú no 7º dia e marcos', () => {
   assert.equal(visitGift(8).gold, 10, 'a tira recomeça');
   assert.equal(visitGift(14).milestone?.chest, 'prata');
   assert.equal(visitGift(30).milestone?.title, 'assidua');
+});
+
+test('N2.1: dados antigos ganham a Jornada vazia; avatar e clima vêm do backup', () => {
+  const old = normalize({ ...emptyData(), journey: undefined });
+  assert.equal(old.journey.avatar, null);
+  assert.equal(old.journey.equipped.morada, 'cabana');
+  const back = normalize({ ...emptyData(), journey: { avatar: { gender: 'm', skin: 'escura', hair: 'preto' }, weather: 'limpo' } });
+  assert.deepEqual(back.journey.avatar, { gender: 'm', skin: 'escura', hair: 'preto' });
+  assert.equal(back.journey.weather, 'limpo');
+  assert.ok(back.journey.owned.includes('aprendiz'));
 });

@@ -1,3 +1,4 @@
+import type { JourneyState } from './jornada/rules.ts';
 // ---------- Organização ----------
 
 export type Priority = 'baixa' | 'media' | 'alta';
@@ -685,6 +686,8 @@ export interface AppData {
   workoutGoal: number;
   /** Treino em casa: link de vídeo de cada exercício (id → endereço). */
   exerciseVideos: Record<string, string>;
+  /** Jornada (N2): avatar, itens, o que está vestido e gastos (o resto é calculado). */
+  journey: JourneyState;
   /** Itens excluídos (id → data), para uma futura sincronização entre aparelhos. */
   deleted: Record<string, string>;
   /** N9.0: data da última alteração de cada item (id → data) e de cada parte (`@chave` → data). */

@@ -37,7 +37,7 @@
 | **Carreira** (vagas, trabalho atual, reuniões, projetos, currículo) | carreira (vagas, cargos, salários, reuniões, projetos, currículo) | Estudos (ciclos concluídos, só leitura) | Agenda (tudo com data entra sozinho e se atualiza), Finanças (aumento atualiza o salário, se você quiser) | `carreira.ts` |
 | **Você** | perfil | Núcleo (hábitos) e Caixinhas (para sugerir) | Núcleo (hábito), Agenda (compromissos), Finanças (caixinha), Início | `profile.ts` |
 | **Notas** | notas | nada | Busca | — |
-| **Jornada** (bloqueada) | ajustes da Jornada | Finanças, Agenda, Diário, Núcleo (dias de uso, XP, ouro) | nada por enquanto | `journey.ts`, `jornada/` |
+| **Jornada** (bloqueada até 14 dias; com telas desde a v0.55) | avatar e ajustes da Jornada (`journey`) | Finanças, Agenda, Diário, Núcleo (dias de uso, XP, ouro) | nada por enquanto | `journey.ts`, `jornada/` |
 
 **Telas que juntam tudo** (mexeu num módulo, conferir estas): **Início** (quase todos), **Revisão semanal** (Finanças, caixinhas, vales, Agenda, Diário, Núcleo e práticas, humor, Estudos), **Busca** (todos os módulos; dentro de um módulo, busca só nele).
 **Partes do app todo:** barra de baixo (`moduleBar.ts`), lápis dos cartões (`cardLayout.ts`), temas (`theme.ts`), backup (`data.ts`).
@@ -149,7 +149,7 @@
 **Aprovado em 11/11 ("pode fazer", fila toda).** Feito nesta sessão, tudo no PR #38: C5 (v0.29.1), C3 (v0.30), E14 + resto do E1 (v0.31), M1 (v0.32), M11 (v0.33), lápis E3 + M12 (v0.34), busca E6 + M13 (v0.35), M8 (v0.36), N8.3 Currículo (v0.37) e M7 (v0.38).
 
 **O que continua aprovado, na ordem:**
-- **N2 Jornada, na frente da fila (aprovado em 15/11: "vamos dar início, do mais simples até a conclusão")**, porque a Jornada desbloqueia em 16/11 e não tinha telas. Uma parte por vez, conforme o uso do dia: N2.1 personagem e cena → N2.2 cartão no Início e Modo Jornada → N2.3 baús, cristais e "Desde a sua última visita" → N2.4 Arsenal e loja → N2.5 títulos, forja e classes → N2.6 pets, moradas e visitas → N2.7 Codex e bônus por raridade → N2.8 efeitos dos místicos → N2.9 missões no ritmo da pessoa → N2.10 campanha (dividir antes). Depois vem o N7. Ver `futuro/modulo-rpg.md`, B.13.
+- **N2 Jornada, na frente da fila (aprovado em 15/11: "vamos dar início, do mais simples até a conclusão")**, porque a Jornada desbloqueia em 16/11 e não tinha telas. Uma parte por vez, conforme o uso do dia: ~~N2.1 personagem e cena~~ (v0.55) → N2.2 cartão no Início e Modo Jornada → N2.3 baús, cristais e "Desde a sua última visita" → N2.4 Arsenal e loja → N2.5 títulos, forja e classes → N2.6 pets, moradas e visitas → N2.7 Codex e bônus por raridade → N2.8 efeitos dos místicos → N2.9 missões no ritmo da pessoa → N2.10 campanha (dividir antes). Depois vem o N7. Ver `futuro/modulo-rpg.md`, B.13.
 0. **N9 Sincronizar com o Google Drive** (G, aprovado em 11/11: "pode começar"), em partes: ~~N9.0 preparar os dados~~ (v0.39) → ~~N9.1 conta Google e cópia na nuvem~~ (v0.40) → ~~N9.2 sincronizar~~ (v0.41) → N9.3 fotos e PDFs (~~N9.3a fotos no Diário~~ v0.42; N9.3b PDFs) → N9.4 exportar. Uma parte por vez, conforme o uso do dia. Ver `futuro/sincronizar-google.md`.
 1. **~~M2 + M23~~ (v0.49) → ~~M3~~ (v0.50) → M4 Preços 2.0** (M cada, já especificados). **Subiu para antes do N10 (aprovado em 12/11: "pode fazer")**, porque trava o uso: a lista com 64 itens não tinha como receber preço. M2 = itens da lista viram produtos + "Sem preço" para preencher em sequência; M23 = catálogo pronto de produtos.
 2. **N10 Objetivos** (G): ~~prévia N10.0~~ (aprovada em 11/11) → N10.1 central de metas (inclui as metas de carreira, antigo N8.4) → N10.2 objetivos grandes.
@@ -163,6 +163,7 @@
 ## Feito
 | Versão | O que entrou | PR |
 |---|---|---|
+| v0.55 | N2.1: Jornada com **personagem e cena** (criar avatar; céu pela hora, estrelas, chuva; classe, título, nível, XP, ouro, cristais) e **Ficha** com os 6 atributos; avatar guardado nos dados e no backup | — |
 | v0.54.1 | E23: ao puxar o Mais, a **barra de baixo inteira** acompanha o puxão, toma um impulso e é **lançada para cima** por cima da gaveta; ao fechar, **cai de volta** e assenta no lugar (só visual; com "menos movimento", só some e volta) | — |
 | v0.54 | M29 + M28: itens marcados descem para **No carrinho** (abaixo de "Concluir compra") e voltam ao corredor ao desmarcar; **Nova lista de mercado** com o catálogo por corredor para marcar vários itens, busca e item escrito à mão no mesmo campo | — |
 | v0.53.1 | E22 (ajuste): ícones da lista de Configurações iguais aos dos cartões do app (fundo do cartão e **cor de destaque escolhida**), no lugar dos quadradinhos coloridos fixos | #78 |

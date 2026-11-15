@@ -2,6 +2,7 @@ import { useStore } from '../store';
 import { journeyStats, UNLOCK_DAYS, unlockProgress } from '../journey';
 import { formatDMY, fromISO, todayISO, WEEKDAYS } from '../utils';
 import { Icon, PageHeader, Pill, Pixels, Progress } from '../ui';
+import { JornadaHome } from './JornadaHome';
 
 const HERO = ['....HHHH....', '...HHHHHH...', '...HSSSSH...', '...SESSES...', '...SSSSSS...', '....SSSS....', '..DGGGGGGD..', '.SDGGGGGGDS.', '.S.GGBBGG.S.', '...GGGGGG...', '...PPPPPP...', '...PP..PP...', '...PP..PP...', '..KKK..KKK..'];
 const HERO_PAL = { H: '#7c4a2d', S: '#f1c27d', E: '#141414', G: '#22c55e', D: '#15803d', B: '#8b5a2b', P: '#3b3f5c', K: '#27272a' };
@@ -63,6 +64,14 @@ export function Jornada() {
       </>
     );
   }
+
+  if (choice === 'quero')
+    return (
+      <>
+        <PageHeader title="Jornada" />
+        <JornadaHome />
+      </>
+    );
 
   const s = journeyStats(data, today);
   return (
@@ -137,7 +146,7 @@ export function Jornada() {
       <section className="card">
         <div className="card-head">
           <h2>E agora?</h2>
-          {choice && <Pill tone={choice === 'quero' ? 'green' : 'gray'}>{choice === 'quero' ? 'Quero a Jornada' : 'Fica para depois'}</Pill>}
+          {choice && <Pill tone="gray">Fica para depois</Pill>}
         </div>
         {choice === null ? (
           <>
@@ -153,13 +162,9 @@ export function Jornada() {
           </>
         ) : (
           <>
-            <p className="muted">
-              {choice === 'quero'
-                ? 'Combinado. Próxima etapa: a Fase 1 — missões do dia, personagem e o aviso “+XP” ao concluir algo. O seu XP atual já entra.'
-                : 'Tudo certo: a Jornada fica guardada aqui, com o XP continuando a contar em segundo plano.'}
-            </p>
-            <button type="button" className="btn ghost small" style={{ marginTop: 10 }} onClick={() => setChoice(null)}>
-              Mudar resposta
+            <p className="muted">Tudo certo: a Jornada fica guardada aqui, com o XP continuando a contar em segundo plano.</p>
+            <button type="button" className="btn primary small" style={{ marginTop: 10 }} onClick={() => setChoice('quero')}>
+              Quero a Jornada
             </button>
           </>
         )}
