@@ -311,8 +311,8 @@ export function App() {
   useScrollingClass();
   // E26: nome embaixo dos ícones da barra (opcional).
   useEffect(() => {
-    document.body.classList.toggle('bar-labels', data.settings.barLabels);
-  }, [data.settings.barLabels]);
+    document.body.classList.toggle('bar-labels', !data.settings.hideBarLabels);
+  }, [data.settings.hideBarLabels]);
   const editor = useCardEditor();
   const where = bar ? crumb(bar, barIndex) : null;
   // E22: dentro de um tema das Configurações, o título mostra "Configurações / Aparência".

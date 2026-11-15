@@ -286,10 +286,10 @@ export function Ajustes({ route }: ViewProps) {
         </div>
         <div className="toggle-row">
           <div>
-            <strong>Mostrar o nome embaixo dos ícones</strong>
-            <span className="muted small">Cada ícone da barra de baixo ganha o nome em letra pequena. Desligado, segurar o ícone mostra o nome.</span>
+            <strong>Esconder o nome embaixo dos ícones</strong>
+            <span className="muted small">Para quem já conhece os ícones: a barra fica mais baixa, só com os desenhos. Segurar o ícone continua mostrando o nome.</span>
           </div>
-          <Toggle checked={data.settings.barLabels} onChange={(v) => setSetting({ barLabels: v })} label="Mostrar o nome embaixo dos ícones" />
+          <Toggle checked={data.settings.hideBarLabels} onChange={(v) => setSetting({ hideBarLabels: v })} label="Esconder o nome embaixo dos ícones" />
         </div>
         <div className="toggle-row">
           <div>
