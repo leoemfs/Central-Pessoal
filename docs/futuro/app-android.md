@@ -36,6 +36,14 @@ Transformar a Central Pessoal num app Android instalável (APK e, se quiser, Pla
 - Precisa de um projeto gratuito no Google Cloud para liberar o login com Google.
 - **Conta Apple: fora.** O iCloud não funciona bem no Android, e usar a conta Apple exigiria um servidor próprio (custo e manutenção).
 
+## Decisões (conversa de 15/11/2026)
+- **Atualização como hoje:** o APK é uma "casca" que abre o site (`server.url` do Capacitor apontando para o GitHub Pages). Mesclou o PR → o app atualiza sozinho na próxima abertura. Funciona sem internet pelo cache do PWA.
+- APK novo só quando mudar a parte nativa (plugins, ícone, permissões). O GitHub Actions monta o APK; o Leonardo baixa e instala por cima, sem perder dados.
+- Se um dia for liberar para outras pessoas, dá para trocar para o modo comum (telas dentro do APK).
+- **Notificações (N3) junto com o N4:** notificações locais de verdade (app fechado, tela bloqueada, sem internet), com botões ("Feito", "Guardei"). Ao abrir o app ou mudar algo, ele agenda no Android os avisos das próximas semanas. Atalho na tela de Notificações para "alarmes e lembretes" e economia de bateria.
+- **O PWA continua:** o site segue funcionando no navegador e é o mesmo código do app. Os dados de cada um são separados (importar backup na primeira abertura do app); a sincronização entre os dois é o N8.
+- Ordem: Parte 1 = APK instalável (M) · Parte 2 = notificações + Configurações › Notificações (M).
+
 ## Etapas sugeridas
 1. Projeto Capacitor + ícone e tela de abertura. Gerar APK de teste (instalação direta no celular).
 2. Notificações locais com as regras de `notificacoes.md` + Configurações › Notificações.
