@@ -251,8 +251,8 @@ export interface Settings {
   moreLayout: 'lista' | 'grade';
   /** E21.2: Mais de volta na ponta da barra do Início (3 favoritos). Desligado = 4 favoritos e puxar a barra abre o Mais. */
   moreButton: boolean;
-  /** E26: nome pequeno embaixo de cada ícone da barra de baixo. */
-  barLabels: boolean;
+  /** E26: esconder o nome pequeno embaixo de cada ícone da barra de baixo (o padrão é mostrar). */
+  hideBarLabels: boolean;
   seededCategories: boolean;
   seededIncomeSources: boolean;
   lastBackupAt: string | null;

@@ -75,7 +75,8 @@ test('E21.2: botão Mais na barra vem desligado (dados antigos também)', () => 
   assert.equal(normalize({ version: 2, settings: { moreButton: true } }).settings.moreButton, true);
 });
 
-test('E26: nome embaixo dos ícones vem desligado (dados antigos também)', () => {
-  assert.equal(normalize(undefined).settings.barLabels, false);
-  assert.equal(normalize({ version: 2, settings: { barLabels: true } }).settings.barLabels, true);
+test('E26: o nome embaixo dos ícones aparece por padrão (inclusive para quem tinha o antigo barLabels desligado)', () => {
+  assert.equal(normalize(undefined).settings.hideBarLabels, false);
+  assert.equal(normalize({ version: 2, settings: { barLabels: false } }).settings.hideBarLabels, false);
+  assert.equal(normalize({ version: 2, settings: { hideBarLabels: true } }).settings.hideBarLabels, true);
 });
