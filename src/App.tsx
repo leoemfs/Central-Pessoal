@@ -2,8 +2,9 @@ import { useEffect, useRef, useState, type ComponentType } from 'react';
 import { ErrorBoundary } from './ErrorScreen';
 import { useStore } from './store';
 import type { Theme } from './types';
-import { go, goReplace, navigate, useRoute, type Route } from './router';
-import { Icon, Sheet, Toasts, useBackToClose, type IconName } from './ui';
+import { canGoBack, go, goReplace, navigate, useRoute, type Route } from './router';
+import { useCurrentPageParent, useCurrentPageTitle } from './pageTitle';
+import { Icon, Sheet, Toasts, type IconName } from './ui';
 import { formatLongDate, todayISO } from './utils';
 import { NAV_GROUPS, SETTINGS_ITEM, type NavItem } from './nav';
 import { SearchSheet } from './Search';
@@ -153,7 +154,7 @@ function TabLink({ to, label, icon, active, center, onTap }: { to: string; label
   );
 }
 
-/** Menu agrupado: usado na barra lateral (computador) e no menu ☰ (celular). */
+/** Menu agrupado: barra lateral do computador. No celular, o mesmo conteúdo fica na gaveta (puxar a barra). */
 function NavMenu({ current, onNavigate }: { current: string; onNavigate?: () => void }) {
   const { data } = useStore();
   // Módulos guardados (desligados na montagem) não aparecem no menu; continuam no Mais.
@@ -203,22 +204,6 @@ function NavMenu({ current, onNavigate }: { current: string; onNavigate?: () => 
   );
 }
 
-function Drawer({ current, onClose }: { current: string; onClose: () => void }) {
-  useBackToClose(onClose);
-  return (
-    <div className="drawer-backdrop" onMouseDown={(e) => e.target === e.currentTarget && onClose()}>
-      <nav className="drawer" aria-label="Menu">
-        <div className="drawer-head">
-          <strong>CP Hub</strong>
-          <button type="button" className="icon-btn" onClick={onClose} aria-label="Fechar menu">
-            <Icon name="x" />
-          </button>
-        </div>
-        <NavMenu current={current} onNavigate={onClose} />
-      </nav>
-    </div>
-  );
-}
 
 /**
  * E24: enquanto a tela rola (qualquer direção), o botão + fica transparente e um pouco menor,
@@ -302,7 +287,6 @@ export function App() {
   const section = SECTIONS.find((s) => s.path === route.path) ?? SECTIONS[0];
   const View = section.view;
   const [quickOpen, setQuickOpen] = useState(false);
-  const [drawer, setDrawer] = useState(false);
   const [search, setSearch] = useState(false);
   const scrollHidden = useHideOnScroll(`${section.path}:${route.n}`);
   const barHidden = data.settings.hideOnScroll && scrollHidden;
@@ -315,8 +299,14 @@ export function App() {
   }, [data.settings.hideBarLabels]);
   const editor = useCardEditor();
   const where = bar ? crumb(bar, barIndex) : null;
-  // E22: dentro de um tema das Configurações, o título mostra "Configurações / Aparência".
   const settingsSub = section.path === 'ajustes' ? settingsPage(route.sub) : null;
+  // E25: telas de dentro (ex.: Estudos › um notebook) mostram "Nível de cima / Tela" no topo, nunca mais de dois níveis.
+  const pageTitle = useCurrentPageTitle();
+  const pageParent = useCurrentPageParent();
+  const nearLevel = where?.page ?? where?.module ?? section.title ?? section.label;
+  const innerTitle = route.sub && pageTitle && pageTitle !== nearLevel && pageTitle !== section.label ? pageTitle : null;
+  const innerParent = settingsSub ? section.label : (pageParent ?? nearLevel);
+  // E22: dentro de um tema das Configurações, o título mostra "Configurações / Aparência".
   // Tocar de novo no módulo em que você já está mostra os favoritos, para trocar de módulo sem passar pelo Início.
   const [showFavs, setShowFavs] = useState(false);
   useEffect(() => setShowFavs(false), [route.path, route.n]);
@@ -348,13 +338,6 @@ export function App() {
   }
 
   useEffect(() => {
-    if (!drawer) return;
-    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && setDrawer(false);
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
-  }, [drawer]);
-
-  useEffect(() => {
     document.title = section.path === 'inicio' ? 'CP Hub' : `${section.title ?? section.label} · CP Hub`;
   }, [section]);
 
@@ -366,12 +349,21 @@ export function App() {
   return (
     <div className={`shell${barHidden ? ' bars-hidden' : ''}`}>
       <header className={`topbar${barHidden ? ' hidden' : ''}`}>
-        <button type="button" className="icon-btn" onClick={() => setDrawer(true)} aria-label="Abrir menu">
-          <Icon name="menu" />
-        </button>
+        {/* E25: sem menu ☰ (o menu inteiro fica na gaveta, puxando a barra). Fora do Início, a seta ‹ sobe um nível. */}
+        {canGoBack() && section.path !== 'inicio' ? (
+          <button type="button" className="icon-btn topbar-back" onClick={() => history.back()} aria-label="Voltar">
+            <Icon name="left" />
+          </button>
+        ) : (
+          <span className="topbar-spacer" aria-hidden="true" />
+        )}
         <h1 className="topbar-title">
           {section.path === 'inicio' ? (
             formatLongDate(todayISO())
+          ) : innerTitle ? (
+            <>
+              <span className="crumb">{innerParent} /</span> {innerTitle}
+            </>
           ) : where?.page ? (
             <>
               <span className="crumb">{where.module} /</span> {where.page}
@@ -405,7 +397,6 @@ export function App() {
         <NavMenu current={section.path} />
       </nav>
 
-      {drawer && <Drawer current={section.path} onClose={() => setDrawer(false)} />}
       {search && <SearchSheet onClose={() => setSearch(false)} scope={moduleOf(section.path)} />}
 
       <main className="main">

@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
 import { formatMoney } from './utils';
+import { usePageTitle } from './pageTitle';
 
 const P: Record<string, ReactNode> = {
   home: <><path d="M3 11.5 12 4l9 7.5" /><path d="M5.5 10v10h13V10" /></>,
@@ -136,6 +137,7 @@ export function IconButton({ icon, label, onClick, tone, active }: { icon: IconN
  * some ao rolar para baixo e volta ao rolar para cima, junto com a barra de cima (igual em todos os módulos).
  */
 export function PageHeader({ title, subtitle, actions, tabs }: { title: ReactNode; subtitle?: ReactNode; actions?: ReactNode; tabs?: ReactNode }) {
+  usePageTitle(typeof title === 'string' ? title : null); // E25: o topo mostra "Módulo / Tela" nas telas de dentro
   const header = (
     <header className="page-header">
       <div className="page-title">

@@ -3,7 +3,8 @@ import { useStore } from '../store';
 import type { AppData } from '../types';
 import { addFavorite, FAVORITABLE } from '../moduleBar';
 import { Icon, notify, PageHeader, Sheet, type IconName } from '../ui';
-import { hiddenFrom, isHidden, toggleModule, visibleFrom } from '../setup';
+import { hiddenFrom, isHidden, moduleOf, toggleModule, visibleFrom } from '../setup';
+import { NAV_GROUPS } from '../nav';
 import { openSetup, openTutorial } from './Montagem';
 import { EditBar, useEditScreen } from '../Cards';
 import { arrange, moveCard, type CardLayout } from '../cardLayout';
@@ -115,15 +116,68 @@ function maisItems(data: AppData, grid: boolean) {
 }
 
 /** E21.2: o Mais dentro da gaveta que sobe ao puxar a barra (sempre em grade, sem lápis). */
-export function MaisPanel() {
-  const { data } = useStore();
-  const { mods, tools } = maisItems(data, true);
-  const row = (items: Item[]) => items.map((it) => <Entry key={it.id} it={it} grid editing={false} first last onMove={() => {}} />);
+/** E25: as telas de dentro de cada módulo (o que ficava no menu lateral), agrupadas pelo módulo. */
+function insideGroups(data: AppData): { title: string; items: { to: string; label: string; icon: IconName }[] }[] {
+  const homes = new Set(['inicio', 'mais', ...LINKS.map((l) => l.path)]);
+  const groups = new Map<string, { to: string; label: string; icon: IconName }[]>();
+  for (const g of NAV_GROUPS)
+    for (const it of g.items) {
+      if (!it.to || homes.has(it.to) || isHidden(data, it.to)) continue;
+      const mod = moduleOf(it.to);
+      const title = (mod && SECTIONS.find((x) => x.path === mod)?.label) || g.title;
+      if (!groups.has(title)) groups.set(title, []);
+      groups.get(title)!.push({ to: it.to, label: it.label, icon: it.icon });
+    }
+  return [...groups.entries()].map(([title, items]) => ({ title, items }));
+}
+
+/** E21.2 + E25: o menu inteiro na gaveta que sobe ao puxar a barra (Misto, Grade ou Lista; lápis muda a ordem). */
+export function MaisPanel({ editing = false }: { editing?: boolean }) {
+  const { data, update } = useStore();
+  const view = data.settings.drawerView;
+  const { modules, shortcuts, mods, tools } = maisItems(data, view !== 'lista');
+  const layouts = data.settings.cards;
+  const move = (key: string, all: Item[], id: string, dir: -1 | 1) =>
+    update((d) => ({ ...d, settings: { ...d.settings, cards: { ...d.settings.cards, [key]: moveCard(all, layouts[key], id, dir) } } }));
+  const grid = view !== 'lista';
+  const row = (items: Item[], all: Item[], key: string) =>
+    items.map((it, i) => <Entry key={it.id} it={it} grid={grid} editing={editing} first={i === 0} last={i === items.length - 1} onMove={(dir) => move(key, all, it.id, dir)} />);
   return (
     <>
-      <div className="mg-grid">{row(mods)}</div>
+      {editing && <p className="muted small mais-edit-hint">Use as setas para mudar a ordem dos módulos e dos atalhos. Toque no lápis de novo para terminar.</p>}
+      <div className={grid ? 'mg-grid' : 'tile-grid'}>{row(mods, modules, KEY_MODULES)}</div>
       <h2 className="section-title">Atalhos</h2>
-      <div className="mg-grid small">{row(tools)}</div>
+      <div className={grid ? 'mg-grid small' : 'tile-grid'}>{row(tools, shortcuts, KEY_SHORTCUTS)}</div>
+      {!editing &&
+        insideGroups(data).map((g) => (
+          <section key={g.title} className="menu-group">
+            <h2 className="section-title">{g.title}</h2>
+            {view === 'grade' ? (
+              <div className="mg-grid small">
+                {g.items.map((it) => (
+                  <a key={it.to} className="mg-cell" href={`#/${it.to}`}>
+                    <span className="mg-icon">
+                      <Icon name={it.icon} size={22} />
+                    </span>
+                    <span className="mg-name">{it.label}</span>
+                  </a>
+                ))}
+              </div>
+            ) : (
+              <div className="menu-list">
+                {g.items.map((it) => (
+                  <a key={it.to} className="menu-row" href={`#/${it.to}`}>
+                    <span className="tile-icon">
+                      <Icon name={it.icon} size={18} />
+                    </span>
+                    <span className="menu-row-name">{it.label}</span>
+                    <Icon name="right" size={16} />
+                  </a>
+                ))}
+              </div>
+            )}
+          </section>
+        ))}
     </>
   );
 }
@@ -267,7 +321,7 @@ export function FavoritesSheet({ onClose }: { onClose: () => void }) {
   return (
     <Sheet title="Favoritos do Início" onClose={onClose}>
       <p className="muted small" style={{ marginTop: 0 }}>
-        Escolha 4. Ao marcar um novo, o mais antigo sai. Os outros módulos continuam no Mais e no menu ☰.
+        Escolha 4. Ao marcar um novo, o mais antigo sai. Os outros módulos continuam no menu, puxando a barra de baixo para cima.
       </p>
       <ul className="list">
         {FAVORITABLE.filter((f) => !isHidden(data, f.id)).map((f) => {

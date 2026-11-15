@@ -74,7 +74,10 @@ function apply(next: string[]) {
   } else write();
 }
 
-/** Abre uma tela. `switch` = barra de baixo e menu ☰; `open` = links e botões dentro das telas. */
+/** E25: há para onde voltar (a seta ‹ do topo aparece)? */
+export const canGoBack = () => trail.length > 1;
+
+/** Abre uma tela. `switch` = barra de baixo e menu; `open` = links e botões dentro das telas. */
 export function navigate(to: string, kind: NavKind = 'open') {
   trail = replaceTop(trail, here()); // o endereço pode ter sido limpo no lugar (ex.: financas/nova → financas)
   apply(nextStack(trail, to, kind, homeOf));

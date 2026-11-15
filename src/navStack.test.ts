@@ -57,7 +57,7 @@ test('ferramenta aberta por um link fora do módulo passa pela casa do módulo',
   assert.deepEqual(go(['inicio'], 'orcamento'), ['inicio', 'financas', 'orcamento']);
 });
 
-test('menu ☰ e barra: módulo fica logo acima do Início', () => {
+test('gaveta e barra: módulo fica logo acima do Início', () => {
   assert.deepEqual(go(['inicio', 'mais', 'estudos/notebook/1'], 'diario', 'switch'), ['inicio', 'diario']);
 });
 
