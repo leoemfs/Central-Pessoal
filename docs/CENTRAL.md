@@ -164,7 +164,7 @@
 ## Feito
 | Versão | O que entrou | PR |
 |---|---|---|
-| v0.56 | N10.1: módulo **Objetivos** (barra Grandes · **Objetivos** · Concluídos): todas as metas do app num lugar só (caixinhas, hábitos, ciclos, limites do orçamento, metas de carreira e do Você), filtro por área e situação, ações rápidas e "Editar meta" (muda no módulo de origem); **metas de carreira** com prazo e passos (também em Carreira › Metas); **Concluídos** por ano; cartão **Objetivos** no Início; quem escolhe "Metas e objetivos" na montagem ganha o favorito | — |
+| v0.56 | N10.1: módulo **Objetivos** (barra Grandes · **Objetivos** · Concluídos): todas as metas do app num lugar só (caixinhas, hábitos, ciclos, limites do orçamento, metas de carreira e do Você), filtro por área e situação, ações rápidas e "Editar meta" (muda no módulo de origem); **metas de carreira** com prazo e passos (também em Carreira › Metas); **Concluídos** por ano; cartão **Objetivos** no Início; quem escolhe "Metas e objetivos" na montagem ganha o favorito | #90 |
 | v0.55.2 | C14 (ajuste): o primeiro toque na **barra de baixo** logo depois de fechar o Mais sempre abre, e **tocar fora** sempre fecha a gaveta | — |
 | v0.55.1 | C14: na gaveta do Mais, o **primeiro toque** num módulo ou atalho sempre abre (antes, logo depois de puxar, às vezes precisava de dois toques) | #88 |
 | v0.55 | N2.1: Jornada com **personagem e cena** (criar avatar; céu pela hora, estrelas, chuva; classe, título, nível, XP, ouro, cristais) e **Ficha** com os 6 atributos; avatar guardado nos dados e no backup | #87 |
