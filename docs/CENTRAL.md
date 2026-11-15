@@ -171,7 +171,7 @@
 ## Feito
 | Versão | O que entrou | PR |
 |---|---|---|
-| v0.63.1 | M31 (ajuste): a descrição da trilha do pacote aparecia com as marcas do texto (##, **) na Biblioteca. Agora é uma frase curta; o texto completo fica na página de abertura do notebook. Quem já importou: importe de novo pelo mesmo link para limpar | — |
+| v0.63.1 | M31 (ajuste): a descrição da trilha do pacote aparecia com as marcas do texto (##, **) na Biblioteca. Agora é uma frase curta; o texto completo fica na página de abertura do notebook. Quem já importou: importe de novo pelo mesmo link para limpar | #107 |
 | v0.63 | M31 (parte 1): **Importar pacote de estudo** em Estudos (arquivo ou endereço; nunca apaga nem sobrescreve, só acrescenta) e o pacote pessoal **"Como o Central Pessoal foi feito", Parte 1** (9 tópicos com página, código, exercício e prompt; 14 fontes; mapa da arquitetura; ciclo pronto), dentro de Desenvolvimento de software. Link: `https://leoemfs.github.io/Central-Pessoal/#/estudos/importar/central-pessoal` | #106 |
 | v0.62 | M30: **mapa mental em tela cheia**. No mapa, "Editar em tela cheia" (ou tocar numa ideia) abre o editor: tocar seleciona, tocar de novo **escreve direto na ideia**; Enter salva e cria a próxima; barra de baixo com Filho, Irmão, Escrever, Recolher, Subir, Descer, Mover e Excluir, cores e **Desfazer** no topo. O painel de edição embaixo do mapa saiu | #105 |
 | v0.61.1 | E28: gaveta do menu com as **categorias do antigo menu** (Geral, Organização pessoal, Financeiro, Bem-estar, Estudos, Carreira, Planejamento) e os itens **"em breve"** de volta; e, rolando até o começo da lista e continuando a puxar para baixo, a gaveta **desce e fecha** | — |
