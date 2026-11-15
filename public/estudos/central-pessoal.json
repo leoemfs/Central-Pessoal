@@ -13,7 +13,8 @@
    "trilhas": [
     {
      "nome": "Parte 1: fundamentos e arquitetura",
-     "descricao": "## Sobre esta trilha\nO app que você usa todo dia, explicado por dentro: do toque na tela até o dado salvo e publicado. Cada página tem **para que serve**, **onde ver no código** (github.com/leoemfs/Central-Pessoal), ideias-chave, um **exercício** e um **prompt** para estudar com IA.\n\n> Próximas partes: Parte 2, tecnologias e APIs (Google, GitHub, testes); Parte 3, desenvolver com IA (Claude Code, CLAUDE.md, prompts). Importe o pacote de novo quando saírem: só o que é novo entra.",
+     "descricao": "O app por dentro: do toque na tela até o dado salvo e publicado.",
+     "pagina": "## Sobre esta trilha\nO app que você usa todo dia, explicado por dentro: do toque na tela até o dado salvo e publicado. Cada página tem **para que serve**, **onde ver no código** (github.com/leoemfs/Central-Pessoal), ideias-chave, um **exercício** e um **prompt** para estudar com IA.\n\n> Próximas partes: Parte 2, tecnologias e APIs (Google, GitHub, testes); Parte 3, desenvolver com IA (Claude Code, CLAUDE.md, prompts). Importe o pacote de novo quando saírem: só o que é novo entra.",
      "topicos": [
       {
        "nome": "Mapa do app: o que é o Central Pessoal por dentro",
