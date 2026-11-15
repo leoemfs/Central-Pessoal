@@ -84,3 +84,11 @@ test('pacote Curso de Claude: o arquivo publicado é válido e entra na área de
   assert.equal(r.study.areas.length, 0, 'usa a área do catálogo');
   assert.equal(r.study.themes[0].areaId, 'ia');
 });
+
+test('pacote Curso de GitHub: o arquivo publicado é válido', () => {
+  const p = parsePack(readFileSync(new URL('../public/estudos/curso-github.json', import.meta.url), 'utf8'));
+  assert.equal(typeof p, 'object', String(p));
+  const r = applyPack(emptyStudy(), p as StudyPack, '2026-11-16T10:00:00.000Z');
+  assert.equal(r.added.topicos, 9);
+  assert.equal(r.study.themes[0].areaId, 'dev');
+});
