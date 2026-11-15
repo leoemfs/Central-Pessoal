@@ -715,7 +715,66 @@ export interface SleepEntry {
   feel: SleepFeel | null;
 }
 
+/** Dieta (N1.2). */
+export type DietMark = 'segui' | 'parte' | 'fugi';
+export type DietSource = 'nutri' | 'eu';
+
+export interface DietMeal {
+  id: string;
+  /** Café da manhã, Almoço… */
+  name: string;
+  /** HH:MM ou vazio. */
+  time: string;
+  /** O que comer (a 1ª opção). */
+  food: string;
+  /** Outras opções ("ou isto"). */
+  alts: string[];
+}
+
+/** Variação do plano (ex.: dia de treino). Sem "dias diferentes", o plano tem uma só. */
+export interface DietVariant {
+  id: string;
+  name: string;
+  /** Dias da semana (0 = domingo) em que vale. */
+  days: number[];
+  meals: DietMeal[];
+}
+
+export interface DietPlan {
+  id: string;
+  name: string;
+  source: DietSource;
+  /** Nutricionista e data da consulta (opcionais). */
+  nutri: string;
+  consultDate: string | null;
+  notes: string;
+  /** Dias diferentes ligado: usa as variações por dia da semana. */
+  split: boolean;
+  variants: DietVariant[];
+  createdAt: string;
+}
+
+/** Uma refeição marcada no dia. */
+export interface DietLog {
+  mark: DietMark;
+  /** Qual opção comeu (0 = a principal). */
+  option: number;
+}
+
+export interface DietData {
+  plans: DietPlan[];
+  activeId: string | null;
+  /** Dia (AAAA-MM-DD) → refeição (id) → marcação. */
+  log: Record<string, Record<string, DietLog>>;
+  /** Variação escolhida à mão num dia (dia → id). */
+  dayVariant: Record<string, string>;
+  /** O que comeu fora do plano (dia → texto). */
+  extras: Record<string, string>;
+}
+
 export interface HealthData {
+  /** Dieta (N1.2). */
+  diet: DietData;
   water: {
     /** Meta do dia e quanto soma cada toque (ml). Valem só sem hábito ligado. */
     goal: number;

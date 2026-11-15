@@ -44,15 +44,25 @@ A ideia é ter a dieta **dentro** do módulo, para seguir no dia a dia.
 - Calorias e macros (proteína, carboidrato, gordura) ficam **fora da primeira versão**; se entrarem depois, ficam escondidos por padrão, como o peso.
 - "Fugi" não tem cor de erro nem aviso: é só registro.
 
-**A decidir antes de construir** (perguntar ao Leonardo):
-1. A dieta vem de nutricionista (copiar o plano pronto) ou é montada por você?
-2. Precisa de dias diferentes (ex.: dia de treino × dia de descanso) já na primeira versão?
+**Decidido em 15/11 (Leonardo: "opcional para ambos os casos"):**
+1. **Origem do plano:** as duas. Ao criar o plano, escolher "Da nutricionista" (copiar o plano pronto; campo opcional com nome e data da consulta) ou "Montei eu". Muda só o rótulo e a dica; a tela é a mesma.
+2. **Dias diferentes:** opcional. O padrão é "igual todos os dias"; quem quiser liga "dias diferentes" e cria variações (ex.: dia de treino × dia de descanso), escolhendo quais dias da semana usam cada uma. No "Hoje", o app mostra a variação do dia e deixa trocar com um toque.
+
+## Dieta × Receitas (ideia de 15/11, aguardando aprovação)
+**Regra:** a receita continua morando em **Listas** (tipo "receita", com porções, ingredientes e preparo); a Dieta só **aponta** para ela. Nada duplicado.
+- **No editor do plano:** em cada refeição (e em cada opção "ou isto"), botão "Ligar receita", que escolhe uma receita de Listas. Pode ter mais de uma.
+- **No Hoje e na aba Dieta:** a refeição mostra "📖 Receita: Omelete de legumes"; tocar abre a receita em Listas (porções, ingredientes, preparo).
+- **Lista de compras da semana:** botão "Gerar lista de compras" na aba Dieta junta os ingredientes das receitas ligadas às refeições da semana (quantas vezes cada uma aparece), usando o "mandar para a lista de mercado" que já existe nas receitas.
+- **Criar receita a partir da refeição:** "Nova receita" no editor cria a receita em Listas já com o nome da refeição.
+- Receita apagada em Listas: a ligação some sozinha, a refeição continua.
+
+**Partes:** N1.2a ligar e abrir receita (P) · N1.2b lista de compras da semana (M, junta com o "Depois" da Dieta). **Afeta:** Listas (receitas e lista de mercado).
 
 ## Divisão para construir
 Ordem sugerida (cada parte com versão, testes e PR próprios):
 1. **N1.0 Prévia visual:** versão P feita em 11/11 (Hoje, Consultas e check-ups, Dieta): https://claude.ai/artifact/LJRc3AgwWsTmuA8ymQCqEv. Aprovada pelo Leonardo; o resto (Histórico, menu do +, cartão no Início, Remédios, Medidas e selo no hábito) segue o documento.
 2. **N1.1 Água e Sono:** pronto na v0.66 (15/11). Barra Hoje · Saúde · Histórico; + registra sono. Ficou para depois: hábito "dormir no horário" marcado pelo sono e cartão da Saúde no Início.
-3. **N1.2 Dieta:** plano alimentar e "Hoje" com segui · em parte · fugi (M).
+3. **N1.2 Dieta:** pronto na v0.67 (15/11). Ficou para depois: hábito "Seguir a dieta" marcado sozinho, linha na Revisão semanal, lista de compras em Listas, lembretes das refeições e ponto na Jornada.
 4. **N1.3 Remédios:** horários, "tomei" e lembrete (M).
 5. **N1.4 Consultas, exames e check-ups:** entram e se atualizam sozinhos na Agenda, como Carreira; intervalo de check-up e cartão "Próximos check-ups" (M).
 6. **N1.5 Peso e medidas:** com gráfico, escondido por padrão (P).

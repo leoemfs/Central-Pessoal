@@ -86,10 +86,10 @@ export const SECTIONS: Section[] = [
   { path: 'objetivos', label: 'Objetivos', icon: 'flag', view: ObjetivosPage, fab: 'objetivos/menu' },
   { path: 'grandes', label: 'Grandes', icon: 'target', view: GrandesPage, fab: 'objetivos/menu' },
   { path: 'concluidos', label: 'Concluídos', icon: 'check', view: ConcluidosPage, fab: 'objetivos/menu' },
-  // Saúde (N1.1): o + registra uma noite de sono; a água soma com um toque nos cartões.
-  { path: 'saude', label: 'Saúde', icon: 'heartPulse', view: SaudePage, fab: 'saude/sono' },
-  { path: 'saudehoje', label: 'Hoje', icon: 'sun', view: SaudeHoje, fab: 'saudehoje/sono' },
-  { path: 'saudehist', label: 'Histórico', icon: 'clock', view: SaudeHistorico, fab: 'saudehist/sono' },
+  // Saúde: o + cria (sono ou plano de dieta); água e refeições marcam com um toque nos cartões.
+  { path: 'saude', label: 'Saúde', icon: 'heartPulse', view: SaudePage, fab: 'saude/menu' },
+  { path: 'saudehoje', label: 'Hoje', icon: 'sun', view: SaudeHoje, fab: 'saudehoje/menu' },
+  { path: 'saudehist', label: 'Histórico', icon: 'clock', view: SaudeHistorico, fab: 'saudehist/menu' },
 ];
 
 export const COMING_SOON: { label: string; icon: IconName; hint: string }[] = [
