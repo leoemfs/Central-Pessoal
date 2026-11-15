@@ -7594,3 +7594,55 @@ button.row:disabled {
   border-radius: 50%;
   background: var(--green);
 }
+
+/* N2.3: baús e "Desde a sua última visita" */
+.jn-since {
+  border-color: var(--accent);
+}
+.jn-since-dot {
+  width: 10px;
+  height: 10px;
+  margin: 0 7px;
+  border-radius: 2px;
+  background: var(--accent);
+  flex: none;
+}
+.jn-since-attrs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+.jn-since-attr {
+  padding: 4px 10px;
+  border: 1px solid;
+  border-radius: 999px;
+  font-size: 14px;
+}
+.jn-chest-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.jn-chest-row {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: none;
+  border: 0;
+  color: inherit;
+  text-align: left;
+  font: inherit;
+  cursor: pointer;
+}
+.jn-chest-row > img {
+  width: 40px;
+  height: 40px;
+  image-rendering: pixelated;
+  flex: none;
+}
+.jn-chest-row .row-body {
+  flex: 1;
+  min-width: 0;
+}

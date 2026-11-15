@@ -38,6 +38,20 @@ export interface JourneyState {
   title: string | null;
   chests: ChestRecord[];
   weather: 'aleatorio' | 'limpo';
+  /** N2.3: retrato da última visita, para o resumo "Desde a sua última visita". */
+  lastSeen: JourneySnapshot | null;
+}
+
+/** Retrato do que foi ganho até um momento (valores ganhos, não o que sobrou depois de gastar). */
+export interface JourneySnapshot {
+  date: string;
+  level: number;
+  xp: number;
+  gold: number;
+  crystals: number;
+  attrs: Attrs;
+  /** Baús merecidos até ali (abertos ou não). */
+  chests: number;
 }
 
 export function defaultJourneyState(): JourneyState {
@@ -50,6 +64,7 @@ export function defaultJourneyState(): JourneyState {
     title: 'aprendiz',
     chests: [],
     weather: 'aleatorio',
+    lastSeen: null,
   };
 }
 
@@ -68,6 +83,7 @@ export function normalizeJourney(raw: unknown): JourneyState {
     title: typeof r.title === 'string' ? r.title : base.title,
     chests: Array.isArray(r.chests) ? r.chests.filter((c) => c && typeof c.key === 'string') : [],
     weather: r.weather === 'limpo' ? 'limpo' : 'aleatorio',
+    lastSeen: normalizeSnapshot(r.lastSeen),
   };
 }
 
@@ -587,7 +603,7 @@ export interface HomeCard {
 /**
  * O cartão da Jornada no Início (Anexo E.1). Só aparece com a Jornada desbloqueada, o Modo Jornada ligado
  * ("Quero a Jornada") e "Mostrar a Jornada no Início" ligado. Por enquanto o status mostra, nesta ordem:
- * personagem por criar, baús esperando, quanto falta para o próximo nível. Novidades e chefe entram com a N2.3 e a campanha.
+ * personagem por criar, novidades desde a última visita (N2.3), baús esperando, quanto falta para o próximo nível. O chefe entra com a campanha.
  */
 export function homeCard(d: AppData, today: string = todayISO()): HomeCard | null {
   if (!unlockProgress(d, today).unlocked) return null;
@@ -596,8 +612,65 @@ export function homeCard(d: AppData, today: string = todayISO()): HomeCard | nul
   const state = d.journey;
   const base = { name: state.avatar?.name.trim() ?? '', level: s.level, pct: Math.round((s.xpInLevel / s.xpForNext) * 100) };
   if (!welcomed(state)) return { ...base, status: 'Crie seu personagem para começar', dot: true };
+  const news = sinceLastVisit(state.lastSeen, snapshot(d, state, today));
+  if (news) return { ...base, status: newsLine(news), dot: true };
   const chests = pendingChests(d, state, today, s.level).length;
   if (chests) return { ...base, status: chests === 1 ? '1 baú esperando' : `${chests} baús esperando`, dot: true };
   const left = s.xpForNext - s.xpInLevel;
   return { ...base, status: `Faltam ${left.toLocaleString('pt-BR')} XP para o nível ${s.level + 1}`, dot: false };
+}
+
+// ---------- N2.3: "Desde a sua última visita" ----------
+
+function normalizeSnapshot(raw: unknown): JourneySnapshot | null {
+  if (!raw || typeof raw !== 'object') return null;
+  const r = raw as Partial<JourneySnapshot>;
+  if (typeof r.date !== 'string') return null;
+  const n = (v: unknown) => (typeof v === 'number' && Number.isFinite(v) && v >= 0 ? v : 0);
+  const attrs = Object.fromEntries(ATTR_CODES.map((c) => [c, n((r.attrs as Partial<Attrs> | undefined)?.[c])])) as Attrs;
+  return { date: r.date, level: Math.max(1, n(r.level)), xp: n(r.xp), gold: n(r.gold), crystals: n(r.crystals), attrs, chests: n(r.chests) };
+}
+
+/** O retrato de agora (usa o que foi ganho, então gastar na loja não aparece como perda). */
+export function snapshot(d: AppData, state: JourneyState, today: string = todayISO()): JourneySnapshot {
+  const w = wallet(d, state, today);
+  return { date: today, level: w.level, xp: w.xp, gold: w.goldEarned, crystals: w.crystalsEarned, attrs: { ...w.attrs }, chests: earnedChests(d, today, w.level).length };
+}
+
+export interface SinceVisit {
+  days: number;
+  xp: number;
+  gold: number;
+  crystals: number;
+  levels: number;
+  attrs: { code: AttrCode; gain: number }[];
+  chests: number;
+}
+
+/** A diferença desde a última visita, ou null quando não há retrato ou nada mudou. */
+export function sinceLastVisit(prev: JourneySnapshot | null, now: JourneySnapshot): SinceVisit | null {
+  if (!prev) return null;
+  const pos = (n: number) => Math.max(0, n);
+  const out: SinceVisit = {
+    days: pos(diffDays(prev.date, now.date)),
+    xp: pos(now.xp - prev.xp),
+    gold: pos(now.gold - prev.gold),
+    crystals: pos(now.crystals - prev.crystals),
+    levels: pos(now.level - prev.level),
+    attrs: ATTR_CODES.map((code) => ({ code, gain: pos(now.attrs[code] - prev.attrs[code]) })).filter((a) => a.gain > 0),
+    chests: pos(now.chests - prev.chests),
+  };
+  return out.xp || out.gold || out.crystals || out.levels || out.attrs.length || out.chests ? out : null;
+}
+
+/** Texto curto das novidades, para o cartão do Início ("Novidades: +80 XP · 1 baú"). */
+export function newsLine(n: SinceVisit): string {
+  const parts: string[] = [];
+  if (n.levels) parts.push(n.levels === 1 ? 'subiu de nível' : `+${n.levels} níveis`);
+  if (n.xp) parts.push(`+${n.xp.toLocaleString('pt-BR')} XP`);
+  if (n.chests) parts.push(n.chests === 1 ? '1 baú' : `${n.chests} baús`);
+  if (!parts.length && n.gold) parts.push(`+${n.gold.toLocaleString('pt-BR')} ouro`);
+  if (!parts.length && n.attrs.length) parts.push('atributos subiram');
+  if (!parts.length && n.crystals) parts.push(n.crystals === 1 ? '+1 cristal' : `+${n.crystals} cristais`);
+  return `Novidades: ${parts.join(' · ')}`;
 }

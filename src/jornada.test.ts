@@ -18,6 +18,9 @@ import {
   equip,
   equipmentBonus,
   homeCard,
+  newsLine,
+  sinceLastVisit,
+  snapshot,
   monthsAllOnTime,
   normalizeJourney,
   openChest,
@@ -350,4 +353,34 @@ test('N2.2: cartão no Início só com a Jornada desbloqueada, o Modo Jornada e 
   d.settings.journeyCard = false;
   assert.equal(homeCard(d, today), null, 'cartão desligado em Configurações');
   assert.equal(normalize({ ...d, settings: { ...d.settings, journeyCard: undefined } } as never).settings.journeyCard, true, 'dados antigos: ligado');
+});
+
+test('N2.3: "Desde a sua última visita" mostra só o que subiu, e o Início avisa as novidades', () => {
+  const today = '2026-11-16';
+  const d = emptyData();
+  d.settings.journeyUnlockedAt = today;
+  d.settings.journeyChoice = 'quero';
+  d.journey = welcomeState(d.journey, { gender: 'f', skin: 'media', hair: 'castanho', name: 'Lia' }, 'gato', today);
+  const before = snapshot(d, d.journey, today);
+  assert.equal(sinceLastVisit(null, before), null, 'primeira visita: sem resumo');
+  assert.equal(sinceLastVisit(before, before), null, 'nada mudou: sem resumo');
+  const later = { ...before, date: '2026-11-19', xp: before.xp + 80, gold: before.gold + 12, attrs: { ...before.attrs, DIS: before.attrs.DIS + 2 }, chests: before.chests + 1 };
+  const n = sinceLastVisit(before, later)!;
+  assert.equal(n.days, 3);
+  assert.equal(n.xp, 80);
+  assert.equal(n.gold, 12);
+  assert.deepEqual(n.attrs, [{ code: 'DIS', gain: 2 }]);
+  assert.equal(n.chests, 1);
+  assert.equal(newsLine(n), 'Novidades: +80 XP · 1 baú');
+  // Gastar na loja não aparece como perda.
+  assert.equal(sinceLastVisit(later, { ...later, gold: later.gold - 50 }), null);
+  // Cartão do Início: com retrato antigo, as novidades vêm primeiro.
+  d.journey = { ...d.journey, lastSeen: { ...snapshot(d, d.journey, today), gold: 0 } };
+  assert.equal(homeCard(d, today)!.status, 'Novidades: +50 ouro');
+  assert.ok(homeCard(d, today)!.dot);
+  d.journey = { ...d.journey, lastSeen: snapshot(d, d.journey, today) };
+  assert.doesNotMatch(homeCard(d, today)!.status, /^Novidades/);
+  // Backup antigo: sem retrato.
+  assert.equal(normalize({ ...d, journey: { ...d.journey, lastSeen: undefined } } as never).journey.lastSeen, null);
+  assert.deepEqual(normalize(d).journey.lastSeen, d.journey.lastSeen);
 });
