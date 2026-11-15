@@ -8,11 +8,11 @@ import { useEffect, useRef, useState } from 'react';
 import { useStore } from '../store';
 import { journeyStats, unlockProgress, UNLOCK_DAYS, UNLOCK_WINDOW } from '../journey';
 import { ATTRIBUTES } from '../habits';
-import { todayISO } from '../utils';
-import { Toggle } from '../ui';
+import { formatDMY, todayISO } from '../utils';
+import { Sheet, Toggle } from '../ui';
 import { avatarIcon, chestIcon, COIN_ICON, GEM_ICON, homeIcon, itemById, itemIcon, petIcon, PETS, RARITY, treeIcon, skyPalette, ATTR_CODES, type AvatarLook } from '../jornada/catalog';
 import { HAIRS, SKINS } from '../jornada/artData';
-import { classOf, recentAttributes, TITLES, wallet, welcomed, welcomeState, type JourneyState } from '../jornada/rules';
+import { classOf, openChest, pendingChests, recentAttributes, sinceLastVisit, snapshot, TITLES, wallet, welcomed, welcomeState, type Chest, type ChestRecord, type JourneyState, type SinceVisit } from '../jornada/rules';
 import { skyAt, starPositions } from '../jornada/sky';
 
 type Look = { gender: 'f' | 'm'; skin: string; hair: string; name: string };
@@ -382,6 +382,14 @@ export function JornadaHome() {
   const [step, setStep] = useState<'create' | 'welcome'>('create');
   const [editing, setEditing] = useState(false);
   const top = () => window.scrollTo({ top: 0 });
+  // N2.3: o resumo usa o retrato da visita anterior; logo ao entrar, o retrato passa a ser o de agora.
+  const [since, setSince] = useState<SinceVisit | null>(() => (welcomed(state) ? sinceLastVisit(state.lastSeen, snapshot(data, state, today)) : null));
+  const [opening, setOpening] = useState<Chest | null>(null);
+  const chestsRef = useRef<HTMLElement>(null);
+  const isWelcomed = welcomed(state);
+  useEffect(() => {
+    if (isWelcomed) update((d) => ({ ...d, journey: { ...d.journey, lastSeen: snapshot(d, d.journey, todayISO()) } }));
+  }, [isWelcomed]); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (!welcomed(state)) {
     if (step === 'create')
@@ -432,9 +440,17 @@ export function JornadaHome() {
   const title = TITLES.find((x) => x.id === state.title);
   const maxAttr = Math.max(10, ...ATTR_CODES.map((c) => w.attrs[c]));
   const gk = look.gender;
+  const chests = pendingChests(data, state, today, s.level);
 
   return (
     <>
+      {since && (
+        <SinceCard
+          n={since}
+          onChests={() => chestsRef.current?.scrollIntoView({ behavior: reduced() ? 'auto' : 'smooth', block: 'start' })}
+          onClose={() => setSince(null)}
+        />
+      )}
       <section className="card raised journey-hero">
         <JourneyScene look={look} state={state} activeDays={data.settings.activeDays} now={now} />
         <div className="journey-info">
@@ -477,6 +493,51 @@ export function JornadaHome() {
           </div>
         </div>
       </section>
+
+      <section className="card" ref={chestsRef}>
+        <div className="card-head">
+          <h2>Baús</h2>
+          {chests.length > 0 && <span className="pill green">{chests.length}</span>}
+        </div>
+        {chests.length === 0 ? (
+          <p className="muted small">Nenhum baú esperando. Eles chegam com 7 dias seguidos de rotina, 30 dias de consistência, revisão com 80% da rotina, mês com as contas em dia, a cada 5 níveis e nos dias sem um hábito a abandonar.</p>
+        ) : (
+          <ul className="list jn-chest-list">
+            {chests.map((c) => (
+              <li key={c.key}>
+                <button type="button" className="row jn-chest-row" onClick={() => setOpening(c)}>
+                  <img alt="" src={chestIcon(c.kind, false)} />
+                  <span className="row-body">
+                    <span className="row-title">{CHEST_NAMES[c.kind]}</span>
+                    <span className="row-meta">
+                      {c.reason} · {formatDMY(c.date)}
+                    </span>
+                  </span>
+                  <span className="btn soft small">Abrir</span>
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
+
+      {opening && (
+        <ChestSheet
+          chest={opening}
+          onOpen={(c) => {
+            let rec: ChestRecord | null = null;
+            update((d) => {
+              if (d.journey.chests.some((x) => x.key === c.key)) return d;
+              const r = openChest(d.journey, c, todayISO());
+              rec = r.record;
+              const next = { ...d, journey: r.state };
+              return { ...next, journey: { ...r.state, lastSeen: snapshot(next, r.state, todayISO()) } };
+            });
+            return rec ?? openChest(state, c, today).record;
+          }}
+          onClose={() => setOpening(null)}
+        />
+      )}
 
       <section className="card">
         <div className="card-head">
@@ -564,5 +625,129 @@ export function JornadaHome() {
         </div>
       </section>
     </>
+  );
+}
+
+// ---------- N2.3: baús e "Desde a sua última visita" ----------
+
+const CHEST_NAMES: Record<Chest['kind'], string> = { bronze: 'Baú de bronze', prata: 'Baú de prata', dourado: 'Baú dourado', cristal: 'Baú de cristal' };
+
+function SinceCard({ n, onChests, onClose }: { n: SinceVisit; onChests: () => void; onClose: () => void }) {
+  const when = n.days === 0 ? 'Desde a sua última visita, hoje' : n.days === 1 ? 'Desde ontem' : `Desde a sua última visita, há ${n.days} dias`;
+  const rows: { key: string; icon?: string; text: React.ReactNode; color?: string }[] = [];
+  if (n.levels) rows.push({ key: 'nivel', text: <strong className="jn-px">{n.levels === 1 ? 'Subiu de nível!' : `Subiu ${n.levels} níveis!`}</strong> });
+  if (n.xp) rows.push({ key: 'xp', text: <><strong className="jn-px">+<CountUp to={n.xp} /></strong> XP</> });
+  if (n.gold) rows.push({ key: 'ouro', icon: COIN_ICON, text: <><strong className="jn-px" style={{ color: 'var(--jn-gold)' }}>+<CountUp to={n.gold} delay={150} /></strong> ouro</> });
+  if (n.crystals) rows.push({ key: 'cristal', icon: GEM_ICON, text: <><strong className="jn-px" style={{ color: 'var(--jn-crystal)' }}>+<CountUp to={n.crystals} delay={300} /></strong> {n.crystals === 1 ? 'cristal' : 'cristais'}</> });
+  return (
+    <section className="card raised jn-since" aria-live="polite">
+      <div className="card-head">
+        <h2>{when}</h2>
+      </div>
+      <div className="jn-loot">
+        {rows.map((r, i) => (
+          <div key={r.key} className="jn-loot-row" style={{ animationDelay: `${i * 0.15}s` }}>
+            {r.icon ? <img alt="" src={r.icon} /> : <span className="jn-since-dot" aria-hidden="true" />}
+            <div>
+              <span>{r.text}</span>
+            </div>
+          </div>
+        ))}
+      </div>
+      {n.attrs.length > 0 && (
+        <div className="jn-since-attrs">
+          {n.attrs.map((a) => {
+            const at = ATTRIBUTES.find((x) => x.code === a.code)!;
+            return (
+              <span key={a.code} className="jn-since-attr" style={{ borderColor: at.color }}>
+                <strong style={{ color: at.color }}>{a.code}</strong> +{fmt(a.gain)}
+              </span>
+            );
+          })}
+        </div>
+      )}
+      <div className="btn-row" style={{ marginTop: 14 }}>
+        {n.chests > 0 && (
+          <button
+            type="button"
+            className="btn primary"
+            onClick={() => {
+              onClose();
+              onChests();
+            }}
+          >
+            {n.chests === 1 ? 'Ver o baú novo' : `Ver os ${n.chests} baús novos`}
+          </button>
+        )}
+        <button type="button" className={`btn${n.chests > 0 ? ' ghost' : ' primary'}`} onClick={onClose}>
+          Continuar
+        </button>
+      </div>
+    </section>
+  );
+}
+
+function ChestSheet({ chest, onOpen, onClose }: { chest: Chest; onOpen: (c: Chest) => ChestRecord; onClose: () => void }) {
+  const [phase, setPhase] = useState<'idle' | 'shake' | 'open'>('idle');
+  const [rec, setRec] = useState<ChestRecord | null>(null);
+  const timers = useRef<number[]>([]);
+  useEffect(() => () => timers.current.forEach((t) => window.clearTimeout(t)), []);
+  const open = () => {
+    if (phase !== 'idle') return;
+    const r = onOpen(chest);
+    setRec(r);
+    setPhase('shake');
+    if (reduced()) return setPhase('open');
+    timers.current.push(window.setTimeout(() => setPhase('open'), 650));
+  };
+  const item = rec?.item ? itemById(rec.item) : null;
+  return (
+    <Sheet
+      title={CHEST_NAMES[chest.kind]}
+      onClose={onClose}
+      footer={
+        <button type="button" className="btn primary block" onClick={phase === 'open' ? onClose : open} disabled={phase === 'shake'}>
+          {phase === 'open' ? 'Guardar' : 'Abrir o baú'}
+        </button>
+      }
+    >
+      <p className="muted small center">{chest.reason}</p>
+      <div className={`jn-chest-stage${phase === 'open' ? ' open' : ''}`}>
+        <i className="jn-rays" />
+        <button type="button" className={`jn-chest ${phase === 'idle' ? 'idle' : phase === 'shake' ? 'shake' : 'pop'}`} aria-label={`Abrir o ${CHEST_NAMES[chest.kind].toLowerCase()}`} onClick={open}>
+          <img alt="" src={chestIcon(chest.kind, phase === 'open')} />
+        </button>
+        {phase === 'idle' && <span className="jn-hint jn-px">TOQUE!</span>}
+      </div>
+      {phase === 'open' && rec && (
+        <div className="jn-loot">
+          {item && (
+            <div className="jn-loot-row">
+              <img alt="" src={itemIcon(item)} />
+              <div>
+                <strong>{item.name}</strong>
+                <span style={{ color: RARITY[item.rarity].color }}>{RARITY[item.rarity].label} · já está no seu arsenal</span>
+              </div>
+            </div>
+          )}
+          <div className="jn-loot-row" style={{ animationDelay: '0.18s' }}>
+            <img alt="" src={COIN_ICON} />
+            <div>
+              <strong>+{fmt(rec.gold)} ouro</strong>
+              <span className="muted small">Para gastar na loja</span>
+            </div>
+          </div>
+          {rec.crystals > 0 && (
+            <div className="jn-loot-row" style={{ animationDelay: '0.36s' }}>
+              <img alt="" src={GEM_ICON} />
+              <div>
+                <strong>+{rec.crystals} {rec.crystals === 1 ? 'cristal' : 'cristais'}</strong>
+                <span className="muted small">Moeda da forja mística</span>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+    </Sheet>
   );
 }

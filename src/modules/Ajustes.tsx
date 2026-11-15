@@ -243,6 +243,28 @@ export function Ajustes({ route }: ViewProps) {
           })}
         </div>
 
+        {data.settings.journeyUnlockedAt && !data.settings.hiddenModules.includes('jornada') && (
+          <>
+            <h3 className="pz-title">Jornada</h3>
+            <div className="toggle-row">
+              <div>
+                <strong>Modo Jornada</strong>
+                <span className="muted small">Desligado, o app fica sem nada de jogo. Nada se perde: o XP e os registros continuam guardados, e a Jornada volta inteira ao ligar.</span>
+              </div>
+              <Toggle checked={data.settings.journeyChoice === 'quero'} onChange={(v) => setSetting({ journeyChoice: v ? 'quero' : 'depois' })} label="Modo Jornada" />
+            </div>
+            {data.settings.journeyChoice === 'quero' && (
+              <div className="toggle-row">
+                <div>
+                  <strong>Mostrar a Jornada no Início</strong>
+                  <span className="muted small">Um cartão com o personagem, o nível e o que há de novo.</span>
+                </div>
+                <Toggle checked={data.settings.journeyCard} onChange={(v) => setSetting({ journeyCard: v })} label="Mostrar a Jornada no Início" />
+              </div>
+            )}
+          </>
+        )}
+
         {!data.settings.hiddenModules.includes('diario') && (
           <>
             <h3 className="pz-title">Ritmo do Diário</h3>

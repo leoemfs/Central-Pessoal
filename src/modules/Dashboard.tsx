@@ -27,6 +27,8 @@ import { JournalRhythmCard, SetupInvite } from './Montagem';
 import { isHidden } from '../setup';
 import { activeCycles, cycleCounts, library } from '../estudos';
 import { GoalsCard } from './Objetivos';
+import { homeCard } from '../jornada/rules';
+import { avatarIcon } from '../jornada/catalog';
 
 function SeeAll({ href, label = 'Ver tudo' }: { href: string; label?: string }) {
   return (
@@ -121,7 +123,9 @@ export function Dashboard() {
   ];
 
   // Módulos guardados (desligados na montagem) saem do "Seu dia" e dos cartões do Início.
-  const day = allDay.filter((d) => !isHidden(data, d.to));
+  // N2.2: com o Modo Jornada ligado, a Jornada tem o próprio cartão; desligado, nada de jogo no Início.
+  const journeyRow = !journey.unlocked || data.settings.journeyChoice === null;
+  const day = allDay.filter((d) => !isHidden(data, d.to) && (d.to !== 'jornada' || journeyRow));
   const off = (mod: string) => isHidden(data, mod);
 
   const backupDays = data.settings.lastBackupAt ? Math.floor((Date.now() - new Date(data.settings.lastBackupAt).getTime()) / 864e5) : null;
@@ -165,6 +169,9 @@ export function Dashboard() {
           ))}
         </ul>
       </section>
+    ) },
+    { id: 'jornada', label: 'Jornada', node: (
+      !off('jornada') && <JourneyCard />
     ) },
     { id: 'orcamento', label: 'Aviso de orçamento', lock: 'keep', node: (
       <BudgetAlerts />
@@ -388,5 +395,34 @@ export function Dashboard() {
       <CardScreen screen="inicio" cards={cards.filter((c) => !OF_MODULE[c.id] || !off(OF_MODULE[c.id]))} />
       {interview && <Interview start={p.onboarding.step} onClose={() => setInterview(false)} />}
     </>
+  );
+}
+
+/** N2.2: cartão compacto da Jornada (Anexo E.1). Só com a Jornada desbloqueada e o Modo Jornada ligado. */
+function JourneyCard() {
+  const { data } = useStore();
+  const card = homeCard(data, todayISO());
+  if (!card) return null;
+  const look = data.journey.avatar;
+  const eq = data.journey.equipped;
+  return (
+    <a className="card journey-card" href="#/jornada">
+      <span className="journey-card-face">
+        {look ? <img src={avatarIcon(look, { elmo: eq.elmo, armadura: eq.armadura, botas: eq.botas, arma: eq.arma })} alt="" /> : <Icon name="sword" size={24} />}
+      </span>
+      <span className="journey-card-body">
+        <strong>
+          Jornada{card.name ? ` · ${card.name}` : ''} · nível {card.level}
+        </strong>
+        <span className="xp-bar thin" aria-hidden="true">
+          <span style={{ width: `${card.pct}%` }} />
+        </span>
+        <span className="muted small journey-card-status">
+          {card.dot && <i className="dot-new" aria-hidden="true" />}
+          {card.status}
+        </span>
+      </span>
+      <Icon name="right" size={18} />
+    </a>
   );
 }

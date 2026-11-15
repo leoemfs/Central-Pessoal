@@ -262,6 +262,8 @@ export interface Settings {
   journeyUnlockedAt: string | null;
   /** Resposta depois de desbloquear: quer a Jornada ou não por agora. */
   journeyChoice: 'quero' | 'depois' | null;
+  /** N2.2: cartão da Jornada no Início (só com o Modo Jornada ligado). */
+  journeyCard: boolean;
   /** Módulos desligados (ficam guardados no Mais, sem apagar nada). Ids de MODULES em setup.ts. */
   hiddenModules: string[];
   /** Montagem do app (E14): novo = abre sozinha; convite = quem já usava vê um cartão no Início; feito = já montou ou dispensou. */
