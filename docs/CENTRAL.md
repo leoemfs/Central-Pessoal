@@ -47,6 +47,7 @@
 ## Caixa de entrada
 *Ideias e problemas ainda sem classificar. Uma linha cada, com a data.*
 
+- 15/11: Dieta × Receitas: ligar receitas de Listas às refeições do plano, abrir a receita pela refeição e gerar a lista de compras da semana. Anotado no N1 (N1.2a P e N1.2b M), aguardando aprovação.
 - 09/11: Saúde com **dieta dentro** (plano alimentar e "segui · em parte · fugi" no dia a dia). Já anotado no N1 (parte N1.2).
 - 09/11: Saúde e treinos ligados aos hábitos sem trocar de módulo (ex.: beber água). Anotado no N1, seção "Ligação com Hábitos e Treinos".
 - 09/11: Saúde é módulo à parte (decidido). Marcar check-up, consultas e dentista, com intervalo para repetir e lembrete do próximo. Anotado no N1 (parte N1.4).
