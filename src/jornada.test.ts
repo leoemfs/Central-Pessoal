@@ -32,6 +32,7 @@ import {
   visitStats,
   wallet,
   welcomeState,
+  pendingGifts,
   type ShopContext,
 } from './jornada/rules.ts';
 import { phaseAt, rainWindow, skyAt, starPositions, starsTonight } from './jornada/sky.ts';
@@ -231,8 +232,10 @@ test('equipar: só o que tem, no espaço certo; segundo artefato no nível 20', 
 
 test('pets e moradas: por nível, atributo e ouro', () => {
   const s = defaultJourneyState();
-  assert.equal(acquirePlace('pet', 'gato', s, ctx({ level: 2 })), 'Ainda não liberado');
-  assert.ok(typeof acquirePlace('pet', 'gato', s, ctx({ level: 3 })) !== 'string');
+  assert.equal(acquirePlace('pet', 'gato', s, ctx({ level: 6 })), 'Ainda não liberado');
+  assert.ok(typeof acquirePlace('pet', 'gato', s, ctx({ level: 7 })) !== 'string');
+  assert.equal(acquirePlace('pet', 'coruja', s, ctx({ level: 30, petGoals: { coruja: { have: 79, need: 80 } } })), 'Ainda não liberado');
+  assert.ok(typeof acquirePlace('pet', 'coruja', s, ctx({ petGoals: { coruja: { have: 80, need: 80 } } })) !== 'string');
   assert.equal(acquirePlace('pet', 'cavalo', s, ctx({ level: 12, attrs: attrs({ AGI: 49 }) })), 'Ainda não liberado');
   assert.equal(acquirePlace('morada', 'pedra', s, ctx({ level: 15, gold: 100 })), 'Faltam 500 de ouro');
   const home = acquirePlace('morada', 'pedra', s, ctx({ level: 15, gold: 600 }));
@@ -414,4 +417,26 @@ test('N2.5: forjar exige atributos e cristais e gasta os cristais; título conqu
   assert.equal((after as ReturnType<typeof defaultJourneyState>).crystalsSpent, 3);
   assert.equal(typeof acquire(st, 'aladas', ctx({ attrs: attrs({ AGI: 99 }), crystals: 3 })), 'string');
   assert.equal(typeof acquire(st, 'aladas', ctx({ attrs: attrs({ AGI: 100 }), crystals: 2 })), 'string');
+});
+
+test('N2.6: presente do dia por abrir o app, uma vez por dia; 7º dia é baú; o ouro entra na carteira', () => {
+  const days = Array.from({ length: 7 }, (_, i) => addDays('2026-11-22', -6 + i));
+  const d = withData({ settings: { ...emptyData().settings, journeyUnlockedAt: '2026-11-01', visitDays: days } });
+  const pend = pendingGifts(d, d.journey, '2026-11-22');
+  assert.equal(pend.length, 7);
+  assert.deepEqual(pend.map((g) => g.gold), [10, 15, 20, 25, 30, 40, 0]);
+  assert.equal(pend[6].chest, 'bronze');
+  const st = { ...d.journey, gifts: pend };
+  assert.equal(pendingGifts(d, st, '2026-11-22').length, 0, 'não repete');
+  assert.equal(wallet({ ...d, journey: st }, st, '2026-11-22').gold - wallet(d, d.journey, '2026-11-22').gold, 140);
+  assert.ok(earnedChests({ ...d, journey: st }, '2026-11-22').some((c) => c.key === 'bronze:visita:2026-11-22'));
+});
+
+test('N2.6: pets novos com pelagens; nome e pelagem vêm do backup', () => {
+  assert.equal(PETS.length, 16);
+  for (const p of PETS) assert.match(petIcon(p.id, 'qualquer'), /^data:image\/svg\+xml,/);
+  const s = normalizeJourney({ petNames: { gato: 'Mingau', x: 3 }, petStyle: { gato: 'laranja' } });
+  assert.deepEqual(s.petNames, { gato: 'Mingau' });
+  assert.deepEqual(s.petStyle, { gato: 'laranja' });
+  assert.deepEqual(s.gifts, []);
 });

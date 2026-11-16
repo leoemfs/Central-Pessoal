@@ -9732,3 +9732,151 @@ body.bar-labels.bar-flat .tabbar .tb-label {
   flex-direction: column;
   gap: 2px;
 }
+
+/* ---------- Jornada N2.6: pets, casas e presente do dia ---------- */
+.jn-pets {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+.jn-pet-card {
+  border: 2px solid var(--border);
+  background: var(--raised);
+  color: var(--text);
+  border-radius: 18px;
+  padding: 0 0 10px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  text-align: center;
+  font: inherit;
+}
+.jn-pet-card > :not(.jn-pet-meadow) {
+  padding-inline: 8px;
+}
+.jn-pet-card.on {
+  border-color: var(--green);
+}
+.jn-pet-card:not(.has) strong {
+  color: var(--muted);
+}
+.jn-pet-meadow {
+  position: relative;
+  width: 100%;
+  height: 92px;
+  display: grid;
+  place-items: end center;
+  padding-bottom: 10px;
+  margin-bottom: 4px;
+  background: linear-gradient(#bae6fd 0 62%, #22c55e 62% 68%, #16a34a 68%);
+}
+.jn-pet-meadow img {
+  height: 54px;
+  max-width: 80%;
+  object-fit: contain;
+  image-rendering: pixelated;
+}
+.jn-pet-card.has .jn-pet-meadow img {
+  animation: jn-bob 1.2s ease-in-out infinite;
+}
+.jn-pet-meadow b {
+  position: absolute;
+  top: 6px;
+  left: 6px;
+  padding: 1px 6px;
+  border-radius: 6px;
+  background: var(--green);
+  color: var(--on-green);
+  font-size: 10px;
+}
+.jn-pet-meadow.big {
+  height: 150px;
+  border-radius: 16px;
+}
+.jn-pet-meadow.big img {
+  height: 90px;
+}
+.jn-pet-edit {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.jn-chipset button:disabled {
+  opacity: 0.45;
+}
+.jn-homes {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.jn-homes li {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.jn-homes img {
+  width: 64px;
+  max-height: 64px;
+  object-fit: contain;
+  flex: none;
+  image-rendering: pixelated;
+}
+.jn-homes li > div {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.jn-gift.ready {
+  border-color: rgb(250 204 21 / 0.45);
+  background: linear-gradient(160deg, rgb(250 204 21 / 0.1), var(--raised) 70%);
+}
+.jn-flame {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: #fb923c;
+  font-size: 16px;
+}
+.jn-strip {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 6px;
+}
+.jn-strip li {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 2px;
+  border-radius: 12px;
+  background: var(--raised-2);
+  border: 2px solid transparent;
+  font-size: 12px;
+}
+.jn-strip img {
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
+  image-rendering: pixelated;
+}
+.jn-strip li.now {
+  border-color: var(--jn-gold);
+}
+.jn-strip li.got {
+  opacity: 0.45;
+}
+@media (prefers-reduced-motion: reduce) {
+  .jn-pet-card.has .jn-pet-meadow img {
+    animation: none;
+  }
+}

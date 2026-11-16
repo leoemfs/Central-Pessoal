@@ -630,7 +630,7 @@ A Jornada desbloqueia em 16/11. Até aqui existiam só as regras e as artes (pas
 | **N2.3** Baús e "Desde a sua última visita" (**feito: v0.59**; os acontecimentos guardados depois do resumo, como títulos e chefe, entram com a N2.5 e a campanha) | baús de rotina e cristais (B.4) com abertura animada; resumo da diferença desde a última visita (E.2) | M |
 | **N2.4** Arsenal e loja (**feito: v0.60**; os místicos ficam para a Forja, N2.5; pets e moradas, N2.6) | inventário, provador, vestir e tirar, comprar com ouro (B.2, B.3); avatar em tela cheia (B.10) | M |
 | **N2.5** Títulos, forja e classes (**feito, v0.82**) | lista de títulos e título em uso (B.6); forja mística com requisitos de atributo (B.5); classes e híbridas (B.7) | M |
-| **N2.6** Pets, moradas e visitas | pets e moradas (B.8, F.3); presentes por sequência de visitas (F.2) | M |
+| **N2.6** Pets, moradas e visitas (**feito, v0.83**) | pets e moradas (B.8, F.3); presentes por sequência de visitas (F.2) | M |
 | **N2.7** Codex e raridades | Codex por coleções, silhuetas com a dica (F.5); bônus por raridade (`jornada-raridades.md`) | M |
 | **N2.8** Efeitos dos místicos | escudo semanal, XP em dobro depois da recaída, cristal por revisão e por mês em dia, baú extra por nível, ouro extra por estudo (ver "Ainda não programado" no B.12) | M |
 | **N2.9a** Missões (**feito, v0.73**) | missões de hoje (os próprios hábitos, tarefas, contas e diário; marcar ali é marcar no módulo) e da semana (Diário no ritmo, bônus de 10 XP por vez combinada desde o desbloqueio; revisão semanal), sem punição | M |
@@ -657,8 +657,8 @@ Prévias: **"Jornada RPG"** (https://claude.ai/artifact/62xbF4H9CfYjaz7RaX554h, 
 | **Conquistas** (medalhas com data; "Próximas" com barra de progresso) | v1 · Conquistas | feito (v0.82) como **Títulos** (a prancha v3 substituiu as conquistas da v1: medalhas, progresso dos que faltam) | **N2.5** |
 | **Título em uso** embaixo do nome, escolher título, **forja mística**, classes e **híbridas** explicadas | v3 · Títulos, forja mística e classes | feito (v0.82) | **N2.5** |
 | **Desbloqueios por atributo** na Ficha ("Força 40 → Bracelete do titã") | v2 · Atributos do avatar | feito (v0.82), com o ganho da semana e de onde vem cada atributo | **N2.5** |
-| **Pets e moradas** (escolher, editar nome e cor do pet) | v3 · Pets e moradas; Prévia da Jornada (Arsenal › Pets) | falta | **N2.6** |
-| **Presente do dia** por abrir o app, chama de dias seguidos com 1 folga por semana | Prévia da Jornada (F.2) | só os dados (`visitDays`) | **N2.6** |
+| **Pets e moradas** (escolher, editar nome e cor do pet) | v3 · Pets e moradas; Prévia da Jornada (Arsenal › Pets) | feito (v0.83): 16 pets com cores, nome, casas | **N2.6** |
+| **Presente do dia** por abrir o app, chama de dias seguidos com 1 folga por semana | Prévia da Jornada (F.2) | feito (v0.83): tira de 7 dias e chama; os títulos de visita (30, 100, 365 dias) ficam para a N2.7 | **N2.6** |
 | **Coleção / Codex** (9 de 19; silhuetas com dica) | v2 · Coleção; Prévia da Jornada (Arsenal › Codex) | falta (cadeado na barra) | **N2.7** |
 | **"Como ganhar XP e ouro"** (regras justas, por módulo) | v2 · Como ganha XP e ouro | feito (v0.81), na Ficha | **N2.13** |
 | **Pote da caixinha** na cena e "Guardar" nas missões | Prévia da Jornada | falta | **N2.10** |

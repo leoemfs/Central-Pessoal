@@ -21,6 +21,9 @@ import { go, useRoute } from '../router';
 import { journeyTab } from '../jornada/tabs';
 import { Entrevista } from './JornadaEntrevista';
 import { TelaCheia } from './JornadaTelaCheia';
+import { GiftCard, HomesView, PetsView } from './JornadaPets';
+
+type ArsenalView = 'itens' | 'pets' | 'casas';
 import { AttrsCard, ClassesView, ForgeView, TitlesView, UnlocksCard } from './JornadaFicha';
 
 type FichaTab = 'ficha' | 'titulos' | 'forja' | 'classes';
@@ -378,7 +381,7 @@ export function JourneyScene({ look, state, activeDays, now }: { look: AvatarLoo
       <img className="jn-home" src={homeIcon(state.equipped.morada, phase)} alt="" />
       <img className="jn-tree" src={treeIcon(phase)} alt="" />
       <img className="jn-avatar" src={avatarIcon(look, outfit)} alt="" />
-      {state.equipped.pet && <img className="jn-pet" src={petIcon(state.equipped.pet)} alt="" />}
+      {state.equipped.pet && <img className="jn-pet" src={petIcon(state.equipped.pet, state.petStyle[state.equipped.pet])} alt="" />}
       {sky.rain && <div className="jn-rain" />}
     </div>
   );
@@ -396,6 +399,7 @@ export function JornadaHome() {
   const [editing, setEditing] = useState(false);
   const [interviewing, setInterviewing] = useState(false);
   const [fichaTab, setFichaTab] = useState<FichaTab>('ficha');
+  const [arsenalView, setArsenalView] = useState<ArsenalView>('itens');
   const top = () => window.scrollTo({ top: 0 });
   // N2.3: o resumo usa o retrato da visita anterior; logo ao entrar, o retrato passa a ser o de agora.
   const [since, setSince] = useState<SinceVisit | null>(() => (welcomed(state) ? sinceLastVisit(state.lastSeen, snapshot(data, state, today)) : null));
@@ -546,6 +550,7 @@ export function JornadaHome() {
         </div>
       </section>
 
+      <GiftCard />
       <ChestsReady chests={chests} />
 
       {!state.profile && (
@@ -605,6 +610,8 @@ export function JornadaHome() {
       </>)}
 
       {tab === 'arsenal' && (<>
+      <Segmented<ArsenalView> label="Arsenal" value={arsenalView} onChange={setArsenalView} options={[{ value: 'itens', label: 'Itens' }, { value: 'pets', label: 'Pets' }, { value: 'casas', label: 'Casas' }]} />
+      {arsenalView === 'itens' && (<>
       <section className="card" ref={arsenalRef}>
         <div className="card-head">
           <h2>Arsenal</h2>
@@ -629,6 +636,9 @@ export function JornadaHome() {
         </div>
         {slot === 'artefato' && <p className="muted small" style={{ marginTop: 10 }}>Cada artefato dá +10% de XP nos hábitos do seu atributo. O segundo espaço de artefato abre no nível 20.</p>}
       </section>
+      </>)}
+      {arsenalView === 'pets' && <PetsView />}
+      {arsenalView === 'casas' && <HomesView />}
       </>)}
 
       {trying && (
@@ -677,7 +687,11 @@ export function JornadaHome() {
           title={title ? title[gk] : null}
           cls={cls}
           onSlot={(x) => {
-            setSlot(x);
+            if (x === 'pet' || x === 'morada') setArsenalView(x === 'pet' ? 'pets' : 'casas');
+            else {
+              setSlot(x);
+              setArsenalView('itens');
+            }
             setFull(false);
             go('jornada/arsenal');
           }}
