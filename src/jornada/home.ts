@@ -8,7 +8,8 @@ import { addDays } from '../utils.ts';
 import { journeyStats } from '../journey.ts';
 import { ATTRIBUTES } from '../habits.ts';
 import { HOMES, ITEMS, PETS, type AttrCode } from './catalog.ts';
-import { ARTIFACT2_LEVEL, attributes, titleProgress, type JourneyState } from './rules.ts';
+import { ARTIFACT2_LEVEL, CRISTAL_MILESTONES, attributes, titleProgress, visitStats, type JourneyState } from './rules.ts';
+import { diffDays } from '../habits.ts';
 import { missionsToday } from './missions.ts';
 
 /** Dias seguidos com algum registro no app, terminando hoje (ou ontem, se hoje ainda não teve). */
@@ -31,43 +32,6 @@ export function dayNumbers(d: AppData, today: string) {
   return { xp: Math.max(0, now.xp - before.xp), gold: Math.max(0, now.gold - before.gold), done: ms.filter((m) => m.done).length, total: ms.length };
 }
 
-export interface NearUnlock {
-  id: string;
-  name: string;
-  kind: string;
-  have: number;
-  need: number;
-  /** Texto do progresso ("41/60", "LV 9/10"). */
-  progress: string;
-}
-
-const attrName = (c: string) => ATTRIBUTES.find((a) => a.code === c)?.name ?? c;
-
-/** "Perto de desbloquear": as 3 coisas mais perto de chegar (títulos, itens por atributo, pets, casas e o baú dourado). */
-export function nearUnlocks(d: AppData, state: JourneyState, today: string, level: number, max = 3): NearUnlock[] {
-  const out: NearUnlock[] = [];
-  const attrs = attributes(d, today);
-  for (const t of titleProgress({ d, today, attrs })) {
-    if (t.earned || t.have <= 0) continue;
-    out.push({ id: `titulo:${t.id}`, name: t.m, kind: `título · ${t.rule}`, have: t.have, need: t.need, progress: `${Math.min(t.have, t.need)}/${t.need}` });
-  }
-  for (const it of ITEMS) {
-    if (!it.attrUnlock || state.owned.includes(it.id)) continue;
-    const [code, need] = Object.entries(it.attrUnlock)[0] as [AttrCode, number];
-    const have = attrs[code];
-    if (have <= 0 || have >= need) continue;
-    out.push({ id: `item:${it.id}`, name: it.name, kind: `item · ${attrName(code)} ${need}`, have, need, progress: `${have}/${need}` });
-  }
-  for (const p of [...PETS, ...HOMES]) {
-    if (state.owned.includes(p.id) || level >= p.level || p.level - level > 10) continue;
-    const isPet = PETS.some((x) => x.id === p.id);
-    out.push({ id: `${isPet ? 'pet' : 'casa'}:${p.id}`, name: p.name, kind: `${isPet ? 'pet' : 'casa'} · nível ${p.level}`, have: level, need: p.level, progress: `LV ${level}/${p.level}` });
-  }
-  const nextGold = Math.ceil((level + 1) / 5) * 5;
-  out.push({ id: 'bau:dourado', name: 'Baú dourado', kind: 'a cada 5 níveis', have: level - (nextGold - 5), need: 5, progress: `LV ${level}/${nextGold}` });
-  return out.sort((a, b) => b.have / b.need - a.have / a.need || a.need - b.need).slice(0, max);
-}
-
 /** O que chegar a um nível libera (para a tela "Subiu de nível"). */
 export function levelRewards(level: number): { title: string; sub: string; kind: 'bau' | 'pet' | 'casa' | 'espaco' }[] {
   const out: { title: string; sub: string; kind: 'bau' | 'pet' | 'casa' | 'espaco' }[] = [];
@@ -77,3 +41,69 @@ export function levelRewards(level: number): { title: string; sub: string; kind:
   if (level === ARTIFACT2_LEVEL) out.push({ title: 'Segundo espaço de anel', sub: 'Agora dá para usar dois anéis', kind: 'espaco' });
   return out;
 }
+
+// ---------- N2.17b: "Quase lá", como na prévia da Jornada ----------
+
+export interface Goal {
+  id: string;
+  /** Desenho: estrela, baú, item, medalha. */
+  icon: { kind: 'estrela' } | { kind: 'bau'; chest: 'bronze' | 'cristal' } | { kind: 'item'; id: string } | { kind: 'medalha'; index: number };
+  title: string;
+  have: number;
+  need: number;
+  label: string;
+  color: string;
+}
+
+const fmtN = (n: number) => n.toLocaleString('pt-BR');
+
+/**
+ * "Quase lá" da prévia: próximo nível, baú de bronze dos dias seguidos, baú de cristal do hábito a
+ * abandonar, o próximo item liberado por atributo, a Coroa de cristal e o título mais perto.
+ */
+export function quaseLa(d: AppData, state: JourneyState, today: string): Goal[] {
+  const out: Goal[] = [];
+  const s = journeyStats(d, today);
+  out.push({ id: 'nivel', icon: { kind: 'estrela' }, title: `Nível ${s.level + 1}`, have: s.xpInLevel, need: s.xpForNext, label: `${fmtN(s.xpInLevel)}/${fmtN(s.xpForNext)} XP`, color: 'var(--jn-xp)' });
+
+  const streak = visitStats(d.settings.visitDays, today).streak;
+  const left = 7 - (streak % 7);
+  out.push({ id: 'bronze', icon: { kind: 'bau', chest: 'bronze' }, title: 'Baú de bronze', have: streak % 7, need: 7, label: left === 1 ? 'amanhã' : `faltam ${left} dias`, color: '#f59e0b' });
+
+  // Hábito a abandonar mais perto do próximo baú de cristal.
+  let best: Goal | null = null;
+  for (const h of d.habits.filter((x) => x.kind === 'abandonar' && x.startDate <= today)) {
+    const last = [h.startDate, ...h.slips.filter((x) => x <= today)].sort().pop()!;
+    const clean = diffDays(last, today);
+    const next = CRISTAL_MILESTONES.find((m) => m > clean);
+    if (!next) continue;
+    const prev = [0, ...CRISTAL_MILESTONES].filter((m) => m < next).pop()!;
+    const g: Goal = { id: `cristal:${h.id}`, icon: { kind: 'bau', chest: 'cristal' }, title: `Baú de cristal · ${next} dias sem ${h.name.toLowerCase()}`, have: clean - prev, need: next - prev, label: `faltam ${next - clean} ${next - clean === 1 ? 'dia' : 'dias'}`, color: 'var(--jn-crystal)' };
+    if (!best || g.have / g.need > best.have / best.need) best = g;
+  }
+  if (best) out.push(best);
+
+  const attrs = attributes(d, today);
+  const next = ITEMS.filter((it) => it.attrUnlock && !state.owned.includes(it.id))
+    .map((it) => {
+      const [code, need] = Object.entries(it.attrUnlock!)[0] as [AttrCode, number];
+      return { it, code, need, gap: need - attrs[code] };
+    })
+    .filter((x) => x.gap > 0)
+    .sort((a, b) => a.gap - b.gap)[0];
+  if (next) out.push({ id: `item:${next.it.id}`, icon: { kind: 'item', id: next.it.id }, title: `${next.it.name} · ${next.code} ${next.need}`, have: attrs[next.code], need: next.need, label: `faltam ${next.gap} ${next.code}`, color: ATTRIBUTES.find((a) => a.code === next.code)!.color });
+
+  if (!state.owned.includes('coroa')) {
+    const dis = Math.min(100, attrs.DIS);
+    out.push({ id: 'coroa', icon: { kind: 'item', id: 'coroa' }, title: 'Coroa de cristal (mística) · DIS 100', have: dis, need: 100, label: attrs.DIS >= 100 ? 'pronta na Forja' : `faltam ${100 - attrs.DIS} DIS`, color: '#fde047' });
+  }
+
+  const titles = titleProgress({ d, today, attrs });
+  const t = titles
+    .map((x, i) => ({ x, i }))
+    .filter(({ x }) => !x.earned)
+    .sort((a, b) => b.x.have / b.x.need - a.x.have / a.x.need)[0];
+  if (t) out.push({ id: `titulo:${t.x.id}`, icon: { kind: 'medalha', index: t.i }, title: `Título: ${state.avatar?.gender === 'f' ? t.x.f : t.x.m}`, have: t.x.have, need: t.x.need, label: t.x.rule.toLowerCase(), color: '#facc15' });
+  return out;
+}
+

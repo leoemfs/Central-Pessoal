@@ -2,7 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { emptyData, normalize, normalizeHabit } from './data.ts';
 import type { AppData } from './types.ts';
-import { dayNumbers, levelRewards, nearUnlocks, streakDays } from './jornada/home.ts';
+import { dayNumbers, levelRewards, quaseLa, streakDays } from './jornada/home.ts';
 import { defaultJourneyState } from './jornada/rules.ts';
 
 const DAY = '2026-11-16';
@@ -22,15 +22,22 @@ test('seu dia em números: XP e ouro de hoje vêm só do que foi feito hoje', ()
   assert.deepEqual([n.done, n.total], [1, 1]);
 });
 
-test('perto de desbloquear: mais perto primeiro, no máximo 3, sem o que já tem', () => {
-  const h = normalizeHabit({ id: 'h', name: 'Ler', kind: 'construir', days: [0, 1, 2, 3, 4, 5, 6], attrs: ['INT'], checks: Array.from({ length: 15 }, (_, i) => `2026-11-${String(i + 1).padStart(2, '0')}`), createdAt: '2026-10-01T10:00:00' });
-  const d: AppData = { ...emptyData(), habits: [h] };
-  const list = nearUnlocks(d, defaultJourneyState(), DAY, 4);
-  assert.ok(list.length <= 3);
-  assert.equal(list[0].id, 'item:chapeu', 'Inteligência 45 de 50 é o mais perto');
-  assert.equal(list[0].progress, '45/50');
-  assert.ok(list.some((x) => x.id === 'bau:dourado' && x.progress === 'LV 4/5'));
-  for (let i = 1; i < list.length; i++) assert.ok(list[i - 1].have / list[i - 1].need >= list[i].have / list[i].need);
+test('quase lá (prévia): nível, baú de bronze, baú de cristal, item pelo atributo, coroa e título', () => {
+  const ler = normalizeHabit({ id: 'h', name: 'Ler', kind: 'construir', days: [0, 1, 2, 3, 4, 5, 6], attrs: ['INT'], checks: Array.from({ length: 15 }, (_, i) => `2026-11-${String(i + 1).padStart(2, '0')}`), createdAt: '2026-10-01T10:00:00' });
+  const refri = normalizeHabit({ id: 'r', name: 'Refrigerante', kind: 'abandonar', attrs: ['RES'], startDate: '2026-11-06', slips: [], createdAt: '2026-11-06T10:00:00' });
+  const base = emptyData();
+  const d: AppData = { ...base, habits: [ler, refri], settings: { ...base.settings, visitDays: ['2026-11-14', '2026-11-15', DAY] } };
+  const list = quaseLa(d, defaultJourneyState(), DAY);
+  const by = Object.fromEntries(list.map((g) => [g.id, g]));
+  assert.equal(list[0].id, 'nivel');
+  assert.deepEqual([by.bronze.have, by.bronze.need, by.bronze.label], [3, 7, 'faltam 4 dias']);
+  assert.deepEqual([by['cristal:r'].have, by['cristal:r'].need, by['cristal:r'].label], [3, 7, 'faltam 4 dias'], '10 dias limpo: próximo marco é 14');
+  assert.equal(by['item:chapeu'].label, 'faltam 5 INT', 'Inteligência 45 de 50 é o item mais perto');
+  assert.ok(by.coroa);
+  assert.ok(list.some((g) => g.id.startsWith('titulo:')));
+  // Sem hábito a abandonar, sem baú de cristal; com a coroa, ela sai da lista.
+  const sem = quaseLa({ ...d, habits: [ler] }, { ...defaultJourneyState(), owned: [...defaultJourneyState().owned, 'coroa'] }, DAY);
+  assert.ok(!sem.some((g) => g.id.startsWith('cristal:') || g.id === 'coroa'));
 });
 
 test('subiu de nível: baú dourado a cada 5, casas e pets do nível; nível guardado com padrão 0', () => {
