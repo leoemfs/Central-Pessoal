@@ -8447,9 +8447,21 @@ body.icons-color .preview-mono [data-mod] {
 }
 body.icons-flat :not(.icon-style-demo) > [data-mod],
 body .preview-flat [data-mod] {
-  background: linear-gradient(180deg, var(--flat-a, #9aa3b2), var(--flat-b, #4b5563));
-  color: var(--flat-ink, #fff);
+  /* Sem cor própria (atalhos como Configurações): cor de destaque, igual ao resto do tema. */
+  background: linear-gradient(180deg, var(--flat-a, color-mix(in srgb, var(--accent) 65%, #fff)), var(--flat-b, var(--accent)));
+  color: var(--flat-ink, var(--on-accent));
 }
+/* E32: o Flat é um tema: todo ícone em quadrado do app (Configurações, atalhos, listas das telas) vira
+   quadrado com degradê. Os que não são de módulo usam a cor de destaque; os de situação (st-*) mantêm a sua cor. */
+body.icons-flat .set-icon,
+body.icons-flat .opt-icon,
+body.icons-flat .sug-icon,
+body.icons-flat .mg-icon:not([data-mod]),
+body.icons-flat .tile-icon:not([data-mod]):not([class*='st-']) {
+  background: linear-gradient(180deg, color-mix(in srgb, var(--accent) 65%, #fff), var(--accent));
+  color: var(--on-accent);
+}
+
 /* E31: opções de Aparência em linhas (uma por opção, amostra à direita). */
 .opt-rows {
   display: flex;
