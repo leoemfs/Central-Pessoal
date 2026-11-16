@@ -16,6 +16,7 @@ import { acquire, arsenalItems, availability, equip, shopContext, type Availabil
 import type { Item, Slot } from '../jornada/catalog';
 import { classOf, openChest, pendingChests, recentAttributes, sinceLastVisit, snapshot, TITLES, wallet, welcomed, welcomeState, type Chest, type ChestRecord, type JourneyState, type SinceVisit } from '../jornada/rules';
 import { skyAt, starPositions } from '../jornada/sky';
+import { MissionsCard, WeekCard } from './JornadaMissoes';
 
 type Look = { gender: 'f' | 'm'; skin: string; hair: string; name: string };
 const fmt = (n: number) => n.toLocaleString('pt-BR');
@@ -501,6 +502,9 @@ export function JornadaHome() {
           </div>
         </div>
       </section>
+
+      <MissionsCard />
+      <WeekCard />
 
       <section className="card" ref={chestsRef}>
         <div className="card-head">
