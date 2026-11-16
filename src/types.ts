@@ -936,6 +936,8 @@ export interface Meeting {
   projectIds: string[];
   /** Já criou a próxima da série. */
   nextCreated: boolean;
+  /** Adiada: a data em que estava marcada (o dia fixo da série). null = não adiada. */
+  originalDate: string | null;
   eventId: string | null;
 }
 

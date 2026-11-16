@@ -136,7 +136,7 @@
 | N6 | Módulo Estudos e Carreira: Biblioteca (áreas, trilhas, tópicos de referência), Ciclos pessoais, Meus notebooks, Fontes, Mapas mentais e Roadmaps | NOVO | G | média | pronto (v0.21), em teste por 3 dias | `futuro/modulo-estudos.md` |
 | N8.5 | Carreira × Agenda automática: tudo que tem data em Carreira (reuniões, passos das vagas e, depois, projetos) aparece sozinho na Agenda do app e se atualiza quando muda; some se for excluído. Sem botão "Pôr na Agenda" | NOVO | P | alta | pronto (v0.24) | `futuro/modulo-carreira.md` |
 | N8.6 | Carreira: **Projetos do trabalho** (ex.: repasse, contratos de prestadores) com prazo, entregas com data, situação e ligação com as reuniões; prazos e entregas na Agenda | NOVO | M | alta | pronto (v0.24) | `futuro/modulo-carreira.md` |
-| N8.7 | Carreira: botão **Adiar** na reunião (amanhã, +1 semana, escolher data) que muda só aquela reunião, sem mexer no dia fixo da série; "Marcar a próxima" continua contando do dia original. Agenda acompanha sozinha | MOD | P | média | especificado | `futuro/modulo-carreira.md` |
+| N8.7 | Carreira: botão **Adiar** na reunião (amanhã, +1 semana, escolher data) que muda só aquela reunião, sem mexer no dia fixo da série; "Marcar a próxima" continua contando do dia original. Agenda acompanha sozinha | MOD | P | média | pronto (v0.72) | `futuro/modulo-carreira.md` |
 | M11 | Estudos no dia a dia: cartão "Estudando agora" no Início e "O que estudei" na Revisão semanal. Afeta: Início, Revisão | MOD | P | alta | pronto (v0.33) | `futuro/modulo-estudos.md` |
 | M12 | Estudos: lápis para subir, descer e ocultar cartões (como no Início e em Finanças). Afeta: só Estudos | MOD | P | média | pronto (v0.34) | `futuro/modulo-estudos.md`, `futuro/navegacao-v2.md` |
 | M13 | Estudos: busca dentro do módulo (tópicos, notebooks, fontes); parte do E6. Afeta: Busca | MOD | P | média | pronto (v0.35) | `futuro/modulo-estudos.md`, `futuro/navegacao-v2.md` |
@@ -177,6 +177,7 @@
 ## Feito
 | Versão | O que entrou | PR |
 |---|---|---|
+| v0.72 | N8.7: **Adiar reunião** (amanhã, +1 semana ou outra data e hora) muda só aquela reunião; mostra "adiada de…", dá para voltar à data original, e "Marcar a próxima" segue no dia fixo da série. Agenda acompanha sozinha | — |
 | v0.71 | N1.4 + N1.5 (juntos, a pedido): **Consultas, exames e check-ups** (Agenda sozinha, "Já fui" com retorno, pedidos de exame e repetir; Próximos check-ups com "Marcar" na Agenda quando vence) e **Peso e medidas** (escondidos por padrão, gráfico, sem pontos); abas Dia · Dieta · Remédios · Consultas · Medidas | — |
 | v0.70 | N1.3: **Remédios** na Saúde: dose, horários, dias e período; "Tomei" com a hora no Hoje; aviso no Google Agenda em cada dose (14 dias); hábito "Tomar remédio" marcado sozinho; +3 RES por dia completo; doses no Histórico | #115 |
 | v0.69 | N1.2b: **Compras da semana** na Dieta: ingredientes das receitas dos próximos 7 dias (vezes ajustáveis, iguais somam) vão para uma lista de mercado (existente ou nova), somando com o que já está lá | #114 |

@@ -59,14 +59,15 @@ Pedido de 08/11: reuniões e projetos de carreira sincronizados com o **calendá
 - Google Agenda fica para depois (precisa de login Google; anotar se pedir).
 - **Construído (v0.24):** `syncCareerEvents` em `src/carreira.ts` roda em toda mudança de Carreira e ao abrir o app. Compromissos de Carreira têm `origin` ("carreira/abrir-m|j|p-<id>"); na Agenda aparecem com a etiqueta "Carreira" e abrem a ficha de origem. O local digitado na Agenda é mantido; o resto vem de Carreira. Entrega concluída, vaga encerrada e projeto concluído saem da Agenda.
 
-## Adiar reunião (N8.7, P)
+## Adiar reunião (N8.7, P) · feito na v0.72
 Pedido de 15/11: adiar uma reunião sem mexer no dia fixo da reunião semanal (ou quinzenal).
 - Na ficha da reunião, botão **Adiar** com atalhos: **amanhã**, **+1 semana** e **escolher data** (e hora, se quiser).
 - Muda só **esta** reunião. A reunião guarda a **data original** (`originalDate`) e mostra "Adiada de sex 20/11".
 - **Marcar a próxima** conta a partir da data original, então a série continua no dia fixo.
 - A Agenda acompanha sozinha (regra da N8.5).
 - Desfazer: "Voltar para a data original".
-- Hoje (sem o botão): dá para mudar o Dia na ficha, mas a próxima da série passa a contar da nova data.
+- Mudar o **Dia** direto na ficha continua mudando a série (aviso na ficha quando a reunião repete).
+- Regras em `postponeMeeting` e `restoreMeetingDate` (`src/carreira.ts`), campo `Meeting.originalDate` com padrão `null` em `normalize`.
 
 ## Perguntas da prévia (responder antes da N8.1)
 1. ~~A casa abre em Trabalho ou em Currículo?~~ Abre em Trabalho (mantém como era; decidido na v0.37, dá para mudar).

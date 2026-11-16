@@ -25,6 +25,8 @@ import {
   meetingTitle,
   newMeeting,
   nextMeeting,
+  postponeMeeting,
+  restoreMeetingDate,
   openTodos,
   REPEAT_OPTIONS,
   salaryChanges,
@@ -447,6 +449,7 @@ function MeetingRow({ m, past, onOpen }: { m: Meeting; past?: boolean; onOpen: (
           <span className="muted small">
             {relativeDay(m.date)}
             {m.time ? `, ${m.time}` : ''}
+            {m.originalDate ? ` · adiada de ${formatDate(m.originalDate)}` : ''}
             {m.repeatDays ? ` · ${REPEAT_OPTIONS.find((r) => r.days === m.repeatDays)?.label.toLowerCase() ?? `a cada ${m.repeatDays} dias`}` : ''}
             {open ? ` · ${open} combinado(s)` : ''}
           </span>
@@ -527,6 +530,9 @@ function MeetingSheet({ id, onClose, onOpen, onOpenProject }: { id: string; onCl
   const { data, update } = useStore();
   const projects = sortProjects(data.career.projects).active;
   const [todo, setTodo] = useState('');
+  const [postponing, setPostponing] = useState(false);
+  const [pDate, setPDate] = useState('');
+  const [pTime, setPTime] = useState('');
   const m = data.career.meetings.find((x) => x.id === id);
   if (!m) return null;
   const set = (patch: Partial<Meeting>) => update(saveMeeting({ ...m, ...patch }));
@@ -535,6 +541,13 @@ function MeetingSheet({ id, onClose, onOpen, onOpenProject }: { id: string; onCl
   function close() {
     if (m && isBlankMeeting(m)) update(removeMeeting(m.id));
     onClose();
+  }
+  function postpone(date: string, time?: string) {
+    if (!m || !date) return;
+    const next = postponeMeeting(m, date, time);
+    update(saveMeeting(next));
+    setPostponing(false);
+    notify('Reunião adiada', `${relativeDay(next.date)}${next.time ? `, ${next.time}` : ''} · a Agenda já mudou`);
   }
   function addTodo() {
     if (!m || !todo.trim()) return;
@@ -564,12 +577,48 @@ function MeetingSheet({ id, onClose, onOpen, onOpenProject }: { id: string; onCl
         </Field>
         <div className="grid-2">
           <Field label="Dia">
-            <input className="input" type="date" value={m.date} onChange={(e) => e.target.value && set({ date: e.target.value })} />
+            <input className="input" type="date" value={m.date} onChange={(e) => e.target.value && set({ date: e.target.value, originalDate: null })} />
           </Field>
           <Field label="Hora (opcional)">
             <input className="input" type="time" value={m.time} onChange={(e) => set({ time: e.target.value })} />
           </Field>
         </div>
+        {m.repeatDays > 0 && !m.originalDate && <p className="muted small" style={{ margin: 0 }}>Mudar o Dia aqui muda a série. Para mudar só esta reunião, use Adiar.</p>}
+        {m.originalDate && (
+          <div className="job-ask">
+            <span>
+              Adiada de <b>{formatDate(m.originalDate, { weekday: 'short', day: '2-digit', month: '2-digit' })}</b>.{m.repeatDays > 0 ? ' A série continua nesse dia.' : ''}
+            </span>
+            <div className="btn-row">
+              <button type="button" className="btn soft" onClick={() => { update(saveMeeting(restoreMeetingDate(m))); notify('Voltou para a data original', formatDate(m.originalDate!)); }}>
+                Voltar para a data original
+              </button>
+            </div>
+          </div>
+        )}
+        <button type="button" className="btn soft" onClick={() => { setPostponing(!postponing); setPDate(addDays(m.date, 1)); setPTime(m.time); }} aria-expanded={postponing}>
+          <Icon name="clock" size={16} /> Adiar
+        </button>
+        {postponing && (
+          <div className="job-ask">
+            <span>Adiar só esta reunião para:</span>
+            <div className="btn-row">
+              <button type="button" className="btn soft" onClick={() => postpone(addDays(m.date, 1))}>Amanhã</button>
+              <button type="button" className="btn soft" onClick={() => postpone(addDays(m.date, 7))}>+1 semana</button>
+            </div>
+            <div className="grid-2">
+              <Field label="Outra data">
+                <input className="input" type="date" value={pDate} min={todayISO()} onChange={(e) => setPDate(e.target.value)} />
+              </Field>
+              <Field label="Hora">
+                <input className="input" type="time" value={pTime} onChange={(e) => setPTime(e.target.value)} />
+              </Field>
+            </div>
+            <button type="button" className="btn primary" disabled={!pDate} onClick={() => postpone(pDate, pTime)}>
+              Adiar para esta data
+            </button>
+          </div>
+        )}
         <Group label="Repete">
           <Chips label="Repete" options={REPEAT_OPTIONS.map((r) => ({ value: String(r.days), label: r.label }))} value={String(m.repeatDays)} onChange={(v) => set({ repeatDays: Number(v) })} />
         </Group>
@@ -642,7 +691,7 @@ function MeetingSheet({ id, onClose, onOpen, onOpenProject }: { id: string; onCl
         </div>
         {m.repeatDays > 0 && !m.nextCreated && (
           <button type="button" className="btn soft" onClick={scheduleNext}>
-            Marcar a próxima ({formatDate(addDays(m.date, m.repeatDays))})
+            Marcar a próxima ({formatDate(addDays(m.originalDate ?? m.date, m.repeatDays))})
           </button>
         )}
         {!isBlankMeeting(m) && (
