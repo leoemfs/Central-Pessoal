@@ -301,6 +301,10 @@ export function App() {
   useEffect(() => {
     document.body.classList.toggle('bar-labels', !data.settings.hideBarLabels);
   }, [data.settings.hideBarLabels]);
+  // E29: ícones dos módulos coloridos (cada um com a sua cor).
+  useEffect(() => {
+    document.body.classList.toggle('icons-color', data.settings.iconColors === 'cores');
+  }, [data.settings.iconColors]);
   const editor = useCardEditor();
   const where = bar ? crumb(bar, barIndex) : null;
   const settingsSub = section.path === 'ajustes' ? settingsPage(route.sub) : null;
