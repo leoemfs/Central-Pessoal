@@ -634,8 +634,10 @@ A Jornada desbloqueia em 16/11. Até aqui existiam só as regras e as artes (pas
 | **N2.7** Codex e raridades | Codex por coleções, silhuetas com a dica (F.5); bônus por raridade (`jornada-raridades.md`) | M |
 | **N2.8** Efeitos dos místicos | escudo semanal, XP em dobro depois da recaída, cristal por revisão e por mês em dia, baú extra por nível, ouro extra por estudo (ver "Ainda não programado" no B.12) | M |
 | **N2.9a** Missões (**feito, v0.73**) | missões de hoje (os próprios hábitos, tarefas, contas e diário; marcar ali é marcar no módulo) e da semana (Diário no ritmo, bônus de 10 XP por vez combinada desde o desbloqueio; revisão semanal), sem punição | M |
-| **N2.9b** Entrevista da Mestra Lume | perguntas do Anexo D; cria os hábitos que faltam no Núcleo e guarda as respostas para a campanha (N2.10) e a caixinha | M |
+| **N2.9b** Entrevista da Mestra Lume (**feito, v0.74**) | perguntas do Anexo D; cria os hábitos que faltam no Núcleo e guarda as respostas para a campanha (N2.10) e a caixinha | M |
 | **N2.10** Campanha | mapa, chefes, história e entrevista (Anexos C e D); **dividir antes de construir** | G |
+
+**N2.9b, como ficou (v0.74):** convite da Mestra Lume na Jornada até a entrevista ser feita (para quem já entrou na Jornada; não entra no meio da chegada). Respostas em `journey.profile` (`src/jornada/interview.ts`); o que ela cria fica em `src/jornada/interviewApply.ts`. Treino: 2× ter/qui, 3× seg/qua/sex, 4× seg/ter/qui/sex, 5× seg a sex. Terapia: quarta. Refazer não apaga nem duplica hábitos; a caixinha só é criada se não houver uma aberta com o mesmo nome. O desafio de dinheiro (ex.: "gastar demais") fica guardado para a campanha (Mercado de Ouro) e ainda não vira missão.
 
 Depois: N7 (Estudos × Jornada, `estudos-jornada.md`).
 

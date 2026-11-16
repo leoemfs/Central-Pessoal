@@ -409,3 +409,13 @@ const CHEST_PAL: Record<string, Palette> = {
 export const chestIcon = (kind: string, open: boolean) => sprite(open ? CHEST_OPEN : CHEST_CLOSED, CHEST_PAL[kind] ?? CHEST_PAL.bronze, 16);
 export const COIN_ICON = sprite(['..OOOO..', '.OYYYYO.', 'OYWYYyYO', 'OYYYYyYO', 'OYYYYyYO', 'OYyyyyYO', '.OYYYYO.', '..OOOO..'], { Y: '#facc15', y: '#ca8a04', W: '#fff7ed' }, 8);
 export const GEM_ICON = sprite(['...OO...', '..OCWO..', '.OCCWcO.', 'OCCCWccO', '.OCCWcO.', '..OCcO..', '...OO...'], { C: '#67e8f9', c: '#0e7490', W: '#ecfeff' }, 8);
+
+// ---------- Personagens da campanha (da prévia da Jornada) ----------
+
+const NPC_FACE = ['......OOOO......', '.....OHHHHO.....', '...OOOHHHHOOO...', '..OHHHHHHHHHHO..', '.OHHHSSSSSSHHHO.', '.OHHSSSSSSSSHHO.', '.OHSGEGSSGEGSHO.', '.OHSSSSssSSSSHO.', '.OHHSSSSSSSSHHO.', '..OHSSOOOOSSHO..', '..OHHSSSSSSHHO..', '...OOSSSSSSOO...', '..OCCOSSSSOCCO..', '.OCCCCOOOOCCCCO.', 'OCCCCCCAACCCCCCO', 'OCCCCCCCCCCCCCCO'];
+const NPC_PAL: Record<string, Palette> = {
+  lume: { H: '#e5e7eb', S: '#d9a066', s: '#b77d48', G: '#facc15', E: '#1f2937', C: '#7c3aed', A: '#67e8f9' },
+  nina: { H: '#7c2d12', S: '#f6d2b0', s: '#e0b08a', G: '#f6d2b0', E: '#1f2937', C: '#16a34a', A: '#facc15' },
+  tork: { H: '#1f1f1f', S: '#8d5524', s: '#6b3e1a', G: '#8d5524', E: '#111827', C: '#78350f', A: '#94a3b8' },
+};
+export const npcIcon = (id: 'lume' | 'nina' | 'tork') => sprite(NPC_FACE, NPC_PAL[id], 16);

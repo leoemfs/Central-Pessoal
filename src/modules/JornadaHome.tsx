@@ -17,6 +17,8 @@ import type { Item, Slot } from '../jornada/catalog';
 import { classOf, openChest, pendingChests, recentAttributes, sinceLastVisit, snapshot, TITLES, wallet, welcomed, welcomeState, type Chest, type ChestRecord, type JourneyState, type SinceVisit } from '../jornada/rules';
 import { skyAt, starPositions } from '../jornada/sky';
 import { MissionsCard, WeekCard } from './JornadaMissoes';
+import { Entrevista } from './JornadaEntrevista';
+import { npcIcon } from '../jornada/catalog';
 
 type Look = { gender: 'f' | 'm'; skin: string; hair: string; name: string };
 const fmt = (n: number) => n.toLocaleString('pt-BR');
@@ -384,6 +386,7 @@ export function JornadaHome() {
   const [draft, setDraft] = useState<Look>(() => state.avatar ?? { gender: 'f', skin: 'media', hair: 'castanho', name: '' });
   const [step, setStep] = useState<'create' | 'welcome'>('create');
   const [editing, setEditing] = useState(false);
+  const [interviewing, setInterviewing] = useState(false);
   const top = () => window.scrollTo({ top: 0 });
   // N2.3: o resumo usa o retrato da visita anterior; logo ao entrar, o retrato passa a ser o de agora.
   const [since, setSince] = useState<SinceVisit | null>(() => (welcomed(state) ? sinceLastVisit(state.lastSeen, snapshot(data, state, today)) : null));
@@ -423,6 +426,20 @@ export function JornadaHome() {
   }
 
   const look = state.avatar!;
+  if (interviewing)
+    return (
+      <Entrevista
+        onDone={() => {
+          setInterviewing(false);
+          top();
+        }}
+        onCancel={() => {
+          setInterviewing(false);
+          top();
+        }}
+      />
+    );
+
   if (editing)
     return (
       <CreateStep
@@ -503,6 +520,27 @@ export function JornadaHome() {
         </div>
       </section>
 
+      {!state.profile && (
+        <section className="card jn-invite">
+          <div className="jn-npc">
+            <img alt="" src={npcIcon('lume')} />
+            <div>
+              <b>Mestra Lume</b>
+              <span>Antes de partir, quero te conhecer. Me conta o que você quer melhorar e eu monto as suas missões. Leva 1 minuto.</span>
+            </div>
+          </div>
+          <button
+            type="button"
+            className="btn primary block"
+            onClick={() => {
+              setInterviewing(true);
+              top();
+            }}
+          >
+            Conversar com a Mestra Lume
+          </button>
+        </section>
+      )}
       <MissionsCard />
       <WeekCard />
 
@@ -722,6 +760,18 @@ export function JornadaHome() {
           >
             Mudar aparência
           </button>
+          {state.profile && (
+            <button
+              type="button"
+              className="btn"
+              onClick={() => {
+                setInterviewing(true);
+                top();
+              }}
+            >
+              Refazer a entrevista
+            </button>
+          )}
           <button type="button" className="btn ghost" onClick={() => update((d) => ({ ...d, settings: { ...d.settings, journeyChoice: 'depois' } }))}>
             Pausar a Jornada
           </button>
