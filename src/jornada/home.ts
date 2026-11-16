@@ -3,7 +3,8 @@
  * pranchas "v2 · Jornada de dia/noite" e "v1 · Subiu de nível" da prévia "Jornada RPG".
  * Tudo calculado a partir dos dados; nada fica guardado à parte.
  */
-import type { AppData } from '../types.ts';
+import type { AppData, SavingsBox } from '../types.ts';
+import { balance } from '../boxes.ts';
 import { addDays } from '../utils.ts';
 import { journeyStats } from '../journey.ts';
 import { ATTRIBUTES } from '../habits.ts';
@@ -48,7 +49,7 @@ export function levelRewards(level: number): { title: string; sub: string; kind:
 export interface Goal {
   id: string;
   /** Desenho: estrela, baú, item, medalha. */
-  icon: { kind: 'estrela' } | { kind: 'bau'; chest: 'bronze' | 'cristal' } | { kind: 'item'; id: string } | { kind: 'medalha'; index: number };
+  icon: { kind: 'estrela' } | { kind: 'pote'; pct: number } | { kind: 'bau'; chest: 'bronze' | 'cristal' } | { kind: 'item'; id: string } | { kind: 'medalha'; index: number };
   title: string;
   have: number;
   need: number;
@@ -69,6 +70,7 @@ export function quaseLa(d: AppData, state: JourneyState, today: string): Goal[] 
 
   const streak = visitStats(d.settings.visitDays, today).streak;
   const left = 7 - (streak % 7);
+  const pushBox = boxGoal(d);
   out.push({ id: 'bronze', icon: { kind: 'bau', chest: 'bronze' }, title: 'Baú de bronze', have: streak % 7, need: 7, label: left === 1 ? 'amanhã' : `faltam ${left} dias`, color: '#f59e0b' });
 
   // Hábito a abandonar mais perto do próximo baú de cristal.
@@ -82,6 +84,7 @@ export function quaseLa(d: AppData, state: JourneyState, today: string): Goal[] 
     const g: Goal = { id: `cristal:${h.id}`, icon: { kind: 'bau', chest: 'cristal' }, title: `Baú de cristal · ${next} dias sem ${h.name.toLowerCase()}`, have: clean - prev, need: next - prev, label: `faltam ${next - clean} ${next - clean === 1 ? 'dia' : 'dias'}`, color: 'var(--jn-crystal)' };
     if (!best || g.have / g.need > best.have / best.need) best = g;
   }
+  if (pushBox) out.push(pushBox);
   if (best) out.push(best);
 
   const attrs = attributes(d, today);
@@ -129,6 +132,8 @@ export function journeyNews(d: AppData, state: JourneyState, today: string) {
       return a.status === 'forja' && a.ready;
     }).map((it) => it.id),
     chests: pendingChests(d, state, today, level),
+    boxGoals: (d.boxes ?? []).filter((b) => b.marks.includes(100)).map((b) => b.id),
+    realized: (d.boxes ?? []).filter((b) => b.realizedAt).map((b) => b.id),
   };
 }
 
@@ -140,6 +145,8 @@ export function newsDiff(before: ReturnType<typeof journeyNews>, now: ReturnType
     free: now.free.filter((id) => !before.free.includes(id)),
     forge: now.forge.filter((id) => !before.forge.includes(id)),
     chests: now.chests.filter((c) => !keys.has(c.key)),
+    boxGoals: now.boxGoals.filter((id) => !before.boxGoals.includes(id)),
+    realized: now.realized.filter((id) => !before.realized.includes(id)),
   };
 }
 
@@ -173,3 +180,23 @@ export function weekSummary(d: AppData, today: string): WeekSummary | null {
 
 /** Mostrar o Resumo da semana? Uma vez por semana, a partir de segunda. */
 export const showWeekSummary = (state: JourneyState, today: string) => state.weekSeen !== weekStart(today);
+
+// ---------- N2.17e: caixinha na Jornada ----------
+
+/** A caixinha que aparece na Jornada: a primeira ainda não realizada (com meta, se houver). */
+export function mainBox(d: AppData): SavingsBox | null {
+  const open = (d.boxes ?? []).filter((b) => !b.realizedAt);
+  return open.find((b) => b.target) ?? open[0] ?? null;
+}
+
+/** Próximo marco (25/50/75/100%) da caixinha principal, para o "Quase lá". */
+export function boxGoal(d: AppData): Goal | null {
+  const b = mainBox(d);
+  if (!b || !b.target) return null;
+  const bal = balance(b);
+  const pct = (bal / b.target) * 100;
+  const next = [25, 50, 75, 100].find((m) => !b.marks.includes(m) && pct < m) ?? null;
+  if (!next) return null;
+  const money = (v: number) => v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL', maximumFractionDigits: 0 });
+  return { id: `caixinha:${b.id}`, icon: { kind: 'pote', pct: pct / 100 }, title: `${b.name} · marco de ${next}%`, have: Math.min(pct, next), need: next, label: `${money(bal)} de ${money((b.target * next) / 100)}`, color: 'var(--jn-gold)' };
+}

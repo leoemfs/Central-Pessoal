@@ -72,5 +72,26 @@ test('novidades: só o que apareceu de novo', () => {
   assert.deepEqual(diff.titles, ['x']);
   assert.deepEqual(diff.free, ['chapeu']);
   assert.deepEqual(diff.chests.map((c) => c.key), ['k']);
-  assert.deepEqual(newsDiff(b, b), { titles: [], free: [], forge: [], chests: [] });
+  assert.deepEqual(newsDiff(b, b), { titles: [], free: [], forge: [], chests: [], boxGoals: [], realized: [] });
+});
+
+test('caixinha: guardar no plano dá XP, ouro e Disciplina; marcos dão baús; missão do dia', async () => {
+  const { normalizeBox, deposit } = await import('./boxes.ts');
+  const { journeyStats } = await import('./journey.ts');
+  const { attributes, earnedChests } = await import('./jornada/rules.ts');
+  const { missionsToday } = await import('./jornada/missions.ts');
+  const b = normalizeBox({ id: 'bx', name: 'Viagem', target: 1000, plan: { amount: 300, every: 'semana', startDate: '2026-11-02' }, createdAt: '2026-11-02T10:00:00' });
+  let d: AppData = { ...emptyData(), boxes: [b] };
+  const m0 = missionsToday(d, DAY).find((m) => m.kind === 'caixinha')!;
+  assert.equal(m0.done, false);
+  assert.equal(m0.xp, 20);
+  d = deposit('bx', 300, DAY, true)(d);
+  d = deposit('bx', 300, DAY, true)(d); // segunda vez na mesma semana vira "extra"
+  assert.equal(missionsToday(d, DAY).find((m) => m.kind === 'caixinha')!.done, true);
+  const s = journeyStats(d, DAY);
+  assert.equal(s.sources.find((x) => x.id === 'caixinha')!.count, 1);
+  assert.equal(attributes(d, DAY).DIS, 3);
+  const keys = earnedChests(d, DAY).map((c) => c.key).filter((k) => k.includes('caixinha'));
+  assert.deepEqual(keys, ['bronze:caixinha:bx:25', 'prata:caixinha:bx:50']);
+  assert.ok(quaseLa(d, defaultJourneyState(), DAY).some((g) => g.id === 'caixinha:bx' && g.title.includes('75%')));
 });

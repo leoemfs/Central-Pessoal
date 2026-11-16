@@ -66,6 +66,8 @@ export const REWARDS = {
   conta: { xp: 20, gold: 10, label: 'Contas pagas no prazo', rule: '20 XP · 10 ouro' },
   diario: { xp: 10, gold: 5, label: 'Registros no diário', rule: '10 XP · 5 ouro' },
   revisao: { xp: 40, gold: 20, label: 'Revisões semanais', rule: '40 XP · 20 ouro' },
+  caixinha: { xp: 20, gold: 10, label: 'Guardar na caixinha no dia do plano', rule: '20 XP · 10 ouro por vez do plano, seja qual for o valor' },
+  realizar: { xp: 0, gold: 200, label: 'Objetivos realizados com a caixinha', rule: '200 ouro por objetivo realizado' },
 } as const;
 
 /** Nível a partir do XP: do nível N para o N+1 são necessários 100 × N XP. */
@@ -98,6 +100,9 @@ export function journeyStats(d: AppData, today: string = todayISO()) {
     sum(d.cards.map((c) => Object.entries(c.paidInvoices).filter(([month, paid]) => paid <= `${month}-${String(c.dueDay).padStart(2, '0')}` && paid <= today).length));
   const reviews = d.journal.filter((j) => j.tag === 'Revisão').length;
   const entries = d.journal.length - reviews;
+  // N2.17e: caixinhas. Cada vez do plano (guardar na data combinada) e cada objetivo realizado.
+  const planSaves = sum((d.boxes ?? []).map((b) => b.moves.filter((m) => m.kind === 'plano' && m.date <= today).length));
+  const realized = (d.boxes ?? []).filter((b) => b.realizedAt && b.realizedAt <= today).length;
 
   const sources = [
     count('ritual', checks('ritual')),
@@ -107,6 +112,8 @@ export function journeyStats(d: AppData, today: string = todayISO()) {
     count('conta', billsOnTime),
     count('diario', entries),
     count('revisao', reviews),
+    count('caixinha', planSaves),
+    count('realizar', realized),
   ];
   // N2.9: semanas com a meta do Diário cumprida (desde o desbloqueio): 10 XP por vez combinada.
   const wk = weeklyBonus(d, today);
