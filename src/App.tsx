@@ -346,7 +346,10 @@ export function App() {
   const [quickOpen, setQuickOpen] = useState(false);
   const [search, setSearch] = useState(false);
   const scrollHidden = useHideOnScroll(`${section.path}:${route.n}`);
-  const barHidden = data.settings.hideOnScroll && scrollHidden;
+  const gameBar = section.path === 'jornada' && gameBarOn(data.settings, welcomed(data.journey));
+  // Na Jornada (imersão à parte), a faixa e a barra do jogo sempre encolhem ao rolar, sem depender
+  // da opção "esconder ao rolar" do sistema (que vale só fora dela).
+  const barHidden = (gameBar || data.settings.hideOnScroll) && scrollHidden;
   const bar = barFor(section.path);
   const barIndex = bar ? activeIndex(bar, section.path) : null;
   useScrollingClass();
@@ -396,7 +399,6 @@ export function App() {
   const middle: BarItem[] = placed ? placed.items : favoriteItems(data.settings.favorites).slice(0, moreButton && !showFavs ? 3 : 4);
   const tabbarRef = useRef<HTMLElement>(null);
   // N2.11: dentro da Jornada (em uso), a barra de baixo vira a barra do jogo.
-  const gameBar = section.path === 'jornada' && gameBarOn(data.settings, welcomed(data.journey));
   // N2.15: a barra do jogo tem duas fileiras; o conteúdo da tela abre espaço para ela.
   useEffect(() => {
     document.body.classList.toggle('jn-tall', gameBar);
