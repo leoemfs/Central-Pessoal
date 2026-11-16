@@ -786,3 +786,20 @@ export function pendingGifts(d: AppData, state: JourneyState, today: string = to
     return { day, n, gold: g.gold, chest };
   });
 }
+
+// ---------- N2.12 (ajuste): trocar o visual tocando nos espaços da tela cheia ----------
+
+/**
+ * O próximo item de um espaço, na ordem do catálogo, entre os que a pessoa tem. Nos espaços que podem
+ * ficar vazios (elmo, arma, artefato, pet), depois do último vem "sem nada" e então recomeça.
+ */
+export function nextInSlot(state: JourneyState, slot: Slot | 'pet' | 'morada'): string | null {
+  const ids =
+    slot === 'pet' ? PETS.filter((p) => state.owned.includes(p.id)).map((p) => p.id) : slot === 'morada' ? HOMES.filter((h) => state.owned.includes(h.id)).map((h) => h.id) : ITEMS.filter((i) => i.slot === slot && state.owned.includes(i.id)).map((i) => i.id);
+  const canEmpty = slot !== 'armadura' && slot !== 'botas' && slot !== 'morada';
+  const cycle: (string | null)[] = canEmpty ? [...ids, null] : ids;
+  if (!cycle.length) return null;
+  const cur = state.equipped[slot] ?? null;
+  const i = cycle.indexOf(cur);
+  return cycle[(i + 1) % cycle.length];
+}

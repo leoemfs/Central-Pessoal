@@ -651,7 +651,7 @@ Prévias: **"Jornada RPG"** (https://claude.ai/artifact/62xbF4H9CfYjaz7RaX554h, 
 |---|---|---|---|
 | Tela principal: **dias de sequência**, cartão **"Baús para abrir · 2 prontos · Abrir"**, **"Seu dia em números"** (XP hoje, ouro hoje, missões 5/6), **"Perto de desbloquear"** e **"Quase lá"** | v2 · Jornada de dia/noite; Prévia da Jornada (tela principal) | feito (v0.81) | **N2.13** |
 | **Subiu de nível** em tela de festa ("LEVEL UP! NÍVEL 8", recompensas, Continuar) | v1 · Subiu de nível | feito (v0.81) | **N2.13** |
-| **Personagem em tela cheia** que ocupa a tela, título em placa dourada, relógio, céu para escolher, espaços com moldura de raridade, Pet e Casa | v3 · Avatar em tela cheia | feito (v0.80) | **N2.12** |
+| **Personagem em tela cheia** que ocupa a tela, título em placa dourada, relógio, céu para escolher, espaços com moldura de raridade, Pet e Casa | v3 · Avatar em tela cheia | feito (v0.80); tocar no espaço troca o item ali mesmo, segurar abre o Arsenal (v0.83.1) | **N2.12** |
 | **Tocar no personagem e no pet** na tela cheia (corações, reação) | Prévia da Jornada | feito (v0.80): personagem pula, pet solta coração | **N2.12** |
 | **Artefato flutuando** ao lado do personagem; cristais (◆) no topo do Arsenal; efeito do item (✦) | v3 · Arsenal com provador | artefato flutuando na tela cheia feito (v0.80); cristais e efeito no Arsenal ainda não | **N2.12** / **N2.13** |
 | **Conquistas** (medalhas com data; "Próximas" com barra de progresso) | v1 · Conquistas | feito (v0.82) como **Títulos** (a prancha v3 substituiu as conquistas da v1: medalhas, progresso dos que faltam) | **N2.5** |
