@@ -21,6 +21,8 @@ import { go, useRoute } from '../router';
 import { journeyTab } from '../jornada/tabs';
 import { Entrevista } from './JornadaEntrevista';
 import { TelaCheia } from './JornadaTelaCheia';
+import { ChestsReady, DayNumbers, HowToEarn, LevelUpScreen, NearCard } from './JornadaPainel';
+import { dayNumbers, streakDays } from '../jornada/home';
 import { npcIcon } from '../jornada/catalog';
 
 type Look = { gender: 'f' | 'm'; skin: string; hair: string; name: string };
@@ -405,6 +407,11 @@ export function JornadaHome() {
   useEffect(() => {
     if (isWelcomed) update((d) => ({ ...d, journey: { ...d.journey, lastSeen: snapshot(d, d.journey, todayISO()) } }));
   }, [isWelcomed]); // eslint-disable-line react-hooks/exhaustive-deps
+  // N2.13: o primeiro nível visto é marcado em silêncio; depois, cada subida ganha a tela de festa.
+  const lvNow = isWelcomed ? journeyStats(data, today).level : 0;
+  useEffect(() => {
+    if (isWelcomed && state.levelSeen === 0 && lvNow > 0) update((d) => ({ ...d, journey: { ...d.journey, levelSeen: lvNow } }));
+  }, [isWelcomed, lvNow, state.levelSeen]); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (!welcomed(state)) {
     if (step === 'create')
@@ -470,6 +477,9 @@ export function JornadaHome() {
   const maxAttr = Math.max(10, ...ATTR_CODES.map((c) => w.attrs[c]));
   const gk = look.gender;
   const chests = pendingChests(data, state, today, s.level);
+  const streak = streakDays(data.settings.activeDays, today);
+  const todayXp = dayNumbers(data, today).xp;
+  const levelUp = state.levelSeen > 0 && s.level > state.levelSeen;
 
   return (
     <>
@@ -496,9 +506,16 @@ export function JornadaHome() {
             </div>
             <span className="jn-px jn-level">LV {s.level}</span>
           </div>
+          {streak > 0 && (
+            <span className="jn-streak">
+              <b className="jn-px">{streak}</b> {streak === 1 ? 'dia' : 'dias'} de sequência
+            </span>
+          )}
           <div>
             <div className="toggle-row small muted">
-              <span>XP</span>
+              <span>
+                XP{todayXp > 0 && <span className="jn-today"> · +{fmt(todayXp)} hoje</span>}
+              </span>
               <span className="tabular">
                 {fmt(s.xpInLevel)} / {fmt(s.xpForNext)}
               </span>
@@ -526,6 +543,8 @@ export function JornadaHome() {
         </div>
       </section>
 
+      <ChestsReady chests={chests} />
+
       {!state.profile && (
         <section className="card jn-invite">
           <div className="jn-npc">
@@ -547,8 +566,10 @@ export function JornadaHome() {
           </button>
         </section>
       )}
+      <DayNumbers />
       <MissionsCard />
       <WeekCard />
+      <NearCard state={state} level={s.level} />
       </>)}
 
       {tab === 'baus' && (<>
@@ -629,6 +650,17 @@ export function JornadaHome() {
             else setTrying(null);
           }}
           onClose={() => setTrying(null)}
+        />
+      )}
+
+      {levelUp && !since && (
+        <LevelUpScreen
+          look={look}
+          outfit={{ elmo: state.equipped.elmo, armadura: state.equipped.armadura, botas: state.equipped.botas, arma: state.equipped.arma }}
+          level={s.level}
+          xp={s.xp}
+          toNext={s.xpForNext - s.xpInLevel}
+          onClose={() => update((d) => ({ ...d, journey: { ...d.journey, levelSeen: s.level } }))}
         />
       )}
 
@@ -725,6 +757,8 @@ export function JornadaHome() {
           Sem punição: faltar nunca tira XP. Gastar dinheiro não rende nada — pagar no prazo, sim.
         </p>
       </section>
+
+      <HowToEarn />
 
       <section className="card">
         <div className="card-head">

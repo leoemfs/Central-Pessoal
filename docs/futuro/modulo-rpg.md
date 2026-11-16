@@ -649,8 +649,8 @@ Prévias: **"Jornada RPG"** (https://claude.ai/artifact/62xbF4H9CfYjaz7RaX554h, 
 
 | O que a prévia tem | Onde (prancha) | Situação no app | Parte |
 |---|---|---|---|
-| Tela principal: **dias de sequência**, cartão **"Baús para abrir · 2 prontos · Abrir"**, **"Seu dia em números"** (XP hoje, ouro hoje, missões 5/6), **"Perto de desbloquear"** e **"Quase lá"** | v2 · Jornada de dia/noite; Prévia da Jornada (tela principal) | falta | **N2.13** |
-| **Subiu de nível** em tela de festa ("LEVEL UP! NÍVEL 8", recompensas, Continuar) | v1 · Subiu de nível | falta (só aparece no resumo da visita) | **N2.13** |
+| Tela principal: **dias de sequência**, cartão **"Baús para abrir · 2 prontos · Abrir"**, **"Seu dia em números"** (XP hoje, ouro hoje, missões 5/6), **"Perto de desbloquear"** e **"Quase lá"** | v2 · Jornada de dia/noite; Prévia da Jornada (tela principal) | feito (v0.81) | **N2.13** |
+| **Subiu de nível** em tela de festa ("LEVEL UP! NÍVEL 8", recompensas, Continuar) | v1 · Subiu de nível | feito (v0.81) | **N2.13** |
 | **Personagem em tela cheia** que ocupa a tela, título em placa dourada, relógio, céu para escolher, espaços com moldura de raridade, Pet e Casa | v3 · Avatar em tela cheia | feito (v0.80) | **N2.12** |
 | **Tocar no personagem e no pet** na tela cheia (corações, reação) | Prévia da Jornada | feito (v0.80): personagem pula, pet solta coração | **N2.12** |
 | **Artefato flutuando** ao lado do personagem; cristais (◆) no topo do Arsenal; efeito do item (✦) | v3 · Arsenal com provador | artefato flutuando na tela cheia feito (v0.80); cristais e efeito no Arsenal ainda não | **N2.12** / **N2.13** |
@@ -660,7 +660,7 @@ Prévias: **"Jornada RPG"** (https://claude.ai/artifact/62xbF4H9CfYjaz7RaX554h, 
 | **Pets e moradas** (escolher, editar nome e cor do pet) | v3 · Pets e moradas; Prévia da Jornada (Arsenal › Pets) | falta | **N2.6** |
 | **Presente do dia** por abrir o app, chama de dias seguidos com 1 folga por semana | Prévia da Jornada (F.2) | só os dados (`visitDays`) | **N2.6** |
 | **Coleção / Codex** (9 de 19; silhuetas com dica) | v2 · Coleção; Prévia da Jornada (Arsenal › Codex) | falta (cadeado na barra) | **N2.7** |
-| **"Como ganhar XP e ouro"** (regras justas, por módulo) | v2 · Como ganha XP e ouro | parcial ("De onde veio o XP") | **N2.13** |
+| **"Como ganhar XP e ouro"** (regras justas, por módulo) | v2 · Como ganha XP e ouro | feito (v0.81), na Ficha | **N2.13** |
 | **Pote da caixinha** na cena e "Guardar" nas missões | Prévia da Jornada | falta | **N2.10** |
 | **Campanha**: mapa, Mestra Lume apresentando a Vila do Começo, chefe semanal com barra de vida, regiões | Prévia da Jornada | falta (cadeado na barra) | **N2.10** |
 | Hábito novo com **"Treina quais atributos?"** sugerido pelo nome | v2 · Hábito que treina atributos | já existe no Núcleo | — |

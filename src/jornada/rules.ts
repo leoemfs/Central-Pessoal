@@ -45,6 +45,8 @@ export interface JourneyState {
   profile: Profile | null;
   /** N2.3: retrato da última visita, para o resumo "Desde a sua última visita". */
   lastSeen: JourneySnapshot | null;
+  /** N2.13: último nível já comemorado na tela "Subiu de nível" (0 = ainda não marcou). */
+  levelSeen: number;
 }
 
 /** Retrato do que foi ganho até um momento (valores ganhos, não o que sobrou depois de gastar). */
@@ -70,6 +72,7 @@ export function defaultJourneyState(): JourneyState {
     chests: [],
     weather: 'aleatorio',
     lastSeen: null,
+    levelSeen: 0,
     profile: null,
   };
 }
@@ -90,6 +93,7 @@ export function normalizeJourney(raw: unknown): JourneyState {
     chests: Array.isArray(r.chests) ? r.chests.filter((c) => c && typeof c.key === 'string') : [],
     weather: r.weather === 'limpo' ? 'limpo' : 'aleatorio',
     lastSeen: normalizeSnapshot(r.lastSeen),
+    levelSeen: typeof r.levelSeen === 'number' && Number.isFinite(r.levelSeen) && r.levelSeen > 0 ? Math.floor(r.levelSeen) : 0,
     profile: normalizeProfile(r.profile),
   };
 }
