@@ -15,12 +15,12 @@ import {
   HELMET_PAL,
   HELMET_WEAR,
   ITEM_ART,
-  PET_ART,
   SHOULDERS,
   SKINS,
   SKY_PALETTES,
   SWORD,
 } from './artData.ts';
+import { PET_SPRITES } from './petsData.ts';
 
 export type AttrCode = 'FOR' | 'AGI' | 'INT' | 'RES' | 'SAB' | 'DIS';
 export const ATTR_CODES: AttrCode[] = ['FOR', 'AGI', 'INT', 'RES', 'SAB', 'DIS'];
@@ -108,9 +108,24 @@ export interface Pet {
   attrUnlock?: Partial<Attrs>;
 }
 export const PETS: Pet[] = [
-  { id: 'gato', name: 'Gatinho', rarity: 'comum', level: 3 },
-  { id: 'cao', name: 'Cãozinho', rarity: 'comum', level: 3 },
+  // Gato e cão: um vem na chegada; o outro chega no nível 7 (F.3).
+  { id: 'gato', name: 'Gatinho', rarity: 'comum', level: 7 },
+  { id: 'cao', name: 'Cãozinho', rarity: 'comum', level: 7 },
+  // Os outros chegam por conquistas (regras em rules.ts, PET_GOALS).
+  { id: 'coelho', name: 'Coelho', rarity: 'raro', level: 1 },
+  { id: 'coruja', name: 'Coruja', rarity: 'raro', level: 1 },
+  { id: 'beijaflor', name: 'Beija-flor', rarity: 'raro', level: 1 },
+  { id: 'esquilo', name: 'Esquilo', rarity: 'raro', level: 1 },
+  { id: 'tartaruga', name: 'Tartaruga', rarity: 'raro', level: 1 },
+  { id: 'raposa', name: 'Raposa', rarity: 'raro', level: 1 },
   { id: 'cavalo', name: 'Cavalinho', rarity: 'raro', level: 12, attrUnlock: { AGI: 50 } },
+  { id: 'lobo', name: 'Lobo filhote', rarity: 'epico', level: 15 },
+  { id: 'sapinho', name: 'Sapinho do pântano', rarity: 'epico', level: 1 },
+  { id: 'golem', name: 'Golem de pedra', rarity: 'epico', level: 1 },
+  { id: 'fenix', name: 'Fênix filhote', rarity: 'epico', level: 1 },
+  { id: 'dragao', name: 'Dragãozinho', rarity: 'mistico', level: 50 },
+  { id: 'grifo', name: 'Grifo', rarity: 'mistico', level: 1 },
+  { id: 'unicornio', name: 'Unicórnio', rarity: 'mistico', level: 1, attrUnlock: { FOR: 100, AGI: 100, INT: 100, RES: 100, SAB: 100, DIS: 100 } },
 ];
 
 export interface Home {
@@ -177,9 +192,11 @@ export function itemGrid(item: Item): Grid {
 }
 export const itemIcon = (item: Item) => toSvg(itemGrid(item));
 
-export function petIcon(id: string): string {
-  const p = PET_ART[id];
-  return sprite(p.rows, p.pal, p.w);
+/** Pet com a pelagem escolhida (a primeira, se nenhuma). */
+export function petIcon(id: string, variant?: string | null): string {
+  const p = PET_SPRITES[id] ?? PET_SPRITES.gato;
+  const v = p.variants.find((x) => x.id === variant) ?? p.variants[0];
+  return sprite(p.rows, v.pal, p.w);
 }
 
 // ---------- Moradas ----------

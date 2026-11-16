@@ -35,7 +35,7 @@ test('perto de desbloquear: mais perto primeiro, no máximo 3, sem o que já tem
 
 test('subiu de nível: baú dourado a cada 5, casas e pets do nível; nível guardado com padrão 0', () => {
   assert.deepEqual(levelRewards(5).map((r) => r.kind), ['bau', 'casa']);
-  assert.deepEqual(levelRewards(3).map((r) => r.title), ['Pet liberado: Gatinho', 'Pet liberado: Cãozinho']);
-  assert.equal(levelRewards(7).length, 0);
+  assert.deepEqual(levelRewards(7).map((r) => r.title), ['Pet liberado: Gatinho', 'Pet liberado: Cãozinho']);
+  assert.equal(levelRewards(8).length, 0);
   assert.equal(normalize({ ...emptyData(), journey: { avatar: null } }).journey.levelSeen, 0);
 });

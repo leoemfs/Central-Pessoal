@@ -31,6 +31,15 @@ export interface ChestRecord {
   item: string | null;
 }
 
+/** Presente de um dia de visita, já recebido. */
+export interface GiftRecord {
+  day: string;
+  /** Posição na sequência de visitas naquele dia. */
+  n: number;
+  gold: number;
+  chest: ChestKind | null;
+}
+
 export interface JourneyState {
   /** null enquanto a pessoa não criou o avatar. */
   avatar: { gender: 'f' | 'm'; skin: string; hair: string; name: string } | null;
@@ -47,6 +56,11 @@ export interface JourneyState {
   lastSeen: JourneySnapshot | null;
   /** N2.13: último nível já comemorado na tela "Subiu de nível" (0 = ainda não marcou). */
   levelSeen: number;
+  /** N2.6: nome dado a cada pet (id → nome) e pelagem escolhida (id → pelagem). */
+  petNames: Record<string, string>;
+  petStyle: Record<string, string>;
+  /** N2.6: presentes do dia já recebidos por abrir o app. */
+  gifts: GiftRecord[];
 }
 
 /** Retrato do que foi ganho até um momento (valores ganhos, não o que sobrou depois de gastar). */
@@ -73,11 +87,17 @@ export function defaultJourneyState(): JourneyState {
     weather: 'aleatorio',
     lastSeen: null,
     levelSeen: 0,
+    petNames: {},
+    petStyle: {},
+    gifts: [],
     profile: null,
   };
 }
 
 /** Completa um estado vindo de backup ou de versão antiga. */
+const strMap = (x: unknown, max: number): Record<string, string> =>
+  x && typeof x === 'object' ? Object.fromEntries(Object.entries(x as Record<string, unknown>).filter((e): e is [string, string] => typeof e[1] === 'string').map(([k, v]) => [k, v.slice(0, max)])) : {};
+
 export function normalizeJourney(raw: unknown): JourneyState {
   const base = defaultJourneyState();
   if (!raw || typeof raw !== 'object') return base;
@@ -93,6 +113,9 @@ export function normalizeJourney(raw: unknown): JourneyState {
     chests: Array.isArray(r.chests) ? r.chests.filter((c) => c && typeof c.key === 'string') : [],
     weather: r.weather === 'limpo' ? 'limpo' : 'aleatorio',
     lastSeen: normalizeSnapshot(r.lastSeen),
+    petNames: strMap(r.petNames, 20),
+    petStyle: strMap(r.petStyle, 20),
+    gifts: Array.isArray(r.gifts) ? r.gifts.filter((g): g is GiftRecord => !!g && typeof g.day === 'string' && typeof g.gold === 'number').map((g) => ({ day: g.day, n: Math.max(1, Math.floor(Number(g.n) || 1)), gold: Math.max(0, g.gold), chest: g.chest === 'bronze' || g.chest === 'prata' || g.chest === 'dourado' ? g.chest : null })) : [],
     levelSeen: typeof r.levelSeen === 'number' && Number.isFinite(r.levelSeen) && r.levelSeen > 0 ? Math.floor(r.levelSeen) : 0,
     profile: normalizeProfile(r.profile),
   };
@@ -350,6 +373,8 @@ export function earnedChests(d: AppData, today: string = todayISO(), level = 1):
         if (len >= m) out.push({ key: `cristal:${h.id}:${start}:${m}`, kind: 'cristal', date: addDays(start, m), reason: `${m} dias sem: ${h.name}` });
     });
   }
+  // N2.6: presentes de visita que vêm como baú (7º dia da tira e marcos de 14 e 30 dias).
+  for (const g of d.journey?.gifts ?? []) if (g.chest) out.push({ key: `${g.chest}:visita:${g.day}`, kind: g.chest, date: g.day, reason: `${g.n} dias seguidos abrindo o app` });
   return out.sort((a, b) => a.date.localeCompare(b.date) || a.key.localeCompare(b.key));
 }
 
@@ -409,7 +434,7 @@ export function wallet(d: AppData, state: JourneyState, today: string = todayISO
   const stats = journeyStats(d, today);
   const attrs = attributes(d, today);
   const titles = titleProgress({ d, today, attrs }).filter((t) => t.earned).length;
-  const goldEarned = stats.gold + sum(state.chests.map((c) => c.gold));
+  const goldEarned = stats.gold + sum(state.chests.map((c) => c.gold)) + sum(state.gifts.map((g) => g.gold));
   const crystalsEarned = titles + sum(state.chests.map((c) => c.crystals));
   return {
     level: stats.level,
@@ -447,6 +472,8 @@ export interface ShopContext {
   level: number;
   /** Maior período limpo depois de uma recaída (para a Pena da fênix). */
   cleanAfterSlip: number;
+  /** N2.6: progresso das conquistas que liberam pets (id → tem/precisa). */
+  petGoals?: Record<string, { have: number; need: number }>;
 }
 
 const reqList = (attrs: Attrs, req: Partial<Attrs> = {}): Requirement[] =>
@@ -510,7 +537,8 @@ export function placeAvailability(kind: 'pet' | 'morada', id: string, state: Jou
   if (state.owned.includes(id)) return { status: 'tem' };
   const def = kind === 'pet' ? PETS.find((p) => p.id === id) : HOMES.find((h) => h.id === id);
   if (!def) return { status: 'bau', unlock: [] };
-  const ready = c.level >= def.level && meets(c.attrs, def.attrUnlock);
+  const goal = kind === 'pet' ? c.petGoals?.[id] : undefined;
+  const ready = c.level >= def.level && meets(c.attrs, def.attrUnlock) && (!goal || goal.have >= goal.need);
   const price = kind === 'morada' ? (def as Home).price : undefined;
   if (!ready) return { status: 'bau', unlock: reqList(c.attrs, def.attrUnlock) };
   if (price) return { status: 'comprar', price, canAfford: c.gold >= price };
@@ -695,7 +723,8 @@ export function newsLine(n: SinceVisit): string {
 /** Tudo o que a loja precisa saber de uma vez: atributos, ouro, cristais, nível e período limpo. */
 export function shopContext(d: AppData, state: JourneyState, today: string = todayISO()): ShopContext {
   const w = wallet(d, state, today);
-  return { attrs: w.attrs, gold: w.gold, crystals: w.crystals, level: w.level, cleanAfterSlip: cleanAfterSlip(d, today) };
+  const goals = Object.fromEntries(Object.entries(petGoals(d, today)).map(([k, g]) => [k, { have: g.have, need: g.need }]));
+  return { attrs: w.attrs, gold: w.gold, crystals: w.crystals, level: w.level, cleanAfterSlip: cleanAfterSlip(d, today), petGoals: goals };
 }
 
 /** Itens de um espaço para o Arsenal, sem os místicos (esses ficam na Forja): os seus primeiro, depois por raridade e preço. */
@@ -704,4 +733,56 @@ export function arsenalItems(slot: Slot, state: JourneyState): Item[] {
   return ITEMS.filter((i) => i.slot === slot && i.rarity !== 'mistico').sort(
     (a, b) => Number(state.owned.includes(b.id)) - Number(state.owned.includes(a.id)) || rank[a.rarity] - rank[b.rarity] || (a.price ?? 0) - (b.price ?? 0),
   );
+}
+
+// ---------- N2.6: pets, pelagens e presente do dia ----------
+
+/** Como cada pet é liberado (F.3). Nível e atributos ficam em PETS; aqui, as conquistas ligadas ao app. */
+export function petGoals(d: AppData, today: string = todayISO()): Record<string, { hint: string; have: number; need: number }> {
+  const stats = journeyStats(d, today);
+  const visits = visitStats(d.settings.visitDays, today);
+  const days = [...checkDays(d, () => true, today)].sort();
+  let run = 0;
+  let bestRun = 0;
+  days.forEach((day, i) => {
+    run = i > 0 && diffDays(days[i - 1], day) === 1 ? run + 1 : 1;
+    bestRun = Math.max(bestRun, run);
+  });
+  const diary = d.journal.filter((j) => j.tag !== 'Revisão').length;
+  const tasks = d.tasks.filter((t) => t.done).length;
+  const half = d.boxes.some((b) => b.marks.includes(50)) ? 1 : 0;
+  return {
+    gato: { hint: 'Companheiro inicial; quem escolheu o cão ganha o gato no nível 7', have: 0, need: 0 },
+    cao: { hint: 'Companheiro inicial; quem escolheu o gato ganha o cão no nível 7', have: 0, need: 0 },
+    coelho: { hint: 'Cumprir 150 missões (hábitos, contas, tarefas…)', have: stats.missions, need: 150 },
+    coruja: { hint: '80 registros no diário', have: diary, need: 80 },
+    beijaflor: { hint: '20 tarefas concluídas na Agenda', have: tasks, need: 20 },
+    esquilo: { hint: 'Uma caixinha chegar a 50% da meta', have: half, need: 1 },
+    tartaruga: { hint: '30 dias seguidos de rotina', have: bestRun, need: 30 },
+    raposa: { hint: '30 dias seguidos abrindo o app', have: visits.best, need: 30 },
+    cavalo: { hint: 'Nível 12 e Agilidade 50', have: 0, need: 0 },
+    lobo: { hint: 'Chegar ao nível 15 (ou vencer o Lobo da Preguiça na Campanha)', have: 0, need: 0 },
+    sapinho: { hint: '60 dias abrindo o app (ou vencer a Serpente do Vício)', have: visits.total, need: 60 },
+    golem: { hint: 'Vencer o Gigante da Desordem na Campanha (em breve)', have: 0, need: 1 },
+    fenix: { hint: '30 dias limpo depois de uma recaída', have: cleanAfterSlip(d, today), need: 30 },
+    dragao: { hint: 'Chegar ao nível 50 (ou vencer o Senhor do Caos)', have: 0, need: 0 },
+    grifo: { hint: '365 dias abrindo o app', have: visits.total, need: 365 },
+    unicornio: { hint: 'Todos os atributos em 100', have: 0, need: 0 },
+  };
+}
+
+/** Pelagens raras: prêmio de dias seguidos abrindo o app. */
+export const RARE_VARIANTS: Record<string, number> = { visitas30: 30, visitas100: 100, visitas365: 365 };
+
+/** Presentes do dia ainda não recebidos: dias com o app aberto nos últimos 7 dias (desde o desbloqueio). */
+export function pendingGifts(d: AppData, state: JourneyState, today: string = todayISO()): GiftRecord[] {
+  const from = d.settings.journeyUnlockedAt ? d.settings.journeyUnlockedAt.slice(0, 10) : today;
+  const claimed = new Set(state.gifts.map((g) => g.day));
+  const days = [...new Set(d.settings.visitDays)].filter((x) => x >= from && x >= addDays(today, -6) && x <= today && !claimed.has(x)).sort();
+  return days.map((day) => {
+    const n = Math.max(1, visitStats(d.settings.visitDays, day).streak);
+    const g = visitGift(n);
+    const chest = g.milestone?.chest ?? g.chest;
+    return { day, n, gold: g.gold, chest };
+  });
 }

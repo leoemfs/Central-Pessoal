@@ -5,7 +5,7 @@
  */
 import { useState } from 'react';
 import { todayISO } from '../utils';
-import { Fullscreen, notify } from '../ui';
+import { Fullscreen } from '../ui';
 import { ATTRIBUTES } from '../habits';
 import { avatarIcon, homeIcon, HOMES, itemById, itemIcon, PETS, petIcon, RARITY, skyPalette, treeIcon, type AvatarLook, type Slot } from '../jornada/catalog';
 import { classOf, type JourneyState } from '../jornada/rules';
@@ -43,7 +43,7 @@ export function TelaCheia({
   level: number;
   title: string | null;
   cls: ReturnType<typeof classOf>;
-  onSlot: (s: Slot) => void;
+  onSlot: (s: Slot | 'pet' | 'morada') => void;
   onClose: () => void;
 }) {
   const [sky, setSky] = useState<Sky>('auto');
@@ -89,8 +89,8 @@ export function TelaCheia({
         <div className="jn-fs-ground" style={{ background: t.ground, borderTopColor: t.grass }} />
         <div className="jn-fs-path" style={{ background: t.path }} />
         {pet && (
-          <button type="button" className="jn-fs-pet" aria-label={`Fazer carinho no ${pet.name.toLowerCase()}`} onClick={() => setHearts((h) => h + 1)}>
-            <img src={petIcon(pet.id)} alt="" />
+          <button type="button" className="jn-fs-pet" aria-label={`Fazer carinho em ${state.petNames[pet.id] || pet.name.toLowerCase()}`} onClick={() => setHearts((h) => h + 1)}>
+            <img src={petIcon(pet.id, state.petStyle[pet.id])} alt="" />
             {hearts > 0 && (
               <span key={hearts} className="jn-fs-heart" aria-hidden="true">
                 ♥
@@ -137,14 +137,14 @@ export function TelaCheia({
             const id = s.id === 'pet' ? state.equipped.pet : s.id === 'morada' ? state.equipped.morada : state.equipped[s.id];
             const it = s.id === 'pet' || s.id === 'morada' ? null : id ? itemById(id) : null;
             const rarity = s.id === 'pet' ? pet?.rarity : s.id === 'morada' ? home.rarity : it?.rarity;
-            const icon = s.id === 'pet' ? (pet ? petIcon(pet.id) : null) : s.id === 'morada' ? homeIcon(home.id, 'manha') : it ? itemIcon(it) : null;
-            const name = s.id === 'pet' ? pet?.name : s.id === 'morada' ? home.name : it?.name;
+            const icon = s.id === 'pet' ? (pet ? petIcon(pet.id, state.petStyle[pet.id]) : null) : s.id === 'morada' ? homeIcon(home.id, 'manha') : it ? itemIcon(it) : null;
+            const name = s.id === 'pet' ? (pet ? state.petNames[pet.id] || pet.name : undefined) : s.id === 'morada' ? home.name : it?.name;
             return (
               <button
                 key={s.id}
                 type="button"
                 aria-label={`${s.label}: ${name ?? 'vazio'}`}
-                onClick={() => (s.id === 'pet' || s.id === 'morada' ? notify(s.id === 'pet' ? 'Pets: em breve' : 'Casas: em breve', 'Trocar de pet e de casa chega numa próxima versão.') : onSlot(s.id))}
+                onClick={() => onSlot(s.id)}
               >
                 <span className="jn-fs-slot" style={{ borderColor: rarity ? RARITY[rarity].color : '#3f3f46' }}>
                   {icon ? <img src={icon} alt="" /> : <b aria-hidden="true">+</b>}
