@@ -3,6 +3,8 @@ import { journeyStats, UNLOCK_DAYS, unlockProgress } from '../journey';
 import { formatDMY, fromISO, todayISO, WEEKDAYS } from '../utils';
 import { Icon, PageHeader, Pill, Pixels, Progress } from '../ui';
 import { JornadaHome, JornadaUnlock } from './JornadaHome';
+import { JornadaPortal } from './JornadaPortal';
+import { welcomed } from '../jornada/rules';
 import { journeyTab } from '../jornada/tabs';
 import { useRoute } from '../router';
 
@@ -82,6 +84,7 @@ export function Jornada() {
     return (
       <>
         <PageHeader title={TAB_TITLES[journeyTab(route.sub)]} />
+        {welcomed(data.journey) && <JornadaPortal />}
         <JornadaHome />
       </>
     );

@@ -9880,3 +9880,14 @@ body.bar-labels.bar-flat .tabbar .tb-label {
     animation: none;
   }
 }
+
+/* ---------- Jornada N2.14: entrada em portal (opção B da prévia) ---------- */
+.jn-portal {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 200;
+  pointer-events: none;
+  image-rendering: pixelated;
+}
