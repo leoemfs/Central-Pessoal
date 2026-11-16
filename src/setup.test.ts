@@ -86,3 +86,9 @@ test('E25: a gaveta começa no jeito Misto (valores estranhos também)', () => {
   assert.equal(normalize({ version: 2, settings: { drawerView: 'lista' } }).settings.drawerView, 'lista');
   assert.equal(normalize({ version: 2, settings: { drawerView: 'mosaico' } }).settings.drawerView, 'misto');
 });
+
+test('E29: ícones começam monocromáticos (valores estranhos também)', () => {
+  assert.equal(normalize(undefined).settings.iconColors, 'mono');
+  assert.equal(normalize({ version: 2, settings: { iconColors: 'cores' } }).settings.iconColors, 'cores');
+  assert.equal(normalize({ version: 2, settings: { iconColors: 'arco-iris' } }).settings.iconColors, 'mono');
+});
