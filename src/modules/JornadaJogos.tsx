@@ -9,6 +9,7 @@ import { todayISO } from '../utils';
 import { Fullscreen, notify } from '../ui';
 import { recordSession } from '../practices';
 import { FICHA_ICON, petIcon } from '../jornada/catalog';
+import { BichinhoCard, BichinhoTelaCheia } from './JornadaBichinho';
 import { DAILY_MINUTES, fichas, finishGame, GAMES, minutesLeft, type GameId } from '../jornada/games';
 
 const fmt = (n: number) => n.toLocaleString('pt-BR');
@@ -20,6 +21,7 @@ export function Fliperama() {
   const state = data.journey;
   const left = minutesLeft(state, today);
   const [playing, setPlaying] = useState<GameId | null>(null);
+  const [petOpen, setPetOpen] = useState(false);
   const started = useRef(0);
   const play = (g: GameId) => {
     started.current = Date.now();
@@ -61,6 +63,8 @@ export function Fliperama() {
           </div>
         </div>
       </section>
+      <BichinhoCard onOpen={() => setPetOpen(true)} />
+      {petOpen && <BichinhoTelaCheia onClose={() => setPetOpen(false)} />}
       <div className="jn-games">
         {GAMES.map((g) => (
           <button key={g.id} type="button" className={`jn-game${g.ready ? '' : ' locked'}`} onClick={() => (g.ready ? play(g.id) : notify(`${g.name}: em breve`, g.text))}>

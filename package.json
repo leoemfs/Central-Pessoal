@@ -1,7 +1,7 @@
 {
   "name": "central-pessoal",
   "private": true,
-  "version": "0.102.0",
+  "version": "0.103.0",
   "type": "module",
   "description": "Central Pessoal — finanças, diário, agenda e organização pessoal em um só lugar.",
   "scripts": {
