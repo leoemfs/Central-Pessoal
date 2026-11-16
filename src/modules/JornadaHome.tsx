@@ -10,7 +10,7 @@ import { journeyStats, unlockProgress, UNLOCK_DAYS, UNLOCK_WINDOW } from '../jou
 import { ATTRIBUTES } from '../habits';
 import { formatDMY, todayISO } from '../utils';
 import { notify, Segmented, Sheet, Toggle } from '../ui';
-import { avatarIcon, chestIcon, COIN_ICON, GEM_ICON, homeIcon, itemById, itemIcon, petIcon, PETS, RARITY, treeIcon, skyPalette, type AvatarLook } from '../jornada/catalog';
+import { avatarIcon, chestIcon, COIN_ICON, GEM_ICON, homeIcon, itemById, itemIcon, petIcon, PETS, RARITY, treeIcon, skyPalette, RING2_LEVEL, SLOT_LIST, SLOT_NAMES, type AvatarLook } from '../jornada/catalog';
 import { HAIRS, SKINS } from '../jornada/artData';
 import { acquire, availability, equip, shopContext, wardrobeItems, type Availability, type EquipSlot } from '../jornada/rules';
 import type { Item, Slot } from '../jornada/catalog';
@@ -361,7 +361,7 @@ export function JourneyScene({ look, state, activeDays, now }: { look: AvatarLoo
   const phase = sky.rain ? 'chuva' : sky.phase;
   const t = skyPalette(phase);
   const night = sky.phase === 'noite';
-  const outfit = { elmo: state.equipped.elmo, armadura: state.equipped.armadura, botas: state.equipped.botas, arma: state.equipped.arma };
+  const outfit = { elmo: state.equipped.elmo, armadura: state.equipped.armadura, botas: state.equipped.botas, arma: state.equipped.arma, colar: state.equipped.colar };
   const label = `${night ? 'Noite' : sky.phase === 'tarde' ? 'Fim de tarde' : 'Manhã'}${sky.rain ? ' com chuva' : ''}${sky.rainbow ? ' com arco-íris' : ''}${night ? `, ${sky.stars} ${sky.stars === 1 ? 'estrela' : 'estrelas'}` : ''}`;
   return (
     <div className="jn-scene" role="img" aria-label={`Cena da Jornada: ${label}`} style={{ background: `linear-gradient(${t.sky1}, ${t.sky2})` }}>
@@ -633,7 +633,7 @@ export function JornadaHome() {
         <p className="muted small" style={{ marginTop: 10 }}>
           Aqui ficam só os seus. Para comprar, vá à <button type="button" className="jn-link" onClick={() => go('jornada/loja')}>Loja</button>; para ver tudo o que existe, o <button type="button" className="jn-link" onClick={() => go('jornada/codex')}>Codex</button>.
         </p>
-        {slot === 'artefato' && <p className="muted small" style={{ marginTop: 10 }}>Cada artefato dá +10% de XP nos hábitos do seu atributo. O segundo espaço de artefato abre no nível 20.</p>}
+        {(slot === 'anel' || slot === 'colar' || slot === 'magico') && <p className="muted small" style={{ marginTop: 10 }}>Anéis, colares e itens mágicos dão bônus (veja cada um). O segundo anel abre no nível {RING2_LEVEL}.</p>}
       </section>
       </>)}
       {tab === 'pet' && <PetsView mine />}
@@ -670,7 +670,7 @@ export function JornadaHome() {
       {levelUp && !since && (
         <LevelUpScreen
           look={look}
-          outfit={{ elmo: state.equipped.elmo, armadura: state.equipped.armadura, botas: state.equipped.botas, arma: state.equipped.arma }}
+          outfit={{ elmo: state.equipped.elmo, armadura: state.equipped.armadura, botas: state.equipped.botas, arma: state.equipped.arma, colar: state.equipped.colar }}
           level={s.level}
           xp={s.xp}
           toNext={s.xpForNext - s.xpInLevel}
@@ -927,8 +927,7 @@ function ChestSheet({ chest, onOpen, onClose }: { chest: Chest; onOpen: (c: Ches
 
 // ---------- N2.4: Arsenal, provador e loja ----------
 
-const SLOTS: Slot[] = ['elmo', 'armadura', 'botas', 'arma', 'artefato'];
-const SLOT_NAMES: Record<Slot, string> = { elmo: 'Elmo', armadura: 'Roupa', botas: 'Botas', arma: 'Arma', artefato: 'Artefato' };
+const SLOTS = SLOT_LIST;
 
 function reqText(a: Extract<Availability, { status: 'bau' }>): string {
   const miss = a.unlock.filter((r) => !r.ok);
@@ -939,10 +938,11 @@ function reqText(a: Extract<Availability, { status: 'bau' }>): string {
 type Act = (state: JourneyState, c: ReturnType<typeof shopContext>, level: number) => JourneyState | string;
 
 function TrySheet({ item, look, state, avail, level, gold, onAct, onClose }: { item: Item; look: AvatarLook; state: JourneyState; avail: Availability; level: number; gold: number; onAct: (fn: Act) => void; onClose: () => void }) {
-  const isArtifact = item.slot === 'artefato';
-  const target: EquipSlot = isArtifact && state.equipped.artefato && state.equipped.artefato !== item.id && level >= 20 && !state.equipped.artefato2 ? 'artefato2' : item.slot;
+  // Anel e mágico não aparecem no corpo: ficam ao lado do personagem no provador.
+  const isArtifact = item.slot === 'anel' || item.slot === 'magico';
+  const target: EquipSlot = item.slot === 'anel' && state.equipped.anel && state.equipped.anel !== item.id && level >= RING2_LEVEL && !state.equipped.anel2 ? 'anel2' : item.slot;
   const wearing = Object.entries(state.equipped).find(([, v]) => v === item.id)?.[0] as EquipSlot | undefined;
-  const outfit = { elmo: state.equipped.elmo, armadura: state.equipped.armadura, botas: state.equipped.botas, arma: state.equipped.arma };
+  const outfit = { elmo: state.equipped.elmo, armadura: state.equipped.armadura, botas: state.equipped.botas, arma: state.equipped.arma, colar: state.equipped.colar };
   const tried = isArtifact ? outfit : { ...outfit, [item.slot]: item.id };
   const canRemove = wearing && wearing !== 'armadura' && wearing !== 'botas';
   let action: { label: string; fn: Act; disabled?: boolean } | null = null;

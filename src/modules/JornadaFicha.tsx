@@ -205,7 +205,7 @@ export function ForgeView() {
   const { data, update } = useStore();
   const today = todayISO();
   const ctx = shopContext(data, data.journey, today);
-  const items = ITEMS.filter((i) => i.rarity === 'mistico');
+  const items = ITEMS.filter((i) => i.rarity === 'mistico' && !i.campaign);
   const forge = (id: string) =>
     update((d) => {
       const r = acquire(d.journey, id, shopContext(d, d.journey, todayISO()));

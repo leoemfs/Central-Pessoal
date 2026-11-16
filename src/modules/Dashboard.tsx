@@ -408,7 +408,7 @@ function JourneyCard() {
   return (
     <a className="card journey-card" href="#/jornada">
       <span className="journey-card-face">
-        {look ? <img src={avatarIcon(look, { elmo: eq.elmo, armadura: eq.armadura, botas: eq.botas, arma: eq.arma })} alt="" /> : <Icon name="sword" size={24} />}
+        {look ? <img src={avatarIcon(look, { elmo: eq.elmo, armadura: eq.armadura, botas: eq.botas, arma: eq.arma, colar: eq.colar })} alt="" /> : <Icon name="sword" size={24} />}
       </span>
       <span className="journey-card-body">
         <strong>

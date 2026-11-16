@@ -20,7 +20,9 @@ const SLOTS: { id: Slot | 'pet' | 'morada'; label: string }[] = [
   { id: 'armadura', label: 'Roupa' },
   { id: 'botas', label: 'Botas' },
   { id: 'arma', label: 'Arma' },
-  { id: 'artefato', label: 'Artef.' },
+  { id: 'anel', label: 'Anel' },
+  { id: 'colar', label: 'Colar' },
+  { id: 'magico', label: 'Mágico' },
   { id: 'pet', label: 'Pet' },
   { id: 'morada', label: 'Casa' },
 ];
@@ -80,10 +82,12 @@ export function TelaCheia({
   const top = cls.codes[0] ? ATTRIBUTES.find((a) => a.code === cls.codes[0]) : null;
   const classLine = cls.codes.length === 2 ? `Classe: ${cls[g]} (${cls.codes.join(' e ')} quase empatados)` : top ? `Classe: ${cls[g]} (${top.name} é o seu atributo mais alto)` : 'A classe aparece quando os atributos começarem a subir';
   const clock = `${sky === 'auto' ? (real.rain ? 'CHUVA' : SKY_NAMES[real.phase].toUpperCase()) : SKY_NAMES[sky].toUpperCase()} · ${pad(now.getHours())}:${pad(now.getMinutes())}`;
-  const artifact = state.equipped.artefato ? itemById(state.equipped.artefato) : null;
+  // O item mágico flutua ao lado do personagem (sem mágico, o anel).
+  const floatId = state.equipped.magico ?? state.equipped.anel;
+  const artifact = floatId ? itemById(floatId) : null;
   const pet = state.equipped.pet ? PETS.find((p) => p.id === state.equipped.pet) : null;
   const home = HOMES.find((h) => h.id === state.equipped.morada) ?? HOMES[0];
-  const outfit = { elmo: state.equipped.elmo, armadura: state.equipped.armadura, botas: state.equipped.botas, arma: state.equipped.arma };
+  const outfit = { elmo: state.equipped.elmo, armadura: state.equipped.armadura, botas: state.equipped.botas, arma: state.equipped.arma, colar: state.equipped.colar };
   const drops = rain ? Array.from({ length: 46 }, (_, i) => ({ x: Math.round(hash01(`gota:${i}`, 1) * 100), d: (0.6 + hash01(`gota:${i}`, 2) * 0.6).toFixed(2), w: (hash01(`gota:${i}`, 3) * 1.2).toFixed(2) })) : [];
 
   return (

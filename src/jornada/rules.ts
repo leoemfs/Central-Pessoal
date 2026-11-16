@@ -18,7 +18,7 @@ import { monthBalance } from '../incomes.ts';
 import { defaultReviewWeek, weekReview, weekStart } from '../review.ts';
 import { addDays, addMonths, monthKey, pad, sum, toISO, todayISO } from '../utils.ts';
 import { normalizeProfile, type Profile } from './interview.ts';
-import { ATTR_CODES, HOMES, ITEMS, PETS, STARTER_ITEMS, itemById, type AttrCode, type Attrs, type Home, type Item, type Rarity, type Slot } from './catalog.ts';
+import { ATTR_CODES, HOMES, ITEMS, PETS, RING2_LEVEL, STARTER_ITEMS, itemById, type AttrCode, type Attrs, type Home, type Item, type Rarity, type Slot } from './catalog.ts';
 
 // ---------- Estado guardado ----------
 
@@ -49,7 +49,7 @@ export interface JourneyState {
   /** null enquanto a pessoa não criou o avatar. */
   avatar: { gender: 'f' | 'm'; skin: string; hair: string; name: string } | null;
   owned: string[];
-  equipped: { elmo: string | null; armadura: string; botas: string; arma: string | null; artefato: string | null; artefato2: string | null; pet: string | null; morada: string };
+  equipped: { elmo: string | null; armadura: string; botas: string; arma: string | null; anel: string | null; anel2: string | null; colar: string | null; magico: string | null; pet: string | null; morada: string };
   goldSpent: number;
   crystalsSpent: number;
   title: string | null;
@@ -86,7 +86,7 @@ export function defaultJourneyState(): JourneyState {
   return {
     avatar: null,
     owned: [...STARTER_ITEMS, 'cabana'],
-    equipped: { elmo: null, armadura: 'aprendiz', botas: 'sapatos', arma: 'madeira', artefato: null, artefato2: null, pet: null, morada: 'cabana' },
+    equipped: { elmo: null, armadura: 'aprendiz', botas: 'sapatos', arma: 'madeira', anel: null, anel2: null, colar: null, magico: null, pet: null, morada: 'cabana' },
     goldSpent: 0,
     crystalsSpent: 0,
     title: 'aprendiz',
@@ -113,6 +113,33 @@ function normalizeGames(x: unknown): GamesState {
 const strMap = (x: unknown, max: number): Record<string, string> =>
   x && typeof x === 'object' ? Object.fromEntries(Object.entries(x as Record<string, unknown>).filter((e): e is [string, string] => typeof e[1] === 'string').map(([k, v]) => [k, v.slice(0, max)])) : {};
 
+/**
+ * Espaços vestidos. Versões antigas tinham "artefato" e "artefato2"; cada artefato vai para o espaço
+ * novo dele (anel, colar ou mágico), como na prévia. Item que não existe mais ou no espaço errado sai.
+ */
+function normalizeEquipped(base: JourneyState['equipped'], raw: unknown): JourneyState['equipped'] {
+  const r = (raw && typeof raw === 'object' ? raw : {}) as Record<string, unknown>;
+  const out = { ...base };
+  const str = (v: unknown) => (typeof v === 'string' && v ? v : null);
+  for (const k of ['elmo', 'armadura', 'botas', 'arma', 'anel', 'colar', 'magico', 'pet', 'morada'] as const) {
+    const v = str(r[k]);
+    if (v === null) {
+      if (k in r && k !== 'armadura' && k !== 'botas' && k !== 'morada') (out as Record<string, string | null>)[k] = null;
+      continue;
+    }
+    if (k === 'pet' || k === 'morada' || itemById(v)?.slot === k) (out as Record<string, string | null>)[k] = v;
+  }
+  const a2 = str(r.anel2);
+  if (a2 && itemById(a2)?.slot === 'anel' && a2 !== out.anel) out.anel2 = a2;
+  for (const old of [str(r.artefato), str(r.artefato2)]) {
+    const it = old ? itemById(old) : undefined;
+    if (!it || (it.slot !== 'anel' && it.slot !== 'colar' && it.slot !== 'magico')) continue;
+    if (!out[it.slot]) out[it.slot] = it.id;
+    else if (it.slot === 'anel' && !out.anel2 && out.anel !== it.id) out.anel2 = it.id;
+  }
+  return out;
+}
+
 export function normalizeJourney(raw: unknown): JourneyState {
   const base = defaultJourneyState();
   if (!raw || typeof raw !== 'object') return base;
@@ -121,7 +148,7 @@ export function normalizeJourney(raw: unknown): JourneyState {
   return {
     avatar: r.avatar && (r.avatar.gender === 'f' || r.avatar.gender === 'm') ? { gender: r.avatar.gender, skin: String(r.avatar.skin ?? 'media'), hair: String(r.avatar.hair ?? 'castanho'), name: typeof r.avatar.name === 'string' ? r.avatar.name.slice(0, 14) : '' } : null,
     owned: Array.from(new Set([...base.owned, ...(Array.isArray(r.owned) ? r.owned.filter((x): x is string => typeof x === 'string') : [])])),
-    equipped: { ...base.equipped, ...(r.equipped ?? {}) },
+    equipped: normalizeEquipped(base.equipped, r.equipped),
     goldSpent: num(r.goldSpent),
     crystalsSpent: num(r.crystalsSpent),
     title: typeof r.title === 'string' ? r.title : base.title,
@@ -502,6 +529,8 @@ const reqList = (attrs: Attrs, req: Partial<Attrs> = {}): Requirement[] =>
 /** O que dá para fazer com um item: já tem, comprar, liberar de graça, esperar baú ou forjar. */
 export function availability(item: Item, state: JourneyState, c: ShopContext): Availability {
   if (state.owned.includes(item.id)) return { status: 'tem' };
+  // Itens de região: vêm da campanha (ou de baús); não se compram nem se forjam.
+  if (item.campaign) return { status: 'bau', unlock: [] };
   if (item.rarity === 'mistico') {
     const reqs = reqList(c.attrs, item.req);
     if (item.extra) reqs.push({ code: 'limpo', have: Math.min(c.cleanAfterSlip, item.extra.cleanAfterSlip), need: item.extra.cleanAfterSlip, ok: c.cleanAfterSlip >= item.extra.cleanAfterSlip });
@@ -533,8 +562,8 @@ export function acquire(state: JourneyState, itemId: string, c: ShopContext): Jo
   }
 }
 
-export const ARTIFACT2_LEVEL = 20;
-export type EquipSlot = Slot | 'artefato2' | 'pet' | 'morada';
+export const ARTIFACT2_LEVEL = RING2_LEVEL;
+export type EquipSlot = Slot | 'anel2' | 'pet' | 'morada';
 
 /** Veste um item que a pessoa já tem (ou tira, com `null`, onde for permitido). */
 export function equip(state: JourneyState, slot: EquipSlot, id: string | null, level: number): JourneyState | string {
@@ -543,10 +572,10 @@ export function equip(state: JourneyState, slot: EquipSlot, id: string | null, l
     return { ...state, equipped: { ...state.equipped, [slot]: null } };
   }
   if (!state.owned.includes(id)) return 'Você ainda não tem este item';
-  if (slot === 'artefato2' && level < ARTIFACT2_LEVEL) return `O segundo artefato abre no nível ${ARTIFACT2_LEVEL}`;
-  if (slot === 'pet' ? !PETS.some((p) => p.id === id) : slot === 'morada' ? !HOMES.some((h) => h.id === id) : itemById(id)?.slot !== (slot === 'artefato2' ? 'artefato' : slot))
+  if (slot === 'anel2' && level < RING2_LEVEL) return `O segundo anel abre no nível ${RING2_LEVEL}`;
+  if (slot === 'pet' ? !PETS.some((p) => p.id === id) : slot === 'morada' ? !HOMES.some((h) => h.id === id) : itemById(id)?.slot !== (slot === 'anel2' ? 'anel' : slot))
     return 'Este item não vai neste espaço';
-  const other = slot === 'artefato' ? 'artefato2' : slot === 'artefato2' ? 'artefato' : null;
+  const other = slot === 'anel' ? 'anel2' : slot === 'anel2' ? 'anel' : null;
   const equipped = { ...state.equipped, [slot]: id };
   if (other && equipped[other] === id) equipped[other] = null;
   return { ...state, equipped };
@@ -573,11 +602,12 @@ export function acquirePlace(kind: 'pet' | 'morada', id: string, state: JourneyS
   return 'Ainda não liberado';
 }
 
-/** Bônus dos artefatos vestidos: +10% de XP no atributo do artefato; Estrela polar dá +10% em tudo. */
+/** Bônus do que está vestido: +10% de XP no atributo do item; Estrela polar dá +10% em tudo. */
 export function equipmentBonus(state: JourneyState) {
   const xpByAttr = zero();
   let all = 0;
-  for (const id of [state.equipped.artefato, state.equipped.artefato2]) {
+  const e = state.equipped;
+  for (const id of [e.anel, e.anel2, e.colar, e.magico]) {
     const it = id ? itemById(id) : undefined;
     if (it?.boosts) xpByAttr[it.boosts] += 0.1;
     if (it?.id === 'polar') all += 0.1;
@@ -811,7 +841,7 @@ export function pendingGifts(d: AppData, state: JourneyState, today: string = to
 
 /**
  * O próximo item de um espaço, na ordem do catálogo, entre os que a pessoa tem. Nos espaços que podem
- * ficar vazios (elmo, arma, artefato, pet), depois do último vem "sem nada" e então recomeça.
+ * ficar vazios (elmo, arma, anel, colar, mágico, pet), depois do último vem "sem nada" e então recomeça.
  */
 export function nextInSlot(state: JourneyState, slot: Slot | 'pet' | 'morada'): string | null {
   const ids =
