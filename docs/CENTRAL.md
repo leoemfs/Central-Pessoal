@@ -47,6 +47,7 @@
 ## Caixa de entrada
 *Ideias e problemas ainda sem classificar. Uma linha cada, com a data.*
 
+- 16/11: Jornada no **estilo anime de adesivo** (talvez no futuro, com investimento). Caminhos: efeito adesivo por cima do pixel (P) ou redesenhar tudo em vetor/ilustrador (G+). Prévia: https://claude.ai/artifact/7JX6ukc6P29FmWPNb1Gmp8
 - 16/11: Jornada: **bichinho virtual** como primeiro mini game, fixo no topo do Fliperama, com o pet atual (quarto, carinho, petisco, brincar, dormir; girar o pet em frente, lados e costas). Mini games ganham **moeda própria (fichas)**, que só serve para o bichinho (brinquedos, papel de parede, caminha, roupinhas, petiscos); o ouro dos hábitos não muda. **Fichas só nos primeiros 30 min de jogo por dia**; depois dá para jogar sem fichas. Prévia: https://claude.ai/artifact/HVXga55DMVo9m3jyRgtKA2. **Versão 2 (16/11):** cartão no Fliperama que abre em **tela cheia** (como a do personagem), pet com mais pixels, lugares **Quarto · Banheiro · Lá fora · Loja** no lugar de Manhã/Tarde/Noite/Chuva, quarto conforme a moradia (barraca, casinha, pedra, torre, castelinho, castelo), Lá fora = cena da Jornada, Loja com rolagem para o lado e o que se compra aparece no cenário, lado e costas usados pela cena (sem botão de girar); prévia https://claude.ai/artifact/Q2pKUhPZ7jXtJpxxH8UYms. Tamanho G, aprovado (16/11) como **N2.18**: a) fichas + limite (P, **feito v0.101**); b) tela cheia com quarto pela moradia e ações (M); c) banheiro e lá fora (M); d) loja com itens no cenário (M).
 - 16/11: Jornada: um pet "igual o boneco do Claude". Recomendação: pet **inspirado** (bichinho laranja em pixel art, jeito simpático), não uma cópia do personagem da marca. Tamanho P (desenho + lugar no catálogo de pets, com cores e como conquistar). Precisa de prévia sem código para aprovar o desenho.
 - 15/11: Dieta × Receitas: ligar receitas de Listas às refeições do plano, abrir a receita pela refeição e gerar a lista de compras da semana. Anotado no N1: N1.2a (v0.68) e N1.2b (v0.69) prontas.
@@ -321,6 +322,7 @@ Documentos sem código: Mapa dos módulos (08/11), módulos personalizáveis, pa
 ## Prévias visuais guardadas
 | Prévia | Link |
 |---|---|
+| Jornada: pixel art × pixel com efeito adesivo × estilo anime (só para ver; ideia para o futuro) (16/11) | https://claude.ai/artifact/7JX6ukc6P29FmWPNb1Gmp8 |
 | Jornada: bichinho virtual v2 (cartão no Fliperama, tela cheia, Quarto/Banheiro/Lá fora/Loja, quarto pela moradia) (16/11) | https://claude.ai/artifact/Q2pKUhPZ7jXtJpxxH8UYms |
 | Jornada: bichinho virtual v1 (quarto do pet, fichas dos mini games, limite de 30 min, loja do pet, girar o pet) (16/11) | https://claude.ai/artifact/HVXga55DMVo9m3jyRgtKA2 |
 | Computador em três faixas: menu, meio e cartões rápidos (E35 + E34, C15, C16, 16/11) | https://claude.ai/artifact/D8q69nMGyQyZjXYXqUzSiz |
