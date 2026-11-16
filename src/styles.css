@@ -8144,6 +8144,128 @@ a.chip-btn {
   font-size: 0.8rem;
 }
 
+/* ---------- Jornada N2.9: missões ---------- */
+.jn-missions,
+.jn-week {
+  list-style: none;
+  margin: 12px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.jn-mission {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  border-radius: 16px;
+  background: var(--raised-2);
+  border: 1px solid transparent;
+  transition: opacity 0.2s;
+}
+.jn-mission.done {
+  opacity: 0.6;
+}
+.jn-mission.done .jn-mtitle {
+  text-decoration: line-through;
+}
+.jn-mission.slipped {
+  border-color: var(--orange);
+}
+.jn-mico {
+  flex: none;
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  background: var(--raised);
+}
+.jn-mbody {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.jn-mtitle {
+  font-weight: 700;
+}
+.jn-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 4px;
+}
+.jn-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--raised);
+  font-size: 12px;
+  font-weight: 700;
+  align-self: flex-start;
+}
+.jn-chip.xp {
+  color: var(--jn-xp);
+}
+.jn-chip.gold {
+  color: var(--jn-gold);
+}
+.jn-chip.won {
+  color: var(--green-text);
+}
+.jn-chip img {
+  width: 12px;
+  image-rendering: pixelated;
+}
+.jn-check {
+  flex: none;
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  border: 2px solid var(--border-strong);
+  background: transparent;
+  color: transparent;
+  display: grid;
+  place-items: center;
+  padding: 0;
+}
+.jn-check.on {
+  background: var(--green);
+  border-color: var(--green);
+  color: var(--on-green);
+  animation: jn-pop 0.35s cubic-bezier(0.3, 1.6, 0.5, 1);
+}
+.jn-check.go {
+  color: var(--muted);
+}
+.jn-check.static {
+  animation: none;
+}
+.jn-daydone {
+  margin-top: 12px;
+  padding: 12px;
+  border-radius: 14px;
+  background: var(--green-soft);
+  color: var(--green-text);
+  font-family: var(--jn-pixel);
+  font-weight: 600;
+}
+.jn-week li {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .jn-check.on {
+    animation: none;
+  }
+}
+
 /* E29: ícones dos módulos coloridos (Aparência › Cor dos ícones). Atalhos e o resto seguem a cor de destaque. */
 body.icons-color [data-mod='financas'],
 .preview-color [data-mod='financas'] {

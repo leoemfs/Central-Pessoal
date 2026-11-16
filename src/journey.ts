@@ -7,6 +7,7 @@
 import type { AppData } from './types.ts';
 import { addDays, sum, toISO, todayISO } from './utils.ts';
 import { diffDays } from './habits.ts';
+import { weeklyBonus } from './jornada/missions.ts';
 
 export const UNLOCK_DAYS = 14;
 export const UNLOCK_WINDOW = 21;
@@ -107,6 +108,9 @@ export function journeyStats(d: AppData, today: string = todayISO()) {
     count('diario', entries),
     count('revisao', reviews),
   ];
+  // N2.9: semanas com a meta do Diário cumprida (desde o desbloqueio): 10 XP por vez combinada.
+  const wk = weeklyBonus(d, today);
+  sources.push({ id: 'semana', label: 'Missões da semana cumpridas', rule: '10 XP por vez combinada no Diário', count: wk.weeks, xp: wk.xp, gold: 0 });
   const xp = sum(sources.map((s) => s.xp));
   return {
     xp,
