@@ -31,6 +31,10 @@
   --raised-border: transparent;
   --shadow: none;
   --sidebar-w: 248px;
+  /* E35.1: largura do meio no computador (toda tela cabe nela). */
+  --mid-w: 820px;
+  /* E35.2: coluna "Sempre à vista" (janela de 1280 px ou mais). */
+  --quick-w: 300px;
   --tabbar-h: 64px;
   font-family: Roboto, Inter, system-ui, -apple-system, 'Segoe UI', sans-serif;
   font-size: 16px;
@@ -300,11 +304,10 @@ button {
     width: var(--sidebar-w);
     display: flex;
     flex-direction: column;
-    gap: 6px;
-    padding: 22px 14px;
+    padding: 0;
     border-right: 1px solid var(--border);
     background: var(--surface);
-    overflow-y: auto;
+    overflow: hidden;
   }
   .brand {
     display: flex;
@@ -362,7 +365,7 @@ button {
   .main {
     margin-left: var(--sidebar-w);
     max-width: none;
-    padding: 32px max(40px, calc((100vw - var(--sidebar-w) - 980px) / 2)) 120px;
+    padding: 32px max(40px, calc((100vw - var(--sidebar-w) - var(--mid-w)) / 2)) 120px;
   }
   .cat-chips {
     margin: 0;
@@ -8461,6 +8464,7 @@ body .preview-flat [data-mod] {
   --tone: #22c55e;
 }
 body.icons-flat .set-icon,
+body.icons-flat .nav-ic:not([data-mod]),
 body.icons-flat .opt-icon,
 body.icons-flat .sug-icon,
 body.icons-flat .mg-icon:not([data-mod]),
@@ -11102,6 +11106,194 @@ body.bar-labels.jn-tall {
   width: 72px;
 }
 
+/* ---------- E35.1: computador em faixas (menu | meio). Prévia "CP Hub no computador", 16/11 ---------- */
+@media (min-width: 900px) {
+  /* Menu: topo fixo (marca + busca), lista que rola, pé fixo (conta + Configurações). */
+  .side-top {
+    flex: none;
+    padding: 20px 14px 6px;
+  }
+  .side-top .sidebar-search {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0;
+  }
+  .side-top .sidebar-search kbd {
+    margin-left: auto;
+    font: inherit;
+    font-size: 0.72rem;
+    line-height: 1.4;
+    padding: 0 6px;
+    border: 1px solid var(--border-strong, var(--border));
+    border-radius: 6px;
+    color: var(--faint);
+  }
+  .side-scroll {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    padding: 0 14px 10px;
+  }
+  .side-foot {
+    flex: none;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 12px;
+    border-top: 1px solid var(--border);
+  }
+  .side-account {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 6px 8px;
+    border-radius: 12px;
+    text-decoration: none;
+    color: var(--text);
+  }
+  a.side-account:hover,
+  .side-gear:hover {
+    background: var(--raised);
+  }
+  .side-avatar {
+    flex: none;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    background: var(--accent-soft);
+    color: var(--accent-text);
+    font-weight: 700;
+    font-size: 0.85rem;
+  }
+  .side-who {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    line-height: 1.25;
+  }
+  .side-who strong,
+  .side-who small {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .side-who strong {
+    font-size: 0.86rem;
+    font-weight: 600;
+  }
+  .side-who small {
+    font-size: 0.74rem;
+    color: var(--muted);
+  }
+  .side-gear {
+    flex: none;
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    display: grid;
+    place-items: center;
+    color: var(--muted);
+  }
+  .side-gear.active {
+    background: var(--accent-soft);
+    color: var(--accent-text);
+  }
+  .sidebar li > a,
+  .sidebar li > span {
+    padding: 7px 10px;
+  }
+  /* Ícones do menu seguem Estilo e Cor (C15). */
+  .nav-ic {
+    flex: none;
+    width: 26px;
+    height: 26px;
+    border-radius: 8px;
+    display: grid;
+    place-items: center;
+  }
+  body.icons-flat .nav-ic svg {
+    width: 15px;
+    height: 15px;
+  }
+  body.icons-flat .sidebar .soon .nav-ic {
+    opacity: 0.45;
+  }
+
+  /* Rolagem discreta: fina e quase invisível; aparece ao passar o mouse. */
+  html {
+    scrollbar-width: thin;
+    scrollbar-color: rgb(127 127 127 / 0.22) transparent;
+  }
+  .side-scroll {
+    scrollbar-width: thin;
+    scrollbar-color: transparent transparent;
+  }
+  .side-scroll:hover {
+    scrollbar-color: rgb(127 127 127 / 0.28) transparent;
+  }
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: rgb(127 127 127 / 0.22);
+    border-radius: 999px;
+  }
+  .side-scroll::-webkit-scrollbar-thumb {
+    background: transparent;
+  }
+  .side-scroll:hover::-webkit-scrollbar-thumb {
+    background: rgb(127 127 127 / 0.28);
+  }
+
+  /* Jornada (C16): a barra do jogo fica dentro do meio, numa linha, e não some ao rolar. */
+  body.jn-tall,
+  body.bar-labels.jn-tall {
+    --tabbar-h: 66px;
+  }
+  .tabbar.jn-gamebar,
+  .tabbar.jn-gamebar.jn-compact {
+    left: calc(var(--sidebar-w) + max(40px, calc((100vw - var(--sidebar-w) - var(--mid-w)) / 2)));
+    right: max(40px, calc((100vw - var(--sidebar-w) - var(--mid-w)) / 2));
+    bottom: 16px;
+    height: var(--tabbar-h);
+    padding: 6px;
+    border-radius: 18px;
+    grid-template-columns: repeat(10, minmax(0, 1fr));
+    transform: none;
+  }
+  .tabbar.jn-gamebar .jn-gsep {
+    display: none;
+  }
+  /* Avisos acima da barra do jogo, sem cobri-la. */
+  body.jn-tall .toasts {
+    bottom: calc(var(--tabbar-h) + 28px);
+  }
+  .tabbar.jn-gamebar a.jn-gtab,
+  .tabbar.jn-gamebar.jn-compact a.jn-gtab:not(.jn-rowon) {
+    display: flex;
+  }
+  .tabbar.jn-gamebar .jn-gicon,
+  .tabbar.jn-gamebar .jn-gicon img:first-child {
+    width: 26px;
+    height: 26px;
+  }
+  .tabbar.jn-gamebar .jn-glabel,
+  .tabbar.jn-gamebar.jn-compact .jn-glabel {
+    display: block;
+    font-size: 9px;
+    line-height: 1.3;
+    white-space: normal;
+  }
+}
 /* ---------- N2.17f: cores do pet em cartões, pet novo ---------- */
 .jn-variants {
   display: grid;
@@ -11158,6 +11350,176 @@ body.bar-labels.jn-tall {
   }
 }
 
+/* ---------- E35.2: coluna "Sempre à vista" (1280 px ou mais) ---------- */
+.quick {
+  display: none;
+}
+@media (min-width: 1280px) {
+  .quick {
+    position: fixed;
+    inset: 0 0 0 auto;
+    z-index: 15;
+    width: var(--quick-w);
+    display: flex;
+    flex-direction: column;
+    border-left: 1px solid var(--border);
+    background: var(--surface);
+  }
+  .quick-head {
+    flex: none;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 16px 10px;
+  }
+  .quick-head b {
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: var(--faint);
+  }
+  .quick-edit {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 32px;
+    padding: 0 12px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: var(--raised);
+    color: var(--muted);
+    font: inherit;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .quick-edit[aria-pressed='true'] {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: var(--on-accent);
+  }
+  .quick-list {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    padding: 0 12px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    scrollbar-width: thin;
+    scrollbar-color: transparent transparent;
+  }
+  .quick-list:hover {
+    scrollbar-color: rgb(127 127 127 / 0.28) transparent;
+  }
+  .quick-list::-webkit-scrollbar-thumb {
+    background: transparent;
+  }
+  .quick-list:hover::-webkit-scrollbar-thumb {
+    background: rgb(127 127 127 / 0.28);
+  }
+  .quick-item {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-width: 0;
+  }
+  /* Cartão sem nada para mostrar agora: some (no Editar continua o nome). */
+  .quick:not(.editing) .quick-item:has(> .quick-slot:empty) {
+    display: none;
+  }
+  .quick.editing .quick-slot:empty::before {
+    content: attr(data-empty);
+    display: block;
+    padding: 12px;
+    border: 1px dashed var(--border);
+    border-radius: 14px;
+    color: var(--faint);
+    font-size: 0.8rem;
+  }
+  .quick-slot {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .quick-slot > .card,
+  .quick-slot > section {
+    margin: 0;
+  }
+  .quick-ctl {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .quick-ctl strong {
+    flex: 1;
+    min-width: 0;
+    font-size: 0.82rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .quick-ctl button {
+    width: 30px;
+    height: 30px;
+    display: grid;
+    place-items: center;
+    border: 1px solid var(--border);
+    border-radius: 9px;
+    background: var(--raised);
+    color: var(--text);
+    cursor: pointer;
+  }
+  .quick-ctl button:disabled {
+    opacity: 0.35;
+    cursor: default;
+  }
+  .quick-add {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .quick-add button {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 9px 10px;
+    border: 1px dashed var(--border);
+    border-radius: 12px;
+    background: transparent;
+    color: var(--muted);
+    font: inherit;
+    font-size: 0.84rem;
+    text-align: left;
+    cursor: pointer;
+  }
+  .quick-add button:hover {
+    color: var(--text);
+    border-color: var(--accent);
+  }
+  .quick-empty {
+    padding: 4px 4px;
+  }
+  /* O meio fica centralizado entre o menu e a coluna. */
+  .main {
+    margin-right: var(--quick-w);
+    padding-left: max(32px, calc((100vw - var(--sidebar-w) - var(--quick-w) - var(--mid-w)) / 2));
+    padding-right: max(32px, calc((100vw - var(--sidebar-w) - var(--quick-w) - var(--mid-w)) / 2));
+  }
+  .tabbar.jn-gamebar,
+  .tabbar.jn-gamebar.jn-compact {
+    left: calc(var(--sidebar-w) + max(32px, calc((100vw - var(--sidebar-w) - var(--quick-w) - var(--mid-w)) / 2)));
+    right: calc(var(--quick-w) + max(32px, calc((100vw - var(--sidebar-w) - var(--quick-w) - var(--mid-w)) / 2)));
+  }
+  .fab {
+    right: calc(var(--quick-w) + 32px);
+  }
+  .toasts {
+    right: calc(var(--quick-w) + 12px);
+  }
+}
 /* ---------- N2.17g1: fala de personagem em balão ---------- */
 .jn-dialog-shade {
   position: fixed;
@@ -11231,4 +11593,87 @@ body.bar-labels.jn-tall {
   text-align: center;
   font-size: 12px;
   color: #d4d4d8;
+}
+
+/* E35.2: atalhos no topo da coluna (3 por linha). Somem junto com a coluna. */
+@media (min-width: 1280px) {
+  .quick-shortcuts {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+  }
+  .quick-sc-wrap {
+    position: relative;
+    min-width: 0;
+  }
+  .quick-sc {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 4px 8px;
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    background: var(--bg);
+    color: var(--text);
+    text-decoration: none;
+    min-width: 0;
+  }
+  .quick-sc:hover {
+    border-color: var(--border-strong, var(--border));
+    background: var(--raised);
+  }
+  .quick-sc .mg-icon {
+    width: calc(var(--ic-menu) * 0.78);
+    height: calc(var(--ic-menu) * 0.78);
+    border-radius: 28%;
+  }
+  .quick-sc .mg-icon > svg {
+    width: calc(var(--ic-menu-svg) * 0.85);
+    height: calc(var(--ic-menu-svg) * 0.85);
+  }
+  .quick-sc-name {
+    max-width: 100%;
+    font-size: 0.72rem;
+    font-weight: 600;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .quick-sc-x {
+    position: absolute;
+    top: -6px;
+    right: -6px;
+    width: 22px;
+    height: 22px;
+    display: grid;
+    place-items: center;
+    border: 1px solid var(--border);
+    border-radius: 50%;
+    background: var(--raised-2);
+    color: var(--text);
+    cursor: pointer;
+  }
+  .quick-add-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .quick-add-chips button {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 6px 10px;
+    border: 1px dashed var(--border);
+    border-radius: 999px;
+    background: transparent;
+    color: var(--muted);
+    font: inherit;
+    font-size: 0.78rem;
+    cursor: pointer;
+  }
+  .quick-add-chips button:hover {
+    color: var(--text);
+    border-color: var(--accent);
+  }
 }

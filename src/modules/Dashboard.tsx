@@ -1,6 +1,7 @@
 import { CardScreen, type CardDef } from '../Cards';
 import { go } from '../router';
-import { useMemo, useState } from 'react';
+import { useMemo, useState, type ReactNode } from 'react';
+import { useWideScreen } from '../wide';
 import { useStore } from '../store';
 import { toggleTask } from '../actions';
 import { cleanDays, habitsOfDay, habitStreak } from '../habits';
@@ -85,7 +86,11 @@ function StudyNow() {
   );
 }
 
-export function Dashboard() {
+/**
+ * Cartões do Início, montados num lugar só (E35.2): o Início e a coluna "Sempre à vista" do computador usam os mesmos.
+ * Devolve os cartões já sem os de módulos guardados e a entrevista (quando aberta pelo cartão "Complete seu perfil").
+ */
+export function useHomeCards(): { cards: CardDef[]; extra: ReactNode } {
   const { data, update } = useStore();
   const [interview, setInterview] = useState(false);
   const p = data.profile;
@@ -380,6 +385,20 @@ export function Dashboard() {
     ) },
   ];
 
+  return {
+    cards: cards.filter((c) => !OF_MODULE[c.id] || !off(OF_MODULE[c.id])),
+    extra: interview ? <Interview start={p.onboarding.step} onClose={() => setInterview(false)} /> : null,
+  };
+}
+
+export function Dashboard() {
+  const { data } = useStore();
+  const p = data.profile;
+  const today = todayISO();
+  const { cards, extra } = useHomeCards();
+  // E35.2: no computador largo, os cartões postos na coluna da direita saem do Início (voltam quando a coluna some).
+  const wide = useWideScreen();
+  const inColumn = new Set(wide ? data.settings.sideCards : []);
   return (
     <>
       <header className="page-header hero">
@@ -392,8 +411,8 @@ export function Dashboard() {
         </div>
       </header>
 
-      <CardScreen screen="inicio" cards={cards.filter((c) => !OF_MODULE[c.id] || !off(OF_MODULE[c.id]))} />
-      {interview && <Interview start={p.onboarding.step} onClose={() => setInterview(false)} />}
+      <CardScreen screen="inicio" cards={cards.filter((c) => !inColumn.has(c.id))} />
+      {extra}
     </>
   );
 }

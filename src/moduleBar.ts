@@ -196,3 +196,11 @@ export function barItems(bar: ModuleBar, _favorites?: string[], _layout?: BarLay
 export function crumb(bar: ModuleBar, index: number | null): { module: string; page: string | null } {
   return { module: bar.name, page: index === null || index === 1 ? null : bar.items[index].label };
 }
+
+/** E35.2: atalhos da coluna "Sempre à vista" (3 por linha). Somem junto com a coluna; não vão para o Início. */
+export const DEFAULT_SIDE_SHORTCUTS = ['financas', 'diario', 'agenda', 'listas', 'estudos', 'jornada'];
+
+export function normalizeShortcuts(raw: unknown): string[] {
+  if (!Array.isArray(raw)) return DEFAULT_SIDE_SHORTCUTS.filter(isFav);
+  return [...new Set(raw.filter(isFav))];
+}

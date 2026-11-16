@@ -21,6 +21,7 @@ import { Jornada } from './modules/Jornada';
 import { Voce } from './modules/Voce';
 import { BarTutorial, SetupHost } from './modules/Montagem';
 import { isHidden, moduleOf } from './setup';
+import { GOOGLE_CLIENT_ID, useCloud } from './cloud';
 import { Orcamento, Relatorios } from './modules/financas/Orcamento';
 import { ComprasPage, Listas, PrecosPage } from './modules/Listas';
 import { HistoricoPage, ProgressoPage } from './modules/Progresso';
@@ -37,6 +38,7 @@ import { barDrag, PullToMais } from './BarPull';
 import { settingsPage } from './settingsPages';
 import { activeIndex, barFor, barItems, crumb, favoriteItems, type BarItem } from './moduleBar';
 import { GameBarItems } from './modules/JornadaBar';
+import { SideCards } from './SideCards';
 import { gameBarOn, journeyTab } from './jornada/tabs';
 import { welcomed } from './jornada/rules';
 
@@ -180,12 +182,16 @@ function NavMenu({ current, onNavigate }: { current: string; onNavigate?: () => 
           onNavigate();
         }}
       >
-        <Icon name={it.icon} />
+        <span className="nav-ic" data-mod={navMod(it.to)}>
+          <Icon name={it.icon} size={18} />
+        </span>
         <span>{it.label}</span>
       </a>
     ) : (
       <span className="soon" aria-disabled="true">
-        <Icon name={it.icon} />
+        <span className="nav-ic">
+          <Icon name={it.icon} size={18} />
+        </span>
         <span>{it.label}</span>
         <em>em breve</em>
       </span>
@@ -202,11 +208,35 @@ function NavMenu({ current, onNavigate }: { current: string; onNavigate?: () => 
           </ul>
         </div>
       ))}
-      <div className="nav-section">
-        <ul>
-          <li>{item(SETTINGS_ITEM)}</li>
-        </ul>
-      </div>
+    </div>
+  );
+}
+
+/** Módulo de um item do menu (para a cor do ícone no Colorido e no Flat). */
+const navMod = (to?: string) => (to ? (moduleOf(to) ?? to.split('/')[0]) : undefined);
+
+/** E35.1: pé do menu do computador, sempre à vista: atalho da conta e Configurações. */
+function SideFoot({ current }: { current: string }) {
+  const { data } = useStore();
+  const cloud = useCloud();
+  const email = cloud?.email ?? null;
+  const name = data.profile?.name?.trim();
+  return (
+    <div className="side-foot">
+      {GOOGLE_CLIENT_ID ? (
+        <a className="side-account" href="#/ajustes/conta" title={email ?? 'Entrar com Google'}>
+          <span className="side-avatar">{email ? (name || email)[0].toUpperCase() : <Icon name="cloud" size={16} />}</span>
+          <span className="side-who">
+            <strong>{name || (email ? 'Conta Google' : 'Entrar com Google')}</strong>
+            <small>{email ?? 'Sincronizar entre aparelhos'}</small>
+          </span>
+        </a>
+      ) : (
+        <span className="side-account" />
+      )}
+      <a className={`side-gear${current === SETTINGS_ITEM.section ? ' active' : ''}`} href={`#/${SETTINGS_ITEM.to}`} aria-label="Configurações" title="Configurações" aria-current={current === SETTINGS_ITEM.section ? 'page' : undefined}>
+        <Icon name="settings" size={20} />
+      </a>
     </div>
   );
 }
@@ -301,6 +331,18 @@ export function App() {
   const barIndex = bar ? activeIndex(bar, section.path) : null;
   useScrollingClass();
   // E26: nome embaixo dos ícones da barra (opcional).
+  // E35.1: no computador, "/" abre a busca (fora de campos de texto).
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== '/' || e.ctrlKey || e.metaKey || e.altKey) return;
+      const t = e.target as HTMLElement | null;
+      if (t && (t.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName))) return;
+      e.preventDefault();
+      setSearch(true);
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, []);
   useEffect(() => {
     document.body.classList.toggle('bar-labels', !data.settings.hideBarLabels);
   }, [data.settings.hideBarLabels]);
@@ -412,14 +454,20 @@ export function App() {
       </header>
 
       <nav className="sidebar" aria-label="Seções">
-        <a className="brand" href="#/inicio">
-          <img src="./icon.svg" alt="" width={30} height={30} />
-          <span>CP Hub</span>
-        </a>
-        <button type="button" className="search sidebar-search" onClick={() => setSearch(true)}>
-          <Icon name="search" size={18} /> <span>Buscar em tudo</span>
-        </button>
-        <NavMenu current={section.path} />
+        <div className="side-top">
+          <a className="brand" href="#/inicio">
+            <img src="./icon.svg" alt="" width={30} height={30} />
+            <span>CP Hub</span>
+          </a>
+          <button type="button" className="search sidebar-search" onClick={() => setSearch(true)}>
+            <Icon name="search" size={18} /> <span>Buscar em tudo</span>
+            <kbd aria-hidden="true">/</kbd>
+          </button>
+        </div>
+        <div className="side-scroll">
+          <NavMenu current={section.path} />
+        </div>
+        <SideFoot current={section.path} />
       </nav>
 
       {search && <SearchSheet onClose={() => setSearch(false)} scope={moduleOf(section.path)} />}
@@ -436,6 +484,8 @@ export function App() {
           <View key={section.path} route={route} />
         </ErrorBoundary>
       </main>
+
+      <SideCards />
 
       {section.fab && (
         <button type="button" className="fab" onClick={fab} aria-label="Adicionar">

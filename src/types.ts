@@ -259,6 +259,10 @@ export interface Settings {
   iconColors: 'mono' | 'cores';
   /** E33: estilo dos ícones do app todo: Clássico (fundo suave) ou Flat (quadrado com degradê, também na barra). */
   iconStyle: 'classico' | 'flat';
+  /** E35.2: cartões do Início que ficam na coluna "Sempre à vista" do computador (em ordem). */
+  sideCards: string[];
+  /** E35.2: atalhos (módulos) no topo da coluna "Sempre à vista". */
+  sideShortcuts: string[];
   /** E31: tamanho dos ícones dos módulos e da barra (o menu sempre um pouco maior que a barra). */
   iconSize: 'p' | 'm' | 'g';
   seededCategories: boolean;

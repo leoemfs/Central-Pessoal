@@ -1,6 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { arrange, hideCard, moveCard, normalizeLayouts, showCard, type CardInfo } from './cardLayout.ts';
+import { DEFAULT_SIDE_CARDS, moveSide, normalizeSideCards, sideCandidates } from './cardLayout.ts';
 
 const CARDS: CardInfo[] = [
   { id: 'humor', label: 'Humor', lock: 'top' },
@@ -46,4 +47,13 @@ test('cartão novo numa atualização aparece; ordem salva antiga continua valen
 test('backup: só o que é válido', () => {
   assert.deepEqual(normalizeLayouts({ inicio: { order: ['a', 'a', 3, 'b'], hidden: 'x' }, ruim: 5 }), { inicio: { order: ['a', 'b'], hidden: [] } });
   assert.deepEqual(normalizeLayouts(null), {});
+});
+
+test('coluna do computador: padrão, backup e ordem', () => {
+  assert.deepEqual(normalizeSideCards(undefined), DEFAULT_SIDE_CARDS);
+  assert.deepEqual(normalizeSideCards(['diario', 'diario', 3, 'contas']), ['diario', 'contas']);
+  assert.deepEqual(normalizeSideCards([]), []);
+  assert.deepEqual(moveSide(['a', 'b', 'c'], 'b', -1), ['b', 'a', 'c']);
+  assert.deepEqual(moveSide(['a', 'b', 'c'], 'c', 1), ['a', 'b', 'c']);
+  assert.deepEqual(sideCandidates([{ id: 'humor', label: 'Humor', lock: 'top' }, { id: 'diario', label: 'Diário' }]).map((c) => c.id), ['diario']);
 });

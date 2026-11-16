@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { activeIndex, addFavorite, barItems, barFor, crumb, DEFAULT_FAVORITES, favoriteItems, MODULE_BARS, normalizeFavorites } from './moduleBar.ts';
+import { activeIndex, addFavorite, barItems, barFor, crumb, DEFAULT_FAVORITES, favoriteItems, MODULE_BARS, normalizeFavorites, normalizeShortcuts, DEFAULT_SIDE_SHORTCUTS } from './moduleBar.ts';
 
 test('favoritos: sempre 4, válidos e sem repetir (quem tinha 3 ganha o 4º)', () => {
   assert.deepEqual(normalizeFavorites(undefined), DEFAULT_FAVORITES);
@@ -69,4 +69,10 @@ test('E21: dentro do módulo, a casa fica sempre no centro (o jeito antigo da ba
   assert.deepEqual(ids(barItems(barFor('relatorios')!, favs, 'fixo')), [['orcamento', 'financas', 'relatorios'], 1]);
   assert.deepEqual(ids(barItems(barFor('agenda')!, favs, 'lado')), [['hoje', 'agenda', 'proximos'], 1]);
   assert.deepEqual(ids(barItems(barFor('listas')!, favs)), [['compras', 'listas', 'precos'], 1]);
+});
+
+test('atalhos da coluna do computador: padrão e só módulos válidos', () => {
+  assert.deepEqual(normalizeShortcuts(undefined), DEFAULT_SIDE_SHORTCUTS);
+  assert.deepEqual(normalizeShortcuts(['agenda', 'agenda', 'xyz', 3]), ['agenda']);
+  assert.deepEqual(normalizeShortcuts([]), []);
 });
