@@ -17,6 +17,8 @@ import type { Item, Slot } from '../jornada/catalog';
 import { classOf, openChest, pendingChests, recentAttributes, sinceLastVisit, snapshot, TITLES, wallet, welcomed, welcomeState, type Chest, type ChestRecord, type JourneyState, type SinceVisit } from '../jornada/rules';
 import { skyAt, starPositions } from '../jornada/sky';
 import { MissionsCard, WeekCard } from './JornadaMissoes';
+import { go, useRoute } from '../router';
+import { journeyTab } from '../jornada/tabs';
 import { Entrevista } from './JornadaEntrevista';
 import { npcIcon } from '../jornada/catalog';
 
@@ -394,6 +396,8 @@ export function JornadaHome() {
   const [slot, setSlot] = useState<Slot>('armadura');
   const [trying, setTrying] = useState<Item | null>(null);
   const [full, setFull] = useState(false);
+  const route = useRoute();
+  const tab = journeyTab(route.sub);
   const arsenalRef = useRef<HTMLElement>(null);
   const chestsRef = useRef<HTMLElement>(null);
   const isWelcomed = welcomed(state);
@@ -468,10 +472,11 @@ export function JornadaHome() {
 
   return (
     <>
+      {tab === 'inicio' && (<>
       {since && (
         <SinceCard
           n={since}
-          onChests={() => chestsRef.current?.scrollIntoView({ behavior: reduced() ? 'auto' : 'smooth', block: 'start' })}
+          onChests={() => go('jornada/baus')}
           onClose={() => setSince(null)}
         />
       )}
@@ -543,7 +548,9 @@ export function JornadaHome() {
       )}
       <MissionsCard />
       <WeekCard />
+      </>)}
 
+      {tab === 'baus' && (<>
       <section className="card" ref={chestsRef}>
         <div className="card-head">
           <h2>Baús</h2>
@@ -570,7 +577,9 @@ export function JornadaHome() {
           </ul>
         )}
       </section>
+      </>)}
 
+      {tab === 'arsenal' && (<>
       <section className="card" ref={arsenalRef}>
         <div className="card-head">
           <h2>Arsenal</h2>
@@ -595,6 +604,7 @@ export function JornadaHome() {
         </div>
         {slot === 'artefato' && <p className="muted small" style={{ marginTop: 10 }}>Cada artefato dá +10% de XP nos hábitos do seu atributo. O segundo espaço de artefato abre no nível 20.</p>}
       </section>
+      </>)}
 
       {trying && (
         <TrySheet
@@ -643,7 +653,7 @@ export function JornadaHome() {
                     onClick={() => {
                       setSlot(x);
                       setFull(false);
-                      window.setTimeout(() => arsenalRef.current?.scrollIntoView({ behavior: reduced() ? 'auto' : 'smooth', block: 'start' }), 50);
+                      go('jornada/arsenal');
                     }}
                   >
                     {it ? <img alt="" src={itemIcon(it)} /> : <span className="jn-empty-slot" aria-hidden="true" />}
@@ -680,6 +690,7 @@ export function JornadaHome() {
         />
       )}
 
+      {tab === 'ficha' && (<>
       <section className="card">
         <div className="card-head">
           <h2>Ficha</h2>
@@ -777,6 +788,7 @@ export function JornadaHome() {
           </button>
         </div>
       </section>
+      </>)}
     </>
   );
 }

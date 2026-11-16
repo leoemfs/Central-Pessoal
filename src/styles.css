@@ -8891,3 +8891,90 @@ body.bar-labels.bar-flat .tabbar .tb-label {
   color: var(--muted);
   font-weight: 400;
 }
+
+/* ---------- Jornada N2.11: barra própria do jogo ---------- */
+.tabbar.jn-gamebar {
+  background: #12101c;
+  border: 2px solid #3b2f63;
+  box-shadow: inset 0 -3px 0 rgb(0 0 0 / 0.35), 0 0 0 2px #050506;
+  gap: 2px;
+}
+.tabbar.jn-gamebar a.jn-gtab {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  border-radius: 12px;
+  color: #a5a3c2;
+  text-decoration: none;
+  padding: 4px 0 3px;
+}
+.jn-gicon {
+  position: relative;
+  width: 30px;
+  height: 30px;
+  display: grid;
+  place-items: center;
+}
+.jn-gicon img {
+  width: 30px;
+  height: 30px;
+  object-fit: contain;
+  image-rendering: pixelated;
+}
+.jn-glabel {
+  font-family: var(--jn-pixel);
+  font-weight: 600;
+  font-size: 11.5px;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+.tabbar.jn-gamebar a.jn-gtab.active {
+  background: #241d40;
+  color: #facc15;
+  box-shadow: inset 0 -3px 0 #facc15;
+}
+.tabbar.jn-gamebar a.jn-gtab.active .jn-gicon img:first-child {
+  animation: jn-hop 0.9s ease-in-out infinite;
+}
+@keyframes jn-hop {
+  50% {
+    transform: translateY(-3px);
+  }
+}
+.tabbar.jn-gamebar a.jn-gtab.locked {
+  color: #5b5873;
+}
+.tabbar.jn-gamebar a.jn-gtab.locked .jn-gicon img:first-child {
+  filter: grayscale(1) brightness(0.45);
+}
+.jn-glock {
+  position: absolute;
+  right: -3px;
+  bottom: -2px;
+  width: 14px !important;
+  height: 16px !important;
+}
+.jn-gbadge {
+  position: absolute;
+  top: -4px;
+  right: -8px;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  border-radius: 999px;
+  background: #22c55e;
+  color: #04130a;
+  font-family: var(--jn-pixel);
+  font-size: 10px;
+  line-height: 16px;
+  text-align: center;
+}
+@media (prefers-reduced-motion: reduce) {
+  .tabbar.jn-gamebar a.jn-gtab.active .jn-gicon img:first-child {
+    animation: none;
+  }
+}

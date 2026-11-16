@@ -639,6 +639,8 @@ A Jornada desbloqueia em 16/11. Até aqui existiam só as regras e as artes (pas
 
 **N2.9b, como ficou (v0.74):** convite da Mestra Lume na Jornada até a entrevista ser feita (para quem já entrou na Jornada; não entra no meio da chegada). Respostas em `journey.profile` (`src/jornada/interview.ts`); o que ela cria fica em `src/jornada/interviewApply.ts`. Treino: 2× ter/qui, 3× seg/qua/sex, 4× seg/ter/qui/sex, 5× seg a sex. Terapia: quarta. Refazer não apaga nem duplica hábitos; a caixinha só é criada se não houver uma aberta com o mesmo nome. O desafio de dinheiro (ex.: "gastar demais") fica guardado para a campanha (Mercado de Ouro) e ainda não vira missão.
 
+**N2.11, barra própria do jogo (v0.79, pedido em 16/11):** dentro da Jornada em uso (desbloqueada, "Quero a Jornada" e personagem criado), a barra de baixo vira a barra do jogo em pixel art: **Jornada** (cena, "Desde a sua última visita", Mestra Lume e missões) · **Arsenal** · **Baús** · **Ficha** (atributos, de onde veio o XP e Personagem). **Codex** (N2.7) e **Campanha** (N2.10) aparecem apagados, com cadeado, e dizem "em breve" ao tocar; quando ficarem prontos, é só tirar o cadeado em `src/jornada/tabs.ts`. O menu ao puxar a barra para cima continua o do app (decidido pelo Leonardo: só a barra muda).
+
 Depois: N7 (Estudos × Jornada, `estudos-jornada.md`).
 
 **N2.1 refeita seguindo a prévia (feita em 15/11, v0.57).** A primeira versão (PR #87) ficou simples demais: não seguiu a prévia "Jornada (pets, Codex, acessórios, visitas)" (`app.js`: telas `unlock`, `create`, `welcome`). A nova N2.1 é uma chegada em **tela cheia**, com a fonte Pixelify Sans e animações (com "menos movimento", sem elas):

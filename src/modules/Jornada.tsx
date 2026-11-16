@@ -3,6 +3,10 @@ import { journeyStats, UNLOCK_DAYS, unlockProgress } from '../journey';
 import { formatDMY, fromISO, todayISO, WEEKDAYS } from '../utils';
 import { Icon, PageHeader, Pill, Pixels, Progress } from '../ui';
 import { JornadaHome, JornadaUnlock } from './JornadaHome';
+import { journeyTab } from '../jornada/tabs';
+import { useRoute } from '../router';
+
+const TAB_TITLES = { inicio: 'Jornada', arsenal: 'Arsenal', baus: 'Baús', ficha: 'Ficha' } as const;
 
 const HERO = ['....HHHH....', '...HHHHHH...', '...HSSSSH...', '...SESSES...', '...SSSSSS...', '....SSSS....', '..DGGGGGGD..', '.SDGGGGGGDS.', '.S.GGBBGG.S.', '...GGGGGG...', '...PPPPPP...', '...PP..PP...', '...PP..PP...', '..KKK..KKK..'];
 const HERO_PAL = { H: '#7c4a2d', S: '#f1c27d', E: '#141414', G: '#22c55e', D: '#15803d', B: '#8b5a2b', P: '#3b3f5c', K: '#27272a' };
@@ -12,6 +16,7 @@ const fmt = (n: number) => n.toLocaleString('pt-BR');
 
 export function Jornada() {
   const { data, update } = useStore();
+  const route = useRoute();
   const today = todayISO();
   const prog = unlockProgress(data, today);
   const choice = data.settings.journeyChoice;
@@ -76,7 +81,7 @@ export function Jornada() {
   if (choice === 'quero')
     return (
       <>
-        <PageHeader title="Jornada" />
+        <PageHeader title={TAB_TITLES[journeyTab(route.sub)]} />
         <JornadaHome />
       </>
     );

@@ -36,6 +36,9 @@ import { useCardEditor } from './Cards';
 import { barDrag, PullToMais } from './BarPull';
 import { settingsPage } from './settingsPages';
 import { activeIndex, barFor, barItems, crumb, favoriteItems, type BarItem } from './moduleBar';
+import { GameBarItems } from './modules/JornadaBar';
+import { gameBarOn, journeyTab } from './jornada/tabs';
+import { welcomed } from './jornada/rules';
 
 export interface ViewProps {
   route: Route;
@@ -330,6 +333,8 @@ export function App() {
   const moreButton = data.settings.moreButton && !placed;
   const middle: BarItem[] = placed ? placed.items : favoriteItems(data.settings.favorites).slice(0, moreButton && !showFavs ? 3 : 4);
   const tabbarRef = useRef<HTMLElement>(null);
+  // N2.11: dentro da Jornada (em uso), a barra de baixo vira a barra do jogo.
+  const gameBar = section.path === 'jornada' && gameBarOn(data.settings, welcomed(data.journey));
 
   /**
    * O que cada ícone faz ao ser tocado. O "voltar" sobe um nível (E20, navStack.ts): ferramenta → casa do módulo → Início.
@@ -433,7 +438,11 @@ export function App() {
         </button>
       )}
 
-      <nav ref={tabbarRef} className={`tabbar${barHidden ? ' hidden' : ''}`} aria-label="Atalhos (puxe para cima para abrir o Mais)">
+      <nav ref={tabbarRef} className={`tabbar${barHidden ? ' hidden' : ''}${gameBar ? ' jn-gamebar' : ''}`} aria-label={gameBar ? 'Barra da Jornada (puxe para cima para abrir o menu)' : 'Atalhos (puxe para cima para abrir o Mais)'}>
+        {gameBar ? (
+          <GameBarItems current={journeyTab(route.sub)} />
+        ) : (
+        <>
         <TabLink to="inicio" label="Início" icon="home" active={section.path === 'inicio'} />
         {middle.map((it, i) => (
           <TabLink
@@ -458,6 +467,8 @@ export function App() {
           </button>
         )}
         {showFavs && <span className="tb-hint">Escolha o módulo</span>}
+        </>
+        )}
       </nav>
 
       <PullToMais bar={tabbarRef} resetKey={`${route.path}:${route.n}`} />
