@@ -7,7 +7,7 @@ import type { AppData, Habit, JournalEntry } from './types.ts';
 import { grid } from './jornada/art.ts';
 import { codexEntries, codexSummary } from './jornada/codex.ts';
 import { finishGame, prizedToday } from './jornada/games.ts';
-import { HOMES, ITEMS, PETS, avatarGrid, homeGrid, itemById, itemGrid, itemIcon, petIcon } from './jornada/catalog.ts';
+import { HOMES, ITEMS, PETS, REGION_NAMES, SLOT_LIST, avatarIcon, homeGrid, itemById, itemIcon, petIcon } from './jornada/catalog.ts';
 import {
   acquire,
   acquirePlace,
@@ -53,32 +53,36 @@ const ctx = (p: Partial<ShopContext> = {}): ShopContext => ({ attrs: attrs(), go
 
 // ---------- Arte ----------
 
-test('arte: todo item, pet e morada tem desenho no tamanho certo', () => {
-  for (const it of ITEMS) {
-    const g = itemGrid(it);
-    assert.ok(g.length >= 12 && g.length <= 16, `${it.id}: até 16 linhas`);
-    assert.ok(g.every((r) => r.length === 16), `${it.id}: 16 colunas`);
-    assert.ok(g.flat().filter(Boolean).length > 20, `${it.id}: tem pixels`);
-    assert.match(itemIcon(it), /^data:image\/svg\+xml,/);
-  }
+test('arte: todo item, pet e morada tem desenho', () => {
+  for (const it of ITEMS) assert.match(itemIcon(it), /^data:image\/svg\+xml,/, it.id);
   for (const p of PETS) assert.match(petIcon(p.id), /^data:image\/svg\+xml,/);
   for (const h of HOMES) for (const phase of ['manha', 'tarde', 'noite', 'chuva'] as const) assert.ok(homeGrid(h.id, phase).flat().some(Boolean), `${h.id} ${phase}`);
 });
 
-test('arte: o avatar veste qualquer combinação no quadro 32×30', () => {
+test('catálogo da prévia: 49 itens em 7 espaços, todas as raridades', () => {
+  assert.equal(ITEMS.length, 49);
+  assert.deepEqual([...new Set(ITEMS.map((i) => i.slot))].sort(), [...SLOT_LIST].sort());
+  for (const r of ['comum', 'raro', 'epico', 'mistico']) assert.ok(ITEMS.some((i) => i.rarity === r), r);
+  assert.equal(itemById('bracelete')?.slot, 'anel');
+  assert.equal(itemById('gota')?.slot, 'colar');
+  assert.equal(itemById('grimorio')?.slot, 'magico');
+  assert.equal(itemById('arcoCurto')?.weapon, 'arco');
+  // Itens de região: só da campanha (ou baús), cada um com sua região.
+  for (const it of ITEMS.filter((i) => i.campaign)) assert.ok(REGION_NAMES[it.campaign!], it.id);
+  // Todo item que não é de começo nem de região tem um jeito de conseguir: loja, atributo/baú ou forja.
+  for (const it of ITEMS.filter((i) => !i.starter && !i.campaign)) assert.ok(it.price || it.attrUnlock || it.crystals, it.id);
+});
+
+test('arte: o avatar veste qualquer combinação (arco, colar, elmo)', () => {
   const pick = (slot: string) => [null, ...ITEMS.filter((i) => i.slot === slot).map((i) => i.id)];
   for (const gender of ['f', 'm'] as const)
     for (const elmo of pick('elmo'))
-      for (const arma of pick('arma')) {
-        const g = avatarGrid({ gender, skin: 'media', hair: 'castanho' }, { elmo, arma, armadura: 'placas', botas: 'aladas' });
-        assert.equal(g.length, 30);
-        assert.ok(g.every((r) => r.length === 32));
-      }
-  // A arma aparece à direita do corpo (colunas além de 20).
-  const armed = avatarGrid({ gender: 'f', skin: 'media', hair: 'castanho' }, { arma: 'espada' });
-  assert.ok(armed.some((r) => r.slice(21).some(Boolean)));
-  const bare = avatarGrid({ gender: 'f', skin: 'media', hair: 'castanho' }, {});
-  assert.ok(bare.every((r) => r.slice(21).every((c) => !c)));
+      for (const arma of pick('arma'))
+        assert.match(avatarIcon({ gender, skin: 'media', hair: 'castanho' }, { elmo, arma, armadura: 'placas', botas: 'aladas', colar: 'perola' }), /^data:image\/svg\+xml,/);
+  const bow = avatarIcon({ gender: 'f', skin: 'media', hair: 'castanho' }, { arma: 'arcoLongo' });
+  assert.notEqual(bow, avatarIcon({ gender: 'f', skin: 'media', hair: 'castanho' }, {}));
+  // Pele ou cabelo desconhecidos não quebram.
+  assert.match(avatarIcon({ gender: 'm', skin: '??', hair: '??' }, {}), /^data:image/);
 });
 
 test('arte: "." é transparente e "O" é o contorno', () => {
@@ -218,22 +222,45 @@ test('loja: compra com ouro, libera pelo atributo e forja místicos com cristais
   assert.ok(fenix.status === 'forja' && !fenix.ready);
 });
 
-test('equipar: só o que tem, no espaço certo; segundo artefato no nível 20', () => {
-  let s = { ...defaultJourneyState(), owned: [...defaultJourneyState().owned, 'grimorio', 'polar', 'gato'] };
+test('equipar: só o que tem, no espaço certo; segundo anel no nível 20', () => {
+  let s = { ...defaultJourneyState(), owned: [...defaultJourneyState().owned, 'grimorio', 'polar', 'gato', 'bracelete', 'anelFoco', 'gota'] };
   assert.equal(equip(s, 'elmo', 'coroa', 1), 'Você ainda não tem este item');
   assert.equal(equip(s, 'elmo', 'grimorio', 1), 'Este item não vai neste espaço');
+  assert.equal(equip(s, 'anel', 'grimorio', 1), 'Este item não vai neste espaço');
   assert.equal(equip(s, 'armadura', null, 1), 'Este espaço não pode ficar vazio');
-  assert.equal(equip(s, 'artefato2', 'polar', 19), 'O segundo artefato abre no nível 20');
-  s = equip(s, 'artefato', 'grimorio', 1) as typeof s;
-  s = equip(s, 'artefato2', 'polar', 20) as typeof s;
+  assert.equal(equip(s, 'anel2', 'anelFoco', 19), 'O segundo anel abre no nível 20');
+  s = equip(s, 'magico', 'grimorio', 1) as typeof s;
+  s = equip(s, 'anel', 'bracelete', 1) as typeof s;
+  s = equip(s, 'anel2', 'anelFoco', 20) as typeof s;
+  s = equip(s, 'colar', 'gota', 1) as typeof s;
   s = equip(s, 'pet', 'gato', 1) as typeof s;
   assert.equal(s.equipped.pet, 'gato');
   const bonus = equipmentBonus(s);
-  assert.equal(bonus.xpByAttr.INT, 0.1);
-  assert.equal(bonus.xpAll, 0.1);
-  // O mesmo artefato não ocupa os dois espaços.
-  s = equip(s, 'artefato2', 'grimorio', 20) as typeof s;
-  assert.equal(s.equipped.artefato, null);
+  assert.equal(bonus.xpByAttr.INT, 0.2);
+  assert.equal(bonus.xpByAttr.FOR, 0.1);
+  assert.equal(bonus.xpByAttr.RES, 0.1);
+  s = equip(s, 'magico', 'polar', 1) as typeof s;
+  assert.equal(equipmentBonus(s).xpAll, 0.1);
+  // O mesmo anel não ocupa os dois espaços.
+  s = equip(s, 'anel2', 'bracelete', 20) as typeof s;
+  assert.equal(s.equipped.anel, null);
+});
+
+test('dados antigos: artefatos vão para o espaço novo (anel, colar ou mágico)', () => {
+  const s = normalizeJourney({ owned: ['grimorio', 'bracelete', 'gota'], equipped: { armadura: 'aprendiz', artefato: 'gota', artefato2: 'grimorio' } });
+  assert.equal(s.equipped.colar, 'gota');
+  assert.equal(s.equipped.magico, 'grimorio');
+  assert.equal(s.equipped.anel, null);
+  assert.ok(!('artefato' in s.equipped));
+  const r = normalizeJourney({ equipped: { artefato: 'bracelete', elmo: 'grimorio', armadura: 'nada' } });
+  assert.equal(r.equipped.anel, 'bracelete');
+  assert.equal(r.equipped.elmo, null);
+  assert.equal(r.equipped.armadura, 'aprendiz');
+});
+
+test('itens de região: não se compram nem se forjam; o Codex diz a região', () => {
+  const lamina = itemById('laminaOrdem')!;
+  assert.deepEqual(availability(lamina, defaultJourneyState(), ctx({ attrs: attrs({ FOR: 999 }), crystals: 99, gold: 99999 })), { status: 'bau', unlock: [] });
 });
 
 test('pets e moradas: por nível, atributo e ouro', () => {

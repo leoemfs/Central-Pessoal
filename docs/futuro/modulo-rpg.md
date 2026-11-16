@@ -596,7 +596,7 @@ XP, ouro ganho, nível e atributos continuam **calculados a partir dos dados** (
 interface JourneyState {
   avatar: { gender: 'f' | 'm'; skin: 'clara' | 'media' | 'escura'; hair: string };
   owned: string[];                 // ids dos itens, pets e moradas que você tem
-  equipped: { elmo?: string; armadura: string; botas: string; arma?: string; artefato?: string; artefato2?: string; pet?: string; morada: string };
+  equipped: { elmo?: string; armadura: string; botas: string; arma?: string; anel?: string; anel2?: string; colar?: string; magico?: string; pet?: string; morada: string }; // v0.88: anel/colar/mágico no lugar de artefato ×2
   goldSpent: number;               // ouro disponível = ouro ganho (calculado) − goldSpent
   crystalsSpent: number;           // cristais disponíveis = cristais ganhos (calculado) − crystalsSpent
   title: string | null;            // título em uso
@@ -680,7 +680,7 @@ O Leonardo comparou o app com a prévia jogável "Prévia da Jornada" (https://c
 - **Campanha:** mapa com capítulos e chefes (N2.10).
 
 **Partes (N2.17), cada uma com a escolha "atual × prévia" antes:**
-1. **N2.17a Catálogo e espaços:** os 49 itens e as artes da prévia; espaços anel, colar e mágico. M
+1. **N2.17a Catálogo e espaços:** os 49 itens e as artes da prévia; espaços anel, colar e mágico. M — **feito (v0.88)**. Escolhas de 16/11: espaços da prévia (Anel, Colar e Mágico; segundo anel no nível 20) e todos os itens agora, os de região no Codex ("Campanha: <região> · ou em baús"; não se compram nem se forjam). As artes vêm do arquivo da prévia (`src/jornada/px.ts`); artefatos salvos migram para o espaço novo em `normalizeJourney`.
 2. **N2.17b Topo fixo e tela principal:** topo com 🔥, ouro, cristais e XP; presente do dia, avisos, cartão da caixinha e da campanha como na prévia. M
 3. **N2.17c Baús como na prévia:** cores por tipo, abrir todos, "Como ganhar", número na barra. P
 4. **N2.17d Recompensas animadas e Resumo da semana.** M

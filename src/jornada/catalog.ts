@@ -2,25 +2,10 @@
  * Catálogo da Jornada: equipamentos, pets e moradas, com raridade, como obter e a arte de cada um.
  * Tudo aqui é dado fixo; as regras (quem pode ter o quê) ficam em rules.ts.
  */
-import { Canvas, OUTLINE, blank, diagonal, grid, paint, sprite, toSvg, type Grid, type Palette } from './art.ts';
-import {
-  ARMOR_PLATE,
-  ARMOR_TUNIC,
-  BODY,
-  BOOTS,
-  BOOT_WINGS_ICON,
-  BOOT_WINGS_WEAR,
-  HAIRS,
-  HELMET_ICONS,
-  HELMET_PAL,
-  HELMET_WEAR,
-  ITEM_ART,
-  SHOULDERS,
-  SKINS,
-  SKY_PALETTES,
-  SWORD,
-} from './artData.ts';
+import { Canvas, OUTLINE, grid, sprite, toSvg, type Grid, type Palette } from './art.ts';
+import { HAIRS, SKINS, SKY_PALETTES } from './artData.ts';
 import { PET_SPRITES } from './petsData.ts';
+import { PX } from './px.ts';
 
 export type AttrCode = 'FOR' | 'AGI' | 'INT' | 'RES' | 'SAB' | 'DIS';
 export const ATTR_CODES: AttrCode[] = ['FOR', 'AGI', 'INT', 'RES', 'SAB', 'DIS'];
@@ -34,15 +19,29 @@ export const RARITY: Record<Rarity, { label: string; color: string }> = {
   mistico: { label: 'Místico', color: '#fde047' },
 };
 
-export type Slot = 'elmo' | 'armadura' | 'botas' | 'arma' | 'artefato';
+export type Slot = 'elmo' | 'armadura' | 'botas' | 'arma' | 'anel' | 'colar' | 'magico';
+export const SLOT_LIST: Slot[] = ['elmo', 'armadura', 'botas', 'arma', 'anel', 'colar', 'magico'];
+export const SLOT_NAMES: Record<Slot, string> = { elmo: 'Elmo', armadura: 'Roupa', botas: 'Botas', arma: 'Arma', anel: 'Anel', colar: 'Colar', magico: 'Mágico' };
+
+/** Regiões da campanha (itens que só existem lá). */
+export const REGION_NAMES: Record<string, string> = {
+  floresta: 'Floresta da Rotina',
+  mercado: 'Mercado de Ouro',
+  pantano: 'Pântano das Tentações',
+  torre: 'Torre do Saber',
+  montanha: 'Montanha da Disciplina',
+  castelo: 'Castelo do Caos',
+  arena: 'Arena de Ferro',
+  jardim: 'Jardim da Calma',
+};
 
 export interface Item {
   id: string;
   slot: Slot;
   name: string;
   rarity: Rarity;
-  /** Arma: espada ou cajado. */
-  weapon?: 'espada' | 'cajado';
+  /** Arma: espada, cajado ou arco. */
+  weapon?: 'espada' | 'cajado' | 'arco';
   /** Já vem com o personagem. */
   starter?: boolean;
   /** Preço na loja, em ouro. */
@@ -57,48 +56,41 @@ export interface Item {
   extra?: { cleanAfterSlip: number };
   /** Místico: custo em cristais. */
   crystals?: number;
-  /** Artefato raro: atributo cujo XP ganha +10%. */
+  /** Atributo cujo XP ganha +10%. */
   boosts?: AttrCode;
+  /** Só existe na campanha (região). */
+  campaign?: string;
   effect?: string;
 }
 
-export const ITEMS: Item[] = [
-  { id: 'capuz', slot: 'elmo', name: 'Capuz de couro', rarity: 'comum', price: 150 },
-  { id: 'elmo', slot: 'elmo', name: 'Elmo de ferro', rarity: 'raro', price: 600 },
-  { id: 'chapeu', slot: 'elmo', name: 'Chapéu de mago', rarity: 'epico', chest: true, attrUnlock: { INT: 50 } },
-  { id: 'coroa', slot: 'elmo', name: 'Coroa de cristal', rarity: 'mistico', req: { DIS: 100 }, crystals: 3, effect: '+1 cristal por mês com todas as contas pagas no prazo.' },
+// Catálogo da "Prévia da Jornada" (px.ts, 49 itens), com os preços e liberações por atributo da prévia (app.js).
+const PRICE: Record<string, number> = { perola: 500, anelFerro: 120, arcoCurto: 150, arcoLongo: 650, capuz: 150, elmo: 600, gibao: 200, malha: 700, couro: 120, ferro: 500, espada: 650, galho: 150, cajado: 650 };
+const UNLOCK: Record<string, Partial<Attrs>> = { denteLobo: { FOR: 60 }, anelFoco: { INT: 60 }, arcoElfico: { AGI: 80 }, chapeu: { INT: 50 }, manto: { SAB: 50 }, placas: { FOR: 80 }, rubi: { FOR: 100 }, pena: { AGI: 40 }, bracelete: { FOR: 40 }, grimorio: { INT: 40 }, gota: { RES: 40 }, lanterna: { SAB: 40 }, ampulheta: { DIS: 40 } };
+const STARTERS = ['aprendiz', 'sapatos', 'madeira'];
+/** +10% de XP nos hábitos de um atributo (o efeito diz "+10% XP em hábitos de ..."). */
+const BOOSTS: Record<string, AttrCode> = { pena: 'AGI', bracelete: 'FOR', grimorio: 'INT', gota: 'RES', lanterna: 'SAB', ampulheta: 'DIS', anelFoco: 'INT', denteLobo: 'FOR' };
 
-  { id: 'aprendiz', slot: 'armadura', name: 'Túnica de aprendiz', rarity: 'comum', starter: true },
-  { id: 'gibao', slot: 'armadura', name: 'Gibão de couro', rarity: 'comum', price: 200 },
-  { id: 'malha', slot: 'armadura', name: 'Cota de malha', rarity: 'raro', price: 700 },
-  { id: 'manto', slot: 'armadura', name: 'Manto arcano', rarity: 'raro', chest: true, attrUnlock: { SAB: 50 } },
-  { id: 'placas', slot: 'armadura', name: 'Armadura de placas', rarity: 'epico', chest: true, attrUnlock: { FOR: 80 } },
-  { id: 'cristal', slot: 'armadura', name: 'Armadura de cristal', rarity: 'mistico', req: { RES: 150 }, crystals: 5, effect: 'Uma vez por semana, um dia perdido não quebra a sequência da Jornada.' },
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const ITEMS: Item[] = (PX.ITEMS as any[]).map((r) => {
+  const it: Item = { id: r.id, slot: r.slot, name: r.name, rarity: r.rarity };
+  if (r.kind) it.weapon = r.kind;
+  if (STARTERS.includes(r.id)) it.starter = true;
+  if (PRICE[r.id]) it.price = PRICE[r.id];
+  if (UNLOCK[r.id]) {
+    it.attrUnlock = UNLOCK[r.id];
+    it.chest = true;
+  }
+  if (r.req) it.req = r.req;
+  if (r.id === 'fenix') it.extra = { cleanAfterSlip: 30 };
+  if (r.crystals) it.crystals = r.crystals;
+  if (BOOSTS[r.id]) it.boosts = BOOSTS[r.id];
+  if (r.campaign) it.campaign = r.campaign;
+  if (r.effect) it.effect = r.effect;
+  return it;
+});
 
-  { id: 'sapatos', slot: 'botas', name: 'Sapatos simples', rarity: 'comum', starter: true },
-  { id: 'couro', slot: 'botas', name: 'Botas de couro', rarity: 'comum', price: 120 },
-  { id: 'ferro', slot: 'botas', name: 'Botas de ferro', rarity: 'raro', price: 500 },
-  { id: 'aladas', slot: 'botas', name: 'Botas aladas', rarity: 'mistico', req: { AGI: 100 }, crystals: 3, effect: '+10% de XP em caminhadas; o pet acompanha mais rápido.' },
-
-  { id: 'madeira', slot: 'arma', weapon: 'espada', name: 'Espada de madeira', rarity: 'comum', starter: true },
-  { id: 'espada', slot: 'arma', weapon: 'espada', name: 'Espada de ferro', rarity: 'raro', price: 650 },
-  { id: 'rubi', slot: 'arma', weapon: 'espada', name: 'Lâmina rubi', rarity: 'epico', chest: true, attrUnlock: { FOR: 100 } },
-  { id: 'aurora', slot: 'arma', weapon: 'espada', name: 'Espada da aurora', rarity: 'mistico', req: { FOR: 150, DIS: 60 }, crystals: 5, effect: 'Subir de nível dá um baú raro extra.' },
-  { id: 'galho', slot: 'arma', weapon: 'cajado', name: 'Cajado de galho', rarity: 'comum', price: 150 },
-  { id: 'cajado', slot: 'arma', weapon: 'cajado', name: 'Cajado de cristal', rarity: 'raro', price: 650 },
-  { id: 'estelar', slot: 'arma', weapon: 'cajado', name: 'Cajado estelar', rarity: 'mistico', req: { INT: 150, SAB: 60 }, crystals: 5, effect: 'Estudo e leitura registrados dão +1 ouro extra.' },
-
-  { id: 'pena', slot: 'artefato', name: 'Pena do vento', rarity: 'raro', chest: true, attrUnlock: { AGI: 40 }, boosts: 'AGI', effect: '+10% de XP em hábitos de Agilidade.' },
-  { id: 'bracelete', slot: 'artefato', name: 'Bracelete do titã', rarity: 'raro', chest: true, attrUnlock: { FOR: 40 }, boosts: 'FOR', effect: '+10% de XP em hábitos de Força.' },
-  { id: 'grimorio', slot: 'artefato', name: 'Grimório', rarity: 'raro', chest: true, attrUnlock: { INT: 40 }, boosts: 'INT', effect: '+10% de XP em hábitos de Inteligência.' },
-  { id: 'gota', slot: 'artefato', name: 'Amuleto da gota', rarity: 'raro', chest: true, attrUnlock: { RES: 40 }, boosts: 'RES', effect: '+10% de XP em hábitos de Resistência.' },
-  { id: 'lanterna', slot: 'artefato', name: 'Lanterna da sabedoria', rarity: 'raro', chest: true, attrUnlock: { SAB: 40 }, boosts: 'SAB', effect: '+10% de XP em hábitos de Sabedoria.' },
-  { id: 'ampulheta', slot: 'artefato', name: 'Ampulheta', rarity: 'raro', chest: true, attrUnlock: { DIS: 40 }, boosts: 'DIS', effect: '+10% de XP em hábitos de Disciplina.' },
-  { id: 'coracao', slot: 'artefato', name: 'Coração de cristal', rarity: 'mistico', req: { RES: 100, DIS: 100 }, crystals: 4, effect: 'Recaída não zera o progresso do baú de cristal.' },
-  { id: 'olho', slot: 'artefato', name: 'Olho do oráculo', rarity: 'mistico', req: { SAB: 100, INT: 100 }, crystals: 4, effect: 'Cada revisão semanal dá +1 cristal.' },
-  { id: 'fenix', slot: 'artefato', name: 'Pena da fênix', rarity: 'mistico', req: { AGI: 80 }, extra: { cleanAfterSlip: 30 }, crystals: 4, effect: 'Depois de uma recaída, os 7 dias seguintes valem XP em dobro.' },
-  { id: 'polar', slot: 'artefato', name: 'Estrela polar', rarity: 'mistico', req: { FOR: 60, AGI: 60, INT: 60, RES: 60, SAB: 60, DIS: 60 }, crystals: 6, effect: '+10% de XP e ouro em tudo. O céu noturno ganha uma constelação.' },
-];
+/** Espaços que abrem mais tarde: o segundo anel no nível 20. */
+export const RING2_LEVEL = 20;
 
 export interface Pet {
   id: string;
@@ -154,43 +146,8 @@ export type SkyPhase = 'manha' | 'tarde' | 'noite' | 'chuva';
 export type SkyPalette = (typeof SKY_PALETTES)['manha'];
 export const skyPalette = (phase: SkyPhase): SkyPalette => SKY_PALETTES[phase];
 
-function feather(pal: Palette): Grid {
-  return diagonal((p, q) => {
-    if (p < -13 || p > 12) return null;
-    if (q === 0 || q === 1) return pal.Q;
-    const w = p < -6 ? 0 : p < -3 ? 2 : p < 8 ? 4 : p < 11 ? 3 : 2;
-    if (q < -w + 1 || q > w) return null;
-    if ((p === 0 || p === 5) && q === w) return null;
-    return q < 0 ? pal.W : pal.F;
-  });
-}
-
-function staff(pal: Palette): Grid {
-  return diagonal((p, q, r, c) => {
-    const dr = r - 3.5;
-    const dc = c - 11.5;
-    const d = dr * dr + dc * dc;
-    if (d <= 7.5) return d < 2.5 && dr < 0 && dc < 0 ? pal.W : dr + dc > 1.5 ? pal.c : pal.C;
-    if (p >= -13 && p <= 3 && (q === 0 || q === 1)) return q === 0 ? pal.B : pal.b || pal.B;
-    if (p >= 2 && p <= 5 && (q === -2 || q === 3)) return pal.G || '#facc15';
-    return null;
-  });
-}
-
-/** Ícone 16×16 do item. */
-export function itemGrid(item: Item): Grid {
-  const art = ITEM_ART[item.id];
-  if (art.icon) return grid(art.icon.rows, art.icon.pal, 16);
-  if (art.feather) return feather(art.feather);
-  if (item.slot === 'elmo') return grid(HELMET_ICONS[item.id], HELMET_PAL[item.id], 16);
-  if (item.slot === 'armadura') return grid(item.id === 'placas' || item.id === 'cristal' ? ARMOR_PLATE : ARMOR_TUNIC, art.pal!, 16);
-  if (item.slot === 'botas') {
-    const g = grid(BOOTS, art.pal!, 16);
-    return item.id === 'aladas' ? paint(g, grid(BOOT_WINGS_ICON, { W: '#ffffff' }, 16), 0, 0) : g;
-  }
-  return item.weapon === 'cajado' ? staff(art.pal!) : grid(SWORD, art.pal!, 16);
-}
-export const itemIcon = (item: Item) => toSvg(itemGrid(item));
+/** Ícone do item (arte da prévia). */
+export const itemIcon = (item: Item): string => PX.itemIcon(PX.find(item.id));
 
 /** Pet com a pelagem escolhida (a primeira, se nenhuma). */
 export function petIcon(id: string, variant?: string | null): string {
@@ -389,29 +346,21 @@ export interface Outfit {
   armadura?: string | null;
   botas?: string | null;
   arma?: string | null;
+  colar?: string | null;
 }
 
-/** Avatar vestido (32×30): corpo + roupa e botas (cores), ombreiras, asas, elmo e arma na mão. */
-export function avatarGrid(look: AvatarLook, outfit: Outfit): Grid {
-  const armorId = outfit.armadura ?? 'aprendiz';
-  const bootsId = outfit.botas ?? 'sapatos';
-  const armorPal = ITEM_ART[armorId]?.pal ?? ITEM_ART.aprendiz.pal!;
-  const bootsPal = ITEM_ART[bootsId]?.pal ?? ITEM_ART.sapatos.pal!;
-  const skin = SKINS[look.skin] ?? SKINS.media;
-  const pal: Palette = { H: HAIRS[look.hair] ?? HAIRS.castanho, S: skin[0], s: skin[1], E: '#141414', P: '#3b3f5c', ...armorPal, K: bootsPal.K };
-  const c = blank(32, 30);
-  const ox = 4;
-  const oy = 6;
-  paint(c, grid(BODY[look.gender === 'm' ? 'homem' : 'mulher'], pal, 16), ox, oy);
-  if (armorId === 'placas' || armorId === 'cristal') paint(c, grid(SHOULDERS, armorPal, 16), ox, oy + 10);
-  if (bootsId === 'aladas') paint(c, grid(BOOT_WINGS_WEAR, { W: '#ffffff' }, 16), ox, oy + 20);
-  if (outfit.elmo && HELMET_WEAR[outfit.elmo]) paint(c, grid(HELMET_WEAR[outfit.elmo], HELMET_PAL[outfit.elmo], 16), ox, oy - 6);
-  const weapon = outfit.arma ? itemById(outfit.arma) : undefined;
-  if (weapon) paint(c, weapon.weapon === 'cajado' ? staff(ITEM_ART[weapon.id].pal!) : grid(SWORD, ITEM_ART[weapon.id].pal!, 16), ox + 11, oy + 2);
-  return c;
-}
-export const avatarIcon = (look: AvatarLook, outfit: Outfit) => toSvg(avatarGrid(look, outfit));
-
+/** Avatar vestido (32×30), igual ao da prévia: arco com aljava, colar no pescoço, ombreiras, asas, elmo e arma. */
+export const avatarIcon = (look: AvatarLook, outfit: Outfit): string =>
+  PX.avatar({
+    genero: look.gender === 'm' ? 'homem' : 'mulher',
+    pele: SKINS[look.skin] ? look.skin : 'media',
+    cabelo: HAIRS[look.hair] ? look.hair : 'castanho',
+    elmo: outfit.elmo || null,
+    armadura: outfit.armadura || 'aprendiz',
+    botas: outfit.botas || 'sapatos',
+    arma: outfit.arma || null,
+    colar: outfit.colar || null,
+  });
 
 // ---------- Baús, moeda e cristal (da prévia da Jornada) ----------
 

@@ -5,7 +5,7 @@
  */
 import type { AppData } from '../types.ts';
 import { ATTRIBUTES } from '../habits.ts';
-import { HOMES, ITEMS, PETS, RARITY, type AttrCode, type Rarity, type Slot } from './catalog.ts';
+import { HOMES, ITEMS, PETS, RARITY, REGION_NAMES, type AttrCode, type Rarity, type Slot } from './catalog.ts';
 import { LORE } from './lore.ts';
 import { availability, petGoals, placeAvailability, shopContext, titleProgress, attributes, CODEX_IDS, codexPct } from './rules.ts';
 
@@ -16,7 +16,9 @@ export const CODEX_CATS: { id: CodexCat; label: string }[] = [
   { id: 'armadura', label: 'Roupas' },
   { id: 'botas', label: 'Botas' },
   { id: 'arma', label: 'Armas' },
-  { id: 'artefato', label: 'Artefatos' },
+  { id: 'anel', label: 'Anéis' },
+  { id: 'colar', label: 'Colares' },
+  { id: 'magico', label: 'Mágicos' },
   { id: 'casa', label: 'Casas' },
   { id: 'titulo', label: 'Títulos' },
 ];
@@ -56,6 +58,7 @@ export function codexEntries(d: AppData, today: string): CodexEntry[] {
     let have: number | undefined;
     let need: number | undefined;
     if (a.status === 'tem') hint = 'Seu';
+    else if (it.campaign) hint = `Campanha: ${REGION_NAMES[it.campaign] ?? it.campaign} · ou em baús`;
     else if (a.status === 'liberar') hint = 'Liberado: é só pegar no Arsenal';
     else if (a.status === 'comprar') hint = `Loja · ${fmt(a.price)} ouro${a.canAfford ? '' : ` (faltam ${fmt(a.price - ctx.gold)})`}`;
     else if (a.status === 'forja') {

@@ -74,6 +74,6 @@ export function levelRewards(level: number): { title: string; sub: string; kind:
   if (level % 5 === 0) out.push({ title: 'Baú dourado', sub: `Por chegar ao nível ${level}. Ele espera em Baús.`, kind: 'bau' });
   for (const p of PETS) if (p.level === level) out.push({ title: `Pet liberado: ${p.name}`, sub: 'Chega com a parte de pets e casas', kind: 'pet' });
   for (const h of HOMES) if (h.level === level) out.push({ title: `Casa liberada: ${h.name}`, sub: h.price ? `${h.price} ouro` : 'De graça', kind: 'casa' });
-  if (level === ARTIFACT2_LEVEL) out.push({ title: 'Segundo espaço de artefato', sub: 'Agora dá para usar dois artefatos', kind: 'espaco' });
+  if (level === ARTIFACT2_LEVEL) out.push({ title: 'Segundo espaço de anel', sub: 'Agora dá para usar dois anéis', kind: 'espaco' });
   return out;
 }
