@@ -75,6 +75,9 @@ export function NearCard({ state, level }: { state: JourneyState; level: number 
     <section className="card">
       <div className="card-head">
         <h2>Perto de desbloquear</h2>
+        <button type="button" className="jn-link small" onClick={() => go('jornada/codex')}>
+          Ver tudo no Codex
+        </button>
       </div>
       <ul className="jn-near">
         {list.map((u) => {

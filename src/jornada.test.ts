@@ -5,6 +5,7 @@ import { addExpense, type ExpenseInput } from './finance.ts';
 import { addDays } from './utils.ts';
 import type { AppData, Habit, JournalEntry } from './types.ts';
 import { grid } from './jornada/art.ts';
+import { codexEntries, codexSummary } from './jornada/codex.ts';
 import { HOMES, ITEMS, PETS, avatarGrid, homeGrid, itemById, itemGrid, itemIcon, petIcon } from './jornada/catalog.ts';
 import {
   acquire,
@@ -36,6 +37,7 @@ import {
   nextInSlot,
   wardrobeItems,
   shopList,
+  CODEX_IDS,
   type ShopContext,
 } from './jornada/rules.ts';
 import { phaseAt, rainWindow, skyAt, starPositions, starsTonight } from './jornada/sky.ts';
@@ -469,4 +471,22 @@ test('N2.15: Arsenal só com o que tem (e o recém-liberado); Loja com o que se 
   assert.equal(malha.missing, 550);
   assert.ok(shop.homes.some((h) => h.home.id === 'pedra' && h.level === 15));
   assert.ok(!shop.items.some((x) => x.item.id === 'aprendiz'), 'o que já tem não aparece na Loja');
+});
+
+test('N2.7: Codex mostra tudo, com dica do que falta; marcos de descoberta viram baús', () => {
+  const d = withData({});
+  const list = codexEntries(d, '2026-11-16');
+  assert.ok(list.some((e) => e.id === 'aprendiz' && e.owned && e.hint === 'Seu'));
+  const capuz = list.find((e) => e.id === 'capuz')!;
+  assert.match(capuz.hint, /^Loja · 150 ouro/);
+  const coroa = list.find((e) => e.id === 'coroa')!;
+  assert.ok(coroa.hint.startsWith("Forja: DIS 100 + 3 cristais"));
+  assert.ok(list.some((e) => e.cat === 'pet' && e.id === 'coruja' && e.need === 80));
+  assert.ok(list.some((e) => e.cat === 'titulo'));
+  const s = codexSummary(d.journey.owned);
+  assert.equal(s.total, CODEX_IDS.length);
+  const half = CODEX_IDS.slice(0, Math.ceil(CODEX_IDS.length / 2));
+  const dd = withData({ journey: { ...d.journey, owned: half } });
+  const keys = earnedChests(dd, '2026-11-16').map((c) => c.key);
+  assert.ok(keys.includes('prata:codex:25') && keys.includes('dourado:codex:50') && !keys.includes('cristal:codex:75'));
 });

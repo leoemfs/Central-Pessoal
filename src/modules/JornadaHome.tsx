@@ -22,6 +22,7 @@ import { journeyTab } from '../jornada/tabs';
 import { Entrevista } from './JornadaEntrevista';
 import { TelaCheia } from './JornadaTelaCheia';
 import { GiftCard, HomesView, PetsView, ShopView } from './JornadaPets';
+import { CodexView } from './JornadaCodex';
 import { AttrsCard, ClassesView, ForgeView, TitlesView, UnlocksCard } from './JornadaFicha';
 
 type FichaTab = 'ficha' | 'titulos' | 'forja' | 'classes';
@@ -629,7 +630,7 @@ export function JornadaHome() {
           })}
         </div>
         <p className="muted small" style={{ marginTop: 10 }}>
-          Aqui ficam só os seus. Para comprar, vá à <button type="button" className="jn-link" onClick={() => go('jornada/loja')}>Loja</button>; para ver tudo o que existe, o Codex (em breve).
+          Aqui ficam só os seus. Para comprar, vá à <button type="button" className="jn-link" onClick={() => go('jornada/loja')}>Loja</button>; para ver tudo o que existe, o <button type="button" className="jn-link" onClick={() => go('jornada/codex')}>Codex</button>.
         </p>
         {slot === 'artefato' && <p className="muted small" style={{ marginTop: 10 }}>Cada artefato dá +10% de XP nos hábitos do seu atributo. O segundo espaço de artefato abre no nível 20.</p>}
       </section>
@@ -637,6 +638,7 @@ export function JornadaHome() {
       {tab === 'pet' && <PetsView mine />}
       {tab === 'casa' && <HomesView mine />}
       {tab === 'loja' && <ShopView onTry={setTrying} />}
+      {tab === 'codex' && <CodexView />}
 
       {trying && (
         <TrySheet

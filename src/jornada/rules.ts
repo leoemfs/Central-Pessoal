@@ -302,6 +302,7 @@ export const TITLES: TitleDef[] = [
   attrTitle('sabia', 'Sábia', 'Sábio', 'SAB', 'Sabedoria'),
   attrTitle('inabalavel', 'Inabalável', 'Inabalável', 'DIS', 'Disciplina'),
   { id: 'lenda', f: 'Lendária', m: 'Lendário', rule: 'Todos os atributos em 100', need: 6, have: (c) => ATTR_CODES.filter((k) => c.attrs[k] >= 100).length },
+  { id: 'codex', f: 'Lenda do Codex', m: 'Lenda do Codex', rule: 'Descobrir tudo o que existe no Codex', need: 100, have: (c) => codexPct(c.d.journey?.owned ?? []) },
 ];
 
 export interface TitleProgress {
@@ -373,6 +374,9 @@ export function earnedChests(d: AppData, today: string = todayISO(), level = 1):
         if (len >= m) out.push({ key: `cristal:${h.id}:${start}:${m}`, kind: 'cristal', date: addDays(start, m), reason: `${m} dias sem: ${h.name}` });
     });
   }
+  // N2.7: marcos de descoberta do Codex (25% prata, 50% dourado, 75% cristal).
+  const pct = codexPct(d.journey?.owned ?? []);
+  for (const [m, kind] of [[25, 'prata'], [50, 'dourado'], [75, 'cristal']] as const) if (pct >= m) out.push({ key: `${kind}:codex:${m}`, kind, date: today, reason: `Codex com ${m}% descoberto` });
   // N2.6: presentes de visita que vêm como baú (7º dia da tira e marcos de 14 e 30 dias).
   for (const g of d.journey?.gifts ?? []) if (g.chest) out.push({ key: `${g.chest}:visita:${g.day}`, kind: g.chest, date: g.day, reason: `${g.n} dias seguidos abrindo o app` });
   return out.sort((a, b) => a.date.localeCompare(b.date) || a.key.localeCompare(b.key));
@@ -824,4 +828,15 @@ export function shopList(state: JourneyState, c: ShopContext) {
     .sort((a, b) => a.price - b.price);
   const homes = HOMES.filter((h) => h.price && !state.owned.includes(h.id)).map((h) => ({ home: h, price: h.price!, missing: Math.max(0, h.price! - c.gold), level: c.level >= h.level ? 0 : h.level }));
   return { items, homes };
+}
+
+// ---------- N2.7: Codex ----------
+
+/** Tudo o que se coleciona no Codex (itens, pets e casas). */
+export const CODEX_IDS: string[] = [...ITEMS.map((i) => i.id), ...PETS.map((p) => p.id), ...HOMES.map((h) => h.id)];
+
+/** Quanto do Codex já foi descoberto (0–100, arredondado para baixo). */
+export function codexPct(owned: string[]): number {
+  const set = new Set(owned);
+  return Math.floor((CODEX_IDS.filter((id) => set.has(id)).length / CODEX_IDS.length) * 100);
 }
