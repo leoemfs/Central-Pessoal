@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type ChangeEvent, type CSSProperties } from 'react';
+import { useEffect, useRef, useState, type ChangeEvent, type CSSProperties, type ReactNode } from 'react';
 import { useStore } from '../store';
 import { discardedCount, emptyData, normalize } from '../data';
 import { dbGet, dbSet } from '../db';
@@ -60,6 +60,7 @@ export function Ajustes({ route }: ViewProps) {
     setUndo(null);
     setMessage({ tone: 'green', text: 'Pronto: os dados voltaram a ser os de antes.' });
   }
+  const { iconStyle, iconColors } = data.settings;
   function setSetting(patch: Partial<typeof data.settings>) {
     update((d) => ({ ...d, settings: { ...d.settings, ...patch } }));
   }
@@ -168,27 +169,26 @@ export function Ajustes({ route }: ViewProps) {
         <p className="muted small" style={{ marginTop: 10 }}>
           {data.settings.theme === 'system' ? 'Segue o tema do celular ou computador.' : 'Vale para todas as telas do app.'}
         </p>
+        <h3 className="pz-title">Estilo dos ícones</h3>
+        <div className="opt-rows" role="radiogroup" aria-label="Estilo dos ícones">
+          {([
+            ['classico', 'Clássico', 'Desenho com fundo suave, como sempre foi.'],
+            ['flat', 'Flat', 'Quadrado com degradê, também na barra.'],
+          ] as const).map(([v, name, desc]) => (
+            <OptRow key={v} on={iconStyle === v} name={name} desc={desc} onPick={() => setSetting({ iconStyle: v })}>
+              {DEMO.map((d) => <DemoIcon key={d.icon} d={d} style={v} color={iconColors} />)}
+            </OptRow>
+          ))}
+        </div>
         <h3 className="pz-title">Cor dos ícones</h3>
         <div className="opt-rows" role="radiogroup" aria-label="Cor dos ícones">
           {([
-            ['cores', 'Colorido', 'Cada módulo com a sua cor.'],
-            ['mono', 'Monocromático', 'Todos na cor de destaque.'],
-            ['flat', 'Flat', 'Quadrado colorido com desenho branco, também na barra.'],
+            ['cores', 'Colorido', 'Cada módulo e categoria com a sua cor.'],
+            ['mono', 'Monocromático', 'Tudo na cor de destaque.'],
           ] as const).map(([v, name, desc]) => (
-            <button key={v} type="button" role="radio" aria-checked={data.settings.iconColors === v} className={`opt-row${data.settings.iconColors === v ? ' on' : ''}`} onClick={() => update((d) => ({ ...d, settings: { ...d.settings, iconColors: v } }))}>
-              <span className="opt-radio" aria-hidden="true" />
-              <span className="opt-text">
-                <strong>{name}</strong>
-                <small>{desc}</small>
-              </span>
-              <span className={`icon-style-demo preview-${v === 'cores' ? 'color' : v}`} aria-hidden="true">
-                {(['financas', 'agenda', 'jornada'] as const).map((m) => (
-                  <span key={m} className="tile-icon" data-mod={m}>
-                    <Icon name={m === 'financas' ? 'wallet' : m === 'agenda' ? 'calendar' : 'sword'} size={16} />
-                  </span>
-                ))}
-              </span>
-            </button>
+            <OptRow key={v} on={iconColors === v} name={name} desc={desc} onPick={() => setSetting({ iconColors: v })}>
+              {DEMO.map((d) => <DemoIcon key={d.icon} d={d} style={iconStyle} color={v} />)}
+            </OptRow>
           ))}
         </div>
         <h3 className="pz-title">Tamanho dos ícones</h3>
@@ -199,20 +199,12 @@ export function Ajustes({ route }: ViewProps) {
             ['m', 'Médio', 'Padrão.', 32],
             ['g', 'Grande', 'Mais fácil de ver e tocar.', 38],
           ] as const).map(([v, name, desc, px]) => (
-            <button key={v} type="button" role="radio" aria-checked={data.settings.iconSize === v} className={`opt-row${data.settings.iconSize === v ? ' on' : ''}`} onClick={() => update((d) => ({ ...d, settings: { ...d.settings, iconSize: v } }))}>
-              <span className="opt-radio" aria-hidden="true" />
-              <span className="opt-text">
-                <strong>{name}</strong>
-                <small>{desc}</small>
-              </span>
-              <span className={`icon-style-demo preview-${data.settings.iconColors === 'cores' ? 'color' : data.settings.iconColors}`} aria-hidden="true">
-                <span className="tile-icon size-demo" data-mod="financas" style={{ width: px, height: px }}>
-                  <Icon name="wallet" size={Math.round(px * 0.55)} />
-                </span>
-              </span>
-            </button>
+            <OptRow key={v} on={data.settings.iconSize === v} name={name} desc={desc} onPick={() => setSetting({ iconSize: v })}>
+              <DemoIcon d={DEMO[0]} style={iconStyle} color={iconColors} px={px} />
+            </OptRow>
           ))}
         </div>
+        <p className="muted small" style={{ marginTop: 8 }}>Vale para o app todo: menu, módulos, categorias, listas, Configurações e a barra.</p>
         <div className="field" style={{ marginTop: 14 }}>
           <span className="field-label">Cor de destaque</span>
           <div className="swatches" role="radiogroup" aria-label="Cor de destaque">
@@ -475,5 +467,36 @@ function SettingsList({ summaries, email }: { summaries: Record<SettingsPageId, 
         </div>
       ))}
     </>
+  );
+}
+
+/** E33: amostras da tela Aparência, desenhadas aqui mesmo (não dependem da escolha atual do app). */
+const DEMO = [
+  { icon: 'wallet' as IconName, color: '#22c55e', flat: ['#6be38a', '#1fa84a'] },
+  { icon: 'calendar' as IconName, color: '#3b82f6', flat: ['#5cc8ff', '#0a84d6'] },
+  { icon: 'sword' as IconName, color: '#eab308', flat: ['#ffe05c', '#d99a00'] },
+];
+function DemoIcon({ d, style, color, px = 28 }: { d: (typeof DEMO)[number]; style: 'classico' | 'flat'; color: 'cores' | 'mono'; px?: number }) {
+  const mono = color === 'mono';
+  const css: CSSProperties =
+    style === 'flat'
+      ? { background: mono ? 'linear-gradient(180deg, color-mix(in srgb, var(--accent) 65%, #fff), var(--accent))' : `linear-gradient(180deg, ${d.flat[0]}, ${d.flat[1]})`, color: mono ? 'var(--on-accent)' : '#fff' }
+      : { background: mono ? 'var(--raised)' : `color-mix(in srgb, ${d.color} 16%, var(--raised))`, color: mono ? 'var(--accent-text)' : d.color };
+  return (
+    <span className="demo-ic" style={{ ...css, width: px, height: px }}>
+      <Icon name={d.icon} size={Math.round(px * 0.55)} />
+    </span>
+  );
+}
+function OptRow({ on, name, desc, onPick, children }: { on: boolean; name: string; desc: string; onPick: () => void; children: ReactNode }) {
+  return (
+    <button type="button" role="radio" aria-checked={on} className={`opt-row${on ? ' on' : ''}`} onClick={onPick}>
+      <span className="opt-radio" aria-hidden="true" />
+      <span className="opt-text">
+        <strong>{name}</strong>
+        <small>{desc}</small>
+      </span>
+      <span className="opt-demo" aria-hidden="true">{children}</span>
+    </button>
   );
 }

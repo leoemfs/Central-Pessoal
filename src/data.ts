@@ -57,7 +57,7 @@ export function emptyData(): AppData {
     incomes: [],
     incomeSeries: [],
     incomeSources: [],
-    settings: { theme: 'dark', accent: null, favorites: [...DEFAULT_FAVORITES], cards: {}, barLayout: 'fixo', tapToFavorites: true, hideOnScroll: true, moreLayout: 'lista', moreButton: false, hideBarLabels: false, drawerView: 'misto', iconColors: 'mono', iconSize: 'm', seededCategories: false, seededIncomeSources: false, lastBackupAt: null, activeDays: [], visitDays: [], journeyUnlockedAt: null, journeyChoice: null, journeyCard: true, hiddenModules: [], setup: 'novo', tutorialSeen: false, setupAreas: [], journeyWanted: null, journalRhythm: { ...DEFAULT_RHYTHM }, googleCalendar: { on: false, events: true, bills: true, tasks: true, calendarId: null, tasksList: null } },
+    settings: { theme: 'dark', accent: null, favorites: [...DEFAULT_FAVORITES], cards: {}, barLayout: 'fixo', tapToFavorites: true, hideOnScroll: true, moreLayout: 'lista', moreButton: false, hideBarLabels: false, drawerView: 'misto', iconColors: 'mono', iconStyle: 'classico', iconSize: 'm', seededCategories: false, seededIncomeSources: false, lastBackupAt: null, activeDays: [], visitDays: [], journeyUnlockedAt: null, journeyChoice: null, journeyCard: true, hiddenModules: [], setup: 'novo', tutorialSeen: false, setupAreas: [], journeyWanted: null, journalRhythm: { ...DEFAULT_RHYTHM }, googleCalendar: { on: false, events: true, bills: true, tasks: true, calendarId: null, tasksList: null } },
     profile: emptyProfile('novo'),
     boxes: [],
     moods: {},
@@ -170,7 +170,9 @@ export function normalize(raw: unknown): AppData {
       // O antigo "barLabels" (v0.60.1, desligado por padrão) é ignorado: agora o nome aparece para todos.
       hideBarLabels: settings.hideBarLabels === true,
       drawerView: settings.drawerView === 'grade' || settings.drawerView === 'lista' ? settings.drawerView : 'misto',
-      iconColors: settings.iconColors === 'cores' || settings.iconColors === 'flat' ? settings.iconColors : 'mono',
+      // E33: o antigo "flat" (v0.75–0.77) vira Flat colorido.
+      iconColors: settings.iconColors === 'cores' || settings.iconColors === 'flat' ? 'cores' : 'mono',
+      iconStyle: settings.iconStyle === 'flat' || settings.iconColors === 'flat' ? 'flat' : 'classico',
       iconSize: settings.iconSize === 'p' || settings.iconSize === 'g' ? settings.iconSize : 'm',
       seededCategories: settings.seededCategories === true,
       seededIncomeSources: settings.seededIncomeSources === true,

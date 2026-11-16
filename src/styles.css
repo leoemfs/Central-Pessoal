@@ -8451,15 +8451,73 @@ body .preview-flat [data-mod] {
   background: linear-gradient(180deg, var(--flat-a, color-mix(in srgb, var(--accent) 65%, #fff)), var(--flat-b, var(--accent)));
   color: var(--flat-ink, var(--on-accent));
 }
-/* E32: o Flat é um tema: todo ícone em quadrado do app (Configurações, atalhos, listas das telas) vira
-   quadrado com degradê. Os que não são de módulo usam a cor de destaque; os de situação (st-*) mantêm a sua cor. */
+/* E32/E33: estilo (Clássico ou Flat) × cor (Colorido ou Monocromático) em todos os ícones em quadrado.
+   - Flat: quadrado com degradê. Quem tem cor própria (--tone, categoria, módulo) usa a sua cor no Colorido;
+     no Monocromático, ou sem cor própria, usa a cor de destaque. */
+.tile-icon.st-blue {
+  --tone: #3b82f6;
+}
+.tile-icon.st-green {
+  --tone: #22c55e;
+}
 body.icons-flat .set-icon,
 body.icons-flat .opt-icon,
 body.icons-flat .sug-icon,
 body.icons-flat .mg-icon:not([data-mod]),
-body.icons-flat .tile-icon:not([data-mod]):not([class*='st-']) {
+body.icons-flat .tile-icon:not([data-mod]):not(.st-level) {
+  background: linear-gradient(180deg, color-mix(in srgb, var(--tone, var(--accent)) 65%, #fff), var(--tone, var(--accent)));
+  color: var(--on-accent) !important;
+}
+body.icons-flat.icons-color .sug-icon,
+body.icons-flat.icons-color .tile-icon.st-blue,
+body.icons-flat.icons-color .tile-icon.st-green {
+  color: #fff !important;
+}
+body.icons-flat.icons-mono .sug-icon,
+body.icons-flat.icons-mono .tile-icon.st-blue,
+body.icons-flat.icons-mono .tile-icon.st-green {
+  background: linear-gradient(180deg, color-mix(in srgb, var(--accent) 65%, #fff), var(--accent));
+}
+/* Monocromático clássico: os ícones com cor própria também na cor de destaque. */
+body.icons-mono:not(.icons-flat) .sug-icon {
+  color: var(--accent-text) !important;
+}
+/* Monocromático no Flat: módulos e barra também na cor de destaque. */
+body.icons-mono [data-mod],
+body.icons-mono [data-flat] {
+  --flat-a: color-mix(in srgb, var(--accent) 65%, #fff);
+  --flat-b: var(--accent);
+  --flat-ink: var(--on-accent);
+}
+/* Categorias (despesas, orçamento, listas…): a cor escolhida pelo usuário. */
+.cat-badge {
+  color: var(--cat);
+  background: color-mix(in srgb, var(--cat) 15%, transparent);
+}
+body.icons-mono .cat-badge {
+  color: var(--accent-text);
+  background: var(--raised);
+}
+body.icons-flat .cat-badge {
+  background: linear-gradient(180deg, color-mix(in srgb, var(--cat) 60%, #fff), var(--cat));
+  color: #fff;
+}
+body.icons-flat.icons-mono .cat-badge {
   background: linear-gradient(180deg, color-mix(in srgb, var(--accent) 65%, #fff), var(--accent));
   color: var(--on-accent);
+}
+/* Amostras da tela Aparência (desenhadas com estilo próprio). */
+.opt-demo {
+  display: flex;
+  flex: none;
+  gap: 5px;
+  align-items: center;
+}
+.demo-ic {
+  display: grid;
+  place-items: center;
+  flex: none;
+  border-radius: 28%;
 }
 
 /* E31: opções de Aparência em linhas (uma por opção, amostra à direita). */

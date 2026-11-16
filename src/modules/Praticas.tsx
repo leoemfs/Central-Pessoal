@@ -650,7 +650,7 @@ function HomeRun({ id, finish, onCancel }: RunProps & { id: string }) {
 function PracticeRow({ icon, tone, title, meta, rec, onClick }: { icon: IconName; tone: string; title: string; meta: string; rec?: boolean; onClick: () => void }) {
   return (
     <button type="button" className={`practice-row${rec ? ' rec' : ''}`} onClick={onClick}>
-      <span className="sug-icon" style={{ color: tone }}>
+      <span className="sug-icon" style={{ color: tone, '--tone': tone } as CSSProperties}>
         <Icon name={icon} size={18} />
       </span>
       <span className="row-body">
