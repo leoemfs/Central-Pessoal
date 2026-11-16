@@ -1,0 +1,284 @@
+{
+ "formato": "central-pessoal/pacote-de-estudo",
+ "versao": 1,
+ "id": "cp-como-foi-feito",
+ "nome": "Como o Central Pessoal foi feito",
+ "area": {
+  "nome": "Desenvolvimento de software",
+  "catalogo": "dev"
+ },
+ "temas": [
+  {
+   "nome": "Como o Central Pessoal foi feito",
+   "trilhas": [
+    {
+     "nome": "Parte 1: fundamentos e arquitetura",
+     "descricao": "O app por dentro: do toque na tela até o dado salvo e publicado.",
+     "pagina": "## Sobre esta trilha\nO app que você usa todo dia, explicado por dentro: do toque na tela até o dado salvo e publicado. Cada página tem **para que serve**, **onde ver no código** (github.com/leoemfs/Central-Pessoal), ideias-chave, um **exercício** e um **prompt** para estudar com IA.\n\n> Próximas partes: Parte 2, tecnologias e APIs (Google, GitHub, testes); Parte 3, desenvolver com IA (Claude Code, CLAUDE.md, prompts). Importe o pacote de novo quando saírem: só o que é novo entra.",
+     "topicos": [
+      {
+       "nome": "Mapa do app: o que é o Central Pessoal por dentro",
+       "pagina": "## Para que serve\nTer a visão de cima antes de mergulhar em cada peça. Quem entende o mapa sabe onde procurar quando algo quebra.\n## No Central Pessoal\nO Central Pessoal é um **site que funciona como app** (PWA). Não tem servidor próprio: tudo roda no navegador do celular e os dados ficam **no aparelho** (IndexedDB), com cópia opcional no Google Drive.\n\nO caminho de uma ação, do toque até ficar salvo:\n1. Você toca num botão de uma tela (`src/modules/...`).\n2. A tela chama uma **regra pura** (`src/finance.ts`, `src/habits.ts`...) que calcula o resultado.\n3. O resultado vira o novo estado em `src/store.tsx` (`update`).\n4. O `store` grava tudo no IndexedDB (`src/db.ts`) com um pequeno atraso, para agrupar mudanças seguidas.\n5. O React redesenha só o que mudou.\n\nPublicação: o código fica no GitHub; ao mesclar um PR, o GitHub Actions (`.github/workflows/deploy.yml`) monta o app e publica no GitHub Pages.\n## Ideias-chave\n- Sem servidor: menos custo e mais privacidade, mas tudo precisa caber no aparelho.\n- Telas (React) e regras (TypeScript puro) ficam separadas.\n- Um único objeto de dados (`AppData`, em `src/types.ts`) guarda o app inteiro.\n- Cada mudança vira uma versão nova (`package.json`) e um PR.\n## Exercício\nAbra o mapa mental \"Arquitetura do Central Pessoal\" deste notebook e acrescente um ramo com o caminho de **uma** ação que você usa todo dia (ex.: marcar um hábito). Escreva os 5 passos com as suas palavras.\n## Prompt para estudar com IA\n> Explique, como para um iniciante, o caminho de um toque num botão até o dado ficar salvo num app React que guarda tudo no IndexedDB, sem servidor. Use um exemplo de lista de tarefas e me faça 3 perguntas no fim para eu checar se entendi.\n",
+       "fontes": [
+        "https://developer.mozilla.org/pt-BR/docs/Learn",
+        "https://git-scm.com/book/pt-br/v2"
+       ]
+      },
+      {
+       "nome": "HTML, CSS e JavaScript: a base de tudo",
+       "pagina": "## Para que serve\nTodo app web é feito dessas três coisas: **HTML** diz o que existe na tela, **CSS** diz como fica, **JavaScript** diz o que acontece.\n## No Central Pessoal\n- O HTML é quase todo gerado pelo React a partir de JSX (o \"HTML dentro do JavaScript\" dos arquivos `.tsx`). O único HTML escrito à mão é o `index.html`.\n- Todo o visual está em `src/styles.css`: cores como variáveis (`--accent`, `--bg`), temas claro e escuro e classes como `.card` e `.btn`.\n- O JavaScript é escrito em **TypeScript** (próximo tópico) e o Vite transforma em JavaScript comum.\n## Ideias-chave\n- Variáveis de CSS (`--accent`) permitem trocar a cor do app inteiro de uma vez (Configurações › Aparência).\n- Flexbox e grid organizam os cartões e as barras.\n- Eventos (`click`, `pointerdown`) são a ponte entre o toque e o código.\n## Exercício\nNo computador, abra o app, aperte F12 e, na aba Elements, encontre um `.card`. Mude a cor de fundo ali mesmo e veja o efeito (nada é salvo). Depois procure a mesma classe em `src/styles.css` no GitHub.\n## Prompt para estudar com IA\n> Me dê um mini-projeto de 30 minutos para praticar HTML, CSS e JavaScript juntos: um cartão com um botão que conta toques. Explique cada linha e proponha 2 variações para eu fazer sozinho.\n",
+       "fontes": [
+        "https://developer.mozilla.org/pt-BR/docs/Learn",
+        "https://developer.mozilla.org/pt-BR/docs/Web/JavaScript/Guide"
+       ]
+      },
+      {
+       "nome": "TypeScript: tipos que evitam erros",
+       "pagina": "## Para que serve\nTypeScript é JavaScript com **tipos**: você diz o formato dos dados e o editor avisa antes de o erro chegar ao celular.\n## No Central Pessoal\n- `src/types.ts` descreve todos os dados do app: `Expense` (despesa), `Habit` (hábito), `StudyCycle` (ciclo)... e o `AppData`, que junta tudo.\n- `npm run build` roda `tsc --noEmit` antes de montar o app: se um tipo não bate, o build para.\n- Os testes (`src/*.test.ts`) rodam direto no Node com os tipos removidos.\n## Ideias-chave\n- `interface` descreve a forma de um objeto.\n- Tipos unidos: `'afazer' | 'andando' | 'feito'` só aceita esses 3 textos.\n- `null` explícito (`dueDate: string | null`) obriga a tratar o caso vazio.\n- Os tipos não existem no app publicado: servem para quem escreve o código.\n## Exercício\nAbra `src/types.ts` e encontre a `interface Habit`. Liste 5 campos e o que cada um guarda. Depois responda: por que `archivedAt` pode ser `null`?\n## Prompt para estudar com IA\n> Sou iniciante. Pegue esta interface do meu app e explique campo por campo, depois crie 3 exemplos de objetos válidos e 2 inválidos, dizendo o erro que o TypeScript daria: [cole aqui a interface Habit de src/types.ts]\n",
+       "fontes": [
+        "https://www.typescriptlang.org/docs/handbook/intro.html",
+        "https://www.typescriptlang.org/docs/handbook/typescript-in-5-minutes.html"
+       ]
+      },
+      {
+       "nome": "React: componentes e estado",
+       "pagina": "## Para que serve\nReact monta a tela a partir de **componentes** (funções que devolvem JSX) e redesenha sozinho quando o **estado** muda.\n## No Central Pessoal\n- Cada tela é um componente: `Dashboard` (Início), `Financas`, `Diario`...\n- Peças reaproveitadas ficam em `src/ui.tsx`: `Sheet` (janela de baixo), `Fullscreen`, `Toggle`, `MoneyInput`, `notify` (aviso rápido).\n- O estado do app inteiro mora no `DataProvider` (`src/store.tsx`); as telas usam `useStore()` para ler `data` e chamar `update(...)`.\n- Estado só da tela (ex.: uma janela aberta) usa `useState`.\n## Ideias-chave\n- Componente = função que recebe `props` e devolve JSX.\n- `useState` guarda um valor e redesenha quando ele muda.\n- `useEffect` roda algo depois de desenhar (ex.: medir, ouvir eventos).\n- `useMemo` evita recalcular contas pesadas a cada desenho.\n- Nunca mude o estado direto: crie um objeto novo (`{ ...d, tasks: [...] }`).\n## Exercício\nAbra `src/ui.tsx` e encontre o componente `Pill`. Explique o que ele recebe e o que devolve. Depois procure no projeto (lupa do GitHub) 3 telas que usam `<Pill`.\n## Prompt para estudar com IA\n> Explique `useState`, `useEffect` e `useMemo` com exemplos de um app de hábitos (marcar hoje, contar a sequência, salvar). Para cada um, mostre um erro comum de iniciante e como corrigir.\n",
+       "fontes": [
+        "https://pt-br.react.dev/learn",
+        "https://pt-br.react.dev/learn/state-a-components-memory"
+       ]
+      },
+      {
+       "nome": "Vite e npm: rodar, testar e montar o app",
+       "pagina": "## Para que serve\nO **npm** instala as bibliotecas e roda os comandos do projeto. O **Vite** liga o app no computador enquanto você programa e monta a versão final para publicar.\n## No Central Pessoal\n- `package.json` lista as dependências (React, Tiptap do editor de Estudos) e os comandos:\n- `npm run dev`: app no computador, atualiza a cada mudança salva.\n- `npm test`: roda os testes das regras (`node --test`).\n- `npm run build`: confere os tipos e gera a pasta `dist/`, que vai para o GitHub Pages.\n- `vite.config.ts` usa `base: './'`, para o app funcionar dentro da subpasta `/Central-Pessoal/`.\n- A `version` do `package.json` muda a cada item entregue (ex.: 0.62.0).\n## Ideias-chave\n- `dependencies` vão para o app; `devDependencies` só ajudam a programar.\n- `package-lock.json` trava as versões exatas.\n- Versão semântica: 0.62.1 = ajuste; 0.63.0 = item novo.\n## Exercício\nInstale o Node.js no computador, clone o projeto (`git clone`), rode `npm install` e `npm run dev`. Abra o endereço que aparecer e mude um texto da tela de Início para ver a atualização ao vivo.\n## Prompt para estudar com IA\n> Vou rodar um projeto React + Vite pela primeira vez no Windows. Me guie passo a passo, do zero (instalar o Node, clonar do GitHub, instalar e rodar), dizendo o que devo ver na tela em cada passo e o que fazer se der erro.\n",
+       "fontes": [
+        "https://vite.dev/guide/",
+        "https://docs.npmjs.com/cli/v10/configuring-npm/package-json"
+       ]
+      },
+      {
+       "nome": "Organização do código: regras puras e telas",
+       "pagina": "## Para que serve\nSeparar **o que o app calcula** de **como ele mostra** deixa o código testável e fácil de mudar sem quebrar o resto.\n## No Central Pessoal\n- Regras puras em `src/*.ts`: `finance.ts` (faturas, parcelas), `habits.ts` (sequências), `boxes.ts` (caixinhas), `estudos.ts`, `mapas.ts`... Recebem dados e devolvem dados, sem tela.\n- Cada regra tem testes em `src/*.test.ts` (mais de 260 hoje).\n- Telas em `src/modules/`, uma pasta ou arquivo por módulo.\n- O **Mapa dos módulos** (em `docs/CENTRAL.md`) diz quem usa o quê, para mudar um módulo sem quebrar os outros.\n## Ideias-chave\n- Função pura: mesma entrada, mesma saída, sem efeito escondido.\n- Teste = um exemplo com a resposta certa conferida sozinha.\n- Quando um bug aparece, primeiro escreva o teste que falha; depois corrija.\n## Exercício\nAbra `src/boxes.test.ts`, escolha um teste e explique em 3 frases o que ele confere. Depois invente um caso que ainda não está testado.\n## Prompt para estudar com IA\n> Mostre com um exemplo simples (calcular o total de uma fatura de cartão) a diferença entre misturar regra e tela e separar a regra numa função pura com teste usando node:test. Termine com um exercício para eu fazer.\n",
+       "fontes": [
+        "https://developer.mozilla.org/pt-BR/docs/Web/JavaScript/Guide"
+       ]
+      },
+      {
+       "nome": "Dados no aparelho: IndexedDB, normalize e backup",
+       "pagina": "## Para que serve\nGuardar os dados **no próprio celular**, sem servidor, e garantir que dados antigos sempre abram nas versões novas.\n## No Central Pessoal\n- `src/db.ts` grava no **IndexedDB** (um banco de dados do navegador). Se falhar, usa uma cópia de reserva no `localStorage`.\n- `src/store.tsx` salva com um pequeno atraso para agrupar mudanças seguidas (ex.: digitação).\n- `src/data.ts` tem o `normalize()`: todo dado lido (do aparelho, de um backup ou da nuvem) passa por ele e ganha valores padrão para campos novos. **Regra do projeto: todo campo novo precisa de padrão ali.**\n- O backup é o mesmo objeto `AppData` em arquivo `.json`.\n## Ideias-chave\n- IndexedDB guarda objetos grandes e funciona offline.\n- Migração: quando o formato muda, o `normalize()` converte o antigo sem perder nada.\n- Backup em arquivo + cópia no Drive = duas redes de segurança.\n## Exercício\nEm Configurações › Backup, exporte um backup e abra o arquivo no computador. Encontre a parte `study` e localize um ciclo seu. Repare que é o mesmo formato de `StudyCycle` em `src/types.ts`.\n## Prompt para estudar com IA\n> Explique o IndexedDB para um iniciante comparando com o localStorage. Depois explique por que um app sem servidor precisa de uma função de normalização ao ler dados antigos, com um exemplo de campo novo sendo adicionado.\n",
+       "fontes": [
+        "https://developer.mozilla.org/pt-BR/docs/Web/API/IndexedDB_API/Using_IndexedDB"
+       ]
+      },
+      {
+       "nome": "Rotas por hash e navegação",
+       "pagina": "## Para que serve\nTrocar de tela sem recarregar a página e permitir que o voltar do celular funcione.\n## No Central Pessoal\n- O endereço depois do `#` diz a tela: `#/financas/nova`, `#/estudos/mapa/123`.\n- `src/router.ts` lê o hash e avisa o app quando ele muda (`hashchange`).\n- `SECTIONS` em `src/App.tsx` liga cada caminho à sua tela.\n- `src/navStack.ts` guarda a trilha para o voltar subir um nível (Orçamento → Finanças → Início).\n- Janelas (`Sheet`, `Fullscreen`) fecham com o voltar antes de sair da tela.\n## Ideias-chave\n- Hash não vai para o servidor: por isso funciona no GitHub Pages sem configuração.\n- O voltar do celular dispara `popstate`/`hashchange`.\n- Uma tabela de rotas central deixa claro onde cada tela mora.\n## Exercício\nNo app, abra Estudos › um mapa e copie o endereço. Identifique as 3 partes do hash. Depois procure `estudos` em `SECTIONS` no `src/App.tsx`.\n## Prompt para estudar com IA\n> Explique como funciona um roteador por hash num app React de uma página só, com um exemplo de 3 telas, e por que ele é uma boa escolha para um app publicado no GitHub Pages.\n",
+       "fontes": [
+        "https://developer.mozilla.org/pt-BR/docs/Web/API/Window/hashchange_event"
+       ]
+      },
+      {
+       "nome": "PWA: instalar e abrir sem internet",
+       "pagina": "## Para que serve\nFazer um site se comportar como app: ícone na tela inicial, tela cheia e funcionar sem internet.\n## No Central Pessoal\n- `public/manifest.webmanifest`: nome, ícones, cores e modo tela cheia.\n- `public/sw.js`: o **service worker** guarda os arquivos do app no aparelho. Páginas: tenta a rede primeiro e, sem internet, usa a cópia.\n- `src/main.tsx` registra o service worker só no app publicado.\n- Por isso, depois de mesclar um PR, às vezes é preciso fechar e abrir o app duas vezes para a versão nova aparecer.\n## Ideias-chave\n- Manifest = a identidade do app.\n- Service worker = um intermediário entre o app e a internet.\n- Estratégias de cache: rede primeiro (atualiza) ou cache primeiro (rápido).\n## Exercício\nNo Chrome do computador, abra o app, F12 › Application › Service Workers e Manifest. Veja o nome, os ícones e o arquivo `sw.js` ativo. Marque \"Offline\" e recarregue: o app abre?\n## Prompt para estudar com IA\n> Explique o que são manifest e service worker num PWA, com um service worker mínimo de \"rede primeiro, cache se offline\" comentado linha por linha. Depois liste 3 cuidados para o app atualizar direito depois de publicar.\n",
+       "fontes": [
+        "https://web.dev/learn/pwa",
+        "https://developer.mozilla.org/pt-BR/docs/Web/API/Service_Worker_API",
+        "https://developer.mozilla.org/pt-BR/docs/Web/Manifest"
+       ]
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "notebook": {
+  "nome": "Como o Central Pessoal foi feito",
+  "descricao": "Estudo pessoal do próprio app: arquitetura, tecnologias e desenvolvimento com IA."
+ },
+ "fontes": [
+  {
+   "titulo": "MDN: Aprendendo desenvolvimento web",
+   "url": "https://developer.mozilla.org/pt-BR/docs/Learn",
+   "tipo": "curso",
+   "nota": "Base de HTML, CSS e JavaScript, em português."
+  },
+  {
+   "titulo": "MDN: Guia de JavaScript",
+   "url": "https://developer.mozilla.org/pt-BR/docs/Web/JavaScript/Guide",
+   "tipo": "doc",
+   "nota": ""
+  },
+  {
+   "titulo": "TypeScript: Handbook",
+   "url": "https://www.typescriptlang.org/docs/handbook/intro.html",
+   "tipo": "doc",
+   "nota": "Documentação oficial (inglês)."
+  },
+  {
+   "titulo": "TypeScript para quem já sabe JavaScript",
+   "url": "https://www.typescriptlang.org/docs/handbook/typescript-in-5-minutes.html",
+   "tipo": "doc",
+   "nota": ""
+  },
+  {
+   "titulo": "React: Aprenda React",
+   "url": "https://pt-br.react.dev/learn",
+   "tipo": "curso",
+   "nota": "Tutorial oficial, em português."
+  },
+  {
+   "titulo": "React: Estado, a memória de um componente",
+   "url": "https://pt-br.react.dev/learn/state-a-components-memory",
+   "tipo": "doc",
+   "nota": ""
+  },
+  {
+   "titulo": "Vite: Guia",
+   "url": "https://vite.dev/guide/",
+   "tipo": "doc",
+   "nota": ""
+  },
+  {
+   "titulo": "npm: o que é o package.json",
+   "url": "https://docs.npmjs.com/cli/v10/configuring-npm/package-json",
+   "tipo": "doc",
+   "nota": ""
+  },
+  {
+   "titulo": "MDN: Usando o IndexedDB",
+   "url": "https://developer.mozilla.org/pt-BR/docs/Web/API/IndexedDB_API/Using_IndexedDB",
+   "tipo": "doc",
+   "nota": ""
+  },
+  {
+   "titulo": "MDN: hashchange",
+   "url": "https://developer.mozilla.org/pt-BR/docs/Web/API/Window/hashchange_event",
+   "tipo": "doc",
+   "nota": ""
+  },
+  {
+   "titulo": "web.dev: Aprenda PWA",
+   "url": "https://web.dev/learn/pwa",
+   "tipo": "curso",
+   "nota": "Curso gratuito do Google (inglês)."
+  },
+  {
+   "titulo": "MDN: Service Worker API",
+   "url": "https://developer.mozilla.org/pt-BR/docs/Web/API/Service_Worker_API",
+   "tipo": "doc",
+   "nota": ""
+  },
+  {
+   "titulo": "MDN: Manifesto de aplicativo web",
+   "url": "https://developer.mozilla.org/pt-BR/docs/Web/Manifest",
+   "tipo": "doc",
+   "nota": ""
+  },
+  {
+   "titulo": "Pro Git (livro gratuito)",
+   "url": "https://git-scm.com/book/pt-br/v2",
+   "tipo": "livro",
+   "nota": "Capítulos 1 a 3 bastam para começar."
+  }
+ ],
+ "mapas": [
+  {
+   "nome": "Arquitetura do Central Pessoal",
+   "raiz": {
+    "texto": "Central Pessoal",
+    "filhos": [
+     {
+      "texto": "Telas (React)",
+      "filhos": [
+       {
+        "texto": "src/modules"
+       },
+       {
+        "texto": "src/ui.tsx (peças)"
+       },
+       {
+        "texto": "App.tsx (rotas e barras)"
+       }
+      ]
+     },
+     {
+      "texto": "Regras (TypeScript)",
+      "filhos": [
+       {
+        "texto": "finance, habits, estudos..."
+       },
+       {
+        "texto": "Testes node:test"
+       }
+      ]
+     },
+     {
+      "texto": "Dados",
+      "filhos": [
+       {
+        "texto": "AppData (types.ts)"
+       },
+       {
+        "texto": "store.tsx (estado)"
+       },
+       {
+        "texto": "IndexedDB (db.ts)"
+       },
+       {
+        "texto": "normalize() e backup"
+       }
+      ]
+     },
+     {
+      "texto": "Publicação",
+      "filhos": [
+       {
+        "texto": "GitHub e PRs"
+       },
+       {
+        "texto": "GitHub Actions"
+       },
+       {
+        "texto": "GitHub Pages"
+       },
+       {
+        "texto": "PWA: manifest e sw.js"
+       }
+      ]
+     },
+     {
+      "texto": "Integrações",
+      "filhos": [
+       {
+        "texto": "Google Drive"
+       },
+       {
+        "texto": "Google Agenda e Tarefas"
+       }
+      ]
+     },
+     {
+      "texto": "Como é feito",
+      "filhos": [
+       {
+        "texto": "Claude Code"
+       },
+       {
+        "texto": "CLAUDE.md e Central"
+       },
+       {
+        "texto": "anotar → aprovar → construir → testar"
+       }
+      ]
+     }
+    ]
+   }
+  }
+ ],
+ "ciclos": [
+  {
+   "nome": "Ciclo 1: fundamentos do Central Pessoal",
+   "trilha": "Parte 1: fundamentos e arquitetura"
+  }
+ ]
+}

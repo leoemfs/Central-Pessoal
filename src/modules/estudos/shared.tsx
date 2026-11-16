@@ -1,4 +1,5 @@
-import { useState, type ReactNode } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
+import { usePagePath } from '../../pageTitle';
 import { useStore } from '../../store';
 import { go } from '../../router';
 import type { SourceKind, StudyData, StudyNotebook, StudySource, StudyStatus } from '../../types';
@@ -6,6 +7,7 @@ import { library, newMap, newNotebook, SOURCE_KINDS, sourceKind, STATUS_LABEL, t
 import { Field, Icon, MultiChips, notify, Pill, Sheet, type IconName } from '../../ui';
 import { fromBranches } from '../../mapas';
 import { uid } from '../../utils';
+import { applyPack, parsePack, type PackResult, type StudyPack } from '../../studyPack';
 
 /** Dados de Estudos + biblioteca montada + atalho para alterar só a parte de estudos. */
 export function useStudy() {
@@ -20,6 +22,8 @@ export const nowISO = () => new Date().toISOString();
 
 /** Caminho de navegação ("Biblioteca › Idiomas › Inglês"): cada parte leva até ela; a última é onde você está. */
 export function Path({ items }: { items: { label: string; to?: string }[] }) {
+  // E25: no celular, o topo mostra os dois últimos níveis ("Idiomas / Inglês") com a seta ‹; este caminho fica só no computador.
+  usePagePath(items[items.length - 2]?.label, items[items.length - 1]?.label);
   return (
     <nav className="st-path" aria-label="Caminho">
       {items.map((it, i) => (
@@ -445,7 +449,7 @@ export function TrackSheet({ onClose, themeId, trackId }: { onClose: () => void;
 
 // ---------- Botão + ----------
 
-export type CreateAction = 'ciclo' | 'notebook' | 'fonte' | 'mapa' | 'trilha' | 'areas';
+export type CreateAction = 'ciclo' | 'notebook' | 'fonte' | 'mapa' | 'trilha' | 'areas' | 'pacote';
 const CREATE: { id: CreateAction; label: string; hint: string; icon: IconName }[] = [
   { id: 'ciclo', label: 'Novo ciclo', hint: 'Escolha tópicos de uma trilha', icon: 'repeat' },
   { id: 'notebook', label: 'Novo notebook', hint: 'Caderno de anotações e materiais', icon: 'notebook' },
@@ -483,6 +487,7 @@ export function CreateMenu({ onClose, onPick, extra }: { onClose: () => void; on
         {CREATE.map((c) => tile(c.id, c.label, c.hint, c.icon, () => onPick(c.id)))}
         <hr className="st-sep" />
         {tile('areas', 'Áreas e temas', 'As categorias da sua biblioteca', 'tag', () => onPick('areas'))}
+        {tile('pacote', 'Importar pacote de estudo', 'Trilhas, notebook, fontes e mapas de um arquivo', 'download', () => onPick('pacote'))}
       </div>
     </Sheet>
   );
@@ -508,6 +513,136 @@ export function useCreate() {
       <TrackSheet onClose={() => setOpen(null)} />
     ) : open === 'areas' ? (
       <AreasSheet onClose={() => setOpen(null)} />
+    ) : open === 'pacote' ? (
+      <PackSheet onClose={() => setOpen(null)} />
     ) : null;
   return { pick, sheet };
+}
+
+/**
+ * Importar um pacote de estudo (.json): por arquivo do aparelho ou por endereço.
+ * `#/estudos/importar/<nome>` abre já com o pacote publicado em `estudos/<nome>.json`.
+ */
+export function PackSheet({ onClose, url: start = '' }: { onClose: () => void; url?: string }) {
+  const { study, set } = useStudy();
+  const [url, setUrl] = useState(start);
+  const [pack, setPack] = useState<StudyPack | null>(null);
+  const [error, setError] = useState('');
+  const [busy, setBusy] = useState(false);
+  const [done, setDone] = useState<PackResult | null>(null);
+  const read = (text: string) => {
+    const p = parsePack(text);
+    if (typeof p === 'string') {
+      setPack(null);
+      setError(p);
+    } else {
+      setError('');
+      setPack(p);
+    }
+  };
+  const fromUrl = async () => {
+    if (!url.trim()) return;
+    setBusy(true);
+    try {
+      const res = await fetch(url.trim(), { cache: 'no-store' });
+      if (!res.ok) throw new Error(String(res.status));
+      read(await res.text());
+    } catch {
+      setError('Não deu para baixar o pacote. Confira o endereço e a internet.');
+    }
+    setBusy(false);
+  };
+  const doImport = () => {
+    if (!pack) return;
+    const r = applyPack(study, pack, nowISO());
+    set(() => r.study);
+    setDone(r);
+  };
+  // Aberto por link (#/estudos/importar/<nome>): já baixa o pacote.
+  useEffect(() => {
+    if (start) void fromUrl();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  const count = (n: number, one: string, many: string) => `${n} ${n === 1 ? one : many}`;
+  if (done) {
+    const a = done.added;
+    const total = a.trilhas + a.topicos + a.paginas + a.fontes + a.mapas + a.ciclos;
+    return (
+      <Sheet
+        title="Pacote importado"
+        onClose={onClose}
+        footer={
+          <button
+            type="button"
+            className="btn primary block"
+            onClick={() => {
+              onClose();
+              if (done.notebookId) go(`estudos/notebook/${done.notebookId}`);
+            }}
+          >
+            Abrir o notebook
+          </button>
+        }
+      >
+        {total === 0 ? (
+          <p className="muted">Tudo deste pacote já estava no seu Estudos. Nada mudou.</p>
+        ) : (
+          <ul className="list">
+            {a.trilhas > 0 && <li className="row">{count(a.trilhas, 'trilha nova', 'trilhas novas')} na Biblioteca</li>}
+            {a.topicos > 0 && <li className="row">{count(a.topicos, 'tópico', 'tópicos')}</li>}
+            {a.paginas > 0 && <li className="row">{count(a.paginas, 'página', 'páginas')} no notebook</li>}
+            {a.fontes > 0 && <li className="row">{count(a.fontes, 'fonte', 'fontes')}</li>}
+            {a.mapas > 0 && <li className="row">{count(a.mapas, 'mapa mental', 'mapas mentais')}</li>}
+            {a.ciclos > 0 && <li className="row">{count(a.ciclos, 'ciclo pronto', 'ciclos prontos')} para começar</li>}
+          </ul>
+        )}
+        <p className="muted small" style={{ marginTop: 10 }}>
+          Importar de novo nunca apaga nem muda o que você editou: só acrescenta o que for novo.
+        </p>
+      </Sheet>
+    );
+  }
+  return (
+    <Sheet
+      title="Importar pacote de estudo"
+      onClose={onClose}
+      footer={
+        <button type="button" className="btn primary block" disabled={!pack} onClick={doImport}>
+          {pack ? `Importar "${pack.nome}"` : 'Escolha um pacote'}
+        </button>
+      }
+    >
+      <p className="muted small">Um pacote traz trilhas, um notebook com páginas, fontes, mapas e um ciclo pronto. Fica só no seu aparelho.</p>
+      <Field label="Endereço do pacote">
+        <input className="input" type="url" inputMode="url" value={url} placeholder="https://…/pacote.json" onChange={(e) => setUrl(e.target.value)} />
+      </Field>
+      <div className="btn-row">
+        <button type="button" className="btn soft small" disabled={!url.trim() || busy} onClick={fromUrl}>
+          {busy ? 'Baixando…' : 'Baixar'}
+        </button>
+        <label className="btn soft small">
+          Escolher arquivo
+          <input
+            type="file"
+            accept="application/json,.json"
+            hidden
+            onChange={(e) => {
+              const f = e.target.files?.[0];
+              if (f) f.text().then(read);
+            }}
+          />
+        </label>
+      </div>
+      {error && <p className="small" style={{ color: 'var(--red)', marginTop: 10 }}>{error}</p>}
+      {pack && (
+        <div className="info-box" style={{ marginTop: 12 }}>
+          <Icon name="cap" />
+          <div>
+            <strong>{pack.nome}</strong>
+            {pack.temas.flatMap((t) => t.trilhas).length} trilha(s) com {pack.temas.flatMap((t) => t.trilhas.flatMap((x) => x.topicos)).length} tópicos.
+          </div>
+        </div>
+      )}
+    </Sheet>
+  );
 }

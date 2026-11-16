@@ -5,6 +5,7 @@
 import type { AppData } from './types.ts';
 import { upcoming } from './upcoming.ts';
 import { addDays, formatMoney, todayISO } from './utils.ts';
+import { isActiveOn } from './remedios.ts';
 
 /** Até quantos dias à frente vão para o Google. */
 export const CALENDAR_DAYS = 60;
@@ -12,6 +13,8 @@ export const CALENDAR_DAYS = 60;
 export const EVENT_REMINDER = 30;
 /** Hora do aviso de contas, tarefas e compromissos sem hora (o evento fica nessa hora, curto). */
 export const DAY_REMINDER_TIME = '09:00';
+/** Remédios (N1.3): avisos só nos próximos dias, para não encher a agenda. */
+export const MED_DAYS = 14;
 
 export interface WantedEvent {
   /** Id do evento no Google (base32hex: letras a-v e números), fixo para o mesmo item. */
@@ -28,7 +31,7 @@ export interface WantedEvent {
 }
 
 /** Id aceito pelo Google (a-v, 0-9): a letra do tipo + o id do app em hexadecimal. */
-export function eventId(kind: 'e' | 't' | 'c', ref: string): string {
+export function eventId(kind: 'e' | 't' | 'c' | 'r', ref: string): string {
   const hex = [...new TextEncoder().encode(ref)].map((b) => b.toString(16).padStart(2, '0')).join('');
   return `${kind}${hex}`.slice(0, 1024);
 }
@@ -63,6 +66,20 @@ export function wantedEvents(d: AppData, today: string = todayISO()): WantedEven
       const reminder = timed ? EVENT_REMINDER : 0;
       const kind = it.kind === 'evento' ? 'e' : 'c';
       out.push({ id: eventId(kind, it.ref), summary, description, start, end, reminder, sig: JSON.stringify([summary, description, start, end, reminder]) });
+    }
+  }
+  // Remédios: um aviso na hora de cada dose (só os com lembrete ligado).
+  for (let i = 0; i < MED_DAYS; i++) {
+    const day = addDays(today, i);
+    for (const m of d.health?.meds ?? []) {
+      if (!m.remind || !isActiveOn(m, day)) continue;
+      for (const time of m.times) {
+        const summary = `💊 ${m.name}${m.dose ? ` · ${m.dose}` : ''}`;
+        const description = [m.notes, FOOTER].filter(Boolean).join('\n\n');
+        const start = plusMinutes(day, time, 0);
+        const end = plusMinutes(day, time, 5);
+        out.push({ id: eventId('r', `${m.id}@${day}@${time}`), summary, description, start, end, reminder: 0, sig: JSON.stringify([summary, description, start, end, 0]) });
+      }
     }
   }
   return out;

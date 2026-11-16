@@ -1,6 +1,6 @@
 # Saúde (N1)
 
-> **Situação: especificado, prévia aprovada em 11/11 ("contém tudo o que preciso").** Sem código. Aparece como "em breve" no app. Não foi adiantado na fila: continua no item 10 da fila sugerida.
+> **Situação: pronto (v0.66 a v0.71).** Todas as partes construídas; o que ficou para depois está em cada parte.
 > **Tamanho:** G, dividido em partes (abaixo). Cada parte é uma sessão de construção, só depois de aprovada.
 
 Um módulo separado do Núcleo. A diferença:
@@ -44,18 +44,28 @@ A ideia é ter a dieta **dentro** do módulo, para seguir no dia a dia.
 - Calorias e macros (proteína, carboidrato, gordura) ficam **fora da primeira versão**; se entrarem depois, ficam escondidos por padrão, como o peso.
 - "Fugi" não tem cor de erro nem aviso: é só registro.
 
-**A decidir antes de construir** (perguntar ao Leonardo):
-1. A dieta vem de nutricionista (copiar o plano pronto) ou é montada por você?
-2. Precisa de dias diferentes (ex.: dia de treino × dia de descanso) já na primeira versão?
+**Decidido em 15/11 (Leonardo: "opcional para ambos os casos"):**
+1. **Origem do plano:** as duas. Ao criar o plano, escolher "Da nutricionista" (copiar o plano pronto; campo opcional com nome e data da consulta) ou "Montei eu". Muda só o rótulo e a dica; a tela é a mesma.
+2. **Dias diferentes:** opcional. O padrão é "igual todos os dias"; quem quiser liga "dias diferentes" e cria variações (ex.: dia de treino × dia de descanso), escolhendo quais dias da semana usam cada uma. No "Hoje", o app mostra a variação do dia e deixa trocar com um toque.
+
+## Dieta × Receitas (15/11; N1.2a pronta na v0.68, N1.2b na v0.69)
+**Regra:** a receita continua morando em **Listas** (tipo "receita", com porções, ingredientes e preparo); a Dieta só **aponta** para ela. Nada duplicado.
+- **No editor do plano:** em cada refeição (e em cada opção "ou isto"), botão "Ligar receita", que escolhe uma receita de Listas. Pode ter mais de uma.
+- **No Hoje e na aba Dieta:** a refeição mostra "📖 Receita: Omelete de legumes"; tocar abre a receita em Listas (porções, ingredientes, preparo).
+- **Lista de compras da semana:** botão "Gerar lista de compras" na aba Dieta junta os ingredientes das receitas ligadas às refeições da semana (quantas vezes cada uma aparece), usando o "mandar para a lista de mercado" que já existe nas receitas.
+- **Criar receita a partir da refeição:** "Nova receita" no editor cria a receita em Listas já com o nome da refeição.
+- Receita apagada em Listas: a ligação some sozinha, a refeição continua.
+
+**Partes:** N1.2a ligar e abrir receita (P) · N1.2b lista de compras da semana (M, junta com o "Depois" da Dieta). **Afeta:** Listas (receitas e lista de mercado).
 
 ## Divisão para construir
 Ordem sugerida (cada parte com versão, testes e PR próprios):
 1. **N1.0 Prévia visual:** versão P feita em 11/11 (Hoje, Consultas e check-ups, Dieta): https://claude.ai/artifact/LJRc3AgwWsTmuA8ymQCqEv. Aprovada pelo Leonardo; o resto (Histórico, menu do +, cartão no Início, Remédios, Medidas e selo no hábito) segue o documento.
-2. **N1.1 Água e Sono:** registros do dia e meta de água (P a M).
-3. **N1.2 Dieta:** plano alimentar e "Hoje" com segui · em parte · fugi (M).
-4. **N1.3 Remédios:** horários, "tomei" e lembrete (M).
-5. **N1.4 Consultas, exames e check-ups:** entram e se atualizam sozinhos na Agenda, como Carreira; intervalo de check-up e cartão "Próximos check-ups" (M).
-6. **N1.5 Peso e medidas:** com gráfico, escondido por padrão (P).
+2. **N1.1 Água e Sono:** pronto na v0.66 (15/11). Barra Hoje · Saúde · Histórico; + registra sono. Ficou para depois: hábito "dormir no horário" marcado pelo sono e cartão da Saúde no Início.
+3. **N1.2 Dieta:** pronto na v0.67 (15/11). Ficou para depois: hábito "Seguir a dieta" marcado sozinho, linha na Revisão semanal, lista de compras em Listas, lembretes das refeições e ponto na Jornada.
+4. **N1.3 Remédios:** pronto na v0.70 (15/11). Lembrete = aviso no Google Agenda na hora de cada dose (próximos 14 dias), enquanto não há notificações próprias (N3). "Na hora" ficou como "todas as doses do dia" para a Jornada (mais gentil). Ficou para depois: estoque (quantos comprimidos sobram) e aviso de recompra.
+5. **N1.4 Consultas, exames e check-ups:** pronto na v0.71 (16/11, junto com N1.5). Agenda sozinha (`syncHealthEvents`, origem `saude/`); "Já fui" com retorno, pedidos de exame e repetir; check-up vencido sem consulta marcada vira "Marcar: …" hoje na Agenda. Abas da casa passaram a ser Dia (água e sono) · Dieta · Remédios · Consultas · Medidas (6 abas não cabiam).
+6. **N1.5 Peso e medidas:** pronto na v0.71. Escondidos por padrão (Mostrar/Esconder na aba), gráfico de linha sem cor de bom/ruim, medidas próprias; nunca no Início e sem pontos na Jornada.
 7. **Depois:** lista de compras da dieta em Listas; ligação com a Jornada.
 
 **Navegação** (regra do app): abas no topo para as partes do mesmo conteúdo; barra de baixo com ferramentas do módulo (ideia: **Hoje · Saúde · Histórico**); botão + para criar (registro, refeição, remédio, consulta, medida) e, por último, Categorias se houver.

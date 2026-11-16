@@ -253,6 +253,8 @@ export interface Settings {
   moreButton: boolean;
   /** E26: esconder o nome pequeno embaixo de cada ícone da barra de baixo (o padrão é mostrar). */
   hideBarLabels: boolean;
+  /** E25: jeito do menu na gaveta: Misto (grade em cima, lista por módulo embaixo), Grade ou Lista. */
+  drawerView: 'misto' | 'grade' | 'lista';
   seededCategories: boolean;
   seededIncomeSources: boolean;
   lastBackupAt: string | null;
@@ -692,12 +694,182 @@ export interface AppData {
   exerciseVideos: Record<string, string>;
   /** Jornada (N2): avatar, itens, o que está vestido e gastos (o resto é calculado). */
   journey: JourneyState;
+  /** Saúde (N1): água e sono (as outras partes vêm depois). */
+  health: HealthData;
   /** Itens excluídos (id → data), para uma futura sincronização entre aparelhos. */
   deleted: Record<string, string>;
   /** N9.0: data da última alteração de cada item (id → data) e de cada parte (`@chave` → data). */
   stamps: Record<string, string>;
   /** Dados da versão anterior que ainda não têm tela (ex.: receitas). */
   legacy: Record<string, unknown>;
+}
+
+// ---------- Saúde (N1) ----------
+export type SleepFeel = 'bem' | 'medio' | 'cansado';
+
+/** Uma noite de sono, guardada pelo dia em que acordou. */
+export interface SleepEntry {
+  /** Hora de dormir e de acordar (HH:MM). */
+  bed: string;
+  wake: string;
+  feel: SleepFeel | null;
+}
+
+/** Dieta (N1.2). */
+export type DietMark = 'segui' | 'parte' | 'fugi';
+export type DietSource = 'nutri' | 'eu';
+
+export interface DietMeal {
+  id: string;
+  /** Café da manhã, Almoço… */
+  name: string;
+  /** HH:MM ou vazio. */
+  time: string;
+  /** O que comer (a 1ª opção). */
+  food: string;
+  /** Outras opções ("ou isto"). */
+  alts: string[];
+  /** Receitas de Listas ligadas a esta refeição (ids). A receita mora em Listas. */
+  recipes: string[];
+}
+
+/** Variação do plano (ex.: dia de treino). Sem "dias diferentes", o plano tem uma só. */
+export interface DietVariant {
+  id: string;
+  name: string;
+  /** Dias da semana (0 = domingo) em que vale. */
+  days: number[];
+  meals: DietMeal[];
+}
+
+export interface DietPlan {
+  id: string;
+  name: string;
+  source: DietSource;
+  /** Nutricionista e data da consulta (opcionais). */
+  nutri: string;
+  consultDate: string | null;
+  notes: string;
+  /** Dias diferentes ligado: usa as variações por dia da semana. */
+  split: boolean;
+  variants: DietVariant[];
+  createdAt: string;
+}
+
+/** Uma refeição marcada no dia. */
+export interface DietLog {
+  mark: DietMark;
+  /** Qual opção comeu (0 = a principal). */
+  option: number;
+}
+
+export interface DietData {
+  plans: DietPlan[];
+  activeId: string | null;
+  /** Dia (AAAA-MM-DD) → refeição (id) → marcação. */
+  log: Record<string, Record<string, DietLog>>;
+  /** Variação escolhida à mão num dia (dia → id). */
+  dayVariant: Record<string, string>;
+  /** O que comeu fora do plano (dia → texto). */
+  extras: Record<string, string>;
+}
+
+/** Remédio (N1.3). O app só registra: nada de dose sugerida. */
+export interface Medicine {
+  id: string;
+  name: string;
+  /** Texto livre: "1 comprimido", "10 gotas". */
+  dose: string;
+  /** Horários do dia (HH:MM), em ordem. */
+  times: string[];
+  /** Dias da semana (0 = domingo); todos = uso diário. */
+  days: number[];
+  /** Começo e fim do tratamento (AAAA-MM-DD); fim null = uso contínuo. */
+  start: string;
+  end: string | null;
+  notes: string;
+  /** Aviso no Google Agenda em cada horário (se a conta Google estiver ligada). */
+  remind: boolean;
+  createdAt: string;
+}
+
+/** Consultas, exames e check-ups (N1.4). */
+export type ApptKind = 'consulta' | 'dentista' | 'exame' | 'checkup' | 'outro';
+
+export interface Appointment {
+  id: string;
+  kind: ApptKind;
+  /** Especialidade, nome do exame ou motivo curto (ex.: "Cardiologista", "Hemograma"). */
+  title: string;
+  /** Profissional ou clínica. */
+  who: string;
+  place: string;
+  /** AAAA-MM-DD; null = ainda a marcar. */
+  date: string | null;
+  time: string;
+  /** O que levar (jejum, exames antigos…). */
+  bring: string;
+  notes: string;
+  done: boolean;
+  /** Como foi / resultado (texto). */
+  result: string;
+  /** Check-up que se repete ao qual esta consulta pertence. */
+  routineId: string | null;
+  createdAt: string;
+}
+
+/** Check-up que se repete (ex.: dentista a cada 6 meses). */
+export interface CheckupRoutine {
+  id: string;
+  label: string;
+  kind: ApptKind;
+  months: number;
+  /** Última vez feita (AAAA-MM-DD); null = ainda não registrada. */
+  last: string | null;
+}
+
+/** Peso e medidas (N1.5): escondidos por padrão. */
+export interface BodyEntry {
+  id: string;
+  date: string;
+  /** Campo (ex.: "Peso") → valor. */
+  values: Record<string, number>;
+}
+
+export interface BodyData {
+  show: boolean;
+  /** Campos e unidades, na ordem (ex.: Peso kg, Cintura cm). */
+  fields: { name: string; unit: string }[];
+  entries: BodyEntry[];
+}
+
+export interface HealthData {
+  /** Consultas, exames e check-ups (N1.4). */
+  appts: Appointment[];
+  routines: CheckupRoutine[];
+  /** Peso e medidas (N1.5). */
+  body: BodyData;
+  /** Dieta (N1.2). */
+  diet: DietData;
+  /** Remédios (N1.3). */
+  meds: Medicine[];
+  /** Doses tomadas: dia → "idDoRemédio@HH:MM" → hora em que marcou (HH:MM). */
+  taken: Record<string, Record<string, string>>;
+  /** Hábito "tomar remédio" ligado: marcado sozinho quando todas as doses do dia foram tomadas. */
+  medsHabitId: string | null;
+  water: {
+    /** Meta do dia e quanto soma cada toque (ml). Valem só sem hábito ligado. */
+    goal: number;
+    step: number;
+    /** Quanto bebeu por dia (AAAA-MM-DD → ml), sem hábito ligado. */
+    days: Record<string, number>;
+    /** Hábito do Núcleo ligado: o número mora nele (um lugar só). */
+    habitId: string | null;
+    /** Já perguntou se quer ligar o hábito de água que existia. */
+    asked: boolean;
+  };
+  /** Sono por dia em que acordou (AAAA-MM-DD). */
+  sleep: Record<string, SleepEntry>;
 }
 
 export type Collection = 'tasks' | 'events' | 'habits' | 'notes' | 'journal' | 'categories' | 'cards' | 'incomeSources' | 'boxes' | 'lists' | 'listCategories' | 'stores' | 'vouchers';

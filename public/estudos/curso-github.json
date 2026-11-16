@@ -1,0 +1,233 @@
+{
+ "formato": "central-pessoal/pacote-de-estudo",
+ "versao": 1,
+ "id": "curso-github",
+ "nome": "Curso de GitHub completo",
+ "area": {
+  "nome": "Desenvolvimento de software",
+  "catalogo": "dev"
+ },
+ "temas": [
+  {
+   "nome": "Curso de GitHub completo",
+   "trilhas": [
+    {
+     "nome": "Git do zero",
+     "descricao": "Controle de versão na prática: instalar, commits, histórico, desfazer com segurança e o caminho de uma mudança.",
+     "pagina": "## Sobre esta trilha\nA base de tudo: o Git no seu computador. Cada página tem **para que serve**, **como funciona**, um exemplo **do próprio Central Pessoal**, cuidados, um **exercício** e um **prompt para praticar**.\n\n> Dica: o jogo **Learn Git Branching** (nas fontes) ajuda muito a visualizar.\n\n> Próximas trilhas: GitHub e colaboração, Automação e publicação, Segurança e boas práticas, GitHub com IA. Chegam pelo mesmo link.",
+     "topicos": [
+      {
+       "nome": "Controle de versão: o que é Git e o que é GitHub",
+       "pagina": "## Para que serve\nGuardar **cada versão** do projeto, saber o que mudou, quem mudou e por quê, e poder voltar atrás. É o \"Ctrl+Z\" do projeto inteiro, com histórico para sempre.\n## Como funciona\n- **Git** é o programa que guarda as versões. Roda no seu computador (ou na máquina do Claude na nuvem).\n- **GitHub** é o site que guarda uma cópia do repositório na internet e acrescenta colaboração: PRs, revisão, issues, automações (Actions) e sites (Pages).\n- Cada versão salva é um **commit**: uma foto do projeto com uma mensagem.\n- O Git é **distribuído**: cada cópia tem o histórico inteiro.\n## No Central Pessoal\nO Central Pessoal tem centenas de commits. Cada versão do app (v0.16, v0.17... v0.64) virou um ou mais commits e um PR no GitHub. Ao mesclar, o GitHub publica o app sozinho.\n## Cuidados\n- Git ≠ GitHub: dá para usar Git sem GitHub, mas não o contrário.\n- O histórico é público num repositório público: nada de senhas ou dados pessoais.\n- Commits pequenos e frequentes contam a história melhor do que um commit gigante.\n## Exercício\nAbra o repositório do Central Pessoal no GitHub e encontre: quantos commits ele tem, o último commit e quem fez.\n## Prompt para praticar\n> Explique a diferença entre Git e GitHub com uma analogia do dia a dia e depois com um exemplo real de um app pessoal publicado no GitHub Pages.\n",
+       "fontes": [
+        "https://git-scm.com/book/pt-br/v2/Come%C3%A7ando-Sobre-Controle-de-Vers%C3%A3o",
+        "https://docs.github.com/pt/get-started/getting-started-with-git"
+       ]
+      },
+      {
+       "nome": "Instalar e configurar o Git",
+       "pagina": "## Para que serve\nDeixar o Git pronto no seu computador, com o seu nome e e-mail nos commits.\n## Como funciona\n1. Instale pelo site oficial (no Windows, o Git for Windows já traz o Git Bash).\n2. Confira: `git --version`.\n3. Diga quem você é (vale para todos os projetos):\n```\ngit config --global user.name \"Leonardo\"\ngit config --global user.email \"seu-email@exemplo.com\"\n```\n4. Nome padrão do ramo principal: `git config --global init.defaultBranch main`.\n5. Veja tudo: `git config --list`.\n## No Central Pessoal\nNos commits do Central Pessoal você vê dois autores: você (quando mescla pelo GitHub) e o Claude (`Co-Authored-By`), porque as conversas na nuvem configuram o autor assim.\n## Cuidados\n- Use no `user.email` o mesmo e-mail da conta do GitHub, para os commits aparecerem no seu perfil.\n- O GitHub permite um e-mail \"noreply\" para esconder o seu e-mail real.\n- Configuração `--global` vale para todos os projetos; sem ela, só para o projeto atual.\n## Exercício\nInstale o Git, configure nome e e-mail e mostre o resultado de `git config --list`.\n## Prompt para praticar\n> Vou instalar o Git no Windows pela primeira vez. Me guie passo a passo, incluindo as opções do instalador que um iniciante deve escolher e como conferir se deu certo.\n",
+       "fontes": [
+        "https://git-scm.com/downloads",
+        "https://git-scm.com/book/pt-br/v2/Come%C3%A7ando-Sobre-Controle-de-Vers%C3%A3o"
+       ]
+      },
+      {
+       "nome": "O repositório: criar, clonar e a pasta .git",
+       "pagina": "## Para que serve\nTer um projeto sob controle do Git, seja começando do zero ou copiando um que já existe.\n## Como funciona\n- `git init`: transforma a pasta atual num repositório (cria a pasta escondida `.git`).\n- `git clone <endereço>`: baixa um repositório inteiro, com todo o histórico.\n- A pasta `.git` é o \"cofre\": guarda todas as versões. **Não mexa nela à mão.**\n- `git status`: o comando que você mais vai usar. Mostra o que mudou.\n## No Central Pessoal\n```\ngit clone https://github.com/leoemfs/Central-Pessoal.git\ncd Central-Pessoal\ngit status\n```\nCada conversa do Claude na nuvem começa exatamente assim: clonando o repositório.\n## Cuidados\n- Apagar a pasta `.git` apaga o histórico local.\n- Não crie um repositório dentro de outro.\n- Clone por HTTPS no começo: é o mais simples.\n## Exercício\nClone o Central Pessoal, rode `git status` e `git log --oneline -5` e anote o que aparece.\n## Prompt para praticar\n> Me explique o que existe dentro da pasta .git de um repositório (em alto nível, sem detalhes internos demais) e por que clonar traz o histórico inteiro.\n",
+       "fontes": [
+        "https://git-scm.com/book/pt-br/v2/Fundamentos-de-Git-Obtendo-um-Reposit%C3%B3rio-Git",
+        "https://github.com/leoemfs/Central-Pessoal"
+       ]
+      },
+      {
+       "nome": "As três áreas: trabalho, preparação e histórico",
+       "pagina": "## Para que serve\nEntender o caminho de uma mudança até virar versão. É a ideia mais importante do Git.\n## Como funciona\n1. **Área de trabalho:** os arquivos como estão na pasta. Você edita aqui.\n2. **Área de preparação** (staging): o que vai entrar no próximo commit. Você escolhe com `git add`.\n3. **Histórico** (repositório): as versões salvas, com `git commit`.\n\n```\ngit status          # o que mudou\ngit add arquivo.ts  # prepara um arquivo\ngit add -A          # prepara tudo\ngit commit -m \"mensagem\"\n```\n## No Central Pessoal\nQuando o Claude termina um item, ele faz `git add -A` e `git commit` com uma mensagem como \"M30 (v0.62): mapa mental em tela cheia\".\n## Cuidados\n- `git add .` prepara tudo da pasta atual: confira com `git status` antes.\n- Dá para preparar só parte das mudanças e deixar o resto para outro commit.\n- Arquivo novo só entra no Git depois do primeiro `git add`.\n## Exercício\nNum projeto de teste, crie 2 arquivos, prepare só um, faça o commit e confira com `git status` que o outro ficou de fora.\n## Prompt para praticar\n> Explique as três áreas do Git (trabalho, preparação e histórico) com a analogia de preparar uma caixa para mandar pelo correio, e me dê um exercício de 10 minutos.\n",
+       "fontes": [
+        "https://git-scm.com/book/pt-br/v2/Fundamentos-de-Git-Obtendo-um-Reposit%C3%B3rio-Git",
+        "https://learngitbranching.js.org/?locale=pt_BR"
+       ]
+      },
+      {
+       "nome": "Commits e boas mensagens",
+       "pagina": "## Para que serve\nSalvar versões que contam uma história fácil de entender depois, por você ou por outra pessoa.\n## Como funciona\n- Um commit = uma mudança com sentido completo (\"corrige o total da fatura\", não \"várias coisas\").\n- Mensagem: uma primeira linha curta dizendo **o que** mudou; se precisar, uma linha em branco e depois o **porquê**.\n- Padrão comum (Conventional Commits): `feat:`, `fix:`, `docs:`.\n- `git commit --amend` corrige o último commit, mas **só antes de enviar**.\n## No Central Pessoal\nO Central Pessoal usa o código do item e a versão: \"N2.4 (v0.60): Arsenal, provador, loja...\". Assim, o histórico conversa com a Central.\n## Cuidados\n- Mensagens como \"ajustes\" ou \"wip\" não ajudam ninguém.\n- Não misture assuntos num commit só.\n- Não use `--amend` em commits que já foram enviados.\n## Exercício\nLeia os últimos 20 commits do Central Pessoal (`git log --oneline -20`) e escolha o melhor e o pior título. Reescreva o pior.\n## Prompt para praticar\n> Aqui estão 5 mensagens de commit minhas. Reescreva cada uma num formato bom e explique a regra que você usou: [cole as mensagens]\n",
+       "fontes": [
+        "https://www.conventionalcommits.org/pt-br/v1.0.0/",
+        "https://github.com/leoemfs/Central-Pessoal"
+       ]
+      },
+      {
+       "nome": "Ver o histórico e as diferenças",
+       "pagina": "## Para que serve\nInvestigar: o que mudou, quando e por quê. Ajuda a achar quando um bug apareceu.\n## Como funciona\n- `git log --oneline`: uma linha por commit.\n- `git log --oneline --graph --all`: o desenho dos ramos.\n- `git diff`: o que mudou e ainda não foi preparado.\n- `git diff --staged`: o que já foi preparado.\n- `git show <commit>`: o que um commit mudou.\n- `git log -p -- src/finance.ts`: a história de um arquivo.\n- `git blame arquivo`: quem mudou cada linha por último.\n## No Central Pessoal\nNo GitHub, a aba **Commits** e a visão de cada PR (aba \"Files changed\") mostram as mesmas diferenças, em verde (acrescentado) e vermelho (removido).\n## Cuidados\n- Para sair do `git log` comprido, aperte `q`.\n- O `blame` não serve para culpar ninguém: ele mostra o contexto da mudança.\n- Diferença grande demais? Olhe arquivo por arquivo.\n## Exercício\nUse `git log -p -- src/boxes.ts` e descubra qual commit criou as Caixinhas.\n## Prompt para praticar\n> Me ensine a investigar quando um bug apareceu usando git log, git diff e git show, com um passo a passo para um projeto React.\n",
+       "fontes": [
+        "https://git-scm.com/book/pt-br/v2/Fundamentos-de-Git-Obtendo-um-Reposit%C3%B3rio-Git"
+       ]
+      },
+      {
+       "nome": "Desfazer com segurança",
+       "pagina": "## Para que serve\nCorrigir erros sem medo e sem perder trabalho.\n## Como funciona\n- **Mudança não preparada:** `git restore arquivo` volta ao último commit (perde a edição).\n- **Tirar da preparação:** `git restore --staged arquivo`.\n- **Commit já enviado:** `git revert <commit>` cria um commit novo que desfaz o antigo. O histórico continua honesto. **É o jeito seguro.**\n- **`git reset`:** volta o ramo para trás. Com `--hard`, apaga mudanças. Use só em commits que **ninguém mais tem**.\n- **Salvar para depois:** `git stash` guarda as mudanças e `git stash pop` traz de volta.\n## No Central Pessoal\nA regra do projeto é \"sem force push e sem rebase\": nada que reescreva a história já enviada ao GitHub. Para desfazer algo publicado, o caminho é um commit novo (revert ou correção).\n## Cuidados\n- `restore` e `reset --hard` apagam edições não salvas: confira antes.\n- Nunca reescreva commits que já estão no GitHub.\n- Na dúvida, crie um ramo de segurança antes de mexer: `git branch backup`.\n## Exercício\nNum projeto de teste: faça 3 commits, desfaça o do meio com `git revert` e veja o histórico.\n## Prompt para praticar\n> Explique a diferença entre git restore, git revert e git reset com exemplos, e me diga qual usar em cada situação, do mais seguro para o mais perigoso.\n",
+       "fontes": [
+        "https://git-scm.com/book/pt-br/v2/Fundamentos-de-Git-Desfazendo-coisas",
+        "https://learngitbranching.js.org/?locale=pt_BR"
+       ]
+      },
+      {
+       "nome": ".gitignore: o que não entra no Git",
+       "pagina": "## Para que serve\nManter fora do Git o que não é código: bibliotecas baixadas, arquivos gerados, senhas e arquivos pessoais.\n## Como funciona\n- O arquivo `.gitignore`, na raiz, lista padrões a ignorar:\n```\nnode_modules/\ndist/\n.env\n*.log\n```\n- `node_modules/`: as bibliotecas (o `npm install` baixa de novo).\n- `dist/`: o app montado (o GitHub Actions gera na hora de publicar).\n- `.env`: chaves e senhas, **nunca** no Git.\n## No Central Pessoal\nAbra o `.gitignore` do Central Pessoal e veja o que ele deixa de fora. Por isso o repositório é leve, mesmo o app usando várias bibliotecas.\n## Cuidados\n- O `.gitignore` não tira do Git o que já foi commitado: aí precisa de `git rm --cached arquivo`.\n- Se uma senha já foi commitada, troque a senha: o histórico guarda tudo.\n- Use os modelos prontos do GitHub para cada linguagem.\n## Exercício\nEscreva um `.gitignore` para um projeto Node com React e compare com o modelo oficial do GitHub.\n## Prompt para praticar\n> Explique o que deve e o que não deve ir para o Git num projeto React com Vite, com um .gitignore comentado linha por linha.\n",
+       "fontes": [
+        "https://docs.github.com/pt/get-started/getting-started-with-git/ignoring-files",
+        "https://github.com/github/gitignore"
+       ]
+      },
+      {
+       "nome": "O caminho de uma mudança no Central Pessoal",
+       "pagina": "## Para que serve\nJuntar tudo da trilha e ver o fluxo real, do pedido até o app atualizado no seu celular.\n## Como funciona\n1. A conversa clona o repositório (`git clone`) e trabalha num **ramo** próprio.\n2. Antes de começar, traz o que há de novo no `main` (`git fetch` e `git merge`).\n3. Edita, testa e faz commits (`git add`, `git commit`).\n4. Envia o ramo ao GitHub (`git push`).\n5. Abre um **PR** do ramo para o `main`.\n6. Você revisa e **mescla**.\n7. O GitHub Actions monta e publica no GitHub Pages.\n8. O app no celular se atualiza ao fechar e abrir.\n## No Central Pessoal\nOs passos 5 a 7 são o assunto da próxima trilha (GitHub e colaboração) e da trilha de Actions e Pages.\n## Cuidados\n- Sempre traga o `main` antes de começar e antes de abrir o PR: evita conflitos.\n- Um PR por item deixa fácil de revisar e de desfazer.\n- Se o PR mostra conflito, peça para resolver sem perder nada dos dois lados.\n## Exercício\nDesenhe este fluxo no mapa mental do curso, com um ramo para cada passo.\n## Prompt para praticar\n> Explique o fluxo clone → branch → commit → push → pull request → merge → deploy como uma história, usando um app pessoal como exemplo, e diga onde cada erro comum acontece.\n",
+       "fontes": [
+        "https://github.com/leoemfs/Central-Pessoal",
+        "https://docs.github.com/pt/get-started/getting-started-with-git"
+       ]
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "notebook": {
+  "nome": "Curso de GitHub",
+  "descricao": "Git e GitHub do zero ao fluxo usado no Central Pessoal."
+ },
+ "fontes": [
+  {
+   "titulo": "Pro Git, cap. 1: Começando",
+   "url": "https://git-scm.com/book/pt-br/v2/Come%C3%A7ando-Sobre-Controle-de-Vers%C3%A3o",
+   "tipo": "livro",
+   "nota": "Livro oficial e gratuito, em português."
+  },
+  {
+   "titulo": "Pro Git, cap. 2: Fundamentos de Git",
+   "url": "https://git-scm.com/book/pt-br/v2/Fundamentos-de-Git-Obtendo-um-Reposit%C3%B3rio-Git",
+   "tipo": "livro",
+   "nota": ""
+  },
+  {
+   "titulo": "Git: download e instalação",
+   "url": "https://git-scm.com/downloads",
+   "tipo": "site",
+   "nota": ""
+  },
+  {
+   "titulo": "GitHub Docs: começar com o Git",
+   "url": "https://docs.github.com/pt/get-started/getting-started-with-git",
+   "tipo": "doc",
+   "nota": "Documentação oficial, em português."
+  },
+  {
+   "titulo": "GitHub Docs: ignorar arquivos",
+   "url": "https://docs.github.com/pt/get-started/getting-started-with-git/ignoring-files",
+   "tipo": "doc",
+   "nota": ""
+  },
+  {
+   "titulo": "Modelos de .gitignore",
+   "url": "https://github.com/github/gitignore",
+   "tipo": "site",
+   "nota": ""
+  },
+  {
+   "titulo": "Pro Git: desfazendo coisas",
+   "url": "https://git-scm.com/book/pt-br/v2/Fundamentos-de-Git-Desfazendo-coisas",
+   "tipo": "livro",
+   "nota": ""
+  },
+  {
+   "titulo": "Learn Git Branching (jogo interativo)",
+   "url": "https://learngitbranching.js.org/?locale=pt_BR",
+   "tipo": "curso",
+   "nota": "Aprende jogando, em português."
+  },
+  {
+   "titulo": "Conventional Commits",
+   "url": "https://www.conventionalcommits.org/pt-br/v1.0.0/",
+   "tipo": "site",
+   "nota": "Um padrão para mensagens de commit."
+  },
+  {
+   "titulo": "O repositório do Central Pessoal",
+   "url": "https://github.com/leoemfs/Central-Pessoal",
+   "tipo": "site",
+   "nota": "O seu próprio projeto, para praticar lendo."
+  }
+ ],
+ "mapas": [
+  {
+   "nome": "Git e GitHub",
+   "raiz": {
+    "texto": "Git e GitHub",
+    "filhos": [
+     {
+      "texto": "Git (no computador)",
+      "filhos": [
+       {
+        "texto": "Trabalho → preparação → histórico"
+       },
+       {
+        "texto": "commit, log, diff"
+       },
+       {
+        "texto": "restore, revert, stash"
+       },
+       {
+        "texto": ".gitignore"
+       }
+      ]
+     },
+     {
+      "texto": "GitHub (na internet)",
+      "filhos": [
+       {
+        "texto": "push e pull"
+       },
+       {
+        "texto": "Branch e PR"
+       },
+       {
+        "texto": "Revisão e merge"
+       },
+       {
+        "texto": "Issues"
+       }
+      ]
+     },
+     {
+      "texto": "Automação",
+      "filhos": [
+       {
+        "texto": "GitHub Actions"
+       },
+       {
+        "texto": "GitHub Pages"
+       }
+      ]
+     },
+     {
+      "texto": "Segurança",
+      "filhos": [
+       {
+        "texto": "Sem senhas no Git"
+       },
+       {
+        "texto": "Sem reescrever o que já foi enviado"
+       }
+      ]
+     }
+    ]
+   }
+  }
+ ],
+ "ciclos": [
+  {
+   "nome": "Ciclo 1: Git do zero",
+   "trilha": "Git do zero"
+  }
+ ]
+}

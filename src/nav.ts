@@ -9,7 +9,7 @@ export interface NavItem {
   section?: string;
 }
 
-/** Menu completo (menu ☰ no celular e barra lateral no computador). */
+/** Menu completo: barra lateral no computador; no celular, o mesmo conteúdo fica na gaveta (puxar a barra). */
 export const NAV_GROUPS: { title: string; items: NavItem[] }[] = [
   {
     title: 'Geral',
@@ -54,7 +54,7 @@ export const NAV_GROUPS: { title: string; items: NavItem[] }[] = [
       { label: 'Treinos e alongamentos', icon: 'dumbbell', to: 'nucleo/corpo' },
       { label: 'Progresso', icon: 'bars', to: 'progresso', section: 'progresso' },
       { label: 'Histórico de práticas', icon: 'clock', to: 'historico', section: 'historico' },
-      { label: 'Saúde', icon: 'heartPulse' },
+      { label: 'Saúde', icon: 'heartPulse', to: 'saude', section: 'saude' },
     ],
   },
   {

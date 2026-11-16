@@ -23,6 +23,7 @@ export function EventItem({ ev, showDate, onClick }: { ev: CalendarEvent; showDa
         <span className="row-meta">
           {showDate && <Pill>{relativeDay(ev.date)}</Pill>}
           {ev.origin?.startsWith('carreira/') && <Pill tone="blue">Carreira</Pill>}
+          {ev.origin?.startsWith('saude/') && <Pill tone="green">Saúde</Pill>}
           {ev.location && (
             <span>
               <Icon name="mapPin" size={13} /> {ev.location}

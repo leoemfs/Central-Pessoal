@@ -4,6 +4,7 @@ import type { AppData } from '../types';
 import { addFavorite, FAVORITABLE } from '../moduleBar';
 import { Icon, notify, PageHeader, Sheet, type IconName } from '../ui';
 import { hiddenFrom, isHidden, toggleModule, visibleFrom } from '../setup';
+import { NAV_GROUPS } from '../nav';
 import { openSetup, openTutorial } from './Montagem';
 import { EditBar, useEditScreen } from '../Cards';
 import { arrange, moveCard, type CardLayout } from '../cardLayout';
@@ -18,6 +19,7 @@ const LINKS: { path: string; hint: string }[] = [
   { path: 'estudos', hint: 'Biblioteca, ciclos de estudo, notebooks, fontes e mapas mentais' },
   { path: 'carreira', hint: 'Trabalho atual, reuniões, projetos, currículo e vagas' },
   { path: 'objetivos', hint: 'Todas as metas do app num lugar só' },
+  { path: 'saude', hint: 'Água e sono; em breve dieta, remédios e consultas' },
   { path: 'arquivo', hint: 'Anotações rápidas e informações importantes' },
   { path: 'voce', hint: 'Perfil, metas e sugestões para você' },
   { path: 'revisao', hint: 'Resumo da semana e reflexão' },
@@ -115,15 +117,85 @@ function maisItems(data: AppData, grid: boolean) {
 }
 
 /** E21.2: o Mais dentro da gaveta que sobe ao puxar a barra (sempre em grade, sem lápis). */
-export function MaisPanel() {
-  const { data } = useStore();
-  const { mods, tools } = maisItems(data, true);
-  const row = (items: Item[]) => items.map((it) => <Entry key={it.id} it={it} grid editing={false} first last onMove={() => {}} />);
+/**
+ * E28: o menu da gaveta usa as categorias do antigo menu lateral (Geral, Organização pessoal, Financeiro,
+ * Bem-estar, Estudos, Carreira, Planejamento) — as mesmas da barra lateral do computador (NAV_GROUPS).
+ * Cada uma traz os módulos e as telas de dentro; o que ainda não existe aparece apagado, com "em breve".
+ */
+function menuGroups(data: AppData): { title: string; items: { to?: string; label: string; icon: IconName }[] }[] {
+  return NAV_GROUPS.map((g) => ({
+    title: g.title,
+    items: g.items.filter((it) => it.to !== 'inicio' && it.to !== 'mais' && !(it.to && isHidden(data, it.to))),
+  })).filter((g) => g.items.some((it) => it.to));
+}
+
+/** E21.2 + E25: o menu inteiro na gaveta que sobe ao puxar a barra (Misto, Grade ou Lista; lápis muda a ordem). */
+export function MaisPanel({ editing = false }: { editing?: boolean }) {
+  const { data, update } = useStore();
+  const view = data.settings.drawerView;
+  const { modules, shortcuts, mods, tools } = maisItems(data, view !== 'lista');
+  const layouts = data.settings.cards;
+  const move = (key: string, all: Item[], id: string, dir: -1 | 1) =>
+    update((d) => ({ ...d, settings: { ...d.settings, cards: { ...d.settings.cards, [key]: moveCard(all, layouts[key], id, dir) } } }));
+  const grid = view !== 'lista';
+  const row = (items: Item[], all: Item[], key: string) =>
+    items.map((it, i) => <Entry key={it.id} it={it} grid={grid} editing={editing} first={i === 0} last={i === items.length - 1} onMove={(dir) => move(key, all, it.id, dir)} />);
   return (
     <>
-      <div className="mg-grid">{row(mods)}</div>
+      {editing && <p className="muted small mais-edit-hint">Use as setas para mudar a ordem dos módulos e dos atalhos. Toque no lápis de novo para terminar.</p>}
+      <div className={grid ? 'mg-grid' : 'tile-grid'}>{row(mods, modules, KEY_MODULES)}</div>
       <h2 className="section-title">Atalhos</h2>
-      <div className="mg-grid small">{row(tools)}</div>
+      <div className={grid ? 'mg-grid small' : 'tile-grid'}>{row(tools, shortcuts, KEY_SHORTCUTS)}</div>
+      {!editing &&
+        menuGroups(data).map((g) => (
+          <section key={g.title} className="menu-group">
+            <h2 className="section-title">{g.title}</h2>
+            {view === 'grade' ? (
+              <div className="mg-grid small">
+                {g.items.map((it) =>
+                  it.to ? (
+                    <a key={it.label} className="mg-cell" href={`#/${it.to}`}>
+                      <span className="mg-icon">
+                        <Icon name={it.icon} size={22} />
+                      </span>
+                      <span className="mg-name">{it.label}</span>
+                    </a>
+                  ) : (
+                    <span key={it.label} className="mg-cell off" aria-disabled="true">
+                      <span className="mg-icon">
+                        <Icon name={it.icon} size={22} />
+                      </span>
+                      <span className="mg-name">{it.label}</span>
+                      <em className="soon-tag">em breve</em>
+                    </span>
+                  ),
+                )}
+              </div>
+            ) : (
+              <div className="menu-list">
+                {g.items.map((it) =>
+                  it.to ? (
+                    <a key={it.label} className="menu-row" href={`#/${it.to}`}>
+                      <span className="tile-icon">
+                        <Icon name={it.icon} size={18} />
+                      </span>
+                      <span className="menu-row-name">{it.label}</span>
+                      <Icon name="right" size={16} />
+                    </a>
+                  ) : (
+                    <span key={it.label} className="menu-row off" aria-disabled="true">
+                      <span className="tile-icon">
+                        <Icon name={it.icon} size={18} />
+                      </span>
+                      <span className="menu-row-name">{it.label}</span>
+                      <em className="soon-tag">em breve</em>
+                    </span>
+                  ),
+                )}
+              </div>
+            )}
+          </section>
+        ))}
     </>
   );
 }
@@ -267,7 +339,7 @@ export function FavoritesSheet({ onClose }: { onClose: () => void }) {
   return (
     <Sheet title="Favoritos do Início" onClose={onClose}>
       <p className="muted small" style={{ marginTop: 0 }}>
-        Escolha 4. Ao marcar um novo, o mais antigo sai. Os outros módulos continuam no Mais e no menu ☰.
+        Escolha 4. Ao marcar um novo, o mais antigo sai. Os outros módulos continuam no menu, puxando a barra de baixo para cima.
       </p>
       <ul className="list">
         {FAVORITABLE.filter((f) => !isHidden(data, f.id)).map((f) => {

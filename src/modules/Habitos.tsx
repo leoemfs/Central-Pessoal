@@ -73,6 +73,12 @@ export function qtyText(h: Habit, day: string): string | null {
   return isQuantity(h) ? `${fmtQty(amountOn(h, day))} / ${fmtQty(h.goal!)} ${h.unit}`.trim() : null;
 }
 
+/** Selo do hábito ligado à Saúde (N1.1): o mesmo número de água nos dois lugares. */
+export function HealthSeal({ h }: { h: Habit }) {
+  const { data } = useStore();
+  return data.health.water.habitId === h.id ? <Pill tone="green">💧 Saúde</Pill> : null;
+}
+
 /** Aviso de "não falhe duas vezes". */
 export function RiskPill({ h, today }: { h: Habit; today: string }) {
   return atRiskToday(h, today) ? <Pill tone="orange">Não falhe 2x</Pill> : null;
@@ -242,6 +248,7 @@ export function Habitos({ route }: ViewProps) {
                           <span className="row-meta">
                             {h.time && <Pill>{h.time}</Pill>}
                             {qtyText(h, today) && <span className="tabular">{qtyText(h, today)}</span>}
+                            <HealthSeal h={h} />
                             {h.cue && <span>Depois de {h.cue}</span>}
                             {resumedToday(h, today) && <Pill tone="green">Voltou hoje</Pill>}
                             <RiskPill h={h} today={today} />
@@ -453,6 +460,7 @@ function BuildCard({ h, today, onOpen, onGraduate, onStart }: { h: Habit; today:
           <strong>{h.name}</strong>
           {h.cue && <span className="muted small">Depois de {h.cue}</span>}
           {qtyText(h, today) && <span className="muted small tabular">Hoje: {qtyText(h, today)}</span>}
+          <HealthSeal h={h} />
         </button>
         {isScheduled(h, today) && <HabitCheck h={h} day={today} />}
         <span className="pill" title="Sequência">

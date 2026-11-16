@@ -12,6 +12,7 @@ import { DEFAULT_LIST_CATEGORIES, linkMarketItems, normalizeListData } from './l
 import { emptyStudy, normalizeStudy } from './estudos.ts';
 import { defaultJourneyState, normalizeJourney } from './jornada/rules.ts';
 import { emptyCareer, normalizeCareer } from './carreira.ts';
+import { emptyHealth, normalizeHealth } from './saude.ts';
 import { DEFAULT_RHYTHM, MODULES, normalizeRhythm, SETUP_AREAS } from './setup.ts';
 import { fixCard, fixCategory, fixEvent, fixExpense, fixExpenseSeries, fixIncome, fixIncomeSeries, fixJournal, fixNote, fixTask, sanitizeList } from './sanitize.ts';
 
@@ -56,7 +57,7 @@ export function emptyData(): AppData {
     incomes: [],
     incomeSeries: [],
     incomeSources: [],
-    settings: { theme: 'dark', accent: null, favorites: [...DEFAULT_FAVORITES], cards: {}, barLayout: 'fixo', tapToFavorites: true, hideOnScroll: true, moreLayout: 'lista', moreButton: false, hideBarLabels: false, seededCategories: false, seededIncomeSources: false, lastBackupAt: null, activeDays: [], visitDays: [], journeyUnlockedAt: null, journeyChoice: null, journeyCard: true, hiddenModules: [], setup: 'novo', tutorialSeen: false, setupAreas: [], journeyWanted: null, journalRhythm: { ...DEFAULT_RHYTHM }, googleCalendar: { on: false, events: true, bills: true, tasks: true, calendarId: null, tasksList: null } },
+    settings: { theme: 'dark', accent: null, favorites: [...DEFAULT_FAVORITES], cards: {}, barLayout: 'fixo', tapToFavorites: true, hideOnScroll: true, moreLayout: 'lista', moreButton: false, hideBarLabels: false, drawerView: 'misto', seededCategories: false, seededIncomeSources: false, lastBackupAt: null, activeDays: [], visitDays: [], journeyUnlockedAt: null, journeyChoice: null, journeyCard: true, hiddenModules: [], setup: 'novo', tutorialSeen: false, setupAreas: [], journeyWanted: null, journalRhythm: { ...DEFAULT_RHYTHM }, googleCalendar: { on: false, events: true, bills: true, tasks: true, calendarId: null, tasksList: null } },
     profile: emptyProfile('novo'),
     boxes: [],
     moods: {},
@@ -73,6 +74,7 @@ export function emptyData(): AppData {
     career: emptyCareer(),
     lastLoads: {},
     journey: defaultJourneyState(),
+    health: emptyHealth(),
     workoutGoal: 3,
     exerciseVideos: {},
     deleted: {},
@@ -167,6 +169,7 @@ export function normalize(raw: unknown): AppData {
       moreButton: settings.moreButton === true,
       // O antigo "barLabels" (v0.60.1, desligado por padrão) é ignorado: agora o nome aparece para todos.
       hideBarLabels: settings.hideBarLabels === true,
+      drawerView: settings.drawerView === 'grade' || settings.drawerView === 'lista' ? settings.drawerView : 'misto',
       seededCategories: settings.seededCategories === true,
       seededIncomeSources: settings.seededIncomeSources === true,
       lastBackupAt: typeof settings.lastBackupAt === 'string' ? settings.lastBackupAt : null,
@@ -198,6 +201,7 @@ export function normalize(raw: unknown): AppData {
     study: normalizeStudy(r.study),
     career: normalizeCareer(r.career),
     journey: normalizeJourney(r.journey),
+    health: normalizeHealth(r.health),
     lastLoads: isRec(r.lastLoads) ? Object.fromEntries(Object.entries(r.lastLoads).filter((e): e is [string, number] => typeof e[1] === 'number')) : {},
     workoutGoal: typeof r.workoutGoal === 'number' && Number.isFinite(r.workoutGoal) ? Math.min(7, Math.max(1, Math.round(r.workoutGoal))) : 3,
     exerciseVideos: isRec(r.exerciseVideos) ? Object.fromEntries(Object.entries(r.exerciseVideos).filter((e): e is [string, string] => typeof e[1] === 'string' && e[1] !== '')) : {},

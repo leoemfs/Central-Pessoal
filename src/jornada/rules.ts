@@ -9,6 +9,8 @@
  * - Nada aqui altera os dados reais (hábitos, finanças, diário).
  */
 import type { AppData, Habit } from '../types.ts';
+import { waterGoalDays } from '../saude.ts';
+import { medFullDays } from '../remedios.ts';
 import { attributeTotals, diffDays, isScheduled, startOf } from '../habits.ts';
 import { journeyStats, unlockProgress } from '../journey.ts';
 import { monthBills } from '../finance.ts';
@@ -117,6 +119,10 @@ export function attributes(d: AppData, to: string = todayISO(), from = '0000-01-
   const diaryDays = new Set(d.journal.filter((j) => !isReview(j.tag)).map((j) => dayOf(j.createdAt)).filter(inRange)).size;
   a.DIS += 2 * billsOnTime(d, from, to) + 3 * reviews;
   a.SAB += diaryDays;
+  // Saúde (N1.1): bater a meta de água vale +3 de Resistência (com hábito ligado, já conta pelo hábito).
+  a.RES += 3 * waterGoalDays(d, from, to);
+  // N1.3: dia com todas as doses de remédio tomadas vale +3 de Resistência (com hábito ligado, conta pelo hábito).
+  a.RES += 3 * medFullDays(d, from, to);
   return a;
 }
 

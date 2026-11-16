@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { CardScreen, type CardDef } from '../../Cards';
 import type { ViewProps } from '../../App';
 import { cycleCounts, trackPath } from '../../estudos';
@@ -8,7 +8,8 @@ import { AreaPage, BibliotecaPage, NivelPage, TemaPage, TrilhaPage } from './Bib
 import { NotebookPage, NotebooksPage } from './Notebooks';
 import { FontesPage } from './Fontes';
 import { MapaPage, MapasPage } from './Mapas';
-import { CreateMenu, DualProgress, useCreate, useStudy } from './shared';
+import { CreateMenu, DualProgress, PackSheet, useCreate, useStudy } from './shared';
+import { cleanAddress } from '../../router';
 
 /** Trilhas sugeridas para começar (uma de cada área). */
 const START = ['en-a1-contatos', 'ia-prompts', 'prod-semana', 'car-cv', 'dev-logica'];
@@ -60,6 +61,15 @@ export function Estudos({ route }: ViewProps) {
       page = <MapaPage key={a} id={a} />;
       // O mapa tem os próprios botões de criar ideias, logo abaixo do desenho.
       fab = false;
+      break;
+    case 'importar':
+      // Link direto para um pacote publicado com o app: #/estudos/importar/<nome>.
+      page = (
+        <>
+          <Home />
+          <PackFromLink key={a} name={a} />
+        </>
+      );
       break;
     default:
       page = <Home />;
@@ -233,4 +243,12 @@ function Home() {
       <CardScreen screen="estudos" cards={cards} />
     </>
   );
+}
+
+/** Abre a importação de um pacote publicado com o app e limpa o endereço (o voltar não reabre a janela). */
+function PackFromLink({ name }: { name: string }) {
+  const [open, setOpen] = useState(true);
+  useEffect(() => cleanAddress('estudos'), []);
+  if (!open || !/^[a-z0-9-]+$/.test(name)) return null;
+  return <PackSheet url={new URL(`estudos/${name}.json`, document.baseURI).href} onClose={() => setOpen(false)} />;
 }

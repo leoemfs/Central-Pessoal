@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
 import { formatMoney } from './utils';
+import { usePageTitle } from './pageTitle';
 
 const P: Record<string, ReactNode> = {
   home: <><path d="M3 11.5 12 4l9 7.5" /><path d="M5.5 10v10h13V10" /></>,
@@ -29,6 +30,13 @@ const P: Record<string, ReactNode> = {
   listPlus: <path d="M4 7h12M4 12h12M4 17h7M17 15v6M14 18h6" />,
   notePen: <><path d="M14 3H6v18h6" /><path d="M9 8h6M9 12h4" /><path d="m14 20 6.5-6.5-2-2L12 18v2z" /></>,
   heartPulse: <><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z" /><path d="M5 12h3l1.5-2.5 2.5 5 1.5-2.5H19" /></>,
+  stethoscope: <><path d="M6 3.5v5a4 4 0 0 0 8 0v-5" /><path d="M10 12.5v2a4.5 4.5 0 0 0 9 0v-2" /><circle cx="19" cy="10.5" r="2" /></>,
+  tooth: <path d="M7.5 4c-2.5 0-4 2-3.5 5 .4 2.2 1.3 3.3 1.7 5.6.4 2.4.9 5.4 2.3 5.4 1.6 0 1.5-4.5 4-4.5s2.4 4.5 4 4.5c1.4 0 1.9-3 2.3-5.4.4-2.3 1.3-3.4 1.7-5.6.5-3-1-5-3.5-5-2 0-2.9 1-4.5 1S9.5 4 7.5 4z" />,
+  flask: <><path d="M9.5 3.5h5M10.5 3.5v5.5L5 18.5a1.5 1.5 0 0 0 1.3 2.2h11.4a1.5 1.5 0 0 0 1.3-2.2L13.5 9V3.5" /><path d="M7.5 14.5h9" /></>,
+  scale: <><rect x="3.5" y="3.5" width="17" height="17" rx="4" /><path d="M8 9.5a5.5 5.5 0 0 1 8 0l-2.5 2.5a2 2 0 0 0-3 0z" /></>,
+  pill: <><rect x="3.5" y="8.5" width="17" height="7" rx="3.5" transform="rotate(-45 12 12)" /><path d="m9.5 9.5 5 5" /></>,
+  drop: <path d="M12 3.5c3.2 4 5.5 7.2 5.5 10.2a5.5 5.5 0 0 1-11 0c0-3 2.3-6.2 5.5-10.2z" />,
+  moon: <path d="M19.5 14.5A8 8 0 0 1 9.5 4.5a8 8 0 1 0 10 10z" />,
   sun: <><circle cx="12" cy="12" r="4" /><path d="M12 2.5v2M12 19.5v2M4.6 4.6 6 6M18 18l1.4 1.4M2.5 12h2M19.5 12h2M4.6 19.4 6 18M18 6l1.4-1.4" /></>,
   lock: <><rect x="5" y="11" width="14" height="10" rx="2" /><path d="M8 11V8a4 4 0 0 1 8 0v3" /></>,
   sword: <><path d="M14.5 4H20v5.5L9.5 20 4 14.5z" /><path d="m7 13 4 4M4.5 19.5l2-2" /></>,
@@ -136,6 +144,7 @@ export function IconButton({ icon, label, onClick, tone, active }: { icon: IconN
  * some ao rolar para baixo e volta ao rolar para cima, junto com a barra de cima (igual em todos os módulos).
  */
 export function PageHeader({ title, subtitle, actions, tabs }: { title: ReactNode; subtitle?: ReactNode; actions?: ReactNode; tabs?: ReactNode }) {
+  usePageTitle(typeof title === 'string' ? title : null); // E25: o topo mostra "Módulo / Tela" nas telas de dentro
   const header = (
     <header className="page-header">
       <div className="page-title">

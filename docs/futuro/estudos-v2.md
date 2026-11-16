@@ -56,6 +56,7 @@ E uma quarta, do editor: **o celular pode ter menos botões, nunca menos conteú
 - **Recolher:** a bolinha na ponta do ramo recolhe e expande; recolhido, mostra quantas ideias guarda.
 - **Notebook:** o mapa pode ser do notebook inteiro ou de uma página (`pageId`). A página tem o cartão "Mapas desta página" e o + oferece "Mapa mental desta página" (a ideia central já vem com o nome da página).
 - Salva a cada mudança. Miniaturas reais (o mesmo desenho, parado) na lista e nas sugestões.
+- **Tela cheia (M30, v0.62):** "Editar em tela cheia" abre o mapa ocupando a tela; tocar seleciona, tocar de novo escreve direto na ideia (Enter salva e cria a próxima); barra de baixo com as ações e as cores; Desfazer no topo. O painel de edição embaixo do mapa saiu.
 - Arrastar as ideias com o dedo para outro ramo ficou de fora (usa "Mudar de ramo"), para não confundir com arrastar o mapa.
 
 ## O que foi construído (v0.27, N11.2a e N11.2b)

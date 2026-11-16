@@ -7859,3 +7859,287 @@ body.bar-labels .tabbar .tb-label {
   flex-direction: column;
   min-width: 0;
 }
+
+/* E25: sem menu ☰ — seta ‹ no topo e o menu inteiro na gaveta */
+.topbar-spacer {
+  width: 8px;
+  flex: none;
+}
+.topbar-back {
+  color: var(--accent-text);
+}
+@media (max-width: 899px) {
+  .desk-only {
+    display: none !important;
+  }
+}
+.pull-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.pull-title strong {
+  flex: 1;
+}
+.pull-views {
+  display: inline-flex;
+  gap: 3px;
+  padding: 3px;
+  border-radius: 10px;
+  background: var(--raised);
+}
+.pull-views button {
+  padding: 5px 9px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--muted);
+  font: inherit;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+.pull-views button[aria-pressed='true'] {
+  background: var(--raised-2);
+  color: var(--text);
+}
+.mais-edit-hint {
+  margin: 0 2px 4px;
+  color: var(--accent-text);
+}
+.menu-list {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--bg);
+  overflow: hidden;
+}
+.menu-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 9px 12px;
+  border-bottom: 1px solid var(--border);
+  color: var(--text);
+  text-decoration: none;
+}
+.menu-row:last-child {
+  border-bottom: 0;
+}
+.menu-row .tile-icon {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+}
+.menu-row-name {
+  flex: 1;
+  min-width: 0;
+  font-size: 0.92rem;
+}
+.menu-row > .icon:last-child {
+  color: var(--faint);
+}
+.menu-group {
+  display: flex;
+  flex-direction: column;
+}
+@media (max-width: 899px) {
+  /* E25: o caminho de Estudos sobe para a barra de cima (dois níveis, com a seta ‹). */
+  .st-path {
+    display: none;
+  }
+}
+
+/* E28: itens "em breve" no menu da gaveta */
+.menu-row.off,
+.mg-cell.off {
+  opacity: 0.5;
+  cursor: default;
+}
+.soon-tag {
+  flex: none;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--raised-2);
+  color: var(--muted);
+  font-size: 0.68rem;
+  font-style: normal;
+}
+.mg-cell .soon-tag {
+  padding: 1px 6px;
+  font-size: 0.6rem;
+}
+
+/* M30: mapa mental em tela cheia */
+.fullscreen ~ .sheet-backdrop {
+  z-index: 130;
+}
+.mm-full {
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+.mm-full > * {
+  max-width: none;
+}
+.mm-full-top {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--border);
+}
+.mm-full-title {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+.mm-full-title strong {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.mm-full-title small {
+  font-size: 12px;
+}
+.mm-canvas.mm-full-canvas {
+  flex: 1;
+  height: auto;
+  min-height: 0;
+  border: 0;
+  border-radius: 0;
+}
+.mm-full-bar {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 10px 12px 12px;
+  border-top: 1px solid var(--border);
+  background: var(--bg);
+}
+.mm-full-actions {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.mm-act {
+  flex: none;
+  min-width: 64px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 8px;
+  border: 0;
+  border-radius: 12px;
+  background: var(--surface);
+  color: var(--text);
+  font: 500 12px var(--font, inherit);
+  cursor: pointer;
+}
+.mm-act.primary {
+  background: var(--accent);
+  color: var(--on-accent, #fff);
+}
+.mm-act.danger {
+  color: var(--red, #ef4444);
+}
+.mm-act:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+.mm-inline {
+  width: 100%;
+  height: 100%;
+  border: 0;
+  outline: 0;
+  border-radius: 999px;
+  background: var(--raised, var(--surface));
+  color: var(--text);
+  box-shadow: inset 0 0 0 2px var(--accent);
+  font: 600 13px var(--font, inherit);
+  text-align: center;
+  padding: 0 10px;
+}
+
+/* Saúde › Dieta (N1.2) */
+.diet-list .diet-meal {
+  display: grid;
+  gap: 8px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border);
+  min-width: 0;
+}
+.diet-list .diet-meal:last-child {
+  border-bottom: none;
+}
+.diet-edit {
+  display: grid;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+a.chip-btn {
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.row .qty-adjust {
+  margin-top: 0;
+  grid-template-columns: 40px 36px 40px;
+  gap: 6px;
+  text-align: center;
+}
+.row .qty-adjust > button {
+  height: 40px;
+}
+
+/* Saúde › Remédios (N1.3) */
+.med-times {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+.med-time {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.med-time .input {
+  width: 9.5rem;
+}
+
+/* Saúde › Medidas (N1.5) */
+.body-chart {
+  width: 100%;
+  max-width: 100%;
+  height: auto;
+  display: block;
+  margin-block: 8px;
+}
+.body-grid {
+  stroke: var(--border);
+  stroke-dasharray: 3 4;
+}
+.body-line {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 2.5;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+.body-dot {
+  fill: var(--accent);
+}
+.body-label {
+  fill: var(--muted);
+  font-size: 10px;
+}
+/* Cinco abas no celular (Saúde): letra um pouco menor. */
+.segmented:has(> :nth-child(5)) button {
+  padding-inline: 2px;
+  font-size: 0.8rem;
+}
