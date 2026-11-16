@@ -8111,3 +8111,35 @@ a.chip-btn {
 .med-time .input {
   width: 9.5rem;
 }
+
+/* Saúde › Medidas (N1.5) */
+.body-chart {
+  width: 100%;
+  max-width: 100%;
+  height: auto;
+  display: block;
+  margin-block: 8px;
+}
+.body-grid {
+  stroke: var(--border);
+  stroke-dasharray: 3 4;
+}
+.body-line {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 2.5;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+.body-dot {
+  fill: var(--accent);
+}
+.body-label {
+  fill: var(--muted);
+  font-size: 10px;
+}
+/* Cinco abas no celular (Saúde): letra um pouco menor. */
+.segmented:has(> :nth-child(5)) button {
+  padding-inline: 2px;
+  font-size: 0.8rem;
+}

@@ -1,15 +1,19 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import type { ViewProps } from '../App';
-import { useSubAction } from '../router';
+import { cleanAddress, useSubAction } from '../router';
 import { useStore } from '../store';
 import type { SleepEntry, SleepFeel } from '../types';
-import { formatDate, relativeDay, todayISO, uid } from '../utils';
+import { addDays as addDaysISO, formatDate, relativeDay, todayISO, uid } from '../utils';
 import { go } from '../router';
 import { qtyText as recipeQty } from '../lists';
 import { fmtQty } from '../habits';
 import { newList } from '../lists';
-import { Chips, Empty, Field, Icon, notify, PageHeader, Pill, Progress, Segmented, Sheet, Toggle } from '../ui';
-import type { DietLog, DietMeal, DietPlan, DietSource, Medicine } from '../types';
+import { Chips, Empty, Field, Icon, notify, PageHeader, Pill, Progress, Segmented, Sheet, Toggle, type IconName } from '../ui';
+import type { AppData, Appointment, ApptKind, BodyEntry, CheckupRoutine, DietLog, DietMeal, DietPlan, DietSource, Medicine } from '../types';
+import {
+  addBodyField, APPT_KINDS, apptTitle, bodyLatest, bodySeries, examRequests, followUp, intervalText, kindInfo, newAppt, removeAppt, removeBodyEntry, removeRoutine, routineStatus,
+  saveAppt, saveBodyEntry, saveRoutine, setBodyShow, splitAppts, suggestRoutine,
+} from '../consultas';
 import { daysText, dosesOn, endMed, linkMedsHabit, medHabitCandidate, medsHabit, newMed, removeMed, saveMed, timesText, toggleTaken } from '../remedios';
 import {
   activePlan, allRecipes, dayLine, MARKS, marketLists, recipesOf, sendShopping, shoppingLines, toggleRecipe, weekRecipes, markMeal, mealsOf, newMeal, newPlan, pickOption, removePlan, savePlan, setDayVariant, setExtra, setSplit, toggleVariantDay, choosePlan,
@@ -37,7 +41,14 @@ function useSaudeActions(route: ViewProps['route'], base: string) {
   const [med, setMed] = useState<Medicine | null>(null);
   const startMed = () => setMed(newMed(uid(), todayISO(), new Date().toISOString()));
   const [pickSource, setPickSource] = useState(false);
-  useSubAction(route, base, { sono: () => setDay(todayISO()), menu: () => setMenu(true), dieta: () => setPickSource(true), remedio: startMed });
+  const [appt, setAppt] = useState<Appointment | null>(null);
+  const [routine, setRoutine] = useState<CheckupRoutine | null>(null);
+  const [body, setBody] = useState<BodyEntry | null>(null);
+  const { data } = useStore();
+  const startAppt = (kind: ApptKind = 'consulta', extra: Partial<Appointment> = {}) => setAppt(newAppt(uid(), kind, new Date().toISOString(), extra));
+  const startRoutine = () => setRoutine({ id: uid(), label: '', kind: 'dentista', months: 6, last: null });
+  const startBody = () => setBody({ id: uid(), date: todayISO(), values: {} });
+  useSubAction(route, base, { sono: () => setDay(todayISO()), menu: () => setMenu(true), dieta: () => setPickSource(true), remedio: startMed, consulta: () => startAppt() });
   const sheet = (
     <>
       {day && <SleepSheet day={day} onClose={() => setDay(null)} />}
@@ -56,15 +67,28 @@ function useSaudeActions(route: ViewProps['route'], base: string) {
               <span className="tile-icon small"><Icon name="pill" size={18} /></span>
               <span className="row-body"><span className="row-title">Remédio</span><span className="row-meta">Nome, dose, horários e por quanto tempo</span></span>
             </button>
+            <button type="button" className="row" onClick={() => { setMenu(false); startAppt(); }}>
+              <span className="tile-icon small"><Icon name="stethoscope" size={18} /></span>
+              <span className="row-body"><span className="row-title">Consulta ou exame</span><span className="row-meta">Médico, dentista, exame ou check-up; entra na Agenda</span></span>
+            </button>
+            {data.health.body.show && (
+              <button type="button" className="row" onClick={() => { setMenu(false); startBody(); }}>
+                <span className="tile-icon small"><Icon name="scale" size={18} /></span>
+                <span className="row-body"><span className="row-title">Medição</span><span className="row-meta">Peso e medidas</span></span>
+              </button>
+            )}
           </div>
         </Sheet>
       )}
       {pickSource && <SourceSheet onClose={() => setPickSource(false)} onPick={(src) => { setPickSource(false); setPlan(newPlan(uid, src, new Date().toISOString())); }} />}
       {plan && <PlanEditor initial={plan} onClose={() => setPlan(null)} />}
       {med && <MedSheet initial={med} onClose={() => setMed(null)} />}
+      {appt && <ApptSheet initial={appt} onClose={() => setAppt(null)} onRoutine={(r) => { setAppt(null); setRoutine(r); }} />}
+      {routine && <RoutineSheet initial={routine} onClose={() => setRoutine(null)} onBook={(r) => { setRoutine(null); startAppt(r.kind, { title: r.kind === 'consulta' || r.kind === 'checkup' ? r.label : '', routineId: r.id }); }} />}
+      {body && <BodySheet initial={body} onClose={() => setBody(null)} />}
     </>
   );
-  return { open: (d: string) => setDay(d), editPlan: (p: DietPlan) => setPlan(p), newPlan: () => setPickSource(true), editMed: (m: Medicine) => setMed(m), newMed: startMed, sheet };
+  return { open: (d: string) => setDay(d), editPlan: (p: DietPlan) => setPlan(p), newPlan: () => setPickSource(true), editMed: (m: Medicine) => setMed(m), newMed: startMed, editAppt: (a: Appointment) => setAppt(a), newAppt: startAppt, editRoutine: (r: CheckupRoutine) => setRoutine(r), newRoutine: startRoutine, editBody: (e: BodyEntry) => setBody(e), newBody: startBody, sheet };
 }
 
 /** Pergunta, uma vez só, se quer ligar o hábito de água que já existe. */
@@ -177,7 +201,7 @@ export function SleepSheet({ day, onClose }: { day: string; onClose: () => void 
 /** Hoje: o que registrar no dia. */
 export function SaudeHoje({ route }: ViewProps) {
   const today = todayISO();
-  const { open, sheet, newPlan: createPlan, newMed: createMed } = useSaudeActions(route, 'saudehoje');
+  const { open, sheet, newPlan: createPlan, newMed: createMed, editAppt } = useSaudeActions(route, 'saudehoje');
   return (
     <>
       <PageHeader title="Hoje" subtitle={relativeDay(today) === 'Hoje' ? formatDate(today, { weekday: 'long', day: 'numeric', month: 'long' }) : undefined} />
@@ -186,28 +210,61 @@ export function SaudeHoje({ route }: ViewProps) {
       <SleepCard day={today} onOpen={open} />
       <MedsToday day={today} onCreate={createMed} />
       <DietToday day={today} onCreate={createPlan} />
-      <section className="card" aria-label="Em breve">
-        <span className="muted small">Em breve na Saúde: consultas e check-ups, peso e medidas.</span>
-      </section>
+      <NextAppts onOpen={editAppt} />
       {sheet}
     </>
   );
 }
 
-type Tab = 'agua' | 'sono' | 'dieta' | 'remedios';
+type Tab = 'dia' | 'dieta' | 'remedios' | 'consultas' | 'medidas';
 
-/** Casa do módulo: abas Água · Sono (ajustes e últimos dias). */
+/** Casa do módulo: abas Dia (água e sono) · Dieta · Remédios · Consultas · Medidas. */
 export function SaudePage({ route }: ViewProps) {
-  const [tab, setTab] = useState<Tab>('agua');
-  const { open, sheet, editPlan, newPlan: createPlan, editMed, newMed: createMed } = useSaudeActions(route, 'saude');
+  const [tab, setTab] = useState<Tab>('dia');
+  const acts = useSaudeActions(route, 'saude');
+  const { open, sheet, editPlan, newPlan: createPlan, editMed, newMed: createMed } = acts;
+  const { data } = useStore();
+  // Vindo da Agenda: #/saude/abrir-c-<id> (consulta) ou abrir-r-<id> (check-up que se repete).
+  useEffect(() => {
+    if (route.sub === 'consultas') {
+      setTab('consultas');
+      cleanAddress('saude');
+      return;
+    }
+    const m = /^abrir-([cr])-(.+)$/.exec(route.sub);
+    if (!m) return;
+    setTab('consultas');
+    if (m[1] === 'c') {
+      const a = data.health.appts.find((x) => x.id === m[2]);
+      if (a) acts.editAppt(a);
+    } else {
+      const r = data.health.routines.find((x) => x.id === m[2]);
+      if (r) acts.editRoutine(r);
+    }
+    cleanAddress('saude');
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [route.n, route.sub]);
   return (
     <>
       <PageHeader
         title="Saúde"
-        tabs={<Segmented<Tab> label="Parte da Saúde" value={tab} onChange={setTab} swipe options={[{ value: 'agua', label: 'Água' }, { value: 'sono', label: 'Sono' }, { value: 'dieta', label: 'Dieta' }, { value: 'remedios', label: 'Remédios' }]} />}
+        tabs={<Segmented<Tab> label="Parte da Saúde" value={tab} onChange={setTab} swipe options={[{ value: 'dia', label: 'Dia' }, { value: 'dieta', label: 'Dieta' }, { value: 'remedios', label: 'Remédios' }, { value: 'consultas', label: 'Consultas' }, { value: 'medidas', label: 'Medidas' }]} />}
       />
       <LinkAsk />
-      {tab === 'agua' ? <WaterTab /> : tab === 'sono' ? <SleepTab onOpen={open} /> : tab === 'dieta' ? <DietTab onEdit={editPlan} onCreate={createPlan} /> : <MedsTab onEdit={editMed} onCreate={createMed} />}
+      {tab === 'dia' ? (
+        <>
+          <WaterTab />
+          <SleepTab onOpen={open} />
+        </>
+      ) : tab === 'dieta' ? (
+        <DietTab onEdit={editPlan} onCreate={createPlan} />
+      ) : tab === 'remedios' ? (
+        <MedsTab onEdit={editMed} onCreate={createMed} />
+      ) : tab === 'consultas' ? (
+        <ApptsTab onEdit={acts.editAppt} onCreate={() => acts.newAppt()} onRoutine={acts.editRoutine} onNewRoutine={acts.newRoutine} />
+      ) : (
+        <BodyTab onEdit={acts.editBody} onCreate={acts.newBody} />
+      )}
       {sheet}
     </>
   );
@@ -987,6 +1044,406 @@ function MedSheet({ initial, onClose }: { initial: Medicine; onClose: () => void
           )}
           <button type="button" className="btn soft danger" onClick={() => { update(removeMed(m.id)); notify('Remédio apagado', 'Ele sai do Hoje e do Histórico. Para guardar o histórico, use "Encerrar hoje".'); onClose(); }}>Apagar</button>
         </div>
+      )}
+    </Sheet>
+  );
+}
+
+// ---------- Consultas, exames e check-ups (N1.4) ----------
+
+const STATE_PILL: Record<string, { tone: 'green' | 'orange' | 'blue' | 'gray'; text: string }> = {
+  marcado: { tone: 'green', text: 'marcado' },
+  atrasado: { tone: 'orange', text: 'passou do prazo' },
+  perto: { tone: 'blue', text: 'perto' },
+  ok: { tone: 'gray', text: 'em dia' },
+  'sem-data': { tone: 'gray', text: 'sem última data' },
+};
+
+const monthYear = (day: string) => formatDate(day, { month: 'short', year: 'numeric' });
+
+function ApptRow({ a, onOpen }: { a: Appointment; onOpen: (a: Appointment) => void }) {
+  const k = kindInfo(a.kind);
+  return (
+    <li>
+      <button type="button" className="row" onClick={() => onOpen(a)}>
+        <span className="tile-icon small"><Icon name={k.icon as IconName} size={18} /></span>
+        <span className="row-body">
+          <span className="row-title">{apptTitle(a)}</span>
+          <span className="row-meta tabular">
+            {a.date ? `${relativeDay(a.date)}${a.time ? ` · ${a.time}` : ''}` : 'a marcar'}
+            {a.who ? ` · ${a.who}` : ''}
+          </span>
+          {a.bring && !a.done && <span className="muted small">Levar: {a.bring}</span>}
+          {a.done && a.result && <span className="muted small">{a.result.split('\n')[0]}</span>}
+        </span>
+      </button>
+    </li>
+  );
+}
+
+/** Hoje: consultas dos próximos 7 dias (e check-ups que passaram do prazo). */
+function NextAppts({ onOpen }: { onOpen: (a: Appointment) => void }) {
+  const { data } = useStore();
+  const today = todayISO();
+  const soon = splitAppts(data).scheduled.filter((a) => a.date! >= today && a.date! <= addDaysISO(today, 7));
+  const late = data.health.routines.filter((r) => routineStatus(data, r, today).state === 'atrasado');
+  if (!soon.length && !late.length) return null;
+  return (
+    <section className="card" aria-label="Consultas">
+      <div className="card-head"><h2><Icon name="stethoscope" size={18} /> Consultas</h2><span className="muted small">próximos 7 dias</span></div>
+      {soon.length > 0 && <ul className="list">{soon.map((a) => <ApptRow key={a.id} a={a} onOpen={onOpen} />)}</ul>}
+      {late.length > 0 && <a className="muted small" href="#/saude/consultas">{late.map((r) => r.label).join(', ')}: passou do prazo de marcar.</a>}
+    </section>
+  );
+}
+
+function ApptsTab({ onEdit, onCreate, onRoutine, onNewRoutine }: { onEdit: (a: Appointment) => void; onCreate: () => void; onRoutine: (r: CheckupRoutine) => void; onNewRoutine: () => void }) {
+  const { data } = useStore();
+  const today = todayISO();
+  const { scheduled, toSchedule, done } = splitAppts(data);
+  const [allDone, setAllDone] = useState(false);
+  const order: Record<string, number> = { atrasado: 0, perto: 1, marcado: 2, 'sem-data': 3, ok: 4 };
+  const routines = data.health.routines.map((r) => ({ r, st: routineStatus(data, r, today) })).sort((a, b) => order[a.st.state] - order[b.st.state] || a.r.label.localeCompare(b.r.label, 'pt-BR'));
+  return (
+    <>
+      <section className="card" aria-label="Consultas marcadas">
+        <div className="card-head"><h2>Marcadas</h2><span className="muted small">aparecem na Agenda sozinhas</span></div>
+        {scheduled.length ? <ul className="list">{scheduled.map((a) => <ApptRow key={a.id} a={a} onOpen={onEdit} />)}</ul> : <Empty>Nenhuma consulta marcada.</Empty>}
+        <button type="button" className="btn soft block" onClick={onCreate}><Icon name="plusCircle" size={18} /> Nova consulta ou exame</button>
+      </section>
+      {toSchedule.length > 0 && (
+        <section className="card" aria-label="A marcar">
+          <div className="card-head"><h2>A marcar</h2><span className="muted small">sem data ainda</span></div>
+          <ul className="list">{toSchedule.map((a) => <ApptRow key={a.id} a={a} onOpen={onEdit} />)}</ul>
+        </section>
+      )}
+      <section className="card" aria-label="Próximos check-ups">
+        <div className="card-head"><h2>Próximos check-ups</h2></div>
+        {routines.length ? (
+          <ul className="list">
+            {routines.map(({ r, st }) => (
+              <li key={r.id}>
+                <button type="button" className="row" onClick={() => onRoutine(r)}>
+                  <span className="tile-icon small"><Icon name={kindInfo(r.kind).icon as IconName} size={18} /></span>
+                  <span className="row-body">
+                    <span className="row-title">{r.label}</span>
+                    <span className="row-meta">
+                      a cada {intervalText(r.months)}
+                      {r.last ? ` · última em ${monthYear(r.last)}` : ''}
+                    </span>
+                    <span className="muted small">
+                      {st.state === 'marcado' && st.booked ? `marcado: ${relativeDay(st.booked.date!)}` : st.due ? `próximo por volta de ${monthYear(st.due)}` : 'diga quando foi a última vez'}
+                    </span>
+                  </span>
+                  <Pill tone={STATE_PILL[st.state].tone}>{STATE_PILL[st.state].text}</Pill>
+                </button>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <Empty>Dentista a cada 6 meses, check-up todo ano… Cadastre o que se repete e o app lembra quando marcar.</Empty>
+        )}
+        <button type="button" className="btn soft block" onClick={onNewRoutine}><Icon name="repeat" size={18} /> Novo check-up que se repete</button>
+      </section>
+      {done.length > 0 && (
+        <section className="card" aria-label="Consultas feitas">
+          <div className="card-head"><h2>Feitas</h2><span className="muted small">{done.length}</span></div>
+          <ul className="list">{(allDone ? done : done.slice(0, 5)).map((a) => <ApptRow key={a.id} a={a} onOpen={onEdit} />)}</ul>
+          {done.length > 5 && !allDone && <button type="button" className="btn soft block" onClick={() => setAllDone(true)}>Ver todas</button>}
+        </section>
+      )}
+      <p className="muted small">O app só registra. Resultados e decisões são com o seu médico.</p>
+    </>
+  );
+}
+
+function ApptSheet({ initial, onClose, onRoutine }: { initial: Appointment; onClose: () => void; onRoutine: (r: CheckupRoutine) => void }) {
+  const { data, update } = useStore();
+  const today = todayISO();
+  const [a, setA] = useState<Appointment>(initial);
+  const [retorno, setRetorno] = useState(false);
+  const [retornoDate, setRetornoDate] = useState('');
+  const [exams, setExams] = useState('');
+  const suggestion = a.done ? suggestRoutine(a, initial.id + '-r') : null;
+  const [repeat, setRepeat] = useState(false);
+  const [picked, setMonths] = useState<number | null>(null);
+  const months = picked ?? suggestion?.months ?? 12;
+  const isNew = !data.health.appts.some((x) => x.id === a.id);
+  const k = kindInfo(a.kind);
+  const routines = data.health.routines;
+  const save = () => {
+    let routineId = a.routineId;
+    const actions: ((d: AppData) => AppData)[] = [];
+    const sug = a.done ? suggestRoutine(a, uid()) : null;
+    if (a.done && repeat && sug) {
+      routineId = sug.id;
+      actions.push(saveRoutine({ ...sug, months }, today));
+    }
+    actions.push(saveAppt({ ...a, title: a.title.trim(), routineId }, today));
+    if (a.done && retorno) actions.push(saveAppt(followUp({ ...a, routineId }, uid(), retornoDate || null, new Date().toISOString()), today));
+    if (a.done && exams.trim()) for (const ex of examRequests(exams, uid, new Date().toISOString())) actions.push(saveAppt(ex, today));
+    update((d) => actions.reduce((acc, f) => f(acc), d));
+    notify(isNew ? 'Consulta salva' : 'Consulta atualizada', a.date && !a.done ? 'Já está na Agenda.' : apptTitle(a));
+    onClose();
+  };
+  return (
+    <Sheet title={isNew ? 'Nova consulta ou exame' : apptTitle(initial)} onClose={onClose} footer={<button type="button" className="btn primary block" onClick={save}>Salvar</button>}>
+      <div className="field">
+        <span className="field-label">Tipo</span>
+        <Chips<ApptKind> label="Tipo" value={a.kind} onChange={(kind) => setA({ ...a, kind })} options={APPT_KINDS.map((x) => ({ value: x.id, label: x.label }))} />
+      </div>
+      <Field label={a.kind === 'consulta' ? 'Especialidade' : a.kind === 'exame' ? 'Exame' : 'Motivo (opcional)'}>
+        <input className="input" value={a.title} onChange={(e) => setA({ ...a, title: e.target.value })} placeholder={k.hint} />
+      </Field>
+      <div className="grid-2">
+        <Field label="Profissional ou clínica">
+          <input className="input" value={a.who} onChange={(e) => setA({ ...a, who: e.target.value })} placeholder="Opcional" />
+        </Field>
+        <Field label="Local">
+          <input className="input" value={a.place} onChange={(e) => setA({ ...a, place: e.target.value })} placeholder="Opcional" />
+        </Field>
+      </div>
+      <div className="grid-2">
+        <Field label="Dia (vazio = a marcar)">
+          <input className="input" type="date" value={a.date ?? ''} onChange={(e) => setA({ ...a, date: e.target.value || null })} />
+        </Field>
+        <Field label="Hora">
+          <input className="input" type="time" value={a.time} onChange={(e) => setA({ ...a, time: e.target.value })} />
+        </Field>
+      </div>
+      <Field label="O que levar (opcional)">
+        <input className="input" value={a.bring} onChange={(e) => setA({ ...a, bring: e.target.value })} placeholder="Ex.: jejum de 8 h, exames antigos" />
+      </Field>
+      <Field label="Anotações (opcional)">
+        <textarea className="input" rows={2} value={a.notes} onChange={(e) => setA({ ...a, notes: e.target.value })} placeholder="Motivo, dúvidas para perguntar…" />
+      </Field>
+      {routines.length > 0 && (
+        <div className="field">
+          <span className="field-label">Faz parte de um check-up que se repete?</span>
+          <Chips<string> label="Check-up" value={a.routineId ?? 'nenhum'} onChange={(v) => setA({ ...a, routineId: v === 'nenhum' ? null : v })} options={[{ value: 'nenhum', label: 'Não' }, ...routines.map((r) => ({ value: r.id, label: r.label }))]} />
+        </div>
+      )}
+      <div className="toggle-row">
+        <strong>Já fui</strong>
+        <Toggle label="Já fui" checked={a.done} onChange={(done) => setA({ ...a, done, date: done && !a.date ? today : a.date })} />
+      </div>
+      {a.done && (
+        <div className="preview-box diet-edit">
+          <Field label="Como foi / resultado">
+            <textarea className="input" rows={3} value={a.result} onChange={(e) => setA({ ...a, result: e.target.value })} placeholder="O que foi falado, resultado, próximos passos…" />
+          </Field>
+          <div className="toggle-row">
+            <strong>Marcar retorno</strong>
+            <Toggle label="Marcar retorno" checked={retorno} onChange={setRetorno} />
+          </div>
+          {retorno && (
+            <Field label="Dia do retorno (vazio = a marcar)">
+              <input className="input" type="date" value={retornoDate} onChange={(e) => setRetornoDate(e.target.value)} />
+            </Field>
+          )}
+          <Field label="Pedidos de exame (um por linha, opcional)">
+            <textarea className="input" rows={2} value={exams} onChange={(e) => setExams(e.target.value)} placeholder={'Hemograma\nGlicemia'} />
+          </Field>
+          {suggestion && (
+            <>
+              <div className="toggle-row">
+                <span>
+                  <strong>Repetir</strong>
+                  <span className="muted small"> (o app lembra quando marcar de novo)</span>
+                </span>
+                <Toggle label="Repetir" checked={repeat} onChange={setRepeat} />
+              </div>
+              {repeat && (
+                <Chips<string> label="De quanto em quanto tempo" value={String(months)} onChange={(v) => setMonths(Number(v))} options={[3, 6, 12, 24].map((m) => ({ value: String(m), label: `a cada ${intervalText(m)}` }))} />
+              )}
+            </>
+          )}
+        </div>
+      )}
+      {!isNew && (
+        <div className="btn-row">
+          {a.routineId && routines.find((r) => r.id === a.routineId) && (
+            <button type="button" className="btn soft" onClick={() => onRoutine(routines.find((r) => r.id === a.routineId)!)}>Ver check-up</button>
+          )}
+          <button type="button" className="btn soft danger" onClick={() => { update(removeAppt(a.id, today)); notify('Consulta apagada', 'Saiu também da Agenda.'); onClose(); }}>Apagar</button>
+        </div>
+      )}
+    </Sheet>
+  );
+}
+
+function RoutineSheet({ initial, onClose, onBook }: { initial: CheckupRoutine; onClose: () => void; onBook: (r: CheckupRoutine) => void }) {
+  const { data, update } = useStore();
+  const today = todayISO();
+  const [r, setR] = useState<CheckupRoutine>(initial);
+  const isNew = !data.health.routines.some((x) => x.id === r.id);
+  const st = routineStatus(data, r, today);
+  const final = () => ({ ...r, label: r.label.trim() || kindInfo(r.kind).label });
+  const save = () => {
+    update(saveRoutine(final(), today));
+    notify(isNew ? 'Check-up cadastrado' : 'Check-up salvo', `${final().label} a cada ${intervalText(r.months)}`);
+    onClose();
+  };
+  return (
+    <Sheet title={isNew ? 'Check-up que se repete' : r.label} onClose={onClose} footer={<button type="button" className="btn primary block" onClick={save}>Salvar</button>}>
+      <div className="field">
+        <span className="field-label">Tipo</span>
+        <Chips<ApptKind> label="Tipo" value={r.kind} onChange={(kind) => setR({ ...r, kind, months: isNew ? kindInfo(kind).months : r.months })} options={APPT_KINDS.map((x) => ({ value: x.id, label: x.label }))} />
+      </div>
+      <Field label="Nome">
+        <input className="input" value={r.label} onChange={(e) => setR({ ...r, label: e.target.value })} placeholder={`Ex.: ${kindInfo(r.kind).label === 'Consulta' ? 'Oftalmologista' : kindInfo(r.kind).label}`} />
+      </Field>
+      <div className="field">
+        <span className="field-label">De quanto em quanto tempo</span>
+        <Chips<string> label="Intervalo" value={String(r.months)} onChange={(v) => setR({ ...r, months: Number(v) })} options={[3, 6, 12, 24].map((m) => ({ value: String(m), label: intervalText(m) }))} />
+      </div>
+      <Field label="Última vez (opcional)">
+        <input className="input" type="date" value={r.last ?? ''} onChange={(e) => setR({ ...r, last: e.target.value || null })} />
+      </Field>
+      <p className="muted small">
+        {st.state === 'marcado' && st.booked ? `Já marcado: ${relativeDay(st.booked.date!)}.` : st.due ? `Próximo por volta de ${monthYear(st.due)}. ${st.state === 'atrasado' ? 'Passou do prazo: aparece "Marcar" hoje na Agenda.' : 'Quando chegar, aparece "Marcar" na Agenda.'}` : 'Diga quando foi a última vez para o app calcular a próxima.'}
+      </p>
+      {!isNew && (
+        <div className="btn-row">
+          {st.state !== 'marcado' && <button type="button" className="btn primary" onClick={() => { update(saveRoutine(final(), today)); onBook(final()); }}>Marcar consulta</button>}
+          <button type="button" className="btn soft danger" onClick={() => { update(removeRoutine(r.id, today)); notify('Check-up apagado', 'As consultas continuam no histórico.'); onClose(); }}>Apagar</button>
+        </div>
+      )}
+    </Sheet>
+  );
+}
+
+// ---------- Peso e medidas (N1.5) ----------
+
+const fmtNum = (n: number) => n.toLocaleString('pt-BR', { maximumFractionDigits: 1 });
+
+/** Gráfico de linha simples (sem cor de bom ou ruim). */
+function BodyChart({ points, unit }: { points: { date: string; value: number }[]; unit: string }) {
+  if (points.length < 2) return <p className="muted small">O gráfico aparece a partir de duas medições.</p>;
+  const W = 320, H = 140, P = 28;
+  const vals = points.map((p) => p.value);
+  const min = Math.min(...vals), max = Math.max(...vals);
+  const span = max - min || 1;
+  const x = (i: number) => P + (i * (W - 2 * P)) / (points.length - 1);
+  const y = (v: number) => H - P / 1.2 - ((v - min) / span) * (H - P * 1.8);
+  const path = points.map((p, i) => `${i ? 'L' : 'M'}${x(i).toFixed(1)},${y(p.value).toFixed(1)}`).join(' ');
+  return (
+    <svg viewBox={`0 0 ${W} ${H}`} className="body-chart" role="img" aria-label={`Gráfico de ${points.length} medições`}>
+      <line x1={P} x2={W - P} y1={y(min)} y2={y(min)} className="body-grid" />
+      <line x1={P} x2={W - P} y1={y(max)} y2={y(max)} className="body-grid" />
+      <text x={2} y={y(max) + 4} className="body-label">{fmtNum(max)}</text>
+      <text x={2} y={y(min) + 4} className="body-label">{fmtNum(min)}</text>
+      <path d={path} className="body-line" />
+      {points.map((p, i) => <circle key={p.date + i} cx={x(i)} cy={y(p.value)} r={i === points.length - 1 ? 4 : 2.5} className="body-dot" />)}
+      <text x={P} y={H - 4} className="body-label">{formatDate(points[0].date)}</text>
+      <text x={W - P} y={H - 4} textAnchor="end" className="body-label">{formatDate(points[points.length - 1].date)} · {unit}</text>
+    </svg>
+  );
+}
+
+function BodyTab({ onEdit, onCreate }: { onEdit: (e: BodyEntry) => void; onCreate: () => void }) {
+  const { data, update } = useStore();
+  const b = data.health.body;
+  const [field, setField] = useState(b.fields[0]?.name ?? 'Peso');
+  const [newField, setNewField] = useState('');
+  const [newUnit, setNewUnit] = useState('cm');
+  if (!b.show) {
+    return (
+      <section className="card" aria-label="Peso e medidas">
+        <div className="card-head"><h2><Icon name="scale" size={18} /> Peso e medidas</h2></div>
+        <p className="small">Estão escondidos, para não aparecer número que você não quer ver. Nunca vão para o Início nem dão pontos na Jornada.</p>
+        <button type="button" className="btn soft block" onClick={() => update(setBodyShow(true))}>Mostrar peso e medidas</button>
+      </section>
+    );
+  }
+  const f = b.fields.find((x) => x.name === field) ?? b.fields[0];
+  const entries = [...b.entries].sort((a, c) => c.date.localeCompare(a.date));
+  return (
+    <>
+      <section className="card" aria-label="Últimas medidas">
+        <div className="card-head">
+          <h2><Icon name="scale" size={18} /> Medidas</h2>
+          <button type="button" className="btn soft small" onClick={() => update(setBodyShow(false))}><Icon name="eyeOff" size={14} /> Esconder</button>
+        </div>
+        <div className="summary three">
+          {b.fields.map((x) => {
+            const l = bodyLatest(b, x.name);
+            return (
+              <button key={x.name} type="button" className={`summary-box${x.name === f?.name ? ' on' : ''}`} onClick={() => setField(x.name)}>
+                <span className="label">{x.name}</span>
+                <span className="value tabular">{l ? `${fmtNum(l.value)} ${x.unit}` : '—'}</span>
+                {l && l.diff !== null && <span className="muted small tabular">{l.diff > 0 ? '+' : ''}{fmtNum(l.diff)} desde a anterior</span>}
+              </button>
+            );
+          })}
+        </div>
+        {f && <BodyChart points={bodySeries(b, f.name)} unit={f.unit} />}
+        <button type="button" className="btn primary block" onClick={onCreate}><Icon name="plusCircle" size={18} /> Nova medição</button>
+      </section>
+      <section className="card" aria-label="Medições">
+        <div className="card-head"><h2>Medições</h2><span className="muted small">{entries.length}</span></div>
+        {entries.length ? (
+          <ul className="list">
+            {entries.map((e) => (
+              <li key={e.id}>
+                <button type="button" className="row" onClick={() => onEdit(e)}>
+                  <span className="row-body">
+                    <span className="row-title">{formatDate(e.date, { day: 'numeric', month: 'short', year: 'numeric' })}</span>
+                    <span className="row-meta tabular">{b.fields.filter((x) => e.values[x.name]).map((x) => `${x.name} ${fmtNum(e.values[x.name])} ${x.unit}`).join(' · ')}</span>
+                  </span>
+                  <Icon name="edit" size={16} />
+                </button>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <Empty>Nenhuma medição ainda.</Empty>
+        )}
+      </section>
+      <section className="card" aria-label="Outra medida">
+        <div className="card-head"><h2>Outra medida</h2></div>
+        <div className="grid-2">
+          <Field label="Nome">
+            <input className="input" value={newField} onChange={(e) => setNewField(e.target.value)} placeholder="Ex.: Quadril" />
+          </Field>
+          <Field label="Unidade">
+            <input className="input" value={newUnit} onChange={(e) => setNewUnit(e.target.value)} placeholder="cm, kg, %" />
+          </Field>
+        </div>
+        <button type="button" className="btn soft block" disabled={!newField.trim()} onClick={() => { update(addBodyField(newField, newUnit)); setNewField(''); }}>Adicionar medida</button>
+      </section>
+      <p className="muted small">Só registro, sem metas nem recompensas.</p>
+    </>
+  );
+}
+
+function BodySheet({ initial, onClose }: { initial: BodyEntry; onClose: () => void }) {
+  const { data, update } = useStore();
+  const [date, setDate] = useState(initial.date);
+  const [vals, setVals] = useState<Record<string, string>>(() => Object.fromEntries(Object.entries(initial.values).map(([k, v]) => [k, String(v).replace('.', ',')])));
+  const isNew = !data.health.body.entries.some((e) => e.id === initial.id);
+  const num = (v: string) => Number(v.replace(/\s/g, '').replace(',', '.'));
+  const save = () => {
+    const values = Object.fromEntries(Object.entries(vals).map(([k, v]) => [k, num(v)]).filter(([, v]) => Number.isFinite(v as number) && (v as number) > 0));
+    if (!Object.keys(values).length) return notify('Falta um valor', 'Preencha pelo menos uma medida.');
+    update(saveBodyEntry({ id: initial.id, date, values }));
+    notify(isNew ? 'Medição salva' : 'Medição atualizada');
+    onClose();
+  };
+  return (
+    <Sheet title={isNew ? 'Nova medição' : 'Editar medição'} onClose={onClose} footer={<button type="button" className="btn primary block" onClick={save}>Salvar</button>}>
+      <Field label="Dia">
+        <input className="input" type="date" value={date} onChange={(e) => e.target.value && setDate(e.target.value)} />
+      </Field>
+      <div className="grid-2">
+        {data.health.body.fields.map((f) => (
+          <Field key={f.name} label={`${f.name}${f.unit ? ` (${f.unit})` : ''}`}>
+            <input className="input" inputMode="decimal" value={vals[f.name] ?? ''} onChange={(e) => setVals({ ...vals, [f.name]: e.target.value })} placeholder="Opcional" />
+          </Field>
+        ))}
+      </div>
+      {!isNew && (
+        <button type="button" className="btn soft block danger" onClick={() => { update(removeBodyEntry(initial.id)); onClose(); }}>Apagar esta medição</button>
       )}
     </Sheet>
   );
