@@ -1,5 +1,6 @@
 import type { AppData, Category, DayPeriod, Expense, Habit, HabitKind, Income, PracticeSession } from './types.ts';
 import { DEFAULT_SIDE_CARDS, normalizeSideCards } from './cardLayout.ts';
+import { DEFAULT_SIDE_SHORTCUTS, normalizeShortcuts } from './moduleBar.ts';
 import { stableId, toISO, uid } from './utils.ts';
 import { suggestAttributes } from './habits.ts';
 import { emptyProfile, normalizeProfile } from './profile.ts';
@@ -58,7 +59,7 @@ export function emptyData(): AppData {
     incomes: [],
     incomeSeries: [],
     incomeSources: [],
-    settings: { theme: 'dark', accent: null, favorites: [...DEFAULT_FAVORITES], cards: {}, barLayout: 'fixo', tapToFavorites: true, hideOnScroll: true, moreLayout: 'lista', moreButton: false, hideBarLabels: false, drawerView: 'misto', iconColors: 'mono', iconStyle: 'classico', sideCards: [...DEFAULT_SIDE_CARDS], iconSize: 'm', seededCategories: false, seededIncomeSources: false, lastBackupAt: null, activeDays: [], visitDays: [], journeyUnlockedAt: null, journeyChoice: null, journeyCard: true, hiddenModules: [], setup: 'novo', tutorialSeen: false, setupAreas: [], journeyWanted: null, journalRhythm: { ...DEFAULT_RHYTHM }, googleCalendar: { on: false, events: true, bills: true, tasks: true, calendarId: null, tasksList: null } },
+    settings: { theme: 'dark', accent: null, favorites: [...DEFAULT_FAVORITES], cards: {}, barLayout: 'fixo', tapToFavorites: true, hideOnScroll: true, moreLayout: 'lista', moreButton: false, hideBarLabels: false, drawerView: 'misto', iconColors: 'mono', iconStyle: 'classico', sideCards: [...DEFAULT_SIDE_CARDS], sideShortcuts: [...DEFAULT_SIDE_SHORTCUTS], iconSize: 'm', seededCategories: false, seededIncomeSources: false, lastBackupAt: null, activeDays: [], visitDays: [], journeyUnlockedAt: null, journeyChoice: null, journeyCard: true, hiddenModules: [], setup: 'novo', tutorialSeen: false, setupAreas: [], journeyWanted: null, journalRhythm: { ...DEFAULT_RHYTHM }, googleCalendar: { on: false, events: true, bills: true, tasks: true, calendarId: null, tasksList: null } },
     profile: emptyProfile('novo'),
     boxes: [],
     moods: {},
@@ -175,6 +176,7 @@ export function normalize(raw: unknown): AppData {
       iconColors: settings.iconColors === 'cores' || settings.iconColors === 'flat' ? 'cores' : 'mono',
       iconStyle: settings.iconStyle === 'flat' || settings.iconColors === 'flat' ? 'flat' : 'classico',
       sideCards: normalizeSideCards(settings.sideCards),
+      sideShortcuts: normalizeShortcuts(settings.sideShortcuts),
       iconSize: settings.iconSize === 'p' || settings.iconSize === 'g' ? settings.iconSize : 'm',
       seededCategories: settings.seededCategories === true,
       seededIncomeSources: settings.seededIncomeSources === true,

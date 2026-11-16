@@ -11520,3 +11520,160 @@ body.bar-labels.jn-tall {
     right: calc(var(--quick-w) + 12px);
   }
 }
+/* ---------- N2.17g1: fala de personagem em balão ---------- */
+.jn-dialog-shade {
+  position: fixed;
+  inset: 0;
+  z-index: 250;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  background: linear-gradient(transparent 40%, rgb(0 0 0 / 0.75));
+  animation: fs-in 0.25s ease both;
+}
+.jn-dialog {
+  width: 100%;
+  max-width: 560px;
+  margin: 0 auto;
+  padding: 14px 14px calc(20px + env(safe-area-inset-bottom));
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  animation: jn-loot-in 0.35s cubic-bezier(0.3, 1.4, 0.5, 1) both;
+}
+.jn-dialog-box {
+  position: relative;
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  padding: 14px;
+  min-height: 132px;
+  text-align: left;
+  background: #0f0f1a;
+  border: 3px solid #e5e7eb;
+  box-shadow: 5px 5px 0 #000;
+  color: #f5f5f7;
+  font: inherit;
+  cursor: pointer;
+}
+.jn-dialog-face {
+  width: 68px;
+  height: 68px;
+  flex: none;
+  background: #1e1b4b;
+  border: 3px solid #4c1d95;
+  image-rendering: pixelated;
+}
+.jn-dialog-text {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 15px;
+  line-height: 1.5;
+}
+.jn-dialog-who {
+  font-size: 15px;
+  color: #facc15;
+}
+.jn-dialog-more {
+  position: absolute;
+  right: 12px;
+  bottom: 8px;
+  color: #facc15;
+  animation: jn-blink 0.9s steps(2) infinite;
+}
+@keyframes jn-blink {
+  50% {
+    opacity: 0;
+  }
+}
+.jn-dialog-skip {
+  text-align: center;
+  font-size: 12px;
+  color: #d4d4d8;
+}
+
+/* E35.2: atalhos no topo da coluna (3 por linha). Somem junto com a coluna. */
+@media (min-width: 1280px) {
+  .quick-shortcuts {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+  }
+  .quick-sc-wrap {
+    position: relative;
+    min-width: 0;
+  }
+  .quick-sc {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 4px 8px;
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    background: var(--bg);
+    color: var(--text);
+    text-decoration: none;
+    min-width: 0;
+  }
+  .quick-sc:hover {
+    border-color: var(--border-strong, var(--border));
+    background: var(--raised);
+  }
+  .quick-sc .mg-icon {
+    width: calc(var(--ic-menu) * 0.78);
+    height: calc(var(--ic-menu) * 0.78);
+    border-radius: 28%;
+  }
+  .quick-sc .mg-icon > svg {
+    width: calc(var(--ic-menu-svg) * 0.85);
+    height: calc(var(--ic-menu-svg) * 0.85);
+  }
+  .quick-sc-name {
+    max-width: 100%;
+    font-size: 0.72rem;
+    font-weight: 600;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .quick-sc-x {
+    position: absolute;
+    top: -6px;
+    right: -6px;
+    width: 22px;
+    height: 22px;
+    display: grid;
+    place-items: center;
+    border: 1px solid var(--border);
+    border-radius: 50%;
+    background: var(--raised-2);
+    color: var(--text);
+    cursor: pointer;
+  }
+  .quick-add-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .quick-add-chips button {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 6px 10px;
+    border: 1px dashed var(--border);
+    border-radius: 999px;
+    background: transparent;
+    color: var(--muted);
+    font: inherit;
+    font-size: 0.78rem;
+    cursor: pointer;
+  }
+  .quick-add-chips button:hover {
+    color: var(--text);
+    border-color: var(--accent);
+  }
+}

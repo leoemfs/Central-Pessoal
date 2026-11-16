@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { useStore } from './store';
 import { moveSide, sideCandidates } from './cardLayout';
+import { FAVORITABLE, favoriteItems } from './moduleBar';
+import { isHidden } from './setup';
 import { useHomeCards } from './modules/Dashboard';
 import { Icon } from './ui';
 import { useWideScreen } from './wide';
@@ -23,6 +25,9 @@ function SideColumn() {
   const shown = ids.flatMap((id) => byId.get(id) ?? []);
   const available = sideCandidates(cards).filter((c) => !ids.includes(c.id));
   const save = (sideCards: string[]) => update((d) => ({ ...d, settings: { ...d.settings, sideCards } }));
+  const shortcuts = favoriteItems(data.settings.sideShortcuts).filter((it) => !isHidden(data, it.to));
+  const moreShortcuts = FAVORITABLE.filter((f) => !data.settings.sideShortcuts.includes(f.id) && !isHidden(data, f.to));
+  const saveShortcuts = (sideShortcuts: string[]) => update((d) => ({ ...d, settings: { ...d.settings, sideShortcuts } }));
 
   return (
     <aside className={`quick${editing ? ' editing' : ''}`} aria-label="Sempre à vista">
@@ -37,6 +42,37 @@ function SideColumn() {
         </button>
       </div>
       <div className="quick-list">
+        {(shortcuts.length > 0 || editing) && (
+          <nav className="quick-shortcuts" aria-label="Atalhos">
+            {shortcuts.map((it) => (
+              <span key={it.id} className="quick-sc-wrap">
+                <a className="quick-sc" href={`#/${it.to}`}>
+                  <span className="mg-icon" data-mod={it.id}>
+                    <Icon name={it.icon} size={20} />
+                  </span>
+                  <span className="quick-sc-name">{it.label}</span>
+                </a>
+                {editing && (
+                  <button type="button" className="quick-sc-x" aria-label={`Tirar o atalho ${it.label}`} onClick={() => saveShortcuts(data.settings.sideShortcuts.filter((x) => x !== it.id))}>
+                    <Icon name="x" size={12} />
+                  </button>
+                )}
+              </span>
+            ))}
+          </nav>
+        )}
+        {editing && moreShortcuts.length > 0 && (
+          <div className="quick-add">
+            <span className="muted small">Adicionar atalho</span>
+            <div className="quick-add-chips">
+              {moreShortcuts.map((f) => (
+                <button key={f.id} type="button" onClick={() => saveShortcuts([...data.settings.sideShortcuts, f.id])}>
+                  <Icon name="plus" size={14} /> {f.label}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
         {shown.map((c, i) => (
           <div key={c.id} className="quick-item">
             {editing && (

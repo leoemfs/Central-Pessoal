@@ -22,6 +22,7 @@ import { BausView } from './JornadaBaus';
 import { go, useRoute } from '../router';
 import { journeyTab } from '../jornada/tabs';
 import { Entrevista } from './JornadaEntrevista';
+import { NpcDialog } from './JornadaFala';
 import { TelaCheia } from './JornadaTelaCheia';
 import { GiftCard, HomesView, PetsView, ShopView } from './JornadaPets';
 import { CodexView } from './JornadaCodex';
@@ -396,7 +397,9 @@ export function JornadaHome() {
   const today = todayISO();
   const state = data.journey;
   const [draft, setDraft] = useState<Look>(() => state.avatar ?? { gender: 'f', skin: 'media', hair: 'castanho', name: '' });
-  const [step, setStep] = useState<'create' | 'welcome'>('create');
+  const [step, setStep] = useState<'create' | 'interview' | 'welcome'>('create');
+  // N2.17g1: depois da chegada, a Mestra Lume dá as boas-vindas em balões.
+  const [lumeIntro, setLumeIntro] = useState(false);
   const [editing, setEditing] = useState(false);
   const [interviewing, setInterviewing] = useState(false);
   const [fichaTab, setFichaTab] = useState<FichaTab>('ficha');
@@ -428,6 +431,21 @@ export function JornadaHome() {
           step={1}
           nextLabel="Continuar"
           onNext={() => {
+            // Já fez a entrevista (ex.: refez a chegada)? Vai direto ao presente.
+            setStep(state.profile ? 'welcome' : 'interview');
+            top();
+          }}
+        />
+      );
+    if (step === 'interview')
+      return (
+        <Entrevista
+          onDone={() => {
+            setStep('welcome');
+            top();
+          }}
+          onCancel={() => {
+            // "Agora não": segue para o presente; o convite da Mestra Lume continua na Jornada.
             setStep('welcome');
             top();
           }}
@@ -437,6 +455,7 @@ export function JornadaHome() {
       <WelcomeStep
         onDone={(pet) => {
           update((d) => ({ ...d, journey: welcomeState(d.journey, draft, pet, today) }));
+          setLumeIntro(true);
           top();
         }}
       />
@@ -485,6 +504,20 @@ export function JornadaHome() {
 
   return (
     <>
+      {lumeIntro && (
+        <NpcDialog
+          npc="lume"
+          lines={[
+            `Então você chegou! Eu sou a Mestra Lume. Que bom ter você aqui, ${look.name || g(look, 'aventureira', 'aventureiro')}.`,
+            'Montei esta jornada com o que você me contou. Suas missões de cada dia são os seus próprios hábitos, contas e tarefas: marcar aqui é o mesmo que marcar no app.',
+            'Cada dia cumprido vira XP, ouro e atributos. Baús, itens e pets vêm da sua rotina. Faltar nunca tira nada.',
+          ]}
+          onDone={() => {
+            setLumeIntro(false);
+            notify('Dica: a seta no topo volta para o app', 'No Início do app, a Jornada vira um cartão só. As recompensas esperam você aqui dentro.');
+          }}
+        />
+      )}
       {tab === 'inicio' && (<>
       {since && (
         <SinceCard
