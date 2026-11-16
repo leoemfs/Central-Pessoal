@@ -39,6 +39,8 @@ export function GameBarItems({ current }: { current: JourneyTab }) {
     [pet, petStyle, home],
   );
   const chests = pendingChests(data, data.journey, today, journeyStats(data, today).level).length;
+  // Barra encolhida (ao rolar): fica só a fileira da tela atual, sem os nomes.
+  const activeRow = GAME_TABS.findIndex((t) => !t.locked && t.id === current) >= 5 ? 2 : 1;
   return (
     <>
       {GAME_TABS.map((t, idx) => {
@@ -50,7 +52,7 @@ export function GameBarItems({ current }: { current: JourneyTab }) {
             key={t.id}
             href={`#/${t.to}`}
             data-nav="switch"
-            className={`jn-gtab${active ? ' active' : ''}${t.locked ? ' locked' : ''}`}
+            className={`jn-gtab${active ? ' active' : ''}${t.locked ? ' locked' : ''}${(idx >= 5 ? 2 : 1) === activeRow ? ' jn-rowon' : ''}`}
             aria-label={label}
             aria-current={active ? 'page' : undefined}
             aria-disabled={t.locked ? true : undefined}

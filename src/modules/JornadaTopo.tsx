@@ -29,11 +29,12 @@ export function JornadaHud() {
   const look = state.avatar;
   const flame = visitStats(data.settings.visitDays, today).streak;
   const e = state.equipped;
+  const face = avatarIcon(look, { elmo: e.elmo, armadura: e.armadura, botas: e.botas, colar: e.colar });
   return (
     <div className="jn-hud">
       <div className="jn-hud-row">
         <button type="button" className="jn-hud-face" aria-label="Ver o personagem" onClick={() => go('jornada')}>
-          <img alt="" src={avatarIcon(look, { elmo: e.elmo, armadura: e.armadura, botas: e.botas, colar: e.colar })} />
+          <img alt="" src={face} />
         </button>
         <div className="jn-hud-who">
           <strong>{look.name || cls[look.gender]}</strong>
@@ -64,6 +65,29 @@ export function JornadaHud() {
           <i style={{ width: `${Math.min(100, (s.xpInLevel / s.xpForNext) * 100)}%` }} />
         </div>
         <span>LV {s.level + 1}</span>
+      </div>
+      <div className="jn-hud-compact" aria-hidden="true">
+        <span className="face">
+          <img alt="" src={face} />
+        </span>
+        <strong>{look.name || cls[look.gender]}</strong>
+        <div className="jn-hud-purse">
+          <span className="f">
+            <img alt="" src={PX.flame} />
+            <b>{flame}</b>
+          </span>
+          <span className="g">
+            <img alt="" src={COIN_ICON} />
+            <b>{fmt(w.gold)}</b>
+          </span>
+          <span className="c">
+            <img alt="" src={GEM_ICON} />
+            <b>{fmt(w.crystals)}</b>
+          </span>
+        </div>
+        <div className="jn-hud-mini">
+          <i style={{ width: `${Math.min(100, (s.xpInLevel / s.xpForNext) * 100)}%` }} />
+        </div>
       </div>
     </div>
   );

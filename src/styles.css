@@ -10774,3 +10774,126 @@ body.bar-labels.jn-tall {
 .jn-history .grow {
   white-space: nowrap;
 }
+
+/* ---------- Jornada: faixa e barra que encolhem ao rolar (prévia "Barra que encolhe", jeito A, 16/11) ----------
+   A faixa não muda de altura (mudar a altura faria o navegador ajustar a rolagem e a faixa ficaria presa):
+   ela sobe e deixa à mostra só a parte de baixo, onde aparece a linha compacta. */
+.jn-hud {
+  position: relative;
+  transition: transform 0.22s ease;
+}
+.jn-hud-row,
+.jn-hud-xp {
+  transition: opacity 0.18s ease;
+}
+.jn-hud-compact {
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  bottom: 0;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.18s ease;
+}
+.jn-hud-compact .face {
+  position: relative;
+  width: 24px;
+  height: 24px;
+  flex: none;
+  overflow: hidden;
+  border-radius: 7px;
+  background: linear-gradient(#7dd3fc, #bae6fd);
+}
+.jn-hud-compact .face img {
+  position: absolute;
+  width: 60px;
+  left: -11px;
+  top: -6px;
+  image-rendering: pixelated;
+}
+.jn-hud-compact strong {
+  flex: 1;
+  min-width: 0;
+  font-size: 13px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.jn-hud-compact .jn-hud-purse span {
+  min-height: 22px;
+  padding: 0 4px;
+  background: transparent;
+  font-size: 12px;
+}
+.jn-hud-mini {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 4px;
+  height: 3px;
+  border-radius: 999px;
+  background: var(--raised-2);
+  overflow: hidden;
+}
+.jn-hud-mini i {
+  display: block;
+  height: 100%;
+  background: linear-gradient(90deg, #8b5cf6, var(--jn-xp));
+}
+.tabbar.jn-gamebar {
+  transition: height 0.22s ease, transform 0.22s ease;
+}
+@media (max-width: 899px) {
+  .bars-hidden .sticky-head:has(.jn-hud) {
+    transform: translateY(-62px);
+  }
+  .bars-hidden .jn-hud {
+    transform: translateY(calc(-100% + 40px));
+  }
+  .bars-hidden .jn-hud-row,
+  .bars-hidden .jn-hud-xp {
+    opacity: 0;
+  }
+  .bars-hidden .jn-hud-compact {
+    opacity: 1;
+    pointer-events: auto;
+  }
+  /* Barra do jogo encolhida: só a fileira da tela atual, sem nomes (puxar para cima continua abrindo o menu). */
+  .tabbar.jn-gamebar.jn-compact {
+    height: calc(48px + env(safe-area-inset-bottom));
+  }
+  .tabbar.jn-gamebar.jn-compact .jn-gsep,
+  .tabbar.jn-gamebar.jn-compact a.jn-gtab:not(.jn-rowon),
+  .tabbar.jn-gamebar.jn-compact .jn-glabel {
+    display: none;
+  }
+  .tabbar.jn-gamebar.jn-compact .jn-gicon,
+  .tabbar.jn-gamebar.jn-compact .jn-gicon img:first-child {
+    width: 24px;
+    height: 24px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .jn-hud,
+  .jn-hud *,
+  .tabbar.jn-gamebar {
+    transition: none !important;
+  }
+}
+.tabbar.jn-gamebar.jn-compact {
+  overflow: hidden;
+}
+@media (max-width: 899px) {
+  .bars-hidden .sticky-head:has(.jn-hud),
+  .bars-hidden .sticky-head.stuck:has(.jn-hud) {
+    background: transparent;
+    box-shadow: none;
+  }
+  .bars-hidden .jn-hud {
+    box-shadow: 0 8px 16px -8px rgb(0 0 0 / 0.8);
+  }
+}
