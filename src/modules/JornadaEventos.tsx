@@ -14,6 +14,8 @@ import { journeyNews, newsDiff, showWeekSummary, weekSummary } from '../jornada/
 import { acquire, acquirePlace, equip, petGoals, shopContext, TITLES, type Chest } from '../jornada/rules';
 import { LORE } from '../jornada/lore';
 import { PetEditor } from './JornadaPets';
+import { ChapterDone } from './JornadaCampanha';
+import { campaign } from '../jornada/campaign';
 import { weekStart } from '../review';
 import { ChestOpen, CHEST_INFO } from './JornadaBaus';
 import { confetti } from './jornadaFx';
@@ -98,6 +100,10 @@ export function JornadaEventos() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [key]);
 
+  // Campanha: região sem chefe com os objetivos cumpridos → tela de região concluída.
+  const campReady = campaign(data, data.journey, today).stage === 'pronto';
+  const [campShown, setCampShown] = useState(false);
+
   const closeWeek = () => {
     setWeek(null);
     update((d) => ({ ...d, journey: { ...d.journey, weekSeen: weekStart(todayISO()) } }));
@@ -107,10 +113,11 @@ export function JornadaEventos() {
     <>
       {petNew && !boxEv && <PetScreen id={petNew} onClose={() => setPetNew(null)} onEdit={(id) => { setPetNew(null); window.setTimeout(() => setPetEdit(id), 250); }} />}
       {petEdit && <PetEditor id={petEdit} onClose={() => setPetEdit(null)} />}
+      {campReady && ready && !campShown && !boxEv && !petNew && !title && <ChapterDone onClose={() => setCampShown(true)} />}
       {boxEv && ready && <BoxScreen ev={boxEv} onClose={() => setBoxEv(null)} />}
       {title && !boxEv && !petNew && <TitleScreen id={title} onClose={() => setTitle(null)} />}
       {opening && <ChestOpen chest={opening} onClose={() => setOpening(null)} />}
-      {week && ready && !title && !boxEv && <WeekScreen w={week} pending={news.chests.length} onClose={closeWeek} />}
+      {week && ready && !title && !boxEv && !(campReady && !campShown) && <WeekScreen w={week} pending={news.chests.length} onClose={closeWeek} />}
     </>
   );
 }

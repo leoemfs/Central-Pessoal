@@ -18,6 +18,7 @@ import { monthBalance } from '../incomes.ts';
 import { defaultReviewWeek, weekReview, weekStart } from '../review.ts';
 import { addDays, addMonths, monthKey, pad, sum, toISO, todayISO } from '../utils.ts';
 import { normalizeProfile, type Profile } from './interview.ts';
+import { defaultCamp, normalizeCamp, type CampState } from './campaign.ts';
 import { ATTR_CODES, HOMES, ITEMS, PETS, RING2_LEVEL, STARTER_ITEMS, itemById, type AttrCode, type Attrs, type Home, type Item, type Rarity, type Slot } from './catalog.ts';
 
 // ---------- Estado guardado ----------
@@ -65,6 +66,8 @@ export interface JourneyState {
   weekSeen: string;
   /** N2.17e: caixinhas já comemoradas ("meta:<id>" e "real:<id>"). */
   boxSeen: string[];
+  /** N2.17g2: Campanha (regiões concluídas, falas ouvidas, já vestiu um item). */
+  camp: CampState;
   /** N2.6: nome dado a cada pet (id → nome) e pelagem escolhida (id → pelagem). */
   petNames: Record<string, string>;
   petStyle: Record<string, string>;
@@ -100,6 +103,7 @@ export function defaultJourneyState(): JourneyState {
     levelSeen: 0,
     weekSeen: '',
     boxSeen: [],
+    camp: defaultCamp(),
     petNames: {},
     petStyle: {},
     gifts: [],
@@ -166,6 +170,7 @@ export function normalizeJourney(raw: unknown): JourneyState {
     gifts: Array.isArray(r.gifts) ? r.gifts.filter((g): g is GiftRecord => !!g && typeof g.day === 'string' && typeof g.gold === 'number').map((g) => ({ day: g.day, n: Math.max(1, Math.floor(Number(g.n) || 1)), gold: Math.max(0, g.gold), chest: g.chest === 'bronze' || g.chest === 'prata' || g.chest === 'dourado' ? g.chest : null })) : [],
     games: normalizeGames(r.games),
     levelSeen: typeof r.levelSeen === 'number' && Number.isFinite(r.levelSeen) && r.levelSeen > 0 ? Math.floor(r.levelSeen) : 0,
+    camp: normalizeCamp(r.camp),
     boxSeen: Array.isArray(r.boxSeen) ? r.boxSeen.filter((x): x is string => typeof x === 'string').slice(-200) : [],
     weekSeen: typeof r.weekSeen === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(r.weekSeen) ? r.weekSeen : '',
     profile: normalizeProfile(r.profile),
@@ -339,6 +344,19 @@ export interface TitleDef {
 
 const attrTitle = (id: string, f: string, m: string, code: AttrCode, name: string): TitleDef => ({ id, f, m, rule: `${name} 100`, need: 100, have: (c) => c.attrs[code] });
 
+/** Títulos das regiões da Campanha (id, feminino, masculino, região, nome da região). */
+const REGION_TITLES: [string, string, string, string, string][] = [
+  ['viajante', 'Viajante', 'Viajante', 'vila', 'a Vila do Começo'],
+  ['lobos', 'Caçadora de Lobos', 'Caçador de Lobos', 'floresta', 'a Floresta da Rotina'],
+  ['arena', 'Campeã da Arena', 'Campeão da Arena', 'arena', 'a Arena de Ferro'],
+  ['mercado', 'Mestra do Mercado', 'Mestre do Mercado', 'mercado', 'o Mercado de Ouro'],
+  ['serpentes', 'Domadora de Serpentes', 'Domador de Serpentes', 'pantano', 'o Pântano das Tentações'],
+  ['saber', 'Guardiã do Saber', 'Guardião do Saber', 'torre', 'a Torre do Saber'],
+  ['calma', 'Jardineira da Calma', 'Jardineiro da Calma', 'jardim', 'o Jardim da Calma'],
+  ['montanha', 'Alpinista', 'Alpinista', 'montanha', 'a Montanha da Disciplina'],
+  ['ordem', 'Senhora da Ordem', 'Senhor da Ordem', 'castelo', 'o Castelo do Caos'],
+];
+
 export const TITLES: TitleDef[] = [
   { id: 'aprendiz', f: 'Aprendiz', m: 'Aprendiz', rule: 'Começar a Jornada', need: 1, have: (c) => (c.d.settings.journeyUnlockedAt ? 1 : 0) },
   { id: 'contas', f: 'Guardiã das Contas', m: 'Guardião das Contas', rule: '3 meses com todas as contas pagas no prazo', need: 3, have: (c) => monthsAllOnTime(c.d, c.today).length },
@@ -357,6 +375,7 @@ export const TITLES: TitleDef[] = [
   attrTitle('sabia', 'Sábia', 'Sábio', 'SAB', 'Sabedoria'),
   attrTitle('inabalavel', 'Inabalável', 'Inabalável', 'DIS', 'Disciplina'),
   { id: 'lenda', f: 'Lendária', m: 'Lendário', rule: 'Todos os atributos em 100', need: 6, have: (c) => ATTR_CODES.filter((k) => c.attrs[k] >= 100).length },
+  ...REGION_TITLES.map(([id, f, m, region, name]) => ({ id, f, m, rule: `Campanha · concluir ${name}`, need: 1, have: (c: TitleContext) => ((c.d.journey?.camp?.cleared ?? []).some((x) => x.id === region) ? 1 : 0) })),
   { id: 'codex', f: 'Lenda do Codex', m: 'Lenda do Codex', rule: 'Descobrir tudo o que existe no Codex', need: 100, have: (c) => codexPct(c.d.journey?.owned ?? []) },
 ];
 
@@ -443,6 +462,11 @@ export function earnedChests(d: AppData, today: string = todayISO(), level = 1):
       if (date > today) continue;
       out.push({ key: `${mk === 100 ? 'dourado' : mk === 50 ? 'prata' : 'bronze'}:caixinha:${b.id}:${mk}`, kind: mk === 100 ? 'dourado' : mk === 50 ? 'prata' : 'bronze', date, reason: `${b.name}: ${mk}% da meta` });
     }
+  }
+  // N2.17g2: região da Campanha concluída (Vila prata; as outras dourado ou cristal).
+  for (const c of d.journey?.camp?.cleared ?? []) {
+    const kind = c.id === 'vila' ? 'prata' : c.id === 'pantano' || c.id === 'castelo' ? 'cristal' : 'dourado';
+    if (c.at <= today) out.push({ key: `${kind}:campanha:${c.id}`, kind, date: c.at, reason: `Campanha: região concluída` });
   }
   // N2.7: marcos de descoberta do Codex (25% prata, 50% dourado, 75% cristal).
   const pct = codexPct(d.journey?.owned ?? []);
@@ -618,7 +642,9 @@ export function equip(state: JourneyState, slot: EquipSlot, id: string | null, l
   const other = slot === 'anel' ? 'anel2' : slot === 'anel2' ? 'anel' : null;
   const equipped = { ...state.equipped, [slot]: id };
   if (other && equipped[other] === id) equipped[other] = null;
-  return { ...state, equipped };
+  // Campanha (Vila do Começo): "vista um item do Arsenal".
+  const dressed = slot !== 'pet' && slot !== 'morada' && !state.camp.dressed;
+  return { ...state, equipped, ...(dressed ? { camp: { ...state.camp, dressed: true } } : {}) };
 }
 
 /** Pets e moradas: liberados por nível (e atributo); algumas moradas também custam ouro. */
