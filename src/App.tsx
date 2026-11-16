@@ -107,7 +107,7 @@ const QUICK: { to: string; label: string; icon: IconName; hint: string }[] = [
 ];
 
 /** Um ícone da barra de baixo. Só o ícone; segurar o dedo mostra o nome. */
-function TabLink({ to, label, icon, active, center, onTap }: { to: string; label: string; icon: string; active: boolean; center?: boolean; onTap?: () => void }) {
+function TabLink({ to, label, icon, active, center, onTap, mod }: { to: string; label: string; icon: string; active: boolean; center?: boolean; onTap?: () => void; mod?: string }) {
   const [tip, setTip] = useState(false);
   const timer = useRef<number | undefined>(undefined);
   const held = useRef(false);
@@ -149,7 +149,7 @@ function TabLink({ to, label, icon, active, center, onTap }: { to: string; label
         }
       }}
     >
-      <span className="tb-pill">
+      <span className="tb-pill" data-flat={mod}>
         <Icon name={icon as IconName} size={26} />
       </span>
       <span className="tb-label" aria-hidden="true">{label}</span>
@@ -299,11 +299,13 @@ export function App() {
   useScrollingClass();
   // E26: nome embaixo dos ícones da barra (opcional).
   useEffect(() => {
-    document.body.classList.toggle('bar-labels', !data.settings.hideBarLabels);
-  }, [data.settings.hideBarLabels]);
+    document.body.classList.toggle('bar-labels', !data.settings.hideBarLabels && data.settings.barIcons !== 'flat');
+    document.body.classList.toggle('bar-flat', data.settings.barIcons === 'flat');
+  }, [data.settings.hideBarLabels, data.settings.barIcons]);
   // E29: ícones dos módulos coloridos (cada um com a sua cor).
   useEffect(() => {
     document.body.classList.toggle('icons-color', data.settings.iconColors === 'cores');
+    document.body.classList.toggle('icons-flat', data.settings.iconColors === 'flat');
   }, [data.settings.iconColors]);
   const editor = useCardEditor();
   const where = bar ? crumb(bar, barIndex) : null;
@@ -434,6 +436,7 @@ export function App() {
             to={it.to}
             label={it.label}
             icon={it.icon}
+            mod={placed ? bar!.id : it.id}
             center={!!placed && i === placed.home}
             active={placed ? it.section === section.path : section.path === it.id || (!!bar && bar.id === it.id)}
             onTap={tapFor(it, i)}
