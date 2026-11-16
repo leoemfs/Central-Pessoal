@@ -169,16 +169,46 @@ export function Ajustes({ route }: ViewProps) {
           {data.settings.theme === 'system' ? 'Segue o tema do celular ou computador.' : 'Vale para todas as telas do app.'}
         </p>
         <h3 className="pz-title">Cor dos ícones</h3>
-        <div className="icon-style-pick" role="radiogroup" aria-label="Cor dos ícones">
-          {(['cores', 'mono', 'flat'] as const).map((v) => (
-            <button key={v} type="button" role="radio" aria-checked={data.settings.iconColors === v} className={`icon-style-card${data.settings.iconColors === v ? ' on' : ''}${v === 'cores' ? ' preview-color' : v === 'flat' ? ' preview-flat' : ''}`} onClick={() => update((d) => ({ ...d, settings: { ...d.settings, iconColors: v } }))}>
-              <strong>{v === 'cores' ? 'Colorido' : v === 'flat' ? 'Flat' : 'Mono\u00adcromático'}</strong>
-              <span className="icon-style-demo" aria-hidden="true">
+        <div className="opt-rows" role="radiogroup" aria-label="Cor dos ícones">
+          {([
+            ['cores', 'Colorido', 'Cada módulo com a sua cor.'],
+            ['mono', 'Monocromático', 'Todos na cor de destaque.'],
+            ['flat', 'Flat', 'Quadrado colorido com desenho branco, também na barra.'],
+          ] as const).map(([v, name, desc]) => (
+            <button key={v} type="button" role="radio" aria-checked={data.settings.iconColors === v} className={`opt-row${data.settings.iconColors === v ? ' on' : ''}`} onClick={() => update((d) => ({ ...d, settings: { ...d.settings, iconColors: v } }))}>
+              <span className="opt-radio" aria-hidden="true" />
+              <span className="opt-text">
+                <strong>{name}</strong>
+                <small>{desc}</small>
+              </span>
+              <span className={`icon-style-demo preview-${v === 'cores' ? 'color' : v}`} aria-hidden="true">
                 {(['financas', 'agenda', 'jornada'] as const).map((m) => (
                   <span key={m} className="tile-icon" data-mod={m}>
-                    <Icon name={m === 'financas' ? 'wallet' : m === 'agenda' ? 'calendar' : 'sword'} size={18} />
+                    <Icon name={m === 'financas' ? 'wallet' : m === 'agenda' ? 'calendar' : 'sword'} size={16} />
                   </span>
                 ))}
+              </span>
+            </button>
+          ))}
+        </div>
+        <h3 className="pz-title">Tamanho dos ícones</h3>
+        <p className="muted small">Muda o menu e a barra juntos. O menu fica sempre um pouco maior que a barra.</p>
+        <div className="opt-rows" role="radiogroup" aria-label="Tamanho dos ícones">
+          {([
+            ['p', 'Pequeno', 'Cabe mais na tela.', 26],
+            ['m', 'Médio', 'Padrão.', 32],
+            ['g', 'Grande', 'Mais fácil de ver e tocar.', 38],
+          ] as const).map(([v, name, desc, px]) => (
+            <button key={v} type="button" role="radio" aria-checked={data.settings.iconSize === v} className={`opt-row${data.settings.iconSize === v ? ' on' : ''}`} onClick={() => update((d) => ({ ...d, settings: { ...d.settings, iconSize: v } }))}>
+              <span className="opt-radio" aria-hidden="true" />
+              <span className="opt-text">
+                <strong>{name}</strong>
+                <small>{desc}</small>
+              </span>
+              <span className={`icon-style-demo preview-${data.settings.iconColors === 'cores' ? 'color' : data.settings.iconColors}`} aria-hidden="true">
+                <span className="tile-icon size-demo" data-mod="financas" style={{ width: px, height: px }}>
+                  <Icon name="wallet" size={Math.round(px * 0.55)} />
+                </span>
               </span>
             </button>
           ))}

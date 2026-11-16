@@ -47,7 +47,7 @@ const KEY_SHORTCUTS = 'mais-atalhos';
 /** Uma entrada do Mais: cartão (lista) ou ícone (grade). No lápis vira bloco parado com setas. */
 function Entry({ it, grid, editing, first, last, onMove }: { it: Item; grid: boolean; editing: boolean; first: boolean; last: boolean; onMove: (dir: -1 | 1) => void }) {
   const icon = (
-    <span className={grid ? 'mg-icon' : 'tile-icon'} data-mod={it.id}>
+    <span className={grid ? 'mg-icon' : 'tile-icon ic-sz'} data-mod={it.id}>
       <Icon name={it.icon} size={grid ? 24 : undefined} />
       {grid && it.badge ? <span className="mg-badge">{it.badge}</span> : null}
     </span>
@@ -179,7 +179,7 @@ export function MaisPanel({ editing = false }: { editing?: boolean }) {
                 {g.items.map((it) =>
                   it.to ? (
                     <a key={it.label} className="menu-row" href={`#/${it.to}`}>
-                      <span className="tile-icon" data-mod={modOf(it.to)}>
+                      <span className="tile-icon ic-sz" data-mod={modOf(it.to)}>
                         <Icon name={it.icon} size={18} />
                       </span>
                       <span className="menu-row-name">{it.label}</span>
@@ -187,7 +187,7 @@ export function MaisPanel({ editing = false }: { editing?: boolean }) {
                     </a>
                   ) : (
                     <span key={it.label} className="menu-row off" aria-disabled="true">
-                      <span className="tile-icon" data-mod={modOf(it.to)}>
+                      <span className="tile-icon ic-sz" data-mod={modOf(it.to)}>
                         <Icon name={it.icon} size={18} />
                       </span>
                       <span className="menu-row-name">{it.label}</span>
@@ -307,7 +307,7 @@ export function Guardados() {
               return (
                 <li key={l.path} className="row kept-row">
                   <a className="kept-open" href={`#/${l.path}`}>
-                    <span className="tile-icon" data-mod={l.path}>
+                    <span className="tile-icon ic-sz" data-mod={l.path}>
                       <Icon name={s.icon} />
                     </span>
                     <span className="row-body">

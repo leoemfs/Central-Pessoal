@@ -8371,7 +8371,7 @@ body.icons-color [data-mod='jornada'],
   height: 34px;
   border-radius: 10px;
 }
-body.icons-color .icon-style-card:not(.preview-color) [data-mod] {
+body.icons-color .preview-mono [data-mod] {
   color: var(--accent-text);
   background: var(--raised);
 }
@@ -8450,52 +8450,164 @@ body .preview-flat [data-mod] {
   background: linear-gradient(180deg, var(--flat-a, #9aa3b2), var(--flat-b, #4b5563));
   color: var(--flat-ink, #fff);
 }
-.icon-style-pick {
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+/* E31: opções de Aparência em linhas (uma por opção, amostra à direita). */
+.opt-rows {
+  display: flex;
+  flex-direction: column;
   gap: 8px;
 }
-.icon-style-pick .icon-style-card {
-  padding: 10px;
+.opt-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  min-height: 56px;
+  padding: 10px 12px;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
 }
-.icon-style-pick .icon-style-card strong {
-  font-size: 0.8rem;
-  overflow-wrap: anywhere;
+.opt-row.on {
+  border-color: var(--accent);
 }
-.icon-style-pick .icon-style-demo .tile-icon {
-  width: 26px;
-  height: 26px;
+.opt-radio {
+  flex: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 2px solid var(--border-strong);
+  display: grid;
+  place-items: center;
+}
+.opt-row.on .opt-radio {
+  border-color: var(--accent);
+}
+.opt-row.on .opt-radio::after {
+  content: '';
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--accent);
+}
+.opt-text {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+.opt-text strong {
+  font-size: 0.92rem;
+}
+.opt-row.on .opt-text strong {
+  color: var(--accent-text);
+}
+.opt-text small {
+  color: var(--muted);
+  font-size: 0.78rem;
+  line-height: 1.3;
+}
+.opt-row .icon-style-demo {
+  flex: none;
+  flex-wrap: nowrap;
+  gap: 5px;
+  align-items: center;
+}
+.opt-row .icon-style-demo .tile-icon {
+  width: 28px;
+  height: 28px;
   border-radius: 8px;
 }
-.icon-style-pick .icon-style-demo svg {
-  width: 15px;
-  height: 15px;
+.opt-row .icon-style-demo .tile-icon.size-demo {
+  border-radius: 28%;
 }
-.icon-style-pick .icon-style-demo {
-  gap: 4px;
-  flex-wrap: nowrap;
+
+/* E31: tamanhos. Médio = padrão. O menu fica sempre um pouco maior que a barra. */
+:root {
+  --ic-menu: 54px;
+  --ic-menu-svg: 24px;
+  --ic-flat-menu: 48px;
+  --ic-list: 42px;
+  --ic-list-svg: 22px;
+  --ic-bar-svg: 26px;
+  --ic-flat-bar: 40px;
+  --ic-flat-bar-svg: 23px;
+}
+body.icons-p {
+  --ic-menu: 46px;
+  --ic-menu-svg: 21px;
+  --ic-flat-menu: 40px;
+  --ic-list: 36px;
+  --ic-list-svg: 19px;
+  --ic-bar-svg: 22px;
+  --ic-flat-bar: 32px;
+  --ic-flat-bar-svg: 19px;
+}
+body.icons-g {
+  --ic-menu: 62px;
+  --ic-menu-svg: 28px;
+  --ic-flat-menu: 58px;
+  --ic-list: 50px;
+  --ic-list-svg: 26px;
+  --ic-bar-svg: 30px;
+  --ic-flat-bar: 46px;
+  --ic-flat-bar-svg: 27px;
+}
+.mg-icon {
+  width: var(--ic-menu);
+  height: var(--ic-menu);
+}
+.mg-icon > svg {
+  width: var(--ic-menu-svg);
+  height: var(--ic-menu-svg);
+}
+.tile-icon.ic-sz {
+  width: var(--ic-list);
+  height: var(--ic-list);
+}
+.tile-icon.ic-sz > svg {
+  width: var(--ic-list-svg);
+  height: var(--ic-list-svg);
+}
+.tabbar .tb-pill > svg {
+  width: var(--ic-bar-svg);
+  height: var(--ic-bar-svg);
+}
+/* Grande: a barra cresce um pouco para não apertar o ícone (com ou sem o nome). */
+body.icons-g:not(.bar-labels) {
+  --tabbar-h: 70px;
+}
+body.icons-g.bar-labels {
+  --tabbar-h: 88px;
+}
+body.icons-g.bar-labels.bar-flat {
+  --tabbar-h: 100px;
 }
 /* Barra no Flat: quadrados coloridos; os fechados mais apagados e um ponto embaixo do aberto. O nome embaixo segue a opção do usuário. */
 body.bar-flat .tabbar .tb {
   position: relative;
 }
 body.bar-flat .tabbar .tb-pill {
-  width: 40px;
-  height: 40px;
-  border-radius: 12px;
+  width: var(--ic-flat-bar);
+  height: var(--ic-flat-bar);
+  border-radius: 28%;
   background: linear-gradient(180deg, var(--flat-a, #9aa3b2), var(--flat-b, #4b5563));
   color: var(--flat-ink, #fff);
   box-shadow: none;
   opacity: 0.55;
 }
 body.bar-flat .tabbar .tb-pill svg {
-  width: 23px;
-  height: 23px;
+  width: var(--ic-flat-bar-svg);
+  height: var(--ic-flat-bar-svg);
 }
 /* Na grade do menu, o quadrado colorido parece maior que o ícone simples: um pouco menor. */
 body.icons-flat .mg-icon[data-mod] {
-  width: 48px;
-  height: 48px;
-  border-radius: 14px;
+  width: var(--ic-flat-menu);
+  height: var(--ic-flat-menu);
+  border-radius: 28%;
 }
 body.bar-flat .tabbar .tb.active .tb-pill,
 body.bar-flat .tabbar a.tb.active .tb-pill {

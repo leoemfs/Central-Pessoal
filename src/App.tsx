@@ -307,7 +307,10 @@ export function App() {
     document.body.classList.toggle('icons-flat', data.settings.iconColors === 'flat');
     // E30: o Flat vale também para a barra de baixo.
     document.body.classList.toggle('bar-flat', data.settings.iconColors === 'flat');
-  }, [data.settings.iconColors]);
+    // E31: tamanho dos ícones (menu e barra juntos).
+    document.body.classList.toggle('icons-p', data.settings.iconSize === 'p');
+    document.body.classList.toggle('icons-g', data.settings.iconSize === 'g');
+  }, [data.settings.iconColors, data.settings.iconSize]);
   const editor = useCardEditor();
   const where = bar ? crumb(bar, barIndex) : null;
   const settingsSub = section.path === 'ajustes' ? settingsPage(route.sub) : null;
