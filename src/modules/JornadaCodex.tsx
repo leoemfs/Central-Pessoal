@@ -7,10 +7,11 @@ import { useState } from 'react';
 import { useStore } from '../store';
 import { todayISO } from '../utils';
 import { Sheet } from '../ui';
-import { chestIcon, homeIcon, itemById, itemIcon, medalIcon, petIcon, RARITY } from '../jornada/catalog';
+import { chestIcon, homeIcon, itemById, itemIcon, medalIcon, petIcon, PETS, RARITY } from '../jornada/catalog';
 import { TITLES } from '../jornada/rules';
 import { CODEX_CATS, codexEntries, codexSummary, type CodexCat, type CodexEntry } from '../jornada/codex';
 import { PET_SPRITES } from '../jornada/petsData';
+import { PetEditor } from './JornadaPets';
 
 const fmt = (n: number) => n.toLocaleString('pt-BR');
 
@@ -29,6 +30,7 @@ export function CodexView() {
   const [cat, setCat] = useState<CodexCat>('pet');
   const [missing, setMissing] = useState(false);
   const [open, setOpen] = useState<CodexEntry | null>(null);
+  const [editPet, setEditPet] = useState<string | null>(null);
   const list = all.filter((e) => e.cat === cat && (!missing || !e.owned));
   const markIcons = [chestIcon('prata', false), chestIcon('dourado', false), chestIcon('cristal', false), medalIcon(3, true)];
   return (
@@ -87,16 +89,33 @@ export function CodexView() {
         ))}
         {list.length === 0 && <p className="muted small">Nada faltando aqui: você já tem tudo desta categoria.</p>}
       </div>
-      {open && <CodexDetail e={open} icon={iconOf(open, data.journey.petStyle)} onClose={() => setOpen(null)} />}
+      {open && (
+        <CodexDetail
+          e={open}
+          icon={iconOf(open, data.journey.petStyle)}
+          onClose={() => setOpen(null)}
+          onEdit={() => {
+            const id = open.id;
+            setOpen(null);
+            // Abre o editor depois que a janela do Codex fecha (cada janela cuida do seu "voltar").
+            window.setTimeout(() => setEditPet(id), 250);
+          }}
+        />
+      )}
+      {editPet && <PetEditor id={editPet} onClose={() => setEditPet(null)} />}
     </>
   );
 }
 
-function CodexDetail({ e, icon, onClose }: { e: CodexEntry; icon: string; onClose: () => void }) {
+function CodexDetail({ e, icon, onClose, onEdit }: { e: CodexEntry; icon: string; onClose: () => void; onEdit: () => void }) {
+  const { data } = useStore();
   const it = itemById(e.id);
   const spr = e.cat === 'pet' ? PET_SPRITES[e.id] : null;
+  // Pet seu: mostra o nome que você deu e permite editar nome e cor dali mesmo.
+  const petName = e.cat === 'pet' && e.owned ? data.journey.petNames[e.id]?.trim() : '';
+  const baseName = PETS.find((p) => p.id === e.id)?.name ?? e.name;
   return (
-    <Sheet title={e.name} onClose={onClose}>
+    <Sheet title={petName && petName !== baseName ? `${petName} (${baseName})` : e.name} onClose={onClose}>
       <div className="jn-cx-detail">
         <span className="jn-px" style={{ color: RARITY[e.rarity].color }}>
           CODEX · {RARITY[e.rarity].label.toUpperCase()}
@@ -124,6 +143,11 @@ function CodexDetail({ e, icon, onClose }: { e: CodexEntry; icon: string; onClos
               </span>
             ))}
           </div>
+        )}
+        {spr && e.owned && (
+          <button type="button" className="btn primary block" onClick={onEdit}>
+            Editar nome e cor
+          </button>
         )}
       </div>
     </Sheet>
