@@ -92,7 +92,4 @@ test('E29: ícones começam monocromáticos (valores estranhos também)', () => 
   assert.equal(normalize({ version: 2, settings: { iconColors: 'cores' } }).settings.iconColors, 'cores');
   assert.equal(normalize({ version: 2, settings: { iconColors: 'arco-iris' } }).settings.iconColors, 'mono');
   assert.equal(normalize({ version: 2, settings: { iconColors: 'flat' } }).settings.iconColors, 'flat');
-  assert.equal(normalize(undefined).settings.barIcons, 'traco');
-  assert.equal(normalize({ version: 2, settings: { barIcons: 'flat' } }).settings.barIcons, 'flat');
-  assert.equal(normalize({ version: 2, settings: { barIcons: 'x' } }).settings.barIcons, 'traco');
 });

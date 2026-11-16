@@ -301,28 +301,11 @@ export function Ajustes({ route }: ViewProps) {
         </div>
         <div className="toggle-row">
           <div>
-            <strong>Ícones da barra</strong>
-            <span className="muted small">Quadrados coloridos: cada favorito na cor do módulo, sem o nome embaixo; o que está aberto ganha um pontinho.</span>
-          </div>
-        </div>
-        <Segmented
-          label="Ícones da barra"
-          value={data.settings.barIcons}
-          onChange={(barIcons) => setSetting({ barIcons })}
-          options={[
-            { value: 'traco', label: 'Traço simples' },
-            { value: 'flat', label: 'Quadrados coloridos' },
-          ]}
-        />
-        {data.settings.barIcons === 'traco' && (
-        <div className="toggle-row">
-          <div>
             <strong>Esconder o nome embaixo dos ícones</strong>
             <span className="muted small">Para quem já conhece os ícones: a barra fica mais baixa, só com os desenhos. Segurar o ícone continua mostrando o nome.</span>
           </div>
           <Toggle checked={data.settings.hideBarLabels} onChange={(v) => setSetting({ hideBarLabels: v })} label="Esconder o nome embaixo dos ícones" />
         </div>
-        )}
         <div className="toggle-row">
           <div>
             <strong>Tocar de novo no módulo mostra os favoritos</strong>

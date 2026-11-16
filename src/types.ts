@@ -257,8 +257,6 @@ export interface Settings {
   drawerView: 'misto' | 'grade' | 'lista';
   /** E29/E30: ícones dos módulos na cor de destaque (mono), cada um com a sua cor (cores) ou em quadrado colorido com desenho branco (flat). */
   iconColors: 'mono' | 'cores' | 'flat';
-  /** E30: ícones da barra de baixo no traço simples (padrão) ou em quadrados coloridos (sem nome, só um ponto no aberto). */
-  barIcons: 'traco' | 'flat';
   seededCategories: boolean;
   seededIncomeSources: boolean;
   lastBackupAt: string | null;
