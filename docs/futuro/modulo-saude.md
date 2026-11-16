@@ -1,6 +1,6 @@
 # Saúde (N1)
 
-> **Situação: especificado, prévia aprovada em 11/11 ("contém tudo o que preciso").** Sem código. Aparece como "em breve" no app. Não foi adiantado na fila: continua no item 10 da fila sugerida.
+> **Situação: pronto (v0.66 a v0.71).** Todas as partes construídas; o que ficou para depois está em cada parte.
 > **Tamanho:** G, dividido em partes (abaixo). Cada parte é uma sessão de construção, só depois de aprovada.
 
 Um módulo separado do Núcleo. A diferença:
@@ -64,8 +64,8 @@ Ordem sugerida (cada parte com versão, testes e PR próprios):
 2. **N1.1 Água e Sono:** pronto na v0.66 (15/11). Barra Hoje · Saúde · Histórico; + registra sono. Ficou para depois: hábito "dormir no horário" marcado pelo sono e cartão da Saúde no Início.
 3. **N1.2 Dieta:** pronto na v0.67 (15/11). Ficou para depois: hábito "Seguir a dieta" marcado sozinho, linha na Revisão semanal, lista de compras em Listas, lembretes das refeições e ponto na Jornada.
 4. **N1.3 Remédios:** pronto na v0.70 (15/11). Lembrete = aviso no Google Agenda na hora de cada dose (próximos 14 dias), enquanto não há notificações próprias (N3). "Na hora" ficou como "todas as doses do dia" para a Jornada (mais gentil). Ficou para depois: estoque (quantos comprimidos sobram) e aviso de recompra.
-5. **N1.4 Consultas, exames e check-ups:** entram e se atualizam sozinhos na Agenda, como Carreira; intervalo de check-up e cartão "Próximos check-ups" (M).
-6. **N1.5 Peso e medidas:** com gráfico, escondido por padrão (P).
+5. **N1.4 Consultas, exames e check-ups:** pronto na v0.71 (16/11, junto com N1.5). Agenda sozinha (`syncHealthEvents`, origem `saude/`); "Já fui" com retorno, pedidos de exame e repetir; check-up vencido sem consulta marcada vira "Marcar: …" hoje na Agenda. Abas da casa passaram a ser Dia (água e sono) · Dieta · Remédios · Consultas · Medidas (6 abas não cabiam).
+6. **N1.5 Peso e medidas:** pronto na v0.71. Escondidos por padrão (Mostrar/Esconder na aba), gráfico de linha sem cor de bom/ruim, medidas próprias; nunca no Início e sem pontos na Jornada.
 7. **Depois:** lista de compras da dieta em Listas; ligação com a Jornada.
 
 **Navegação** (regra do app): abas no topo para as partes do mesmo conteúdo; barra de baixo com ferramentas do módulo (ideia: **Hoje · Saúde · Histórico**); botão + para criar (registro, refeição, remédio, consulta, medida) e, por último, Categorias se houver.

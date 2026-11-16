@@ -793,7 +793,62 @@ export interface Medicine {
   createdAt: string;
 }
 
+/** Consultas, exames e check-ups (N1.4). */
+export type ApptKind = 'consulta' | 'dentista' | 'exame' | 'checkup' | 'outro';
+
+export interface Appointment {
+  id: string;
+  kind: ApptKind;
+  /** Especialidade, nome do exame ou motivo curto (ex.: "Cardiologista", "Hemograma"). */
+  title: string;
+  /** Profissional ou clínica. */
+  who: string;
+  place: string;
+  /** AAAA-MM-DD; null = ainda a marcar. */
+  date: string | null;
+  time: string;
+  /** O que levar (jejum, exames antigos…). */
+  bring: string;
+  notes: string;
+  done: boolean;
+  /** Como foi / resultado (texto). */
+  result: string;
+  /** Check-up que se repete ao qual esta consulta pertence. */
+  routineId: string | null;
+  createdAt: string;
+}
+
+/** Check-up que se repete (ex.: dentista a cada 6 meses). */
+export interface CheckupRoutine {
+  id: string;
+  label: string;
+  kind: ApptKind;
+  months: number;
+  /** Última vez feita (AAAA-MM-DD); null = ainda não registrada. */
+  last: string | null;
+}
+
+/** Peso e medidas (N1.5): escondidos por padrão. */
+export interface BodyEntry {
+  id: string;
+  date: string;
+  /** Campo (ex.: "Peso") → valor. */
+  values: Record<string, number>;
+}
+
+export interface BodyData {
+  show: boolean;
+  /** Campos e unidades, na ordem (ex.: Peso kg, Cintura cm). */
+  fields: { name: string; unit: string }[];
+  entries: BodyEntry[];
+}
+
 export interface HealthData {
+  /** Consultas, exames e check-ups (N1.4). */
+  appts: Appointment[];
+  routines: CheckupRoutine[];
+  /** Peso e medidas (N1.5). */
+  body: BodyData;
   /** Dieta (N1.2). */
   diet: DietData;
   /** Remédios (N1.3). */

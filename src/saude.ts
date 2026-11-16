@@ -10,6 +10,7 @@ import { setAmount } from './habits.ts';
 import { addDays } from './utils.ts';
 import { dietCount, emptyDiet, normalizeDiet, type DietCount } from './dieta.ts';
 import { medCount, normalizeMeds, normalizeTaken } from './remedios.ts';
+import { emptyBody, normalizeAppts, normalizeBody, normalizeRoutines } from './consultas.ts';
 
 export const WATER_GOAL = 2000;
 export const WATER_STEP = 250;
@@ -21,7 +22,7 @@ export const FEELS: { id: SleepFeel; label: string }[] = [
 ];
 
 export function emptyHealth(): HealthData {
-  return { diet: emptyDiet(), meds: [], taken: {}, medsHabitId: null, water: { goal: WATER_GOAL, step: WATER_STEP, days: {}, habitId: null, asked: false }, sleep: {} };
+  return { appts: [], routines: [], body: emptyBody(), diet: emptyDiet(), meds: [], taken: {}, medsHabitId: null, water: { goal: WATER_GOAL, step: WATER_STEP, days: {}, habitId: null, asked: false }, sleep: {} };
 }
 
 type Rec = Record<string, unknown>;
@@ -44,6 +45,9 @@ export function normalizeHealth(raw: unknown): HealthData {
       sleep[k] = { bed: v.bed, wake: v.wake, feel: FEELS.some((f) => f.id === v.feel) ? (v.feel as SleepFeel) : null };
     }
   return {
+    appts: normalizeAppts(raw.appts),
+    routines: normalizeRoutines(raw.routines),
+    body: normalizeBody(raw.body),
     diet: normalizeDiet(raw.diet),
     meds: normalizeMeds(raw.meds),
     taken: normalizeTaken(raw.taken),
