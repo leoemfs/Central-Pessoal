@@ -183,7 +183,7 @@
 ## Feito
 | Versão | O que entrou | PR |
 |---|---|---|
-| v0.79 | N2.11: **barra própria do jogo** na Jornada, em pixel art: Jornada · Arsenal · Baús (com o número de baús esperando) · Ficha, cada uma numa tela (`#/jornada/arsenal`…); **Codex e Campanha apagados com cadeado** ("em breve"). Puxar a barra para cima abre o menu de sempre (sem pixel art); a seta ‹ volta ao app. Fora da Jornada, a barra continua a normal | — |
+| v0.79 | N2.11: **barra própria do jogo** na Jornada, em pixel art: Jornada · Arsenal · Baús (com o número de baús esperando) · Ficha, cada uma numa tela (`#/jornada/arsenal`…); **Codex e Campanha apagados com cadeado** ("em breve"). Puxar a barra para cima abre o menu de sempre (sem pixel art); a seta ‹ volta ao app. Fora da Jornada, a barra continua a normal | #138 |
 | v0.78 | E33: Aparência com **Estilo** (Clássico ou Flat) e **Cor** (Colorido ou Monocromático) para todos os ícones do app, incluindo categorias, listas e a barra. O antigo Flat vira Flat colorido | — |
 | v0.77 | E32: o **Flat vale para o app todo** (Configurações, atalhos, listas): quem não é módulo ganha o quadrado na cor de destaque | — |
 | v0.76 | E31: Aparência com as opções **em linhas** e o novo **Tamanho dos ícones** (Pequeno, Médio, Grande) para o menu e a barra juntos | — |
