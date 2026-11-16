@@ -2,7 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { emptyData, normalize, normalizeHabit } from './data.ts';
 import type { AppData } from './types.ts';
-import { dayNumbers, levelRewards, quaseLa, streakDays } from './jornada/home.ts';
+import { dayNumbers, journeyNews, levelRewards, newsDiff, quaseLa, showWeekSummary, streakDays, weekSummary } from './jornada/home.ts';
 import { defaultJourneyState } from './jornada/rules.ts';
 
 const DAY = '2026-11-16';
@@ -45,4 +45,32 @@ test('subiu de nível: baú dourado a cada 5, casas e pets do nível; nível gua
   assert.deepEqual(levelRewards(7).map((r) => r.title), ['Pet liberado: Gatinho', 'Pet liberado: Cãozinho']);
   assert.equal(levelRewards(8).length, 0);
   assert.equal(normalize({ ...emptyData(), journey: { avatar: null } }).journey.levelSeen, 0);
+});
+
+test('resumo da semana: a semana que acabou (seg a dom), uma vez por semana', () => {
+  // 16/11/2026 é segunda: resume 09 a 15/11.
+  const days = ['2026-11-08', '2026-11-09', '2026-11-10', '2026-11-15', DAY];
+  const h = normalizeHabit({ id: 'h', name: 'Ler', kind: 'construir', days: [0, 1, 2, 3, 4, 5, 6], attrs: ['INT'], checks: days, createdAt: '2026-11-01T10:00:00' });
+  const d: AppData = { ...emptyData(), habits: [h] };
+  const w = weekSummary(d, DAY)!;
+  assert.deepEqual([w.start, w.end], ['2026-11-09', '2026-11-15']);
+  assert.equal(w.missions, 3, 'só os 3 dias da semana');
+  assert.ok(w.xp > 0 && w.gold > 0);
+  assert.deepEqual(w.attrs.map((a) => a.code), ['INT']);
+  assert.equal(weekSummary({ ...emptyData() }, DAY), null, 'sem nada, sem resumo');
+  const s = defaultJourneyState();
+  assert.equal(showWeekSummary(s, DAY), true);
+  assert.equal(showWeekSummary({ ...s, weekSeen: '2026-11-16' }, '2026-11-20'), false, 'já visto nesta semana');
+  assert.equal(normalize({ ...emptyData(), journey: { avatar: null } }).journey.weekSeen, '');
+});
+
+test('novidades: só o que apareceu de novo', () => {
+  const d = emptyData();
+  const a = journeyNews(d, defaultJourneyState(), DAY);
+  const b = { ...a, titles: [...a.titles, 'x'], free: [...a.free, 'chapeu'], chests: [...a.chests, { key: 'k', kind: 'bronze' as const, date: DAY, reason: 'r' }] };
+  const diff = newsDiff(a, b);
+  assert.deepEqual(diff.titles, ['x']);
+  assert.deepEqual(diff.free, ['chapeu']);
+  assert.deepEqual(diff.chests.map((c) => c.key), ['k']);
+  assert.deepEqual(newsDiff(b, b), { titles: [], free: [], forge: [], chests: [] });
 });

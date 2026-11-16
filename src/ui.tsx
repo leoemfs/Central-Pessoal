@@ -390,13 +390,14 @@ export function Fullscreen({ onClose, label, className = '', children }: { onClo
 
 // ---------- Avisos rápidos ----------
 
-type ToastMsg = { id: number; title: string; text?: string };
+type ToastMsg = { id: number; title: string; text?: string; icon?: string; action?: { label: string; fn: () => void } };
 let toastSeq = 0;
 const toastListeners = new Set<(t: ToastMsg) => void>();
 
 /** Mostra um aviso curto na parte de baixo da tela. */
-export function notify(title: string, text?: string) {
-  const t = { id: ++toastSeq, title, text };
+/** Aviso rápido. `icon` (imagem) e `action` (um botão, ex.: "Pegar") são opcionais; com botão ele fica mais tempo. */
+export function notify(title: string, text?: string, opts: { icon?: string; action?: { label: string; fn: () => void } } = {}) {
+  const t = { id: ++toastSeq, title, text, ...opts };
   toastListeners.forEach((fn) => fn(t));
 }
 
@@ -405,7 +406,7 @@ export function Toasts() {
   useEffect(() => {
     const on = (t: ToastMsg) => {
       setList([t]);
-      window.setTimeout(() => setList((cur) => cur.filter((x) => x.id !== t.id)), 3200);
+      window.setTimeout(() => setList((cur) => cur.filter((x) => x.id !== t.id)), t.action ? 6000 : 3200);
     };
     toastListeners.add(on);
     return () => void toastListeners.delete(on);
@@ -413,9 +414,24 @@ export function Toasts() {
   return createPortal(
     <div className="toasts" aria-live="polite">
       {list.map((t) => (
-        <div key={t.id} className="toast">
-          <strong>{t.title}</strong>
-          {t.text && <span className="muted small">{t.text}</span>}
+        <div key={t.id} className={`toast${t.icon || t.action ? ' rich' : ''}`}>
+          {t.icon && <img className="toast-icon" alt="" src={t.icon} />}
+          <div className="toast-body">
+            <strong>{t.title}</strong>
+            {t.text && <span className="muted small">{t.text}</span>}
+          </div>
+          {t.action && (
+            <button
+              type="button"
+              className="btn primary small"
+              onClick={() => {
+                setList((cur) => cur.filter((x) => x.id !== t.id));
+                t.action!.fn();
+              }}
+            >
+              {t.action.label}
+            </button>
+          )}
         </div>
       ))}
     </div>,

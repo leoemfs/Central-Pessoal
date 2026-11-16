@@ -5,6 +5,7 @@ import { Icon, PageHeader, Pill, Pixels, Progress } from '../ui';
 import { JornadaHome, JornadaUnlock } from './JornadaHome';
 import { JornadaPortal } from './JornadaPortal';
 import { JornadaHud } from './JornadaTopo';
+import { JornadaEventos } from './JornadaEventos';
 import { welcomed } from '../jornada/rules';
 import { journeyTab } from '../jornada/tabs';
 import { useRoute } from '../router';
@@ -86,6 +87,7 @@ export function Jornada() {
       <>
         <PageHeader title={TAB_TITLES[journeyTab(route.sub)]} tabs={welcomed(data.journey) ? <JornadaHud /> : undefined} />
         {welcomed(data.journey) && <JornadaPortal />}
+        {welcomed(data.journey) && <JornadaEventos />}
         <JornadaHome />
       </>
     );

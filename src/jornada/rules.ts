@@ -61,6 +61,8 @@ export interface JourneyState {
   lastSeen: JourneySnapshot | null;
   /** N2.13: último nível já comemorado na tela "Subiu de nível" (0 = ainda não marcou). */
   levelSeen: number;
+  /** N2.17d: semana (segunda) cujo Resumo da semana já foi mostrado. */
+  weekSeen: string;
   /** N2.6: nome dado a cada pet (id → nome) e pelagem escolhida (id → pelagem). */
   petNames: Record<string, string>;
   petStyle: Record<string, string>;
@@ -94,6 +96,7 @@ export function defaultJourneyState(): JourneyState {
     weather: 'aleatorio',
     lastSeen: null,
     levelSeen: 0,
+    weekSeen: '',
     petNames: {},
     petStyle: {},
     gifts: [],
@@ -160,6 +163,7 @@ export function normalizeJourney(raw: unknown): JourneyState {
     gifts: Array.isArray(r.gifts) ? r.gifts.filter((g): g is GiftRecord => !!g && typeof g.day === 'string' && typeof g.gold === 'number').map((g) => ({ day: g.day, n: Math.max(1, Math.floor(Number(g.n) || 1)), gold: Math.max(0, g.gold), chest: g.chest === 'bronze' || g.chest === 'prata' || g.chest === 'dourado' ? g.chest : null })) : [],
     games: normalizeGames(r.games),
     levelSeen: typeof r.levelSeen === 'number' && Number.isFinite(r.levelSeen) && r.levelSeen > 0 ? Math.floor(r.levelSeen) : 0,
+    weekSeen: typeof r.weekSeen === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(r.weekSeen) ? r.weekSeen : '',
     profile: normalizeProfile(r.profile),
   };
 }
