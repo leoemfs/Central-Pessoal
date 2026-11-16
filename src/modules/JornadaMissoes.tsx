@@ -14,6 +14,7 @@ import { Field, Icon, MoneyInput, notify, Sheet, type IconName } from '../ui';
 import { balance, deposit, progress, removeMove } from '../boxes';
 import { PX } from '../jornada/px';
 import { floatTexts, flyCoins } from './jornadaFx';
+import { campaign } from '../jornada/campaign';
 import { COIN_ICON } from '../jornada/catalog';
 import { missionsToday, missionsWeek, type Mission } from '../jornada/missions';
 
@@ -31,6 +32,15 @@ export function MissionsCard() {
     const r = btn.getBoundingClientRect();
     floatTexts(r, [{ text: `+${m.xp} XP`, color: 'var(--jn-xp)' }, ...Object.entries(m.attrs).map(([k, v]) => ({ text: `+${v} ${k}`, color: color(k) }))]);
     if (m.gold) flyCoins(r, COIN_ICON, Math.min(6, Math.ceil(m.gold / 3)));
+    // Chefe da Campanha: cada missão é um golpe.
+    const card = document.getElementById('jn-bosscard');
+    if (card && campaign(data, data.journey, today).stage === 'chefe') {
+      const img = card.querySelector('img');
+      img?.classList.remove('hit');
+      void (img as HTMLElement | null)?.offsetWidth;
+      img?.classList.add('hit');
+      floatTexts(card.getBoundingClientRect(), [{ text: '−1 HP', color: '#f87171' }]);
+    }
   };
   const act = (m: Mission, btn?: HTMLElement) => {
     const a = m.action;

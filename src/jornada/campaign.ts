@@ -34,9 +34,30 @@ export interface CampState {
   intro: string[];
   /** Já vestiu algum item do Arsenal (objetivo da Vila). */
   dressed: boolean;
+  /** N2.10b: chefe da região atual, desde que apareceu. */
+  boss: BossState | null;
 }
 
-export const defaultCamp = (): CampState => ({ cleared: [], intro: [], dressed: false });
+export interface BossState {
+  /** Região do chefe. */
+  id: string;
+  /** Dia em que a luta começou. */
+  start: string;
+  /** Vida cheia (fica a mesma em cada tentativa). */
+  max: number;
+  /** Missões que já estavam feitas no dia em que ele apareceu (não contam). */
+  base: number;
+  /** Quantas fugas já foram avisadas. */
+  seen: number;
+}
+
+export const defaultCamp = (): CampState => ({ cleared: [], intro: [], dressed: false, boss: null });
+
+function normalizeBoss(x: unknown): BossState | null {
+  const b = (x && typeof x === 'object' ? x : null) as Partial<BossState> | null;
+  if (!b || typeof b.id !== 'string' || typeof b.start !== 'string' || typeof b.max !== 'number') return null;
+  return { id: b.id, start: b.start, max: Math.max(1, Math.round(b.max)), base: Math.max(0, Math.round(Number(b.base) || 0)), seen: Math.max(0, Math.round(Number(b.seen) || 0)) };
+}
 
 export function normalizeCamp(x: unknown): CampState {
   const r = (x && typeof x === 'object' ? x : {}) as Partial<CampState>;
@@ -44,6 +65,7 @@ export function normalizeCamp(x: unknown): CampState {
     cleared: Array.isArray(r.cleared) ? r.cleared.filter((c): c is { id: string; at: string } => !!c && typeof c.id === 'string' && typeof c.at === 'string') : [],
     intro: Array.isArray(r.intro) ? r.intro.filter((i): i is string => typeof i === 'string') : [],
     dressed: r.dressed === true,
+    boss: normalizeBoss(r.boss),
   };
 }
 
@@ -278,9 +300,66 @@ export interface CampaignView {
   done: boolean;
   /** Progresso dos objetivos da região atual. */
   goals: { key: string; title: string; need: number; have: number }[];
-  /** Objetivos cumpridos; com chefe, ele chega na N2.10b. */
-  stage: 'objetivos' | 'chefe' | 'pronto' | 'fim';
+  /**
+   * objetivos → (com chefe) aparece → chefe → pronto (vencido) · sem chefe: objetivos → pronto · fim.
+   * "aparece": objetivos cumpridos, o chefe ainda não se apresentou.
+   */
+  stage: 'objetivos' | 'aparece' | 'chefe' | 'pronto' | 'fim';
   start: string;
+  /** Luta com o chefe (quando há uma). */
+  boss: BossView | null;
+}
+
+export interface BossView {
+  hp: number;
+  max: number;
+  /** Dias da tentativa atual que ainda faltam (contando hoje). */
+  daysLeft: number;
+  /** Quantas vezes ele já fugiu. */
+  fled: number;
+  beaten: boolean;
+}
+
+/** Dias de cada tentativa: 7, ou 14 no Castelo do Caos. */
+export const bossDays = (id: string) => (id === 'castelo' ? 14 : 7);
+const SHARE = { tranquilo: 0.6, equilibrado: 0.8, desafiador: 0.95 } as const;
+
+/** Missões cumpridas num dia (as mesmas da Jornada: hábitos, tarefas, contas, diário, caixinha). */
+const doneOn = (d: AppData, day: string) => missionsToday(d, day).filter((m) => m.done).length;
+
+/** Vida do chefe: missões de um período (pela média dos últimos 7 dias) × ritmo da entrevista. Mínimo 6. */
+export function bossMax(d: AppData, today: string, days: number, pace: Profile['pace'] | undefined): number {
+  let total = 0;
+  for (let i = 1; i <= 7; i++) total += missionsToday(d, addDays(today, -i)).length;
+  const perDay = Math.max(total / 7, missionsToday(d, today).length, 1);
+  return Math.max(6, Math.round(perDay * days * SHARE[pace ?? 'equilibrado']));
+}
+
+/** Como está a luta: cada missão cumprida é um golpe; se o prazo acaba, ele foge e volta com a vida cheia. */
+export function bossView(d: AppData, b: BossState, today: string): BossView {
+  const days = bossDays(b.id);
+  let hits = 0;
+  let cycle = 0;
+  for (let day = b.start; day <= today; day = addDays(day, 1)) {
+    const c = Math.floor(diffDays(b.start, day) / days);
+    if (c !== cycle) {
+      cycle = c;
+      hits = 0;
+    }
+    hits += Math.max(0, doneOn(d, day) - (day === b.start ? b.base : 0));
+    if (hits >= b.max) return { hp: 0, max: b.max, daysLeft: 0, fled: cycle, beaten: true };
+  }
+  const daysLeft = days - (diffDays(b.start, today) % days);
+  return { hp: b.max - hits, max: b.max, daysLeft, fled: cycle, beaten: false };
+}
+
+/** O chefe se apresenta (tela "Um chefe apareceu!" → Enfrentar): a luta começa hoje. */
+export function startBoss(d: AppData, state: JourneyState, today: string): JourneyState {
+  const v = campaign(d, state, today);
+  if (v.stage !== 'aparece') return state;
+  const ch = v.chapters[v.current];
+  const boss: BossState = { id: ch.id, start: today, max: bossMax(d, today, bossDays(ch.id), state.profile?.pace), base: doneOn(d, today), seen: 0 };
+  return { ...state, camp: { ...state.camp, boss } };
 }
 
 /** Onde a pessoa está na campanha. Começa no dia da chegada (baú de boas-vindas). */
@@ -297,8 +376,9 @@ export function campaign(d: AppData, state: JourneyState, today: string = todayI
   const start = current === 0 ? arrival : (camp.cleared.find((c) => c.id === chs[current - 1]?.id)?.at ?? arrival);
   const goals = done ? ch.goals.map((g) => ({ ...g, have: g.need })) : ch.goals.map((g) => ({ ...g, have: Math.min(g.need, goalCount(g.key, d, camp, start, today, p)) }));
   const all = goals.every((g) => g.have >= g.need);
-  const stage = done ? 'fim' : !all ? 'objetivos' : ch.boss ? 'chefe' : 'pronto';
-  return { chapters: chs, current: idx, done, goals, stage, start };
+  const fight = !done && all && ch.boss && camp.boss?.id === ch.id ? bossView(d, camp.boss, today) : null;
+  const stage = done ? 'fim' : !all ? 'objetivos' : !ch.boss ? 'pronto' : !fight ? 'aparece' : fight.beaten ? 'pronto' : 'chefe';
+  return { chapters: chs, current: idx, done, goals, stage, start, boss: fight };
 }
 
 /** Conclui a região atual (só quando está "pronto"): guarda a data e, se houver, dá o item da região. */
@@ -306,6 +386,6 @@ export function clearChapter(state: JourneyState, view: CampaignView, today: str
   if (view.stage !== 'pronto') return state;
   const ch = view.chapters[view.current];
   const owned = [...state.owned, ...[ch.reward.item, ch.reward.home].filter((x): x is string => !!x && !state.owned.includes(x))];
-  return { ...state, owned, camp: { ...state.camp, cleared: [...state.camp.cleared, { id: ch.id, at: today }] } };
+  return { ...state, owned, camp: { ...state.camp, boss: null, cleared: [...state.camp.cleared, { id: ch.id, at: today }] } };
 }
 
