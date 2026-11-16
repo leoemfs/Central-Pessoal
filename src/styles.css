@@ -11941,3 +11941,50 @@ body.bar-labels.jn-tall {
     animation: none;
   }
 }
+
+/* ---------- N2.18a: fichas dos mini games ---------- */
+.jn-fichas-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.jn-fichas-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 34px;
+  padding: 0 12px;
+  border-radius: 999px;
+  background: var(--raised-2);
+  color: #f472b6;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  flex: none;
+}
+.jn-fichas-pill img {
+  width: 16px;
+  height: 16px;
+  image-rendering: pixelated;
+}
+.jn-fichas-time {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.jn-fichas-bar {
+  height: 6px;
+  border-radius: 999px;
+  background: var(--raised-2);
+  overflow: hidden;
+}
+.jn-fichas-bar i {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #be185d, #f472b6);
+}
+.jn-fichas-bar.done i {
+  background: #52525b;
+}

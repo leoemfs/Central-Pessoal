@@ -958,3 +958,8 @@ Uma campanha fixa não serve para todo mundo. Por exemplo, "14 dias sem refriger
   - 50%: baú dourado;
   - 75%: baú de cristal;
   - 100%: título **Lenda do Codex**.
+
+
+### B.17 Bichinho virtual e fichas (N2.18, aprovado 16/11)
+
+Prévias: v1 https://claude.ai/artifact/HVXga55DMVo9m3jyRgtKA2 e v2 (modelo) https://claude.ai/artifact/Q2pKUhPZ7jXtJpxxH8UYms. Partes: **a) fichas e limite de 30 min (feito, v0.101)**: `src/jornada/games.ts` (`fichas`, `minutesLeft`, `finishGame` com segundos jogados; `games.plays` e `games.fichasSpent` no estado; o ouro antigo de `games.prizes` continua na carteira). b) tela cheia do bichinho (cartão no Fliperama, quarto pela moradia, pet com mais pixels, ações; lugares Quarto · Banheiro · Lá fora · Loja). c) banheiro e lá fora. d) loja com itens que aparecem no cenário. Lado e costas do pet aparecem pela cena, sem botão de girar. O bichinho nunca fica doente nem triste.

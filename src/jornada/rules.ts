@@ -34,7 +34,12 @@ export interface ChestRecord {
 
 export interface GamesState {
   records: Record<string, number>;
+  /** Ouro que os jogos deram antes das fichas (até a v0.100). Continua na carteira. */
   prizes: { day: string; game: string; gold: number }[];
+  /** N2.18a: cada partida (dia, jogo, segundos jogados, fichas ganhas). */
+  plays: { day: string; game: string; seconds: number; fichas: number }[];
+  /** Fichas gastas no bichinho virtual. */
+  fichasSpent: number;
 }
 
 /** Presente de um dia de visita, já recebido. */
@@ -107,7 +112,7 @@ export function defaultJourneyState(): JourneyState {
     petNames: {},
     petStyle: {},
     gifts: [],
-    games: { records: {}, prizes: [] },
+    games: { records: {}, prizes: [], plays: [], fichasSpent: 0 },
     profile: null,
   };
 }
@@ -117,7 +122,9 @@ function normalizeGames(x: unknown): GamesState {
   const g = (x && typeof x === 'object' ? x : {}) as Partial<GamesState>;
   const records = g.records && typeof g.records === 'object' ? Object.fromEntries(Object.entries(g.records).filter((e): e is [string, number] => typeof e[1] === 'number' && e[1] >= 0)) : {};
   const prizes = Array.isArray(g.prizes) ? g.prizes.filter((p) => p && typeof p.day === 'string' && typeof p.game === 'string' && typeof p.gold === 'number').map((p) => ({ day: p.day, game: p.game, gold: Math.max(0, Math.min(20, p.gold)) })).slice(-400) : [];
-  return { records, prizes };
+  const plays = Array.isArray(g.plays) ? g.plays.filter((p) => p && typeof p.day === 'string' && typeof p.game === 'string' && typeof p.seconds === 'number' && typeof p.fichas === 'number').map((p) => ({ day: p.day, game: p.game, seconds: Math.max(0, Math.min(600, p.seconds)), fichas: Math.max(0, Math.min(10, p.fichas)) })).slice(-600) : [];
+  const fichasSpent = typeof g.fichasSpent === 'number' && Number.isFinite(g.fichasSpent) && g.fichasSpent > 0 ? g.fichasSpent : 0;
+  return { records, prizes, plays, fichasSpent };
 }
 
 const strMap = (x: unknown, max: number): Record<string, string> =>

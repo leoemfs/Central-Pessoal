@@ -374,6 +374,8 @@ const CHEST_PAL: Record<string, Palette> = {
 };
 export const chestIcon = (kind: string, open: boolean) => sprite(open ? CHEST_OPEN : CHEST_CLOSED, CHEST_PAL[kind] ?? CHEST_PAL.bronze, 16);
 export const COIN_ICON = sprite(['..OOOO..', '.OYYYYO.', 'OYWYYyYO', 'OYYYYyYO', 'OYYYYyYO', 'OYyyyyYO', '.OYYYYO.', '..OOOO..'], { Y: '#facc15', y: '#ca8a04', W: '#fff7ed' }, 8);
+/** Ficha dos mini games (N2.18a): moeda só do bichinho virtual. */
+export const FICHA_ICON = sprite(['..OOOO..', '.OPPPPO.', 'OPWPPpPO', 'OPPHHpPO', 'OPPHHpPO', 'OPppppPO', '.OPPPPO.', '..OOOO..'], { P: '#f472b6', p: '#be185d', W: '#fff1f2', H: '#fff1f2' }, 8);
 export const GEM_ICON = sprite(['...OO...', '..OCWO..', '.OCCWcO.', 'OCCCWccO', '.OCCWcO.', '..OCcO..', '...OO...'], { C: '#67e8f9', c: '#0e7490', W: '#ecfeff' }, 8);
 
 // ---------- Personagens da campanha (da prévia da Jornada) ----------
