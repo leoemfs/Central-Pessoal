@@ -666,6 +666,8 @@ Prévias: **"Jornada RPG"** (https://claude.ai/artifact/62xbF4H9CfYjaz7RaX554h, 
 | Hábito novo com **"Treina quais atributos?"** sugerido pelo nome | v2 · Hábito que treina atributos | já existe no Núcleo | — |
 | **Modo Jornada** nas Configurações, cartão no Início | v1 · Configurações; Início com a Jornada | já existe (v0.58) | — |
 
+**N2.14, entrada na Jornada (v0.84):** a opção B da prévia "Entrada na Jornada" (https://claude.ai/artifact/8aDRvyPSSCfYjFkbZpNpbH) é a padrão, em `src/modules/JornadaPortal.tsx`. As opções A, C, D (espiral noturna) e E (estrela) ficam para as regiões da campanha; a proposta de qual região usa qual está na Central (N2.14).
+
 Depois: N7 (Estudos × Jornada, `estudos-jornada.md`).
 
 **N2.1 refeita seguindo a prévia (feita em 15/11, v0.57).** A primeira versão (PR #87) ficou simples demais: não seguiu a prévia "Jornada (pets, Codex, acessórios, visitas)" (`app.js`: telas `unlock`, `create`, `welcome`). A nova N2.1 é uma chegada em **tela cheia**, com a fonte Pixelify Sans e animações (com "menos movimento", sem elas):
