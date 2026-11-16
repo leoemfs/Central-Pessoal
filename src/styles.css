@@ -8479,17 +8479,23 @@ body.bar-flat .tabbar .tb {
   position: relative;
 }
 body.bar-flat .tabbar .tb-pill {
-  width: 34px;
-  height: 34px;
-  border-radius: 10px;
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
   background: linear-gradient(180deg, var(--flat-a, #9aa3b2), var(--flat-b, #4b5563));
   color: var(--flat-ink, #fff);
   box-shadow: none;
   opacity: 0.55;
 }
 body.bar-flat .tabbar .tb-pill svg {
-  width: 20px;
-  height: 20px;
+  width: 23px;
+  height: 23px;
+}
+/* Na grade do menu, o quadrado colorido parece maior que o ícone simples: um pouco menor. */
+body.icons-flat .mg-icon[data-mod] {
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
 }
 body.bar-flat .tabbar .tb.active .tb-pill,
 body.bar-flat .tabbar a.tb.active .tb-pill {
@@ -8500,7 +8506,7 @@ body.bar-flat .tabbar .tb.active::after {
   content: '';
   position: absolute;
   left: 50%;
-  top: calc(50% + 21px);
+  top: calc(50% + 24px);
   width: 5px;
   height: 5px;
   margin-left: -2.5px;
