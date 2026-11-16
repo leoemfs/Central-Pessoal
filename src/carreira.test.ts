@@ -2,7 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { applySalaryToFinance, currentWork, nextMeeting, newMeeting, openTodos, salaryChanges, splitMeetings, tenure } from './carreira.ts';
 import { addIncome } from './incomes.ts';
-import { newProject, projectProgress, syncCareerEvents } from './carreira.ts';
+import { newProject, postponeMeeting, projectProgress, restoreMeetingDate, syncCareerEvents } from './carreira.ts';
 import { advance, closeJob, closedJobs, newJob, normalizeCareer, openJobs, reopenJob, setStage, stageCounts, waitingDays } from './carreira.ts';
 import { normalize } from './data.ts';
 
@@ -154,4 +154,20 @@ test('N8.3: currículo normaliza, ordena e traz ciclos concluídos de Estudos', 
   assert.deepEqual(cyclesToResume(d).map((x) => [x.id, x.to]), [['c1', '2026-10']]);
   d = upsertResume({ id: 'r', kind: 'curso', title: 'Inglês A1', org: '', from: '2026-09', to: '2026-10', note: '', cycleId: 'c1', createdAt: '' })(d);
   assert.equal(cyclesToResume(d).length, 0);
+});
+
+test('adiar reunião: muda só esta; a próxima da série fica no dia fixo; dá para desfazer', () => {
+  const m = { ...newMeeting('m', '2026-11-20'), repeatDays: 7, time: '10:00' };
+  const a = postponeMeeting(m, '2026-11-23', '14:00');
+  assert.equal(a.date, '2026-11-23');
+  assert.equal(a.time, '14:00');
+  assert.equal(a.originalDate, '2026-11-20');
+  const b = postponeMeeting(a, '2026-11-24');
+  assert.equal(b.originalDate, '2026-11-20');
+  assert.equal(nextMeeting(b, 'n')!.date, '2026-11-27');
+  assert.equal(nextMeeting(b, 'n')!.originalDate, null);
+  assert.equal(restoreMeetingDate(b).date, '2026-11-20');
+  assert.equal(restoreMeetingDate(b).originalDate, null);
+  assert.equal(postponeMeeting(a, '2026-11-20').originalDate, null);
+  assert.equal(normalizeCareer({ meetings: [{ id: 'x', date: '2026-11-20', originalDate: 'ontem' }] }).meetings[0].originalDate, null);
 });
