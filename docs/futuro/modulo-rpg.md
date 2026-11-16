@@ -641,6 +641,31 @@ A Jornada desbloqueia em 16/11. Até aqui existiam só as regras e as artes (pas
 
 **N2.11, barra própria do jogo (v0.79, pedido em 16/11):** dentro da Jornada em uso (desbloqueada, "Quero a Jornada" e personagem criado), a barra de baixo vira a barra do jogo em pixel art: **Jornada** (cena, "Desde a sua última visita", Mestra Lume e missões) · **Arsenal** · **Baús** · **Ficha** (atributos, de onde veio o XP e Personagem). **Codex** (N2.7) e **Campanha** (N2.10) aparecem apagados, com cadeado, e dizem "em breve" ao tocar; quando ficarem prontos, é só tirar o cadeado em `src/jornada/tabs.ts`. O menu ao puxar a barra para cima continua o do app (decidido pelo Leonardo: só a barra muda).
 
+### B.14. O que as prévias têm e o app ainda não (conferido em 16/11)
+
+O Leonardo notou que as prévias não estavam sendo aproveitadas por inteiro. **Regra daqui para frente:** antes de construir cada parte, abrir a prancha da prévia que corresponde a ela (tabela abaixo) e seguir o visual e os detalhes dela; o que mudar tem que ser dito antes.
+
+Prévias: **"Jornada RPG"** (https://claude.ai/artifact/62xbF4H9CfYjaz7RaX554h, 19 pranchas v1 a v3) e **"Prévia da Jornada"** (https://claude.ai/artifact/LDdQDmTYY3j56etqqMc9Qc, jogável).
+
+| O que a prévia tem | Onde (prancha) | Situação no app | Parte |
+|---|---|---|---|
+| Tela principal: **dias de sequência**, cartão **"Baús para abrir · 2 prontos · Abrir"**, **"Seu dia em números"** (XP hoje, ouro hoje, missões 5/6), **"Perto de desbloquear"** e **"Quase lá"** | v2 · Jornada de dia/noite; Prévia da Jornada (tela principal) | falta | **N2.13** |
+| **Subiu de nível** em tela de festa ("LEVEL UP! NÍVEL 8", recompensas, Continuar) | v1 · Subiu de nível | falta (só aparece no resumo da visita) | **N2.13** |
+| **Personagem em tela cheia** que ocupa a tela, título em placa dourada, relógio, céu para escolher, espaços com moldura de raridade, Pet e Casa | v3 · Avatar em tela cheia | mais simples | **N2.12** |
+| **Tocar no personagem e no pet** na tela cheia (corações, reação) | Prévia da Jornada | falta | **N2.12** |
+| **Artefato flutuando** ao lado do personagem; cristais (◆) no topo do Arsenal; efeito do item (✦) | v3 · Arsenal com provador | parcial | **N2.12** |
+| **Conquistas** (medalhas com data; "Próximas" com barra de progresso) | v1 · Conquistas | falta | **N2.5** |
+| **Título em uso** embaixo do nome, escolher título, **forja mística**, classes e **híbridas** explicadas | v3 · Títulos, forja mística e classes | regras prontas, sem tela | **N2.5** |
+| **Desbloqueios por atributo** na Ficha ("Força 40 → Bracelete do titã") | v2 · Atributos do avatar | falta | **N2.5** |
+| **Pets e moradas** (escolher, editar nome e cor do pet) | v3 · Pets e moradas; Prévia da Jornada (Arsenal › Pets) | falta | **N2.6** |
+| **Presente do dia** por abrir o app, chama de dias seguidos com 1 folga por semana | Prévia da Jornada (F.2) | só os dados (`visitDays`) | **N2.6** |
+| **Coleção / Codex** (9 de 19; silhuetas com dica) | v2 · Coleção; Prévia da Jornada (Arsenal › Codex) | falta (cadeado na barra) | **N2.7** |
+| **"Como ganhar XP e ouro"** (regras justas, por módulo) | v2 · Como ganha XP e ouro | parcial ("De onde veio o XP") | **N2.13** |
+| **Pote da caixinha** na cena e "Guardar" nas missões | Prévia da Jornada | falta | **N2.10** |
+| **Campanha**: mapa, Mestra Lume apresentando a Vila do Começo, chefe semanal com barra de vida, regiões | Prévia da Jornada | falta (cadeado na barra) | **N2.10** |
+| Hábito novo com **"Treina quais atributos?"** sugerido pelo nome | v2 · Hábito que treina atributos | já existe no Núcleo | — |
+| **Modo Jornada** nas Configurações, cartão no Início | v1 · Configurações; Início com a Jornada | já existe (v0.58) | — |
+
 Depois: N7 (Estudos × Jornada, `estudos-jornada.md`).
 
 **N2.1 refeita seguindo a prévia (feita em 15/11, v0.57).** A primeira versão (PR #87) ficou simples demais: não seguiu a prévia "Jornada (pets, Codex, acessórios, visitas)" (`app.js`: telas `unlock`, `create`, `welcome`). A nova N2.1 é uma chegada em **tela cheia**, com a fonte Pixelify Sans e animações (com "menos movimento", sem elas):
