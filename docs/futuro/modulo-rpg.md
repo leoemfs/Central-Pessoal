@@ -662,6 +662,34 @@ A Jornada desbloqueia em 16/11. Até aqui existiam só as regras e as artes (pas
 
 Depois da Jornada: **N7** (Estudos × Jornada).
 
+### B.16. A "Prévia da Jornada" é o modelo (decidido em 16/11)
+
+O Leonardo comparou o app com a prévia jogável "Prévia da Jornada" (https://claude.ai/artifact/LDdQDmTYY3j56etqqMc9Qc; código em `app.js`, `sprites.js`, `styles.css`) e decidiu: **ela é o modelo da Jornada**. A **barra fica como está** (duas fileiras, N2.15). **Antes de cada mudança, ele escolhe entre o atual e a prévia**, parte por parte. **Todos os itens e todas as raridades da prévia** entram no app.
+
+**Como cada parte é feita daqui para frente:** abrir o código da prévia daquela parte, mostrar "atual × prévia" para a escolha, e então copiar o comportamento escolhido, só adaptando aos dados reais.
+
+**O que a prévia tem a mais (conferido no código e nas imagens de 16/11):**
+- **Catálogo:** 49 itens (o app tem 31): 4 arcos (curto, longo de teixo, élfico, do vento), 4 anéis (bracelete do titã, bracelete do mercador, anel de ferro, de foco, da aurora), colares (gota, coração de cristal, pérola, dente de lobo), mágicos (pena, grimório, lanterna, ampulheta, olho, fênix, estrela polar, lanterna da calma, grimório das estrelas) e itens de região (manto da floresta, armaduras da montanha e da arena, botas do pântano, cajado do saber, lâmina da ordem). Espaços de equipamento: elmo, roupa, botas, arma, **anel, colar e mágico** (o app usa "artefato" ×2).
+- **Topo fixo** em todas as telas: rosto, nome, nível e classe, 🔥 dias seguidos abrindo o app, ouro, cristais, barra de XP até o próximo nível.
+- **Tela principal:** cena com relógio e botão de ampliar, título em placa abaixo da cena, **presente do dia** (caixa de presente, "N presentes esperando", tira 1 a 7), **cartão da campanha**, **cartão da caixinha**, **avisos** ("Liberado: Ampulheta", "pronta para forjar", baús esperando), missões com "Tive uma recaída", "Quase lá".
+- **Baús:** número na barra, "Abrir todos os N baús", cartões na cor de cada baú, "Como ganhar" com o que cada um dá, "o próximo vem com X dias".
+- **Recompensas animadas:** moedas voando para o topo, confete, telas de título novo, nível, vitória e objetivo realizado; **Resumo da semana** ("Que semana!") com "Abrir os baús".
+- **Caixinha na Jornada:** criar com meta e plano, pote na cena, guardar com recompensa (+20 XP, +10 ouro, +3 DIS na data do plano), marcos 25/50/75/100% com baús, "Guardar" nas missões, "Realizei o objetivo".
+- **Chegada:** entrevista dentro da chegada; Mestra Lume apresenta a Vila do Começo; dica "a seta volta ao app".
+- **Pet:** editor com as cores em cartões com o desenho; Codex com "Editar nome e cor".
+- **Campanha:** mapa com capítulos e chefes (N2.10).
+
+**Partes (N2.17), cada uma com a escolha "atual × prévia" antes:**
+1. **N2.17a Catálogo e espaços:** os 49 itens e as artes da prévia; espaços anel, colar e mágico. M
+2. **N2.17b Topo fixo e tela principal:** topo com 🔥, ouro, cristais e XP; presente do dia, avisos, cartão da caixinha e da campanha como na prévia. M
+3. **N2.17c Baús como na prévia:** cores por tipo, abrir todos, "Como ganhar", número na barra. P
+4. **N2.17d Recompensas animadas e Resumo da semana.** M
+5. **N2.17e Caixinha na Jornada.** M
+6. **N2.17f Pet e Codex como na prévia** (cores em cartões, editar pelo Codex). P
+7. **N2.17g Chegada completa** (entrevista na chegada, Mestra Lume apresentando), junto com o começo da Campanha (N2.10a). M
+
+Depois: N2.16b (Memória e Pescaria), N2.8 e o resto da Campanha.
+
 **N2.9b, como ficou (v0.74):** convite da Mestra Lume na Jornada até a entrevista ser feita (para quem já entrou na Jornada; não entra no meio da chegada). Respostas em `journey.profile` (`src/jornada/interview.ts`); o que ela cria fica em `src/jornada/interviewApply.ts`. Treino: 2× ter/qui, 3× seg/qua/sex, 4× seg/ter/qui/sex, 5× seg a sex. Terapia: quarta. Refazer não apaga nem duplica hábitos; a caixinha só é criada se não houver uma aberta com o mesmo nome. O desafio de dinheiro (ex.: "gastar demais") fica guardado para a campanha (Mercado de Ouro) e ainda não vira missão.
 
 **N2.11, barra própria do jogo (v0.79, pedido em 16/11):** dentro da Jornada em uso (desbloqueada, "Quero a Jornada" e personagem criado), a barra de baixo vira a barra do jogo em pixel art: **Jornada** (cena, "Desde a sua última visita", Mestra Lume e missões) · **Arsenal** · **Baús** · **Ficha** (atributos, de onde veio o XP e Personagem). **Codex** (N2.7) e **Campanha** (N2.10) aparecem apagados, com cadeado, e dizem "em breve" ao tocar; quando ficarem prontos, é só tirar o cadeado em `src/jornada/tabs.ts`. O menu ao puxar a barra para cima continua o do app (decidido pelo Leonardo: só a barra muda).
