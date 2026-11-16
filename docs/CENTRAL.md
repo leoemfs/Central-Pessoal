@@ -177,7 +177,7 @@
 ## Feito
 | Versão | O que entrou | PR |
 |---|---|---|
-| v0.72 | N8.7: **Adiar reunião** (amanhã, +1 semana ou outra data e hora) muda só aquela reunião; mostra "adiada de…", dá para voltar à data original, e "Marcar a próxima" segue no dia fixo da série. Agenda acompanha sozinha | — |
+| v0.72 | N8.7: **Adiar reunião** (amanhã, +1 semana ou outra data e hora) muda só aquela reunião; mostra "adiada de…", dá para voltar à data original, e "Marcar a próxima" segue no dia fixo da série. Agenda acompanha sozinha || #119 |
 | v0.71.1 | E29: Aparência › **Cor dos ícones** (Monocromático ou Colorido: cada módulo com a sua cor na gaveta do menu, no Mais e nos Guardados). Ajuste: a **seta ‹** do topo sai na **cor de destaque** (estava branca), também no modo colorido | — |
 | v0.71 | N1.4 + N1.5 (juntos, a pedido): **Consultas, exames e check-ups** (Agenda sozinha, "Já fui" com retorno, pedidos de exame e repetir; Próximos check-ups com "Marcar" na Agenda quando vence) e **Peso e medidas** (escondidos por padrão, gráfico, sem pontos); abas Dia · Dieta · Remédios · Consultas · Medidas | — |
 | v0.70 | N1.3: **Remédios** na Saúde: dose, horários, dias e período; "Tomei" com a hora no Hoje; aviso no Google Agenda em cada dose (14 dias); hábito "Tomar remédio" marcado sozinho; +3 RES por dia completo; doses no Histórico | #115 |
