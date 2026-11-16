@@ -9577,3 +9577,158 @@ body.bar-labels.bar-flat .tabbar .tb-label {
     animation: none !important;
   }
 }
+
+/* ---------- Jornada N2.5: Ficha, Títulos, Forja e Classes (prancha "v3 · Títulos, forja mística e classes") ---------- */
+.jn-class-tag {
+  font-size: 11px;
+  color: var(--jn-gold);
+  letter-spacing: 0.06em;
+}
+.jn-attrs2,
+.jn-unlocks,
+.jn-titles,
+.jn-classes {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.jn-attrs2 li {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.jn-attr-row {
+  display: grid;
+  grid-template-columns: 1fr 44px;
+  gap: 10px;
+  align-items: center;
+}
+.jn-attr-row strong {
+  text-align: right;
+}
+.jn-unlocks li,
+.jn-titles li {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.jn-unlocks img {
+  width: 36px;
+  height: 36px;
+  flex: none;
+  image-rendering: pixelated;
+}
+.jn-unlocks li > div,
+.jn-titles li > div {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 14px;
+}
+.jn-titles img,
+.jn-title-now img {
+  width: 34px;
+  flex: none;
+  image-rendering: pixelated;
+}
+.jn-titles li:not(.earned) strong {
+  color: var(--muted);
+}
+.jn-title-now {
+  flex-direction: row;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.jn-title-now > div {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+}
+.jn-forge-head {
+  border-color: rgb(253 224 71 / 0.35);
+  background: linear-gradient(160deg, rgb(253 224 71 / 0.08), var(--raised) 70%);
+}
+.jn-forge-head > span:first-child {
+  color: var(--jn-gold);
+  letter-spacing: 0.08em;
+}
+.jn-forge-head p {
+  margin: 0;
+  line-height: 1.5;
+}
+.jn-forge-gems {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--jn-crystal);
+}
+.jn-forge-gems img {
+  width: 16px;
+  image-rendering: pixelated;
+}
+.jn-forge {
+  flex-direction: row;
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+}
+.jn-forge > img {
+  width: 48px;
+  height: 48px;
+  flex: none;
+  image-rendering: pixelated;
+}
+.jn-forge > div {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.jn-forge.ready {
+  border-color: rgb(253 224 71 / 0.5);
+}
+.jn-forge.owned {
+  border-color: rgb(34 197 94 / 0.45);
+}
+.jn-forge .btn {
+  align-self: flex-start;
+}
+.jn-reqs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.jn-reqs span {
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--raised-2);
+  font-size: 12px;
+  font-weight: 700;
+}
+.jn-reqs span.ok {
+  color: var(--green-text);
+}
+.jn-classes li {
+  display: grid;
+  grid-template-columns: 40px 1fr auto;
+  gap: 10px;
+  align-items: center;
+  padding: 8px 10px;
+  border-radius: 12px;
+}
+.jn-classes li.on {
+  background: var(--green-soft);
+}
+.jn-classes li > div {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}

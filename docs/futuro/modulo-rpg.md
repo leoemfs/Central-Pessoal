@@ -629,7 +629,7 @@ A Jornada desbloqueia em 16/11. Até aqui existiam só as regras e as artes (pas
 | **N2.2** Cartão no Início e Modo Jornada (**feito: v0.58**; novidades e chefe na linha de status entram com a N2.3 e a campanha) | cartão compacto no Início (E.1); Configurações: "Mostrar a Jornada no Início" e "Modo Jornada" (F.1); "Agora não" deixa tudo guardado em silêncio | P |
 | **N2.3** Baús e "Desde a sua última visita" (**feito: v0.59**; os acontecimentos guardados depois do resumo, como títulos e chefe, entram com a N2.5 e a campanha) | baús de rotina e cristais (B.4) com abertura animada; resumo da diferença desde a última visita (E.2) | M |
 | **N2.4** Arsenal e loja (**feito: v0.60**; os místicos ficam para a Forja, N2.5; pets e moradas, N2.6) | inventário, provador, vestir e tirar, comprar com ouro (B.2, B.3); avatar em tela cheia (B.10) | M |
-| **N2.5** Títulos, forja e classes | lista de títulos e título em uso (B.6); forja mística com requisitos de atributo (B.5); classes e híbridas (B.7) | M |
+| **N2.5** Títulos, forja e classes (**feito, v0.82**) | lista de títulos e título em uso (B.6); forja mística com requisitos de atributo (B.5); classes e híbridas (B.7) | M |
 | **N2.6** Pets, moradas e visitas | pets e moradas (B.8, F.3); presentes por sequência de visitas (F.2) | M |
 | **N2.7** Codex e raridades | Codex por coleções, silhuetas com a dica (F.5); bônus por raridade (`jornada-raridades.md`) | M |
 | **N2.8** Efeitos dos místicos | escudo semanal, XP em dobro depois da recaída, cristal por revisão e por mês em dia, baú extra por nível, ouro extra por estudo (ver "Ainda não programado" no B.12) | M |
@@ -654,9 +654,9 @@ Prévias: **"Jornada RPG"** (https://claude.ai/artifact/62xbF4H9CfYjaz7RaX554h, 
 | **Personagem em tela cheia** que ocupa a tela, título em placa dourada, relógio, céu para escolher, espaços com moldura de raridade, Pet e Casa | v3 · Avatar em tela cheia | feito (v0.80) | **N2.12** |
 | **Tocar no personagem e no pet** na tela cheia (corações, reação) | Prévia da Jornada | feito (v0.80): personagem pula, pet solta coração | **N2.12** |
 | **Artefato flutuando** ao lado do personagem; cristais (◆) no topo do Arsenal; efeito do item (✦) | v3 · Arsenal com provador | artefato flutuando na tela cheia feito (v0.80); cristais e efeito no Arsenal ainda não | **N2.12** / **N2.13** |
-| **Conquistas** (medalhas com data; "Próximas" com barra de progresso) | v1 · Conquistas | falta | **N2.5** |
-| **Título em uso** embaixo do nome, escolher título, **forja mística**, classes e **híbridas** explicadas | v3 · Títulos, forja mística e classes | regras prontas, sem tela | **N2.5** |
-| **Desbloqueios por atributo** na Ficha ("Força 40 → Bracelete do titã") | v2 · Atributos do avatar | falta | **N2.5** |
+| **Conquistas** (medalhas com data; "Próximas" com barra de progresso) | v1 · Conquistas | feito (v0.82) como **Títulos** (a prancha v3 substituiu as conquistas da v1: medalhas, progresso dos que faltam) | **N2.5** |
+| **Título em uso** embaixo do nome, escolher título, **forja mística**, classes e **híbridas** explicadas | v3 · Títulos, forja mística e classes | feito (v0.82) | **N2.5** |
+| **Desbloqueios por atributo** na Ficha ("Força 40 → Bracelete do titã") | v2 · Atributos do avatar | feito (v0.82), com o ganho da semana e de onde vem cada atributo | **N2.5** |
 | **Pets e moradas** (escolher, editar nome e cor do pet) | v3 · Pets e moradas; Prévia da Jornada (Arsenal › Pets) | falta | **N2.6** |
 | **Presente do dia** por abrir o app, chama de dias seguidos com 1 folga por semana | Prévia da Jornada (F.2) | só os dados (`visitDays`) | **N2.6** |
 | **Coleção / Codex** (9 de 19; silhuetas com dica) | v2 · Coleção; Prévia da Jornada (Arsenal › Codex) | falta (cadeado na barra) | **N2.7** |

@@ -10,7 +10,7 @@ import { journeyStats, unlockProgress, UNLOCK_DAYS, UNLOCK_WINDOW } from '../jou
 import { ATTRIBUTES } from '../habits';
 import { formatDMY, todayISO } from '../utils';
 import { notify, Segmented, Sheet, Toggle } from '../ui';
-import { avatarIcon, chestIcon, COIN_ICON, GEM_ICON, homeIcon, itemById, itemIcon, petIcon, PETS, RARITY, treeIcon, skyPalette, ATTR_CODES, type AvatarLook } from '../jornada/catalog';
+import { avatarIcon, chestIcon, COIN_ICON, GEM_ICON, homeIcon, itemById, itemIcon, petIcon, PETS, RARITY, treeIcon, skyPalette, type AvatarLook } from '../jornada/catalog';
 import { HAIRS, SKINS } from '../jornada/artData';
 import { acquire, arsenalItems, availability, equip, shopContext, type Availability, type EquipSlot } from '../jornada/rules';
 import type { Item, Slot } from '../jornada/catalog';
@@ -21,6 +21,9 @@ import { go, useRoute } from '../router';
 import { journeyTab } from '../jornada/tabs';
 import { Entrevista } from './JornadaEntrevista';
 import { TelaCheia } from './JornadaTelaCheia';
+import { AttrsCard, ClassesView, ForgeView, TitlesView, UnlocksCard } from './JornadaFicha';
+
+type FichaTab = 'ficha' | 'titulos' | 'forja' | 'classes';
 import { ChestsReady, DayNumbers, HowToEarn, LevelUpScreen, NearCard } from './JornadaPainel';
 import { dayNumbers, streakDays } from '../jornada/home';
 import { npcIcon } from '../jornada/catalog';
@@ -392,6 +395,7 @@ export function JornadaHome() {
   const [step, setStep] = useState<'create' | 'welcome'>('create');
   const [editing, setEditing] = useState(false);
   const [interviewing, setInterviewing] = useState(false);
+  const [fichaTab, setFichaTab] = useState<FichaTab>('ficha');
   const top = () => window.scrollTo({ top: 0 });
   // N2.3: o resumo usa o retrato da visita anterior; logo ao entrar, o retrato passa a ser o de agora.
   const [since, setSince] = useState<SinceVisit | null>(() => (welcomed(state) ? sinceLastVisit(state.lastSeen, snapshot(data, state, today)) : null));
@@ -474,7 +478,6 @@ export function JornadaHome() {
   const w = wallet(data, state, today);
   const cls = classOf(w.attrs, recentAttributes(data, today));
   const title = TITLES.find((x) => x.id === state.title);
-  const maxAttr = Math.max(10, ...ATTR_CODES.map((c) => w.attrs[c]));
   const gk = look.gender;
   const chests = pendingChests(data, state, today, s.level);
   const streak = streakDays(data.settings.activeDays, today);
@@ -701,36 +704,13 @@ export function JornadaHome() {
       )}
 
       {tab === 'ficha' && (<>
-      <section className="card">
-        <div className="card-head">
-          <h2>Ficha</h2>
-        </div>
-        <ul className="jn-attrs">
-          {ATTR_CODES.map((code) => {
-            const a = ATTRIBUTES.find((x) => x.code === code)!;
-            const v = w.attrs[code];
-            return (
-              <li key={code}>
-                <span className="jn-attr-code" style={{ color: a.color }}>
-                  {code}
-                </span>
-                <span className="jn-attr-name">{a.name}</span>
-                <span className="jn-attr-bar" aria-hidden="true">
-                  <span style={{ width: `${(v / maxAttr) * 100}%`, background: a.color }} />
-                </span>
-                <span className="tabular jn-attr-val">{fmt(v)}</span>
-              </li>
-            );
-          })}
-        </ul>
-        <p className="muted small" style={{ marginTop: 10 }}>
-          {cls.codes.length === 0
-            ? 'Sua classe aparece quando os atributos começarem a subir (hábitos com atributo, contas no prazo, diário e revisões).'
-            : cls.codes.length === 2
-              ? `Classe híbrida: ${cls.codes.join(' e ')} estão quase empatados.`
-              : `Classe pelo atributo mais alto: ${ATTRIBUTES.find((x) => x.code === cls.codes[0])!.name}.`}
-        </p>
-      </section>
+      <Segmented<FichaTab> label="Ficha" value={fichaTab} onChange={setFichaTab} options={[{ value: 'ficha', label: 'Ficha' }, { value: 'titulos', label: 'Títulos' }, { value: 'forja', label: 'Forja' }, { value: 'classes', label: 'Classes' }]} />
+      {fichaTab === 'titulos' && <TitlesView gender={gk} />}
+      {fichaTab === 'forja' && <ForgeView />}
+      {fichaTab === 'classes' && <ClassesView gender={gk} />}
+      {fichaTab === 'ficha' && (<>
+      <AttrsCard gender={gk} />
+      <UnlocksCard />
 
       <section className="card">
         <div className="card-head">
@@ -800,6 +780,7 @@ export function JornadaHome() {
           </button>
         </div>
       </section>
+      </>)}
       </>)}
     </>
   );
