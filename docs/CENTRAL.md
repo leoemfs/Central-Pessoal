@@ -178,7 +178,7 @@
 ## Feito
 | Versão | O que entrou | PR |
 |---|---|---|
-| v0.74 | N2.9b: **entrevista da Mestra Lume** na Jornada (convite até ser feita; áreas até 3 na ordem do toque, uma pergunta por área, horário, ritmo e resumo): cria no Núcleo os hábitos que faltam (sem duplicar pelo nome), a **caixinha** em Finanças se quiser juntar para algo, e guarda as respostas para a campanha (N2.10); "Refazer a entrevista" no cartão Personagem | — |
+| v0.74 | N2.9b: **entrevista da Mestra Lume** na Jornada (convite até ser feita; áreas até 3 na ordem do toque, uma pergunta por área, horário, ritmo e resumo): cria no Núcleo os hábitos que faltam (sem duplicar pelo nome), a **caixinha** em Finanças se quiser juntar para algo, e guarda as respostas para a campanha (N2.10); "Refazer a entrevista" no cartão Personagem | #123 |
 | v0.73 | N2.9a: **Missões de hoje** na Jornada (rituais e hábitos do dia, tarefas do dia e atrasadas, contas que vencem hoje, diário no ritmo e "Dia sem…" dos hábitos a abandonar, com XP, ouro e atributos; marcar ali marca no Núcleo, conclui a tarefa ou paga a conta) e **Missões da semana** (Diário no ritmo escolhido, com bônus de 10 XP por vez combinada, e revisão semanal) | #120 |
 | v0.72 | N8.7: **Adiar reunião** (amanhã, +1 semana ou outra data e hora) muda só aquela reunião; mostra "adiada de…", dá para voltar à data original, e "Marcar a próxima" segue no dia fixo da série. Agenda acompanha sozinha || #119 |
 | v0.71.1 | E29: Aparência › **Cor dos ícones** (Monocromático ou Colorido: cada módulo com a sua cor na gaveta do menu, no Mais e nos Guardados). Ajuste: a **seta ‹** do topo sai na **cor de destaque** (estava branca), também no modo colorido | — |
