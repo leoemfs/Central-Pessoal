@@ -8,7 +8,7 @@ import { welcomed } from '../jornada/rules';
 import { journeyTab } from '../jornada/tabs';
 import { useRoute } from '../router';
 
-const TAB_TITLES = { inicio: 'Jornada', arsenal: 'Arsenal', baus: 'Baús', ficha: 'Ficha' } as const;
+const TAB_TITLES = { inicio: 'Jornada', arsenal: 'Arsenal', baus: 'Baús', ficha: 'Ficha', pet: 'Pet', casa: 'Casa', loja: 'Loja' } as const;
 
 const HERO = ['....HHHH....', '...HHHHHH...', '...HSSSSH...', '...SESSES...', '...SSSSSS...', '....SSSS....', '..DGGGGGGD..', '.SDGGGGGGDS.', '.S.GGBBGG.S.', '...GGGGGG...', '...PPPPPP...', '...PP..PP...', '...PP..PP...', '..KKK..KKK..'];
 const HERO_PAL = { H: '#7c4a2d', S: '#f1c27d', E: '#141414', G: '#22c55e', D: '#15803d', B: '#8b5a2b', P: '#3b3f5c', K: '#27272a' };

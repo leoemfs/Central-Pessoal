@@ -12,7 +12,7 @@ import { formatDMY, todayISO } from '../utils';
 import { notify, Segmented, Sheet, Toggle } from '../ui';
 import { avatarIcon, chestIcon, COIN_ICON, GEM_ICON, homeIcon, itemById, itemIcon, petIcon, PETS, RARITY, treeIcon, skyPalette, type AvatarLook } from '../jornada/catalog';
 import { HAIRS, SKINS } from '../jornada/artData';
-import { acquire, arsenalItems, availability, equip, shopContext, type Availability, type EquipSlot } from '../jornada/rules';
+import { acquire, availability, equip, shopContext, wardrobeItems, type Availability, type EquipSlot } from '../jornada/rules';
 import type { Item, Slot } from '../jornada/catalog';
 import { classOf, openChest, pendingChests, recentAttributes, sinceLastVisit, snapshot, TITLES, wallet, welcomed, welcomeState, type Chest, type ChestRecord, type JourneyState, type SinceVisit } from '../jornada/rules';
 import { skyAt, starPositions } from '../jornada/sky';
@@ -21,9 +21,7 @@ import { go, useRoute } from '../router';
 import { journeyTab } from '../jornada/tabs';
 import { Entrevista } from './JornadaEntrevista';
 import { TelaCheia } from './JornadaTelaCheia';
-import { GiftCard, HomesView, PetsView } from './JornadaPets';
-
-type ArsenalView = 'itens' | 'pets' | 'casas';
+import { GiftCard, HomesView, PetsView, ShopView } from './JornadaPets';
 import { AttrsCard, ClassesView, ForgeView, TitlesView, UnlocksCard } from './JornadaFicha';
 
 type FichaTab = 'ficha' | 'titulos' | 'forja' | 'classes';
@@ -399,7 +397,6 @@ export function JornadaHome() {
   const [editing, setEditing] = useState(false);
   const [interviewing, setInterviewing] = useState(false);
   const [fichaTab, setFichaTab] = useState<FichaTab>('ficha');
-  const [arsenalView, setArsenalView] = useState<ArsenalView>('itens');
   const top = () => window.scrollTo({ top: 0 });
   // N2.3: o resumo usa o retrato da visita anterior; logo ao entrar, o retrato passa a ser o de agora.
   const [since, setSince] = useState<SinceVisit | null>(() => (welcomed(state) ? sinceLastVisit(state.lastSeen, snapshot(data, state, today)) : null));
@@ -610,8 +607,6 @@ export function JornadaHome() {
       </>)}
 
       {tab === 'arsenal' && (<>
-      <Segmented<ArsenalView> label="Arsenal" value={arsenalView} onChange={setArsenalView} options={[{ value: 'itens', label: 'Itens' }, { value: 'pets', label: 'Pets' }, { value: 'casas', label: 'Casas' }]} />
-      {arsenalView === 'itens' && (<>
       <section className="card" ref={arsenalRef}>
         <div className="card-head">
           <h2>Arsenal</h2>
@@ -621,25 +616,27 @@ export function JornadaHome() {
         </div>
         <Segmented<Slot> label="Espaço" value={slot} onChange={setSlot} options={SLOTS.map((x) => ({ value: x, label: SLOT_NAMES[x] }))} />
         <div className="jn-arsenal">
-          {arsenalItems(slot, state).map((it) => {
-            const a = availability(it, state, shopContext(data, state, today));
+          {wardrobeItems(slot, state, shopContext(data, state, today)).map(({ item: it, isNew }) => {
             const on = Object.values(state.equipped).includes(it.id);
             return (
-              <button key={it.id} type="button" className={`jn-item${on ? ' on' : ''}${a.status === 'tem' ? '' : ' locked'}`} onClick={() => setTrying(it)}>
+              <button key={it.id} type="button" className={`jn-item${on ? ' on' : ''}${isNew ? ' new' : ''}`} onClick={() => setTrying(it)}>
                 <img alt="" src={itemIcon(it)} />
                 <strong>{it.name}</strong>
                 <span style={{ color: RARITY[it.rarity].color }}>{RARITY[it.rarity].label}</span>
-                <span className="jn-item-status">{on ? 'Vestindo' : statusText(a)}</span>
+                <span className="jn-item-status">{on ? 'Vestindo' : isNew ? 'Novo! Pegar' : 'Seu'}</span>
               </button>
             );
           })}
         </div>
+        <p className="muted small" style={{ marginTop: 10 }}>
+          Aqui ficam só os seus. Para comprar, vá à <button type="button" className="jn-link" onClick={() => go('jornada/loja')}>Loja</button>; para ver tudo o que existe, o Codex (em breve).
+        </p>
         {slot === 'artefato' && <p className="muted small" style={{ marginTop: 10 }}>Cada artefato dá +10% de XP nos hábitos do seu atributo. O segundo espaço de artefato abre no nível 20.</p>}
       </section>
       </>)}
-      {arsenalView === 'pets' && <PetsView />}
-      {arsenalView === 'casas' && <HomesView />}
-      </>)}
+      {tab === 'pet' && <PetsView mine />}
+      {tab === 'casa' && <HomesView mine />}
+      {tab === 'loja' && <ShopView onTry={setTrying} />}
 
       {trying && (
         <TrySheet
@@ -687,13 +684,13 @@ export function JornadaHome() {
           title={title ? title[gk] : null}
           cls={cls}
           onSlot={(x) => {
-            if (x === 'pet' || x === 'morada') setArsenalView(x === 'pet' ? 'pets' : 'casas');
+            setFull(false);
+            if (x === 'pet') go('jornada/pet');
+            else if (x === 'morada') go('jornada/casa');
             else {
               setSlot(x);
-              setArsenalView('itens');
+              go('jornada/arsenal');
             }
-            setFull(false);
-            go('jornada/arsenal');
           }}
           onClose={() => setFull(false)}
         />
@@ -934,13 +931,6 @@ function reqText(a: Extract<Availability, { status: 'bau' }>): string {
   return miss.length ? `Vem em baús ou com ${miss.map((r) => `${r.code} ${r.need}`).join(' e ')}` : 'Vem em baús';
 }
 
-function statusText(a: Availability): string {
-  if (a.status === 'tem') return 'Seu';
-  if (a.status === 'comprar') return `${fmt(a.price)} ouro`;
-  if (a.status === 'liberar') return 'Liberado!';
-  if (a.status === 'bau') return a.unlock.length ? `Baú ou ${a.unlock.map((r) => `${r.code} ${r.need}`).join(' + ')}` : 'Em baús';
-  return 'Forja';
-}
 
 type Act = (state: JourneyState, c: ReturnType<typeof shopContext>, level: number) => JourneyState | string;
 

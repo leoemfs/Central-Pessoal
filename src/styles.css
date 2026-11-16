@@ -9891,3 +9891,85 @@ body.bar-labels.bar-flat .tabbar .tb-label {
   pointer-events: none;
   image-rendering: pixelated;
 }
+
+/* ---------- Jornada N2.15: barra do jogo em duas fileiras de 5 ---------- */
+body.jn-tall,
+body.bar-labels.jn-tall {
+  --tabbar-h: 134px;
+}
+.tabbar.jn-gamebar {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  align-content: center;
+  row-gap: 2px;
+}
+.jn-gsep {
+  grid-column: 1 / -1;
+  height: 2px;
+  margin: 1px 12px;
+  background: repeating-linear-gradient(90deg, #3b2f63 0 6px, transparent 6px 10px);
+}
+.tabbar.jn-gamebar a.jn-gtab {
+  padding: 3px 0 2px;
+}
+.tabbar.jn-gamebar .jn-gicon,
+.tabbar.jn-gamebar .jn-gicon img:first-child {
+  width: 28px;
+  height: 28px;
+}
+.tabbar.jn-gamebar .jn-glabel {
+  font-size: 11px;
+}
+.jn-item.new {
+  border-color: var(--green);
+  box-shadow: 0 0 0 2px var(--green-soft);
+}
+.jn-item.new .jn-item-status {
+  color: var(--green-text);
+  font-weight: 700;
+}
+.jn-link {
+  border: 0;
+  background: none;
+  padding: 0;
+  color: var(--green-text);
+  font: inherit;
+  text-decoration: underline;
+}
+.jn-shop-head {
+  flex-direction: row;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-color: rgb(250 204 21 / 0.35);
+  background: linear-gradient(160deg, rgb(250 204 21 / 0.08), var(--raised) 70%);
+}
+.jn-shop-head > span:first-child {
+  color: var(--jn-gold);
+  letter-spacing: 0.1em;
+}
+.jn-shop-gold {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--jn-gold);
+}
+.jn-shop-gold img {
+  width: 16px;
+  image-rendering: pixelated;
+}
+.jn-homes li.locked img {
+  filter: grayscale(0.8) brightness(0.6);
+}
+.jn-homes li.locked strong {
+  color: var(--muted);
+}
+.jn-item .jn-item-status img.jn-inline-icon {
+  width: 14px;
+  height: 14px;
+  vertical-align: -2px;
+  filter: none;
+}
+.jn-item.locked strong {
+  color: var(--muted);
+}

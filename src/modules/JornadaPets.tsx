@@ -6,13 +6,13 @@ import { useState } from 'react';
 import { useStore } from '../store';
 import { todayISO } from '../utils';
 import { Icon, notify, Sheet } from '../ui';
-import { chestIcon, COIN_ICON, homeIcon, HOMES, PETS, petIcon, RARITY } from '../jornada/catalog';
+import { chestIcon, COIN_ICON, homeIcon, HOMES, itemIcon, PETS, petIcon, RARITY, type Item } from '../jornada/catalog';
 import { PET_SPRITES } from '../jornada/petsData';
-import { acquirePlace, equip, pendingGifts, petGoals, placeAvailability, RARE_VARIANTS, shopContext, visitGift, visitStats, VISIT_GIFTS } from '../jornada/rules';
+import { acquirePlace, equip, pendingGifts, petGoals, placeAvailability, RARE_VARIANTS, shopContext, shopList, visitGift, visitStats, VISIT_GIFTS } from '../jornada/rules';
 
 const fmt = (n: number) => n.toLocaleString('pt-BR');
 
-export function PetsView() {
+export function PetsView({ mine = false }: { mine?: boolean }) {
   const { data, update } = useStore();
   const today = todayISO();
   const state = data.journey;
@@ -34,14 +34,14 @@ export function PetsView() {
     <>
       <section className="card">
         <div className="card-head">
-          <h2>Pets</h2>
+          <h2>{mine ? 'Seus pets' : 'Pets'}</h2>
           <span className="muted small">
             {owned} de {PETS.length}
           </span>
         </div>
         <p className="muted small">O pet passeia na cena e fica feliz nos dias em que você registra algo. Nunca fica triste nem some.</p>
         <div className="jn-pets">
-          {PETS.map((p) => {
+          {PETS.filter((p) => !mine || state.owned.includes(p.id) || placeAvailability('pet', p.id, state, ctx).status === 'liberar').map((p) => {
             const has = state.owned.includes(p.id);
             const a = placeAvailability('pet', p.id, state, ctx);
             const ready = a.status === 'liberar';
@@ -61,7 +61,7 @@ export function PetsView() {
                 {!has &&
                   (ready ? (
                     <span className="small" style={{ color: 'var(--green-text)' }}>
-                      Liberado: tocar para pegar
+                      Novo! Tocar para pegar
                     </span>
                   ) : (
                     <span className="muted small">
@@ -143,7 +143,7 @@ function PetEditor({ id, onClose }: { id: string; onClose: () => void }) {
   );
 }
 
-export function HomesView() {
+export function HomesView({ mine = false }: { mine?: boolean }) {
   const { data, update } = useStore();
   const today = todayISO();
   const state = data.journey;
@@ -170,10 +170,11 @@ export function HomesView() {
   return (
     <section className="card">
       <div className="card-head">
-        <h2>Casas</h2>
+        <h2>{mine ? 'Suas casas' : 'Casas'}</h2>
       </div>
+      {mine && <p className="muted small">Novas casas chegam por nível ou se compram na Loja. Decorar com móveis vem depois.</p>}
       <ul className="jn-homes">
-        {HOMES.map((h) => {
+        {HOMES.filter((h) => !mine || ['tem', 'liberar'].includes(placeAvailability('morada', h.id, state, ctx).status)).map((h) => {
           const a = placeAvailability('morada', h.id, state, ctx);
           const has = a.status === 'tem';
           const on = state.equipped.morada === h.id;
@@ -252,5 +253,86 @@ export function GiftCard() {
         <p className="muted small">Volte amanhã para o próximo. Basta abrir o app; um dia sem abrir por semana não quebra a sequência.</p>
       )}
     </section>
+  );
+}
+
+/** Loja (N2.15): tudo o que se compra com ouro; o que ainda não dá aparece apagado, com quanto falta. */
+export function ShopView({ onTry }: { onTry: (it: Item) => void }) {
+  const { data, update } = useStore();
+  const today = todayISO();
+  const state = data.journey;
+  const ctx = shopContext(data, state, today);
+  const { items, homes } = shopList(state, ctx);
+  const buyHome = (id: string) =>
+    update((d) => {
+      const r = acquirePlace('morada', id, d.journey, shopContext(d, d.journey, todayISO()));
+      if (typeof r === 'string') {
+        notify('Ainda não', r);
+        return d;
+      }
+      notify('Casa nova!', `${HOMES.find((h) => h.id === id)!.name} é sua. Escolha morar nela em Casa.`);
+      return { ...d, journey: r };
+    });
+  return (
+    <>
+      <section className="card jn-shop-head">
+        <span className="jn-px">LOJA</span>
+        <span className="jn-px jn-shop-gold">
+          <img alt="" src={COIN_ICON} /> {fmt(ctx.gold)} ouro
+        </span>
+      </section>
+      <section className="card">
+        <div className="card-head">
+          <h2>Itens</h2>
+        </div>
+        {items.length === 0 ? (
+          <p className="muted small">Você já tem tudo o que se compra. Os outros itens saem em baús, pelo atributo ou na forja.</p>
+        ) : (
+          <div className="jn-arsenal">
+            {items.map(({ item, price, missing, free }) => (
+              <button key={item.id} type="button" className={`jn-item${missing > 0 ? ' locked' : ''}${free ? ' new' : ''}`} onClick={() => onTry(item)}>
+                <img alt="" src={itemIcon(item)} />
+                <strong>{item.name}</strong>
+                <span style={{ color: RARITY[item.rarity].color }}>{RARITY[item.rarity].label}</span>
+                <span className="jn-item-status">
+                  {free ? 'Liberado de graça' : missing > 0 ? `faltam ${fmt(missing)} de ouro` : (
+                    <>
+                      <img alt="" src={COIN_ICON} className="jn-inline-icon" /> {fmt(price)}
+                    </>
+                  )}
+                </span>
+              </button>
+            ))}
+          </div>
+        )}
+        <p className="muted small">Toque num item para provar antes de comprar.</p>
+      </section>
+      {homes.length > 0 && (
+        <section className="card">
+          <div className="card-head">
+            <h2>Casas</h2>
+          </div>
+          <ul className="jn-homes">
+            {homes.map(({ home, price, missing, level }) => (
+              <li key={home.id} className={missing > 0 || level ? 'locked' : ''}>
+                <img alt="" src={homeIcon(home.id, 'manha')} />
+                <div>
+                  <strong>{home.name}</strong>
+                  <span className="small" style={{ color: RARITY[home.rarity].color }}>
+                    {RARITY[home.rarity].label}
+                  </span>
+                  <span className="muted small">
+                    {fmt(price)} ouro{level ? ` · a partir do nível ${level}` : missing > 0 ? ` · faltam ${fmt(missing)}` : ''}
+                  </span>
+                </div>
+                <button type="button" className="btn small primary" disabled={missing > 0 || level > 0} onClick={() => buyHome(home.id)}>
+                  Comprar
+                </button>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+    </>
   );
 }

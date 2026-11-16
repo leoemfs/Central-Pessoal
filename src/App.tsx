@@ -335,6 +335,11 @@ export function App() {
   const tabbarRef = useRef<HTMLElement>(null);
   // N2.11: dentro da Jornada (em uso), a barra de baixo vira a barra do jogo.
   const gameBar = section.path === 'jornada' && gameBarOn(data.settings, welcomed(data.journey));
+  // N2.15: a barra do jogo tem duas fileiras; o conteúdo da tela abre espaço para ela.
+  useEffect(() => {
+    document.body.classList.toggle('jn-tall', gameBar);
+    return () => document.body.classList.remove('jn-tall');
+  }, [gameBar]);
 
   /**
    * O que cada ícone faz ao ser tocado. O "voltar" sobe um nível (E20, navStack.ts): ferramenta → casa do módulo → Início.

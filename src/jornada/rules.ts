@@ -803,3 +803,25 @@ export function nextInSlot(state: JourneyState, slot: Slot | 'pet' | 'morada'): 
   const i = cycle.indexOf(cur);
   return cycle[(i + 1) % cycle.length];
 }
+
+// ---------- N2.15: cada lugar com uma função ----------
+
+/** Arsenal: só o que a pessoa tem naquele espaço, mais o que acabou de ser liberado pelo atributo ("Novo! Pegar"). */
+export function wardrobeItems(slot: Slot, state: JourneyState, c: ShopContext): { item: Item; isNew: boolean }[] {
+  return ITEMS.filter((i) => i.slot === slot)
+    .map((item) => ({ item, a: availability(item, state, c) }))
+    .filter((x) => x.a.status === 'tem' || x.a.status === 'liberar')
+    .map((x) => ({ item: x.item, isNew: x.a.status === 'liberar' }));
+}
+
+/** Loja: tudo o que se compra com ouro e ainda não é seu (o que ainda não dá aparece apagado, com o que falta). */
+export function shopList(state: JourneyState, c: ShopContext) {
+  const items = ITEMS.filter((i) => i.price && !state.owned.includes(i.id))
+    .map((item) => {
+      const a = availability(item, state, c);
+      return { item, price: item.price!, missing: a.status === 'comprar' ? Math.max(0, item.price! - c.gold) : 0, free: a.status === 'liberar' };
+    })
+    .sort((a, b) => a.price - b.price);
+  const homes = HOMES.filter((h) => h.price && !state.owned.includes(h.id)).map((h) => ({ home: h, price: h.price!, missing: Math.max(0, h.price! - c.gold), level: c.level >= h.level ? 0 : h.level }));
+  return { items, homes };
+}
