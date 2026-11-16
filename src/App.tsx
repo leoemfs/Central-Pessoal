@@ -2,8 +2,9 @@ import { useEffect, useRef, useState, type ComponentType } from 'react';
 import { ErrorBoundary } from './ErrorScreen';
 import { useStore } from './store';
 import type { Theme } from './types';
-import { canGoBack, go, goReplace, navigate, useRoute, type Route } from './router';
-import { useCurrentPageParent, useCurrentPageTitle } from './pageTitle';
+import { canGoBack, getTrail, go, goReplace, navigate, useRoute, type Route } from './router';
+import { buildCrumbs } from './crumbs';
+import { useCurrentPageCrumbs, useCurrentPageParent, useCurrentPageTitle } from './pageTitle';
 import { Icon, Sheet, Toasts, type IconName } from './ui';
 import { formatLongDate, todayISO } from './utils';
 import { NAV_GROUPS, SETTINGS_ITEM, type NavItem } from './nav';
@@ -172,6 +173,7 @@ function NavMenu({ current, onNavigate }: { current: string; onNavigate?: () => 
     it.to ? (
       <a
         href={`#/${it.to}`}
+        data-nav="switch"
         className={it.section === current ? 'active' : ''}
         aria-current={it.section === current ? 'page' : undefined}
         onClick={(e) => {
@@ -209,6 +211,24 @@ function NavMenu({ current, onNavigate }: { current: string; onNavigate?: () => 
         </div>
       ))}
     </div>
+  );
+}
+
+/** E27: caminho do computador na primeira linha da tela ("Início › Finanças › Orçamento"), cada nível clicável. */
+function Crumbs() {
+  const title = useCurrentPageTitle();
+  const items = useCurrentPageCrumbs();
+  const crumbs = buildCrumbs(getTrail(), (p) => SECTIONS.find((s) => s.path === p)?.label ?? null, { items, title });
+  if (crumbs.length < 2) return null;
+  return (
+    <nav className="crumbs desk-only" aria-label="Caminho">
+      {crumbs.map((c, i) => (
+        <span key={i} className="crumb-item">
+          {i > 0 && <span className="crumb-sep" aria-hidden="true">›</span>}
+          {c.to ? <a href={`#/${c.to}`}>{c.label}</a> : <b aria-current="page">{c.label}</b>}
+        </span>
+      ))}
+    </nav>
   );
 }
 
@@ -480,6 +500,7 @@ export function App() {
               : 'Não foi possível salvar neste aparelho. Exporte um backup em Configurações agora.'}
           </div>
         )}
+        <Crumbs />
         <ErrorBoundary scope="tela" resetKey={`${section.path}:${route.n}`}>
           <View key={section.path} route={route} />
         </ErrorBoundary>

@@ -55,3 +55,35 @@ export function useCurrentPageParent(): string | null {
     () => parent,
   );
 }
+
+/** E27: caminho completo que a própria tela informa (Estudos), para o caminho do computador. */
+export interface PageCrumb {
+  label: string;
+  to?: string;
+}
+let crumbs: PageCrumb[] | null = null;
+
+export function usePageCrumbs(items: PageCrumb[] | null) {
+  const key = items ? JSON.stringify(items) : '';
+  useEffect(() => {
+    const mine = key ? (JSON.parse(key) as PageCrumb[]) : null;
+    crumbs = mine;
+    emit();
+    return () => {
+      if (crumbs === mine) {
+        crumbs = null;
+        emit();
+      }
+    };
+  }, [key]);
+}
+
+export function useCurrentPageCrumbs(): PageCrumb[] | null {
+  return useSyncExternalStore(
+    (l) => {
+      listeners.add(l);
+      return () => listeners.delete(l);
+    },
+    () => crumbs,
+  );
+}
