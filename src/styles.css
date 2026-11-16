@@ -10590,3 +10590,187 @@ body.bar-labels.jn-tall {
     animation: none;
   }
 }
+
+/* ---------- N2.17c: baús como na prévia ---------- */
+.jn-open-fs {
+  background: radial-gradient(circle at 50% 35%, #1e1b2e, #050506 70%);
+}
+.jn-open-center {
+  position: relative;
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: calc(28px + env(safe-area-inset-top)) 20px 12px;
+  text-align: center;
+}
+.jn-open-center.top {
+  justify-content: flex-start;
+  padding-top: calc(36px + env(safe-area-inset-top));
+}
+.jn-open-center > p {
+  margin: 0;
+}
+.jn-open-center .jn-chest-stage {
+  width: 100%;
+}
+.jn-open-center .jn-loot {
+  width: 100%;
+  max-width: 340px;
+}
+.jn-eyebrow {
+  font-size: 13px;
+  letter-spacing: 0.12em;
+  color: var(--jn-gold);
+}
+.jn-open-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px 20px calc(16px + env(safe-area-inset-bottom));
+}
+.jn-sparks {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+}
+.jn-sparks i {
+  position: absolute;
+  width: 7px;
+  height: 7px;
+  margin: -3px;
+  animation: jn-spark 0.8s ease-out both;
+}
+@keyframes jn-spark {
+  from {
+    transform: translate(0, 0) scale(1);
+    opacity: 1;
+  }
+  to {
+    transform: translate(var(--dx), var(--dy)) scale(0.3);
+    opacity: 0;
+  }
+}
+.jn-confetti {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+.jn-confetti i {
+  position: absolute;
+  top: -12px;
+  width: 7px;
+  height: 11px;
+  animation: jn-confetti 1.8s ease-in both;
+}
+@keyframes jn-confetti {
+  to {
+    transform: translateY(105vh) rotate(540deg);
+    opacity: 0.2;
+  }
+}
+.jn-open-chests {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 4px;
+  max-width: 320px;
+}
+.jn-open-chests img {
+  width: 40px;
+  image-rendering: pixelated;
+  animation: jn-loot-in 0.4s ease both;
+}
+.jn-baus-head {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.jn-baus-head h2 {
+  margin: 0;
+  font-size: 24px;
+}
+.jn-baus-head p {
+  margin: 0;
+  line-height: 1.5;
+}
+.jn-empty {
+  padding: 18px;
+  border-radius: 18px;
+  border: 1px dashed var(--border-strong);
+  color: var(--muted);
+  text-align: center;
+  font-size: 14px;
+}
+.jn-chest-kind {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.jn-chest-kind img {
+  width: 40px;
+  flex: none;
+  image-rendering: pixelated;
+}
+.jn-chest-kind div {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.jn-history {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.jn-history li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+}
+.jn-history img {
+  width: 28px;
+  flex: none;
+  image-rendering: pixelated;
+}
+.jn-history .grow {
+  flex: 1;
+  min-width: 0;
+}
+.jn-history .muted {
+  text-align: right;
+}
+.jn-notice-btns {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: none !important;
+}
+@media (prefers-reduced-motion: reduce) {
+  .jn-sparks,
+  .jn-confetti {
+    display: none;
+  }
+  .jn-open-chests img {
+    animation: none;
+  }
+}
+.jn-open-center .jn-loot {
+  text-align: left;
+}
+.jn-chest-kind {
+  padding: 4px 0;
+}
+.jn-history .grow {
+  white-space: nowrap;
+}

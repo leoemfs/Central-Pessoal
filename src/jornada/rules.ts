@@ -442,6 +442,19 @@ export function hash01(s: string, salt = 0): number {
 
 const chestPool = (rarity: Rarity, owned: string[]) => ITEMS.filter((i) => i.rarity === rarity && !i.starter && !owned.includes(i.id));
 
+/** N2.17c: abre vários baús de uma vez (o mesmo baú sempre dá o mesmo conteúdo, então a ordem não importa). */
+export function openChests(state: JourneyState, chests: Chest[], today: string = todayISO()): { state: JourneyState; records: ChestRecord[] } {
+  let st = state;
+  const records: ChestRecord[] = [];
+  for (const c of chests) {
+    if (st.chests.some((x) => x.key === c.key)) continue;
+    const r = openChest(st, c, today);
+    st = r.state;
+    records.push(r.record);
+  }
+  return { state: st, records };
+}
+
 /** Abre um baú: sorteia (de forma estável) ouro, cristais e um item que você ainda não tem. */
 export function openChest(state: JourneyState, chest: Chest, today: string = todayISO()): { state: JourneyState; record: ChestRecord } {
   if (state.chests.some((c) => c.key === chest.key)) throw new Error('Baú já aberto');

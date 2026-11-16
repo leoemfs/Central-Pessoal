@@ -28,6 +28,7 @@ import {
   monthsAllOnTime,
   normalizeJourney,
   openChest,
+  openChests,
   pendingChests,
   titleProgress,
   visitGift,
@@ -535,4 +536,20 @@ test('N2.16: mini games dão prêmio pequeno, até 3 por dia; recorde guardado; 
   const d = withData({});
   assert.equal(wallet({ ...d, journey: r4.state }, r4.state, '2026-11-16').gold - wallet(d, d.journey, '2026-11-16').gold, 14 + 10 + 20);
   assert.deepEqual(normalizeJourney({}).games, { records: {}, prizes: [] });
+});
+
+test('abrir todos: mesmo resultado que abrir um por um, sem abrir duas vezes', () => {
+  const s = defaultJourneyState();
+  const cs = [
+    { key: 'bronze:2026-11-07', kind: 'bronze' as const, date: '2026-11-07', reason: 'x' },
+    { key: 'prata:2026-11-08', kind: 'prata' as const, date: '2026-11-08', reason: 'y' },
+  ];
+  const all = openChests(s, cs, '2026-11-16');
+  let one = s;
+  for (const c of cs) one = openChest(one, c, '2026-11-16').state;
+  assert.deepEqual(all.state, one);
+  assert.equal(all.records.length, 2);
+  const again = openChests(all.state, cs, '2026-11-16');
+  assert.equal(again.records.length, 0);
+  assert.equal(again.state, all.state);
 });

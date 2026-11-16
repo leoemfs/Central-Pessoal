@@ -2,7 +2,9 @@
  * Jornada (N2.17b): faixa fixa do topo e peças da tela principal, como na "Prévia da Jornada"
  * (hud, avisos, três números e "Quase lá"). Tudo calculado a partir dos dados.
  */
+import { useState } from 'react';
 import { useStore } from '../store';
+import { ChestCard, ChestOpen, OpenAll } from './JornadaBaus';
 import { go } from '../router';
 import { todayISO } from '../utils';
 import { notify } from '../ui';
@@ -10,7 +12,7 @@ import { journeyStats } from '../journey';
 import { avatarIcon, chestIcon, COIN_ICON, GEM_ICON, HOMES, itemById, itemIcon, ITEMS, medalIcon, PETS, petIcon, homeIcon } from '../jornada/catalog';
 import { PX } from '../jornada/px';
 import { quaseLa, streakDays, dayNumbers } from '../jornada/home';
-import { acquire, acquirePlace, availability, classOf, pendingChests, placeAvailability, recentAttributes, shopContext, visitStats, wallet, welcomed } from '../jornada/rules';
+import { acquire, acquirePlace, availability, type Chest, classOf, pendingChests, placeAvailability, recentAttributes, shopContext, visitStats, wallet, welcomed } from '../jornada/rules';
 import { starsTonight } from '../jornada/sky';
 
 const fmt = (n: number) => n.toLocaleString('pt-BR');
@@ -70,6 +72,8 @@ export function JornadaHud() {
 /** Avisos da tela principal: baús esperando, o que o atributo/nível liberou ("Pegar") e o místico pronto ("Forjar"). */
 export function Notices() {
   const { data, update } = useStore();
+  const [opening, setOpening] = useState<Chest | null>(null);
+  const [all, setAll] = useState<Chest[] | null>(null);
   const today = todayISO();
   const state = data.journey;
   const level = journeyStats(data, today).level;
@@ -78,7 +82,7 @@ export function Notices() {
   const freeItems = ITEMS.filter((it) => !it.campaign && it.rarity !== 'mistico' && availability(it, state, ctx).status === 'liberar');
   const freePlaces = [...PETS.map((p) => ({ kind: 'pet' as const, id: p.id, name: p.name })), ...HOMES.map((h) => ({ kind: 'morada' as const, id: h.id, name: h.name }))].filter((p) => placeAvailability(p.kind, p.id, state, ctx).status === 'liberar');
   const forge = ITEMS.filter((it) => it.rarity === 'mistico' && !it.campaign && (() => { const a = availability(it, state, ctx); return a.status === 'forja' && a.ready; })());
-  if (!chests.length && !freeItems.length && !freePlaces.length && !forge.length) return null;
+  if (!chests.length && !freeItems.length && !freePlaces.length && !forge.length && !opening && !all) return null;
 
   const run = (fn: (d: typeof data) => ReturnType<typeof acquire>, done: string) =>
     update((d) => {
@@ -100,23 +104,17 @@ export function Notices() {
             <strong>{chests.length} baús esperando</strong>
             <span className="muted small">{chests.slice(-2).map((c) => c.reason).join(' · ')}</span>
           </div>
-          <button type="button" className="btn primary small" onClick={() => go('jornada/baus')}>
-            Ver baús
-          </button>
-        </div>
-      ) : (
-        chests.map((c) => (
-          <div key={c.key} className={`jn-notice${c.kind === 'cristal' ? ' gem' : ''}`}>
-            <img className="chest" alt="" src={chestIcon(c.kind, false)} />
-            <div>
-              <strong>Baú {c.kind === 'bronze' ? 'de bronze' : c.kind === 'prata' ? 'de prata' : c.kind === 'dourado' ? 'dourado' : 'de cristal'}</strong>
-              <span className="muted small">{c.reason}</span>
-            </div>
-            <button type="button" className="btn primary small" onClick={() => go('jornada/baus')}>
-              Abrir
+          <div className="jn-notice-btns">
+            <button type="button" className="btn primary small" onClick={() => setAll(chests)}>
+              Abrir todos
+            </button>
+            <button type="button" className="btn soft small" onClick={() => go('jornada/baus')}>
+              Ver
             </button>
           </div>
-        ))
+        </div>
+      ) : (
+        chests.map((c) => <ChestCard key={c.key} chest={c} onOpen={() => setOpening(c)} />)
       )}
       {freeItems.map((it) => {
         const [code, need] = Object.entries(it.attrUnlock ?? {})[0] ?? ['', 0];
@@ -157,6 +155,8 @@ export function Notices() {
           </button>
         </div>
       ))}
+      {opening && <ChestOpen chest={opening} onClose={() => setOpening(null)} />}
+      {all && <OpenAll chests={all} onClose={() => setAll(null)} />}
     </div>
   );
 }
