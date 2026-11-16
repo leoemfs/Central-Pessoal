@@ -443,7 +443,7 @@ export function App() {
         </button>
       )}
 
-      <nav ref={tabbarRef} className={`tabbar${barHidden ? ' hidden' : ''}${gameBar ? ' jn-gamebar' : ''}`} aria-label={gameBar ? 'Barra da Jornada (puxe para cima para abrir o menu)' : 'Atalhos (puxe para cima para abrir o Mais)'}>
+      <nav ref={tabbarRef} className={`tabbar${barHidden && !gameBar ? ' hidden' : ''}${gameBar ? ` jn-gamebar${barHidden ? ' jn-compact' : ''}` : ''}`} aria-label={gameBar ? 'Barra da Jornada (puxe para cima para abrir o menu)' : 'Atalhos (puxe para cima para abrir o Mais)'}>
         {gameBar ? (
           <GameBarItems current={journeyTab(route.sub)} />
         ) : (
