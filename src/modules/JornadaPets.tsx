@@ -79,7 +79,7 @@ export function PetsView({ mine = false }: { mine?: boolean }) {
   );
 }
 
-function PetEditor({ id, onClose }: { id: string; onClose: () => void }) {
+export function PetEditor({ id, onClose }: { id: string; onClose: () => void }) {
   const { data, update } = useStore();
   const state = data.journey;
   const pet = PETS.find((p) => p.id === id)!;
@@ -87,6 +87,7 @@ function PetEditor({ id, onClose }: { id: string; onClose: () => void }) {
   const [name, setName] = useState(state.petNames[id] ?? '');
   const [style, setStyle] = useState(state.petStyle[id] ?? spr.variants[0].id);
   const best = visitStats(data.settings.visitDays, todayISO()).best;
+  const [pop, setPop] = useState(0);
   const save = (alsoEquip: boolean) => {
     update((d) => {
       let j = { ...d.journey, petNames: { ...d.journey.petNames, [id]: name.trim().slice(0, 20) }, petStyle: { ...d.journey.petStyle, [id]: style } };
@@ -102,7 +103,7 @@ function PetEditor({ id, onClose }: { id: string; onClose: () => void }) {
     <Sheet title={name.trim() || pet.name} onClose={onClose}>
       <div className="jn-pet-edit">
         <span className="jn-pet-meadow big">
-          <img alt="" src={petIcon(id, style)} />
+          <img key={pop} className={pop ? 'jn-pop' : undefined} alt="" src={petIcon(id, style)} />
         </span>
         <div className="jn-field">
           <label htmlFor="jn-pet-name">Nome</label>
@@ -110,13 +111,15 @@ function PetEditor({ id, onClose }: { id: string; onClose: () => void }) {
         </div>
         <div className="jn-field">
           <span>Cor</span>
-          <div className="jn-chipset" role="group" aria-label="Cor">
+          <div className="jn-variants" role="group" aria-label="Cor">
             {spr.variants.map((v) => {
               const need = v.rare ? RARE_VARIANTS[v.rare] : 0;
               const locked = need > 0 && best < need;
               return (
-                <button key={v.id} type="button" aria-pressed={style === v.id} disabled={locked} onClick={() => setStyle(v.id)} title={locked ? `${need} dias seguidos abrindo o app` : undefined}>
-                  {locked ? `${v.name} · ${need} dias seguidos` : v.name}
+                <button key={v.id} type="button" aria-pressed={style === v.id} disabled={locked} onClick={() => { setStyle(v.id); setPop((n) => n + 1); }} aria-label={locked ? `${v.name}: libera com ${need} dias seguidos abrindo o app` : v.name}>
+                  <img alt="" src={petIcon(id, v.id)} style={locked ? { filter: 'grayscale(1) brightness(0.5)' } : undefined} />
+                  <span>{v.name}</span>
+                  {locked && <small>{need} dias seguidos</small>}
                 </button>
               );
             })}
