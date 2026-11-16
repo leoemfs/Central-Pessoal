@@ -1,11 +1,14 @@
 /**
- * Mini games da Jornada (N2.16, decidido em 16/11): partidas de 30 a 60 s, prêmio pequeno
- * (5 a 20 de ouro) e até 3 partidas premiadas por dia; depois joga sem prêmio. Recorde pessoal.
+ * Mini games da Jornada (N2.16; fichas e limite na N2.18a, decidido em 16/11).
+ * Os jogos dão FICHAS, uma moeda só deles, que servem apenas para o bichinho virtual. O ouro dos
+ * hábitos não muda (o ouro que os jogos deram antes continua na carteira). Só os primeiros 30 minutos
+ * de jogo de cada dia dão fichas; depois dá para continuar jogando, sem fichas, até o dia seguinte.
  */
 import type { JourneyState } from './rules.ts';
 
 export type GameId = 'corrida' | 'respira' | 'memoria' | 'pescaria';
-export const PRIZED_PER_DAY = 3;
+/** Minutos de jogo por dia que dão fichas. */
+export const DAILY_MINUTES = 30;
 
 export const GAMES: { id: GameId; name: string; text: string; ready: boolean }[] = [
   { id: 'corrida', name: 'Corrida do pet', text: 'Seu pet corre sozinho; toque para pular troncos e pedras.', ready: true },
@@ -14,29 +17,38 @@ export const GAMES: { id: GameId; name: string; text: string; ready: boolean }[]
   { id: 'pescaria', name: 'Pescaria', text: 'Toque na hora certa para pegar o peixe.', ready: false },
 ];
 
-export const prizedToday = (state: JourneyState, today: string) => state.games.prizes.filter((p) => p.day === today).length;
+/** Segundos jogados no dia (todas as partidas, com ou sem fichas). */
+export const playedToday = (state: JourneyState, today: string) => state.games.plays.filter((p) => p.day === today).reduce((a, p) => a + p.seconds, 0);
 
-/** Prêmio da partida: Corrida de 5 a 20 pela distância; Respira, 10 ao completar. */
-export function prizeFor(game: GameId, score: number): number {
+/** Minutos que ainda dão fichas hoje (0 a 30). */
+export const minutesLeft = (state: JourneyState, today: string) => Math.max(0, Math.ceil((DAILY_MINUTES * 60 - playedToday(state, today)) / 60));
+
+/** Fichas da partida: Corrida de 1 a 5 pela distância; Respira, 2 ao completar. */
+export function fichasFor(game: GameId, score: number): number {
   if (score <= 0) return 0;
-  if (game === 'respira') return 10;
-  return Math.max(5, Math.min(20, 5 + Math.floor(score / 100) * 3));
+  if (game === 'respira') return 2;
+  return Math.max(1, Math.min(5, 1 + Math.floor(score / 150)));
 }
 
-/** Guarda a partida: recorde e, se ainda houver partida premiada no dia, o ouro. */
-export function finishGame(state: JourneyState, game: GameId, score: number, today: string): { state: JourneyState; gold: number; record: boolean } {
+/** Fichas na carteira: o que os jogos deram menos o que foi gasto no bichinho. */
+export const fichas = (state: JourneyState) => Math.max(0, state.games.plays.reduce((a, p) => a + p.fichas, 0) - state.games.fichasSpent);
+
+/** Guarda a partida: tempo jogado, recorde e, se ainda estiver nos 30 minutos do dia, as fichas. */
+export function finishGame(state: JourneyState, game: GameId, score: number, seconds: number, today: string): { state: JourneyState; fichas: number; record: boolean } {
   const prev = state.games.records[game] ?? 0;
   const record = score > prev;
-  const gold = prizedToday(state, today) < PRIZED_PER_DAY ? prizeFor(game, score) : 0;
+  const secs = Math.max(1, Math.min(600, Math.round(seconds)));
+  const won = playedToday(state, today) < DAILY_MINUTES * 60 ? fichasFor(game, score) : 0;
   return {
     state: {
       ...state,
       games: {
+        ...state.games,
         records: record ? { ...state.games.records, [game]: score } : state.games.records,
-        prizes: gold ? [...state.games.prizes, { day: today, game, gold }].slice(-400) : state.games.prizes,
+        plays: [...state.games.plays, { day: today, game, seconds: secs, fichas: won }].slice(-600),
       },
     },
-    gold,
+    fichas: won,
     record,
   };
 }

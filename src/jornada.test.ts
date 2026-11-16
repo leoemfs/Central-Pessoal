@@ -6,7 +6,7 @@ import { addDays } from './utils.ts';
 import type { AppData, Habit, JournalEntry } from './types.ts';
 import { grid } from './jornada/art.ts';
 import { codexEntries, codexSummary } from './jornada/codex.ts';
-import { finishGame, prizedToday } from './jornada/games.ts';
+import { fichas, finishGame, minutesLeft } from './jornada/games.ts';
 import { HOMES, ITEMS, PETS, REGION_NAMES, SLOT_LIST, avatarIcon, homeGrid, itemById, itemIcon, petIcon } from './jornada/catalog.ts';
 import {
   acquire,
@@ -520,22 +520,32 @@ test('N2.7: Codex mostra tudo, com dica do que falta; marcos de descoberta viram
   assert.ok(keys.includes('prata:codex:25') && keys.includes('dourado:codex:50') && !keys.includes('cristal:codex:75'));
 });
 
-test('N2.16: mini games dão prêmio pequeno, até 3 por dia; recorde guardado; ouro entra na carteira', () => {
+test('N2.18a: mini games dão fichas (não ouro), só nos primeiros 30 min do dia; recorde guardado', () => {
   let st = defaultJourneyState();
-  const r1 = finishGame(st, 'corrida', 350, '2026-11-16');
-  assert.equal(r1.gold, 14);
+  const r1 = finishGame(st, 'corrida', 350, 60, '2026-11-16');
+  assert.equal(r1.fichas, 3);
   assert.equal(r1.record, true);
   st = r1.state;
-  st = finishGame(st, 'respira', 1, '2026-11-16').state;
-  st = finishGame(st, 'corrida', 2000, '2026-11-16').state;
-  const r4 = finishGame(st, 'corrida', 50, '2026-11-16');
-  assert.equal(r4.gold, 0, 'a 4ª partida do dia não dá ouro');
+  st = finishGame(st, 'respira', 1, 60, '2026-11-16').state;
+  assert.equal(fichas(st), 5);
+  assert.equal(minutesLeft(st, '2026-11-16'), 28);
+  // Três partidas longas (uma partida conta no máximo 10 min): a última começa dentro dos 30 min e vale.
+  st = finishGame(st, 'corrida', 2000, 600, '2026-11-16').state;
+  st = finishGame(st, 'corrida', 10, 600, '2026-11-16').state;
+  st = finishGame(st, 'corrida', 10, 480, '2026-11-16').state;
+  assert.equal(fichas(st), 12);
+  const r4 = finishGame(st, 'corrida', 600, 60, '2026-11-16');
+  assert.equal(r4.fichas, 0, 'depois de 30 min, joga sem fichas');
+  assert.equal(minutesLeft(r4.state, '2026-11-16'), 0);
   assert.equal(r4.state.games.records.corrida, 2000);
-  assert.equal(finishGame(r4.state, 'corrida', 50, '2026-11-17').gold, 5, 'no outro dia volta a valer');
-  assert.equal(prizedToday(r4.state, '2026-11-16'), 3);
+  assert.equal(finishGame(r4.state, 'corrida', 50, 30, '2026-11-17').fichas, 1, 'no outro dia volta a valer');
+  // Fichas não entram no ouro; o ouro antigo dos jogos continua.
   const d = withData({});
-  assert.equal(wallet({ ...d, journey: r4.state }, r4.state, '2026-11-16').gold - wallet(d, d.journey, '2026-11-16').gold, 14 + 10 + 20);
-  assert.deepEqual(normalizeJourney({}).games, { records: {}, prizes: [] });
+  assert.equal(wallet({ ...d, journey: r4.state }, r4.state, '2026-11-16').gold, wallet(d, d.journey, '2026-11-16').gold);
+  const old = normalizeJourney({ games: { records: {}, prizes: [{ day: '2026-11-10', game: 'corrida', gold: 14 }] } });
+  assert.equal(wallet({ ...d, journey: old }, old, '2026-11-16').gold - wallet(d, d.journey, '2026-11-16').gold, 14);
+  assert.equal(fichas({ ...r4.state, games: { ...r4.state.games, fichasSpent: 4 } }), 8);
+  assert.deepEqual(normalizeJourney({}).games, { records: {}, prizes: [], plays: [], fichasSpent: 0 });
 });
 
 test('abrir todos: mesmo resultado que abrir um por um, sem abrir duas vezes', () => {
