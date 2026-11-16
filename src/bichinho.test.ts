@@ -41,3 +41,15 @@ test('bichinho: gatinho com mais pixels e quarto de cada moradia', () => {
   assert.ok(roomOf('castelo').extra.includes('torch'));
   assert.equal(roomOf('nada'), roomOf('casinha'));
 });
+
+test('N2.18c: banheiro e lá fora; desenhos de lado e de costas', async () => {
+  const { CAT_HD_BACK, CAT_HD_SIDE } = await import('./jornada/bichinho.ts');
+  const s = { ...defaultJourneyState(), vpet: { joy: 50, full: 50, rest: 50, clean: 30, at: T0.toISOString() } };
+  assert.equal((petAction(s, 'banho', T0) as typeof s).vpet.clean, 100);
+  assert.equal((petAction(s, 'dentes', T0) as typeof s).vpet.clean, 40);
+  assert.deepEqual([(petAction(s, 'passear', T0) as typeof s).vpet.joy, (petAction(s, 'passear', T0) as typeof s).vpet.rest], [60, 42]);
+  assert.equal((petAction(s, 'sol', T0) as typeof s).vpet.rest, 65);
+  assert.ok(CAT_HD_BACK.every((r) => r.length === 24));
+  assert.ok(CAT_HD_SIDE.every((r) => r.length === 28));
+  assert.ok(!CAT_HD_BACK.join('').includes('E'), 'de costas não tem olhos');
+});

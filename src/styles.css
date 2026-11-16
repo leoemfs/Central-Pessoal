@@ -12321,3 +12321,71 @@ body.bar-labels.jn-tall {
     animation: none;
   }
 }
+/* N2.18c: banheiro e lá fora */
+.jn-vp-tiles {
+  background: linear-gradient(#cbd5e1 2px, transparent 2px) 0 0/100% 30px, linear-gradient(90deg, #cbd5e1 2px, transparent 2px) 0 0/30px 30px, #f8fafc;
+}
+.jn-vp-bathfloor {
+  background: repeating-linear-gradient(90deg, #93c5fd 0 30px, #bfdbfe 30px 60px);
+  border-top-color: #60a5fa;
+}
+.jn-vp-tub {
+  left: 50%;
+  bottom: 4%;
+  width: 230px;
+  transform: translateX(-50%);
+  z-index: 4;
+}
+.jn-vp-sky {
+  position: absolute;
+  inset: 0;
+}
+.jn-vp-hill {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 52%;
+  height: 22%;
+  border-radius: 50% 50% 0 0 / 40% 40% 0 0;
+}
+.jn-vp-grass {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 72%;
+  bottom: 0;
+  background: #65a30d;
+  border-top: 6px solid #84cc16;
+}
+.jn-vp-path {
+  position: absolute;
+  left: 40%;
+  right: 40%;
+  top: 72%;
+  bottom: 0;
+  background: #d6b48a;
+}
+.jn-vp-pet {
+  transition: left 1.6s linear;
+}
+.jn-vp-pet.flip img {
+  transform: scaleX(-1);
+}
+.jn-vp-throw {
+  animation: jn-vp-throw 0.9s ease both;
+}
+@keyframes jn-vp-throw {
+  50% {
+    transform: translate(140px, -70px);
+  }
+  100% {
+    transform: translate(200px, 0);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .jn-vp-pet,
+  .jn-vp-throw {
+    transition: none;
+    animation: none;
+  }
+}
