@@ -631,11 +631,36 @@ A Jornada desbloqueia em 16/11. Até aqui existiam só as regras e as artes (pas
 | **N2.4** Arsenal e loja (**feito: v0.60**; os místicos ficam para a Forja, N2.5; pets e moradas, N2.6) | inventário, provador, vestir e tirar, comprar com ouro (B.2, B.3); avatar em tela cheia (B.10) | M |
 | **N2.5** Títulos, forja e classes (**feito, v0.82**) | lista de títulos e título em uso (B.6); forja mística com requisitos de atributo (B.5); classes e híbridas (B.7) | M |
 | **N2.6** Pets, moradas e visitas (**feito, v0.83**) | pets e moradas (B.8, F.3); presentes por sequência de visitas (F.2) | M |
-| **N2.7** Codex e raridades | Codex por coleções, silhuetas com a dica (F.5); bônus por raridade (`jornada-raridades.md`) | M |
+| **N2.7** Codex e raridades | **tudo o que existe**, por coleção (itens, pets, casas, títulos, conquistas dos mini games): o que tem colorido, o que falta em silhueta com a dica e o progresso; místicos com "Forja: faltam X"; bônus por raridade (`jornada-raridades.md`); títulos de visitas (30, 100, 365 dias); "Perto de desbloquear" leva para cá. Sai o cadeado da barra | M |
 | **N2.8** Efeitos dos místicos | escudo semanal, XP em dobro depois da recaída, cristal por revisão e por mês em dia, baú extra por nível, ouro extra por estudo (ver "Ainda não programado" no B.12) | M |
 | **N2.9a** Missões (**feito, v0.73**) | missões de hoje (os próprios hábitos, tarefas, contas e diário; marcar ali é marcar no módulo) e da semana (Diário no ritmo, bônus de 10 XP por vez combinada desde o desbloqueio; revisão semanal), sem punição | M |
 | **N2.9b** Entrevista da Mestra Lume (**feito, v0.74**) | perguntas do Anexo D; cria os hábitos que faltam no Núcleo e guarda as respostas para a campanha (N2.10) e a caixinha | M |
-| **N2.10** Campanha | mapa, chefes, história e entrevista (Anexos C e D); **dividir antes de construir** | G |
+| **N2.10** Campanha | em 3 partes: **N2.10a** mapa com as regiões da entrevista, Vila do Começo com a Mestra Lume e objetivos por região (lidos dos dados reais); **N2.10b** chefe da semana com barra de vida (cada missão cumprida é um golpe; ritmo da entrevista define a vida), vitórias, baús e pets de região (Lobo, Sapinho, Golem, Dragão); **N2.10c** entrada animada de cada região (A, C, D e E da prévia "Entrada na Jornada") e pote da caixinha na cena | G |
+| **N2.11** Barra própria do jogo (**feito, v0.79**) | barra em pixel art dentro da Jornada; cadeado no que falta; puxar abre o menu | M |
+| **N2.12** Personagem em tela cheia (**feito, v0.80 e v0.83.1**) | cena na tela toda, título em placa, céu para escolher, espaços com moldura de raridade; tocar troca, segurar abre o Arsenal | P |
+| **N2.13** Tela principal completa (**feito, v0.81**) | sequência, baús prontos, seu dia em números, perto de desbloquear, festa ao subir de nível, como ganhar XP | M |
+| **N2.14** Entrada animada (**feito, v0.84**: opção B padrão) | portal em degraus ao entrar; as outras opções ficam para as regiões (N2.10c) | P |
+| **N2.15** Barra em duas fileiras e telas reorganizadas | barra 5 + 5 (Jornada · Campanha · Arsenal · Baús · Ficha / Pet · Casa · Codex · Mini games · Loja); **Arsenal, Pet e Casa só com o que você tem** (o que acabou de ser liberado aparece com "Novo! Pegar"); **Loja** nova com tudo o que se compra com ouro, inclusive o que ainda não dá (apagado, com "faltam X de ouro"); Arsenal fica só para vestir | M |
+| **N2.16** Mini games | **N2.16a** Fliperama (partidas premiadas do dia, recordes) + **Corrida do pet** + **Respira com o pet** (pode contar como prática de Mente); **N2.16b** **Memória do Arsenal** + **Pescaria** + conquistas dos jogos no Codex | M + M |
+
+
+### B.15. Decisões de 16/11 e plano para terminar a Jornada
+
+**Decidido pelo Leonardo (16/11):**
+- **Cada lugar com uma função:** Arsenal, Pet e Casa mostram **só o que você tem** (e o que acabou de liberar, com "Novo! Pegar"); a **Loja** mostra o que se compra com ouro, **inclusive o que ainda não dá, apagado e com "faltam X de ouro"** (instiga a meta); o **Codex** mostra **tudo o que existe**, com silhuetas, dicas e progresso. "Perto de desbloquear" continua na tela principal e leva ao Codex. A Forja continua na Ficha.
+- **Barra em duas fileiras de 5** (N2.15), aprovada como na prévia (https://claude.ai/artifact/XGMxQUaM9TCWtunRUnV6dz).
+- **Mini games aprovados (N2.16), os 4:** Corrida do pet, Memória do Arsenal, Pescaria e Respira com o pet. Regras: partidas de 30 a 60 s, em pixel art, sem internet; **prêmio pequeno** (5 a 20 de ouro) e **até 3 partidas premiadas por dia** (depois joga sem prêmio); recorde pessoal, sem ranking; Respira com o pet pode contar como prática de Mente no Núcleo. **Conquistas dos jogos** entram no Codex.
+- **Entrada animada:** B padrão (feito, v0.84); A, C, D (espiral noturna) e E (estrela) para as regiões da campanha.
+
+**Ordem para terminar** (uma parte por vez, testando no uso):
+1. **N2.15** barra em duas fileiras e telas reorganizadas (Arsenal, Pet, Casa, Loja). M
+2. **N2.7** Codex. M
+3. **N2.16a** Fliperama, Corrida do pet e Respira com o pet. M
+4. **N2.16b** Memória do Arsenal, Pescaria e conquistas dos jogos. M
+5. **N2.8** efeitos dos itens místicos. M
+6. **N2.10a → N2.10b → N2.10c** Campanha. G (3 partes)
+
+Depois da Jornada: **N7** (Estudos × Jornada).
 
 **N2.9b, como ficou (v0.74):** convite da Mestra Lume na Jornada até a entrevista ser feita (para quem já entrou na Jornada; não entra no meio da chegada). Respostas em `journey.profile` (`src/jornada/interview.ts`); o que ela cria fica em `src/jornada/interviewApply.ts`. Treino: 2× ter/qui, 3× seg/qua/sex, 4× seg/ter/qui/sex, 5× seg a sex. Terapia: quarta. Refazer não apaga nem duplica hábitos; a caixinha só é criada se não houver uma aberta com o mesmo nome. O desafio de dinheiro (ex.: "gastar demais") fica guardado para a campanha (Mercado de Ouro) e ainda não vira missão.
 
