@@ -9,9 +9,11 @@ import { go } from '../router';
 import { formatDMY, todayISO } from '../utils';
 import { Fullscreen, notify } from '../ui';
 import { ATTRIBUTES } from '../habits';
-import { chestIcon, COIN_ICON, HOMES, homeIcon, itemById, itemIcon, medalIcon, PETS, petIcon } from '../jornada/catalog';
+import { chestIcon, COIN_ICON, RARITY, HOMES, homeIcon, itemById, itemIcon, medalIcon, PETS, petIcon } from '../jornada/catalog';
 import { journeyNews, newsDiff, showWeekSummary, weekSummary } from '../jornada/home';
-import { acquire, acquirePlace, shopContext, TITLES, type Chest } from '../jornada/rules';
+import { acquire, acquirePlace, equip, petGoals, shopContext, TITLES, type Chest } from '../jornada/rules';
+import { LORE } from '../jornada/lore';
+import { PetEditor } from './JornadaPets';
 import { weekStart } from '../review';
 import { ChestOpen, CHEST_INFO } from './JornadaBaus';
 import { confetti } from './jornadaFx';
@@ -29,6 +31,8 @@ export function JornadaEventos() {
   const prev = useRef({ ...news, boxGoals: news.boxGoals.filter((id) => seen.includes(`meta:${id}`)), realized: news.realized.filter((id) => seen.includes(`real:${id}`)) });
   const [title, setTitle] = useState<string | null>(null);
   const [opening, setOpening] = useState<Chest | null>(null);
+  const [petNew, setPetNew] = useState<string | null>(null);
+  const [petEdit, setPetEdit] = useState<string | null>(null);
   const [boxEv, setBoxEv] = useState<{ kind: 'meta' | 'realizado'; id: string } | null>(null);
   const [week, setWeek] = useState(() => (showWeekSummary(data.journey, today) ? weekSummary(data, today) : null));
 
@@ -59,7 +63,11 @@ export function JornadaEventos() {
         notify(ok);
         return { ...d, journey: r };
       });
+    // Pet novo: tela "Novo companheiro!" (os outros liberados viram aviso com "Pegar").
+    const newPet = diff.free.find((id) => PETS.some((p) => p.id === id));
+    if (newPet) setPetNew(newPet);
     for (const id of diff.free) {
+      if (id === newPet) continue;
       const it = itemById(id);
       const pet = PETS.find((p) => p.id === id);
       const home = HOMES.find((h) => h.id === id);
@@ -97,8 +105,10 @@ export function JornadaEventos() {
 
   return (
     <>
+      {petNew && !boxEv && <PetScreen id={petNew} onClose={() => setPetNew(null)} onEdit={(id) => { setPetNew(null); window.setTimeout(() => setPetEdit(id), 250); }} />}
+      {petEdit && <PetEditor id={petEdit} onClose={() => setPetEdit(null)} />}
       {boxEv && ready && <BoxScreen ev={boxEv} onClose={() => setBoxEv(null)} />}
-      {title && !boxEv && <TitleScreen id={title} onClose={() => setTitle(null)} />}
+      {title && !boxEv && !petNew && <TitleScreen id={title} onClose={() => setTitle(null)} />}
       {opening && <ChestOpen chest={opening} onClose={() => setOpening(null)} />}
       {week && ready && !title && !boxEv && <WeekScreen w={week} pending={news.chests.length} onClose={closeWeek} />}
     </>
@@ -279,6 +289,61 @@ function BoxScreen({ ev, onClose }: { ev: { kind: 'meta' | 'realizado'; id: stri
         )}
         <button type="button" className={`btn block${meta ? ' primary' : ''}`} onClick={onClose}>
           Continuar
+        </button>
+      </div>
+    </Fullscreen>
+  );
+}
+
+/** Pet novo: "Novo companheiro!" com confete. Levar para passear (pega e põe na cena), dar um nome ou deixar para depois. */
+function PetScreen({ id, onClose, onEdit }: { id: string; onClose: () => void; onEdit: (id: string) => void }) {
+  const { data, update } = useStore();
+  const pet = PETS.find((p) => p.id === id);
+  useEffect(() => confetti(), []);
+  if (!pet) return null;
+  const take = () =>
+    update((d) => {
+      const got = acquirePlace('pet', id, d.journey, shopContext(d, d.journey, todayISO()));
+      const j = typeof got === 'string' ? d.journey : got;
+      const r = equip(j, 'pet', id, 1);
+      return { ...d, journey: typeof r === 'string' ? j : r };
+    });
+  const lore = LORE[id];
+  const goal = petGoals(data, todayISO())[id];
+  return (
+    <Fullscreen label="Novo companheiro" className="jn-open-fs" onClose={onClose}>
+      <div className="jn-open-center">
+        <span className="jn-eyebrow jn-px">NOVO COMPANHEIRO!</span>
+        <img className="jn-title-medal jn-pet-new" alt="" src={petIcon(id)} />
+        <h2 className="jn-week-h">{pet.name}</h2>
+        <span style={{ color: RARITY[pet.rarity].color, fontWeight: 700 }}>{RARITY[pet.rarity].label}</span>
+        {lore && <p className="muted" style={{ fontStyle: 'italic' }}>“{lore}”</p>}
+        {goal?.hint && <p className="muted small">Conquistado por: {goal.hint.charAt(0).toLowerCase() + goal.hint.slice(1)}</p>}
+      </div>
+      <div className="jn-open-actions">
+        <button
+          type="button"
+          className="btn primary block"
+          onClick={() => {
+            take();
+            notify(`${pet.name} está na cena`, 'Seu novo companheiro já passeia com você.', { icon: petIcon(id) });
+            onClose();
+          }}
+        >
+          Levar para passear
+        </button>
+        <button
+          type="button"
+          className="btn block"
+          onClick={() => {
+            take();
+            onEdit(id);
+          }}
+        >
+          Dar um nome
+        </button>
+        <button type="button" className="btn ghost block" onClick={onClose}>
+          Depois
         </button>
       </div>
     </Fullscreen>
