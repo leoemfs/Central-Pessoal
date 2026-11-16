@@ -31,6 +31,11 @@
 
 Afeta: layout do app todo (`App.tsx`, CSS), Personalização (opção de esconder ao rolar), Início (`cardLayout.ts`, cartões da coluna), backup.
 
+## Cartões da coluna × Início (16/11)
+- A coluna usa os **mesmos cartões do Início** (não são cartões novos).
+- Cartão posto na coluna **sai do Início** enquanto a coluna está visível, para não aparecer em dois lugares.
+- Janela estreita (coluna escondida) ou celular: o cartão **volta ao Início** sozinho, no mesmo lugar.
+
 ## Ligado a outros itens (16/11)
 - **E27 · Caminho no computador:** a primeira linha do conteúdo mostra "Início › Finanças › Orçamento", clicável (documento `navegacao-v2.md`). Entra junto com o PC2.
 - **E25:** no celular o menu ☰ saiu (tudo na gaveta); no computador a **barra lateral continua** (regra do `CLAUDE.md`).
