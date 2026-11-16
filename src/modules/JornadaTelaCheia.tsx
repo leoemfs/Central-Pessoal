@@ -3,12 +3,13 @@
  * da prévia "Jornada RPG". A cena ocupa a tela toda; por cima, nome · nível, título em placa,
  * classe e estrelas; embaixo, o céu para escolher e os 7 espaços (moldura na cor da raridade).
  */
-import { useState } from 'react';
+import { useRef, useState } from 'react';
+import { useStore } from '../store';
 import { todayISO } from '../utils';
 import { Fullscreen } from '../ui';
 import { ATTRIBUTES } from '../habits';
 import { avatarIcon, homeIcon, HOMES, itemById, itemIcon, PETS, petIcon, RARITY, skyPalette, treeIcon, type AvatarLook, type Slot } from '../jornada/catalog';
-import { classOf, type JourneyState } from '../jornada/rules';
+import { classOf, equip, nextInSlot, type JourneyState } from '../jornada/rules';
 import { hash01 } from '../jornada/rules';
 import { skyAt, starPositions, starsTonight } from '../jornada/sky';
 
@@ -47,6 +48,25 @@ export function TelaCheia({
   onClose: () => void;
 }) {
   const [sky, setSky] = useState<Sky>('auto');
+  const { update } = useStore();
+  const timer = useRef<number | undefined>(undefined);
+  const held = useRef(false);
+  const holdStart = (id: Slot | 'pet' | 'morada') => {
+    held.current = false;
+    window.clearTimeout(timer.current);
+    timer.current = window.setTimeout(() => {
+      held.current = true;
+      onSlot(id);
+    }, 550);
+  };
+  const holdEnd = () => window.clearTimeout(timer.current);
+  // Tocar troca na hora: passa pelos itens que você tem e, quando o espaço pode, fica sem nada.
+  const cycle = (id: Slot | 'pet' | 'morada') =>
+    update((d) => {
+      const next = nextInSlot(d.journey, id);
+      const r = equip(d.journey, id, next, 999);
+      return typeof r === 'string' ? d : { ...d, journey: r };
+    });
   const [hearts, setHearts] = useState(0);
   const [jump, setJump] = useState(0);
   const real = skyAt(now, activeDays, state.weather);
@@ -75,7 +95,7 @@ export function TelaCheia({
           ))}
         {night && <span className="jn-fs-moon" style={{ boxShadow: `inset -14px -8px 0 ${t.sky1}` }} />}
         {night && <span className="jn-fs-shoot" />}
-        {!night && !rain && <span className="jn-fs-sun" style={{ background: t.sun, top: phase === 'tarde' ? '30%' : '17%' }} />}
+        {!night && !rain && <span className="jn-fs-sun" style={{ background: t.sun, top: phase === 'tarde' ? '40%' : '33%' }} />}
         {!night && (
           <>
             <i className="jn-fs-cloud" style={{ background: t.cloud, left: '8%', top: '14%', width: 84 }} />
@@ -143,8 +163,13 @@ export function TelaCheia({
               <button
                 key={s.id}
                 type="button"
-                aria-label={`${s.label}: ${name ?? 'vazio'}`}
-                onClick={() => onSlot(s.id)}
+                aria-label={`${s.label}: ${name ?? 'vazio'}. Toque para trocar; segure para abrir o Arsenal`}
+                onPointerDown={() => holdStart(s.id)}
+                onPointerUp={holdEnd}
+                onPointerLeave={holdEnd}
+                onPointerCancel={holdEnd}
+                onContextMenu={(e) => e.preventDefault()}
+                onClick={() => (held.current ? (held.current = false) : cycle(s.id))}
               >
                 <span className="jn-fs-slot" style={{ borderColor: rarity ? RARITY[rarity].color : '#3f3f46' }}>
                   {icon ? <img src={icon} alt="" /> : <b aria-hidden="true">+</b>}
@@ -154,7 +179,7 @@ export function TelaCheia({
             );
           })}
         </div>
-        <span className="jn-fs-hint">Toque num espaço para trocar · o céu segue o relógio do celular</span>
+        <span className="jn-fs-hint">Toque num espaço para trocar · segure para abrir o Arsenal</span>
       </section>
     </Fullscreen>
   );

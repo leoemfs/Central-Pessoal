@@ -33,6 +33,7 @@ import {
   wallet,
   welcomeState,
   pendingGifts,
+  nextInSlot,
   type ShopContext,
 } from './jornada/rules.ts';
 import { phaseAt, rainWindow, skyAt, starPositions, starsTonight } from './jornada/sky.ts';
@@ -439,4 +440,16 @@ test('N2.6: pets novos com pelagens; nome e pelagem vêm do backup', () => {
   assert.deepEqual(s.petNames, { gato: 'Mingau' });
   assert.deepEqual(s.petStyle, { gato: 'laranja' });
   assert.deepEqual(s.gifts, []);
+});
+
+test('N2.12: tocar no espaço passa pelos itens que tem e, quando pode, fica sem nada', () => {
+  const s = { ...defaultJourneyState(), owned: [...defaultJourneyState().owned, 'capuz', 'elmo', 'couro', 'gato', 'cao'] };
+  assert.equal(nextInSlot(s, 'elmo'), 'capuz');
+  const s2 = { ...s, equipped: { ...s.equipped, elmo: 'capuz' } };
+  assert.equal(nextInSlot(s2, 'elmo'), 'elmo');
+  assert.equal(nextInSlot({ ...s, equipped: { ...s.equipped, elmo: 'elmo' } }, 'elmo'), null, 'sem elmo');
+  assert.equal(nextInSlot(s, 'botas'), 'couro');
+  assert.equal(nextInSlot({ ...s, equipped: { ...s.equipped, botas: 'couro' } }, 'botas'), 'sapatos', 'botas nunca ficam vazias');
+  assert.equal(nextInSlot({ ...s, equipped: { ...s.equipped, pet: 'cao' } }, 'pet'), null);
+  assert.equal(nextInSlot(s, 'morada'), 'cabana', 'uma casa só: continua nela');
 });
