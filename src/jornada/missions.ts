@@ -8,13 +8,14 @@ import type { AppData, Habit, JournalRhythm } from '../types.ts';
 import { addDays, fromISO, toISO } from '../utils.ts';
 import { isArchived, isScheduled } from '../habits.ts';
 import { REWARDS } from '../journey.ts';
+import { planStatus } from '../boxes.ts';
 import type { AttrCode } from './catalog.ts';
 
-export type MissionAction = { type: 'habit'; id: string } | { type: 'task'; id: string } | { type: 'bill'; id: string } | { type: 'go'; to: string } | { type: 'none' };
+export type MissionAction = { type: 'box'; id: string; amount: number } | { type: 'habit'; id: string } | { type: 'task'; id: string } | { type: 'bill'; id: string } | { type: 'go'; to: string } | { type: 'none' };
 
 export interface Mission {
   id: string;
-  kind: 'ritual' | 'construir' | 'abandonar' | 'tarefa' | 'conta' | 'diario';
+  kind: 'ritual' | 'construir' | 'abandonar' | 'tarefa' | 'conta' | 'diario' | 'caixinha';
   title: string;
   meta: string;
   xp: number;
@@ -120,6 +121,25 @@ export function missionsToday(d: AppData, today: string): Mission[] {
       attrs: { DIS: 2 },
       done: e.paidAt === today,
       action: { type: 'bill', id: e.id },
+    });
+  }
+  // N2.17e: guardar na caixinha enquanto o plano do período não foi cumprido (ou cumprido hoje).
+  for (const b of d.boxes ?? []) {
+    const st = planStatus(b, today);
+    if (!st || !b.plan) continue;
+    const savedToday = b.moves.some((m) => m.kind === 'plano' && m.date === today);
+    if (!st.pending && !savedToday) continue;
+    const money = (v: number) => v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+    out.push({
+      id: `b:${b.id}`,
+      kind: 'caixinha',
+      title: `Guardar ${money(b.plan.amount)} em ${b.name}`,
+      meta: `Finanças › Caixinhas · plano de ${money(b.plan.amount)} por ${b.plan.every === 'semana' ? 'semana' : 'mês'}`,
+      xp: REWARDS.caixinha.xp,
+      gold: REWARDS.caixinha.gold,
+      attrs: { DIS: 3 },
+      done: savedToday,
+      action: { type: 'box', id: b.id, amount: b.plan.amount },
     });
   }
   const r = d.settings.journalRhythm;

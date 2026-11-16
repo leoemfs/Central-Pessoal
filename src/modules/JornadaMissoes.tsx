@@ -9,12 +9,15 @@ import { payExpense, unpayExpense } from '../finance';
 import { go } from '../router';
 import { ATTRIBUTES } from '../habits';
 import { formatDMY, todayISO } from '../utils';
-import { Icon, notify, type IconName } from '../ui';
+import { useState } from 'react';
+import { Field, Icon, MoneyInput, notify, Sheet, type IconName } from '../ui';
+import { balance, deposit, progress, removeMove } from '../boxes';
+import { PX } from '../jornada/px';
 import { floatTexts, flyCoins } from './jornadaFx';
 import { COIN_ICON } from '../jornada/catalog';
 import { missionsToday, missionsWeek, type Mission } from '../jornada/missions';
 
-const ICONS: Record<Mission['kind'], IconName> = { ritual: 'sun', construir: 'sprout', abandonar: 'shield', tarefa: 'tasks', conta: 'bolt', diario: 'notePen' };
+const ICONS: Record<Mission['kind'], IconName> = { ritual: 'sun', construir: 'sprout', abandonar: 'shield', tarefa: 'tasks', conta: 'bolt', diario: 'notePen', caixinha: 'piggy' };
 const color = (code: string) => ATTRIBUTES.find((a) => a.code === code)?.color ?? 'var(--green-text)';
 
 export function MissionsCard() {
@@ -22,15 +25,28 @@ export function MissionsCard() {
   const today = todayISO();
   const ms = missionsToday(data, today);
   const done = ms.filter((m) => m.done).length;
+  const [saving, setSaving] = useState<{ m: Mission; btn: HTMLElement | null } | null>(null);
+  const fx = (m: Mission, btn: HTMLElement | null | undefined) => {
+    if (!btn) return;
+    const r = btn.getBoundingClientRect();
+    floatTexts(r, [{ text: `+${m.xp} XP`, color: 'var(--jn-xp)' }, ...Object.entries(m.attrs).map(([k, v]) => ({ text: `+${v} ${k}`, color: color(k) }))]);
+    if (m.gold) flyCoins(r, COIN_ICON, Math.min(6, Math.ceil(m.gold / 3)));
+  };
   const act = (m: Mission, btn?: HTMLElement) => {
     const a = m.action;
+    // Caixinha: marcar pergunta quanto guardou; desmarcar tira o "guardado (plano)" de hoje.
+    if (a.type === 'box') {
+      if (!m.done) return setSaving({ m, btn: btn ?? null });
+      notify('Missão desmarcada', 'O valor guardado hoje pelo plano saiu da caixinha, e a recompensa junto.');
+      return update((d) => {
+        const b = d.boxes.find((x) => x.id === a.id);
+        const mv = b?.moves.find((x) => x.kind === 'plano' && x.date === today);
+        return b && mv ? removeMove(a.id, mv.id)(d) : d;
+      });
+    }
     if (a.type !== 'go' && a.type !== 'none') {
       if (m.done) notify('Missão desmarcada', 'A recompensa saiu junto. Desmarcar algo marcado por engano tira os pontos.');
-      else if (btn) {
-        const r = btn.getBoundingClientRect();
-        floatTexts(r, [{ text: `+${m.xp} XP`, color: 'var(--jn-xp)' }, ...Object.entries(m.attrs).map(([k, v]) => ({ text: `+${v} ${k}`, color: color(k) }))]);
-        if (m.gold) flyCoins(r, COIN_ICON, Math.min(6, Math.ceil(m.gold / 3)));
-      }
+      else fx(m, btn);
     }
     if (a.type === 'habit') update(toggleCheck(a.id, today));
     else if (a.type === 'task') update(toggleTask(a.id));
@@ -106,9 +122,63 @@ export function MissionsCard() {
       <p className="muted small" style={{ marginTop: 10 }}>
         Estas missões são os seus próprios hábitos, tarefas, contas e diário. Marcar aqui é o mesmo que marcar no Núcleo, na Agenda ou em Finanças. O que ficar para trás só some à meia-noite, sem perder nada.
       </p>
+      {saving && saving.m.action.type === 'box' && (
+        <SaveSheet
+          boxId={saving.m.action.id}
+          amount={saving.m.action.amount}
+          onClose={() => setSaving(null)}
+          onSaved={() => {
+            fx(saving.m, saving.btn);
+            setSaving(null);
+          }}
+        />
+      )}
     </section>
   );
 }
+
+/** Quanto guardou na caixinha (o app só registra: o dinheiro fica no banco). */
+function SaveSheet({ boxId, amount, onClose, onSaved }: { boxId: string; amount: number; onClose: () => void; onSaved: () => void }) {
+  const { data, update } = useStore();
+  const b = data.boxes.find((x) => x.id === boxId);
+  const [cents, setCents] = useState(Math.round(amount * 100));
+  if (!b) return null;
+  const pct = progress(b);
+  return (
+    <Sheet
+      title="Guardar na caixinha"
+      onClose={onClose}
+      footer={
+        <button
+          type="button"
+          className="btn primary block"
+          disabled={cents <= 0}
+          onClick={() => {
+            update(deposit(boxId, cents / 100, todayISO(), true));
+            onSaved();
+          }}
+        >
+          Guardei
+        </button>
+      }
+    >
+      <div className="jn-save">
+        <img alt="" src={PX.jar(pct)} />
+        <strong>{b.name}</strong>
+        <span className="muted small">
+          {money(balance(b))}
+          {b.target ? ` de ${money(b.target)}` : ''}
+        </span>
+      </div>
+      <Field label="Valor em R$">
+        <MoneyInput cents={cents} onChange={setCents} label="Valor guardado" large autoFocus />
+      </Field>
+      <p className="muted small">O app só registra. O dinheiro fica no seu banco. No dia do plano vale +20 XP, +10 de ouro e +3 de Disciplina, seja qual for o valor.</p>
+    </Sheet>
+  );
+}
+
+const money = (v: number) => v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 
 export function WeekCard() {
   const { data } = useStore();

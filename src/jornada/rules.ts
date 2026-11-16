@@ -63,6 +63,8 @@ export interface JourneyState {
   levelSeen: number;
   /** N2.17d: semana (segunda) cujo Resumo da semana já foi mostrado. */
   weekSeen: string;
+  /** N2.17e: caixinhas já comemoradas ("meta:<id>" e "real:<id>"). */
+  boxSeen: string[];
   /** N2.6: nome dado a cada pet (id → nome) e pelagem escolhida (id → pelagem). */
   petNames: Record<string, string>;
   petStyle: Record<string, string>;
@@ -97,6 +99,7 @@ export function defaultJourneyState(): JourneyState {
     lastSeen: null,
     levelSeen: 0,
     weekSeen: '',
+    boxSeen: [],
     petNames: {},
     petStyle: {},
     gifts: [],
@@ -163,6 +166,7 @@ export function normalizeJourney(raw: unknown): JourneyState {
     gifts: Array.isArray(r.gifts) ? r.gifts.filter((g): g is GiftRecord => !!g && typeof g.day === 'string' && typeof g.gold === 'number').map((g) => ({ day: g.day, n: Math.max(1, Math.floor(Number(g.n) || 1)), gold: Math.max(0, g.gold), chest: g.chest === 'bronze' || g.chest === 'prata' || g.chest === 'dourado' ? g.chest : null })) : [],
     games: normalizeGames(r.games),
     levelSeen: typeof r.levelSeen === 'number' && Number.isFinite(r.levelSeen) && r.levelSeen > 0 ? Math.floor(r.levelSeen) : 0,
+    boxSeen: Array.isArray(r.boxSeen) ? r.boxSeen.filter((x): x is string => typeof x === 'string').slice(-200) : [],
     weekSeen: typeof r.weekSeen === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(r.weekSeen) ? r.weekSeen : '',
     profile: normalizeProfile(r.profile),
   };
@@ -196,7 +200,9 @@ export function attributes(d: AppData, to: string = todayISO(), from = '0000-01-
   const inRange = (day: string) => day >= from && day <= to;
   const reviews = d.journal.filter((j) => isReview(j.tag) && inRange(dayOf(j.createdAt))).length;
   const diaryDays = new Set(d.journal.filter((j) => !isReview(j.tag)).map((j) => dayOf(j.createdAt)).filter(inRange)).size;
-  a.DIS += 2 * billsOnTime(d, from, to) + 3 * reviews;
+  // N2.17e: guardar na caixinha no dia do plano vale +3 de Disciplina.
+  const planSaves = (d.boxes ?? []).reduce((n, b) => n + b.moves.filter((m) => m.kind === 'plano' && inRange(m.date)).length, 0);
+  a.DIS += 2 * billsOnTime(d, from, to) + 3 * reviews + 3 * planSaves;
   a.SAB += diaryDays;
   // Saúde (N1.1): bater a meta de água vale +3 de Resistência (com hábito ligado, já conta pelo hábito).
   a.RES += 3 * waterGoalDays(d, from, to);
@@ -337,6 +343,8 @@ export const TITLES: TitleDef[] = [
   { id: 'aprendiz', f: 'Aprendiz', m: 'Aprendiz', rule: 'Começar a Jornada', need: 1, have: (c) => (c.d.settings.journeyUnlockedAt ? 1 : 0) },
   { id: 'contas', f: 'Guardiã das Contas', m: 'Guardião das Contas', rule: '3 meses com todas as contas pagas no prazo', need: 3, have: (c) => monthsAllOnTime(c.d, c.today).length },
   { id: 'tesouro', f: 'Tesoureira', m: 'Tesoureiro', rule: '3 meses seguidos com sobra positiva', need: 3, have: (c) => bestPositiveRun(c.d, c.today) },
+  { id: 'poupadora', f: 'Poupadora', m: 'Poupador', rule: 'Encher uma caixinha até a meta', need: 1, have: (c) => ((c.d.boxes ?? []).some((b) => b.marks.includes(100)) ? 1 : 0) },
+  { id: 'realizadora', f: 'Realizadora', m: 'Realizador', rule: 'Usar uma caixinha para realizar o objetivo', need: 1, have: (c) => ((c.d.boxes ?? []).some((b) => b.realizedAt && b.realizedAt <= c.today) ? 1 : 0) },
   { id: 'madrugada', f: 'Madrugadora', m: 'Madrugador', rule: '30 dias de rituais da manhã cumpridos', need: 30, have: (c) => checkDays(c.d, (h) => h.period === 'manha', c.today).size },
   { id: 'inquebravel', f: 'Inquebrável', m: 'Inquebrável', rule: 'Sequência de 30 dias num hábito', need: 30, have: (c) => Math.max(0, ...c.d.habits.map((h) => bestStreak(h, c.today))) },
   { id: 'tempo', f: 'Mestra do Tempo', m: 'Mestre do Tempo', rule: '12 revisões semanais feitas', need: 12, have: (c) => c.d.journal.filter((j) => isReview(j.tag)).length },
@@ -420,6 +428,21 @@ export function earnedChests(d: AppData, today: string = todayISO(), level = 1):
       for (const m of CRISTAL_MILESTONES)
         if (len >= m) out.push({ key: `cristal:${h.id}:${start}:${m}`, kind: 'cristal', date: addDays(start, m), reason: `${m} dias sem: ${h.name}` });
     });
+  }
+  // N2.17e: marcos da caixinha (25% e 75% bronze, 50% prata, 100% dourado), uma vez por caixinha.
+  for (const b of d.boxes ?? []) {
+    if (!b.target) continue;
+    let bal = 0;
+    const when: Record<number, string> = {};
+    for (const m of [...b.moves].sort((x, y) => x.date.localeCompare(y.date))) {
+      bal += m.kind === 'retirada' ? -m.amount : m.amount;
+      for (const mk of [25, 50, 75, 100]) if (!when[mk] && bal >= (b.target * mk) / 100) when[mk] = m.date;
+    }
+    for (const mk of b.marks) {
+      const date = when[mk] ?? b.createdAt.slice(0, 10);
+      if (date > today) continue;
+      out.push({ key: `${mk === 100 ? 'dourado' : mk === 50 ? 'prata' : 'bronze'}:caixinha:${b.id}:${mk}`, kind: mk === 100 ? 'dourado' : mk === 50 ? 'prata' : 'bronze', date, reason: `${b.name}: ${mk}% da meta` });
+    }
   }
   // N2.7: marcos de descoberta do Codex (25% prata, 50% dourado, 75% cristal).
   const pct = codexPct(d.journey?.owned ?? []);

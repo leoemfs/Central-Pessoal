@@ -17,7 +17,7 @@ import type { Item, Slot } from '../jornada/catalog';
 import { classOf, recentAttributes, sinceLastVisit, snapshot, TITLES, wallet, welcomed, welcomeState, type JourneyState, type SinceVisit } from '../jornada/rules';
 import { skyAt, starPositions } from '../jornada/sky';
 import { MissionsCard, WeekCard } from './JornadaMissoes';
-import { Notices, QuaseLa, Stats3 } from './JornadaTopo';
+import { BoxCard, Notices, QuaseLa, Stats3 } from './JornadaTopo';
 import { BausView } from './JornadaBaus';
 import { go, useRoute } from '../router';
 import { journeyTab } from '../jornada/tabs';
@@ -502,6 +502,7 @@ export function JornadaHome() {
       </div>
 
       <GiftCard />
+      <BoxCard />
       <Notices />
 
       {!state.profile && (

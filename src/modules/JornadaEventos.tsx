@@ -15,6 +15,8 @@ import { acquire, acquirePlace, shopContext, TITLES, type Chest } from '../jorna
 import { weekStart } from '../review';
 import { ChestOpen, CHEST_INFO } from './JornadaBaus';
 import { confetti } from './jornadaFx';
+import { PX } from '../jornada/px';
+import { balance } from '../boxes';
 
 const fmt = (n: number) => n.toLocaleString('pt-BR');
 
@@ -22,9 +24,12 @@ export function JornadaEventos() {
   const { data, update } = useStore();
   const today = todayISO();
   const news = journeyNews(data, data.journey, today);
-  const prev = useRef(news);
+  // Caixinhas: guardar e realizar acontecem em Finanças; o que ainda não foi comemorado aparece ao voltar.
+  const seen = data.journey.boxSeen;
+  const prev = useRef({ ...news, boxGoals: news.boxGoals.filter((id) => seen.includes(`meta:${id}`)), realized: news.realized.filter((id) => seen.includes(`real:${id}`)) });
   const [title, setTitle] = useState<string | null>(null);
   const [opening, setOpening] = useState<Chest | null>(null);
+  const [boxEv, setBoxEv] = useState<{ kind: 'meta' | 'realizado'; id: string } | null>(null);
   const [week, setWeek] = useState(() => (showWeekSummary(data.journey, today) ? weekSummary(data, today) : null));
 
   // Mostra o resumo depois da entrada (portal) e da arrumação da página, para não ser fechado por ela.
@@ -40,7 +45,7 @@ export function JornadaEventos() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const key = JSON.stringify([news.titles, news.free, news.forge, news.chests.map((c) => c.key)]);
+  const key = JSON.stringify([news.titles, news.free, news.forge, news.chests.map((c) => c.key), news.boxGoals, news.realized]);
   useEffect(() => {
     const diff = newsDiff(prev.current, news);
     prev.current = news;
@@ -76,6 +81,12 @@ export function JornadaEventos() {
     for (const c of diff.chests)
       notify(`Novo baú: ${CHEST_INFO[c.kind].name.replace('Baú de ', '').replace('Baú ', '')}`, c.reason, { icon: chestIcon(c.kind, false), action: { label: 'Abrir', fn: () => setOpening(c) } });
     if (diff.titles.length) setTitle(diff.titles[0]);
+    if (diff.realized.length || diff.boxGoals.length) {
+      if (diff.realized.length) setBoxEv({ kind: 'realizado', id: diff.realized[0] });
+      else setBoxEv({ kind: 'meta', id: diff.boxGoals[0] });
+      const add = [...diff.boxGoals.map((id) => `meta:${id}`), ...diff.realized.map((id) => `real:${id}`)];
+      update((d) => ({ ...d, journey: { ...d.journey, boxSeen: [...new Set([...d.journey.boxSeen, ...add])] } }));
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [key]);
 
@@ -86,9 +97,10 @@ export function JornadaEventos() {
 
   return (
     <>
-      {title && <TitleScreen id={title} onClose={() => setTitle(null)} />}
+      {boxEv && ready && <BoxScreen ev={boxEv} onClose={() => setBoxEv(null)} />}
+      {title && !boxEv && <TitleScreen id={title} onClose={() => setTitle(null)} />}
       {opening && <ChestOpen chest={opening} onClose={() => setOpening(null)} />}
-      {week && ready && !title && <WeekScreen w={week} pending={news.chests.length} onClose={closeWeek} />}
+      {week && ready && !title && !boxEv && <WeekScreen w={week} pending={news.chests.length} onClose={closeWeek} />}
     </>
   );
 }
@@ -202,6 +214,71 @@ function WeekScreen({ w, pending, onClose }: { w: NonNullable<ReturnType<typeof 
           }}
         >
           {pending ? 'Abrir os baús' : 'Continuar'}
+        </button>
+      </div>
+    </Fullscreen>
+  );
+}
+
+/** Caixinha: meta atingida ou objetivo realizado (dinheiro de verdade, fora do jogo). */
+function BoxScreen({ ev, onClose }: { ev: { kind: 'meta' | 'realizado'; id: string }; onClose: () => void }) {
+  const { data } = useStore();
+  const b = data.boxes.find((x) => x.id === ev.id);
+  useEffect(() => confetti(), []);
+  if (!b) return null;
+  const money = (v: number) => v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+  const meta = ev.kind === 'meta';
+  const tIdx = TITLES.findIndex((t) => t.id === (meta ? 'poupadora' : 'realizadora'));
+  const t = TITLES[tIdx];
+  const g = data.journey.avatar?.gender === 'm' ? t.m : t.f;
+  const saved = meta ? balance(b) : b.moves.filter((m) => m.kind === 'retirada' && m.reason === 'realizei').reduce((a, m) => a + m.amount, 0);
+  return (
+    <Fullscreen label={meta ? 'Meta atingida' : 'Objetivo realizado'} className="jn-open-fs" onClose={onClose}>
+      <div className="jn-open-center">
+        <span className="jn-eyebrow jn-px">{meta ? 'META ATINGIDA!' : 'OBJETIVO REALIZADO!'}</span>
+        <img className="jn-title-medal" alt="" src={meta ? PX.jar(1) : medalIcon(tIdx, true)} />
+        <h2 className="jn-week-h">{meta ? b.name : `Você realizou: ${b.name}`}</h2>
+        <p className="muted">
+          {meta ? (
+            <>
+              Você juntou <b style={{ color: 'var(--jn-gold)' }}>{money(saved)}</b> de verdade. Isso é seu, fora do jogo.
+            </>
+          ) : (
+            'Juntar para usar é exatamente o objetivo. Essa conquista fica guardada para sempre, mesmo com a caixinha vazia.'
+          )}
+        </p>
+        <div className="jn-loot">
+          <div className="jn-loot-row">
+            <img alt="" src={meta ? chestIcon('dourado', false) : COIN_ICON} />
+            <div>
+              <strong>{meta ? 'Baú dourado' : '+200 ouro'}</strong>
+              <span className="muted small">{meta ? 'Já espera em Baús' : 'Por realizar o objetivo'}</span>
+            </div>
+          </div>
+          <div className="jn-loot-row" style={{ animationDelay: '0.18s' }}>
+            <img alt="" src={medalIcon(tIdx, true)} />
+            <div>
+              <strong>Título: {g}</strong>
+              <span className="muted small">{t.rule} · +1 cristal</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div className="jn-open-actions">
+        {!meta && (
+          <button
+            type="button"
+            className="btn primary block"
+            onClick={() => {
+              onClose();
+              go('financas/nova-caixinha');
+            }}
+          >
+            Começar outra caixinha
+          </button>
+        )}
+        <button type="button" className={`btn block${meta ? ' primary' : ''}`} onClick={onClose}>
+          Continuar
         </button>
       </div>
     </Fullscreen>

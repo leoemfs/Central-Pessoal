@@ -11,7 +11,9 @@ import { notify } from '../ui';
 import { journeyStats } from '../journey';
 import { avatarIcon, chestIcon, COIN_ICON, GEM_ICON, HOMES, itemById, itemIcon, ITEMS, medalIcon, PETS, petIcon, homeIcon } from '../jornada/catalog';
 import { PX } from '../jornada/px';
-import { quaseLa, streakDays, dayNumbers } from '../jornada/home';
+import { mainBox, quaseLa, streakDays, dayNumbers } from '../jornada/home';
+import { balance, planStatus, progress } from '../boxes';
+import { diffDays } from '../habits';
 import { acquire, acquirePlace, availability, type Chest, classOf, pendingChests, placeAvailability, recentAttributes, shopContext, visitStats, wallet, welcomed } from '../jornada/rules';
 import { starsTonight } from '../jornada/sky';
 
@@ -219,7 +221,7 @@ export function QuaseLa() {
   const { data } = useStore();
   const list = quaseLa(data, data.journey, todayISO());
   const icon = (g: (typeof list)[number]['icon']) =>
-    g.kind === 'estrela' ? PX.star : g.kind === 'bau' ? chestIcon(g.chest, false) : g.kind === 'medalha' ? medalIcon(g.index, true) : itemIcon(itemById(g.id)!);
+    g.kind === 'estrela' ? PX.star : g.kind === 'pote' ? PX.jar(g.pct) : g.kind === 'bau' ? chestIcon(g.chest, false) : g.kind === 'medalha' ? medalIcon(g.index, true) : itemIcon(itemById(g.id)!);
   return (
     <section className="card">
       <div className="card-head">
@@ -244,6 +246,45 @@ export function QuaseLa() {
           </li>
         ))}
       </ul>
+    </section>
+  );
+}
+
+/** Cartão da caixinha na tela principal: o pote enche com o que você guardou. "Abrir" leva às Caixinhas de Finanças. */
+export function BoxCard() {
+  const { data } = useStore();
+  const b = mainBox(data);
+  if (!b) return null;
+  const today = todayISO();
+  const bal = balance(b);
+  const pct = progress(b, bal);
+  const st = planStatus(b, today);
+  const days = st && !st.pending ? Math.max(0, diffDays(today, st.next)) : 0;
+  const money = (v: number) => v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+  const when = !b.plan || !st ? 'sem plano' : st.pending ? 'guardar hoje' : days === 1 ? 'próximo amanhã' : `próximo em ${days} dias`;
+  return (
+    <section className="card jn-boxcard">
+      <button type="button" className="jn-jar" aria-label={`Abrir caixinhas (${b.name})`} onClick={() => go('financas/caixinhas')}>
+        <img alt="" src={PX.jar(pct)} />
+      </button>
+      <div>
+        <span className="jn-boxeye">Caixinha · {b.name}</span>
+        <strong className="tabular">
+          {money(bal)} {b.target ? <span className="muted small">de {money(b.target)}</span> : null}
+        </strong>
+        {b.target ? (
+          <div className="jn-near-bar">
+            <i style={{ width: `${Math.min(100, pct * 100)}%`, background: 'var(--jn-gold)' }} />
+          </div>
+        ) : null}
+        <span className="muted small">
+          {b.plan ? `${money(b.plan.amount)} por ${b.plan.every === 'semana' ? 'semana' : 'mês'} · ` : ''}
+          {when}
+        </span>
+      </div>
+      <button type="button" className="btn soft small" onClick={() => go('financas/caixinhas')}>
+        Abrir
+      </button>
     </section>
   );
 }
