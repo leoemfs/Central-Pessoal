@@ -177,7 +177,7 @@
 ## Feito
 | Versão | O que entrou | PR |
 |---|---|---|
-| v0.73 | N2.9a: **Missões de hoje** na Jornada (rituais e hábitos do dia, tarefas do dia e atrasadas, contas que vencem hoje, diário no ritmo e "Dia sem…" dos hábitos a abandonar, com XP, ouro e atributos; marcar ali marca no Núcleo, conclui a tarefa ou paga a conta) e **Missões da semana** (Diário no ritmo escolhido, com bônus de 10 XP por vez combinada, e revisão semanal) | — |
+| v0.73 | N2.9a: **Missões de hoje** na Jornada (rituais e hábitos do dia, tarefas do dia e atrasadas, contas que vencem hoje, diário no ritmo e "Dia sem…" dos hábitos a abandonar, com XP, ouro e atributos; marcar ali marca no Núcleo, conclui a tarefa ou paga a conta) e **Missões da semana** (Diário no ritmo escolhido, com bônus de 10 XP por vez combinada, e revisão semanal) | #120 |
 | v0.72 | N8.7: **Adiar reunião** (amanhã, +1 semana ou outra data e hora) muda só aquela reunião; mostra "adiada de…", dá para voltar à data original, e "Marcar a próxima" segue no dia fixo da série. Agenda acompanha sozinha || #119 |
 | v0.71.1 | E29: Aparência › **Cor dos ícones** (Monocromático ou Colorido: cada módulo com a sua cor na gaveta do menu, no Mais e nos Guardados). Ajuste: a **seta ‹** do topo sai na **cor de destaque** (estava branca), também no modo colorido | — |
 | v0.71 | N1.4 + N1.5 (juntos, a pedido): **Consultas, exames e check-ups** (Agenda sozinha, "Já fui" com retorno, pedidos de exame e repetir; Próximos check-ups com "Marcar" na Agenda quando vence) e **Peso e medidas** (escondidos por padrão, gráfico, sem pontos); abas Dia · Dieta · Remédios · Consultas · Medidas | — |
