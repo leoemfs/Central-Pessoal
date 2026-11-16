@@ -17,6 +17,7 @@ import { monthBills } from '../finance.ts';
 import { monthBalance } from '../incomes.ts';
 import { defaultReviewWeek, weekReview, weekStart } from '../review.ts';
 import { addDays, addMonths, monthKey, pad, sum, toISO, todayISO } from '../utils.ts';
+import { normalizeProfile, type Profile } from './interview.ts';
 import { ATTR_CODES, HOMES, ITEMS, PETS, STARTER_ITEMS, itemById, type AttrCode, type Attrs, type Home, type Item, type Rarity, type Slot } from './catalog.ts';
 
 // ---------- Estado guardado ----------
@@ -40,6 +41,8 @@ export interface JourneyState {
   title: string | null;
   chests: ChestRecord[];
   weather: 'aleatorio' | 'limpo';
+  /** N2.9b: respostas da entrevista da Mestra Lume (null = ainda não feita). */
+  profile: Profile | null;
   /** N2.3: retrato da última visita, para o resumo "Desde a sua última visita". */
   lastSeen: JourneySnapshot | null;
 }
@@ -67,6 +70,7 @@ export function defaultJourneyState(): JourneyState {
     chests: [],
     weather: 'aleatorio',
     lastSeen: null,
+    profile: null,
   };
 }
 
@@ -86,6 +90,7 @@ export function normalizeJourney(raw: unknown): JourneyState {
     chests: Array.isArray(r.chests) ? r.chests.filter((c) => c && typeof c.key === 'string') : [],
     weather: r.weather === 'limpo' ? 'limpo' : 'aleatorio',
     lastSeen: normalizeSnapshot(r.lastSeen),
+    profile: normalizeProfile(r.profile),
   };
 }
 

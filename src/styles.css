@@ -8375,3 +8375,188 @@ body.icons-color .icon-style-card:not(.preview-color) [data-mod] {
   color: var(--accent-text);
   background: var(--raised);
 }
+
+/* ---------- Jornada N2.9b: entrevista da Mestra Lume ---------- */
+.jn-npc {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  padding: 10px;
+  border-radius: 14px;
+  background: var(--raised-2);
+}
+.jn-npc img {
+  width: 44px;
+  flex: none;
+  image-rendering: pixelated;
+  background: #1e1b4b;
+  border: 2px solid #4c1d95;
+}
+.jn-npc div {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 13px;
+  line-height: 1.45;
+}
+.jn-npc b {
+  font-family: var(--jn-pixel);
+  font-weight: 600;
+  color: var(--jn-gold);
+}
+.jn-invite {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.jn-areas {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+.jn-area {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  padding: 12px;
+  min-height: 112px;
+  text-align: left;
+  border-radius: 16px;
+  border: 2px solid var(--border);
+  background: var(--raised);
+  color: var(--text);
+  font: inherit;
+  transition: border-color 0.15s, transform 0.15s;
+}
+.jn-area:active {
+  transform: scale(0.97);
+}
+.jn-area-ico {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  display: grid;
+  place-items: center;
+  background: var(--raised-2);
+  color: var(--green-text);
+}
+.jn-area strong {
+  font-size: 14px;
+}
+.jn-area > span:not(.jn-area-ico) {
+  font-size: 12px;
+  color: var(--muted);
+}
+.jn-area[aria-pressed='true'] {
+  border-color: var(--green);
+  background: var(--green-soft);
+}
+.jn-rank {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 26px;
+  height: 26px;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  background: var(--green);
+  color: var(--on-green);
+  font-family: var(--jn-pixel);
+  font-size: 15px;
+  animation: jn-pop 0.35s cubic-bezier(0.3, 1.6, 0.5, 1);
+}
+.jn-chipset {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.jn-chipset button {
+  min-height: 42px;
+  padding: 0 14px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--raised);
+  color: var(--text);
+  font: inherit;
+  font-weight: 600;
+  font-size: 14px;
+}
+.jn-chipset button[aria-pressed='true'] {
+  border-color: var(--green);
+  background: var(--green-soft);
+  color: var(--green-text);
+}
+.jn-bigopts {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+.jn-bigopts button {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 18px 8px;
+  border-radius: 16px;
+  border: 2px solid var(--border);
+  background: var(--raised);
+  color: var(--muted);
+  font: inherit;
+}
+.jn-bigopts button strong {
+  color: var(--text);
+}
+.jn-paces {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.jn-paces button {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  padding: 14px;
+  border-radius: 16px;
+  border: 2px solid var(--border);
+  background: var(--raised);
+  color: var(--text);
+  font: inherit;
+  text-align: left;
+}
+.jn-paces span {
+  font-size: 12px;
+  color: var(--muted);
+}
+.jn-bigopts button[aria-pressed='true'],
+.jn-paces button[aria-pressed='true'] {
+  border-color: var(--green);
+  background: var(--green-soft);
+  color: var(--green-text);
+}
+.jn-route {
+  margin: 0;
+  padding-left: 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 14px;
+}
+.jn-foot-row {
+  flex-direction: row;
+}
+.jn-foot-row .btn {
+  flex: 1;
+}
+@media (prefers-reduced-motion: reduce) {
+  .jn-rank {
+    animation: none;
+  }
+}
+.jn-sources li span.muted:last-child {
+  color: var(--muted);
+  font-weight: 400;
+}
