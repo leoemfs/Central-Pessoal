@@ -11595,6 +11595,7 @@ body.bar-labels.jn-tall {
   color: #d4d4d8;
 }
 
+<<<<<<< Updated upstream
 /* E35.2: atalhos no topo da coluna (3 por linha). Somem junto com a coluna. */
 @media (min-width: 1280px) {
   .quick-shortcuts {
@@ -11712,4 +11713,232 @@ body.bar-labels.jn-tall {
 /* O caminho de Estudos passou para a linha do caminho do app. */
 .st-path {
   display: none !important;
+=======
+/* ---------- N2.17g2: Campanha (mapa da prévia) ---------- */
+.jn-cp-map {
+  position: relative;
+  height: 470px;
+  border-radius: 22px;
+  overflow: hidden;
+  background: radial-gradient(60% 40% at 30% 20%, rgb(255 255 255 / 0.06), transparent 70%), linear-gradient(#14532d, #166534 35%, #15803d 70%, #166534);
+  border: 3px solid #0f3d22;
+  box-shadow: inset 0 0 0 3px #1f6b3a;
+}
+.jn-cp-map::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: linear-gradient(rgb(0 0 0 / 0.05) 1px, transparent 1px), linear-gradient(90deg, rgb(0 0 0 / 0.05) 1px, transparent 1px);
+  background-size: 12px 12px;
+  pointer-events: none;
+}
+.jn-cp-lake {
+  position: absolute;
+  left: 46%;
+  top: 56%;
+  width: 70px;
+  height: 34px;
+  background: #38bdf8;
+  border: 3px solid #0c4a6e;
+  border-radius: 40% 60% 50% 50%;
+  box-shadow: inset -8px -4px 0 #0284c7;
+}
+.jn-cp-decor {
+  position: absolute;
+  width: 22px;
+  transform: translate(-50%, -50%);
+  opacity: 0.85;
+  image-rendering: pixelated;
+}
+.jn-cp-step {
+  position: absolute;
+  width: 7px;
+  height: 7px;
+  transform: translate(-50%, -50%);
+  background: #a8a29e;
+  box-shadow: 1px 1px 0 rgb(0 0 0 / 0.4);
+}
+.jn-cp-step.done {
+  background: #fde68a;
+}
+.jn-cp-node {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  border: 0;
+  background: transparent;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  cursor: pointer;
+  z-index: 2;
+}
+.jn-cp-node .pic {
+  position: relative;
+  width: 70px;
+  height: 52px;
+  display: grid;
+  place-items: end center;
+}
+.jn-cp-node .pic > img:first-child {
+  width: 66px;
+  height: 48px;
+  object-fit: contain;
+  object-position: center bottom;
+  image-rendering: pixelated;
+}
+.jn-cp-node .lbl {
+  font-size: 11px;
+  color: #fff;
+  white-space: nowrap;
+  padding: 2px 6px;
+  background: rgb(0 0 0 / 0.55);
+}
+.jn-cp-node[aria-pressed='true'] .lbl {
+  background: #facc15;
+  color: #111;
+}
+.jn-cp-node.locked .pic > img:first-child {
+  filter: grayscale(1) brightness(0.35);
+}
+.jn-cp-node.locked .lbl {
+  color: #a1a1aa;
+}
+.jn-cp-node .q {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  font-family: var(--jn-pixel);
+  font-size: 22px;
+  color: #e5e7eb;
+  text-shadow: 2px 2px 0 #000;
+}
+.jn-cp-node .flag {
+  position: absolute;
+  right: -2px;
+  top: -6px;
+  width: 22px;
+  image-rendering: pixelated;
+}
+.jn-cp-node .me {
+  position: absolute;
+  left: -30px;
+  bottom: -4px;
+  width: 48px;
+  image-rendering: pixelated;
+  animation: jn-hop 1.6s ease-in-out infinite;
+}
+.jn-cp-node.current .pic::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 80px;
+  height: 80px;
+  margin: -40px 0 0 -40px;
+  border: 3px solid #facc15;
+  border-radius: 50%;
+  animation: jn-ring 1.8s ease-out infinite;
+}
+@keyframes jn-ring {
+  from {
+    transform: scale(0.6);
+    opacity: 1;
+  }
+  to {
+    transform: scale(1.2);
+    opacity: 0;
+  }
+}
+.jn-npc-btn {
+  width: 100%;
+  border: 0;
+  text-align: left;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+.jn-cp-tick {
+  width: 22px;
+  height: 22px;
+  flex: none;
+  display: grid;
+  place-items: center;
+  border-radius: 7px;
+  border: 2px solid var(--border-strong);
+  color: #04130a;
+}
+.jn-cp-tick.ok {
+  background: var(--green);
+  border-color: var(--green);
+}
+.jn-cp-boss {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: 14px;
+  background: rgb(127 29 29 / 0.25);
+  border: 1px solid rgb(239 68 68 / 0.3);
+}
+.jn-cp-boss img {
+  width: 48px;
+  image-rendering: pixelated;
+}
+.jn-cp-boss img.silhouette {
+  filter: brightness(0) drop-shadow(0 0 6px rgb(239 68 68 / 0.6));
+}
+.jn-cp-boss div {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.jn-cp-rewards {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.jn-cp-rewards > div {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.jn-cp-rewards img {
+  width: 30px;
+  image-rendering: pixelated;
+}
+.jn-campcard {
+  flex-direction: row;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  text-align: left;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  border: 1px solid rgb(239 68 68 / 0.35);
+  background: linear-gradient(160deg, rgb(127 29 29 / 0.25), var(--raised) 70%);
+}
+.jn-campcard > img {
+  width: 56px;
+  flex: none;
+  image-rendering: pixelated;
+}
+.jn-campcard > div {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .jn-cp-node .me,
+  .jn-cp-node.current .pic::before {
+    animation: none;
+  }
+>>>>>>> Stashed changes
 }

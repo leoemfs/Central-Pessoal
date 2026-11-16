@@ -19,6 +19,7 @@ import { skyAt, starPositions } from '../jornada/sky';
 import { MissionsCard, WeekCard } from './JornadaMissoes';
 import { BoxCard, Notices, QuaseLa, Stats3 } from './JornadaTopo';
 import { BausView } from './JornadaBaus';
+import { CampCard, CampanhaView } from './JornadaCampanha';
 import { go, useRoute } from '../router';
 import { journeyTab } from '../jornada/tabs';
 import { Entrevista } from './JornadaEntrevista';
@@ -535,6 +536,7 @@ export function JornadaHome() {
       </div>
 
       <GiftCard />
+      <CampCard />
       <BoxCard />
       <Notices />
 
@@ -566,6 +568,7 @@ export function JornadaHome() {
       </>)}
 
       {tab === 'baus' && <BausView />}
+      {tab === 'campanha' && <CampanhaView />}
 
       {tab === 'arsenal' && (<>
       <section className="card" ref={arsenalRef}>
