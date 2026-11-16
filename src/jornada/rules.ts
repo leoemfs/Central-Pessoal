@@ -19,6 +19,7 @@ import { defaultReviewWeek, weekReview, weekStart } from '../review.ts';
 import { addDays, addMonths, monthKey, pad, sum, toISO, todayISO } from '../utils.ts';
 import { normalizeProfile, type Profile } from './interview.ts';
 import { defaultCamp, normalizeCamp, type CampState } from './campaign.ts';
+import { defaultVPet, normalizeVPet, type VPet } from './bichinho.ts';
 import { ATTR_CODES, HOMES, ITEMS, PETS, RING2_LEVEL, STARTER_ITEMS, itemById, type AttrCode, type Attrs, type Home, type Item, type Rarity, type Slot } from './catalog.ts';
 
 // ---------- Estado guardado ----------
@@ -73,6 +74,8 @@ export interface JourneyState {
   boxSeen: string[];
   /** N2.17g2: Campanha (regiões concluídas, falas ouvidas, já vestiu um item). */
   camp: CampState;
+  /** N2.18b: humor do bichinho virtual. */
+  vpet: VPet;
   /** N2.6: nome dado a cada pet (id → nome) e pelagem escolhida (id → pelagem). */
   petNames: Record<string, string>;
   petStyle: Record<string, string>;
@@ -109,6 +112,7 @@ export function defaultJourneyState(): JourneyState {
     weekSeen: '',
     boxSeen: [],
     camp: defaultCamp(),
+    vpet: defaultVPet(),
     petNames: {},
     petStyle: {},
     gifts: [],
@@ -178,6 +182,7 @@ export function normalizeJourney(raw: unknown): JourneyState {
     games: normalizeGames(r.games),
     levelSeen: typeof r.levelSeen === 'number' && Number.isFinite(r.levelSeen) && r.levelSeen > 0 ? Math.floor(r.levelSeen) : 0,
     camp: normalizeCamp(r.camp),
+    vpet: normalizeVPet(r.vpet),
     boxSeen: Array.isArray(r.boxSeen) ? r.boxSeen.filter((x): x is string => typeof x === 'string').slice(-200) : [],
     weekSeen: typeof r.weekSeen === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(r.weekSeen) ? r.weekSeen : '',
     profile: normalizeProfile(r.profile),
