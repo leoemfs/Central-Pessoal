@@ -31,6 +31,11 @@ export interface ChestRecord {
   item: string | null;
 }
 
+export interface GamesState {
+  records: Record<string, number>;
+  prizes: { day: string; game: string; gold: number }[];
+}
+
 /** Presente de um dia de visita, já recebido. */
 export interface GiftRecord {
   day: string;
@@ -61,6 +66,8 @@ export interface JourneyState {
   petStyle: Record<string, string>;
   /** N2.6: presentes do dia já recebidos por abrir o app. */
   gifts: GiftRecord[];
+  /** N2.16: mini games — recorde de cada jogo e prêmios recebidos (até 3 por dia). */
+  games: GamesState;
 }
 
 /** Retrato do que foi ganho até um momento (valores ganhos, não o que sobrou depois de gastar). */
@@ -90,11 +97,19 @@ export function defaultJourneyState(): JourneyState {
     petNames: {},
     petStyle: {},
     gifts: [],
+    games: { records: {}, prizes: [] },
     profile: null,
   };
 }
 
 /** Completa um estado vindo de backup ou de versão antiga. */
+function normalizeGames(x: unknown): GamesState {
+  const g = (x && typeof x === 'object' ? x : {}) as Partial<GamesState>;
+  const records = g.records && typeof g.records === 'object' ? Object.fromEntries(Object.entries(g.records).filter((e): e is [string, number] => typeof e[1] === 'number' && e[1] >= 0)) : {};
+  const prizes = Array.isArray(g.prizes) ? g.prizes.filter((p) => p && typeof p.day === 'string' && typeof p.game === 'string' && typeof p.gold === 'number').map((p) => ({ day: p.day, game: p.game, gold: Math.max(0, Math.min(20, p.gold)) })).slice(-400) : [];
+  return { records, prizes };
+}
+
 const strMap = (x: unknown, max: number): Record<string, string> =>
   x && typeof x === 'object' ? Object.fromEntries(Object.entries(x as Record<string, unknown>).filter((e): e is [string, string] => typeof e[1] === 'string').map(([k, v]) => [k, v.slice(0, max)])) : {};
 
@@ -116,6 +131,7 @@ export function normalizeJourney(raw: unknown): JourneyState {
     petNames: strMap(r.petNames, 20),
     petStyle: strMap(r.petStyle, 20),
     gifts: Array.isArray(r.gifts) ? r.gifts.filter((g): g is GiftRecord => !!g && typeof g.day === 'string' && typeof g.gold === 'number').map((g) => ({ day: g.day, n: Math.max(1, Math.floor(Number(g.n) || 1)), gold: Math.max(0, g.gold), chest: g.chest === 'bronze' || g.chest === 'prata' || g.chest === 'dourado' ? g.chest : null })) : [],
+    games: normalizeGames(r.games),
     levelSeen: typeof r.levelSeen === 'number' && Number.isFinite(r.levelSeen) && r.levelSeen > 0 ? Math.floor(r.levelSeen) : 0,
     profile: normalizeProfile(r.profile),
   };
@@ -438,7 +454,7 @@ export function wallet(d: AppData, state: JourneyState, today: string = todayISO
   const stats = journeyStats(d, today);
   const attrs = attributes(d, today);
   const titles = titleProgress({ d, today, attrs }).filter((t) => t.earned).length;
-  const goldEarned = stats.gold + sum(state.chests.map((c) => c.gold)) + sum(state.gifts.map((g) => g.gold));
+  const goldEarned = stats.gold + sum(state.chests.map((c) => c.gold)) + sum(state.gifts.map((g) => g.gold)) + sum(state.games.prizes.map((g) => g.gold));
   const crystalsEarned = titles + sum(state.chests.map((c) => c.crystals));
   return {
     level: stats.level,

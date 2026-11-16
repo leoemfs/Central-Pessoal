@@ -6,6 +6,7 @@ import { addDays } from './utils.ts';
 import type { AppData, Habit, JournalEntry } from './types.ts';
 import { grid } from './jornada/art.ts';
 import { codexEntries, codexSummary } from './jornada/codex.ts';
+import { finishGame, prizedToday } from './jornada/games.ts';
 import { HOMES, ITEMS, PETS, avatarGrid, homeGrid, itemById, itemGrid, itemIcon, petIcon } from './jornada/catalog.ts';
 import {
   acquire,
@@ -489,4 +490,22 @@ test('N2.7: Codex mostra tudo, com dica do que falta; marcos de descoberta viram
   const dd = withData({ journey: { ...d.journey, owned: half } });
   const keys = earnedChests(dd, '2026-11-16').map((c) => c.key);
   assert.ok(keys.includes('prata:codex:25') && keys.includes('dourado:codex:50') && !keys.includes('cristal:codex:75'));
+});
+
+test('N2.16: mini games dão prêmio pequeno, até 3 por dia; recorde guardado; ouro entra na carteira', () => {
+  let st = defaultJourneyState();
+  const r1 = finishGame(st, 'corrida', 350, '2026-11-16');
+  assert.equal(r1.gold, 14);
+  assert.equal(r1.record, true);
+  st = r1.state;
+  st = finishGame(st, 'respira', 1, '2026-11-16').state;
+  st = finishGame(st, 'corrida', 2000, '2026-11-16').state;
+  const r4 = finishGame(st, 'corrida', 50, '2026-11-16');
+  assert.equal(r4.gold, 0, 'a 4ª partida do dia não dá ouro');
+  assert.equal(r4.state.games.records.corrida, 2000);
+  assert.equal(finishGame(r4.state, 'corrida', 50, '2026-11-17').gold, 5, 'no outro dia volta a valer');
+  assert.equal(prizedToday(r4.state, '2026-11-16'), 3);
+  const d = withData({});
+  assert.equal(wallet({ ...d, journey: r4.state }, r4.state, '2026-11-16').gold - wallet(d, d.journey, '2026-11-16').gold, 14 + 10 + 20);
+  assert.deepEqual(normalizeJourney({}).games, { records: {}, prizes: [] });
 });
