@@ -6,7 +6,7 @@
 import { useState } from 'react';
 import { useStore } from '../store';
 import { todayISO } from '../utils';
-import { Sheet } from '../ui';
+import { Sheet, Toggle } from '../ui';
 import { chestIcon, homeIcon, itemById, itemIcon, medalIcon, petIcon, PETS, RARITY } from '../jornada/catalog';
 import { TITLES } from '../jornada/rules';
 import { CODEX_CATS, codexEntries, codexSummary, type CodexCat, type CodexEntry } from '../jornada/codex';
@@ -61,9 +61,14 @@ export function CodexView() {
             </button>
           );
         })}
-        <button type="button" aria-pressed={missing} onClick={() => setMissing(!missing)}>
-          Só o que falta
-        </button>
+      </div>
+      <div className="jn-codex-filter">
+        <span className="muted small">
+          {CODEX_CATS.find((c) => c.id === cat)?.label} · {all.filter((e) => e.cat === cat && e.owned).length} de {all.filter((e) => e.cat === cat).length}
+        </span>
+        <span className="jn-codex-tog">
+          Só o que falta <Toggle label="Só o que falta" checked={missing} onChange={setMissing} />
+        </span>
       </div>
       <div className="jn-codex-grid">
         {list.map((e) => (

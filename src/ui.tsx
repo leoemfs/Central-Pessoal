@@ -546,7 +546,7 @@ export function Segmented<T extends string>({ options, value, onChange, label, s
   }, [swipe]);
 
   return (
-    <div ref={ref} className="segmented" role="tablist" aria-label={label}>
+    <div ref={ref} className={`segmented${options.length > 4 ? ' scroll' : ''}`} role="tablist" aria-label={label}>
       {options.map((o) => (
         <button key={o.value} type="button" role="tab" aria-selected={value === o.value} className={value === o.value ? 'on' : ''} onClick={() => pick(o.value)}>
           {o.label}

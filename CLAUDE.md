@@ -32,6 +32,7 @@ anotar → especificar → aprovar → construir → testar. A cada mudança de 
 - **Barra de cima e níveis:** fora do Início, a seta **‹** (canto esquerdo) sobe um nível pela trilha do voltar (`router.ts`/`navStack.ts`, a mesma do voltar do celular). O título mostra **no máximo dois níveis**: "Nível de cima / Tela" (ferramenta do módulo, tela de dentro via `PageHeader`/`usePageTitle`, ou o caminho de Estudos via `Path`/`usePagePath`). No celular, nada de voltar ou caminho repetido dentro da tela (use `desk-only` para o que só serve no computador).
 - **Botão +:** tudo o que cria algo; por último, separado, **Categorias** (padrão para qualquer categoria do app; Configurações não tem atalhos para elas).
 - **Cabeçalho da tela:** mês/semana + abas formam **um bloco** preso no topo, que some e volta junto com a barra de cima (`PageHeader` com `actions`/`tabs`).
+- **Seletores com muitas opções** (chips, categorias, abas com mais de 4) ficam numa **linha só com rolagem para o lado** (`src/hscroll.ts`); filtros de liga/desliga ficam fora da fileira, como botão fixo.
 - **Cada coisa aparece em um lugar só.** O que está na barra não aparece também como botão ou aba.
 
 ## Regras técnicas
