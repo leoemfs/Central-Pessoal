@@ -1,5 +1,5 @@
 import { useEffect, useState, type ReactNode } from 'react';
-import { usePagePath } from '../../pageTitle';
+import { usePagePath, usePageCrumbs } from '../../pageTitle';
 import { useStore } from '../../store';
 import { go } from '../../router';
 import type { SourceKind, StudyData, StudyNotebook, StudySource, StudyStatus } from '../../types';
@@ -24,6 +24,8 @@ export const nowISO = () => new Date().toISOString();
 export function Path({ items }: { items: { label: string; to?: string }[] }) {
   // E25: no celular, o topo mostra os dois últimos níveis ("Idiomas / Inglês") com a seta ‹; este caminho fica só no computador.
   usePagePath(items[items.length - 2]?.label, items[items.length - 1]?.label);
+  // E27: no computador, o caminho vai para a linha de cima da tela (caminho do app todo).
+  usePageCrumbs(items);
   return (
     <nav className="st-path" aria-label="Caminho">
       {items.map((it, i) => (

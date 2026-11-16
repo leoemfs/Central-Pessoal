@@ -26,6 +26,7 @@
 - **Depois:** atalhos de teclado (ex.: `N` nova despesa, `/` buscar), instalação do PWA no Windows, janela própria.
 
 ## Histórico
+- v0.98 (E27): caminho clicável na primeira linha do meio; menu lateral troca de módulo como a barra.
 - v0.97 (E35.2): coluna "Sempre à vista" a partir de 1280 px: atalhos dos módulos em grade de 3 (padrão Finanças, Diário, Agenda, Listas, Estudos, Jornada; somem com a coluna, não vão para o Início) e com os cartões do Início (padrão: compromissos, tarefas, diário e contas), Editar para subir, descer, tirar e adicionar; cartões da coluna saem do Início e voltam quando ela some.
 - v0.96 (E35.1, C15, C16): menu em três partes (topo fixo, lista, pé com conta e Configurações), ícones do menu no estilo escolhido, rolagem discreta, meio de 820 px, barra da Jornada dentro do meio em uma linha.
 - v0.27.1 (C10): coluna central de 980 px no computador.

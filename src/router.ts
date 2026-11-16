@@ -77,6 +77,9 @@ function apply(next: string[]) {
 /** E25: há para onde voltar (a seta ‹ do topo aparece)? */
 export const canGoBack = () => trail.length > 1;
 
+/** E27: a trilha atual (Início › … › tela), para o caminho do computador. */
+export const getTrail = (): string[] => trail;
+
 /** Abre uma tela. `switch` = barra de baixo e menu; `open` = links e botões dentro das telas. */
 export function navigate(to: string, kind: NavKind = 'open') {
   trail = replaceTop(trail, here()); // o endereço pode ter sido limpo no lugar (ex.: financas/nova → financas)

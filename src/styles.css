@@ -11677,3 +11677,39 @@ body.bar-labels.jn-tall {
     border-color: var(--accent);
   }
 }
+
+/* ---------- E27: caminho no computador (primeira linha da tela) ---------- */
+.crumbs {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 2px 6px;
+  margin-bottom: -4px;
+  font-size: 0.82rem;
+  color: var(--faint);
+}
+.crumb-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+.crumbs a {
+  color: var(--muted);
+  text-decoration: none;
+  border-radius: 6px;
+  padding: 2px 4px;
+  margin: 0 -4px;
+}
+.crumbs a:hover {
+  color: var(--text);
+  background: var(--raised);
+}
+.crumbs b {
+  color: var(--text);
+  font-weight: 600;
+}
+/* O caminho de Estudos passou para a linha do caminho do app. */
+.st-path {
+  display: none !important;
+}
