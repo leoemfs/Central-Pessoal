@@ -41,3 +41,12 @@ Afeta: layout do app todo (`App.tsx`, CSS), Personalização (opção de esconde
 - **E25:** no celular o menu ☰ saiu (tudo na gaveta); no computador a **barra lateral continua** (regra do `CLAUDE.md`).
 - **E31/E33:** tamanho e estilo dos ícones valem também no computador (barra lateral e coluna).
 - **Antes de construir:** conferir esta central e a prévia, para não repetir o caso da Jornada (construída e depois refeita).
+
+## Aprovado em 16/11 (prévia: https://claude.ai/artifact/D8q69nMGyQyZjXYXqUzSiz)
+**E35.1 · Menu + meio (M)**
+- Menu (232 px): busca **fixa no topo** (atalho `/`); grupos por categoria e "em breve"; **conta + Configurações fixos embaixo**; ícones seguem Estilo/Cor/Tamanho (C15).
+- Indicador de rolagem **discreto**: fino, quase invisível, aparece ao passar o mouse ou rolar. Vale para o menu, o meio e a coluna.
+- Meio: largura máxima de 820 px, centralizado; caminho clicável no topo (E27); toda tela cabe nele.
+- Jornada no computador (C16): a barra dela fica dentro do meio, numa linha; barra de cima e de baixo da Jornada **sempre fixas** (sem esconder ao rolar), só na Jornada.
+**E35.2 · Coluna de cartões (E34, M)**
+- A partir de 1280 px; cartões do Início (saem do Início enquanto a coluna aparece); lápis para escolher e ordenar.
