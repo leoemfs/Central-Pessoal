@@ -64,6 +64,7 @@ function normalizeMeeting(m: Record<string, unknown>): Meeting {
     repeatDays: typeof m.repeatDays === 'number' && m.repeatDays > 0 ? Math.round(m.repeatDays) : 0,
     projectIds: Array.isArray(m.projectIds) ? m.projectIds.filter((x): x is string => typeof x === 'string') : [],
     nextCreated: m.nextCreated === true,
+    originalDate: isDate(m.originalDate) && m.originalDate !== m.date ? m.originalDate : null,
     eventId: typeof m.eventId === 'string' ? m.eventId : null,
   };
 }
@@ -319,7 +320,7 @@ export const REPEAT_OPTIONS: { days: number; label: string }[] = [
 ];
 
 export function newMeeting(id: string, date: string): Meeting {
-  return { id, kind: 'reuniao', title: '', with: '', date, time: '', notes: '', todos: [], link: '', repeatDays: 0, projectIds: [], nextCreated: false, eventId: null };
+  return { id, kind: 'reuniao', title: '', with: '', date, time: '', notes: '', todos: [], link: '', repeatDays: 0, projectIds: [], nextCreated: false, originalDate: null, eventId: null };
 }
 
 export const meetingTitle = (m: Meeting) => m.title.trim() || meetingKindLabel(m.kind) + (m.with.trim() ? ` com ${m.with.trim()}` : '');
@@ -343,7 +344,19 @@ export const openTodos = (ms: Meeting[]) => ms.flatMap((m) => m.todos.filter((t)
  */
 export function nextMeeting(m: Meeting, id: string): Meeting | null {
   if (!m.repeatDays) return null;
-  return { ...m, id, date: addDays(m.date, m.repeatDays), notes: '', todos: m.todos.filter((t) => !t.done), nextCreated: false, eventId: null };
+  // Adiada: a série continua no dia fixo (conta da data original).
+  const base = m.originalDate ?? m.date;
+  return { ...m, id, date: addDays(base, m.repeatDays), notes: '', todos: m.todos.filter((t) => !t.done), nextCreated: false, originalDate: null, eventId: null };
+}
+
+/** Adia só esta reunião (N8.7): guarda o dia fixo; voltar para ele desfaz o adiamento. */
+export function postponeMeeting(m: Meeting, date: string, time?: string): Meeting {
+  const original = m.originalDate ?? m.date;
+  return { ...m, date, time: time ?? m.time, originalDate: date === original ? null : original };
+}
+
+export function restoreMeetingDate(m: Meeting): Meeting {
+  return m.originalDate ? { ...m, date: m.originalDate, originalDate: null } : m;
 }
 
 

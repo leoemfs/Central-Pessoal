@@ -168,6 +168,21 @@ export function Ajustes({ route }: ViewProps) {
         <p className="muted small" style={{ marginTop: 10 }}>
           {data.settings.theme === 'system' ? 'Segue o tema do celular ou computador.' : 'Vale para todas as telas do app.'}
         </p>
+        <h3 className="pz-title">Cor dos ícones</h3>
+        <div className="icon-style-pick" role="radiogroup" aria-label="Cor dos ícones">
+          {(['cores', 'mono'] as const).map((v) => (
+            <button key={v} type="button" role="radio" aria-checked={data.settings.iconColors === v} className={`icon-style-card${data.settings.iconColors === v ? ' on' : ''}${v === 'cores' ? ' preview-color' : ''}`} onClick={() => update((d) => ({ ...d, settings: { ...d.settings, iconColors: v } }))}>
+              <strong>{v === 'cores' ? 'Colorido' : 'Monocromático'}</strong>
+              <span className="icon-style-demo" aria-hidden="true">
+                {(['financas', 'agenda', 'diario', 'jornada'] as const).map((m) => (
+                  <span key={m} className="tile-icon" data-mod={m}>
+                    <Icon name={m === 'financas' ? 'wallet' : m === 'agenda' ? 'calendar' : m === 'diario' ? 'journal' : 'sword'} size={18} />
+                  </span>
+                ))}
+              </span>
+            </button>
+          ))}
+        </div>
         <div className="field" style={{ marginTop: 14 }}>
           <span className="field-label">Cor de destaque</span>
           <div className="swatches" role="radiogroup" aria-label="Cor de destaque">

@@ -255,6 +255,8 @@ export interface Settings {
   hideBarLabels: boolean;
   /** E25: jeito do menu na gaveta: Misto (grade em cima, lista por módulo embaixo), Grade ou Lista. */
   drawerView: 'misto' | 'grade' | 'lista';
+  /** E29: ícones dos módulos na cor de destaque (mono) ou cada um com a sua cor (cores). */
+  iconColors: 'mono' | 'cores';
   seededCategories: boolean;
   seededIncomeSources: boolean;
   lastBackupAt: string | null;
@@ -936,6 +938,8 @@ export interface Meeting {
   projectIds: string[];
   /** Já criou a próxima da série. */
   nextCreated: boolean;
+  /** Adiada: a data em que estava marcada (o dia fixo da série). null = não adiada. */
+  originalDate: string | null;
   eventId: string | null;
 }
 

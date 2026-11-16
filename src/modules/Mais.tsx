@@ -3,7 +3,7 @@ import { useStore } from '../store';
 import type { AppData } from '../types';
 import { addFavorite, FAVORITABLE } from '../moduleBar';
 import { Icon, notify, PageHeader, Sheet, type IconName } from '../ui';
-import { hiddenFrom, isHidden, toggleModule, visibleFrom } from '../setup';
+import { hiddenFrom, isHidden, moduleOf, toggleModule, visibleFrom } from '../setup';
 import { NAV_GROUPS } from '../nav';
 import { openSetup, openTutorial } from './Montagem';
 import { EditBar, useEditScreen } from '../Cards';
@@ -47,7 +47,7 @@ const KEY_SHORTCUTS = 'mais-atalhos';
 /** Uma entrada do Mais: cartão (lista) ou ícone (grade). No lápis vira bloco parado com setas. */
 function Entry({ it, grid, editing, first, last, onMove }: { it: Item; grid: boolean; editing: boolean; first: boolean; last: boolean; onMove: (dir: -1 | 1) => void }) {
   const icon = (
-    <span className={grid ? 'mg-icon' : 'tile-icon'}>
+    <span className={grid ? 'mg-icon' : 'tile-icon'} data-mod={it.id}>
       <Icon name={it.icon} size={grid ? 24 : undefined} />
       {grid && it.badge ? <span className="mg-badge">{it.badge}</span> : null}
     </span>
@@ -122,6 +122,9 @@ function maisItems(data: AppData, grid: boolean) {
  * Bem-estar, Estudos, Carreira, Planejamento) — as mesmas da barra lateral do computador (NAV_GROUPS).
  * Cada uma traz os módulos e as telas de dentro; o que ainda não existe aparece apagado, com "em breve".
  */
+/** Módulo de uma tela (para a cor do ícone); "em breve" sem tela usa o nome. */
+const modOf = (to?: string) => (to ? (moduleOf(to) ?? to.split('/')[0]) : undefined);
+
 function menuGroups(data: AppData): { title: string; items: { to?: string; label: string; icon: IconName }[] }[] {
   return NAV_GROUPS.map((g) => ({
     title: g.title,
@@ -155,14 +158,14 @@ export function MaisPanel({ editing = false }: { editing?: boolean }) {
                 {g.items.map((it) =>
                   it.to ? (
                     <a key={it.label} className="mg-cell" href={`#/${it.to}`}>
-                      <span className="mg-icon">
+                      <span className="mg-icon" data-mod={modOf(it.to)}>
                         <Icon name={it.icon} size={22} />
                       </span>
                       <span className="mg-name">{it.label}</span>
                     </a>
                   ) : (
                     <span key={it.label} className="mg-cell off" aria-disabled="true">
-                      <span className="mg-icon">
+                      <span className="mg-icon" data-mod={modOf(it.to)}>
                         <Icon name={it.icon} size={22} />
                       </span>
                       <span className="mg-name">{it.label}</span>
@@ -176,7 +179,7 @@ export function MaisPanel({ editing = false }: { editing?: boolean }) {
                 {g.items.map((it) =>
                   it.to ? (
                     <a key={it.label} className="menu-row" href={`#/${it.to}`}>
-                      <span className="tile-icon">
+                      <span className="tile-icon" data-mod={modOf(it.to)}>
                         <Icon name={it.icon} size={18} />
                       </span>
                       <span className="menu-row-name">{it.label}</span>
@@ -184,7 +187,7 @@ export function MaisPanel({ editing = false }: { editing?: boolean }) {
                     </a>
                   ) : (
                     <span key={it.label} className="menu-row off" aria-disabled="true">
-                      <span className="tile-icon">
+                      <span className="tile-icon" data-mod={modOf(it.to)}>
                         <Icon name={it.icon} size={18} />
                       </span>
                       <span className="menu-row-name">{it.label}</span>
@@ -304,7 +307,7 @@ export function Guardados() {
               return (
                 <li key={l.path} className="row kept-row">
                   <a className="kept-open" href={`#/${l.path}`}>
-                    <span className="tile-icon">
+                    <span className="tile-icon" data-mod={l.path}>
                       <Icon name={s.icon} />
                     </span>
                     <span className="row-body">
