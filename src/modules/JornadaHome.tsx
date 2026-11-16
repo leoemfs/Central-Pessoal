@@ -23,6 +23,7 @@ import { Entrevista } from './JornadaEntrevista';
 import { TelaCheia } from './JornadaTelaCheia';
 import { GiftCard, HomesView, PetsView, ShopView } from './JornadaPets';
 import { CodexView } from './JornadaCodex';
+import { Fliperama } from './JornadaJogos';
 import { AttrsCard, ClassesView, ForgeView, TitlesView, UnlocksCard } from './JornadaFicha';
 
 type FichaTab = 'ficha' | 'titulos' | 'forja' | 'classes';
@@ -639,6 +640,7 @@ export function JornadaHome() {
       {tab === 'casa' && <HomesView mine />}
       {tab === 'loja' && <ShopView onTry={setTrying} />}
       {tab === 'codex' && <CodexView />}
+      {tab === 'jogos' && <Fliperama />}
 
       {trying && (
         <TrySheet

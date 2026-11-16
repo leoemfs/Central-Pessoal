@@ -641,7 +641,7 @@ A Jornada desbloqueia em 16/11. Até aqui existiam só as regras e as artes (pas
 | **N2.13** Tela principal completa (**feito, v0.81**) | sequência, baús prontos, seu dia em números, perto de desbloquear, festa ao subir de nível, como ganhar XP | M |
 | **N2.14** Entrada animada (**feito, v0.84**: opção B padrão) | portal em degraus ao entrar; as outras opções ficam para as regiões (N2.10c) | P |
 | **N2.15** Barra em duas fileiras e telas reorganizadas (**feito, v0.85**) | barra 5 + 5 (Jornada · Campanha · Arsenal · Baús · Ficha / Pet · Casa · Codex · Mini games · Loja); **Arsenal, Pet e Casa só com o que você tem** (o que acabou de ser liberado aparece com "Novo! Pegar"); **Loja** nova com tudo o que se compra com ouro, inclusive o que ainda não dá (apagado, com "faltam X de ouro"); Arsenal fica só para vestir | M |
-| **N2.16** Mini games | **N2.16a** Fliperama (partidas premiadas do dia, recordes) + **Corrida do pet** + **Respira com o pet** (pode contar como prática de Mente); **N2.16b** **Memória do Arsenal** + **Pescaria** + conquistas dos jogos no Codex | M + M |
+| **N2.16** Mini games (**N2.16a feito, v0.87**) | **N2.16a** Fliperama (partidas premiadas do dia, recordes) + **Corrida do pet** + **Respira com o pet** (pode contar como prática de Mente); **N2.16b** **Memória do Arsenal** + **Pescaria** + conquistas dos jogos no Codex | M + M |
 
 
 ### B.15. Decisões de 16/11 e plano para terminar a Jornada
@@ -655,12 +655,40 @@ A Jornada desbloqueia em 16/11. Até aqui existiam só as regras e as artes (pas
 **Ordem para terminar** (uma parte por vez, testando no uso):
 1. ~~**N2.15** barra em duas fileiras e telas reorganizadas (Arsenal, Pet, Casa, Loja)~~ (v0.85). M
 2. ~~**N2.7** Codex~~ (v0.86). M
-3. **N2.16a** Fliperama, Corrida do pet e Respira com o pet. M
+3. ~~**N2.16a** Fliperama, Corrida do pet e Respira com o pet~~ (v0.87). M
 4. **N2.16b** Memória do Arsenal, Pescaria e conquistas dos jogos. M
 5. **N2.8** efeitos dos itens místicos. M
 6. **N2.10a → N2.10b → N2.10c** Campanha. G (3 partes)
 
 Depois da Jornada: **N7** (Estudos × Jornada).
+
+### B.16. A "Prévia da Jornada" é o modelo (decidido em 16/11)
+
+O Leonardo comparou o app com a prévia jogável "Prévia da Jornada" (https://claude.ai/artifact/LDdQDmTYY3j56etqqMc9Qc; código em `app.js`, `sprites.js`, `styles.css`) e decidiu: **ela é o modelo da Jornada**. A **barra fica como está** (duas fileiras, N2.15). **Antes de cada mudança, ele escolhe entre o atual e a prévia**, parte por parte. **Todos os itens e todas as raridades da prévia** entram no app.
+
+**Como cada parte é feita daqui para frente:** abrir o código da prévia daquela parte, mostrar "atual × prévia" para a escolha, e então copiar o comportamento escolhido, só adaptando aos dados reais.
+
+**O que a prévia tem a mais (conferido no código e nas imagens de 16/11):**
+- **Catálogo:** 49 itens (o app tem 31): 4 arcos (curto, longo de teixo, élfico, do vento), 4 anéis (bracelete do titã, bracelete do mercador, anel de ferro, de foco, da aurora), colares (gota, coração de cristal, pérola, dente de lobo), mágicos (pena, grimório, lanterna, ampulheta, olho, fênix, estrela polar, lanterna da calma, grimório das estrelas) e itens de região (manto da floresta, armaduras da montanha e da arena, botas do pântano, cajado do saber, lâmina da ordem). Espaços de equipamento: elmo, roupa, botas, arma, **anel, colar e mágico** (o app usa "artefato" ×2).
+- **Topo fixo** em todas as telas: rosto, nome, nível e classe, 🔥 dias seguidos abrindo o app, ouro, cristais, barra de XP até o próximo nível.
+- **Tela principal:** cena com relógio e botão de ampliar, título em placa abaixo da cena, **presente do dia** (caixa de presente, "N presentes esperando", tira 1 a 7), **cartão da campanha**, **cartão da caixinha**, **avisos** ("Liberado: Ampulheta", "pronta para forjar", baús esperando), missões com "Tive uma recaída", "Quase lá".
+- **Baús:** número na barra, "Abrir todos os N baús", cartões na cor de cada baú, "Como ganhar" com o que cada um dá, "o próximo vem com X dias".
+- **Recompensas animadas:** moedas voando para o topo, confete, telas de título novo, nível, vitória e objetivo realizado; **Resumo da semana** ("Que semana!") com "Abrir os baús".
+- **Caixinha na Jornada:** criar com meta e plano, pote na cena, guardar com recompensa (+20 XP, +10 ouro, +3 DIS na data do plano), marcos 25/50/75/100% com baús, "Guardar" nas missões, "Realizei o objetivo".
+- **Chegada:** entrevista dentro da chegada; Mestra Lume apresenta a Vila do Começo; dica "a seta volta ao app".
+- **Pet:** editor com as cores em cartões com o desenho; Codex com "Editar nome e cor".
+- **Campanha:** mapa com capítulos e chefes (N2.10).
+
+**Partes (N2.17), cada uma com a escolha "atual × prévia" antes:**
+1. **N2.17a Catálogo e espaços:** os 49 itens e as artes da prévia; espaços anel, colar e mágico. M
+2. **N2.17b Topo fixo e tela principal:** topo com 🔥, ouro, cristais e XP; presente do dia, avisos, cartão da caixinha e da campanha como na prévia. M
+3. **N2.17c Baús como na prévia:** cores por tipo, abrir todos, "Como ganhar", número na barra. P
+4. **N2.17d Recompensas animadas e Resumo da semana.** M
+5. **N2.17e Caixinha na Jornada.** M
+6. **N2.17f Pet e Codex como na prévia** (cores em cartões, editar pelo Codex). P
+7. **N2.17g Chegada completa** (entrevista na chegada, Mestra Lume apresentando), junto com o começo da Campanha (N2.10a). M
+
+Depois: N2.16b (Memória e Pescaria), N2.8 e o resto da Campanha.
 
 **N2.9b, como ficou (v0.74):** convite da Mestra Lume na Jornada até a entrevista ser feita (para quem já entrou na Jornada; não entra no meio da chegada). Respostas em `journey.profile` (`src/jornada/interview.ts`); o que ela cria fica em `src/jornada/interviewApply.ts`. Treino: 2× ter/qui, 3× seg/qua/sex, 4× seg/ter/qui/sex, 5× seg a sex. Terapia: quarta. Refazer não apaga nem duplica hábitos; a caixinha só é criada se não houver uma aberta com o mesmo nome. O desafio de dinheiro (ex.: "gastar demais") fica guardado para a campanha (Mercado de Ouro) e ainda não vira missão.
 
