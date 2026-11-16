@@ -9360,3 +9360,375 @@ body.bar-labels.bar-flat .tabbar .tb-label {
     animation: none !important;
   }
 }
+
+/* ---------- Jornada N2.13: tela principal completa (pranchas v1/v2 da prévia) ---------- */
+.jn-streak {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: rgb(251 146 60 / 0.14);
+  color: #fb923c;
+  font-size: 12.5px;
+  font-weight: 700;
+}
+.jn-today {
+  color: var(--green-text);
+  font-weight: 700;
+}
+.jn-ready {
+  flex-direction: row;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border: 1px solid rgb(250 204 21 / 0.4);
+  background: linear-gradient(160deg, rgb(250 204 21 / 0.1), var(--raised) 70%);
+}
+.jn-ready.crystal {
+  border-color: rgb(103 232 249 / 0.45);
+  background: linear-gradient(160deg, rgb(103 232 249 / 0.12), var(--raised) 70%);
+}
+.jn-ready img {
+  width: 48px;
+  flex: none;
+  image-rendering: pixelated;
+  animation: jn-wiggle 2.2s ease-in-out infinite;
+}
+.jn-ready > div {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.jn-ready strong {
+  color: var(--jn-gold);
+}
+.jn-ready.crystal strong {
+  color: var(--jn-crystal);
+}
+.jn-daynums {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+.jn-daynums div {
+  padding: 10px;
+  border-radius: 12px;
+  background: var(--raised-2);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.jn-daynums span {
+  font-size: 11px;
+  color: var(--muted);
+}
+.jn-daynums strong {
+  font-size: 20px;
+}
+.jn-near {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.jn-near li {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.jn-near-bar {
+  height: 8px;
+  border-radius: 4px;
+  background: var(--raised-2);
+  overflow: hidden;
+}
+.jn-near-bar i {
+  display: block;
+  height: 100%;
+}
+.fullscreen.jn-lvup {
+  background: radial-gradient(120% 60% at 50% 28%, #1e3a2a 0%, #050506 65%);
+  color: #f5f5f7;
+  overflow-y: auto;
+}
+.jn-lvup-body {
+  position: relative;
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: calc(40px + env(safe-area-inset-top)) 20px calc(20px + env(safe-area-inset-bottom));
+  text-align: center;
+}
+.jn-lvup-rays {
+  position: absolute;
+  top: 40px;
+  left: 50%;
+  width: 420px;
+  height: 420px;
+  margin-left: -210px;
+  border-radius: 50%;
+  background: repeating-conic-gradient(from 0deg, rgb(74 222 128 / 0.16) 0 10deg, transparent 10deg 30deg);
+  -webkit-mask: radial-gradient(circle, #000 25%, transparent 68%);
+  mask: radial-gradient(circle, #000 25%, transparent 68%);
+  animation: jn-spin 16s linear infinite;
+  pointer-events: none;
+}
+.jn-lvup-tag {
+  position: relative;
+  padding: 6px 12px;
+  background: #141414;
+  border: 3px solid #22c55e;
+  box-shadow: 3px 3px 0 #15803d;
+  color: #4ade80;
+  font-size: 14px;
+  letter-spacing: 0.1em;
+  animation: jn-pop 0.5s cubic-bezier(0.3, 1.6, 0.5, 1);
+}
+.jn-lvup-hero {
+  position: relative;
+  width: 190px;
+  image-rendering: pixelated;
+  animation: jn-lvup-jump 1.2s ease-in-out infinite;
+}
+@keyframes jn-lvup-jump {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  30% {
+    transform: translateY(-18px);
+  }
+}
+.jn-lvup-n {
+  margin: 0;
+  font-size: 36px;
+  color: #facc15;
+  text-shadow: 3px 3px 0 #a16207;
+}
+.jn-lvup-rewards {
+  width: 100%;
+  max-width: 420px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  text-align: left;
+}
+.jn-lvup-rewards > span {
+  font-size: 12px;
+  color: #a1a1aa;
+  letter-spacing: 0.1em;
+}
+.jn-lvup .btn.block {
+  width: 100%;
+  max-width: 420px;
+  margin-top: 6px;
+}
+.jn-earn {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 8px;
+}
+.jn-earn h3 {
+  margin: 4px 0 0;
+  font-size: 13px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.jn-earn-row {
+  display: grid;
+  grid-template-columns: 1fr auto 96px;
+  gap: 10px;
+  align-items: baseline;
+  font-size: 14px;
+}
+.jn-earn-row span:last-child {
+  text-align: right;
+  font-size: 12.5px;
+  font-weight: 700;
+}
+.jn-fair {
+  margin-top: 12px;
+  padding: 12px;
+  border-radius: 14px;
+  background: var(--green-soft);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 13px;
+}
+.jn-fair strong {
+  color: var(--green-text);
+}
+@media (prefers-reduced-motion: reduce) {
+  .jn-ready img,
+  .jn-lvup-rays,
+  .jn-lvup-tag,
+  .jn-lvup-hero {
+    animation: none !important;
+  }
+}
+
+/* ---------- Jornada N2.5: Ficha, Títulos, Forja e Classes (prancha "v3 · Títulos, forja mística e classes") ---------- */
+.jn-class-tag {
+  font-size: 11px;
+  color: var(--jn-gold);
+  letter-spacing: 0.06em;
+}
+.jn-attrs2,
+.jn-unlocks,
+.jn-titles,
+.jn-classes {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.jn-attrs2 li {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.jn-attr-row {
+  display: grid;
+  grid-template-columns: 1fr 44px;
+  gap: 10px;
+  align-items: center;
+}
+.jn-attr-row strong {
+  text-align: right;
+}
+.jn-unlocks li,
+.jn-titles li {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.jn-unlocks img {
+  width: 36px;
+  height: 36px;
+  flex: none;
+  image-rendering: pixelated;
+}
+.jn-unlocks li > div,
+.jn-titles li > div {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 14px;
+}
+.jn-titles img,
+.jn-title-now img {
+  width: 34px;
+  flex: none;
+  image-rendering: pixelated;
+}
+.jn-titles li:not(.earned) strong {
+  color: var(--muted);
+}
+.jn-title-now {
+  flex-direction: row;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.jn-title-now > div {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+}
+.jn-forge-head {
+  border-color: rgb(253 224 71 / 0.35);
+  background: linear-gradient(160deg, rgb(253 224 71 / 0.08), var(--raised) 70%);
+}
+.jn-forge-head > span:first-child {
+  color: var(--jn-gold);
+  letter-spacing: 0.08em;
+}
+.jn-forge-head p {
+  margin: 0;
+  line-height: 1.5;
+}
+.jn-forge-gems {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--jn-crystal);
+}
+.jn-forge-gems img {
+  width: 16px;
+  image-rendering: pixelated;
+}
+.jn-forge {
+  flex-direction: row;
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+}
+.jn-forge > img {
+  width: 48px;
+  height: 48px;
+  flex: none;
+  image-rendering: pixelated;
+}
+.jn-forge > div {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.jn-forge.ready {
+  border-color: rgb(253 224 71 / 0.5);
+}
+.jn-forge.owned {
+  border-color: rgb(34 197 94 / 0.45);
+}
+.jn-forge .btn {
+  align-self: flex-start;
+}
+.jn-reqs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.jn-reqs span {
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--raised-2);
+  font-size: 12px;
+  font-weight: 700;
+}
+.jn-reqs span.ok {
+  color: var(--green-text);
+}
+.jn-classes li {
+  display: grid;
+  grid-template-columns: 40px 1fr auto;
+  gap: 10px;
+  align-items: center;
+  padding: 8px 10px;
+  border-radius: 12px;
+}
+.jn-classes li.on {
+  background: var(--green-soft);
+}
+.jn-classes li > div {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}

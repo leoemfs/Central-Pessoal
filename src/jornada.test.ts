@@ -405,3 +405,13 @@ test('N2.4: Arsenal mostra os seus primeiro e sem místicos; comprar gasta ouro 
   const worn = equip(bought, 'elmo', 'capuz', 1);
   assert.ok(typeof worn !== 'string' && worn.equipped.elmo === 'capuz');
 });
+
+test('N2.5: forjar exige atributos e cristais e gasta os cristais; título conquistado vale cristal', () => {
+  const st = defaultJourneyState();
+  const ready = ctx({ attrs: attrs({ AGI: 100 }), crystals: 3 });
+  const after = acquire(st, 'aladas', ready);
+  assert.notEqual(typeof after, 'string');
+  assert.equal((after as ReturnType<typeof defaultJourneyState>).crystalsSpent, 3);
+  assert.equal(typeof acquire(st, 'aladas', ctx({ attrs: attrs({ AGI: 99 }), crystals: 3 })), 'string');
+  assert.equal(typeof acquire(st, 'aladas', ctx({ attrs: attrs({ AGI: 100 }), crystals: 2 })), 'string');
+});

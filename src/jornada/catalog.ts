@@ -419,3 +419,20 @@ const NPC_PAL: Record<string, Palette> = {
   tork: { H: '#1f1f1f', S: '#8d5524', s: '#6b3e1a', G: '#8d5524', E: '#111827', C: '#78350f', A: '#94a3b8' },
 };
 export const npcIcon = (id: 'lume' | 'nina' | 'tork') => sprite(NPC_FACE, NPC_PAL[id], 16);
+
+// ---------- Medalhas dos títulos (da prévia "Jornada RPG", v3) ----------
+
+const MEDAL = ['OOO....OOO', 'ORRO..ORRO', '.ORRO.ORO.', '..ORROROO.', '...OROO...', '..OOMMOO..', '.OMMWMMMO.', 'OMMWMMMMdO', 'OMMMMMMMdO', 'OMMMMMMddO', '.OMMMMddO.', '..OOOOOO..'];
+const MEDAL_TONES: [string, string, string][] = [
+  ['#22c55e', '#facc15', '#a16207'],
+  ['#3b82f6', '#e5e7eb', '#9ca3af'],
+  ['#ef4444', '#facc15', '#a16207'],
+  ['#a855f7', '#67e8f9', '#0e7490'],
+  ['#f97316', '#d6a35c', '#78350f'],
+  ['#ec4899', '#fde68a', '#ca8a04'],
+];
+/** Medalha do título (cinza enquanto não foi conquistado). */
+export function medalIcon(index: number, earned: boolean): string {
+  const [r, m, d] = earned ? MEDAL_TONES[index % MEDAL_TONES.length] : ['#52525b', '#71717a', '#3f3f46'];
+  return sprite(MEDAL, { R: r, M: m, W: '#ffffff', d }, 10);
+}

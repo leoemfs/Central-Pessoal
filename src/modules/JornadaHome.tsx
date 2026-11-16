@@ -10,7 +10,7 @@ import { journeyStats, unlockProgress, UNLOCK_DAYS, UNLOCK_WINDOW } from '../jou
 import { ATTRIBUTES } from '../habits';
 import { formatDMY, todayISO } from '../utils';
 import { notify, Segmented, Sheet, Toggle } from '../ui';
-import { avatarIcon, chestIcon, COIN_ICON, GEM_ICON, homeIcon, itemById, itemIcon, petIcon, PETS, RARITY, treeIcon, skyPalette, ATTR_CODES, type AvatarLook } from '../jornada/catalog';
+import { avatarIcon, chestIcon, COIN_ICON, GEM_ICON, homeIcon, itemById, itemIcon, petIcon, PETS, RARITY, treeIcon, skyPalette, type AvatarLook } from '../jornada/catalog';
 import { HAIRS, SKINS } from '../jornada/artData';
 import { acquire, arsenalItems, availability, equip, shopContext, type Availability, type EquipSlot } from '../jornada/rules';
 import type { Item, Slot } from '../jornada/catalog';
@@ -21,6 +21,11 @@ import { go, useRoute } from '../router';
 import { journeyTab } from '../jornada/tabs';
 import { Entrevista } from './JornadaEntrevista';
 import { TelaCheia } from './JornadaTelaCheia';
+import { AttrsCard, ClassesView, ForgeView, TitlesView, UnlocksCard } from './JornadaFicha';
+
+type FichaTab = 'ficha' | 'titulos' | 'forja' | 'classes';
+import { ChestsReady, DayNumbers, HowToEarn, LevelUpScreen, NearCard } from './JornadaPainel';
+import { dayNumbers, streakDays } from '../jornada/home';
 import { npcIcon } from '../jornada/catalog';
 
 type Look = { gender: 'f' | 'm'; skin: string; hair: string; name: string };
@@ -390,6 +395,7 @@ export function JornadaHome() {
   const [step, setStep] = useState<'create' | 'welcome'>('create');
   const [editing, setEditing] = useState(false);
   const [interviewing, setInterviewing] = useState(false);
+  const [fichaTab, setFichaTab] = useState<FichaTab>('ficha');
   const top = () => window.scrollTo({ top: 0 });
   // N2.3: o resumo usa o retrato da visita anterior; logo ao entrar, o retrato passa a ser o de agora.
   const [since, setSince] = useState<SinceVisit | null>(() => (welcomed(state) ? sinceLastVisit(state.lastSeen, snapshot(data, state, today)) : null));
@@ -405,6 +411,11 @@ export function JornadaHome() {
   useEffect(() => {
     if (isWelcomed) update((d) => ({ ...d, journey: { ...d.journey, lastSeen: snapshot(d, d.journey, todayISO()) } }));
   }, [isWelcomed]); // eslint-disable-line react-hooks/exhaustive-deps
+  // N2.13: o primeiro nível visto é marcado em silêncio; depois, cada subida ganha a tela de festa.
+  const lvNow = isWelcomed ? journeyStats(data, today).level : 0;
+  useEffect(() => {
+    if (isWelcomed && state.levelSeen === 0 && lvNow > 0) update((d) => ({ ...d, journey: { ...d.journey, levelSeen: lvNow } }));
+  }, [isWelcomed, lvNow, state.levelSeen]); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (!welcomed(state)) {
     if (step === 'create')
@@ -467,9 +478,11 @@ export function JornadaHome() {
   const w = wallet(data, state, today);
   const cls = classOf(w.attrs, recentAttributes(data, today));
   const title = TITLES.find((x) => x.id === state.title);
-  const maxAttr = Math.max(10, ...ATTR_CODES.map((c) => w.attrs[c]));
   const gk = look.gender;
   const chests = pendingChests(data, state, today, s.level);
+  const streak = streakDays(data.settings.activeDays, today);
+  const todayXp = dayNumbers(data, today).xp;
+  const levelUp = state.levelSeen > 0 && s.level > state.levelSeen;
 
   return (
     <>
@@ -496,9 +509,16 @@ export function JornadaHome() {
             </div>
             <span className="jn-px jn-level">LV {s.level}</span>
           </div>
+          {streak > 0 && (
+            <span className="jn-streak">
+              <b className="jn-px">{streak}</b> {streak === 1 ? 'dia' : 'dias'} de sequência
+            </span>
+          )}
           <div>
             <div className="toggle-row small muted">
-              <span>XP</span>
+              <span>
+                XP{todayXp > 0 && <span className="jn-today"> · +{fmt(todayXp)} hoje</span>}
+              </span>
               <span className="tabular">
                 {fmt(s.xpInLevel)} / {fmt(s.xpForNext)}
               </span>
@@ -526,6 +546,8 @@ export function JornadaHome() {
         </div>
       </section>
 
+      <ChestsReady chests={chests} />
+
       {!state.profile && (
         <section className="card jn-invite">
           <div className="jn-npc">
@@ -547,8 +569,10 @@ export function JornadaHome() {
           </button>
         </section>
       )}
+      <DayNumbers />
       <MissionsCard />
       <WeekCard />
+      <NearCard state={state} level={s.level} />
       </>)}
 
       {tab === 'baus' && (<>
@@ -632,6 +656,17 @@ export function JornadaHome() {
         />
       )}
 
+      {levelUp && !since && (
+        <LevelUpScreen
+          look={look}
+          outfit={{ elmo: state.equipped.elmo, armadura: state.equipped.armadura, botas: state.equipped.botas, arma: state.equipped.arma }}
+          level={s.level}
+          xp={s.xp}
+          toNext={s.xpForNext - s.xpInLevel}
+          onClose={() => update((d) => ({ ...d, journey: { ...d.journey, levelSeen: s.level } }))}
+        />
+      )}
+
       {full && (
         <TelaCheia
           look={look}
@@ -669,36 +704,13 @@ export function JornadaHome() {
       )}
 
       {tab === 'ficha' && (<>
-      <section className="card">
-        <div className="card-head">
-          <h2>Ficha</h2>
-        </div>
-        <ul className="jn-attrs">
-          {ATTR_CODES.map((code) => {
-            const a = ATTRIBUTES.find((x) => x.code === code)!;
-            const v = w.attrs[code];
-            return (
-              <li key={code}>
-                <span className="jn-attr-code" style={{ color: a.color }}>
-                  {code}
-                </span>
-                <span className="jn-attr-name">{a.name}</span>
-                <span className="jn-attr-bar" aria-hidden="true">
-                  <span style={{ width: `${(v / maxAttr) * 100}%`, background: a.color }} />
-                </span>
-                <span className="tabular jn-attr-val">{fmt(v)}</span>
-              </li>
-            );
-          })}
-        </ul>
-        <p className="muted small" style={{ marginTop: 10 }}>
-          {cls.codes.length === 0
-            ? 'Sua classe aparece quando os atributos começarem a subir (hábitos com atributo, contas no prazo, diário e revisões).'
-            : cls.codes.length === 2
-              ? `Classe híbrida: ${cls.codes.join(' e ')} estão quase empatados.`
-              : `Classe pelo atributo mais alto: ${ATTRIBUTES.find((x) => x.code === cls.codes[0])!.name}.`}
-        </p>
-      </section>
+      <Segmented<FichaTab> label="Ficha" value={fichaTab} onChange={setFichaTab} options={[{ value: 'ficha', label: 'Ficha' }, { value: 'titulos', label: 'Títulos' }, { value: 'forja', label: 'Forja' }, { value: 'classes', label: 'Classes' }]} />
+      {fichaTab === 'titulos' && <TitlesView gender={gk} />}
+      {fichaTab === 'forja' && <ForgeView />}
+      {fichaTab === 'classes' && <ClassesView gender={gk} />}
+      {fichaTab === 'ficha' && (<>
+      <AttrsCard gender={gk} />
+      <UnlocksCard />
 
       <section className="card">
         <div className="card-head">
@@ -725,6 +737,8 @@ export function JornadaHome() {
           Sem punição: faltar nunca tira XP. Gastar dinheiro não rende nada — pagar no prazo, sim.
         </p>
       </section>
+
+      <HowToEarn />
 
       <section className="card">
         <div className="card-head">
@@ -766,6 +780,7 @@ export function JornadaHome() {
           </button>
         </div>
       </section>
+      </>)}
       </>)}
     </>
   );
