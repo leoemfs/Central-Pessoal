@@ -63,7 +63,7 @@ Ordem sugerida (cada parte com versão, testes e PR próprios):
 1. **N1.0 Prévia visual:** versão P feita em 11/11 (Hoje, Consultas e check-ups, Dieta): https://claude.ai/artifact/LJRc3AgwWsTmuA8ymQCqEv. Aprovada pelo Leonardo; o resto (Histórico, menu do +, cartão no Início, Remédios, Medidas e selo no hábito) segue o documento.
 2. **N1.1 Água e Sono:** pronto na v0.66 (15/11). Barra Hoje · Saúde · Histórico; + registra sono. Ficou para depois: hábito "dormir no horário" marcado pelo sono e cartão da Saúde no Início.
 3. **N1.2 Dieta:** pronto na v0.67 (15/11). Ficou para depois: hábito "Seguir a dieta" marcado sozinho, linha na Revisão semanal, lista de compras em Listas, lembretes das refeições e ponto na Jornada.
-4. **N1.3 Remédios:** horários, "tomei" e lembrete (M).
+4. **N1.3 Remédios:** pronto na v0.70 (15/11). Lembrete = aviso no Google Agenda na hora de cada dose (próximos 14 dias), enquanto não há notificações próprias (N3). "Na hora" ficou como "todas as doses do dia" para a Jornada (mais gentil). Ficou para depois: estoque (quantos comprimidos sobram) e aviso de recompra.
 5. **N1.4 Consultas, exames e check-ups:** entram e se atualizam sozinhos na Agenda, como Carreira; intervalo de check-up e cartão "Próximos check-ups" (M).
 6. **N1.5 Peso e medidas:** com gráfico, escondido por padrão (P).
 7. **Depois:** lista de compras da dieta em Listas; ligação com a Jornada.

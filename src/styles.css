@@ -8095,3 +8095,19 @@ a.chip-btn {
 .row .qty-adjust > button {
   height: 40px;
 }
+
+/* Saúde › Remédios (N1.3) */
+.med-times {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+.med-time {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.med-time .input {
+  width: 9.5rem;
+}

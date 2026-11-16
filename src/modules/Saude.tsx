@@ -9,7 +9,8 @@ import { qtyText as recipeQty } from '../lists';
 import { fmtQty } from '../habits';
 import { newList } from '../lists';
 import { Chips, Empty, Field, Icon, notify, PageHeader, Pill, Progress, Segmented, Sheet, Toggle } from '../ui';
-import type { DietLog, DietMeal, DietPlan, DietSource } from '../types';
+import type { DietLog, DietMeal, DietPlan, DietSource, Medicine } from '../types';
+import { daysText, dosesOn, endMed, linkMedsHabit, medHabitCandidate, medsHabit, newMed, removeMed, saveMed, timesText, toggleTaken } from '../remedios';
 import {
   activePlan, allRecipes, dayLine, MARKS, marketLists, recipesOf, sendShopping, shoppingLines, toggleRecipe, weekRecipes, markMeal, mealsOf, newMeal, newPlan, pickOption, removePlan, savePlan, setDayVariant, setExtra, setSplit, toggleVariantDay, choosePlan,
 } from '../dieta';
@@ -33,8 +34,10 @@ function useSaudeActions(route: ViewProps['route'], base: string) {
   const [day, setDay] = useState<string | null>(null);
   const [menu, setMenu] = useState(false);
   const [plan, setPlan] = useState<DietPlan | null>(null);
+  const [med, setMed] = useState<Medicine | null>(null);
+  const startMed = () => setMed(newMed(uid(), todayISO(), new Date().toISOString()));
   const [pickSource, setPickSource] = useState(false);
-  useSubAction(route, base, { sono: () => setDay(todayISO()), menu: () => setMenu(true), dieta: () => setPickSource(true) });
+  useSubAction(route, base, { sono: () => setDay(todayISO()), menu: () => setMenu(true), dieta: () => setPickSource(true), remedio: startMed });
   const sheet = (
     <>
       {day && <SleepSheet day={day} onClose={() => setDay(null)} />}
@@ -49,14 +52,19 @@ function useSaudeActions(route: ViewProps['route'], base: string) {
               <span className="tile-icon small"><Icon name="list" size={18} /></span>
               <span className="row-body"><span className="row-title">Plano de dieta</span><span className="row-meta">Da nutricionista ou montado por você</span></span>
             </button>
+            <button type="button" className="row" onClick={() => { setMenu(false); startMed(); }}>
+              <span className="tile-icon small"><Icon name="pill" size={18} /></span>
+              <span className="row-body"><span className="row-title">Remédio</span><span className="row-meta">Nome, dose, horários e por quanto tempo</span></span>
+            </button>
           </div>
         </Sheet>
       )}
       {pickSource && <SourceSheet onClose={() => setPickSource(false)} onPick={(src) => { setPickSource(false); setPlan(newPlan(uid, src, new Date().toISOString())); }} />}
       {plan && <PlanEditor initial={plan} onClose={() => setPlan(null)} />}
+      {med && <MedSheet initial={med} onClose={() => setMed(null)} />}
     </>
   );
-  return { open: (d: string) => setDay(d), editPlan: (p: DietPlan) => setPlan(p), newPlan: () => setPickSource(true), sheet };
+  return { open: (d: string) => setDay(d), editPlan: (p: DietPlan) => setPlan(p), newPlan: () => setPickSource(true), editMed: (m: Medicine) => setMed(m), newMed: startMed, sheet };
 }
 
 /** Pergunta, uma vez só, se quer ligar o hábito de água que já existe. */
@@ -169,36 +177,37 @@ export function SleepSheet({ day, onClose }: { day: string; onClose: () => void 
 /** Hoje: o que registrar no dia. */
 export function SaudeHoje({ route }: ViewProps) {
   const today = todayISO();
-  const { open, sheet, newPlan: createPlan } = useSaudeActions(route, 'saudehoje');
+  const { open, sheet, newPlan: createPlan, newMed: createMed } = useSaudeActions(route, 'saudehoje');
   return (
     <>
       <PageHeader title="Hoje" subtitle={relativeDay(today) === 'Hoje' ? formatDate(today, { weekday: 'long', day: 'numeric', month: 'long' }) : undefined} />
       <LinkAsk />
       <WaterCard day={today} />
       <SleepCard day={today} onOpen={open} />
+      <MedsToday day={today} onCreate={createMed} />
       <DietToday day={today} onCreate={createPlan} />
       <section className="card" aria-label="Em breve">
-        <span className="muted small">Em breve na Saúde: remédios, consultas e check-ups, peso e medidas.</span>
+        <span className="muted small">Em breve na Saúde: consultas e check-ups, peso e medidas.</span>
       </section>
       {sheet}
     </>
   );
 }
 
-type Tab = 'agua' | 'sono' | 'dieta';
+type Tab = 'agua' | 'sono' | 'dieta' | 'remedios';
 
 /** Casa do módulo: abas Água · Sono (ajustes e últimos dias). */
 export function SaudePage({ route }: ViewProps) {
   const [tab, setTab] = useState<Tab>('agua');
-  const { open, sheet, editPlan, newPlan: createPlan } = useSaudeActions(route, 'saude');
+  const { open, sheet, editPlan, newPlan: createPlan, editMed, newMed: createMed } = useSaudeActions(route, 'saude');
   return (
     <>
       <PageHeader
         title="Saúde"
-        tabs={<Segmented<Tab> label="Parte da Saúde" value={tab} onChange={setTab} swipe options={[{ value: 'agua', label: 'Água' }, { value: 'sono', label: 'Sono' }, { value: 'dieta', label: 'Dieta' }]} />}
+        tabs={<Segmented<Tab> label="Parte da Saúde" value={tab} onChange={setTab} swipe options={[{ value: 'agua', label: 'Água' }, { value: 'sono', label: 'Sono' }, { value: 'dieta', label: 'Dieta' }, { value: 'remedios', label: 'Remédios' }]} />}
       />
       <LinkAsk />
-      {tab === 'agua' ? <WaterTab /> : tab === 'sono' ? <SleepTab onOpen={open} /> : <DietTab onEdit={editPlan} onCreate={createPlan} />}
+      {tab === 'agua' ? <WaterTab /> : tab === 'sono' ? <SleepTab onOpen={open} /> : tab === 'dieta' ? <DietTab onEdit={editPlan} onCreate={createPlan} /> : <MedsTab onEdit={editMed} onCreate={createMed} />}
       {sheet}
     </>
   );
@@ -304,7 +313,7 @@ export function SaudeHistorico({ route }: ViewProps) {
   const { sheet } = useSaudeActions(route, 'saudehist');
   const weeks = healthWeeks(data, today, 6);
   const { unit } = waterSetup(data);
-  const any = weeks.some((w) => w.waterDays || w.nights || w.diet.segui + w.diet.parte + w.diet.fugi);
+  const any = weeks.some((w) => w.waterDays || w.nights || w.diet.segui + w.diet.parte + w.diet.fugi || w.meds.taken);
   return (
     <>
       <PageHeader title="Histórico" />
@@ -338,6 +347,15 @@ export function SaudeHistorico({ route }: ViewProps) {
                   )}
                 </span>
               </li>
+              {w.meds.planned > 0 && (
+                <li className="row">
+                  <span className="tile-icon small"><Icon name="pill" size={18} /></span>
+                  <span className="row-body">
+                    <span className="row-title">Remédios</span>
+                    <span className="row-meta tabular">{w.meds.taken} de {w.meds.planned} doses · {w.meds.fullDays} {w.meds.fullDays === 1 ? 'dia completo' : 'dias completos'}</span>
+                  </span>
+                </li>
+              )}
               {w.diet.planned > 0 && (
                 <li className="row">
                   <span className="tile-icon small"><Icon name="list" size={18} /></span>
@@ -356,7 +374,7 @@ export function SaudeHistorico({ route }: ViewProps) {
         ))
       ) : (
         <section className="card">
-          <Empty>Aqui aparecem as suas semanas de água, sono e dieta. Registre em Hoje ou no botão +.</Empty>
+          <Empty>Aqui aparecem as suas semanas de água, sono, dieta e remédios. Registre em Hoje ou no botão +.</Empty>
         </section>
       )}
       {sheet}
@@ -784,6 +802,191 @@ function ShoppingSheet({ onClose }: { onClose: () => void }) {
           </div>
           <p className="muted small">Se o item já está na lista e ainda não foi comprado, a quantidade é somada.</p>
         </>
+      )}
+    </Sheet>
+  );
+}
+
+// ---------- Remédios (N1.3) ----------
+
+const nowHHMM = () => new Date().toTimeString().slice(0, 5);
+
+/** Hoje: as doses do dia em ordem de horário, com "Tomei". */
+function MedsToday({ day, onCreate }: { day: string; onCreate: () => void }) {
+  const { data, update } = useStore();
+  const doses = dosesOn(data, day);
+  if (!data.health.meds.length) {
+    return (
+      <section className="card" aria-label="Remédios">
+        <div className="card-head"><h2><Icon name="pill" size={18} /> Remédios</h2></div>
+        <p className="muted small">Cadastre os remédios ou suplementos que você toma para marcar cada dose.</p>
+        <button type="button" className="btn soft block" onClick={onCreate}><Icon name="plusCircle" size={18} /> Cadastrar remédio</button>
+      </section>
+    );
+  }
+  if (!doses.length) return null;
+  const done = doses.filter((x) => x.taken).length;
+  const next = doses.find((x) => !x.taken);
+  return (
+    <section className="card" aria-label="Remédios">
+      <div className="card-head">
+        <h2><Icon name="pill" size={18} /> Remédios</h2>
+        <span className="muted small tabular">{done} de {doses.length}</span>
+      </div>
+      <ul className="list">
+        {doses.map((x) => (
+          <li key={x.key} className="row">
+            <span className="row-body">
+              <span className="row-title">{x.med.name}{x.med.dose ? <span className="muted small"> · {x.med.dose}</span> : null}</span>
+              <span className="row-meta tabular">
+                {x.time}
+                {x.taken ? ` · tomei às ${x.taken}` : x === next ? ' · próxima' : ''}
+              </span>
+            </span>
+            <button
+              type="button"
+              className={`btn small ${x.taken ? 'soft' : 'primary'}`}
+              aria-pressed={!!x.taken}
+              aria-label={x.taken ? `Desfazer: ${x.med.name} das ${x.time}` : `Tomei ${x.med.name} das ${x.time}`}
+              onClick={() => update(toggleTaken(day, x.med.id, x.time, nowHHMM()))}
+            >
+              {x.taken ? <><Icon name="check" size={14} /> Tomei</> : 'Tomei'}
+            </button>
+          </li>
+        ))}
+      </ul>
+    </section>
+  );
+}
+
+function MedsTab({ onEdit, onCreate }: { onEdit: (m: Medicine) => void; onCreate: () => void }) {
+  const { data, update } = useStore();
+  const today = todayISO();
+  const meds = [...data.health.meds].sort((a, b) => a.name.localeCompare(b.name, 'pt-BR'));
+  const current = meds.filter((m) => m.end === null || m.end >= today);
+  const ended = meds.filter((m) => m.end !== null && m.end < today);
+  const linked = medsHabit(data);
+  const cand = linked ? null : medHabitCandidate(data.habits);
+  const row = (m: Medicine) => (
+    <li key={m.id}>
+      <button type="button" className="row" onClick={() => onEdit(m)}>
+        <span className="tile-icon small"><Icon name="pill" size={18} /></span>
+        <span className="row-body">
+          <span className="row-title">{m.name}{m.dose ? <span className="muted small"> · {m.dose}</span> : null}</span>
+          <span className="row-meta tabular">{timesText(m.times)} · {daysText(m.days)}</span>
+          <span className="muted small">{m.end ? `até ${formatDate(m.end)}` : 'uso contínuo'}{m.remind ? ' · aviso no Google Agenda' : ''}</span>
+        </span>
+        <Icon name="edit" size={16} />
+      </button>
+    </li>
+  );
+  return (
+    <>
+      <section className="card" aria-label="Remédios em uso">
+        <div className="card-head"><h2>Em uso</h2></div>
+        {current.length ? <ul className="list">{current.map(row)}</ul> : <Empty>Nenhum remédio em uso.</Empty>}
+        <button type="button" className="btn soft block" onClick={onCreate}><Icon name="plusCircle" size={18} /> Novo remédio</button>
+      </section>
+      {(linked || cand) && (
+        <section className="card" aria-label="Hábito ligado">
+          <div className="card-head"><h2>Hábito</h2></div>
+          {linked ? (
+            <>
+              <p className="small">O hábito <strong>{linked.name}</strong> é marcado sozinho quando todas as doses do dia foram tomadas.</p>
+              <button type="button" className="btn soft" onClick={() => update(linkMedsHabit(null))}>Desligar</button>
+            </>
+          ) : cand ? (
+            <>
+              <p className="small">Quer que o hábito <strong>{cand.name}</strong> seja marcado sozinho quando todas as doses do dia forem tomadas?</p>
+              <button type="button" className="btn primary" onClick={() => { update(linkMedsHabit(cand.id)); notify('Hábito ligado', `"${cand.name}" agora segue os remédios.`); }}>Ligar</button>
+            </>
+          ) : null}
+        </section>
+      )}
+      {ended.length > 0 && (
+        <section className="card" aria-label="Tratamentos encerrados">
+          <div className="card-head"><h2>Encerrados</h2></div>
+          <ul className="list">{ended.map(row)}</ul>
+        </section>
+      )}
+      <p className="muted small">O app só registra. Dose e horário são os que o seu médico indicou.</p>
+    </>
+  );
+}
+
+function MedSheet({ initial, onClose }: { initial: Medicine; onClose: () => void }) {
+  const { data, update } = useStore();
+  const [m, setM] = useState<Medicine>(initial);
+  const isNew = !data.health.meds.some((x) => x.id === m.id);
+  const google = data.settings.googleCalendar.on;
+  const today = todayISO();
+  const save = () => {
+    if (!m.name.trim()) return notify('Falta o nome', 'Escreva o nome do remédio.');
+    update(saveMed({ ...m, name: m.name.trim(), dose: m.dose.trim() }));
+    notify(isNew ? 'Remédio cadastrado' : 'Remédio salvo', `${m.name.trim()} · ${timesText([...m.times].sort())}`);
+    onClose();
+  };
+  const everyDay = m.days.length === 7;
+  return (
+    <Sheet title={isNew ? 'Novo remédio' : 'Editar remédio'} onClose={onClose} footer={<button type="button" className="btn primary block" onClick={save}>Salvar</button>}>
+      <Field label="Nome">
+        <input className="input" value={m.name} onChange={(e) => setM({ ...m, name: e.target.value })} placeholder="Ex.: Vitamina D" />
+      </Field>
+      <Field label="Dose (opcional)">
+        <input className="input" value={m.dose} onChange={(e) => setM({ ...m, dose: e.target.value })} placeholder="Ex.: 1 comprimido, 10 gotas" />
+      </Field>
+      <div className="field">
+        <span className="field-label">Horários</span>
+        <div className="med-times">
+          {m.times.map((t, i) => (
+            <span key={i} className="med-time">
+              <input className="input" type="time" aria-label={`Horário ${i + 1}`} value={t} onChange={(e) => e.target.value && setM({ ...m, times: m.times.map((x, j) => (j === i ? e.target.value : x)) })} />
+              {m.times.length > 1 && (
+                <button type="button" className="icon-btn" aria-label={`Tirar o horário ${t}`} onClick={() => setM({ ...m, times: m.times.filter((_, j) => j !== i) })}>×</button>
+              )}
+            </span>
+          ))}
+          <button type="button" className="btn soft small" onClick={() => setM({ ...m, times: [...m.times, '20:00'] })}>+ Horário</button>
+        </div>
+      </div>
+      <div className="field">
+        <span className="field-label">Dias</span>
+        <Chips<string> label="Dias" value={everyDay ? 'todos' : 'alguns'} onChange={(v) => setM({ ...m, days: v === 'todos' ? [0, 1, 2, 3, 4, 5, 6] : [1, 2, 3, 4, 5] })} options={[{ value: 'todos', label: 'Todo dia' }, { value: 'alguns', label: 'Alguns dias' }]} />
+        {!everyDay && (
+          <div className="chips" role="group" aria-label="Dias da semana">
+            {DOW.map((l, d) => (
+              <button key={d} type="button" aria-label={DOW_NAME[d]} aria-pressed={m.days.includes(d)} className={`chip-btn${m.days.includes(d) ? ' on' : ''}`} onClick={() => setM({ ...m, days: m.days.includes(d) ? m.days.filter((x) => x !== d) : [...m.days, d].sort() })}>
+                {l}
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+      <div className="grid-2">
+        <Field label="Começa em">
+          <input className="input" type="date" value={m.start} onChange={(e) => e.target.value && setM({ ...m, start: e.target.value })} />
+        </Field>
+        <Field label="Até (vazio = contínuo)">
+          <input className="input" type="date" value={m.end ?? ''} onChange={(e) => setM({ ...m, end: e.target.value || null })} />
+        </Field>
+      </div>
+      <Field label="Observações (opcional)">
+        <textarea className="input" rows={2} value={m.notes} onChange={(e) => setM({ ...m, notes: e.target.value })} placeholder="Ex.: tomar depois do almoço" />
+      </Field>
+      <div className="toggle-row">
+        <span>
+          <strong>Aviso no Google Agenda</strong>
+          <span className="muted small"> {google ? '(na hora de cada dose)' : '(ligue a conta Google em Configurações)'}</span>
+        </span>
+        <Toggle label="Aviso no Google Agenda" checked={m.remind} onChange={(remind) => setM({ ...m, remind })} />
+      </div>
+      {!isNew && (
+        <div className="btn-row">
+          {(m.end === null || m.end >= today) && (
+            <button type="button" className="btn soft" onClick={() => { update(endMed(m.id, today)); notify('Tratamento encerrado', `${m.name} sai do Hoje a partir de amanhã.`); onClose(); }}>Encerrar hoje</button>
+          )}
+          <button type="button" className="btn soft danger" onClick={() => { update(removeMed(m.id)); notify('Remédio apagado', 'Ele sai do Hoje e do Histórico. Para guardar o histórico, use "Encerrar hoje".'); onClose(); }}>Apagar</button>
+        </div>
       )}
     </Sheet>
   );

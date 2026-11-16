@@ -9,6 +9,7 @@ import type { AppData, Habit, HealthData, SleepEntry, SleepFeel } from './types.
 import { setAmount } from './habits.ts';
 import { addDays } from './utils.ts';
 import { dietCount, emptyDiet, normalizeDiet, type DietCount } from './dieta.ts';
+import { medCount, normalizeMeds, normalizeTaken } from './remedios.ts';
 
 export const WATER_GOAL = 2000;
 export const WATER_STEP = 250;
@@ -20,7 +21,7 @@ export const FEELS: { id: SleepFeel; label: string }[] = [
 ];
 
 export function emptyHealth(): HealthData {
-  return { diet: emptyDiet(), water: { goal: WATER_GOAL, step: WATER_STEP, days: {}, habitId: null, asked: false }, sleep: {} };
+  return { diet: emptyDiet(), meds: [], taken: {}, medsHabitId: null, water: { goal: WATER_GOAL, step: WATER_STEP, days: {}, habitId: null, asked: false }, sleep: {} };
 }
 
 type Rec = Record<string, unknown>;
@@ -44,6 +45,9 @@ export function normalizeHealth(raw: unknown): HealthData {
     }
   return {
     diet: normalizeDiet(raw.diet),
+    meds: normalizeMeds(raw.meds),
+    taken: normalizeTaken(raw.taken),
+    medsHabitId: typeof raw.medsHabitId === 'string' && raw.medsHabitId ? raw.medsHabitId : null,
     water: {
       goal: posNum(w.goal, WATER_GOAL),
       step: posNum(w.step, WATER_STEP),
@@ -209,6 +213,8 @@ export interface HealthWeek {
   feels: Record<SleepFeel, number>;
   /** Dieta da semana (até hoje). */
   diet: DietCount;
+  /** Remédios da semana (até hoje). */
+  meds: { planned: number; taken: number; fullDays: number };
 }
 
 /** Segunda-feira da semana de `day`. */
@@ -242,7 +248,7 @@ export function healthWeeks(d: Pick<AppData, 'health' | 'habits'>, today: string
       }
     }
     const last = end > today ? today : end;
-    out.push({ diet: dietCount(d, start, last), start, end, waterAvg: wDays ? Math.round(wSum / wDays) : null, waterDays: wDays, waterMet: wMet, sleepAvg: nights ? Math.round(sSum / nights) : null, nights, feels });
+    out.push({ meds: medCount(d, start, last), diet: dietCount(d, start, last), start, end, waterAvg: wDays ? Math.round(wSum / wDays) : null, waterDays: wDays, waterMet: wMet, sleepAvg: nights ? Math.round(sSum / nights) : null, nights, feels });
   }
   return out;
 }

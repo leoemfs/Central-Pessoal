@@ -774,9 +774,34 @@ export interface DietData {
   extras: Record<string, string>;
 }
 
+/** Remédio (N1.3). O app só registra: nada de dose sugerida. */
+export interface Medicine {
+  id: string;
+  name: string;
+  /** Texto livre: "1 comprimido", "10 gotas". */
+  dose: string;
+  /** Horários do dia (HH:MM), em ordem. */
+  times: string[];
+  /** Dias da semana (0 = domingo); todos = uso diário. */
+  days: number[];
+  /** Começo e fim do tratamento (AAAA-MM-DD); fim null = uso contínuo. */
+  start: string;
+  end: string | null;
+  notes: string;
+  /** Aviso no Google Agenda em cada horário (se a conta Google estiver ligada). */
+  remind: boolean;
+  createdAt: string;
+}
+
 export interface HealthData {
   /** Dieta (N1.2). */
   diet: DietData;
+  /** Remédios (N1.3). */
+  meds: Medicine[];
+  /** Doses tomadas: dia → "idDoRemédio@HH:MM" → hora em que marcou (HH:MM). */
+  taken: Record<string, Record<string, string>>;
+  /** Hábito "tomar remédio" ligado: marcado sozinho quando todas as doses do dia foram tomadas. */
+  medsHabitId: string | null;
   water: {
     /** Meta do dia e quanto soma cada toque (ml). Valem só sem hábito ligado. */
     goal: number;
