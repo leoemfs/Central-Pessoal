@@ -79,3 +79,27 @@ export function normalizeLayouts(raw: unknown): CardLayouts {
   }
   return out;
 }
+
+/** E35.2: coluna "Sempre à vista" do computador. Padrão: compromissos, tarefas, diário e contas. */
+export const DEFAULT_SIDE_CARDS = ['compromissos', 'tarefas', 'diario', 'contas'];
+
+/** Lê do backup: lista de textos sem repetidos; sem nada salvo, o padrão. */
+export function normalizeSideCards(raw: unknown): string[] {
+  if (!Array.isArray(raw)) return [...DEFAULT_SIDE_CARDS];
+  return [...new Set(raw.filter((x): x is string => typeof x === 'string' && x.length > 0))];
+}
+
+/** Sobe (-1) ou desce (+1) um cartão na coluna. */
+export function moveSide(list: string[], id: string, dir: -1 | 1): string[] {
+  const i = list.indexOf(id);
+  const j = i + dir;
+  if (i < 0 || j < 0 || j >= list.length) return list;
+  const next = [...list];
+  [next[i], next[j]] = [next[j], next[i]];
+  return next;
+}
+
+/** Cartões que podem ir para a coluna: os do Início que não são fixos no topo. */
+export function sideCandidates(cards: CardInfo[]): CardInfo[] {
+  return cards.filter((c) => c.lock !== 'top');
+}

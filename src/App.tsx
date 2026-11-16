@@ -38,6 +38,7 @@ import { barDrag, PullToMais } from './BarPull';
 import { settingsPage } from './settingsPages';
 import { activeIndex, barFor, barItems, crumb, favoriteItems, type BarItem } from './moduleBar';
 import { GameBarItems } from './modules/JornadaBar';
+import { SideCards } from './SideCards';
 import { gameBarOn, journeyTab } from './jornada/tabs';
 import { welcomed } from './jornada/rules';
 
@@ -483,6 +484,8 @@ export function App() {
           <View key={section.path} route={route} />
         </ErrorBoundary>
       </main>
+
+      <SideCards />
 
       {section.fab && (
         <button type="button" className="fab" onClick={fab} aria-label="Adicionar">
