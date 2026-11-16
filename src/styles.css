@@ -8474,7 +8474,7 @@ body .preview-flat [data-mod] {
   gap: 4px;
   flex-wrap: nowrap;
 }
-/* Barra com quadrados coloridos: sem nome; os fechados mais apagados e um ponto embaixo do aberto. */
+/* Barra no Flat: quadrados coloridos; os fechados mais apagados e um ponto embaixo do aberto. O nome embaixo segue a opção do usuário. */
 body.bar-flat .tabbar .tb {
   position: relative;
 }
@@ -8502,16 +8502,27 @@ body.bar-flat .tabbar a.tb.active .tb-pill {
   background: linear-gradient(180deg, var(--flat-a, #9aa3b2), var(--flat-b, #4b5563));
   opacity: 1;
 }
-body.bar-flat .tabbar .tb.active::after {
+body.bar-flat .tabbar .tb-pill {
+  position: relative;
+}
+/* Pontinho embaixo do aberto (só no Flat; no Monocromático e no Colorido o destaque já mostra). */
+body.bar-flat .tabbar .tb.active .tb-pill::after {
   content: '';
   position: absolute;
   left: 50%;
-  top: calc(50% + 24px);
+  top: calc(100% + 3px);
   width: 5px;
   height: 5px;
   margin-left: -2.5px;
   border-radius: 50%;
   background: var(--accent);
+}
+/* Com o nome embaixo, a barra cresce um pouco para caber quadrado, ponto e nome sem apertar o ícone. */
+body.bar-labels.bar-flat {
+  --tabbar-h: 92px;
+}
+body.bar-labels.bar-flat .tabbar .tb-label {
+  margin-top: 8px;
 }
 
 /* ---------- Jornada N2.9b: entrevista da Mestra Lume ---------- */

@@ -299,13 +299,14 @@ export function App() {
   useScrollingClass();
   // E26: nome embaixo dos ícones da barra (opcional).
   useEffect(() => {
-    document.body.classList.toggle('bar-labels', !data.settings.hideBarLabels && data.settings.barIcons !== 'flat');
-    document.body.classList.toggle('bar-flat', data.settings.barIcons === 'flat');
-  }, [data.settings.hideBarLabels, data.settings.barIcons]);
+    document.body.classList.toggle('bar-labels', !data.settings.hideBarLabels);
+  }, [data.settings.hideBarLabels]);
   // E29: ícones dos módulos coloridos (cada um com a sua cor).
   useEffect(() => {
     document.body.classList.toggle('icons-color', data.settings.iconColors === 'cores');
     document.body.classList.toggle('icons-flat', data.settings.iconColors === 'flat');
+    // E30: o Flat vale também para a barra de baixo.
+    document.body.classList.toggle('bar-flat', data.settings.iconColors === 'flat');
   }, [data.settings.iconColors]);
   const editor = useCardEditor();
   const where = bar ? crumb(bar, barIndex) : null;
