@@ -9,7 +9,7 @@ import { useStore } from '../store';
 import { journeyStats, unlockProgress, UNLOCK_DAYS, UNLOCK_WINDOW } from '../journey';
 import { ATTRIBUTES } from '../habits';
 import { formatDMY, todayISO } from '../utils';
-import { Fullscreen, notify, Segmented, Sheet, Toggle } from '../ui';
+import { notify, Segmented, Sheet, Toggle } from '../ui';
 import { avatarIcon, chestIcon, COIN_ICON, GEM_ICON, homeIcon, itemById, itemIcon, petIcon, PETS, RARITY, treeIcon, skyPalette, ATTR_CODES, type AvatarLook } from '../jornada/catalog';
 import { HAIRS, SKINS } from '../jornada/artData';
 import { acquire, arsenalItems, availability, equip, shopContext, type Availability, type EquipSlot } from '../jornada/rules';
@@ -20,6 +20,7 @@ import { MissionsCard, WeekCard } from './JornadaMissoes';
 import { go, useRoute } from '../router';
 import { journeyTab } from '../jornada/tabs';
 import { Entrevista } from './JornadaEntrevista';
+import { TelaCheia } from './JornadaTelaCheia';
 import { npcIcon } from '../jornada/catalog';
 
 type Look = { gender: 'f' | 'm'; skin: string; hair: string; name: string };
@@ -632,44 +633,21 @@ export function JornadaHome() {
       )}
 
       {full && (
-        <Fullscreen label="Personagem" className="jn-full" onClose={() => setFull(false)}>
-          <div className="jn-full-head">
-            <strong className="jn-px jn-name">{look.name || cls[gk]}</strong>
-            <span className="muted small">
-              LV {s.level} · {title ? title[gk] : 'Sem título'} · {cls[gk]}
-            </span>
-          </div>
-          <div className="jn-full-scene">
-            <JourneyScene look={look} state={state} activeDays={data.settings.activeDays} now={now} />
-          </div>
-          <ul className="jn-full-slots">
-            {SLOTS.map((x) => {
-              const id = state.equipped[x];
-              const it = id ? itemById(id) : null;
-              return (
-                <li key={x}>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setSlot(x);
-                      setFull(false);
-                      go('jornada/arsenal');
-                    }}
-                  >
-                    {it ? <img alt="" src={itemIcon(it)} /> : <span className="jn-empty-slot" aria-hidden="true" />}
-                    <span>
-                      <small className="muted">{SLOT_NAMES[x]}</small>
-                      <strong>{it ? it.name : 'Vazio'}</strong>
-                    </span>
-                  </button>
-                </li>
-              );
-            })}
-          </ul>
-          <button type="button" className="btn block" onClick={() => setFull(false)}>
-            Voltar
-          </button>
-        </Fullscreen>
+        <TelaCheia
+          look={look}
+          state={state}
+          activeDays={data.settings.activeDays}
+          now={now}
+          level={s.level}
+          title={title ? title[gk] : null}
+          cls={cls}
+          onSlot={(x) => {
+            setSlot(x);
+            setFull(false);
+            go('jornada/arsenal');
+          }}
+          onClose={() => setFull(false)}
+        />
       )}
 
       {opening && (
