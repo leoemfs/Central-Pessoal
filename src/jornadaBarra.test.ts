@@ -10,11 +10,14 @@ test('N2.11: cada endereço abre a sua tela da Jornada; o resto abre a principal
   assert.equal(journeyTab('codex'), 'inicio', 'Codex ainda não existe');
 });
 
-test('N2.11: barra do jogo só com a Jornada em uso; Codex e Campanha com cadeado', () => {
+test('N2.11/N2.15: barra do jogo só com a Jornada em uso; 10 botões, Campanha, Codex e Mini games com cadeado', () => {
   const on = { journeyUnlockedAt: '2026-11-16', journeyChoice: 'quero' };
   assert.equal(gameBarOn(on, true), true);
   assert.equal(gameBarOn(on, false), false, 'antes de criar o personagem');
   assert.equal(gameBarOn({ ...on, journeyChoice: 'depois' }, true), false);
   assert.equal(gameBarOn({ ...on, journeyUnlockedAt: null }, true), false);
-  assert.deepEqual(GAME_TABS.filter((t) => t.locked).map((t) => t.id), ['codex', 'campanha']);
+  assert.equal(GAME_TABS.length, 10);
+  assert.deepEqual(GAME_TABS.filter((t) => t.locked).map((t) => t.id), ['campanha', 'codex', 'jogos']);
+  assert.equal(journeyTab('loja'), 'loja');
+  assert.equal(journeyTab('pet'), 'pet');
 });

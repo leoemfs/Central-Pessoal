@@ -34,6 +34,8 @@ import {
   welcomeState,
   pendingGifts,
   nextInSlot,
+  wardrobeItems,
+  shopList,
   type ShopContext,
 } from './jornada/rules.ts';
 import { phaseAt, rainWindow, skyAt, starPositions, starsTonight } from './jornada/sky.ts';
@@ -452,4 +454,19 @@ test('N2.12: tocar no espaço passa pelos itens que tem e, quando pode, fica sem
   assert.equal(nextInSlot({ ...s, equipped: { ...s.equipped, botas: 'couro' } }, 'botas'), 'sapatos', 'botas nunca ficam vazias');
   assert.equal(nextInSlot({ ...s, equipped: { ...s.equipped, pet: 'cao' } }, 'pet'), null);
   assert.equal(nextInSlot(s, 'morada'), 'cabana', 'uma casa só: continua nela');
+});
+
+test('N2.15: Arsenal só com o que tem (e o recém-liberado); Loja com o que se compra e quanto falta', () => {
+  const st = defaultJourneyState();
+  const w = wardrobeItems('armadura', st, ctx({ attrs: attrs({ SAB: 50 }) }));
+  assert.ok(w.some((x) => x.item.id === 'aprendiz' && !x.isNew));
+  assert.ok(w.some((x) => x.item.id === 'manto' && x.isNew), 'Manto arcano liberado por SAB 50');
+  assert.ok(!w.some((x) => x.item.id === 'placas'), 'o que falta não aparece no Arsenal');
+  const shop = shopList(st, ctx({ gold: 150 }));
+  const capuz = shop.items.find((x) => x.item.id === 'capuz')!;
+  assert.equal(capuz.missing, 0);
+  const malha = shop.items.find((x) => x.item.id === 'malha')!;
+  assert.equal(malha.missing, 550);
+  assert.ok(shop.homes.some((h) => h.home.id === 'pedra' && h.level === 15));
+  assert.ok(!shop.items.some((x) => x.item.id === 'aprendiz'), 'o que já tem não aparece na Loja');
 });

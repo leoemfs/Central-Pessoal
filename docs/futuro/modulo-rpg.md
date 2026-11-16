@@ -640,7 +640,7 @@ A Jornada desbloqueia em 16/11. Até aqui existiam só as regras e as artes (pas
 | **N2.12** Personagem em tela cheia (**feito, v0.80 e v0.83.1**) | cena na tela toda, título em placa, céu para escolher, espaços com moldura de raridade; tocar troca, segurar abre o Arsenal | P |
 | **N2.13** Tela principal completa (**feito, v0.81**) | sequência, baús prontos, seu dia em números, perto de desbloquear, festa ao subir de nível, como ganhar XP | M |
 | **N2.14** Entrada animada (**feito, v0.84**: opção B padrão) | portal em degraus ao entrar; as outras opções ficam para as regiões (N2.10c) | P |
-| **N2.15** Barra em duas fileiras e telas reorganizadas | barra 5 + 5 (Jornada · Campanha · Arsenal · Baús · Ficha / Pet · Casa · Codex · Mini games · Loja); **Arsenal, Pet e Casa só com o que você tem** (o que acabou de ser liberado aparece com "Novo! Pegar"); **Loja** nova com tudo o que se compra com ouro, inclusive o que ainda não dá (apagado, com "faltam X de ouro"); Arsenal fica só para vestir | M |
+| **N2.15** Barra em duas fileiras e telas reorganizadas (**feito, v0.85**) | barra 5 + 5 (Jornada · Campanha · Arsenal · Baús · Ficha / Pet · Casa · Codex · Mini games · Loja); **Arsenal, Pet e Casa só com o que você tem** (o que acabou de ser liberado aparece com "Novo! Pegar"); **Loja** nova com tudo o que se compra com ouro, inclusive o que ainda não dá (apagado, com "faltam X de ouro"); Arsenal fica só para vestir | M |
 | **N2.16** Mini games | **N2.16a** Fliperama (partidas premiadas do dia, recordes) + **Corrida do pet** + **Respira com o pet** (pode contar como prática de Mente); **N2.16b** **Memória do Arsenal** + **Pescaria** + conquistas dos jogos no Codex | M + M |
 
 
@@ -653,7 +653,7 @@ A Jornada desbloqueia em 16/11. Até aqui existiam só as regras e as artes (pas
 - **Entrada animada:** B padrão (feito, v0.84); A, C, D (espiral noturna) e E (estrela) para as regiões da campanha.
 
 **Ordem para terminar** (uma parte por vez, testando no uso):
-1. **N2.15** barra em duas fileiras e telas reorganizadas (Arsenal, Pet, Casa, Loja). M
+1. ~~**N2.15** barra em duas fileiras e telas reorganizadas (Arsenal, Pet, Casa, Loja)~~ (v0.85). M
 2. **N2.7** Codex. M
 3. **N2.16a** Fliperama, Corrida do pet e Respira com o pet. M
 4. **N2.16b** Memória do Arsenal, Pescaria e conquistas dos jogos. M
