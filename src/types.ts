@@ -256,7 +256,9 @@ export interface Settings {
   /** E25: jeito do menu na gaveta: Misto (grade em cima, lista por módulo embaixo), Grade ou Lista. */
   drawerView: 'misto' | 'grade' | 'lista';
   /** E29/E30: ícones dos módulos na cor de destaque (mono), cada um com a sua cor (cores) ou em quadrado colorido com desenho branco (flat). */
-  iconColors: 'mono' | 'cores' | 'flat';
+  iconColors: 'mono' | 'cores';
+  /** E33: estilo dos ícones do app todo: Clássico (fundo suave) ou Flat (quadrado com degradê, também na barra). */
+  iconStyle: 'classico' | 'flat';
   /** E31: tamanho dos ícones dos módulos e da barra (o menu sempre um pouco maior que a barra). */
   iconSize: 'p' | 'm' | 'g';
   seededCategories: boolean;

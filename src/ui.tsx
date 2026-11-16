@@ -225,7 +225,7 @@ export function Pill({ tone = 'gray', children }: { tone?: PillTone; children: R
 
 export function CategoryBadge({ icon, color, size = 40 }: { icon: string; color: string; size?: number }) {
   return (
-    <span className="cat-badge" style={{ width: size, height: size, color, background: `${color}26` }} aria-hidden="true">
+    <span className="cat-badge" style={{ width: size, height: size, '--cat': color } as CSSProperties} aria-hidden="true">
       <Icon name={icon as IconName} size={Math.round(size * 0.5)} />
     </span>
   );
