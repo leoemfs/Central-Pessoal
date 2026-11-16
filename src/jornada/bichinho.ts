@@ -38,7 +38,7 @@ export function moodNow(v: VPet, now: Date): VPet {
   return { joy: down('joy'), full: down('full'), rest: down('rest'), clean: down('clean'), at: v.at };
 }
 
-export type PetAction = 'carinho' | 'petisco' | 'brincar' | 'dormir' | 'escovar' | 'banho' | 'dentes' | 'secar' | 'passear' | 'bolinha' | 'sol';
+export type PetAction = 'carinho' | 'petisco' | 'brincar' | 'dormir' | 'escovar' | 'banho' | 'dentes' | 'secar' | 'passear' | 'bolinha' | 'sol' | 'patinho' | 'flores';
 
 /** Aplica uma ação: devolve o estado novo ou uma mensagem (ex.: faltam fichas). */
 export function petAction(state: JourneyState, action: PetAction, now: Date): JourneyState | string {
@@ -83,6 +83,15 @@ export function petAction(state: JourneyState, action: PetAction, now: Date): Jo
       break;
     case 'sol':
       next = { ...next, rest: up(m.rest, 15) };
+      break;
+    // N2.18d: itens da Loja
+    case 'patinho':
+      if (!state.petRoom.owned.includes('duck')) return 'O patinho está na Loja, em Banho.';
+      next = { ...next, joy: up(m.joy, 10) };
+      break;
+    case 'flores':
+      if (!state.petRoom.owned.includes('flower')) return 'As flores estão na Loja, em Jardim.';
+      next = { ...next, joy: up(m.joy, 6) };
       break;
   }
   return { ...state, games, vpet: { ...next, at: now.toISOString() } };
@@ -150,3 +159,79 @@ export const ROOMS: Record<string, { wall: string; floor: string; extra: ('banne
   castelo: { wall: bricks('#a8a29e', '#d6d3d1'), floor: 'linear-gradient(90deg, transparent 30%, #b91c1c 30% 70%, transparent 70%), repeating-linear-gradient(90deg, #78716c 0 40px, #57534e 40px 42px)', extra: ['banner', 'torch'] },
 };
 export const roomOf = (morada: string) => ROOMS[morada] ?? ROOMS.casinha;
+
+// ---------- N2.18d: Loja do bichinho (itens que aparecem no cenário) ----------
+
+export type ShopCat = 'brinquedos' | 'caminhas' | 'decoracao' | 'roupinhas' | 'banho' | 'jardim' | 'petiscos';
+export const SHOP_CATS: { id: ShopCat; label: string }[] = [
+  { id: 'brinquedos', label: 'Brinquedos' },
+  { id: 'caminhas', label: 'Caminhas' },
+  { id: 'decoracao', label: 'Decoração' },
+  { id: 'roupinhas', label: 'Roupinhas' },
+  { id: 'banho', label: 'Banho' },
+  { id: 'jardim', label: 'Jardim' },
+  { id: 'petiscos', label: 'Petiscos' },
+];
+export interface PetShopItem {
+  id: string;
+  name: string;
+  cat: ShopCat;
+  price: number;
+  /** Onde aparece: quarto, banheiro ou lá fora. */
+  place: 'quarto' | 'banheiro' | 'fora';
+}
+export const PET_SHOP: PetShopItem[] = [
+  { id: 'mouse', name: 'Ratinho', cat: 'brinquedos', price: 12, place: 'quarto' },
+  { id: 'yarn', name: 'Novelo', cat: 'brinquedos', price: 8, place: 'quarto' },
+  { id: 'bed2', name: 'Caminha real', cat: 'caminhas', price: 30, place: 'quarto' },
+  { id: 'rug', name: 'Tapete', cat: 'decoracao', price: 15, place: 'quarto' },
+  { id: 'frame', name: 'Quadro', cat: 'decoracao', price: 20, place: 'quarto' },
+  { id: 'bow', name: 'Lacinho', cat: 'roupinhas', price: 10, place: 'quarto' },
+  { id: 'hat', name: 'Chapéu', cat: 'roupinhas', price: 18, place: 'quarto' },
+  { id: 'scarf', name: 'Cachecol', cat: 'roupinhas', price: 14, place: 'quarto' },
+  { id: 'duck', name: 'Patinho', cat: 'banho', price: 6, place: 'banheiro' },
+  { id: 'flower', name: 'Flores', cat: 'jardim', price: 10, place: 'fora' },
+  { id: 'doghouse', name: 'Casinha do pet', cat: 'jardim', price: 40, place: 'fora' },
+  { id: 'snack', name: 'Petisco', cat: 'petiscos', price: SNACK_PRICE, place: 'quarto' },
+];
+const WEARS = ['bow', 'hat', 'scarf'];
+const TOYS = ['ball', 'mouse', 'yarn'];
+
+export interface PetRoom {
+  owned: string[];
+  toy: string;
+  bed: string;
+  wear: string | null;
+}
+export const defaultPetRoom = (): PetRoom => ({ owned: [], toy: 'ball', bed: 'bed', wear: null });
+export function normalizePetRoom(x: unknown): PetRoom {
+  const r = (x && typeof x === 'object' ? x : {}) as Partial<PetRoom>;
+  const owned = Array.isArray(r.owned) ? r.owned.filter((i): i is string => typeof i === 'string' && PET_SHOP.some((p) => p.id === i)) : [];
+  const has = (i: string) => owned.includes(i);
+  return {
+    owned,
+    toy: typeof r.toy === 'string' && (r.toy === 'ball' || has(r.toy)) && TOYS.includes(r.toy) ? r.toy : 'ball',
+    bed: r.bed === 'bed2' && has('bed2') ? 'bed2' : 'bed',
+    wear: typeof r.wear === 'string' && WEARS.includes(r.wear) && has(r.wear) ? r.wear : null,
+  };
+}
+
+/** Comprar (gasta fichas) ou usar um item que já é seu. Brinquedo, caminha e roupinha passam a ser usados. */
+export function buyPetItem(state: JourneyState, id: string): JourneyState | string {
+  const it = PET_SHOP.find((p) => p.id === id);
+  if (!it) return 'Item não encontrado';
+  if (it.id === 'snack') return 'O petisco se dá no quarto, em Petisco.';
+  const room = state.petRoom;
+  let games = state.games;
+  let owned = room.owned;
+  if (!owned.includes(id)) {
+    if (fichas(state) < it.price) return `Faltam ${it.price - fichas(state)} fichas. As fichas vêm dos mini games.`;
+    games = { ...games, fichasSpent: games.fichasSpent + it.price };
+    owned = [...owned, id];
+  }
+  const next: PetRoom = { ...room, owned };
+  if (TOYS.includes(id)) next.toy = id;
+  if (id === 'bed2') next.bed = room.bed === 'bed2' && room.owned.includes(id) ? 'bed' : 'bed2';
+  if (WEARS.includes(id)) next.wear = room.wear === id && room.owned.includes(id) ? null : id;
+  return { ...state, games, petRoom: next };
+}

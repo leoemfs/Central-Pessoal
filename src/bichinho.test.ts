@@ -53,3 +53,24 @@ test('N2.18c: banheiro e lá fora; desenhos de lado e de costas', async () => {
   assert.ok(CAT_HD_SIDE.every((r) => r.length === 28));
   assert.ok(!CAT_HD_BACK.join('').includes('E'), 'de costas não tem olhos');
 });
+
+test('N2.18d: loja do bichinho gasta fichas; o que é seu fica e passa a ser usado', async () => {
+  const { buyPetItem } = await import('./jornada/bichinho.ts');
+  let s = defaultJourneyState();
+  assert.match(buyPetItem(s, 'bow') as string, /Faltam 10 fichas/);
+  for (let i = 0; i < 4; i++) s = finishGame(s, 'corrida', 600, 60, '2026-11-16').state; // 20 fichas
+  s = buyPetItem(s, 'bow') as typeof s;
+  assert.deepEqual([s.petRoom.wear, s.games.fichasSpent], ['bow', 10]);
+  s = buyPetItem(s, 'bow') as typeof s; // tirar não gasta de novo
+  assert.deepEqual([s.petRoom.wear, s.games.fichasSpent], [null, 10]);
+  s = buyPetItem(s, 'yarn') as typeof s; // 8 das 10 que sobraram
+  assert.equal(s.petRoom.toy, 'yarn');
+  assert.match(buyPetItem(s, 'bed2') as string, /Faltam/);
+  assert.match(petAction(s, 'patinho', T0) as string, /Loja/);
+  s = finishGame(s, 'respira', 1, 60, '2026-11-16').state;
+  s = finishGame(s, 'respira', 2, 60, '2026-11-16').state;
+  s = buyPetItem(s, 'duck') as typeof s;
+  assert.ok(typeof petAction(s, 'patinho', T0) !== 'string');
+  const n = normalizeJourney({ petRoom: { owned: ['bow', 'xx'], toy: 'mouse', bed: 'bed2', wear: 'bow' } }).petRoom;
+  assert.deepEqual(n, { owned: ['bow'], toy: 'ball', bed: 'bed', wear: 'bow' }, 'só vale o que é seu');
+});
