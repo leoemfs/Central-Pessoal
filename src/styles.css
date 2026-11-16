@@ -10897,3 +10897,158 @@ body.bar-labels.jn-tall {
     box-shadow: 0 8px 16px -8px rgb(0 0 0 / 0.8);
   }
 }
+
+/* ---------- Avisos com ícone e botão (N2.17d) ---------- */
+.toast-body {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.toast.rich {
+  flex-direction: row;
+  align-items: center;
+  gap: 12px;
+  pointer-events: auto;
+}
+.toast.rich .toast-body {
+  flex: 1;
+}
+.toast-icon {
+  width: 36px;
+  height: 36px;
+  flex: none;
+  object-fit: contain;
+  image-rendering: pixelated;
+}
+
+/* ---------- N2.17d: recompensas animadas ---------- */
+.jn-fx {
+  position: fixed;
+  inset: 0;
+  z-index: 300;
+  pointer-events: none;
+}
+.jn-float {
+  position: fixed;
+  font-family: var(--jn-pixel);
+  font-size: 15px;
+  font-weight: 600;
+  white-space: nowrap;
+  text-shadow: 0 2px 0 rgb(0 0 0 / 0.7);
+  animation: jn-float-up 1.4s ease-out both;
+}
+@keyframes jn-float-up {
+  0% {
+    opacity: 0;
+    transform: translateY(6px) scale(0.8);
+  }
+  15% {
+    opacity: 1;
+    transform: translateY(0) scale(1.1);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-46px) scale(1);
+  }
+}
+.jn-flyer {
+  position: fixed;
+  width: 16px;
+  height: 16px;
+  image-rendering: pixelated;
+  transition: transform 0.75s cubic-bezier(0.5, -0.3, 0.6, 1), opacity 0.75s ease-in;
+}
+.jn-bump {
+  animation: jn-bump 0.35s ease;
+}
+@keyframes jn-bump {
+  40% {
+    transform: scale(1.18);
+  }
+}
+.jn-confetti-fx {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  z-index: 400;
+}
+.jn-confetti-fx i {
+  position: absolute;
+  top: -14px;
+  width: 7px;
+  height: 11px;
+  animation: jn-confetti-fall 2.6s ease-in both;
+}
+@keyframes jn-confetti-fall {
+  to {
+    transform: translate(var(--dx), 105vh) rotate(600deg);
+    opacity: 0.3;
+  }
+}
+.jn-title-medal {
+  width: 120px;
+  image-rendering: pixelated;
+  animation: jn-loot-in 0.6s cubic-bezier(0.3, 1.6, 0.5, 1) both;
+}
+.jn-title-name {
+  margin: 0;
+  font-size: 24px;
+  color: #fde047;
+  text-wrap: balance;
+}
+.jn-title-gem {
+  margin: 0;
+  color: var(--jn-crystal);
+  font-weight: 700;
+}
+.jn-week-h {
+  margin: 0;
+  font-size: 26px;
+}
+.jn-week-grid {
+  width: 100%;
+  max-width: 340px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+.jn-week-grid div {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 12px;
+  border-radius: 16px;
+  background: var(--raised);
+  border: 1px solid var(--border);
+  animation: jn-loot-in 0.45s ease both;
+}
+.jn-week-grid strong {
+  font-size: 22px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+}
+.jn-week-grid span {
+  font-size: 12px;
+  color: var(--muted);
+}
+.jn-week-attrs {
+  width: 100%;
+  max-width: 340px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.jn-week-attrs > div {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 6px;
+}
+.jn-open-center > .jn-loot-row {
+  width: 100%;
+  max-width: 340px;
+  text-align: left;
+}

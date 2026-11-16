@@ -8,7 +8,8 @@ import { addDays } from '../utils.ts';
 import { journeyStats } from '../journey.ts';
 import { ATTRIBUTES } from '../habits.ts';
 import { HOMES, ITEMS, PETS, type AttrCode } from './catalog.ts';
-import { ARTIFACT2_LEVEL, CRISTAL_MILESTONES, attributes, titleProgress, visitStats, type JourneyState } from './rules.ts';
+import { ARTIFACT2_LEVEL, CRISTAL_MILESTONES, attributes, availability, earnedChests, pendingChests, placeAvailability, shopContext, titleProgress, visitStats, type JourneyState } from './rules.ts';
+import { weekStart } from '../review.ts';
 import { diffDays } from '../habits.ts';
 import { missionsToday } from './missions.ts';
 
@@ -107,3 +108,68 @@ export function quaseLa(d: AppData, state: JourneyState, today: string): Goal[] 
   return out;
 }
 
+
+// ---------- N2.17d: novidades na hora e Resumo da semana ----------
+
+/** O que existe agora para avisar: títulos conquistados, o que dá para pegar, místicos prontos e baús fechados. */
+export function journeyNews(d: AppData, state: JourneyState, today: string) {
+  const level = journeyStats(d, today).level;
+  const attrs = attributes(d, today);
+  const ctx = shopContext(d, state, today);
+  return {
+    titles: titleProgress({ d, today, attrs }).filter((t) => t.earned).map((t) => t.id),
+    free: [
+      ...ITEMS.filter((it) => !it.campaign && it.rarity !== 'mistico' && availability(it, state, ctx).status === 'liberar').map((it) => it.id),
+      ...PETS.filter((p) => placeAvailability('pet', p.id, state, ctx).status === 'liberar').map((p) => p.id),
+      ...HOMES.filter((h) => placeAvailability('morada', h.id, state, ctx).status === 'liberar').map((h) => h.id),
+    ],
+    forge: ITEMS.filter((it) => {
+      if (it.rarity !== 'mistico' || it.campaign) return false;
+      const a = availability(it, state, ctx);
+      return a.status === 'forja' && a.ready;
+    }).map((it) => it.id),
+    chests: pendingChests(d, state, today, level),
+  };
+}
+
+/** O que apareceu de novo entre duas leituras de `journeyNews`. */
+export function newsDiff(before: ReturnType<typeof journeyNews>, now: ReturnType<typeof journeyNews>) {
+  const keys = new Set(before.chests.map((c) => c.key));
+  return {
+    titles: now.titles.filter((id) => !before.titles.includes(id)),
+    free: now.free.filter((id) => !before.free.includes(id)),
+    forge: now.forge.filter((id) => !before.forge.includes(id)),
+    chests: now.chests.filter((c) => !keys.has(c.key)),
+  };
+}
+
+export interface WeekSummary {
+  /** Segunda e domingo da semana resumida. */
+  start: string;
+  end: string;
+  xp: number;
+  gold: number;
+  levelFrom: number;
+  levelTo: number;
+  attrs: { code: AttrCode; gain: number }[];
+  /** Baús ganhos na semana (abertos ou não). */
+  chests: number;
+  missions: number;
+}
+
+/** Resumo da semana que acabou (segunda a domingo antes da semana de `today`). Nulo se nada aconteceu. */
+export function weekSummary(d: AppData, today: string): WeekSummary | null {
+  const start = addDays(weekStart(today), -7);
+  const end = addDays(start, 6);
+  const before = journeyStats(d, addDays(start, -1));
+  const after = journeyStats(d, end);
+  const xp = after.xp - before.xp;
+  if (xp <= 0) return null;
+  const gains = attributes(d, end, start);
+  const attrs = (Object.keys(gains) as AttrCode[]).map((code) => ({ code, gain: gains[code] })).filter((a) => a.gain > 0).sort((a, b) => b.gain - a.gain);
+  const chests = earnedChests(d, end, after.level).filter((c) => c.date >= start && c.date <= end && !c.key.startsWith('dourado:nivel:')).length + Math.max(0, Math.floor(after.level / 5) - Math.floor(before.level / 5));
+  return { start, end, xp, gold: after.gold - before.gold, levelFrom: before.level, levelTo: after.level, attrs, chests, missions: after.missions - before.missions };
+}
+
+/** Mostrar o Resumo da semana? Uma vez por semana, a partir de segunda. */
+export const showWeekSummary = (state: JourneyState, today: string) => state.weekSeen !== weekStart(today);

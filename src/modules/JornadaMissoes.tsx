@@ -9,7 +9,8 @@ import { payExpense, unpayExpense } from '../finance';
 import { go } from '../router';
 import { ATTRIBUTES } from '../habits';
 import { formatDMY, todayISO } from '../utils';
-import { Icon, type IconName } from '../ui';
+import { Icon, notify, type IconName } from '../ui';
+import { floatTexts, flyCoins } from './jornadaFx';
 import { COIN_ICON } from '../jornada/catalog';
 import { missionsToday, missionsWeek, type Mission } from '../jornada/missions';
 
@@ -21,8 +22,16 @@ export function MissionsCard() {
   const today = todayISO();
   const ms = missionsToday(data, today);
   const done = ms.filter((m) => m.done).length;
-  const act = (m: Mission) => {
+  const act = (m: Mission, btn?: HTMLElement) => {
     const a = m.action;
+    if (a.type !== 'go' && a.type !== 'none') {
+      if (m.done) notify('Missão desmarcada', 'A recompensa saiu junto. Desmarcar algo marcado por engano tira os pontos.');
+      else if (btn) {
+        const r = btn.getBoundingClientRect();
+        floatTexts(r, [{ text: `+${m.xp} XP`, color: 'var(--jn-xp)' }, ...Object.entries(m.attrs).map(([k, v]) => ({ text: `+${v} ${k}`, color: color(k) }))]);
+        if (m.gold) flyCoins(r, COIN_ICON, Math.min(6, Math.ceil(m.gold / 3)));
+      }
+    }
     if (a.type === 'habit') update(toggleCheck(a.id, today));
     else if (a.type === 'task') update(toggleTask(a.id));
     else if (a.type === 'bill')
@@ -84,7 +93,7 @@ export function MissionsCard() {
                     <Icon name="right" size={20} />
                   </button>
                 ) : (
-                  <button type="button" className={`jn-check${m.done ? ' on' : ''}`} aria-pressed={m.done} aria-label={`${m.done ? 'Desmarcar' : 'Marcar'}: ${m.title}`} onClick={() => act(m)} disabled={m.action.type === 'go'}>
+                  <button type="button" className={`jn-check${m.done ? ' on' : ''}`} aria-pressed={m.done} aria-label={`${m.done ? 'Desmarcar' : 'Marcar'}: ${m.title}`} onClick={(e) => act(m, e.currentTarget)} disabled={m.action.type === 'go'}>
                     <Icon name="check" size={20} />
                   </button>
                 )}
