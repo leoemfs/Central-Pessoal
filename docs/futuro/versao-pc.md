@@ -26,6 +26,7 @@
 - **Depois:** atalhos de teclado (ex.: `N` nova despesa, `/` buscar), instalação do PWA no Windows, janela própria.
 
 ## Histórico
+- v0.94 (E35.1, C15, C16): menu em três partes (topo fixo, lista, pé com conta e Configurações), ícones do menu no estilo escolhido, rolagem discreta, meio de 820 px, barra da Jornada dentro do meio em uma linha.
 - v0.27.1 (C10): coluna central de 980 px no computador.
 - 13/11: A coluna (hoje E34) e esta central (hoje E35) criados a partir do print do Mais em ~930 px (menu + conteúdo, sem coluna).
 
