@@ -1,11 +1,7 @@
 {
   "name": "central-pessoal",
   "private": true,
-<<<<<<< Updated upstream
-  "version": "0.98.0",
-=======
-  "version": "0.96.0",
->>>>>>> Stashed changes
+  "version": "0.99.0",
   "type": "module",
   "description": "Central Pessoal — finanças, diário, agenda e organização pessoal em um só lugar.",
   "scripts": {

@@ -11595,7 +11595,6 @@ body.bar-labels.jn-tall {
   color: #d4d4d8;
 }
 
-<<<<<<< Updated upstream
 /* E35.2: atalhos no topo da coluna (3 por linha). Somem junto com a coluna. */
 @media (min-width: 1280px) {
   .quick-shortcuts {
@@ -11713,7 +11712,8 @@ body.bar-labels.jn-tall {
 /* O caminho de Estudos passou para a linha do caminho do app. */
 .st-path {
   display: none !important;
-=======
+}
+
 /* ---------- N2.17g2: Campanha (mapa da prévia) ---------- */
 .jn-cp-map {
   position: relative;
@@ -11940,5 +11940,4 @@ body.bar-labels.jn-tall {
   .jn-cp-node.current .pic::before {
     animation: none;
   }
->>>>>>> Stashed changes
 }
