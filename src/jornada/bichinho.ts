@@ -38,7 +38,7 @@ export function moodNow(v: VPet, now: Date): VPet {
   return { joy: down('joy'), full: down('full'), rest: down('rest'), clean: down('clean'), at: v.at };
 }
 
-export type PetAction = 'carinho' | 'petisco' | 'brincar' | 'dormir' | 'escovar';
+export type PetAction = 'carinho' | 'petisco' | 'brincar' | 'dormir' | 'escovar' | 'banho' | 'dentes' | 'secar' | 'passear' | 'bolinha' | 'sol';
 
 /** Aplica uma ação: devolve o estado novo ou uma mensagem (ex.: faltam fichas). */
 export function petAction(state: JourneyState, action: PetAction, now: Date): JourneyState | string {
@@ -64,6 +64,26 @@ export function petAction(state: JourneyState, action: PetAction, now: Date): Jo
     case 'escovar':
       next = { ...next, clean: up(m.clean, 15), joy: up(m.joy, 4) };
       break;
+    // N2.18c: banheiro
+    case 'banho':
+      next = { ...next, clean: 100 };
+      break;
+    case 'dentes':
+      next = { ...next, clean: up(m.clean, 10) };
+      break;
+    case 'secar':
+      next = { ...next, joy: up(m.joy, 4) };
+      break;
+    // N2.18c: lá fora
+    case 'passear':
+      next = { ...next, joy: up(m.joy, 10), rest: up(m.rest, -8) };
+      break;
+    case 'bolinha':
+      next = { ...next, joy: up(m.joy, 14), rest: up(m.rest, -8) };
+      break;
+    case 'sol':
+      next = { ...next, rest: up(m.rest, 15) };
+      break;
   }
   return { ...state, games, vpet: { ...next, at: now.toISOString() } };
 }
@@ -85,6 +105,23 @@ export const CAT_HD = [
   'OCCLOEWEOLLLLLLOEWEOLCCO', 'OCCLOEEEOLLLLLLOEEEOLCCO', 'OCCLLOOOLLLNNLLLOOOLLCCO', 'OCCCLLLLLLMNNMLLLLLLLCCO',
   'ODCCCLLLLLLMMLLLLLLCCCDO', '.ODCCCCLLLLLLLLLLCCCCDO.', '..ODDCCCCCCCCCCCCCCDDO..', '..OCCCCCCCCCCCCCCCCCCO..',
   '.OCCCLLCCCCCCCCCCLLCCCO.', '.OCCLLLCCOOOOOOCCLLLCCO.', '.ODCCCCDOO....OODCCCCDO.', '..OOOOOO........OOOOOO..',
+];
+
+/** De costas (banho, dormir) e de lado (passear): a cena escolhe, sem botão de girar. */
+export const CAT_HD_BACK = CAT_HD.map((r, i) => {
+  if (i >= 7 && i <= 11) return 'OCC' + 'L'.repeat(18) + 'CCO';
+  if (i === 12) return 'ODCCC' + 'L'.repeat(14) + 'CCCDO';
+  if (i === 17) return '.OCCLLLCCCCCCCCCCLLLCCOO';
+  if (i === 18) return '.ODCCCCDOO....OODCCCCDOC';
+  if (i === 19) return '..OOOOOO........OOOOOOO.';
+  return r;
+});
+export const CAT_HD_SIDE = [
+  '.....................OO..OO.', '....................OCCOOCCO', '....................OCPCCPCO', '..OO................OCCCCCCO',
+  '.OCCO..............OCCLLLLLO', '.OCO...............OCLOOLLLO', 'OCO................OCLOEWLLN', 'OCO................OCLLOOLLM',
+  'OCO...OOOOOOOOOOOOOCCLLLLLO.', '.OCOOOCCCCCCCCCCCCCCCLLLLO..', '..OCCCCCCCCCCCCCCCCCCCCCO...', '..OCLLLLLLLLLLLLLLLLLLLCO...',
+  '..OCCLLLLLLLLLLLLLLLLLCCO...', '..ODCCCCCCCCCCCCCCCCCCCDO...', '..OCCO.OCCO.....OCCO.OCCO...', '..OCCO.OCCO.....OCCO.OCCO...',
+  '..ODDO.ODDO.....ODDO.ODDO...', '..OOOO.OOOO.....OOOO.OOOO...',
 ];
 
 function mix(hex: string, to: string, k: number): string {
