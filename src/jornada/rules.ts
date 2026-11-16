@@ -717,6 +717,8 @@ export function welcomeState(state: JourneyState, avatar: { gender: 'f' | 'm'; s
     owned: Array.from(new Set([...state.owned, 'couro', pet])),
     equipped: { ...state.equipped, botas: 'couro', pet },
     chests: [...state.chests, { key: WELCOME_KEY, kind: 'dourado', openedAt: today, gold: 50, crystals: 1, item: 'couro' }],
+    // N2.17g1: no dia da chegada quem fala é a Mestra Lume; o Resumo da semana começa na semana seguinte.
+    weekSeen: weekStart(today),
   };
 }
 
