@@ -7,7 +7,7 @@ test('N2.11: cada endereço abre a sua tela da Jornada; o resto abre a principal
   assert.equal(journeyTab('arsenal'), 'arsenal');
   assert.equal(journeyTab('baus'), 'baus');
   assert.equal(journeyTab('ficha/algo'), 'ficha');
-  assert.equal(journeyTab('codex'), 'inicio', 'Codex ainda não existe');
+  assert.equal(journeyTab('codex'), 'codex');
 });
 
 test('N2.11/N2.15: barra do jogo só com a Jornada em uso; 10 botões, Campanha, Codex e Mini games com cadeado', () => {
@@ -17,7 +17,7 @@ test('N2.11/N2.15: barra do jogo só com a Jornada em uso; 10 botões, Campanha,
   assert.equal(gameBarOn({ ...on, journeyChoice: 'depois' }, true), false);
   assert.equal(gameBarOn({ ...on, journeyUnlockedAt: null }, true), false);
   assert.equal(GAME_TABS.length, 10);
-  assert.deepEqual(GAME_TABS.filter((t) => t.locked).map((t) => t.id), ['campanha', 'codex', 'jogos']);
+  assert.deepEqual(GAME_TABS.filter((t) => t.locked).map((t) => t.id), ['campanha', 'jogos']);
   assert.equal(journeyTab('loja'), 'loja');
   assert.equal(journeyTab('pet'), 'pet');
 });

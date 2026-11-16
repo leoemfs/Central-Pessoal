@@ -2,10 +2,10 @@
  * Barra própria do jogo dentro da Jornada (N2.11; duas fileiras de 5 na N2.15, Anexo E.1 de `modulo-rpg.md`).
  * Cada botão é uma tela (`#/jornada`, `#/jornada/arsenal`…). O que ainda não existe aparece apagado, com cadeado.
  */
-export type JourneyTab = 'inicio' | 'arsenal' | 'baus' | 'ficha' | 'pet' | 'casa' | 'loja';
+export type JourneyTab = 'inicio' | 'arsenal' | 'baus' | 'ficha' | 'pet' | 'casa' | 'loja' | 'codex';
 
 export interface GameTab {
-  id: JourneyTab | 'campanha' | 'codex' | 'jogos';
+  id: JourneyTab | 'campanha' | 'jogos';
   label: string;
   /** Endereço sem o "#/". */
   to: string;
@@ -22,12 +22,12 @@ export const GAME_TABS: GameTab[] = [
   { id: 'ficha', label: 'Ficha', to: 'jornada/ficha' },
   { id: 'pet', label: 'Pet', to: 'jornada/pet' },
   { id: 'casa', label: 'Casa', to: 'jornada/casa' },
-  { id: 'codex', label: 'Codex', to: 'jornada', locked: 'O Codex, álbum com tudo o que existe na Jornada, chega numa próxima versão.' },
+  { id: 'codex', label: 'Codex', to: 'jornada/codex' },
   { id: 'jogos', label: 'Mini games', to: 'jornada', locked: 'Os mini games (Corrida do pet, Memória, Pescaria e Respira com o pet) chegam numa próxima versão.' },
   { id: 'loja', label: 'Loja', to: 'jornada/loja' },
 ];
 
-const SCREENS: JourneyTab[] = ['arsenal', 'baus', 'ficha', 'pet', 'casa', 'loja'];
+const SCREENS: JourneyTab[] = ['arsenal', 'baus', 'ficha', 'pet', 'casa', 'loja', 'codex'];
 
 /** Qual tela da Jornada o endereço pede (o que não for conhecido abre a tela principal). */
 export function journeyTab(sub: string): JourneyTab {
