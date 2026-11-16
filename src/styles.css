@@ -8264,6 +8264,7 @@ a.chip-btn {
   .jn-check.on {
     animation: none;
   }
+}
 
 /* E29: ícones dos módulos coloridos (Aparência › Cor dos ícones). Atalhos e o resto seguem a cor de destaque. */
 body.icons-color [data-mod='financas'],
