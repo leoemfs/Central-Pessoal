@@ -47,6 +47,7 @@
 ## Caixa de entrada
 *Ideias e problemas ainda sem classificar. Uma linha cada, com a data.*
 
+- 16/11: Jornada: um pet "igual o boneco do Claude". Recomendação: pet **inspirado** (bichinho laranja em pixel art, jeito simpático), não uma cópia do personagem da marca. Tamanho P (desenho + lugar no catálogo de pets, com cores e como conquistar). Precisa de prévia sem código para aprovar o desenho.
 - 15/11: Dieta × Receitas: ligar receitas de Listas às refeições do plano, abrir a receita pela refeição e gerar a lista de compras da semana. Anotado no N1: N1.2a (v0.68) e N1.2b (v0.69) prontas.
 - 09/11: Saúde com **dieta dentro** (plano alimentar e "segui · em parte · fugi" no dia a dia). Já anotado no N1 (parte N1.2).
 - 09/11: Saúde e treinos ligados aos hábitos sem trocar de módulo (ex.: beber água). Anotado no N1, seção "Ligação com Hábitos e Treinos".
