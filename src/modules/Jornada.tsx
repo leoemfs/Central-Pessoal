@@ -4,6 +4,7 @@ import { formatDMY, fromISO, todayISO, WEEKDAYS } from '../utils';
 import { Icon, PageHeader, Pill, Pixels, Progress } from '../ui';
 import { JornadaHome, JornadaUnlock } from './JornadaHome';
 import { JornadaPortal } from './JornadaPortal';
+import { JornadaHud } from './JornadaTopo';
 import { welcomed } from '../jornada/rules';
 import { journeyTab } from '../jornada/tabs';
 import { useRoute } from '../router';
@@ -83,7 +84,7 @@ export function Jornada() {
   if (choice === 'quero')
     return (
       <>
-        <PageHeader title={TAB_TITLES[journeyTab(route.sub)]} />
+        <PageHeader title={TAB_TITLES[journeyTab(route.sub)]} tabs={welcomed(data.journey) ? <JornadaHud /> : undefined} />
         {welcomed(data.journey) && <JornadaPortal />}
         <JornadaHome />
       </>

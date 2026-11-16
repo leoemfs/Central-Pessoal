@@ -681,7 +681,7 @@ O Leonardo comparou o app com a prévia jogável "Prévia da Jornada" (https://c
 
 **Partes (N2.17), cada uma com a escolha "atual × prévia" antes:**
 1. **N2.17a Catálogo e espaços:** os 49 itens e as artes da prévia; espaços anel, colar e mágico. M — **feito (v0.88)**. Escolhas de 16/11: espaços da prévia (Anel, Colar e Mágico; segundo anel no nível 20) e todos os itens agora, os de região no Codex ("Campanha: <região> · ou em baús"; não se compram nem se forjam). As artes vêm do arquivo da prévia (`src/jornada/px.ts`); artefatos salvos migram para o espaço novo em `normalizeJourney`.
-2. **N2.17b Topo fixo e tela principal:** topo com 🔥, ouro, cristais e XP; presente do dia, avisos, cartão da caixinha e da campanha como na prévia. M
+2. **N2.17b Topo fixo e tela principal:** topo com 🔥, ouro, cristais e XP; presente do dia, avisos, cartão da caixinha e da campanha como na prévia. M — **feito (v0.89)**. Escolhas de 16/11: faixa da prévia presa no topo em todas as telas da Jornada (`JornadaHud`, no bloco do `PageHeader`) e a tela principal na ordem da prévia: cena, placa do título, presente, avisos (`Notices`: baús, liberado, forja), missões, semana, 3 números e "Quase lá" (`quaseLa` em `home.ts`). Cartões da caixinha e da campanha ficam para N2.17e e N2.17g.
 3. **N2.17c Baús como na prévia:** cores por tipo, abrir todos, "Como ganhar", número na barra. P
 4. **N2.17d Recompensas animadas e Resumo da semana.** M
 5. **N2.17e Caixinha na Jornada.** M

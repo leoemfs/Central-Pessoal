@@ -17,6 +17,7 @@ import type { Item, Slot } from '../jornada/catalog';
 import { classOf, openChest, pendingChests, recentAttributes, sinceLastVisit, snapshot, TITLES, wallet, welcomed, welcomeState, type Chest, type ChestRecord, type JourneyState, type SinceVisit } from '../jornada/rules';
 import { skyAt, starPositions } from '../jornada/sky';
 import { MissionsCard, WeekCard } from './JornadaMissoes';
+import { Notices, QuaseLa, Stats3 } from './JornadaTopo';
 import { go, useRoute } from '../router';
 import { journeyTab } from '../jornada/tabs';
 import { Entrevista } from './JornadaEntrevista';
@@ -27,8 +28,7 @@ import { Fliperama } from './JornadaJogos';
 import { AttrsCard, ClassesView, ForgeView, TitlesView, UnlocksCard } from './JornadaFicha';
 
 type FichaTab = 'ficha' | 'titulos' | 'forja' | 'classes';
-import { ChestsReady, DayNumbers, HowToEarn, LevelUpScreen, NearCard } from './JornadaPainel';
-import { dayNumbers, streakDays } from '../jornada/home';
+import { HowToEarn, LevelUpScreen } from './JornadaPainel';
 import { npcIcon } from '../jornada/catalog';
 
 type Look = { gender: 'f' | 'm'; skin: string; hair: string; name: string };
@@ -483,8 +483,6 @@ export function JornadaHome() {
   const title = TITLES.find((x) => x.id === state.title);
   const gk = look.gender;
   const chests = pendingChests(data, state, today, s.level);
-  const streak = streakDays(data.settings.activeDays, today);
-  const todayXp = dayNumbers(data, today).xp;
   const levelUp = state.levelSeen > 0 && s.level > state.levelSeen;
 
   return (
@@ -497,60 +495,16 @@ export function JornadaHome() {
           onClose={() => setSince(null)}
         />
       )}
-      <section className="card raised journey-hero">
-        <button type="button" className="jn-scene-btn" aria-label="Ver o personagem em tela cheia" onClick={() => setFull(true)}>
-          <JourneyScene look={look} state={state} activeDays={data.settings.activeDays} now={now} />
-        </button>
-        <div className="journey-info">
-          <div className="toggle-row">
-            <div>
-              <strong className="jn-px jn-name">{look.name || cls[gk]}</strong>
-              <span className="muted small">
-                {look.name ? `${cls[gk]} · ` : ''}
-                {title ? title[gk] : 'Sem título'}
-              </span>
-            </div>
-            <span className="jn-px jn-level">LV {s.level}</span>
-          </div>
-          {streak > 0 && (
-            <span className="jn-streak">
-              <b className="jn-px">{streak}</b> {streak === 1 ? 'dia' : 'dias'} de sequência
-            </span>
-          )}
-          <div>
-            <div className="toggle-row small muted">
-              <span>
-                XP{todayXp > 0 && <span className="jn-today"> · +{fmt(todayXp)} hoje</span>}
-              </span>
-              <span className="tabular">
-                {fmt(s.xpInLevel)} / {fmt(s.xpForNext)}
-              </span>
-            </div>
-            <div className="xp-bar">
-              <div style={{ width: `${(s.xpInLevel / s.xpForNext) * 100}%` }} />
-            </div>
-          </div>
-          <div className="jn-purse">
-            <span>
-              <img alt="" src={COIN_ICON} />
-              <strong className="jn-px" style={{ color: 'var(--jn-gold)' }}>
-                {fmt(w.gold)}
-              </strong>
-              <small className="muted">ouro</small>
-            </span>
-            <span>
-              <img alt="" src={GEM_ICON} />
-              <strong className="jn-px" style={{ color: 'var(--jn-crystal)' }}>
-                {fmt(w.crystals)}
-              </strong>
-              <small className="muted">{w.crystals === 1 ? 'cristal' : 'cristais'}</small>
-            </span>
-          </div>
-        </div>
-      </section>
+      <button type="button" className="jn-scene-btn jn-scene-main" aria-label="Ver o personagem em tela cheia" onClick={() => setFull(true)}>
+        <JourneyScene look={look} state={state} activeDays={data.settings.activeDays} now={now} />
+      </button>
+      <div className="jn-nameplate">
+        <span className="jn-title-tag jn-px">{(title ? title[gk] : 'Sem título').toUpperCase()}</span>
+        <span className="muted small">Toque na cena para ampliar</span>
+      </div>
 
       <GiftCard />
-      <ChestsReady chests={chests} />
+      <Notices />
 
       {!state.profile && (
         <section className="card jn-invite">
@@ -573,10 +527,10 @@ export function JornadaHome() {
           </button>
         </section>
       )}
-      <DayNumbers />
       <MissionsCard />
       <WeekCard />
-      <NearCard state={state} level={s.level} />
+      <Stats3 />
+      <QuaseLa />
       </>)}
 
       {tab === 'baus' && (<>

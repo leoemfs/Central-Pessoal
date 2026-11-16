@@ -3,103 +3,12 @@
  * baús prontos, "Seu dia em números", "Perto de desbloquear", a festa ao subir de nível
  * ("v1 · Subiu de nível") e "Como ganhar XP e ouro" ("v2 · Como ganha XP e ouro").
  */
-import { useStore } from '../store';
-import { go } from '../router';
-import { todayISO } from '../utils';
 import { Fullscreen } from '../ui';
 import { REWARDS } from '../journey';
 import { avatarIcon, chestIcon, COIN_ICON, GEM_ICON, homeIcon, HOMES, PETS, petIcon, type AvatarLook } from '../jornada/catalog';
-import { dayNumbers, levelRewards, nearUnlocks } from '../jornada/home';
-import type { Chest, JourneyState } from '../jornada/rules';
+import { levelRewards } from '../jornada/home';
 
 const fmt = (n: number) => n.toLocaleString('pt-BR');
-
-export function ChestsReady({ chests }: { chests: Chest[] }) {
-  if (!chests.length) return null;
-  const best = chests.find((c) => c.kind === 'cristal') ?? chests.find((c) => c.kind === 'dourado') ?? chests[0];
-  return (
-    <section className={`card jn-ready${best.kind === 'cristal' ? ' crystal' : ''}`}>
-      <img alt="" src={chestIcon(best.kind, false)} />
-      <div>
-        <strong className="jn-px">{chests.length === 1 ? 'Baú para abrir' : 'Baús para abrir'}</strong>
-        <span className="muted small">
-          {chests.length} {chests.length === 1 ? 'pronto' : 'prontos'} · {best.reason}
-        </span>
-      </div>
-      <button type="button" className="btn primary small" onClick={() => go('jornada/baus')}>
-        Abrir
-      </button>
-    </section>
-  );
-}
-
-export function DayNumbers() {
-  const { data } = useStore();
-  const n = dayNumbers(data, todayISO());
-  return (
-    <section className="card">
-      <div className="card-head">
-        <h2>Seu dia em números</h2>
-      </div>
-      <div className="jn-daynums">
-        <div>
-          <span>XP hoje</span>
-          <strong className="jn-px" style={{ color: 'var(--jn-xp)' }}>
-            +{fmt(n.xp)}
-          </strong>
-        </div>
-        <div>
-          <span>Ouro hoje</span>
-          <strong className="jn-px" style={{ color: 'var(--jn-gold)' }}>
-            +{fmt(n.gold)}
-          </strong>
-        </div>
-        <div>
-          <span>Missões</span>
-          <strong className="jn-px" style={{ color: 'var(--green-text)' }}>
-            {n.done}/{n.total}
-          </strong>
-        </div>
-      </div>
-    </section>
-  );
-}
-
-const NEAR_COLORS: Record<string, string> = { titulo: '#67e8f9', item: '#c084fc', pet: '#f97316', casa: '#f97316', bau: '#facc15' };
-
-export function NearCard({ state, level }: { state: JourneyState; level: number }) {
-  const { data } = useStore();
-  const list = nearUnlocks(data, state, todayISO(), level);
-  if (!list.length) return null;
-  return (
-    <section className="card">
-      <div className="card-head">
-        <h2>Perto de desbloquear</h2>
-        <button type="button" className="jn-link small" onClick={() => go('jornada/codex')}>
-          Ver tudo no Codex
-        </button>
-      </div>
-      <ul className="jn-near">
-        {list.map((u) => {
-          const color = NEAR_COLORS[u.id.split(':')[0]] ?? 'var(--green)';
-          return (
-            <li key={u.id}>
-              <div className="toggle-row">
-                <span>
-                  <strong>{u.name}</strong> <span className="muted small">· {u.kind}</span>
-                </span>
-                <span className="muted small tabular">{u.progress}</span>
-              </div>
-              <div className="jn-near-bar">
-                <i style={{ width: `${Math.min(100, (u.have / u.need) * 100)}%`, background: color }} />
-              </div>
-            </li>
-          );
-        })}
-      </ul>
-    </section>
-  );
-}
 
 export function LevelUpScreen({ look, outfit, level, xp, toNext, onClose }: { look: AvatarLook; outfit: Parameters<typeof avatarIcon>[1]; level: number; xp: number; toNext: number; onClose: () => void }) {
   const rewards = levelRewards(level);
