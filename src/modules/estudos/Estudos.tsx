@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { CardScreen, type CardDef } from '../../Cards';
 import type { ViewProps } from '../../App';
-import { cycleCounts, trackPath } from '../../estudos';
+import { cycleCounts, isHidden, trackPath } from '../../estudos';
 import { Icon, PageHeader, type IconName } from '../../ui';
 import { formatDateTime } from '../../utils';
 import { AreaPage, BibliotecaPage, NivelPage, TemaPage, TrilhaPage } from './Biblioteca';
@@ -9,7 +9,8 @@ import { NotebookPage, NotebooksPage } from './Notebooks';
 import { FontesPage } from './Fontes';
 import { MapaPage, MapasPage } from './Mapas';
 import { CreateMenu, DualProgress, PackSheet, useCreate, useStudy } from './shared';
-import { CourseCta, ImportCoursePage, ManageCoursesPage } from './Cursos';
+import { CourseCta, ImportCoursePage } from './Cursos';
+import { TutorialCard, TutorialLink } from './Tutorial';
 import { cleanAddress } from '../../router';
 
 /** Trilhas sugeridas para começar (uma de cada área). */
@@ -68,8 +69,8 @@ export function Estudos({ route }: ViewProps) {
       fab = false;
       break;
     case 'cursos':
-      page = <ManageCoursesPage />;
-      fab = false;
+      // A antiga tela "Meus cursos" (M36) virou ícones na própria Biblioteca (M38).
+      page = <BibliotecaPage />;
       break;
     case 'importar':
       // Link direto para um pacote publicado com o app: #/estudos/importar/<nome>.
@@ -100,7 +101,7 @@ export function Estudos({ route }: ViewProps) {
 function Home() {
   const { study, lib } = useStudy();
   const visibleAreas = lib.areas.filter((x) => !study.archived.includes(x.id));
-  const trackCount = lib.tracks.filter((t) => !study.archived.includes(t.areaId)).length;
+  const trackCount = lib.tracks.filter((t) => !isHidden(study.archived, t.areaId, t.id)).length;
   const active = study.cycles.filter((c) => !c.finishedAt);
   const lastNb = [...study.notebooks].sort((x, y) => y.updatedAt.localeCompare(x.updatedAt))[0];
   const firstTime = study.cycles.length === 0 && study.notebooks.length === 0;
@@ -147,6 +148,7 @@ function Home() {
         </div>
       </div>
     ) },
+    { id: 'tutorial', label: 'Como usar Estudos', node: <TutorialCard /> },
     { id: 'agora', label: 'Estudando agora', node: (
       <section className="card">
         <div className="card-head">
@@ -199,28 +201,6 @@ function Home() {
         </a>
     ) },
     { id: 'importar', label: 'Importar um curso', node: <CourseCta /> },
-    { id: 'como', label: 'Como funciona', node: firstTime && (
-          <section className="card">
-            <div className="card-head">
-              <h2>Como funciona</h2>
-            </div>
-            <ol className="st-how">
-              <li>
-                <b>Explore a Biblioteca.</b> Áreas, temas e trilhas são roteiros de referência, nunca obrigatórios.
-              </li>
-              <li>
-                <b>Monte um ciclo.</b> Marque só os tópicos que quer estudar agora e escolha a ordem.
-              </li>
-              <li>
-                <b>Anote num notebook.</b> Anotações, vocabulário, links e vídeos de cada assunto.
-              </li>
-              <li>
-                <b>Guarde fontes e mapas.</b> Uma fonte pode servir a vários estudos.
-              </li>
-            </ol>
-            <p className="muted small">Também dá para começar direto por um notebook, sem trilha nenhuma.</p>
-          </section>
-    ) },
     { id: 'sugestoes', label: 'Sugestões para começar', node: firstTime && (
           <section className="card">
             <div className="card-head">
@@ -228,7 +208,7 @@ function Home() {
             </div>
             <ul className="list">
               {START.map((id) => lib.track(id))
-                .filter((t): t is NonNullable<typeof t> => !!t && !study.archived.includes(t.areaId))
+                .filter((t): t is NonNullable<typeof t> => !!t && !isHidden(study.archived, t.areaId, t.id))
                 .map((t) => (
                   <li key={t.id}>
                     <a className="row" href={`#/estudos/trilha/${t.id}`}>
@@ -251,6 +231,7 @@ function Home() {
     <>
       <PageHeader title="Estudos" subtitle="Seu espaço para explorar, planejar e guardar o que aprende." />
       <CardScreen screen="estudos" cards={cards} />
+      <TutorialLink />
     </>
   );
 }

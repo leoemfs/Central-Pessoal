@@ -3,7 +3,7 @@ import { usePagePath, usePageCrumbs } from '../../pageTitle';
 import { useStore } from '../../store';
 import { go } from '../../router';
 import type { SourceKind, StudyData, StudyNotebook, StudySource, StudyStatus } from '../../types';
-import { library, newMap, newNotebook, SOURCE_KINDS, sourceKind, STATUS_LABEL, touch, trackPath, type Library, type TrackView } from '../../estudos';
+import { isHidden, library, newMap, newNotebook, SOURCE_KINDS, sourceKind, STATUS_LABEL, touch, trackPath, type Library, type TrackView } from '../../estudos';
 import { Field, Icon, MultiChips, notify, Pill, Sheet, type IconName } from '../../ui';
 import { fromBranches } from '../../mapas';
 import { uid } from '../../utils';
@@ -125,7 +125,7 @@ export function TrackSelect({ lib, value, onChange, archived }: { lib: Library; 
       {lib.areas
         .filter((a) => !archived.includes(a.id))
         .map((a) => {
-          const trs = lib.tracks.filter((t) => t.areaId === a.id);
+          const trs = lib.tracks.filter((t) => t.areaId === a.id && !isHidden(archived, a.id, t.id));
           if (!trs.length) return null;
           return (
             <optgroup key={a.id} label={a.name}>
@@ -379,7 +379,7 @@ export function AreasSheet({ onClose, areaId }: { onClose: () => void; areaId?: 
 export function TrackSheet({ onClose, themeId, trackId }: { onClose: () => void; themeId?: string; trackId?: string }) {
   const { study, lib, set } = useStudy();
   const mine = trackId ? study.tracks.find((t) => t.id === trackId) : undefined;
-  const themes = lib.areas.filter((a) => !study.archived.includes(a.id)).flatMap((a) => a.themes.map((t) => ({ id: t.id, label: `${a.name} › ${t.name}` })));
+  const themes = lib.areas.filter((a) => !study.archived.includes(a.id)).flatMap((a) => a.themes.filter((t) => !isHidden(study.archived, a.id, t.id)).map((t) => ({ id: t.id, label: `${a.name} › ${t.name}` })));
   const [theme, setTheme] = useState(mine?.themeId ?? themeId ?? themes[0]?.id ?? '');
   const [name, setName] = useState(mine?.name ?? '');
   const [desc, setDesc] = useState(mine?.desc ?? '');

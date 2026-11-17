@@ -7,7 +7,7 @@
 1. Uma área clara **"Deseja importar um curso?"** em Estudos.
 2. Um **prompt padrão** para a pessoa colar numa IA (Claude, ChatGPT, Gemini…). A IA devolve o curso pronto: área, temas, trilhas, tópicos com texto, notebook com páginas e subpáginas, fontes (links) e mapas mentais.
 3. A pessoa **cola a resposta** da IA no app e importa.
-4. Na Biblioteca, **"Gerenciar cursos"** para ver e excluir cursos importados.
+4. Na Biblioteca, cada curso importado tem os ícones de **arquivar** e **excluir** na própria linha (M38, v0.124; antes era "Gerenciar cursos").
 5. Anotar para depois: **exportar o curso em PDF**, com as trilhas e o que a pessoa escreveu nos notebooks (M37).
 
 ## O que o importador já aceita (requisitos de entrada)
@@ -185,3 +185,9 @@ REGRAS:
 - Gerar um PDF com: capa (nome do curso e data), sumário, cada trilha com seus tópicos e situação (estudado ou não) e **o que a pessoa escreveu** nas páginas e subpáginas do notebook (com a formatação do editor), mais as fontes no fim.
 - Recomendação técnica: montar uma página de impressão no próprio app e usar "Imprimir › Salvar como PDF" do celular ou computador. Funciona sem biblioteca nova e mantém a formatação. Mapas entram como desenho.
 - Tamanho estimado: M. Depende do M36 (registro dos cursos).
+
+## M38 (v0.124): ações no próprio curso
+- Saíram o botão "Gerenciar (n)" e a tela "Meus cursos" (`#/estudos/cursos` agora abre a Biblioteca).
+- Biblioteca: "Meus cursos e áreas" (cursos importados e áreas da pessoa) · "Referência" (áreas do app) · "Arquivados". Cada linha: tocar entra; ícone arquivar/trazer de volta; lixeira (não aparece nas áreas do app).
+- Arquivar um curso guarda `pk-<curso>` em `archived`: os temas e trilhas dele somem das listas (`isHidden` em `estudos.ts`).
+- Excluir área, tema ou trilha da pessoa: `removeMine` em `curso.ts` (saem temas, trilhas e ciclos; notebooks ligados ficam ou vão junto, com mapas; fontes ficam). Lixeira também nos temas e trilhas da pessoa, dentro da área e do tema.
