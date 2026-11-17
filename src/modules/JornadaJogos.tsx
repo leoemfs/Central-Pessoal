@@ -8,7 +8,8 @@ import { useStore } from '../store';
 import { todayISO } from '../utils';
 import { Fullscreen, notify } from '../ui';
 import { recordSession } from '../practices';
-import { FICHA_ICON, petIcon } from '../jornada/catalog';
+import { FICHA_ICON, ITEMS, itemById, itemIcon, petIcon } from '../jornada/catalog';
+import { sprite } from '../jornada/art';
 import { BichinhoCard, BichinhoTelaCheia } from './JornadaBichinho';
 import { DAILY_MINUTES, fichas, finishGame, GAMES, minutesLeft, type GameId } from '../jornada/games';
 
@@ -27,20 +28,19 @@ export function Fliperama() {
     started.current = Date.now();
     setPlaying(g);
   };
-  const done = (game: GameId, score: number, extra?: () => void) => {
+  const done = (game: GameId, score: number, marks: Record<string, number> = {}) => {
     // Tempo jogado desde o início desta partida (conta para os 30 minutos do dia).
     const secs = (Date.now() - started.current) / 1000;
     started.current = Date.now();
     // O resultado mostrado vem do estado de agora; a gravação refaz a conta sobre o estado mais novo.
-    const now = finishGame(state, game, score, secs, todayISO());
+    const now = finishGame(state, game, score, secs, todayISO(), marks);
     const msg = { fichas: now.fichas, record: now.record };
     update((d) => {
-      const r = finishGame(d.journey, game, score, secs, todayISO());
+      const r = finishGame(d.journey, game, score, secs, todayISO(), marks);
       let next = { ...d, journey: r.state };
       if (game === 'respira' && score > 0) next = recordSession({ type: 'respiracao', sub: '478', title: 'Respira com o pet (4-7-8)', minutes: 1 })(next);
       return next;
     });
-    extra?.();
     return msg;
   };
   const petId = state.equipped.pet ?? 'gato';
@@ -69,7 +69,7 @@ export function Fliperama() {
         {GAMES.map((g) => (
           <button key={g.id} type="button" className={`jn-game${g.ready ? '' : ' locked'}`} onClick={() => (g.ready ? play(g.id) : notify(`${g.name}: em breve`, g.text))}>
             <span className={`jn-game-art ${g.id}`}>
-              <img alt="" src={g.id === 'corrida' || g.id === 'respira' ? pet : petIcon('coelho')} />
+              <img alt="" src={g.id === 'memoria' ? itemIcon(itemById('espada')!) : g.id === 'pescaria' ? fishIcon('raro') : pet} />
             </span>
             <strong>{g.name}</strong>
             <span className="muted small">{g.text}</span>
@@ -80,6 +80,8 @@ export function Fliperama() {
         ))}
       </div>
       {playing === 'corrida' && <Corrida pet={pet} record={state.games.records.corrida ?? 0} onFinish={(s) => done('corrida', s)} onClose={() => setPlaying(null)} />}
+      {playing === 'memoria' && <Memoria owned={state.owned} record={state.games.records.memoria ?? 0} onFinish={(sc, marks) => done('memoria', sc, marks)} onClose={() => setPlaying(null)} />}
+      {playing === 'pescaria' && <Pescaria pet={pet} record={state.games.records.pescaria ?? 0} onFinish={(sc, marks) => done('pescaria', sc, marks)} onClose={() => setPlaying(null)} />}
       {playing === 'respira' && <Respira pet={pet} onFinish={(ok) => done('respira', ok ? (state.games.records.respira ?? 0) + 1 : 0)} onClose={() => setPlaying(null)} />}
     </>
   );
@@ -370,3 +372,264 @@ function Respira({ pet, onFinish, onClose }: { pet: string; onFinish: (ok: boole
   );
 }
 
+
+// ---------- Memória do Arsenal (N2.16b) ----------
+
+const MEM_SECONDS = 60;
+
+/** 8 itens para os pares: primeiro os seus, depois outros do Arsenal, embaralhados a cada partida. */
+function memoryDeck(owned: string[]): string[] {
+  const mine = ITEMS.filter((i) => owned.includes(i.id)).map((i) => i.id);
+  const rest = ITEMS.filter((i) => !owned.includes(i.id) && !i.campaign).map((i) => i.id);
+  const shuffle = <T,>(a: T[]) => a.map((x) => [Math.random(), x] as const).sort((p, q) => p[0] - q[0]).map((x) => x[1]);
+  const pick = [...shuffle(mine), ...shuffle(rest)].slice(0, 8);
+  return shuffle([...pick, ...pick]);
+}
+
+function Memoria({ owned, record, onFinish, onClose }: { owned: string[]; record: number; onFinish: (score: number, marks: Record<string, number>) => { fichas: number; record: boolean }; onClose: () => void }) {
+  const [deck, setDeck] = useState(() => memoryDeck(owned));
+  const [open, setOpen] = useState<number[]>([]);
+  const [found, setFound] = useState<number[]>([]);
+  const [phase, setPhase] = useState<'pronto' | 'jogando' | 'fim'>('pronto');
+  const [left, setLeft] = useState(MEM_SECONDS);
+  const [result, setResult] = useState<{ score: number; pairs: number; fichas: number; record: boolean } | null>(null);
+  const lock = useRef(false);
+  useEffect(() => {
+    if (phase !== 'jogando') return;
+    const t = window.setInterval(() => setLeft((x) => x - 1), 1000);
+    return () => window.clearInterval(t);
+  }, [phase]);
+  const finish = (pairs: number, secs: number) => {
+    const all = pairs === 8;
+    const score = pairs * 10 + (all ? secs : 0);
+    const r = onFinish(score, { memoria_pares: pairs, memoria_sobra: all ? secs : 0 });
+    setResult({ score, pairs, fichas: r.fichas, record: r.record });
+    setPhase('fim');
+  };
+  useEffect(() => {
+    if (phase === 'jogando' && left <= 0) finish(found.length / 2, 0);
+  }, [left]); // eslint-disable-line react-hooks/exhaustive-deps
+  const flip = (i: number) => {
+    if (phase !== 'jogando' || lock.current || open.includes(i) || found.includes(i)) return;
+    const now = [...open, i];
+    setOpen(now);
+    if (now.length < 2) return;
+    lock.current = true;
+    const [a, b] = now;
+    const match = deck[a] === deck[b];
+    window.setTimeout(
+      () => {
+        lock.current = false;
+        setOpen([]);
+        if (!match) return;
+        const f = [...found, a, b];
+        setFound(f);
+        if (f.length === deck.length) finish(8, left);
+      },
+      match ? 250 : reduced() ? 400 : 750,
+    );
+  };
+  const again = () => {
+    setDeck(memoryDeck(owned));
+    setOpen([]);
+    setFound([]);
+    setLeft(MEM_SECONDS);
+    setResult(null);
+    setPhase('pronto');
+  };
+  return (
+    <Fullscreen label="Memória do Arsenal" className="jn-game-fs jn-mem-fs" onClose={onClose}>
+      <div className="jn-game-top">
+        <button type="button" className="jn-fs-close" aria-label="Sair" onClick={onClose}>
+          ✕
+        </button>
+        <strong className="jn-px">MEMÓRIA</strong>
+        <span className="jn-px small">{phase === 'jogando' ? `${left} s · ${found.length / 2}/8` : `Recorde: ${record}`}</span>
+      </div>
+      <div className="jn-mem">
+        <div className="jn-mem-grid" role="group" aria-label="Cartas">
+          {deck.map((id, i) => {
+            const up = open.includes(i) || found.includes(i) || phase === 'fim';
+            const it = itemById(id)!;
+            return (
+              <button key={i} type="button" className={`jn-mem-card${up ? ' up' : ''}${found.includes(i) ? ' found' : ''}`} aria-label={up ? it.name : `Carta ${i + 1}`} onClick={() => flip(i)}>
+                <span className="back jn-px">?</span>
+                <span className="face">
+                  <img alt="" src={itemIcon(it)} />
+                </span>
+              </button>
+            );
+          })}
+        </div>
+        {phase === 'pronto' && (
+          <div className="jn-game-over">
+            <strong className="jn-px">MEMÓRIA DO ARSENAL</strong>
+            <span>Vire duas cartas por vez e ache os 8 pares de itens em {MEM_SECONDS} segundos. Cada par vale 10 pontos; terminar antes soma os segundos que sobraram.</span>
+            <div className="btn-row">
+              <button type="button" className="btn primary" onClick={() => setPhase('jogando')}>
+                Começar
+              </button>
+            </div>
+          </div>
+        )}
+        {phase === 'fim' && result && (
+          <Result
+            title={result.pairs === 8 ? 'TODOS OS PARES!' : 'O TEMPO ACABOU'}
+            lines={`${result.pairs} de 8 pares · ${result.score} pontos`}
+            fichas={result.fichas}
+            record={result.record}
+            onClose={onClose}
+            onAgain={again}
+          />
+        )}
+      </div>
+    </Fullscreen>
+  );
+}
+
+// ---------- Pescaria (N2.16b; peixes com o dobro de pixels) ----------
+
+const FISH = [
+  '..........OOOO..........', '......OOOOFFFFOO.....OO.', '....OOFFFFFFFFFFOO..OFFO', '..OOFFWOFFFFFFFFFFOOFFFO',
+  '..OFFFOOFFFFFFFFFFFFFFO.', '.OFFFFFFFFFFLLFFFFFFFFO.', '.OFFFFFFFFFLLLFFFFFOOFFO', '..OOFFFFFFFFFFFFFOO..OFO',
+  '....OOFFFFFFFFFOO.....OO', '......OOOOOOOOO.........',
+];
+const FISH_PAL = {
+  comum: { F: '#60a5fa', L: '#bfdbfe', W: '#ffffff' },
+  raro: { F: '#a855f7', L: '#e9d5ff', W: '#ffffff' },
+  dourado: { F: '#facc15', L: '#fef9c3', W: '#ffffff' },
+} as const;
+type FishKind = keyof typeof FISH_PAL;
+const FISH_POINTS: Record<FishKind, number> = { comum: 1, raro: 3, dourado: 6 };
+export const fishIcon = (k: FishKind) => sprite(FISH, FISH_PAL[k], 24);
+const FISH_SECONDS = 40;
+
+function Pescaria({ pet, record, onFinish, onClose }: { pet: string; record: number; onFinish: (score: number, marks: Record<string, number>) => { fichas: number; record: boolean }; onClose: () => void }) {
+  const [phase, setPhase] = useState<'pronto' | 'jogando' | 'fim'>('pronto');
+  const [left, setLeft] = useState(FISH_SECONDS);
+  const [points, setPoints] = useState(0);
+  const [golds, setGolds] = useState(0);
+  const [zone, setZone] = useState({ at: 40, w: 22 });
+  const [needle, setNeedle] = useState(0);
+  const [catchKind, setCatch] = useState<FishKind | 'escapou' | null>(null);
+  const [result, setResult] = useState<{ score: number; fichas: number; record: boolean } | null>(null);
+  const t0 = useRef(0);
+  const speed = useRef(70);
+  const paused = useRef(false);
+  useEffect(() => {
+    if (phase !== 'jogando') return;
+    const timer = window.setInterval(() => setLeft((x) => x - 1), 1000);
+    let raf = 0;
+    const step = (now: number) => {
+      if (!paused.current) {
+        if (!t0.current) t0.current = now;
+        const p = (((now - t0.current) / 1000) * speed.current) % 200;
+        setNeedle(p <= 100 ? p : 200 - p);
+      }
+      raf = requestAnimationFrame(step);
+    };
+    raf = requestAnimationFrame(step);
+    return () => {
+      window.clearInterval(timer);
+      cancelAnimationFrame(raf);
+    };
+  }, [phase]);
+  useEffect(() => {
+    if (phase === 'jogando' && left <= 0) {
+      const r = onFinish(points, { pescaria_dourado: golds });
+      setResult({ score: points, fichas: r.fichas, record: r.record });
+      setPhase('fim');
+    }
+  }, [left]); // eslint-disable-line react-hooks/exhaustive-deps
+  const newCast = () => {
+    const w = 14 + Math.random() * 14;
+    setZone({ at: 10 + Math.random() * (80 - w), w });
+    speed.current = 60 + Math.random() * 50;
+    t0.current = 0;
+    paused.current = false;
+    setCatch(null);
+  };
+  const pull = () => {
+    if (phase !== 'jogando' || paused.current) return;
+    paused.current = true;
+    const inZone = needle >= zone.at && needle <= zone.at + zone.w;
+    let k: FishKind | 'escapou' = 'escapou';
+    if (inZone) {
+      const center = Math.abs(needle - (zone.at + zone.w / 2)) <= zone.w * 0.12;
+      k = center ? 'dourado' : Math.random() < 0.3 ? 'raro' : 'comum';
+      setPoints((x) => x + FISH_POINTS[k as FishKind]);
+      if (k === 'dourado') setGolds((g) => g + 1);
+    }
+    setCatch(k);
+    window.setTimeout(newCast, reduced() ? 300 : 900);
+  };
+  const again = () => {
+    setLeft(FISH_SECONDS);
+    setPoints(0);
+    setGolds(0);
+    setResult(null);
+    setCatch(null);
+    paused.current = false;
+    t0.current = 0;
+    setPhase('pronto');
+  };
+  return (
+    <Fullscreen label="Pescaria" className="jn-game-fs jn-fish-fs" onClose={onClose}>
+      <div className="jn-game-top">
+        <button type="button" className="jn-fs-close" aria-label="Sair" onClick={onClose}>
+          ✕
+        </button>
+        <strong className="jn-px">PESCARIA</strong>
+        <span className="jn-px small">{phase === 'jogando' ? `${left} s · ${points} pts` : `Recorde: ${record}`}</span>
+      </div>
+      <button type="button" className="jn-fish-lake" aria-label="Puxar a linha" onClick={pull}>
+        <span className="jn-fish-sky" />
+        <span className="jn-fish-water" />
+        <span className="jn-fish-pier" aria-hidden="true" />
+        <img className="jn-fish-pet" alt="" src={pet} />
+        <span className="jn-fish-line" />
+        <span className={`jn-fish-bob${catchKind ? ' pulled' : ''}`} />
+        {catchKind && catchKind !== 'escapou' && <img className="jn-fish-catch" alt="" src={fishIcon(catchKind)} />}
+        {catchKind && (
+          <span className="jn-fish-msg jn-px">{catchKind === 'escapou' ? 'ESCAPOU!' : `+${FISH_POINTS[catchKind]} ${catchKind === 'dourado' ? 'DOURADO!' : catchKind === 'raro' ? 'RARO!' : ''}`}</span>
+        )}
+      </button>
+      <div className="jn-fish-panel">
+        <div className="jn-fish-meter" aria-hidden="true">
+          <i className="zone" style={{ left: `${zone.at}%`, width: `${zone.w}%` }} />
+          <i className="gold" style={{ left: `${zone.at + zone.w * 0.38}%`, width: `${zone.w * 0.24}%` }} />
+          <b style={{ left: `${needle}%` }} />
+        </div>
+        <button type="button" className="btn primary block" onClick={pull} disabled={phase !== 'jogando'}>
+          Puxar!
+        </button>
+        <span className="jn-fs-hint">Toque quando o ponteiro estiver no verde · no meio dourado, peixe dourado</span>
+      </div>
+      {phase === 'pronto' && (
+        <div className="jn-fish-over">
+        <div className="jn-game-over">
+          <strong className="jn-px">PESCARIA</strong>
+          <span>{FISH_SECONDS} segundos para pescar. Toque em Puxar quando o ponteiro passar pelo verde. Comum vale 1, raro 3 e dourado 6.</span>
+          <div className="btn-row">
+            <button
+              type="button"
+              className="btn primary"
+              onClick={() => {
+                newCast();
+                setPhase('jogando');
+              }}
+            >
+              Começar
+            </button>
+          </div>
+        </div>
+        </div>
+      )}
+      {phase === 'fim' && result && (
+        <div className="jn-fish-over">
+          <Result title="FIM DA PESCARIA" lines={`${result.score} pontos${golds ? ` · ${golds} dourado${golds > 1 ? 's' : ''}` : ''}`} fichas={result.fichas} record={result.record} onClose={onClose} onAgain={again} />
+        </div>
+      )}
+    </Fullscreen>
+  );
+}

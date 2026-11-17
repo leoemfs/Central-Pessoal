@@ -404,3 +404,16 @@ export function medalIcon(index: number, earned: boolean): string {
   const [r, m, d] = earned ? MEDAL_TONES[index % MEDAL_TONES.length] : ['#52525b', '#71717a', '#3f3f46'];
   return sprite(MEDAL, { R: r, M: m, W: '#ffffff', d }, 10);
 }
+
+// ---------- Troféu das conquistas dos jogos (N2.16b; arte nova com o dobro de pixels) ----------
+
+const TROPHY = [
+  '....OOOOOOOOOOOOOOOO....', 'OOOOYWWYYYYYYYYYYYDYOOOO', 'OYYOYWYYYYYYYYYYYYDYOYYO', 'OYOOYWYYYYYYYYYYYYDYOOYO',
+  'OYO.OYYYYYYYYYYYYYDO.OYO', 'OYO.OYYYYYYSYYYYYYDO.OYO', '.OYO.OYYYYSSSYYYYDO.OYO.', '..OYOOYYYYYSYYYYYDOOYO..',
+  '...OOOOYYYYYYYYYDOOOO...', '......OOYYYYYYYDOO......', '........OOYYYDOO........', '..........OYDO..........',
+  '..........OYDO..........', '.........OYYDDO.........', '......OOOOOOOOOOOO......', '.....OBBBBBBBBBBBBO.....',
+  '.....OBbbbbbbbbbbBO.....', '.....OOOOOOOOOOOOOO.....',
+];
+/** Troféu dourado (conquistado) ou cinza (ainda não). */
+export const trophyIcon = (earned: boolean) =>
+  sprite(TROPHY, earned ? { Y: '#facc15', W: '#fef9c3', D: '#a16207', S: '#ffffff', B: '#7c4a2d', b: '#5b3410' } : { Y: '#52525b', W: '#71717a', D: '#3f3f46', S: '#71717a', B: '#3f3f46', b: '#27272a' }, 24);
