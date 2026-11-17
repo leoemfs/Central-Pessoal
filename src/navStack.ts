@@ -52,3 +52,13 @@ export function replaceTop(stack: string[], to: string): string[] {
 export function backStack(stack: string[]): string[] {
   return stack.length <= 1 ? [ROOT] : stack.slice(0, -1);
 }
+
+/**
+ * E39: cada nível da trilha é uma entrada de verdade no histórico do navegador (criada no toque do usuário).
+ * Ao trocar de trilha: quantas entradas voltar (janelas abertas + níveis a menos) e quantas criar (níveis a mais).
+ */
+export function historyMoves(fromLen: number, toLen: number, overlays = 0): { back: number; push: number } {
+  const from = Math.max(1, fromLen);
+  const to = Math.max(1, toLen);
+  return { back: overlays + Math.max(0, from - to), push: Math.max(0, to - from) };
+}
