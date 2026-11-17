@@ -216,7 +216,7 @@
 ## Feito
 | Versão | O que entrou | PR |
 |---|---|---|
-| v0.127.1 | C18: no PDF, mapa largo vai girado na folha em pé (não some mais no celular) | PRNUM |
+| v0.127.1 | C18: no PDF, mapa largo vai girado na folha em pé (não some mais no celular) | #216 |
 | v0.127 | M37a: **exportar notebook ou curso em PDF**: botão na capa do notebook; capa (curso, nome, data), sumário numerado com situação, páginas e subpáginas com a formatação do editor, mapas em anexo (em pé ou deitados; mapa grande avisa e pode ser resumido ou ficar fora) e referências; "Salvar em PDF" pela tela de imprimir do aparelho | #214 |
 | v0.126.1 | C17: descrição das trilhas sem marcas de texto (##, **) e em no máximo 2 linhas; tocar num curso importado na Biblioteca abre a **tela do curso** (`#/estudos/curso/<id>`), só com os temas e trilhas dele e o botão do caderno | — |
 | v0.126 | M40: **coleções na Biblioteca**: grupos com nome que recolhem e expandem (cursos e áreas do mesmo assunto), Nova, ⋯ (renomear, pôr ou tirar itens, subir, descer, excluir), Organizar (ordem e mudar de coleção); cada item num lugar só; o resto continua em "Meus cursos e áreas" e "Referência"; excluir a coleção não apaga nada | #210 |
