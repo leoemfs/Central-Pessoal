@@ -13061,3 +13061,24 @@ body.no-glass .tabbar:not(.jn-gamebar) {
   /* Totalmente opaca: sem o desfoque, qualquer transparência deixa ver o conteúdo nítido por trás. */
   background: var(--surface);
 }
+
+/* ---------- E38: sem seleção de texto ao segurar o dedo (só no celular) ---------- */
+@media (hover: none) and (pointer: coarse) {
+  body {
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
+  }
+  input,
+  textarea,
+  [contenteditable],
+  [contenteditable] *,
+  .selectable,
+  .note-body,
+  .entry-content,
+  .st-topic-body {
+    -webkit-user-select: text;
+    user-select: text;
+    -webkit-touch-callout: default;
+  }
+}
