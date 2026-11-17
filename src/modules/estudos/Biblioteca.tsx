@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { go } from '../../router';
-import { addTopicsAsPages, isHidden, defaultCycleName, findSource, missingBefore, moveItem, newCycle, newNotebook, remainingTopics, topicState, touch, trackPath, trackProgress, type TrackView } from '../../estudos';
+import { addTopicsAsPages, isHidden, shortDesc, defaultCycleName, findSource, missingBefore, moveItem, newCycle, newNotebook, remainingTopics, topicState, touch, trackPath, trackProgress, type TrackView } from '../../estudos';
 import type { StudyCollection, StudySource } from '../../types';
 import { groupLibrary, moveCollection, moveItem as moveColItem, newCollection, placeItem, removeCollection, renameCollection, setItems, toggleCollection } from '../../colecoes';
 import { Empty, Field, Icon, notify, PageHeader, Sheet, type IconName } from '../../ui';
@@ -91,7 +91,7 @@ export function BibliotecaPage() {
   const courses: Item[] = listCourses(study).map((c) => {
     const key = `pk-${c.id}`;
     const themes = study.themes.filter((t) => t.id.startsWith(`${key}-t-`));
-    const href = lib.area(key) ? `#/estudos/area/${key}` : themes.length === 1 ? `#/estudos/tema/${themes[0].id}` : themes[0] ? `#/estudos/area/${themes[0].areaId}` : c.notebookId ? `#/estudos/notebook/${c.notebookId}` : null;
+    const href = themes.length ? `#/estudos/curso/${c.id}` : c.notebookId ? `#/estudos/notebook/${c.notebookId}` : null;
     const done = study.cycles.filter((x) => x.trackId.startsWith(`${key}-tr-`)).reduce((n, x) => n + x.topics.filter((i) => i.doneAt).length, 0);
     const meta = c.tracks
       ? ['Curso', plural(themes.length, 'tema', 'temas'), plural(c.tracks, 'trilha', 'trilhas'), plural(c.topics, 'tópico', 'tópicos'), done ? plural(done, 'estudado', 'estudados') : ''].filter(Boolean).join(' · ')
@@ -450,6 +450,36 @@ function ItemsSheet({ col, items, owner, onClose, onSave }: { col: StudyCollecti
 }
 
 
+/** #/estudos/curso/:id (C17): só os temas e trilhas de um curso importado, mesmo quando ele mora numa área do app. */
+export function CursoPage({ id }: { id: string }) {
+  const { study, lib } = useStudy();
+  const course = listCourses(study).find((c) => c.id === id);
+  const themes = study.themes
+    .filter((t) => t.id.startsWith(`pk-${id}-t-`))
+    .map((t) => lib.theme(t.id))
+    .filter((t): t is NonNullable<typeof t> => !!t);
+  if (!course || !themes.length) return <Missing what="Curso" />;
+  const area = lib.area(themes[0].areaId);
+  const meta = [area && !area.id.startsWith('pk-') ? `Curso em ${area.name}` : 'Curso importado', plural(course.tracks, 'trilha', 'trilhas'), plural(course.topics, 'tópico', 'tópicos'), course.parts > 1 ? `${course.parts} partes` : ''];
+  return (
+    <>
+      <Path items={[{ label: 'Biblioteca', to: 'estudos/biblioteca' }, { label: course.name }]} />
+      <PageHeader title={course.name} subtitle={meta.filter(Boolean).join(' · ')} />
+      {course.notebookId && (
+        <a className="btn soft block" href={`#/estudos/notebook/${course.notebookId}`}>
+          <Icon name="notebook" size={18} /> Abrir o caderno do curso
+        </a>
+      )}
+      {themes.map((t) => (
+        <div key={t.id} className="st-course-theme">
+          <h2 className="section-title">{t.name}</h2>
+          <TrackList tracks={t.tracks} bare />
+        </div>
+      ))}
+    </>
+  );
+}
+
 export function AreaPage({ id }: { id: string }) {
   const { study, lib } = useStudy();
   const [newTheme, setNewTheme] = useState(false);
@@ -561,7 +591,7 @@ export function NivelPage({ themeId, id }: { themeId: string; id: string }) {
   );
 }
 
-function TrackList({ tracks, title }: { tracks: TrackView[]; title?: string }) {
+function TrackList({ tracks, title, bare }: { tracks: TrackView[]; title?: string; bare?: boolean }) {
   const { study } = useStudy();
   const [doomed, setDoomed] = useState<Doomed | null>(null);
   if (!tracks.length)
@@ -577,9 +607,11 @@ function TrackList({ tracks, title }: { tracks: TrackView[]; title?: string }) {
           <h2>{title}</h2>
         </div>
       )}
-      <p className="muted small" style={{ marginTop: 0 }}>
-        Trilhas são roteiros de referência. Você escolhe só os tópicos que quiser para montar um ciclo.
-      </p>
+      {!bare && (
+        <p className="muted small" style={{ marginTop: 0 }}>
+          Trilhas são roteiros de referência. Você escolhe só os tópicos que quiser para montar um ciclo.
+        </p>
+      )}
       <ul className="list">
         {tracks.map((t) => {
           const p = trackProgress(study.cycles, t);
@@ -591,8 +623,8 @@ function TrackList({ tracks, title }: { tracks: TrackView[]; title?: string }) {
                 </span>
                 <div className="row-body">
                   <span className="row-title">{t.name}</span>
-                  <span className="row-meta">
-                    {t.desc || plural(t.topics.length, 'tópico', 'tópicos')}
+                  <span className="row-meta st-clamp2">
+                    {shortDesc(t.desc) || plural(t.topics.length, 'tópico', 'tópicos')}
                     {t.mine && ' · sua'}
                   </span>
                 </div>
@@ -631,7 +663,7 @@ export function TrilhaPage({ id }: { id: string }) {
   return (
     <>
       <Path items={[...trackCrumbs(lib, tr), { label: tr.name }]} />
-      <PageHeader title={tr.name} subtitle={tr.desc || undefined} />
+      <PageHeader title={tr.name} subtitle={shortDesc(tr.desc) || undefined} />
       <div className="info-box">
         <Icon name="info" size={18} />
         <span>

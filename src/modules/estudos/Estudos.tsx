@@ -4,7 +4,7 @@ import type { ViewProps } from '../../App';
 import { cycleCounts, isHidden, trackPath } from '../../estudos';
 import { Icon, PageHeader, type IconName } from '../../ui';
 import { formatDateTime } from '../../utils';
-import { AreaPage, BibliotecaPage, NivelPage, TemaPage, TrilhaPage } from './Biblioteca';
+import { AreaPage, BibliotecaPage, CursoPage, NivelPage, TemaPage, TrilhaPage } from './Biblioteca';
 import { NotebookPage, NotebooksPage } from './Notebooks';
 import { FontesPage } from './Fontes';
 import { MapaPage, MapasPage } from './Mapas';
@@ -18,7 +18,7 @@ const START = ['en-a1-contatos', 'ia-prompts', 'prod-semana', 'car-cv', 'dev-log
 
 /**
  * Estudos. Endereços:
- * #/estudos · /biblioteca · /area/:id · /tema/:id · /nivel/:tema/:id · /trilha/:id
+ * #/estudos · /biblioteca · /curso/:id · /area/:id · /tema/:id · /nivel/:tema/:id · /trilha/:id
  * /notebooks · /notebook/:id[/:assunto] · /fontes · /mapas · /mapa/:id
  * Ciclos e Roadmaps têm telas próprias (#/ciclos, #/roadmaps), na barra de baixo.
  */
@@ -39,6 +39,9 @@ export function Estudos({ route }: ViewProps) {
       break;
     case 'tema':
       page = <TemaPage key={k} id={a} />;
+      break;
+    case 'curso':
+      page = <CursoPage key={k} id={a} />;
       break;
     case 'nivel':
       page = <NivelPage key={k} themeId={a} id={b} />;
