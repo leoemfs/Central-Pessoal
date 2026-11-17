@@ -191,3 +191,20 @@ REGRAS:
 - Biblioteca: "Meus cursos e áreas" (cursos importados e áreas da pessoa) · "Referência" (áreas do app) · "Arquivados". Cada linha: tocar entra; ícone arquivar/trazer de volta; lixeira (não aparece nas áreas do app).
 - Arquivar um curso guarda `pk-<curso>` em `archived`: os temas e trilhas dele somem das listas (`isHidden` em `estudos.ts`).
 - Excluir área, tema ou trilha da pessoa: `removeMine` em `curso.ts` (saem temas, trilhas e ciclos; notebooks ligados ficam ou vão junto, com mapas; fontes ficam). Lixeira também nos temas e trilhas da pessoa, dentro da área e do tema.
+
+## Coleções na Biblioteca (M40, pronto na v0.126)
+Pedido: vários cursos são do mesmo assunto e deveriam ficar juntos na Biblioteca, em listas que recolhem e expandem e que a pessoa pode editar.
+- **Coleção** = um grupo com nome criado pela pessoa (ex.: "Desenvolvimento com IA"), que recolhe e expande. Dentro dela ficam áreas e cursos importados.
+- **Editar:** criar, renomear, mudar a ordem das coleções e dos itens, pôr e tirar itens, excluir a coleção. Excluir a coleção nunca apaga os cursos: eles voltam para as listas da Biblioteca.
+- **Cada coisa num lugar só:** um item fica em uma coleção por vez; o que não está em nenhuma continua nas listas da Biblioteca.
+- A coleção lembra se está aberta ou recolhida.
+- **Prévia (18/11):** https://claude.ai/artifact/LYbXyJApv1xnVPdJ5S7bSS
+
+### O que foi construído (v0.126)
+- Biblioteca: seção **Coleções** (Nova, Organizar) logo abaixo do cartão de importar, antes de "Meus cursos e áreas" e "Referência" (do M38). O que está numa coleção sai dessas listas (cada coisa num lugar só) e volta para elas quando sai da coleção ou a coleção é excluída.
+- Itens: as mesmas linhas da Biblioteca do M38: áreas (pelo id) e cursos importados (`pk-<id>`, inclusive os que ficam dentro de áreas do app, como Claude, GitHub e Central Pessoal). Dentro da coleção, cada linha mantém o toque para entrar e os ícones de arquivar e excluir.
+- Coleção recolhida mostra os nomes do que tem dentro; o estado aberto/recolhido fica guardado.
+- ⋯: renomear, pôr ou tirar itens (marcar um item de outra coleção mostra "Sai de…" e ele muda), subir, descer, excluir (os itens voltam para as listas).
+- Organizar: setas para a ordem das coleções e dos itens; a pasta muda o item de coleção, tira de todas ou cria uma coleção nova com ele.
+- Item arquivado some da coleção, mas volta para o mesmo lugar ao ser trazido de volta.
+- Dados em `study.collections` (padrão vazio em `normalize()`; item repetido fica só na primeira coleção). Regras em `src/colecoes.ts`, 3 testes em `src/colecoes.test.ts`.

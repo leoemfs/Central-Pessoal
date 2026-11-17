@@ -664,6 +664,17 @@ export interface StudyData {
   packs: StudyPackRecord[];
   /** Cartão "Como usar Estudos" arquivado (N11.5). O passo a passo continua no fim da tela. */
   tutorialOff: boolean;
+  /** Coleções da Biblioteca (M40): grupos que recolhem e expandem. */
+  collections: StudyCollection[];
+}
+
+export interface StudyCollection {
+  id: string;
+  name: string;
+  /** Aberta (expandida) ou recolhida. */
+  open: boolean;
+  /** Itens da Biblioteca, na ordem escolhida: id da área, ou `pk-<id>` de um curso importado. */
+  items: string[];
 }
 
 export interface StudyPackRecord {
