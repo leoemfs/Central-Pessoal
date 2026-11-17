@@ -47,6 +47,7 @@
 ## Caixa de entrada
 *Ideias e problemas ainda sem classificar. Uma linha cada, com a data.*
 
+- 17/11: App todo: **abas e chips num jeito só** (Leonardo: dois jeitos de navegação confundem). Proposta: uma barra só que rola para o lado, com a opção marcada em **verde** (também nas abas, que hoje marcam em cinza); poucas opções ocupam a largura; contagem em letra menor dentro da opção; filtros de liga/desliga ficam fora, como botão. Prévia: https://claude.ai/artifact/QoXTA6LGUwkw3W4isXb9Rs. Aguardando aprovação.
 - 17/11: Jornada: **armaduras mais legais** no futuro (Leonardo: "essas roupinhas estão muito caretas"). Ideia: roupas novas com formato próprio (capa, armadura com elmo combinando, manto longo, roupas de classe), não só cor e textura. Fazer depois do redesenho, com prévia.
 - 17/11: Jornada: **cena principal com o dobro de pixels** (prévia https://claude.ai/artifact/NFcp1wPNozPhtZ6xK91fjz). Leonardo: **o Início do app e a entrada da Jornada também precisam ser remodelados**, não só a cena. Os desenhos são os mesmos em todo lugar (`px.ts`), então redesenhar uma vez muda todas as telas; cada tela precisa de conferência. Partes propostas: 1) cenário e pet (M); 2) personagem e tudo o que vai no corpo (G); 3) ícones do Arsenal (M); conferir Início e entrada em cada parte. **Decidido (17/11): o redesenho vem ANTES de terminar a Jornada**, para ser o padrão das construções novas (sem construir e reconstruir). No Início e na entrada da Jornada muda **só a arte**, o jeito das telas fica como está.
 - 17/11: Jornada: **mais pixels nas artes existentes**. Dois jeitos: filtro automático (P, vale para tudo, sem detalhe novo) ou redesenhar com o dobro de pixels (G por partes: pets em lotes de 4, depois itens, casas e chefes, personagem e roupas por último). Recomendação: redesenhar os pets primeiro. **Leonardo gostou, mas fica para depois (17/11): por enquanto, as artes ficam como estão.** **Regra (17/11): toda arte nova já nasce com o dobro de pixels** (exceto o que vai no corpo do personagem); registrada no `CLAUDE.md`. Prévia: https://claude.ai/artifact/8ix2bMWBVxK4k5XVzNE5ic
@@ -348,6 +349,7 @@ Documentos sem código: Mapa dos módulos (08/11), módulos personalizáveis, pa
 ## Prévias visuais guardadas
 | Prévia | Link |
 |---|---|
+| App todo: abas e chips num jeito só (barra que rola, marcada em verde) × hoje (17/11) | https://claude.ai/artifact/QoXTA6LGUwkw3W4isXb9Rs |
 | Jornada: cena principal com o dobro de pixels (hoje × 24 pixels): personagem, casinha, árvore, lua, gatinho (17/11) | https://claude.ai/artifact/NFcp1wPNozPhtZ6xK91fjz |
 | Jornada: mais pixels (hoje × filtro automático × redesenhado), gatinho, cãozinho e baú (17/11) | https://claude.ai/artifact/8ix2bMWBVxK4k5XVzNE5ic |
 | App: seletores com muitas opções numa linha só, com rolagem para o lado (16/11) | https://claude.ai/artifact/7HWfnYAcgx9AN2MZcC1Xfb |
