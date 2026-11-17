@@ -9,6 +9,7 @@ import { NotebookPage, NotebooksPage } from './Notebooks';
 import { FontesPage } from './Fontes';
 import { MapaPage, MapasPage } from './Mapas';
 import { CreateMenu, DualProgress, PackSheet, useCreate, useStudy } from './shared';
+import { CourseCta, ImportCoursePage, ManageCoursesPage } from './Cursos';
 import { cleanAddress } from '../../router';
 
 /** Trilhas sugeridas para começar (uma de cada área). */
@@ -60,6 +61,14 @@ export function Estudos({ route }: ViewProps) {
     case 'mapa':
       page = <MapaPage key={a} id={a} />;
       // O mapa tem os próprios botões de criar ideias, logo abaixo do desenho.
+      fab = false;
+      break;
+    case 'importar-curso':
+      page = <ImportCoursePage />;
+      fab = false;
+      break;
+    case 'cursos':
+      page = <ManageCoursesPage />;
       fab = false;
       break;
     case 'importar':
@@ -189,6 +198,7 @@ function Home() {
           <Icon name="right" size={18} />
         </a>
     ) },
+    { id: 'importar', label: 'Importar um curso', node: <CourseCta /> },
     { id: 'como', label: 'Como funciona', node: firstTime && (
           <section className="card">
             <div className="card-head">

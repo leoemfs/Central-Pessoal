@@ -31,7 +31,8 @@ export interface StudyPack {
   temas: { nome: string; trilhas: { nome: string; descricao?: string; pagina?: string; topicos: PackTopic[] }[] }[];
   notebook?: { nome: string; descricao?: string };
   fontes?: { titulo: string; url: string; tipo?: SourceKind; nota?: string }[];
-  mapas?: { nome: string; raiz: PackNode }[];
+  /** `pagina`: nome de uma trilha ou tópico; o mapa aparece em "Mapas desta página". */
+  mapas?: { nome: string; raiz: PackNode; pagina?: string }[];
   /** Ciclos com todos os tópicos de uma trilha (pelo nome). */
   ciclos?: { nome: string; trilha: string }[];
 }
@@ -169,7 +170,7 @@ const toMapNode = (n: PackNode, id: string): MapNode => ({
 export function applyPack(study: StudyData, pack: StudyPack, now: string): PackResult {
   const pre = slug(pack.id);
   const added = { trilhas: 0, topicos: 0, paginas: 0, fontes: 0, mapas: 0, ciclos: 0 };
-  const s: StudyData = { ...study, areas: [...study.areas], themes: [...study.themes], tracks: [...study.tracks], sources: [...study.sources], maps: [...study.maps], cycles: [...study.cycles], notebooks: [...study.notebooks] };
+  const s: StudyData = { ...study, areas: [...study.areas], themes: [...study.themes], tracks: [...study.tracks], sources: [...study.sources], maps: [...study.maps], cycles: [...study.cycles], notebooks: [...study.notebooks], packs: [...(study.packs ?? [])] };
 
   const inCatalog = pack.area.catalogo && CATALOG.some((a) => a.id === pack.area.catalogo) ? pack.area.catalogo : null;
   const areaId = inCatalog ?? `pk-${pre}`;
@@ -252,7 +253,8 @@ export function applyPack(study: StudyData, pack: StudyPack, now: string): PackR
   for (const m of pack.mapas ?? []) {
     const id = `pk-${pre}-m-${slug(m.nome)}`;
     if (s.maps.some((x) => x.id === id)) continue;
-    const map: StudyMap = { id, name: m.nome.trim(), root: toMapNode(m.raiz, `${id}-n`), notebookId: nbId, pageId: null, createdAt: now, updatedAt: now };
+    const page = m.pagina ? nb.pages.find((x) => x.name.trim().toLowerCase() === m.pagina!.trim().toLowerCase()) : undefined;
+    const map: StudyMap = { id, name: m.nome.trim(), root: toMapNode(m.raiz, `${id}-n`), notebookId: nbId, pageId: page?.id ?? null, createdAt: now, updatedAt: now };
     s.maps.push(map);
     added.mapas++;
   }
@@ -274,6 +276,10 @@ export function applyPack(study: StudyData, pack: StudyPack, now: string): PackR
     });
     added.ciclos++;
   }
+
+  // Registro do curso (Gerenciar cursos). Cada importação conta como uma parte.
+  const rec = s.packs.find((x) => x.id === pre);
+  s.packs = rec ? s.packs.map((x) => (x.id === pre ? { ...x, name: pack.nome.trim(), parts: x.parts + 1 } : x)) : [...s.packs, { id: pre, name: pack.nome.trim(), importedAt: now, parts: 1 }];
 
   return { study: s, added, notebookId: nbId };
 }

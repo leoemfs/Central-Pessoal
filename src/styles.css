@@ -12910,3 +12910,87 @@ body.bar-labels.jn-tall {
     order: 2;
   }
 }
+
+/* M36: importar curso */
+.st-course-cta {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.st-course-cta-text {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+.st-course-cta-text h2 {
+  font-size: 1.05rem;
+  font-weight: 700;
+  margin: 0 0 2px;
+}
+.st-course-cta-text p {
+  margin: 0;
+}
+.st-course-cta .btn-row > * {
+  flex: 0 1 auto;
+}
+.st-step .card-head h2 {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.st-step-n {
+  flex: none;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: var(--accent-soft);
+  color: var(--accent-text);
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+.st-step-error {
+  border-color: var(--red);
+}
+.st-step-error .st-step-n {
+  background: var(--red-soft);
+  color: var(--red-text);
+}
+.st-prompt {
+  font-family: ui-monospace, 'SF Mono', 'Roboto Mono', Menlo, Consolas, monospace;
+  font-size: 0.78rem;
+  line-height: 1.45;
+}
+.st-course-tree {
+  margin: 0 0 12px;
+  padding-left: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 0.92rem;
+}
+.st-course-tree ul {
+  margin: 4px 0 0;
+  padding-left: 18px;
+}
+.st-choice {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.st-choice-opt {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  text-align: left;
+  padding: 12px 14px;
+  border-radius: var(--radius-md);
+  border: 1.5px solid var(--border);
+  background: var(--raised);
+  color: var(--text);
+}
+.st-choice-opt.on {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}

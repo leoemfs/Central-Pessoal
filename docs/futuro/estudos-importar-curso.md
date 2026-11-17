@@ -1,6 +1,6 @@
 # Estudos: importar um curso feito por IA (M36) e exportar em PDF (M37)
 
-> Situação: **especificado (17/11), prioridade alta** a pedido do Leonardo ("priorizar importação de cursos"). Aguardando o "pode fazer".
+> Situação: **M36 pronto na v0.122 (17/11)**; M37 (PDF) é ideia para depois.
 > Base que já existe: o importador de pacotes do **M31** (`src/studyPack.ts`, formato `central-pessoal/pacote-de-estudo`, v0.63), usado nos cursos M31, M32 e M33.
 
 ## O pedido
@@ -33,7 +33,17 @@
 - Uma fonte com o mesmo endereço de outra já guardada é reaproveitada.
 - O ciclo só é criado se ainda não houver ciclo daquela trilha.
 
-## O que falta construir (M36, tamanho M)
+## O que foi construído (v0.122, M36)
+- **Entrada:** cartão "Deseja importar um curso?" no Estudos (pelo lápis dá para mover ou ocultar) e na Biblioteca (com "Gerenciar (n)"). O + de Estudos › "Importar um curso" leva para a mesma tela. Tela em `#/estudos/importar-curso`.
+- **Passo 1:** tema, nível (iniciante, intermediário, avançado) e tamanho (curto, médio, completo) → **Copiar prompt** (e "Ver prompt", que mostra o texto para copiar à mão se o navegador não deixar).
+- **Passo 2:** **Escolher arquivo** (.md, .txt ou .json) ou **Colar o texto** (a resposta inteira da IA, até com as crases de bloco de código).
+- **Passo 3:** conferir (área, temas, trilhas e quantidades; avisa quando é um curso que já existe, ou seja, uma Parte 2) e importar. Com erro, explica e oferece **Copiar pedido de correção para a IA**.
+- **Meus cursos** (`#/estudos/cursos`): lista com trilhas, tópicos, páginas, mapas, data e partes; abrir o notebook; **Excluir** com duas opções: "Só o curso" (padrão; o notebook e as anotações ficam, só perdem a ligação com as trilhas) ou "Tudo, inclusive o notebook" (pede confirmação com o número de páginas; fontes usadas em outros notebooks ficam).
+- **Por dentro:** `src/curso.ts` (`mdCourseToPack`, `readCourse`, `coursePrompt`, `fixRequest`, `listCourses`, `removeCourse`), 7 testes em `src/curso.test.ts`. O `.md` vira o mesmo pacote do M31 (`applyPack`). Registro em `study.packs` (padrão vazio em `normalize()`); cursos importados antes aparecem pelo notebook `pk-<id>-nb`. `mapas[].pagina` liga o mapa a uma página. Exclusões entram no registro de sincronização como qualquer outra.
+- Linha "Antes:" do tópico é aceita e ignorada (as trilhas da pessoa não guardam recomendação).
+- O teste confere que o exemplo dentro do próprio prompt é um curso válido.
+
+## Plano original (M36)
 1. **"Deseja importar um curso?"**: cartão em Estudos (abaixo do bloco principal) e na Biblioteca. Abre a tela de importar, em 3 passos:
    1. **Copiar o prompt**: campo "Sobre o que é o curso?" (ex.: "Excel do básico ao avançado"), nível (iniciante, intermediário, avançado) e tamanho (curto, médio, completo). O app monta o prompt e mostra **Copiar**.
    2. **Colar a resposta**: caixa de texto grande. Aceita a resposta inteira da IA, mesmo com texto antes ou depois e com as crases de bloco de código: o app acha o JSON sozinho.
