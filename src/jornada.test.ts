@@ -582,3 +582,47 @@ test('N2.16b: Memória e Pescaria dão fichas; marcas extras e conquistas no Cod
   assert.equal(jogos.length, GAME_ACHIEVEMENTS.length);
   assert.equal(jogos.filter((e) => e.owned).length, 4);
 });
+
+test('N2.8a: efeitos dos místicos contam desde que o item foi vestido', async () => {
+  const { mysticExtras, wallet } = await import('./jornada/rules.ts');
+  // equip registra a data; vestir de novo o mesmo item não muda a data.
+  let st = { ...defaultJourneyState(), owned: [...defaultJourneyState().owned, 'cristal', 'coracao', 'aurora', 'estelar', 'olho', 'coroa'] };
+  st = equip(st, 'armadura', 'cristal', 1, '2026-11-01') as typeof st;
+  assert.equal(st.equippedAt.cristal, '2026-11-01');
+  st = equip(st, 'armadura', 'cristal', 1, '2026-11-05') as typeof st;
+  assert.equal(st.equippedAt.cristal, '2026-11-01');
+  assert.equal(normalizeJourney({ equippedAt: { x: 'lixo', cristal: '2026-11-01' } }).equippedAt.cristal, '2026-11-01');
+  assert.deepEqual(normalizeJourney({}).equippedAt, {});
+
+  // Armadura de cristal: um dia perdido por semana não quebra a sequência de rotina (bronze aos 7 dias).
+  const checks = days('2026-11-20', 8).filter((x) => x !== '2026-11-16');
+  const sem = withData({ habits: [habit({ id: 'a', checks })] });
+  const com = { ...sem, journey: st };
+  const bronze = (dd: typeof sem) => earnedChests(dd, TODAY, 1).filter((c) => c.kind === 'bronze' && !c.key.includes(':visita:') && !c.key.includes('caixinha')).length;
+  assert.equal(bronze(sem), 0, 'sem a armadura, o dia perdido quebra');
+  assert.equal(bronze(com), 1, 'com a armadura, a sequência segue');
+
+  // Coração: recaída depois de vestir não zera a contagem do baú de cristal.
+  const vicio = habit({ id: 'q', name: 'Doce', kind: 'abandonar', startDate: '2026-11-01', slips: ['2026-11-12'] });
+  const base = withData({ habits: [vicio] });
+  const cor = equip({ ...st }, 'colar', 'coracao', 1, '2026-11-02');
+  const cristais = (dd: typeof base) => earnedChests(dd, TODAY, 1).filter((c) => c.kind === 'cristal').map((c) => c.key.split(':').slice(2).join(':'));
+  assert.ok(!cristais(base).includes('2026-11-01:14'), 'sem o coração, a recaída zera');
+  assert.ok(cristais({ ...base, journey: cor as typeof st }).includes('2026-11-01:14'), 'com o coração, a contagem segue');
+
+  // Espada da aurora: baú prata extra por nível novo depois de vestir.
+  const sw = equip(st, 'arma', 'aurora', 1, TODAY) as typeof st;
+  const lv = (n: number) => earnedChests({ ...sem, journey: sw }, TODAY, n).filter((c) => c.key.startsWith('prata:aurora:')).length;
+  assert.ok(lv(5) >= 1, 'subiu de nível depois de vestir: baú extra');
+
+  // Coroa, Olho e Cajado estelar: cristais e ouro a mais na carteira.
+  const studies = habit({ id: 'e', name: 'Estudar', attrs: ['INT'], checks: ['2026-11-18', '2026-11-19', '2026-11-20'] });
+  const rev: JournalEntry = { id: 'r1', createdAt: '2026-11-19T20:00:00', title: 'Revisão', summary: '', content: 'x', tag: 'Revisão' } as JournalEntry;
+  const dd = withData({ habits: [studies], journal: [rev] });
+  let s2 = equip(st, 'arma', 'estelar', 1, '2026-11-18') as typeof st;
+  s2 = equip(s2, 'magico', 'olho', 1, '2026-11-18') as typeof st;
+  const mx = mysticExtras(dd, s2, TODAY);
+  assert.equal(mx.gold, 3, '+1 ouro por estudo');
+  assert.equal(mx.crystals, 1, '+1 cristal pela revisão');
+  assert.equal(wallet({ ...dd, journey: s2 }, s2, TODAY).crystalsEarned - wallet({ ...dd, journey: st }, st, TODAY).crystalsEarned, 1);
+});
