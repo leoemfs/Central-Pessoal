@@ -7,9 +7,10 @@ import type { AppData } from '../types.ts';
 import { ATTRIBUTES } from '../habits.ts';
 import { HOMES, ITEMS, PETS, RARITY, REGION_NAMES, type AttrCode, type Rarity, type Slot } from './catalog.ts';
 import { LORE } from './lore.ts';
+import { GAME_ACHIEVEMENTS } from './games.ts';
 import { availability, petGoals, placeAvailability, shopContext, titleProgress, attributes, CODEX_IDS, codexPct } from './rules.ts';
 
-export type CodexCat = Slot | 'pet' | 'casa' | 'titulo';
+export type CodexCat = Slot | 'pet' | 'casa' | 'titulo' | 'jogo';
 export const CODEX_CATS: { id: CodexCat; label: string }[] = [
   { id: 'pet', label: 'Pets' },
   { id: 'elmo', label: 'Elmos' },
@@ -21,6 +22,7 @@ export const CODEX_CATS: { id: CodexCat; label: string }[] = [
   { id: 'magico', label: 'Mágicos' },
   { id: 'casa', label: 'Casas' },
   { id: 'titulo', label: 'Títulos' },
+  { id: 'jogo', label: 'Jogos' },
 ];
 
 export interface CodexEntry {
@@ -90,6 +92,11 @@ export function codexEntries(d: AppData, today: string): CodexEntry[] {
   const g = d.journey.avatar?.gender ?? 'f';
   for (const t of titleProgress({ d, today, attrs: attributes(d, today) })) {
     out.push({ id: `titulo:${t.id}`, cat: 'titulo', name: t[g], rarity: t.need >= 100 ? 'epico' : t.need >= 30 ? 'raro' : 'comum', owned: t.earned, hint: t.earned ? 'Conquistado' : t.rule, lore: t.rule, have: Math.min(t.have, t.need), need: t.need });
+  }
+  // N2.16b: conquistas dos mini games.
+  for (const a of GAME_ACHIEVEMENTS) {
+    const have = a.have(state);
+    out.push({ id: `jogo:${a.id}`, cat: 'jogo', name: a.name, rarity: a.need >= 1000 || a.id === 'dourado' ? 'epico' : a.need >= 10 ? 'raro' : 'comum', owned: have >= a.need, hint: have >= a.need ? 'Conquistado' : a.rule, lore: a.rule, have: Math.min(have, a.need), need: a.need });
   }
   return out;
 }

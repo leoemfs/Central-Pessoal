@@ -641,7 +641,7 @@ A Jornada desbloqueia em 16/11. Até aqui existiam só as regras e as artes (pas
 | **N2.13** Tela principal completa (**feito, v0.81**) | sequência, baús prontos, seu dia em números, perto de desbloquear, festa ao subir de nível, como ganhar XP | M |
 | **N2.14** Entrada animada (**feito, v0.84**: opção B padrão) | portal em degraus ao entrar; as outras opções ficam para as regiões (N2.10c) | P |
 | **N2.15** Barra em duas fileiras e telas reorganizadas (**feito, v0.85**) | barra 5 + 5 (Jornada · Campanha · Arsenal · Baús · Ficha / Pet · Casa · Codex · Mini games · Loja); **Arsenal, Pet e Casa só com o que você tem** (o que acabou de ser liberado aparece com "Novo! Pegar"); **Loja** nova com tudo o que se compra com ouro, inclusive o que ainda não dá (apagado, com "faltam X de ouro"); Arsenal fica só para vestir | M |
-| **N2.16** Mini games (**N2.16a feito, v0.87**) | **N2.16a** Fliperama (partidas premiadas do dia, recordes) + **Corrida do pet** + **Respira com o pet** (pode contar como prática de Mente); **N2.16b** **Memória do Arsenal** + **Pescaria** + conquistas dos jogos no Codex | M + M |
+| **N2.16** Mini games (**N2.16a feito, v0.87; N2.16b feito, v0.107**: `Memoria` e `Pescaria` em `JornadaJogos.tsx`, `GAME_ACHIEVEMENTS` em `games.ts`, categoria Jogos no Codex) | **N2.16a** Fliperama (partidas premiadas do dia, recordes) + **Corrida do pet** + **Respira com o pet** (pode contar como prática de Mente); **N2.16b** **Memória do Arsenal** + **Pescaria** + conquistas dos jogos no Codex | M + M |
 
 
 ### B.15. Decisões de 16/11 e plano para terminar a Jornada

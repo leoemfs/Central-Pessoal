@@ -7,7 +7,7 @@ import { useState } from 'react';
 import { useStore } from '../store';
 import { todayISO } from '../utils';
 import { Sheet, Toggle } from '../ui';
-import { chestIcon, homeIcon, itemById, itemIcon, medalIcon, petIcon, PETS, RARITY } from '../jornada/catalog';
+import { chestIcon, homeIcon, itemById, itemIcon, medalIcon, petIcon, PETS, RARITY, trophyIcon } from '../jornada/catalog';
 import { TITLES } from '../jornada/rules';
 import { CODEX_CATS, codexEntries, codexSummary, type CodexCat, type CodexEntry } from '../jornada/codex';
 import { PET_SPRITES } from '../jornada/petsData';
@@ -18,6 +18,7 @@ const fmt = (n: number) => n.toLocaleString('pt-BR');
 function iconOf(e: CodexEntry, petStyle: Record<string, string>): string {
   if (e.cat === 'pet') return petIcon(e.id, petStyle[e.id]);
   if (e.cat === 'casa') return homeIcon(e.id, 'manha');
+  if (e.cat === 'jogo') return trophyIcon(e.owned);
   if (e.cat === 'titulo') return medalIcon(Math.max(0, TITLES.findIndex((t) => `titulo:${t.id}` === e.id)), e.owned);
   return itemIcon(itemById(e.id)!);
 }
@@ -132,7 +133,7 @@ function CodexDetail({ e, icon, onClose, onEdit }: { e: CodexEntry; icon: string
         {it?.effect && <p className="small">✦ {it.effect}</p>}
         <div className="jn-cx-how">
           <b>{e.owned ? 'Conquistado' : 'Como conquistar'}</b>
-          <span>{e.owned ? (e.cat === 'titulo' ? e.lore : 'Já é seu.') : e.hint}</span>
+          <span>{e.owned ? (e.cat === 'titulo' || e.cat === 'jogo' ? e.lore : 'Já é seu.') : e.hint}</span>
           {!e.owned && e.need ? (
             <span className="muted small tabular">
               {fmt(e.have ?? 0)} de {fmt(e.need)}

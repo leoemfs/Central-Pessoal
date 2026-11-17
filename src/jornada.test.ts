@@ -563,3 +563,22 @@ test('abrir todos: mesmo resultado que abrir um por um, sem abrir duas vezes', (
   assert.equal(again.records.length, 0);
   assert.equal(again.state, all.state);
 });
+
+test('N2.16b: Memória e Pescaria dão fichas; marcas extras e conquistas no Codex', async () => {
+  const { GAME_ACHIEVEMENTS, fichasFor } = await import('./jornada/games.ts');
+  assert.equal(fichasFor('memoria', 80 + 25), 5);
+  assert.equal(fichasFor('memoria', 30), 2);
+  assert.equal(fichasFor('pescaria', 12), 3);
+  let st = defaultJourneyState();
+  st = finishGame(st, 'memoria', 110, 40, '2026-11-17', { memoria_pares: 8, memoria_sobra: 30 }).state;
+  st = finishGame(st, 'pescaria', 11, 40, '2026-11-17', { pescaria_dourado: 1 }).state;
+  st = finishGame(st, 'pescaria', 4, 40, '2026-11-17', { pescaria_dourado: 0 }).state;
+  assert.equal(st.games.records.pescaria, 11, 'recorde é o melhor');
+  assert.equal(st.games.records.pescaria_dourado, 1, 'marca extra também guarda a melhor');
+  const done = GAME_ACHIEVEMENTS.filter((a) => a.have(st) >= a.need).map((a) => a.id);
+  assert.deepEqual(done.sort(), ['dourado', 'memoria30', 'memoria8', 'pesca10']);
+  const d = withData({ journey: st });
+  const jogos = codexEntries(d, '2026-11-17').filter((e) => e.cat === 'jogo');
+  assert.equal(jogos.length, GAME_ACHIEVEMENTS.length);
+  assert.equal(jogos.filter((e) => e.owned).length, 4);
+});
