@@ -9,7 +9,7 @@ import { go } from '../router';
 import { formatDMY, todayISO } from '../utils';
 import { Fullscreen, notify } from '../ui';
 import { ATTRIBUTES } from '../habits';
-import { chestIcon, COIN_ICON, RARITY, HOMES, homeIcon, itemById, itemIcon, medalIcon, PETS, petIcon } from '../jornada/catalog';
+import { chestIcon, COIN_ICON, RARITY, HOMES, homeIcon, itemById, itemIcon, medalIcon, PETS, petIcon, jarIcon, bossIcon } from '../jornada/catalog';
 import { journeyNews, newsDiff, showWeekSummary, weekSummary } from '../jornada/home';
 import { acquire, acquirePlace, equip, petGoals, shopContext, TITLES, type Chest } from '../jornada/rules';
 import { LORE } from '../jornada/lore';
@@ -19,7 +19,6 @@ import { campaign } from '../jornada/campaign';
 import { weekStart } from '../review';
 import { ChestOpen, CHEST_INFO } from './JornadaBaus';
 import { confetti } from './jornadaFx';
-import { PX } from '../jornada/px';
 import { balance } from '../boxes';
 
 const fmt = (n: number) => n.toLocaleString('pt-BR');
@@ -112,7 +111,7 @@ export function JornadaEventos() {
     const b = data.journey.camp.boss;
     if (!b || fled <= b.seen) return;
     const ch = camp.chapters[camp.current];
-    if (ch.boss) notify(`${ch.boss.name} fugiu`, 'Ele voltou com a vida cheia para uma nova tentativa. Nada do que você ganhou se perde.', { icon: PX.boss(ch.boss.id) });
+    if (ch.boss) notify(`${ch.boss.name} fugiu`, 'Ele voltou com a vida cheia para uma nova tentativa. Nada do que você ganhou se perde.', { icon: bossIcon(ch.boss.id) });
     update((d) => (d.journey.camp.boss ? { ...d, journey: { ...d.journey, camp: { ...d.journey.camp, boss: { ...d.journey.camp.boss, seen: fled } } } } : d));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fled]);
@@ -267,7 +266,7 @@ function BoxScreen({ ev, onClose }: { ev: { kind: 'meta' | 'realizado'; id: stri
     <Fullscreen label={meta ? 'Meta atingida' : 'Objetivo realizado'} className="jn-open-fs" onClose={onClose}>
       <div className="jn-open-center">
         <span className="jn-eyebrow jn-px">{meta ? 'META ATINGIDA!' : 'OBJETIVO REALIZADO!'}</span>
-        <img className="jn-title-medal" alt="" src={meta ? PX.jar(1) : medalIcon(tIdx, true)} />
+        <img className="jn-title-medal" alt="" src={meta ? jarIcon(1) : medalIcon(tIdx, true)} />
         <h2 className="jn-week-h">{meta ? b.name : `Você realizou: ${b.name}`}</h2>
         <p className="muted">
           {meta ? (
