@@ -6,6 +6,7 @@ import { grid, sprite, toSvg, type Grid, type Palette } from './art.ts';
 import { HAIRS, SKINS, SKY_PALETTES } from './artData.ts';
 import { PET_SPRITES } from './petsData.ts';
 import { PETS24 } from './pets24.ts';
+import { avatar24 } from './avatar24.ts';
 import { PX } from './px.ts';
 import { cabana24, casinha24, castelinho24, castelo24, moon24, sun24, torre24, tree24 } from './scene24.ts';
 
@@ -207,7 +208,7 @@ export interface Outfit {
 
 /** Avatar vestido (32×30), igual ao da prévia: arco com aljava, colar no pescoço, ombreiras, asas, elmo e arma. */
 export const avatarIcon = (look: AvatarLook, outfit: Outfit): string =>
-  PX.avatar({
+  toSvg(avatar24({
     genero: look.gender === 'm' ? 'homem' : 'mulher',
     pele: SKINS[look.skin] ? look.skin : 'media',
     cabelo: HAIRS[look.hair] ? look.hair : 'castanho',
@@ -216,7 +217,7 @@ export const avatarIcon = (look: AvatarLook, outfit: Outfit): string =>
     botas: outfit.botas || 'sapatos',
     arma: outfit.arma || null,
     colar: outfit.colar || null,
-  });
+  }), 2);
 
 // ---------- Baús, moeda e cristal (da prévia da Jornada) ----------
 

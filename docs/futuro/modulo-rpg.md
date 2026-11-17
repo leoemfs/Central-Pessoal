@@ -971,4 +971,5 @@ Antes de terminar a Jornada, para ser o padrão das construções novas. Só a a
 
 - **R1 (feito, v0.108):** `src/jornada/scene24.ts` com moradias, árvore, sol e lua. Cada desenho tem o dobro de largura e altura do antigo e sai com `toSvg(g, 2)` (mesmo tamanho na tela). Os desenhos de regiões do mapa da Campanha (`px.ts`) ficam para a R4.
 - **R2a (feito, v0.109):** `src/jornada/pets24.ts` (gato, cão, coelho, coruja); `petIcon` usa o desenho novo quando existe. **R2b (feito, v0.110):** beija-flor, esquilo, tartaruga, raposa. **R2c (feito, v0.111):** cavalo, lobo, sapinho, golem. **R2d (feito, v0.112):** fênix, dragão, grifo, unicórnio. **R2 concluída: os 16 pets.**
+- **R3a (feito, v0.113):** `src/jornada/avatar24.ts` (`avatar24`, 64×60 mostrado em 32×30): corpo dobrado com detalhe novo, mantendo as letras da paleta da roupa; o que falta redesenhar entra dobrado; `thin()` deixa o contorno com 1 pixel. Próximas: R3b roupas e botas; R3c elmos e armas.
 - R2: pets em lotes de 4. R3: personagem com roupas, botas, elmos e armas. R4: ícones do Arsenal, baús, chefes, NPCs e regiões.
