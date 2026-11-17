@@ -192,4 +192,4 @@ Pedido: vários cursos são do mesmo assunto e deveriam ficar juntos na Bibliote
 - **Editar:** criar, renomear, mudar a ordem das coleções e dos itens, pôr e tirar itens, excluir a coleção. Excluir a coleção nunca apaga os cursos: eles voltam para "Outras áreas".
 - **Cada coisa num lugar só:** um item fica em uma coleção por vez; o que não está em nenhuma aparece em "Outras áreas".
 - A coleção lembra se está aberta ou recolhida.
-- Prévia antes de construir.
+- **Prévia (18/11):** https://claude.ai/artifact/LYbXyJApv1xnVPdJ5S7bSS
