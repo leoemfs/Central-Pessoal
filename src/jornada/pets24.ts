@@ -93,4 +93,53 @@ export const PETS24: Record<string, Pet24> = {
     ]),
     pal: (p) => ({ C: p.C, K: p.K, W: p.W, E: p.E, H: '#ffffff', N: p.N, L: light(p.C, 0.25), M: dark(p.C, 0.4) }),
   },
+  cavalo: {
+    rows: [
+    '..........OO....................................', '.........OCCO...................................',
+    '.........OCCOO..................................', '.......OOOCcCHO.................................',
+    '......OCCCCCCHHO................................', '.....OCCCCCCCHHHO...............................',
+    '.....OCCCCCCCHHHHO..............................', '.....OCCCCCCCCHHHHO.............................',
+    '....OLLCCCCCCCCHHHHO............................', '...OLLCCCCCCCCCCHHHHO...........................',
+    '..OLLCWECCCCCCCCCHHHHOO.........................', '..OLCCEECCCCCCCCCCHHHHHO........................',
+    '.OLCCCCCCCCCCCCCCCCHHHHHO.......................', '..OCCCCCCCCCCCCCCCCCHHHHHO......................',
+    '.OMMMMMCCCCCCCCCCCCCCHHHHHO.....................', 'OMMMMMMMCCCOOCCCCCCCCCHHHHOOOOOOOOOO............',
+    'OMNNMMMMCCO..OCCCCCCCCCHHHOLLLLLLLLLOOOO...OOO..', 'OMMMMMMMOO....OCCCCCCCCCCCLLLLLLLLLLLLCCOOOHHHO.',
+    '.OMMMMMO.......OCCCCCCCCCCCCCCCCCCCCCCCCCCOHHHO.', '..OOOOO.........OCCCCCCCCCCCCCCCCCCCCCCCCCCHHHO.',
+    '.................OCCCCCCCCCCCCCCCCCCCCCCCCCCHHHO', '..................OCCCCCCCCCCCCCCCCCCCCCCCCCHHHO',
+    '..................OCCCCCCCCCCCCCCCCCCCCCCCCCHHHO', '..................OCCCCCCCCCCCCCCCCCCCCCCCCCOHHH',
+    '...................OCCCCCCCCCCCCCCCCCCCCCCCOOHHH', '..................OOOcccccccccccccccccccccOOOHHH',
+    '.................OCCCCccccccccccccccccccccccOOHH', '.................OCCCCccccOcccccccccCCCCccccOOHH',
+    '.................OCCCCccccOOOOOOOOOOCCCCccccOOHH', '.................OCCCCccccO........OCCCCccccOOHH',
+    '.................OCCCCccccO........OCCCCccccOOHH', '.................OCCCCccccO........OCCCCccccOOHH',
+    '.................OCCCCccccO........OCCCCccccOOHH', '.................OCCCCccccO........OCCCCccccO.OO',
+    '.................OKKKKKKKKO........OKKKKKKKKO...', '.................OKKKKKKKKO........OKKKKKKKKO...',
+    '..................OOOOOOOO..........OOOOOOOO....', '................................................',
+    ],
+    pal: (p) => ({ C: p.C, c: p.c, L: light(p.C, 0.25), H: p.H, M: p.M, N: p.N, E: p.E, W: '#ffffff', K: p.K }),
+  },
+  lobo: {
+    rows: mirror([
+      'OO..........', 'OKO.........', 'OKKO........', 'OKCKO..OOOOO', 'OKCCKOOCCCCC', 'OCCCCCCCCCCC', 'OCCLLCCCCCCC',
+      'OCCOOOCCCCCC', 'OCOEHEOCCCCC', 'OCOEEEOCCCWW', 'OWCOOOCCCWWW', 'OWWCCCCCWWWN', '.OWWWCCWWWWN', '..OWWWWWWWMM',
+      '...OOWWWWWWW', '...OCCCWWWWW', '..OCCCCCWWWC', '..OKKCCCCCCO', '..OKKKKO....', '..OOOOOO....',
+    ]),
+    pal: (p) => ({ C: p.C, K: p.K, W: p.W, E: p.E, H: '#ffffff', N: p.N, L: light(p.C, 0.25), M: dark(p.C, 0.45) }),
+  },
+  sapinho: {
+    rows: mirror([
+      '............', '..OOOO......', '.OWWWWO.....', 'OWWHEWO.....', 'OWWEEWOOOOOO', 'OGWWWWGGGGGG', 'OGGGGGGGGGGG',
+      'OGGLLGGGGGGG', 'OGGGGGGGGGGG', 'OGGOOOOOOOOO', 'OGGGGGGGGGGG', '.OGggggggggg', '..OGgggggggg', '.OGGGOgggggg',
+      'OGGGGGOGgggg', 'OGgGgGOOGGGO', 'OOOOOOO..OO.', '............',
+    ]),
+    pal: (p) => ({ G: p.G, g: p.g, L: light(p.G, 0.35), W: p.W, E: p.E, H: '#ffffff' }),
+  },
+  golem: {
+    rows: mirror([
+      '....OOOOOOOO', '...ORRRLRRRR', '...ORLLRRRRR', '...ORRRRRRRR', '...ORRRRRRRR', '...ORrEERRRR', '...ORrEERRRR',
+      '...ORRRRRRRR', '...OOMRRRRRR', '.OOOOMMOOOOO', 'ORRRROORRRRR', 'ORLRROORRLRR', 'ORRRROORRRRR', 'ORRrROORRRrR',
+      'ORRRRORRRRRR', 'ORrRRORRMRRR', 'ORRRROrRRRRr', 'OOOOOOORRRRR', '......ORrrRR', '......ORRRrr', '......ORROOO',
+      '......ORRO..', '.....ORRRO..', '.....OOOOO..',
+    ]),
+    pal: (p) => ({ R: p.R, r: p.r, L: light(p.R, 0.3), E: p.E, M: p.M }),
+  },
 };
