@@ -2,7 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { COURSE_END, coursePrompt, fixRequest, listCourses, mdCourseToPack, readCourse, mineReach, removeCourse, removeMine } from './curso.ts';
 import { applyPack, type StudyPack } from './studyPack.ts';
-import { docText, emptyStudy, isHidden, library, normalizeStudy } from './estudos.ts';
+import { docText, emptyStudy, isHidden, library, normalizeStudy, shortDesc } from './estudos.ts';
 
 const NOW = '2026-11-17T10:00:00.000Z';
 const md = `Aqui está o seu curso!
@@ -241,4 +241,10 @@ test('tutorial de Estudos: cartão aparece por padrão e o arquivado sobrevive a
   assert.equal(normalizeStudy({}).tutorialOff, false);
   assert.equal(normalizeStudy({ tutorialOff: true }).tutorialOff, true);
   assert.equal(emptyStudy().tutorialOff, false);
+});
+
+test('descrição curta de trilha: sem marcas de texto (C17)', () => {
+  assert.equal(shortDesc('## Sobre esta trilha\nO app por dentro: **para que serve** e `código`.\n> Próximas partes: Parte 2.'), 'O app por dentro: para que serve e código. Próximas partes: Parte 2.');
+  assert.equal(shortDesc('## Sobre esta trilha O app que você usa. Cada página tem **para que serve**, **onde ver**.'), 'O app que você usa. Cada página tem para que serve, onde ver.');
+  assert.equal(shortDesc('Frase simples.'), 'Frase simples.');
 });

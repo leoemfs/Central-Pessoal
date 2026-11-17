@@ -475,3 +475,21 @@ export function studyWeek(study: StudyData, start: string, last: string) {
  * `pk-<curso>` em `archived`, e tudo o que veio dele (temas `pk-<curso>-t-…`, trilhas `pk-<curso>-tr-…`) some das listas.
  */
 export const isHidden = (archived: string[], areaId: string, id: string): boolean => archived.includes(areaId) || archived.some((a) => a.startsWith('pk-') && id.startsWith(`${a}-`));
+
+/**
+ * Descrição curta de trilha para listas (C17): sem marcas de texto (##, **, >, `) e numa linha só.
+ * Corrige também descrições antigas de pacotes, que vinham com o texto de abertura inteiro.
+ */
+export function shortDesc(desc: string): string {
+  const lines = desc.split('\n').filter((l) => l.trim());
+  // Várias linhas: os títulos (##) saem. Uma linha só: sai o título do começo ("## Sobre esta trilha O app…").
+  const text = lines.length > 1 ? lines.filter((l) => !/^#{1,6}\s/.test(l.trim())).join(' ') : (lines[0] ?? '').replace(/^\s*#{1,6}\s+\S+(?:\s+[a-zà-ú]\S*)*\s+(?=[A-ZÀ-Ú])/, '');
+  return text
+    .replace(/\*\*([^*]+)\*\*/g, '$1')
+    .replace(/`([^`]+)`/g, '$1')
+    .replace(/(^|\s)>\s?/g, '$1')
+    .replace(/(^|\s)#{1,6}\s/g, '$1')
+    .replace(/\*\*/g, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
