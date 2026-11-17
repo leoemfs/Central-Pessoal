@@ -11525,6 +11525,39 @@ body.bar-labels.jn-tall {
   .toasts {
     right: calc(var(--quick-w) + 12px);
   }
+  /* E38: coluna mais larga, sem rolagem para o lado, e o + no meio do vão. */
+  :root {
+    --quick-w: 340px;
+    --gap-r: max(96px, calc((100vw - var(--sidebar-w) - var(--quick-w) - var(--mid-w)) / 2));
+  }
+  .main {
+    padding-right: var(--gap-r);
+  }
+  .tabbar.jn-gamebar,
+  .tabbar.jn-gamebar.jn-compact {
+    right: calc(var(--quick-w) + var(--gap-r));
+  }
+  .fab {
+    right: calc(var(--quick-w) + var(--gap-r) / 2 - 29px);
+  }
+  .quick-list {
+    overflow-x: hidden;
+  }
+  .quick-slot,
+  .quick-slot * {
+    min-width: 0;
+    max-width: 100%;
+  }
+  .quick-slot {
+    overflow-wrap: anywhere;
+  }
+  .quick-slot .row-title {
+    display: block;
+  }
+  .quick-slot .card-head {
+    flex-wrap: wrap;
+    gap: 4px 8px;
+  }
 }
 /* ---------- N2.17g1: fala de personagem em balão ---------- */
 .jn-dialog-shade {
