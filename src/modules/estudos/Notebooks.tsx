@@ -310,6 +310,9 @@ export function NotebookPage({ id, pageId, setExtra }: { id: string; pageId: str
           </a>
         </span>
       </div>
+      <a className="btn soft small st-export-btn" href={`#/estudos/exportar/${nb.id}`}>
+        <Icon name="download" size={16} /> Exportar em PDF
+      </a>
 
       <section className="card">
         <div className="card-head">

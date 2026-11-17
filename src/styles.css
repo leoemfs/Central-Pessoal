@@ -13280,3 +13280,341 @@ body.icons-flat .st-shortcut {
   gap: 10px;
   padding: 12px;
 }
+
+/* M37a: exportar notebook em PDF */
+.st-export-btn {
+  align-self: flex-start;
+}
+.st-export-form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.st-export-opts {
+  display: flex;
+  flex-direction: column;
+}
+.st-export-opt {
+  padding: 8px 0;
+  border-top: 1px solid var(--border);
+}
+.st-export-opt > span {
+  display: flex;
+  flex-direction: column;
+}
+.st-export-opt small {
+  font-size: 0.8rem;
+}
+.st-export-warn {
+  border-color: var(--orange);
+}
+.st-export-warn h2 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.st-export-map {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px 0;
+  border-top: 1px solid var(--border);
+}
+
+/* O documento: sempre papel branco, na fonte do app (tela e impressão). */
+.pr-doc {
+  --pr-ink: #1a1a1a;
+  --pr-soft: #5b6270;
+  --pr-line: #d9dce1;
+  --pr-accent: #15803d;
+  /* Para o desenho dos mapas no papel. */
+  --raised-2: #eceef1;
+  --text: #1a1a1a;
+  --accent: #16a34a;
+  --on-accent: #ffffff;
+  --surface: #ffffff;
+  color: var(--pr-ink);
+  background: #ffffff;
+  font-family: Roboto, Inter, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  font-size: 11pt;
+  line-height: 1.5;
+}
+.pr-doc h1,
+.pr-doc h2,
+.pr-doc h3,
+.pr-doc h4,
+.pr-doc h5,
+.pr-doc h6 {
+  color: var(--pr-ink);
+  line-height: 1.25;
+  margin: 1.1em 0 0.4em;
+  break-after: avoid;
+}
+.pr-doc h2 {
+  font-size: 18pt;
+}
+.pr-doc h3 {
+  font-size: 14pt;
+}
+.pr-doc h4 {
+  font-size: 12.5pt;
+}
+.pr-doc h5 {
+  font-size: 11.5pt;
+}
+.pr-doc h6 {
+  font-size: 11pt;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+.pr-doc p {
+  margin: 0.45em 0;
+}
+.pr-doc a {
+  color: #1d4ed8;
+  text-decoration: underline;
+  overflow-wrap: anywhere;
+}
+.pr-doc mark {
+  background: #fde68a;
+  color: inherit;
+  padding: 0 2px;
+}
+.pr-doc code {
+  font-family: ui-monospace, 'SF Mono', 'Roboto Mono', Menlo, Consolas, monospace;
+  font-size: 0.92em;
+  background: #f1f3f5;
+  border-radius: 4px;
+  padding: 0 4px;
+}
+.pr-doc pre {
+  background: #f6f7f9;
+  border: 1px solid var(--pr-line);
+  border-radius: 6px;
+  padding: 10px 12px;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  break-inside: avoid;
+}
+.pr-doc pre code {
+  background: none;
+  padding: 0;
+}
+.pr-doc blockquote {
+  margin: 0.6em 0;
+  padding: 2px 0 2px 12px;
+  border-left: 3px solid var(--pr-line);
+  color: var(--pr-soft);
+}
+.pr-doc hr {
+  border: none;
+  border-top: 1px solid var(--pr-line);
+  margin: 1em 0;
+}
+.pr-doc img {
+  max-width: 100%;
+  height: auto;
+  break-inside: avoid;
+}
+.pr-doc ul,
+.pr-doc ol {
+  padding-left: 1.4em;
+  margin: 0.4em 0;
+}
+.pr-doc li p {
+  margin: 0.1em 0;
+}
+.pr-doc .pr-tasks {
+  list-style: none;
+  padding-left: 0;
+}
+.pr-doc .pr-tasks li {
+  display: flex;
+  gap: 8px;
+}
+.pr-doc .pr-tasks li.done > div {
+  color: var(--pr-soft);
+  text-decoration: line-through;
+}
+.pr-doc .pr-details {
+  border-left: 3px solid var(--pr-accent);
+  padding-left: 10px;
+  margin: 0.6em 0;
+}
+.pr-doc .pr-summary {
+  font-weight: 700;
+}
+.pr-num {
+  color: var(--pr-accent);
+  font-variant-numeric: tabular-nums;
+  margin-right: 6px;
+}
+.pr-meta {
+  font-size: 9.5pt;
+  color: var(--pr-soft);
+}
+.pr-empty {
+  color: var(--pr-soft);
+  font-style: italic;
+}
+.pr-cover {
+  min-height: 250mm;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 8px;
+}
+.pr-cover-top {
+  font-size: 10pt;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--pr-accent);
+}
+.pr-doc .pr-cover h1 {
+  font-size: 30pt;
+  margin: 0;
+}
+.pr-cover-sub {
+  font-size: 16pt;
+  color: var(--pr-soft);
+}
+.pr-cover-desc {
+  font-size: 12pt;
+}
+.pr-cover-foot {
+  margin-top: 40mm;
+  padding-top: 12px;
+  border-top: 2px solid var(--pr-accent);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 11pt;
+}
+.pr-app {
+  color: var(--pr-soft);
+  font-size: 9pt;
+}
+.pr-toc {
+  break-before: page;
+}
+.pr-toc ol {
+  list-style: none;
+  padding: 0;
+}
+.pr-toc li {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  padding: 4px 0;
+  border-bottom: 1px dotted var(--pr-line);
+}
+.pr-toc li.d2 {
+  padding-left: 22px;
+  font-size: 10pt;
+}
+.pr-toc li.d1 {
+  font-weight: 600;
+}
+.pr-toc-title {
+  flex: 1;
+}
+.pr-status {
+  font-size: 8.5pt;
+  font-weight: 600;
+  color: var(--pr-soft);
+  white-space: nowrap;
+}
+.pr-status.feito {
+  color: var(--pr-accent);
+}
+.pr-status.andando {
+  color: #c2410c;
+}
+.pr-break {
+  break-before: page;
+}
+.pr-map h3 small {
+  font-weight: 400;
+  color: var(--pr-soft);
+  font-size: 10pt;
+}
+.pr-mapsvg {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: 230mm;
+}
+.pr-map.paisagem .pr-mapsvg {
+  max-height: 150mm;
+}
+.pr-refs li {
+  margin: 4px 0;
+}
+.pr-refs small {
+  color: var(--pr-soft);
+}
+
+/* Prévia na tela: folhas brancas. */
+.pr-preview {
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  border: 1px solid var(--border);
+}
+.pr-preview .pr-doc {
+  padding: 18px 16px;
+}
+.pr-preview .pr-cover {
+  min-height: 0;
+  padding: 24px 0;
+}
+.pr-preview .pr-cover-foot {
+  margin-top: 24px;
+}
+.pr-preview .pr-break,
+.pr-preview .pr-toc {
+  border-top: 6px solid var(--bg);
+  margin: 18px -16px 0;
+  padding: 14px 16px 0;
+}
+.pr-host {
+  display: none;
+}
+
+/* Na hora de imprimir: só o documento. */
+@page {
+  size: A4;
+  margin: 18mm 16mm 20mm;
+  @bottom-center {
+    content: counter(page) ' / ' counter(pages);
+    font-size: 9pt;
+    color: #777;
+  }
+}
+@page :first {
+  @bottom-center {
+    content: none;
+  }
+}
+@page paisagem {
+  size: A4 landscape;
+}
+@media print {
+  html:has(body.printing),
+  body.printing {
+    background: #ffffff !important;
+    color-scheme: light;
+  }
+  body.printing > *:not(.pr-host) {
+    display: none !important;
+  }
+  body.printing .pr-host {
+    display: block;
+  }
+  .pr-map.paisagem {
+    page: paisagem;
+  }
+  .pr-doc {
+    font-size: 11pt;
+  }
+}

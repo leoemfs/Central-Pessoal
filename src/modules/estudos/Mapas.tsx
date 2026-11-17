@@ -13,7 +13,7 @@ const plural = (n: number, one: string, many: string) => `${n} ${n === 1 ? one :
 // ---------- Desenho ----------
 
 /** As ideias e as ligações entre elas. Serve para o mapa aberto e para as miniaturas. */
-function MapShapes({ layout, selected, interactive, editing, editor }: { layout: MapLayout; selected?: string | null; interactive?: boolean; editing?: string | null; editor?: (n: LaidNode) => ReactNode }) {
+export function MapShapes({ layout, selected, interactive, editing, editor }: { layout: MapLayout; selected?: string | null; interactive?: boolean; editing?: string | null; editor?: (n: LaidNode) => ReactNode }) {
   const byId = new Map(layout.nodes.map((n) => [n.id, n]));
   return (
     <>
