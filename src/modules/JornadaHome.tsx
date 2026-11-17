@@ -17,7 +17,7 @@ import type { Item, Slot } from '../jornada/catalog';
 import { classOf, recentAttributes, sinceLastVisit, snapshot, TITLES, wallet, welcomed, welcomeState, type JourneyState, type SinceVisit } from '../jornada/rules';
 import { skyAt, starPositions } from '../jornada/sky';
 import { MissionsCard, WeekCard } from './JornadaMissoes';
-import { BoxCard, Notices, QuaseLa, Stats3 } from './JornadaTopo';
+import { BoxCard, HudTabs, Notices, QuaseLa, Stats3 } from './JornadaTopo';
 import { BausView } from './JornadaBaus';
 import { CampCard, CampanhaView } from './JornadaCampanha';
 import { go, useRoute } from '../router';
@@ -578,7 +578,7 @@ export function JornadaHome() {
             <img alt="" src={COIN_ICON} className="jn-inline-icon" /> {fmt(w.gold)}
           </span>
         </div>
-        <Segmented<Slot> label="Espaço" value={slot} onChange={setSlot} options={SLOTS.map((x) => ({ value: x, label: SLOT_NAMES[x] }))} />
+        <HudTabs><Segmented<Slot> label="Espaço" value={slot} onChange={setSlot} options={SLOTS.map((x) => ({ value: x, label: SLOT_NAMES[x] }))} /></HudTabs>
         <div className="jn-arsenal">
           {wardrobeItems(slot, state, shopContext(data, state, today)).map(({ item: it, isNew }) => {
             const on = Object.values(state.equipped).includes(it.id);
@@ -664,7 +664,7 @@ export function JornadaHome() {
 
 
       {tab === 'ficha' && (<>
-      <Segmented<FichaTab> label="Ficha" value={fichaTab} onChange={setFichaTab} options={[{ value: 'ficha', label: 'Ficha' }, { value: 'titulos', label: 'Títulos' }, { value: 'forja', label: 'Forja' }, { value: 'classes', label: 'Classes' }]} />
+      <HudTabs><Segmented<FichaTab> label="Ficha" value={fichaTab} onChange={setFichaTab} options={[{ value: 'ficha', label: 'Ficha' }, { value: 'titulos', label: 'Títulos' }, { value: 'forja', label: 'Forja' }, { value: 'classes', label: 'Classes' }]} /></HudTabs>
       {fichaTab === 'titulos' && <TitlesView gender={gk} />}
       {fichaTab === 'forja' && <ForgeView />}
       {fichaTab === 'classes' && <ClassesView gender={gk} />}

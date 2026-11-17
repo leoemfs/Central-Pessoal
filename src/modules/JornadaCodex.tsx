@@ -12,6 +12,7 @@ import { TITLES } from '../jornada/rules';
 import { CODEX_CATS, codexEntries, codexSummary, type CodexCat, type CodexEntry } from '../jornada/codex';
 import { PET_SPRITES } from '../jornada/petsData';
 import { PetEditor } from './JornadaPets';
+import { HudTabs } from './JornadaTopo';
 
 const fmt = (n: number) => n.toLocaleString('pt-BR');
 
@@ -53,6 +54,7 @@ export function CodexView() {
         </div>
         <p className="muted small">Tudo o que existe na Jornada. O que falta aparece em silhueta, com a dica de como conquistar. Ao descobrir 25%, 50% e 75% você ganha baús; com 100%, o título Lenda do Codex.</p>
       </section>
+      <HudTabs>
       <div className="jn-chipset jn-codex-cats" role="group" aria-label="Categoria do Codex">
         {CODEX_CATS.map((c) => {
           const l = all.filter((e) => e.cat === c.id);
@@ -63,6 +65,7 @@ export function CodexView() {
           );
         })}
       </div>
+      </HudTabs>
       <div className="jn-codex-filter">
         <span className="muted small">
           {CODEX_CATS.find((c) => c.id === cat)?.label} · {all.filter((e) => e.cat === cat && e.owned).length} de {all.filter((e) => e.cat === cat).length}

@@ -2,7 +2,8 @@
  * Jornada (N2.17b): faixa fixa do topo e peças da tela principal, como na "Prévia da Jornada"
  * (hud, avisos, três números e "Quase lá"). Tudo calculado a partir dos dados.
  */
-import { useState } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
+import { createPortal } from 'react-dom';
 import { useStore } from '../store';
 import { ChestCard, ChestOpen, OpenAll } from './JornadaBaus';
 import { go } from '../router';
@@ -17,6 +18,25 @@ import { acquire, acquirePlace, availability, type Chest, classOf, pendingChests
 import { starsTonight } from '../jornada/sky';
 
 const fmt = (n: number) => n.toLocaleString('pt-BR');
+
+/**
+ * Abas da tela (Ficha · Títulos · Forja · Classes, espaços do Arsenal, categorias do Codex) presas logo abaixo
+ * da faixa do topo: vão para o lugar reservado dentro do bloco preso (#jn-subtabs) e sobem e descem com ele.
+ */
+export function HudTabs({ children }: { children: ReactNode }) {
+  const [slot, setSlot] = useState<HTMLElement | null>(null);
+  useEffect(() => {
+    const el = document.getElementById('jn-subtabs');
+    setSlot(el);
+    // A faixa encolhe subindo (sem mudar de altura); as abas sobem junto, pela altura dela.
+    const hud = document.querySelector<HTMLElement>('.jn-hud');
+    if (!el || !hud || typeof ResizeObserver === 'undefined') return;
+    const ro = new ResizeObserver(() => el.style.setProperty('--jn-hud-h', `${hud.offsetHeight}px`));
+    ro.observe(hud);
+    return () => ro.disconnect();
+  }, []);
+  return slot ? createPortal(children, slot) : <>{children}</>;
+}
 
 /** Faixa presa no topo em todas as telas da Jornada: rosto, nome, LV · classe, 🔥, ouro, cristais e XP. */
 export function JornadaHud() {
