@@ -243,7 +243,7 @@ export function Ajustes({ route }: ViewProps) {
             <strong>Vidro fosco</strong>
             <span className="muted small">A barra de cima, o bloco preso no topo e a barra de favoritos deixam ver, embaçado, o que passa por trás. Desligado, ficam com fundo sólido.</span>
           </div>
-          <Toggle checked={data.settings.glass} onChange={(v) => setSetting({ glass: v })} label="Vidro fosco" />
+          <Toggle checked={data.settings.frostedGlass} onChange={(v) => setSetting({ frostedGlass: v })} label="Vidro fosco" />
         </div>
       </section>
       )}
