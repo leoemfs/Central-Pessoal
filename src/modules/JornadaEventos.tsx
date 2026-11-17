@@ -14,7 +14,7 @@ import { journeyNews, newsDiff, showWeekSummary, weekSummary } from '../jornada/
 import { acquire, acquirePlace, equip, petGoals, shopContext, TITLES, type Chest } from '../jornada/rules';
 import { LORE } from '../jornada/lore';
 import { PetEditor } from './JornadaPets';
-import { ChapterDone } from './JornadaCampanha';
+import { BossAppear, ChapterDone } from './JornadaCampanha';
 import { campaign } from '../jornada/campaign';
 import { weekStart } from '../review';
 import { ChestOpen, CHEST_INFO } from './JornadaBaus';
@@ -101,8 +101,21 @@ export function JornadaEventos() {
   }, [key]);
 
   // Campanha: região sem chefe com os objetivos cumpridos → tela de região concluída.
-  const campReady = campaign(data, data.journey, today).stage === 'pronto';
+  const camp = campaign(data, data.journey, today);
+  const campReady = camp.stage === 'pronto';
   const [campShown, setCampShown] = useState(false);
+  const bossSoon = camp.stage === 'aparece';
+  const [bossShown, setBossShown] = useState(false);
+  // Fugiu? Avisa uma vez por fuga (ele volta com a vida cheia; nada se perde).
+  const fled = camp.boss?.fled ?? 0;
+  useEffect(() => {
+    const b = data.journey.camp.boss;
+    if (!b || fled <= b.seen) return;
+    const ch = camp.chapters[camp.current];
+    if (ch.boss) notify(`${ch.boss.name} fugiu`, 'Ele voltou com a vida cheia para uma nova tentativa. Nada do que você ganhou se perde.', { icon: PX.boss(ch.boss.id) });
+    update((d) => (d.journey.camp.boss ? { ...d, journey: { ...d.journey, camp: { ...d.journey.camp, boss: { ...d.journey.camp.boss, seen: fled } } } } : d));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [fled]);
 
   const closeWeek = () => {
     setWeek(null);
@@ -113,11 +126,12 @@ export function JornadaEventos() {
     <>
       {petNew && !boxEv && <PetScreen id={petNew} onClose={() => setPetNew(null)} onEdit={(id) => { setPetNew(null); window.setTimeout(() => setPetEdit(id), 250); }} />}
       {petEdit && <PetEditor id={petEdit} onClose={() => setPetEdit(null)} />}
+      {bossSoon && ready && !bossShown && !boxEv && !petNew && !title && <BossAppear onClose={() => setBossShown(true)} />}
       {campReady && ready && !campShown && !boxEv && !petNew && !title && <ChapterDone onClose={() => setCampShown(true)} />}
       {boxEv && ready && <BoxScreen ev={boxEv} onClose={() => setBoxEv(null)} />}
       {title && !boxEv && !petNew && <TitleScreen id={title} onClose={() => setTitle(null)} />}
       {opening && <ChestOpen chest={opening} onClose={() => setOpening(null)} />}
-      {week && ready && !title && !boxEv && !(campReady && !campShown) && <WeekScreen w={week} pending={news.chests.length} onClose={closeWeek} />}
+      {week && ready && !title && !boxEv && !(campReady && !campShown) && !(bossSoon && !bossShown) && <WeekScreen w={week} pending={news.chests.length} onClose={closeWeek} />}
     </>
   );
 }

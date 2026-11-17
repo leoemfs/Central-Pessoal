@@ -12458,3 +12458,99 @@ body.bar-labels.jn-tall {
 .jn-vp-shoprow .poor {
   opacity: 0.5;
 }
+
+/* ---------- N2.10b: chefes da Campanha ---------- */
+.jn-bosscard {
+  border-color: rgb(239 68 68 / 0.5);
+  background: linear-gradient(160deg, rgb(127 29 29 / 0.4), var(--raised) 75%);
+}
+.jn-bosscard .jn-boss-img {
+  width: 60px;
+  image-rendering: pixelated;
+  animation: jn-boss-idle 1.6s ease-in-out infinite;
+}
+.jn-bosscard .jn-boss-img.hit {
+  animation: jn-boss-hit 0.45s ease;
+}
+@keyframes jn-boss-idle {
+  50% {
+    transform: translateY(-3px);
+  }
+}
+@keyframes jn-boss-hit {
+  20% {
+    transform: translateX(-6px) rotate(-6deg);
+    filter: brightness(2) saturate(0.5);
+  }
+  60% {
+    transform: translateX(5px) rotate(4deg);
+  }
+}
+.jn-boss-hp {
+  height: 10px;
+  border-radius: 999px;
+  background: rgb(0 0 0 / 0.4);
+  border: 1px solid rgb(239 68 68 / 0.5);
+  overflow: hidden;
+}
+.jn-boss-hp i {
+  display: block;
+  height: 100%;
+  background: linear-gradient(90deg, #b91c1c, #ef4444);
+  transition: width 0.4s ease;
+}
+.jn-boss-fs {
+  background: radial-gradient(100% 60% at 50% 35%, rgb(127 29 29 / 0.55), rgb(3 3 5 / 0.96) 70%), #050506;
+}
+.jn-boss-big {
+  width: 176px;
+  image-rendering: pixelated;
+  filter: drop-shadow(0 0 22px rgb(239 68 68 / 0.6));
+  animation: jn-boss-enter 0.9s cubic-bezier(0.3, 1.5, 0.5, 1) both, jn-boss-idle 1.6s ease-in-out 0.9s infinite;
+}
+@keyframes jn-boss-enter {
+  from {
+    transform: scale(0.2) translateY(60px);
+    opacity: 0;
+  }
+}
+.jn-boss-taunt {
+  margin: 0;
+  max-width: 300px;
+  font-style: italic;
+  color: #fecaca;
+}
+.jn-boss-rules {
+  width: 100%;
+  max-width: 340px;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+.jn-boss-rules div {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 10px 6px;
+  border-radius: 14px;
+  background: rgb(0 0 0 / 0.4);
+  border: 1px solid rgb(239 68 68 / 0.35);
+}
+.jn-boss-rules b {
+  font-size: 22px;
+  color: #fca5a5;
+}
+.jn-boss-rules span {
+  font-size: 11px;
+  color: var(--muted);
+}
+.jn-boss-down {
+  filter: grayscale(0.6);
+  transform: rotate(-12deg);
+}
+@media (prefers-reduced-motion: reduce) {
+  .jn-bosscard .jn-boss-img,
+  .jn-boss-big {
+    animation: none;
+  }
+}

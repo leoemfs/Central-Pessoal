@@ -11,7 +11,7 @@ import { todayISO } from '../utils';
 import { Fullscreen, Icon, notify } from '../ui';
 import { avatarIcon, chestIcon, homeIcon, itemById, itemIcon, medalIcon, npcIcon } from '../jornada/catalog';
 import { PX } from '../jornada/px';
-import { campaign, clearChapter, type Chapter } from '../jornada/campaign';
+import { bossDays, bossMax, campaign, clearChapter, startBoss, type Chapter } from '../jornada/campaign';
 import { TITLES } from '../jornada/rules';
 import { NpcDialog } from './JornadaFala';
 import { confetti } from './jornadaFx';
@@ -173,10 +173,18 @@ export function CampanhaView() {
           </ul>
           {ch.boss && (
             <div className="jn-cp-boss">
-              <img className={cleared ? undefined : 'silhouette'} alt="" src={PX.boss(ch.boss.id)} />
+              <img className={cleared || (current && v.stage === 'chefe') ? undefined : 'silhouette'} alt="" src={PX.boss(ch.boss.id)} />
               <div>
-                <b>{cleared ? ch.boss.name : 'Chefe: ???'}</b>
-                <span className="muted small">{cleared ? 'Vencido.' : current && v.stage === 'chefe' ? 'Objetivos cumpridos! O chefe chega na próxima versão da Campanha.' : 'Aparece quando os objetivos terminarem.'}</span>
+                <b>{cleared || (current && (v.stage === 'chefe' || v.stage === 'aparece')) ? ch.boss.name : 'Chefe: ???'}</b>
+                <span className="muted small">
+                  {cleared
+                    ? 'Vencido.'
+                    : current && v.stage === 'chefe' && v.boss
+                      ? `Lutando agora: ${v.boss.hp}/${v.boss.max} de vida · ${v.boss.daysLeft <= 1 ? 'último dia' : `${v.boss.daysLeft} dias`}${v.boss.fled ? ` · já fugiu ${v.boss.fled}×` : ''}.`
+                      : current && v.stage === 'aparece'
+                        ? 'Objetivos cumpridos! Ele aparece quando você abrir a Jornada.'
+                        : 'Aparece quando os objetivos terminarem.'}
+                </span>
               </div>
             </div>
           )}
@@ -196,6 +204,29 @@ export function CampCard() {
   const ch = v.chapters[v.current];
   const next = v.goals.find((g) => g.have < g.need);
   const done = v.goals.filter((g) => g.have >= g.need).length;
+  if (v.stage === 'chefe' && v.boss && ch.boss) {
+    const b = v.boss;
+    return (
+      <button type="button" className="card jn-campcard jn-bosscard" id="jn-bosscard" onClick={() => go('jornada/campanha')}>
+        <img className="jn-boss-img" alt={ch.boss.name} src={PX.boss(ch.boss.id)} />
+        <div>
+          <span className="jn-boxeye" style={{ color: '#fca5a5' }}>
+            Chefe · {ch.name}
+          </span>
+          <strong>{ch.boss.name}</strong>
+          <div className="jn-boss-hp" role="progressbar" aria-label="Vida do chefe" aria-valuemin={0} aria-valuemax={b.max} aria-valuenow={b.hp}>
+            <i style={{ width: `${(b.hp / b.max) * 100}%` }} />
+          </div>
+          <span className="small" style={{ color: '#fecaca' }}>
+            <b className="tabular">
+              {b.hp}/{b.max}
+            </b>{' '}
+            de vida · cada missão é um golpe · {b.daysLeft <= 1 ? 'último dia' : `${b.daysLeft} dias`}
+          </span>
+        </div>
+      </button>
+    );
+  }
   return (
     <button type="button" className="card jn-campcard" onClick={() => go('jornada/campanha')}>
       <img alt="" src={PX.region(ch.id)} />
@@ -204,7 +235,7 @@ export function CampCard() {
           Campanha · capítulo {v.current + 1} de {v.chapters.length}
         </span>
         <strong>{ch.name}</strong>
-        <span className="muted small">{v.done ? 'Campanha concluída!' : next ? `Próximo: ${next.title.charAt(0).toLowerCase()}${next.title.slice(1)} (${next.have}/${next.need})` : v.stage === 'chefe' ? 'Objetivos cumpridos! O chefe chega em breve.' : 'Pronto para concluir!'}</span>
+        <span className="muted small">{v.done ? 'Campanha concluída!' : next ? `Próximo: ${next.title.charAt(0).toLowerCase()}${next.title.slice(1)} (${next.have}/${next.need})` : v.stage === 'aparece' ? 'Objetivos cumpridos! Um chefe vai aparecer.' : 'Pronto para concluir!'}</span>
         <div className="jn-near-bar">
           <i style={{ width: `${(done / Math.max(1, v.goals.length)) * 100}%`, background: '#ef4444' }} />
         </div>
@@ -225,15 +256,16 @@ export function ChapterDone({ onClose }: { onClose: () => void }) {
       const vv = campaign(d, d.journey, todayISO());
       return { ...d, journey: clearChapter(d.journey, vv, todayISO()) };
     });
-    notify(`${ch.name} concluída!`, 'O baú da região já espera em Baús. A próxima região abriu no mapa.', { icon: chestIcon(ch.reward.chest, false) });
+    notify(`${ch.name} concluída!`, `O baú da região já espera em Baús${ch.reward.item ? ' e o item exclusivo está no Arsenal' : ''}. A próxima região abriu no mapa.`, { icon: chestIcon(ch.reward.chest, false) });
     onClose();
   };
   if (v.stage !== 'pronto') return null;
   return (
     <Fullscreen label="Região concluída" className="jn-open-fs" onClose={finish}>
       <div className="jn-open-center">
-        <span className="jn-eyebrow jn-px">REGIÃO CONCLUÍDA!</span>
-        <img className="jn-title-medal" alt="" src={PX.region(ch.id)} />
+        <span className="jn-eyebrow jn-px">{ch.boss ? 'VITÓRIA!' : 'REGIÃO CONCLUÍDA!'}</span>
+        <img className={`jn-title-medal${ch.boss ? ' jn-boss-down' : ''}`} alt="" src={ch.boss ? PX.boss(ch.boss.id) : PX.region(ch.id)} />
+        {ch.boss && <p className="muted">Você venceu {ch.boss.name}!</p>}
         <h2 className="jn-week-h">{ch.name}</h2>
         <div className="jn-npc">
           <img alt="" src={npcIcon(ch.npc)} />
@@ -247,6 +279,53 @@ export function ChapterDone({ onClose }: { onClose: () => void }) {
       <div className="jn-open-actions">
         <button type="button" className="btn primary block" onClick={finish}>
           Seguir viagem
+        </button>
+      </div>
+    </Fullscreen>
+  );
+}
+
+/** "Um chefe apareceu!": fala dele e as regras; Enfrentar começa a luta hoje. */
+export function BossAppear({ onClose }: { onClose: () => void }) {
+  const { data, update } = useStore();
+  const today = todayISO();
+  const v = campaign(data, data.journey, today);
+  const ch = v.chapters[v.current];
+  const days = bossDays(ch.id);
+  const max = bossMax(data, today, days, data.journey.profile?.pace);
+  if (v.stage !== 'aparece' || !ch.boss) return null;
+  const fight = () => {
+    update((d) => ({ ...d, journey: startBoss(d, d.journey, todayISO()) }));
+    onClose();
+  };
+  return (
+    <Fullscreen label="Um chefe apareceu" className="jn-open-fs jn-boss-fs" onClose={fight}>
+      <div className="jn-open-center">
+        <span className="jn-eyebrow jn-px" style={{ color: '#fca5a5' }}>
+          UM CHEFE APARECEU!
+        </span>
+        <img className="jn-boss-big" alt="" src={PX.boss(ch.boss.id)} />
+        <h2 className="jn-week-h">{ch.boss.name}</h2>
+        <p className="jn-boss-taunt">“{ch.boss.taunt}”</p>
+        <div className="jn-boss-rules">
+          <div>
+            <b className="jn-px">{max}</b>
+            <span>de vida</span>
+          </div>
+          <div>
+            <b className="jn-px">−1</b>
+            <span>por missão cumprida</span>
+          </div>
+          <div>
+            <b className="jn-px">{days}</b>
+            <span>dias para vencer</span>
+          </div>
+        </div>
+        <p className="muted small">Se o prazo acabar, ele foge e volta com a vida cheia. Você não perde nada.</p>
+      </div>
+      <div className="jn-open-actions">
+        <button type="button" className="btn primary block" onClick={fight}>
+          Enfrentar
         </button>
       </div>
     </Fullscreen>
