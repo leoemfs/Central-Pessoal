@@ -12774,3 +12774,24 @@ body.bar-labels.jn-tall {
   height: 46px;
   background: linear-gradient(90deg, #451a03 0 10px, transparent 10px calc(100% - 10px), #451a03 calc(100% - 10px));
 }
+
+/* Abas da tela da Jornada presas logo abaixo da faixa do topo (17/11). */
+.jn-subtabs {
+  margin-top: 8px;
+  padding-bottom: 6px;
+  background: var(--bg);
+  box-shadow: 0 -12px 0 var(--bg);
+  transition: transform 0.22s ease;
+}
+@media (max-width: 899px) {
+  .bars-hidden .jn-subtabs {
+    transform: translateY(calc(26px - var(--jn-hud-h, 98px)));
+  }
+}
+.jn-subtabs:empty {
+  display: none;
+}
+.jn-subtabs > .segmented,
+.jn-subtabs > .jn-chipset {
+  margin: 0;
+}

@@ -85,7 +85,7 @@ export function Jornada() {
   if (choice === 'quero')
     return (
       <>
-        <PageHeader title={TAB_TITLES[journeyTab(route.sub)]} tabs={welcomed(data.journey) ? <JornadaHud /> : undefined} />
+        <PageHeader title={TAB_TITLES[journeyTab(route.sub)]} tabs={welcomed(data.journey) ? (<><JornadaHud /><div id="jn-subtabs" className="jn-subtabs" /></>) : undefined} />
         {welcomed(data.journey) && <JornadaPortal />}
         {welcomed(data.journey) && <JornadaEventos />}
         <JornadaHome />
