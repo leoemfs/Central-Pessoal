@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { go } from '../../router';
 import { addTopicsAsPages, isHidden, defaultCycleName, findSource, missingBefore, moveItem, newCycle, newNotebook, remainingTopics, topicState, touch, trackPath, trackProgress, type TrackView } from '../../estudos';
-import type { StudySource } from '../../types';
+import type { StudyCollection, StudySource } from '../../types';
+import { groupLibrary, moveCollection, moveItem as moveColItem, newCollection, placeItem, removeCollection, renameCollection, setItems, toggleCollection } from '../../colecoes';
 import { Empty, Field, Icon, notify, PageHeader, Sheet, type IconName } from '../../ui';
 import { todayISO, uid } from '../../utils';
 import { listCourses, mineReach, removeCourse, removeMine } from '../../curso';
@@ -78,6 +79,9 @@ export function BibliotecaPage() {
   const { study, lib, set } = useStudy();
   const [areas, setAreas] = useState(false);
   const [doomed, setDoomed] = useState<Doomed | null>(null);
+  const [organizing, setOrganizing] = useState(false);
+  const [sheet, setSheet] = useState<ColSheet | null>(null);
+  const setCols = (fn: (c: StudyCollection[]) => StudyCollection[]) => set((s) => ({ ...s, collections: fn(s.collections) }));
   const archive = (id: string, name: string, on: boolean) => {
     set((s) => ({ ...s, archived: on ? [...s.archived, id] : s.archived.filter((x) => x !== id) }));
     notify(on ? `${name}: arquivado` : `${name} voltou para a biblioteca`, on ? 'Nada foi apagado. Fica em "Arquivados".' : undefined);
@@ -103,7 +107,7 @@ export function BibliotecaPage() {
   const mine = [...courses, ...lib.areas.filter((a) => a.mine && !a.id.startsWith('pk-')).map(areaItem)];
   const catalog = lib.areas.filter((a) => !a.mine).map(areaItem);
   const off = (i: Item) => study.archived.includes(i.key);
-  const row = (i: Item) => {
+  const row = (i: Item, col: StudyCollection | null = null, idx = 0, count = 1) => {
     const isOff = off(i);
     const body = (
       <>
@@ -125,30 +129,123 @@ export function BibliotecaPage() {
             {body}
           </a>
         )}
-        <RowActions name={i.name} archived={isOff} onArchive={() => archive(i.key, i.name, !isOff)} onDelete={i.onDelete} />
+        {organizing && !isOff ? (
+          <span className="st-order-btns">
+            {col && (
+              <>
+                <button type="button" className="icon-btn" disabled={idx === 0} onClick={() => setCols((c) => moveColItem(c, col.id, i.key, -1, visible))} aria-label={`Subir ${i.name}`}>
+                  <Icon name="up" size={16} />
+                </button>
+                <button type="button" className="icon-btn" disabled={idx === count - 1} onClick={() => setCols((c) => moveColItem(c, col.id, i.key, 1, visible))} aria-label={`Descer ${i.name}`}>
+                  <Icon name="down" size={16} />
+                </button>
+              </>
+            )}
+            <button type="button" className="icon-btn" onClick={() => setSheet({ kind: 'place', key: i.key })} aria-label={`Mudar ${i.name} de coleção`}>
+              <Icon name="folder" size={16} />
+            </button>
+          </span>
+        ) : (
+          <RowActions name={i.name} archived={isOff} onArchive={() => archive(i.key, i.name, !isOff)} onDelete={i.onDelete} />
+        )}
       </li>
     );
   };
-  const shownMine = mine.filter((i) => !off(i));
-  const shownCatalog = catalog.filter((i) => !off(i));
+  // Coleções (M40): o que está numa coleção sai das listas de baixo (cada coisa num lugar só).
+  const shown = [...mine, ...catalog].filter((i) => !off(i));
+  const visible = new Set(shown.map((i) => i.key));
+  const { groups } = groupLibrary(study.collections, shown);
+  const grouped = new Set(groups.flatMap((g) => g.items.map((i) => i.key)));
+  const shownMine = mine.filter((i) => !off(i) && !grouped.has(i.key));
+  const shownCatalog = catalog.filter((i) => !off(i) && !grouped.has(i.key));
   const archived = [...mine, ...catalog].filter(off);
   return (
     <>
       <Path items={[{ label: 'Estudos', to: 'estudos' }, { label: 'Biblioteca' }]} />
       <PageHeader title="Biblioteca" subtitle="Roteiros de referência para explorar. Escolher algo daqui não muda o catálogo." />
       <CourseCta />
+
+      <div className="st-sec">
+        <h2 className="section-title">Coleções</h2>
+        {!organizing && (
+          <button type="button" className="btn soft small" onClick={() => setSheet({ kind: 'name', id: null })}>
+            <Icon name="plus" size={16} /> Nova
+          </button>
+        )}
+        {study.collections.length > 0 && (
+          <button type="button" className={`btn small ${organizing ? 'primary' : 'soft'}`} onClick={() => setOrganizing((v) => !v)}>
+            {organizing ? 'Pronto' : 'Organizar'}
+          </button>
+        )}
+      </div>
+      {groups.length === 0 && (
+        <p className="muted small" style={{ margin: 0 }}>
+          Junte cursos e áreas do mesmo assunto numa coleção, que recolhe e expande. Toque em "Nova".
+        </p>
+      )}
+      {groups.map(({ col, items: its }, ci) => {
+        const open = col.open || organizing;
+        return (
+          <section key={col.id} className={`card st-col${open ? ' open' : ''}`}>
+            <div className="st-col-head">
+              <button type="button" className="st-col-toggle" disabled={organizing} aria-expanded={open} onClick={() => setCols((c) => toggleCollection(c, col.id))}>
+                {!organizing && (
+                  <span className="st-col-chev">
+                    <Icon name="right" size={18} />
+                  </span>
+                )}
+                <span className="st-col-title">
+                  <b>{col.name}</b>
+                  {!open && <small>{its.map((x) => x.name).join(' · ') || 'Vazia'}</small>}
+                </span>
+                <span className="pill">{its.length}</span>
+              </button>
+              {organizing && (
+                <span className="st-order-btns">
+                  <button type="button" className="icon-btn" disabled={ci === 0} onClick={() => setCols((c) => moveCollection(c, col.id, -1))} aria-label={`Subir a coleção ${col.name}`}>
+                    <Icon name="up" size={16} />
+                  </button>
+                  <button type="button" className="icon-btn" disabled={ci === groups.length - 1} onClick={() => setCols((c) => moveCollection(c, col.id, 1))} aria-label={`Descer a coleção ${col.name}`}>
+                    <Icon name="down" size={16} />
+                  </button>
+                </span>
+              )}
+              <button type="button" className="icon-btn st-quiet" onClick={() => setSheet({ kind: 'menu', id: col.id })} aria-label={`Opções de ${col.name}`}>
+                <Icon name="more" size={20} />
+              </button>
+            </div>
+            {open && (
+              <div className="st-col-body">
+                {its.length ? <ul className="list">{its.map((it, i) => row(it, col, i, its.length))}</ul> : <p className="muted small">Coleção vazia. Toque em ⋯ › Pôr cursos e áreas.</p>}
+              </div>
+            )}
+          </section>
+        );
+      })}
       {shownMine.length > 0 && (
         <>
           <h2 className="section-title">Meus cursos e áreas</h2>
           <section className="card">
-            <ul className="list">{shownMine.map(row)}</ul>
+            <ul className="list">{shownMine.map((i) => row(i))}</ul>
           </section>
         </>
       )}
-      {shownMine.length > 0 && <h2 className="section-title">Referência</h2>}
-      <section className="card">
-        <ul className="list">{shownCatalog.map(row)}</ul>
-      </section>
+      {shownMine.length > 0 && shownCatalog.length > 0 && <h2 className="section-title">Referência</h2>}
+      {shownCatalog.length > 0 && (
+        <section className="card">
+          <ul className="list">{shownCatalog.map((i) => row(i))}</ul>
+        </section>
+      )}
+      {organizing && (
+        <div className="st-actionbar">
+          <div className="st-actionbar-text">
+            <span className="muted small">As setas mudam a ordem. A pasta muda o item de coleção.</span>
+          </div>
+          <button type="button" className="btn primary" onClick={() => setOrganizing(false)}>
+            Pronto
+          </button>
+        </div>
+      )}
       <button type="button" className="btn soft" onClick={() => setAreas(true)}>
         <Icon name="plus" size={18} /> Criar área ou tema
       </button>
@@ -159,15 +256,199 @@ export function BibliotecaPage() {
             <p className="muted small">Fora da sua biblioteca, mas tudo continua guardado.</p>
           </div>
           <section className="card">
-            <ul className="list">{archived.map(row)}</ul>
+            <ul className="list">{archived.map((i) => row(i))}</ul>
           </section>
         </>
       )}
       {areas && <AreasSheet onClose={() => setAreas(false)} />}
       {doomed && <DeleteDoomed item={doomed} onClose={() => setDoomed(null)} />}
+      {sheet && <CollectionSheets sheet={sheet} setSheet={setSheet} items={shown} />}
     </>
   );
 }
+
+/** Um item que pode entrar numa coleção (as mesmas linhas da Biblioteca). */
+type ColItem = { key: string; name: string; meta: string };
+
+type ColSheet = { kind: 'menu'; id: string } | { kind: 'name'; id: string | null } | { kind: 'items'; id: string } | { kind: 'delete'; id: string } | { kind: 'place'; key: string };
+
+/** As fichas das coleções: opções (⋯), nome, escolher itens, excluir e mudar um item de coleção. */
+function CollectionSheets({ sheet, setSheet, items }: { sheet: ColSheet; setSheet: (s: ColSheet | null) => void; items: ColItem[] }) {
+  const { study, set } = useStudy();
+  const cols = study.collections;
+  const close = () => setSheet(null);
+  const setCols = (fn: (c: StudyCollection[]) => StudyCollection[]) => set((s) => ({ ...s, collections: fn(s.collections) }));
+  const col = 'id' in sheet && sheet.id ? cols.find((c) => c.id === sheet.id) : undefined;
+  const owner = (key: string) => cols.find((c) => c.items.includes(key));
+
+  if (sheet.kind === 'menu' && col) {
+    const i = cols.indexOf(col);
+    const opt = (icon: IconName, label: string, run: () => void, extra = '') => (
+      <button type="button" className={`row st-menu-row ${extra}`} onClick={run}>
+        <Icon name={icon} size={20} />
+        <span className="row-title">{label}</span>
+      </button>
+    );
+    return (
+      <Sheet title={col.name} onClose={close}>
+        <div className="list">
+          {opt('edit', 'Renomear', () => setSheet({ kind: 'name', id: col.id }))}
+          {opt('list', 'Pôr ou tirar cursos e áreas', () => setSheet({ kind: 'items', id: col.id }))}
+          {i > 0 && opt('up', 'Subir a coleção', () => (setCols((c) => moveCollection(c, col.id, -1)), close()))}
+          {i < cols.length - 1 && opt('down', 'Descer a coleção', () => (setCols((c) => moveCollection(c, col.id, 1)), close()))}
+          {opt('trash', 'Excluir coleção', () => setSheet({ kind: 'delete', id: col.id }), 'st-danger')}
+        </div>
+      </Sheet>
+    );
+  }
+  if (sheet.kind === 'name') return <NameSheet col={col} onClose={close} onSave={(name) => {
+    if (col) {
+      setCols((c) => renameCollection(c, col.id, name));
+      notify('Coleção renomeada');
+      close();
+    } else {
+      const n = newCollection(name);
+      setCols((c) => [...c, n]);
+      setSheet({ kind: 'items', id: n.id });
+    }
+  }} />;
+  if (sheet.kind === 'items' && col) return <ItemsSheet col={col} items={items} owner={owner} onClose={close} onSave={(keys) => {
+    const r = setItems(cols, col.id, keys);
+    setCols(() => r.cols);
+    notify('Coleção salva', r.moved ? `${plural(r.moved, 'item mudou', 'itens mudaram')} de coleção.` : undefined);
+    close();
+  }} />;
+  if (sheet.kind === 'delete' && col) {
+    const n = col.items.filter((k) => items.some((i) => i.key === k)).length;
+    return (
+      <Sheet
+        title={`Excluir "${col.name}"?`}
+        onClose={close}
+        footer={
+          <div className="btn-row">
+            <button type="button" className="btn soft" onClick={close}>
+              Cancelar
+            </button>
+            <button
+              type="button"
+              className="btn danger"
+              onClick={() => {
+                setCols((c) => removeCollection(c, col.id));
+                notify('Coleção excluída', 'Os cursos e áreas continuam na Biblioteca.');
+                close();
+              }}
+            >
+              Excluir coleção
+            </button>
+          </div>
+        }
+      >
+        <p className="muted" style={{ marginTop: 0 }}>
+          Só a coleção some. {n ? `${plural(n, 'item volta', 'itens voltam')} para as listas da Biblioteca, com tudo o que você estudou.` : 'Ela está vazia.'}
+        </p>
+      </Sheet>
+    );
+  }
+  if (sheet.kind === 'place') {
+    const it = items.find((i) => i.key === sheet.key);
+    const o = owner(sheet.key);
+    if (!it) return null;
+    const go = (to: string | null) => {
+      setCols((c) => placeItem(c, sheet.key, to));
+      notify(to ? 'Item mudou de coleção' : 'Item saiu da coleção');
+      close();
+    };
+    return (
+      <Sheet title={it.name} onClose={close}>
+        <div className="list">
+          {cols.map((c) => (
+            <button key={c.id} type="button" className="row st-menu-row" disabled={c === o} onClick={() => go(c.id)}>
+              <Icon name="folder" size={20} />
+              <span className="row-title">{c.name}</span>
+              {c === o && <span className="muted small">aqui agora</span>}
+            </button>
+          ))}
+          <button type="button" className="row st-menu-row" disabled={!o} onClick={() => go(null)}>
+            <Icon name="list" size={20} />
+            <span className="row-title">Nenhuma: tirar da coleção</span>
+          </button>
+          <button
+            type="button"
+            className="row st-menu-row"
+            onClick={() => {
+              const n = newCollection('Nova coleção', []);
+              setCols((c) => [...placeItem(c, sheet.key, null), { ...n, items: [sheet.key] }]);
+              setSheet({ kind: 'name', id: n.id });
+            }}
+          >
+            <Icon name="plus" size={20} />
+            <span className="row-title">Nova coleção com este item</span>
+          </button>
+        </div>
+      </Sheet>
+    );
+  }
+  return null;
+}
+
+function NameSheet({ col, onClose, onSave }: { col?: StudyCollection; onClose: () => void; onSave: (name: string) => void }) {
+  const [name, setName] = useState(col && col.name !== 'Nova coleção' ? col.name : '');
+  return (
+    <Sheet
+      title={col ? 'Nome da coleção' : 'Nova coleção'}
+      onClose={onClose}
+      footer={
+        <button type="button" className="btn primary block" onClick={() => (name.trim() ? onSave(name.trim()) : notify('Dê um nome à coleção'))}>
+          {col ? 'Salvar' : 'Criar e escolher os itens'}
+        </button>
+      }
+    >
+      <Field label="Nome">
+        <input className="input" value={name} onChange={(e) => setName(e.target.value)} placeholder="Ex.: Desenvolvimento com IA" autoFocus />
+      </Field>
+    </Sheet>
+  );
+}
+
+/** Marcar o que fica na coleção. Item que está em outra coleção muda para esta (um lugar só). */
+function ItemsSheet({ col, items, owner, onClose, onSave }: { col: StudyCollection; items: ColItem[]; owner: (k: string) => StudyCollection | undefined; onClose: () => void; onSave: (keys: string[]) => void }) {
+  const [sel, setSel] = useState<string[]>(col.items.filter((k) => items.some((i) => i.key === k)));
+  return (
+    <Sheet
+      title={col.name}
+      onClose={onClose}
+      footer={
+        <button type="button" className="btn primary block" onClick={() => onSave(sel)}>
+          Salvar ({plural(sel.length, 'item', 'itens')})
+        </button>
+      }
+    >
+      <p className="muted small" style={{ marginTop: 0 }}>
+        Marque o que fica nesta coleção. Se um item já está em outra, ele muda para esta.
+      </p>
+      <ul className="list">
+        {items.map((it) => {
+          const on = sel.includes(it.key);
+          const o = owner(it.key);
+          return (
+            <li key={it.key}>
+              <button type="button" className="row" aria-pressed={on} onClick={() => setSel((v) => (on ? v.filter((x) => x !== it.key) : [...v, it.key]))}>
+                <span className={`check${on ? ' on' : ''}`}>{on && <Icon name="check" size={16} />}</span>
+                <div className="row-body">
+                  <span className="row-title">{it.name}</span>
+                  <span className={`row-meta${o && o.id !== col.id && on ? ' st-move' : ''}`}>
+                    {o && o.id !== col.id ? (on ? `Sai de "${o.name}"` : `Em "${o.name}"`) : it.meta}
+                  </span>
+                </div>
+              </button>
+            </li>
+          );
+        })}
+      </ul>
+    </Sheet>
+  );
+}
+
 
 export function AreaPage({ id }: { id: string }) {
   const { study, lib } = useStudy();
