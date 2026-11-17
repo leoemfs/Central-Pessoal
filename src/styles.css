@@ -13618,3 +13618,14 @@ body.icons-flat .st-shortcut {
     font-size: 11pt;
   }
 }
+/* C17: descrição de trilha em no máximo 2 linhas; temas na tela do curso */
+.st-clamp2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.st-course-theme {
+  display: grid;
+  gap: 10px;
+}
