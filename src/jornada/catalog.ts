@@ -255,7 +255,7 @@ const NPC_PAL: Record<string, Palette> = {
   nina: { H: '#7c2d12', S: '#f6d2b0', s: '#e0b08a', G: '#f6d2b0', E: '#1f2937', C: '#16a34a', A: '#facc15' },
   tork: { H: '#1f1f1f', S: '#8d5524', s: '#6b3e1a', G: '#8d5524', E: '#111827', C: '#78350f', A: '#94a3b8' },
 };
-export const npcIcon = (id: 'lume' | 'nina' | 'tork') => sprite(NPC_FACE, NPC_PAL[id], 16);
+export const npcIcon = (id: 'lume' | 'nina' | 'tork') => up(sprite(NPC_FACE, NPC_PAL[id], 16));
 
 // ---------- Medalhas dos títulos (da prévia "Jornada RPG", v3) ----------
 
@@ -291,3 +291,14 @@ export const trophyIcon = (earned: boolean) =>
 export const FLAME_ICON = up(PX.flame);
 export const STAR_ICON = up(PX.star);
 export const HEART_ICON = up(PX.heart);
+
+// ---------- R4c: chefes, regiões do mapa, bandeira e pote com o dobro de pixels ----------
+const memo = new Map<string, string>();
+const once = (k: string, f: () => string) => {
+  if (!memo.has(k)) memo.set(k, f());
+  return memo.get(k)!;
+};
+export const bossIcon = (id: string) => once(`boss:${id}`, () => up(PX.boss(id)));
+export const regionIcon = (id: string) => once(`region:${id}`, () => up(PX.region(id)));
+export const jarIcon = (pct: number) => once(`jar:${pct}`, () => up(PX.jar(pct)));
+export const FLAG_ICON = up(PX.flag);

@@ -9,8 +9,7 @@ import { go } from '../router';
 import { todayISO } from '../utils';
 import { notify } from '../ui';
 import { journeyStats } from '../journey';
-import { avatarIcon, chestIcon, COIN_ICON, GEM_ICON, HOMES, itemById, itemIcon, ITEMS, medalIcon, PETS, petIcon, homeIcon, FLAME_ICON, STAR_ICON } from '../jornada/catalog';
-import { PX } from '../jornada/px';
+import { avatarIcon, chestIcon, COIN_ICON, GEM_ICON, HOMES, itemById, itemIcon, ITEMS, medalIcon, PETS, petIcon, homeIcon, FLAME_ICON, STAR_ICON, jarIcon } from '../jornada/catalog';
 import { mainBox, quaseLa, streakDays, dayNumbers } from '../jornada/home';
 import { balance, planStatus, progress } from '../boxes';
 import { diffDays } from '../habits';
@@ -221,7 +220,7 @@ export function QuaseLa() {
   const { data } = useStore();
   const list = quaseLa(data, data.journey, todayISO());
   const icon = (g: (typeof list)[number]['icon']) =>
-    g.kind === 'estrela' ? STAR_ICON : g.kind === 'pote' ? PX.jar(g.pct) : g.kind === 'bau' ? chestIcon(g.chest, false) : g.kind === 'medalha' ? medalIcon(g.index, true) : itemIcon(itemById(g.id)!);
+    g.kind === 'estrela' ? STAR_ICON : g.kind === 'pote' ? jarIcon(g.pct) : g.kind === 'bau' ? chestIcon(g.chest, false) : g.kind === 'medalha' ? medalIcon(g.index, true) : itemIcon(itemById(g.id)!);
   return (
     <section className="card">
       <div className="card-head">
@@ -265,7 +264,7 @@ export function BoxCard() {
   return (
     <section className="card jn-boxcard">
       <button type="button" className="jn-jar" aria-label={`Abrir caixinhas (${b.name})`} onClick={() => go('financas/caixinhas')}>
-        <img alt="" src={PX.jar(pct)} />
+        <img alt="" src={jarIcon(pct)} />
       </button>
       <div>
         <span className="jn-boxeye">Caixinha · {b.name}</span>

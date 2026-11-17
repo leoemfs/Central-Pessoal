@@ -12,10 +12,9 @@ import { formatDMY, todayISO } from '../utils';
 import { useState } from 'react';
 import { Field, Icon, MoneyInput, notify, Sheet, type IconName } from '../ui';
 import { balance, deposit, progress, removeMove } from '../boxes';
-import { PX } from '../jornada/px';
 import { floatTexts, flyCoins } from './jornadaFx';
 import { campaign } from '../jornada/campaign';
-import { COIN_ICON } from '../jornada/catalog';
+import { COIN_ICON, jarIcon } from '../jornada/catalog';
 import { missionsToday, missionsWeek, type Mission } from '../jornada/missions';
 
 const ICONS: Record<Mission['kind'], IconName> = { ritual: 'sun', construir: 'sprout', abandonar: 'shield', tarefa: 'tasks', conta: 'bolt', diario: 'notePen', caixinha: 'piggy' };
@@ -173,7 +172,7 @@ function SaveSheet({ boxId, amount, onClose, onSaved }: { boxId: string; amount:
       }
     >
       <div className="jn-save">
-        <img alt="" src={PX.jar(pct)} />
+        <img alt="" src={jarIcon(pct)} />
         <strong>{b.name}</strong>
         <span className="muted small">
           {money(balance(b))}

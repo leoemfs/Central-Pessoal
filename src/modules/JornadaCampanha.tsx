@@ -9,8 +9,7 @@ import { useStore } from '../store';
 import { go } from '../router';
 import { todayISO } from '../utils';
 import { Fullscreen, Icon, notify } from '../ui';
-import { avatarIcon, chestIcon, homeIcon, itemById, itemIcon, medalIcon, npcIcon } from '../jornada/catalog';
-import { PX } from '../jornada/px';
+import { avatarIcon, chestIcon, homeIcon, itemById, itemIcon, medalIcon, npcIcon, bossIcon, regionIcon, FLAG_ICON, treeIcon } from '../jornada/catalog';
 import { bossDays, bossMax, campaign, clearChapter, startBoss, type Chapter } from '../jornada/campaign';
 import { TITLES } from '../jornada/rules';
 import { NpcDialog } from './JornadaFala';
@@ -80,7 +79,7 @@ export function CampanhaView() {
       path.push({ x: a.x + (b.x - a.x) * t, y: a.y + (b.y - a.y) * t + Math.sin(t * Math.PI) * 4, done });
     }
   }
-  const tree = PX.svg(PX.tree(PX.TIMES.manha));
+  const tree = treeIcon('manha');
   return (
     <>
       <div className="jn-cp-map" role="group" aria-label="Mapa da campanha">
@@ -107,8 +106,8 @@ export function CampanhaView() {
               onClick={() => setSel(i)}
             >
               <span className="pic">
-                <img alt="" src={PX.region(c.id)} />
-                {isDone && <img className="flag" alt="" src={PX.flag} />}
+                <img alt="" src={regionIcon(c.id)} />
+                {isDone && <img className="flag" alt="" src={FLAG_ICON} />}
                 {isCur && <img className="me" alt="" src={avatarIcon(look, { elmo: state.equipped.elmo, armadura: state.equipped.armadura, botas: state.equipped.botas, colar: state.equipped.colar })} />}
                 {isLocked && <span className="q">?</span>}
               </span>
@@ -127,7 +126,7 @@ export function CampanhaView() {
           <p className="muted">Termine {v.chapters[Math.max(0, sel - 1)].name} para abrir esta região. O que tem aqui, só vendo de perto.</p>
           {ch.boss && (
             <div className="jn-cp-boss">
-              <img className="silhouette" alt="" src={PX.boss(ch.boss.id)} />
+              <img className="silhouette" alt="" src={bossIcon(ch.boss.id)} />
               <span className="muted small">Um chefe espera por você aqui.</span>
             </div>
           )}
@@ -173,7 +172,7 @@ export function CampanhaView() {
           </ul>
           {ch.boss && (
             <div className="jn-cp-boss">
-              <img className={cleared || (current && v.stage === 'chefe') ? undefined : 'silhouette'} alt="" src={PX.boss(ch.boss.id)} />
+              <img className={cleared || (current && v.stage === 'chefe') ? undefined : 'silhouette'} alt="" src={bossIcon(ch.boss.id)} />
               <div>
                 <b>{cleared || (current && (v.stage === 'chefe' || v.stage === 'aparece')) ? ch.boss.name : 'Chefe: ???'}</b>
                 <span className="muted small">
@@ -208,7 +207,7 @@ export function CampCard() {
     const b = v.boss;
     return (
       <button type="button" className="card jn-campcard jn-bosscard" id="jn-bosscard" onClick={() => go('jornada/campanha')}>
-        <img className="jn-boss-img" alt={ch.boss.name} src={PX.boss(ch.boss.id)} />
+        <img className="jn-boss-img" alt={ch.boss.name} src={bossIcon(ch.boss.id)} />
         <div>
           <span className="jn-boxeye" style={{ color: '#fca5a5' }}>
             Chefe · {ch.name}
@@ -229,7 +228,7 @@ export function CampCard() {
   }
   return (
     <button type="button" className="card jn-campcard" onClick={() => go('jornada/campanha')}>
-      <img alt="" src={PX.region(ch.id)} />
+      <img alt="" src={regionIcon(ch.id)} />
       <div>
         <span className="jn-boxeye" style={{ color: '#fca5a5' }}>
           Campanha · capítulo {v.current + 1} de {v.chapters.length}
@@ -264,7 +263,7 @@ export function ChapterDone({ onClose }: { onClose: () => void }) {
     <Fullscreen label="Região concluída" className="jn-open-fs" onClose={finish}>
       <div className="jn-open-center">
         <span className="jn-eyebrow jn-px">{ch.boss ? 'VITÓRIA!' : 'REGIÃO CONCLUÍDA!'}</span>
-        <img className={`jn-title-medal${ch.boss ? ' jn-boss-down' : ''}`} alt="" src={ch.boss ? PX.boss(ch.boss.id) : PX.region(ch.id)} />
+        <img className={`jn-title-medal${ch.boss ? ' jn-boss-down' : ''}`} alt="" src={ch.boss ? bossIcon(ch.boss.id) : regionIcon(ch.id)} />
         {ch.boss && <p className="muted">Você venceu {ch.boss.name}!</p>}
         <h2 className="jn-week-h">{ch.name}</h2>
         <div className="jn-npc">
@@ -304,7 +303,7 @@ export function BossAppear({ onClose }: { onClose: () => void }) {
         <span className="jn-eyebrow jn-px" style={{ color: '#fca5a5' }}>
           UM CHEFE APARECEU!
         </span>
-        <img className="jn-boss-big" alt="" src={PX.boss(ch.boss.id)} />
+        <img className="jn-boss-big" alt="" src={bossIcon(ch.boss.id)} />
         <h2 className="jn-week-h">{ch.boss.name}</h2>
         <p className="jn-boss-taunt">“{ch.boss.taunt}”</p>
         <div className="jn-boss-rules">
