@@ -237,6 +237,14 @@ export function Ajustes({ route }: ViewProps) {
             {data.settings.accent ? `${accentById(data.settings.accent)?.name}, nos dois temas.` : 'Padrão: verde no tema escuro e azul no claro.'} Muda botões, abas e destaques. As cores de situação não mudam: pago é verde, pendente é laranja e atrasado é vermelho.
           </p>
         </div>
+        <h3 className="pz-title">Efeitos</h3>
+        <div className="toggle-row first">
+          <div>
+            <strong>Vidro fosco</strong>
+            <span className="muted small">A barra de cima, o bloco preso no topo e a barra de favoritos deixam ver, embaçado, o que passa por trás. Desligado, ficam com fundo sólido.</span>
+          </div>
+          <Toggle checked={data.settings.glass} onChange={(v) => setSetting({ glass: v })} label="Vidro fosco" />
+        </div>
       </section>
       )}
 

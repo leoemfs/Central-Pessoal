@@ -12921,3 +12921,12 @@ body.bar-labels.jn-tall {
 .sticky-head:has(.jn-hud)::before {
   display: none;
 }
+
+/* E37: vidro fosco desligado: barras com fundo sólido. */
+body.no-glass {
+  --glass: var(--bg);
+  --glass-blur: none;
+}
+body.no-glass .tabbar:not(.jn-gamebar) {
+  background: var(--tabbar-bg);
+}
