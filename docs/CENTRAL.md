@@ -65,6 +65,7 @@
 - 08/11: Você: perguntas de carreira (emprego atual, carreira desejada, melhorias na atual, caminhos até a desejada) para a carreira desejada orientar os tópicos sugeridos em Estudos. Conferir com N10 (Objetivos) e N8.
 - 11/11: **GPS na caminhada** (Núcleo › Corpo › Caminhada): distância e percurso medidos sozinhos em vez de digitar os km. No site só funciona com a tela ligada (o navegador para o GPS com a tela apagada); com tela apagada, só no app Android (N4). Tamanho M.
 - 11/11: **Conexão com a saúde do Google** (passos, caminhadas, sono, batimentos): no Android isso é o **Health Connect**, que só um app Android acessa (o site não). Depende do N4; junta com Saúde (N1) e Treinos. Tamanho M.
+- 17/11: **aviso "Sincronizar agora" ao abrir o app** (pedido pensando no computador): quando o acesso do Google venceu, aparece no topo de qualquer tela um aviso com o botão **Sincronizar agora** (um toque abre o Google e sincroniza) e um X para fechar. Hoje o Início só avisa depois de 1 dia parado, e o botão fica em Configurações. Pediu prévia. Tamanho P. Afeta: todas as telas (aviso), Conta Google.
 
 ## Itens
 | ID | Item | Frente | Tam. | Prior. | Situação | Documento |
