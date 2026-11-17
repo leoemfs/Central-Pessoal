@@ -57,6 +57,8 @@ export interface JourneyState {
   avatar: { gender: 'f' | 'm'; skin: string; hair: string; name: string } | null;
   owned: string[];
   equipped: { elmo: string | null; armadura: string; botas: string; arma: string | null; anel: string | null; anel2: string | null; colar: string | null; magico: string | null; pet: string | null; morada: string };
+  /** N2.8a: desde quando cada item está vestido (os efeitos dos místicos contam a partir daí). */
+  equippedAt: Record<string, string>;
   goldSpent: number;
   crystalsSpent: number;
   title: string | null;
@@ -104,6 +106,7 @@ export function defaultJourneyState(): JourneyState {
     avatar: null,
     owned: [...STARTER_ITEMS, 'cabana'],
     equipped: { elmo: null, armadura: 'aprendiz', botas: 'sapatos', arma: 'madeira', anel: null, anel2: null, colar: null, magico: null, pet: null, morada: 'cabana' },
+    equippedAt: {},
     goldSpent: 0,
     crystalsSpent: 0,
     title: 'aprendiz',
@@ -173,6 +176,7 @@ export function normalizeJourney(raw: unknown): JourneyState {
     avatar: r.avatar && (r.avatar.gender === 'f' || r.avatar.gender === 'm') ? { gender: r.avatar.gender, skin: String(r.avatar.skin ?? 'media'), hair: String(r.avatar.hair ?? 'castanho'), name: typeof r.avatar.name === 'string' ? r.avatar.name.slice(0, 14) : '' } : null,
     owned: Array.from(new Set([...base.owned, ...(Array.isArray(r.owned) ? r.owned.filter((x): x is string => typeof x === 'string') : [])])),
     equipped: normalizeEquipped(base.equipped, r.equipped),
+    equippedAt: r.equippedAt && typeof r.equippedAt === 'object' ? Object.fromEntries(Object.entries(r.equippedAt).filter(([k, v]) => typeof k === 'string' && typeof v === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(v))) : {},
     goldSpent: num(r.goldSpent),
     crystalsSpent: num(r.crystalsSpent),
     title: typeof r.title === 'string' ? r.title : base.title,
@@ -432,9 +436,17 @@ export function earnedChests(d: AppData, today: string = todayISO(), level = 1):
 
   // Bronze a cada 7 dias seguidos com algum ritual/hábito feito; prata a cada 30.
   const days = [...checkDays(d, () => true, today)].sort();
+  const js = d.journey;
+  // Armadura de cristal: um dia perdido por semana não quebra a sequência de rotina.
+  const shield = js ? wornSince(js, 'cristal', today) : null;
+  const shieldWeeks = new Set<string>();
   let run = 0;
   days.forEach((day, i) => {
-    run = i > 0 && diffDays(days[i - 1], day) === 1 ? run + 1 : 1;
+    const gap = i > 0 ? diffDays(days[i - 1], day) : 0;
+    const missed = addDays(day, -1);
+    const shielded = gap === 2 && !!shield && missed >= shield && !shieldWeeks.has(weekStart(missed));
+    if (shielded) shieldWeeks.add(weekStart(missed));
+    run = i > 0 && (gap === 1 || shielded) ? run + 1 : 1;
     if (run % 7 === 0) out.push({ key: `bronze:${day}`, kind: 'bronze', date: day, reason: `${run} dias seguidos de rotina` });
     if (run % 30 === 0) out.push({ key: `prata:${day}`, kind: 'prata', date: day, reason: `${run} dias de consistência` });
   });
@@ -452,11 +464,19 @@ export function earnedChests(d: AppData, today: string = todayISO(), level = 1):
 
   // Dourado: a cada 5 níveis e a cada mês com todas as contas em dia.
   for (let n = 5; n <= level; n += 5) out.push({ key: `dourado:nivel:${n}`, kind: 'dourado', date: today, reason: `Chegou ao nível ${n}` });
+  // Espada da aurora: cada nível novo depois de vestir dá um baú raro (prata) extra.
+  const aurora = js ? wornSince(js, 'aurora', today) : null;
+  if (aurora) {
+    const from = journeyStats(d, aurora).level;
+    for (let n = from + 1; n <= level; n++) out.push({ key: `prata:aurora:${n}`, kind: 'prata', date: today, reason: `Espada da aurora: nível ${n}` });
+  }
   for (const m of monthsAllOnTime(d, today)) out.push({ key: `dourado:mes:${m}`, kind: 'dourado', date: `${m}-01`, reason: 'Mês com todas as contas em dia' });
 
   // Cristal: 7, 14, 30 e 60 dias sem um hábito a abandonar (a contagem recomeça na recaída).
   for (const h of d.habits.filter((x) => x.kind === 'abandonar' && x.startDate <= today)) {
-    const starts = [h.startDate, ...h.slips.filter((s) => s > h.startDate && s <= today).sort()];
+    // Coração de cristal: recaída depois de vestir não zera a contagem do baú de cristal.
+    const heart = js ? wornSince(js, 'coracao', today) : null;
+    const starts = [h.startDate, ...h.slips.filter((s) => s > h.startDate && s <= today && !(heart && s >= heart)).sort()];
     starts.forEach((start, i) => {
       const end = starts[i + 1] ?? today;
       const len = diffDays(start, end) - (starts[i + 1] ? 1 : 0);
@@ -555,14 +575,41 @@ export function openChest(state: JourneyState, chest: Chest, today: string = tod
   return { state: { ...state, chests: [...state.chests, record], owned: item ? [...state.owned, item.id] : state.owned }, record };
 }
 
+
+// ---------- N2.8a: efeitos dos místicos (cristais, ouro, baús e sequência) ----------
+
+/**
+ * Desde quando o item está vestido (só se estiver vestido agora). Item vestido antes de existir o registro
+ * conta a partir de hoje: o efeito vale dali pra frente.
+ */
+export function wornSince(state: JourneyState, id: string, today: string = todayISO()): string | null {
+  if (!Object.values(state.equipped).includes(id)) return null;
+  return state.equippedAt?.[id] ?? today;
+}
+
+/** Cristais e ouro extras dos místicos: Coroa (mês em dia), Olho do oráculo (revisão) e Cajado estelar (estudo). */
+export function mysticExtras(d: AppData, state: JourneyState, today: string = todayISO()) {
+  let crystals = 0;
+  let gold = 0;
+  const coroa = wornSince(state, 'coroa', today);
+  if (coroa) crystals += monthsAllOnTime(d, today).filter((m) => m >= coroa.slice(0, 7)).length;
+  const olho = wornSince(state, 'olho', today);
+  if (olho) crystals += d.journal.filter((j) => isReview(j.tag) && j.createdAt.slice(0, 10) >= olho && j.createdAt.slice(0, 10) <= today).length;
+  const estelar = wornSince(state, 'estelar', today);
+  if (estelar)
+    gold += sum(d.habits.filter((h) => h.kind !== 'abandonar' && (h.attrs ?? []).includes('INT')).map((h) => new Set(h.checks.filter((c) => c >= estelar && c <= today)).size));
+  return { crystals, gold };
+}
+
 // ---------- Carteira: ouro e cristais ----------
 
 export function wallet(d: AppData, state: JourneyState, today: string = todayISO()) {
   const stats = journeyStats(d, today);
   const attrs = attributes(d, today);
   const titles = titleProgress({ d, today, attrs }).filter((t) => t.earned).length;
-  const goldEarned = stats.gold + sum(state.chests.map((c) => c.gold)) + sum(state.gifts.map((g) => g.gold)) + sum(state.games.prizes.map((g) => g.gold));
-  const crystalsEarned = titles + sum(state.chests.map((c) => c.crystals));
+  const mx = mysticExtras(d, state, today);
+  const goldEarned = stats.gold + sum(state.chests.map((c) => c.gold)) + sum(state.gifts.map((g) => g.gold)) + sum(state.games.prizes.map((g) => g.gold)) + mx.gold;
+  const crystalsEarned = titles + sum(state.chests.map((c) => c.crystals)) + mx.crystals;
   return {
     level: stats.level,
     xp: stats.xp,
@@ -646,7 +693,7 @@ export const ARTIFACT2_LEVEL = RING2_LEVEL;
 export type EquipSlot = Slot | 'anel2' | 'pet' | 'morada';
 
 /** Veste um item que a pessoa já tem (ou tira, com `null`, onde for permitido). */
-export function equip(state: JourneyState, slot: EquipSlot, id: string | null, level: number): JourneyState | string {
+export function equip(state: JourneyState, slot: EquipSlot, id: string | null, level: number, today: string = todayISO()): JourneyState | string {
   if (id === null) {
     if (slot === 'armadura' || slot === 'botas' || slot === 'morada') return 'Este espaço não pode ficar vazio';
     return { ...state, equipped: { ...state.equipped, [slot]: null } };
@@ -660,7 +707,9 @@ export function equip(state: JourneyState, slot: EquipSlot, id: string | null, l
   if (other && equipped[other] === id) equipped[other] = null;
   // Campanha (Vila do Começo): "vista um item do Arsenal".
   const dressed = slot !== 'pet' && slot !== 'morada' && !state.camp.dressed;
-  return { ...state, equipped, ...(dressed ? { camp: { ...state.camp, dressed: true } } : {}) };
+  const already = Object.values(state.equipped).includes(id);
+  const equippedAt = already && state.equippedAt[id] ? state.equippedAt : { ...state.equippedAt, [id]: today };
+  return { ...state, equipped, equippedAt, ...(dressed ? { camp: { ...state.camp, dressed: true } } : {}) };
 }
 
 /** Pets e moradas: liberados por nível (e atributo); algumas moradas também custam ouro. */
