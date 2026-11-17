@@ -27,7 +27,11 @@ export const STATUS_LABEL: Record<StudyStatus, string> = { afazer: 'A estudar', 
 export const nextStatus = (s: StudyStatus): StudyStatus => (s === 'afazer' ? 'andando' : s === 'andando' ? 'feito' : 'afazer');
 
 export function emptyStudy(): StudyData {
+<<<<<<< HEAD
   return { archived: [], areas: [], themes: [], tracks: [], cycles: [], notebooks: [], sources: [], maps: [], packs: [], collections: [] };
+=======
+  return { archived: [], areas: [], themes: [], tracks: [], cycles: [], notebooks: [], sources: [], maps: [], packs: [], tutorialOff: false };
+>>>>>>> origin/main
 }
 
 // ---------- Biblioteca (catálogo + pessoal) ----------
@@ -442,7 +446,11 @@ export function normalizeStudy(raw: unknown): StudyData {
       updatedAt: str(m.updatedAt, now),
     })),
     packs: recs(r.packs).map((p) => ({ id: p.id as string, name: str(p.name, 'Curso'), importedAt: str(p.importedAt), parts: typeof p.parts === 'number' && p.parts > 0 ? Math.floor(p.parts) : 1 })),
+<<<<<<< HEAD
     collections: normalizeCollections(r.collections),
+=======
+    tutorialOff: r.tutorialOff === true,
+>>>>>>> origin/main
   };
 }
 
@@ -468,3 +476,9 @@ export function studyWeek(study: StudyData, start: string, last: string) {
   const cycles = activeCycles(study).map((c) => ({ id: c.id, name: c.name, ...cycleCounts(c) }));
   return { topicsDone, noteDays: noteDays.size, cycles };
 }
+
+/**
+ * Arquivado? Vale para áreas (o id está em `archived`) e para cursos importados (M38): arquivar um curso guarda
+ * `pk-<curso>` em `archived`, e tudo o que veio dele (temas `pk-<curso>-t-…`, trilhas `pk-<curso>-tr-…`) some das listas.
+ */
+export const isHidden = (archived: string[], areaId: string, id: string): boolean => archived.includes(areaId) || archived.some((a) => a.startsWith('pk-') && id.startsWith(`${a}-`));

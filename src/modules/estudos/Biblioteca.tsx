@@ -1,18 +1,89 @@
 import { useState } from 'react';
 import { go } from '../../router';
+<<<<<<< HEAD
 import { addTopicsAsPages, defaultCycleName, findSource, missingBefore, moveItem, newCycle, newNotebook, remainingTopics, topicState, touch, trackPath, trackProgress, type TrackView } from '../../estudos';
 import type { StudyCollection, StudySource } from '../../types';
 import { groupLibrary, libraryItems, moveCollection, moveItem as moveColItem, newCollection, placeItem, removeCollection, renameCollection, setItems, toggleCollection, type LibItem } from '../../colecoes';
+=======
+import { addTopicsAsPages, isHidden, defaultCycleName, findSource, missingBefore, moveItem, newCycle, newNotebook, remainingTopics, topicState, touch, trackPath, trackProgress, type TrackView } from '../../estudos';
+import type { StudySource } from '../../types';
+>>>>>>> origin/main
 import { Empty, Field, Icon, notify, PageHeader, Sheet, type IconName } from '../../ui';
 import { todayISO, uid } from '../../utils';
-import { CourseCta } from './Cursos';
+import { listCourses, mineReach, removeCourse, removeMine } from '../../curso';
+import { CourseCta, DeleteSheet } from './Cursos';
 import { AreasSheet, NotebookSheet, nowISO, Path, SourceCard, StatusPill, TrackSheet, trackCrumbs, useStudy } from './shared';
 
 const plural = (n: number, one: string, many: string) => `${n} ${n === 1 ? one : many}`;
 
+/** Um item que se exclui (M38): curso importado ou área, tema e trilha da pessoa. */
+type Doomed = { kind: 'curso'; id: string; name: string; pages: number; hasLibrary: boolean } | { kind: 'area' | 'tema' | 'trilha'; id: string; name: string };
+
+/** Confirmação de excluir, com o texto certo para cada tipo de item. */
+function DeleteDoomed({ item, onClose }: { item: Doomed; onClose: () => void }) {
+  const { study, set } = useStudy();
+  if (item.kind === 'curso') {
+    return (
+      <DeleteSheet
+        name={item.name}
+        what="o curso"
+        keep={item.hasLibrary ? 'Sai da Biblioteca com as trilhas, os ciclos e os mapas do curso. O notebook e as suas anotações ficam.' : null}
+        all={`Também apaga o notebook do curso, com o que você escreveu nele${item.pages ? ` (${plural(item.pages, 'página', 'páginas')})` : ''}. Fontes usadas em outros notebooks ficam.`}
+        pages={item.pages}
+        onClose={onClose}
+        onConfirm={(tudo) => {
+          set((s) => removeCourse(s, item.id, tudo));
+          onClose();
+          notify(tudo ? 'Curso excluído com o notebook' : 'Curso excluído da Biblioteca', tudo ? undefined : 'O notebook e as suas anotações continuam em Meus notebooks.');
+        }}
+      />
+    );
+  }
+  const sel = item.kind === 'area' ? { areas: [item.id] } : item.kind === 'tema' ? { themes: [item.id] } : { tracks: [item.id] };
+  const r = mineReach(study, sel);
+  const what = item.kind === 'area' ? 'a área' : item.kind === 'tema' ? 'o tema' : 'a trilha';
+  const inside = [item.kind !== 'trilha' && r.tracks ? plural(r.tracks, 'trilha', 'trilhas') : '', r.cycles ? plural(r.cycles, 'ciclo', 'ciclos') : ''].filter(Boolean).join(' e ');
+  const keep = `${inside ? `Saem também ${inside}. ` : ''}${r.notebooks ? 'Os notebooks ligados e as suas anotações ficam.' : 'Nenhum notebook está ligado a ela.'}`;
+  return (
+    <DeleteSheet
+      name={item.name}
+      what={what}
+      keep={keep}
+      all={r.notebooks ? `Também apaga ${plural(r.notebooks, 'notebook ligado', 'notebooks ligados')} (${plural(r.pages, 'página', 'páginas')}) e os mapas deles. As fontes ficam.` : null}
+      pages={r.pages}
+      onClose={onClose}
+      onConfirm={(tudo) => {
+        set((s) => removeMine(s, sel, tudo));
+        onClose();
+        notify(`"${item.name}" ${item.kind === 'tema' ? 'excluído' : 'excluída'}`);
+        if (item.kind === 'area') go('estudos/biblioteca');
+      }}
+    />
+  );
+}
+
+/** Ícones de arquivar (ou trazer de volta) e excluir, na própria linha (M38). */
+function RowActions({ name, archived, onArchive, onDelete }: { name: string; archived?: boolean; onArchive?: () => void; onDelete?: () => void }) {
+  return (
+    <>
+      {onArchive && (
+        <button type="button" className="icon-btn st-quiet" onClick={onArchive} aria-label={archived ? `Trazer ${name} de volta` : `Arquivar ${name}`} title={archived ? 'Trazer de volta' : 'Arquivar'}>
+          <Icon name={archived ? 'restore' : 'archive'} size={18} />
+        </button>
+      )}
+      {onDelete && (
+        <button type="button" className="icon-btn st-quiet" onClick={onDelete} aria-label={`Excluir ${name}`} title="Excluir">
+          <Icon name="trash" size={18} />
+        </button>
+      )}
+    </>
+  );
+}
+
 export function BibliotecaPage() {
   const { study, lib, set } = useStudy();
   const [areas, setAreas] = useState(false);
+<<<<<<< HEAD
   const [organizing, setOrganizing] = useState(false);
   const [sheet, setSheet] = useState<ColSheet | null>(null);
   const archived = lib.areas.filter((a) => study.archived.includes(a.id));
@@ -21,10 +92,14 @@ export function BibliotecaPage() {
   const visible = new Set(items.map((i) => i.key));
   const setCols = (fn: (c: StudyCollection[]) => StudyCollection[]) => set((s) => ({ ...s, collections: fn(s.collections) }));
   const archive = (id: string, on: boolean) => {
+=======
+  const [doomed, setDoomed] = useState<Doomed | null>(null);
+  const archive = (id: string, name: string, on: boolean) => {
+>>>>>>> origin/main
     set((s) => ({ ...s, archived: on ? [...s.archived, id] : s.archived.filter((x) => x !== id) }));
-    const name = lib.area(id)?.name ?? '';
-    notify(on ? `${name} arquivada` : `${name} voltou para a biblioteca`, on ? 'Nada foi apagado. Ela fica em "Arquivadas".' : undefined);
+    notify(on ? `${name}: arquivado` : `${name} voltou para a biblioteca`, on ? 'Nada foi apagado. Fica em "Arquivados".' : undefined);
   };
+<<<<<<< HEAD
   const doneOf = (it: LibItem) => {
     const trs = it.key.startsWith('a:') ? lib.tracks.filter((t) => t.areaId === it.key.slice(2)) : lib.tracks.filter((t) => t.id.startsWith(`pk-${it.key.slice(2)}-tr-`));
     return trs.reduce((n, t) => n + trackProgress(study.cycles, t).done, 0);
@@ -71,13 +146,63 @@ export function BibliotecaPage() {
             </button>
           )
         )}
+=======
+  type Item = { key: string; name: string; icon: IconName; meta: string; href: string | null; onDelete?: () => void };
+  // Cursos importados: uma linha própria, mesmo quando os temas ficam numa área do app.
+  const courses: Item[] = listCourses(study).map((c) => {
+    const key = `pk-${c.id}`;
+    const themes = study.themes.filter((t) => t.id.startsWith(`${key}-t-`));
+    const href = lib.area(key) ? `#/estudos/area/${key}` : themes.length === 1 ? `#/estudos/tema/${themes[0].id}` : themes[0] ? `#/estudos/area/${themes[0].areaId}` : c.notebookId ? `#/estudos/notebook/${c.notebookId}` : null;
+    const done = study.cycles.filter((x) => x.trackId.startsWith(`${key}-tr-`)).reduce((n, x) => n + x.topics.filter((i) => i.doneAt).length, 0);
+    const meta = c.tracks
+      ? ['Curso', plural(themes.length, 'tema', 'temas'), plural(c.tracks, 'trilha', 'trilhas'), plural(c.topics, 'tópico', 'tópicos'), done ? plural(done, 'estudado', 'estudados') : ''].filter(Boolean).join(' · ')
+      : `Curso · só o notebook${c.pages ? ` · ${plural(c.pages, 'página', 'páginas')}` : ''}`;
+    return { key, name: c.name, icon: 'cap', meta, href, onDelete: () => setDoomed({ kind: 'curso', id: c.id, name: c.name, pages: c.pages, hasLibrary: c.tracks > 0 }) };
+  });
+  const areaItem = (a: (typeof lib.areas)[number]): Item => {
+    const trs = lib.tracks.filter((t) => t.areaId === a.id && !isHidden(study.archived, a.id, t.id));
+    const done = trs.reduce((n, t) => n + trackProgress(study.cycles, t).done, 0);
+    const meta = [plural(a.themes.length, 'tema', 'temas'), plural(trs.length, 'trilha', 'trilhas'), done ? plural(done, 'tópico estudado', 'tópicos estudados') : '', a.mine ? 'criada por você' : ''].filter(Boolean).join(' · ');
+    return { key: a.id, name: a.name, icon: a.icon as IconName, meta, href: `#/estudos/area/${a.id}`, onDelete: a.mine ? () => setDoomed({ kind: 'area', id: a.id, name: a.name }) : undefined };
+  };
+  const mine = [...courses, ...lib.areas.filter((a) => a.mine && !a.id.startsWith('pk-')).map(areaItem)];
+  const catalog = lib.areas.filter((a) => !a.mine).map(areaItem);
+  const off = (i: Item) => study.archived.includes(i.key);
+  const row = (i: Item) => {
+    const isOff = off(i);
+    const body = (
+      <>
+        <span className={`tile-icon${isOff ? '' : ' st-green'}`}>
+          <Icon name={i.icon} size={20} />
+        </span>
+        <div className="row-body">
+          <span className="row-title">{i.name}</span>
+          <span className="row-meta">{i.meta}</span>
+        </div>
+      </>
+    );
+    return (
+      <li key={i.key} className="row">
+        {isOff || !i.href ? (
+          <div className={`st-row-main${isOff ? ' dim' : ''}`}>{body}</div>
+        ) : (
+          <a className="st-row-main" href={i.href}>
+            {body}
+          </a>
+        )}
+        <RowActions name={i.name} archived={isOff} onArchive={() => archive(i.key, i.name, !isOff)} onDelete={i.onDelete} />
+>>>>>>> origin/main
       </li>
     );
   };
+  const shownMine = mine.filter((i) => !off(i));
+  const shownCatalog = catalog.filter((i) => !off(i));
+  const archived = [...mine, ...catalog].filter(off);
   return (
     <>
       <Path items={[{ label: 'Estudos', to: 'estudos' }, { label: 'Biblioteca' }]} />
       <PageHeader title="Biblioteca" subtitle="Roteiros de referência para explorar. Escolher algo daqui não muda o catálogo." />
+<<<<<<< HEAD
       <CourseCta manage />
 
       <div className="st-sec">
@@ -140,6 +265,20 @@ export function BibliotecaPage() {
       </div>
       <section className="card">
         {loose.length ? <ul className="list">{loose.map((it) => itemRow(it, null, 0, 1))}</ul> : <Empty>Tudo está organizado em coleções.</Empty>}
+=======
+      <CourseCta />
+      {shownMine.length > 0 && (
+        <>
+          <h2 className="section-title">Meus cursos e áreas</h2>
+          <section className="card">
+            <ul className="list">{shownMine.map(row)}</ul>
+          </section>
+        </>
+      )}
+      {shownMine.length > 0 && <h2 className="section-title">Referência</h2>}
+      <section className="card">
+        <ul className="list">{shownCatalog.map(row)}</ul>
+>>>>>>> origin/main
       </section>
       {organizing && (
         <div className="st-actionbar">
@@ -157,10 +296,11 @@ export function BibliotecaPage() {
       {archived.length > 0 && (
         <>
           <div>
-            <h2 className="section-title">Arquivadas</h2>
+            <h2 className="section-title">Arquivados</h2>
             <p className="muted small">Fora da sua biblioteca, mas tudo continua guardado.</p>
           </div>
           <section className="card">
+<<<<<<< HEAD
             <ul className="list">
               {archived.map((a) => (
                 <li key={a.id} className="row">
@@ -179,11 +319,18 @@ export function BibliotecaPage() {
                 </li>
               ))}
             </ul>
+=======
+            <ul className="list">{archived.map(row)}</ul>
+>>>>>>> origin/main
           </section>
         </>
       )}
       {areas && <AreasSheet onClose={() => setAreas(false)} />}
+<<<<<<< HEAD
       {sheet && <CollectionSheets sheet={sheet} setSheet={setSheet} items={items} />}
+=======
+      {doomed && <DeleteDoomed item={doomed} onClose={() => setDoomed(null)} />}
+>>>>>>> origin/main
     </>
   );
 }
@@ -370,6 +517,7 @@ function ItemsSheet({ col, items, owner, onClose, onSave }: { col: StudyCollecti
 export function AreaPage({ id }: { id: string }) {
   const { study, lib } = useStudy();
   const [newTheme, setNewTheme] = useState(false);
+  const [doomed, setDoomed] = useState<Doomed | null>(null);
   const area = lib.area(id);
   if (!area) return <Missing what="Área" />;
   const active = new Set(study.cycles.filter((c) => !c.finishedAt).map((c) => lib.track(c.trackId)?.themeId));
@@ -381,13 +529,13 @@ export function AreaPage({ id }: { id: string }) {
       <section className="card">
         {area.themes.length ? (
           <ul className="list">
-            {area.themes.map((t) => {
+            {area.themes.filter((t) => !isHidden(study.archived, area.id, t.id)).map((t) => {
               const trs = [...(t.levels ?? []).flatMap((l) => l.tracks), ...t.tracks];
               const done = trs.reduce((n, x) => n + trackProgress(study.cycles, x).done, 0);
               const info = t.levels ? plural(t.levels.length, 'nível', 'níveis') : trs.length ? plural(trs.length, 'trilha', 'trilhas') : 'Sem trilhas ainda';
               return (
-                <li key={t.id}>
-                  <a className="row" href={`#/estudos/tema/${t.id}`}>
+                <li key={t.id} className={t.mine ? 'row' : undefined}>
+                  <a className={t.mine ? 'st-row-main' : 'row'} href={`#/estudos/tema/${t.id}`}>
                     <div className="row-body">
                       <span className="row-title">{t.name}</span>
                       <span className="row-meta">
@@ -397,8 +545,9 @@ export function AreaPage({ id }: { id: string }) {
                       </span>
                     </div>
                     {active.has(t.id) && <span className="pill orange">Estudando</span>}
-                    <Icon name="right" size={18} />
+                    {!t.mine && <Icon name="right" size={18} />}
                   </a>
+                  {t.mine && <RowActions name={t.name} onDelete={() => setDoomed({ kind: 'tema', id: t.id, name: t.name })} />}
                 </li>
               );
             })}
@@ -411,6 +560,7 @@ export function AreaPage({ id }: { id: string }) {
         <Icon name="plus" size={18} /> Novo tema em {area.name}
       </button>
       {newTheme && <AreasSheet areaId={area.id} onClose={() => setNewTheme(false)} />}
+      {doomed && <DeleteDoomed item={doomed} onClose={() => setDoomed(null)} />}
     </>
   );
 }
@@ -477,6 +627,7 @@ export function NivelPage({ themeId, id }: { themeId: string; id: string }) {
 
 function TrackList({ tracks, title }: { tracks: TrackView[]; title?: string }) {
   const { study } = useStudy();
+  const [doomed, setDoomed] = useState<Doomed | null>(null);
   if (!tracks.length)
     return (
       <section className="card">
@@ -497,8 +648,8 @@ function TrackList({ tracks, title }: { tracks: TrackView[]; title?: string }) {
         {tracks.map((t) => {
           const p = trackProgress(study.cycles, t);
           return (
-            <li key={t.id}>
-              <a className="row" href={`#/estudos/trilha/${t.id}`}>
+            <li key={t.id} className={t.mine ? 'row' : undefined}>
+              <a className={t.mine ? 'st-row-main' : 'row'} href={`#/estudos/trilha/${t.id}`}>
                 <span className="tile-icon">
                   <Icon name="route" size={18} />
                 </span>
@@ -510,12 +661,14 @@ function TrackList({ tracks, title }: { tracks: TrackView[]; title?: string }) {
                   </span>
                 </div>
                 <span className="muted small tabular nowrap">{p.done ? `${p.done}/${p.total}` : p.total}</span>
-                <Icon name="right" size={18} />
+                {!t.mine && <Icon name="right" size={18} />}
               </a>
+              {t.mine && <RowActions name={t.name} onDelete={() => setDoomed({ kind: 'trilha', id: t.id, name: t.name })} />}
             </li>
           );
         })}
       </ul>
+      {doomed && <DeleteDoomed item={doomed} onClose={() => setDoomed(null)} />}
     </section>
   );
 }

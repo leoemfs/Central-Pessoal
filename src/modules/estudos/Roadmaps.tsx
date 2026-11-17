@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { trackPath, trackProgress } from '../../estudos';
+import { isHidden, trackPath, trackProgress } from '../../estudos';
 import { Icon, PageHeader, Progress, type IconName } from '../../ui';
 import { useStudy } from './shared';
 
@@ -43,7 +43,7 @@ export function RoadmapsPage() {
           </div>
           <ul className="list">
             {lib.tracks
-              .filter((t) => t.areaId === a.id)
+              .filter((t) => t.areaId === a.id && !isHidden(study.archived, a.id, t.id))
               .map((t) => {
                 const p = trackProgress(study.cycles, t);
                 return (

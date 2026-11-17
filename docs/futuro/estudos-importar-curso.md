@@ -7,7 +7,7 @@
 1. Uma área clara **"Deseja importar um curso?"** em Estudos.
 2. Um **prompt padrão** para a pessoa colar numa IA (Claude, ChatGPT, Gemini…). A IA devolve o curso pronto: área, temas, trilhas, tópicos com texto, notebook com páginas e subpáginas, fontes (links) e mapas mentais.
 3. A pessoa **cola a resposta** da IA no app e importa.
-4. Na Biblioteca, **"Gerenciar cursos"** para ver e excluir cursos importados.
+4. Na Biblioteca, cada curso importado tem os ícones de **arquivar** e **excluir** na própria linha (M38, v0.124; antes era "Gerenciar cursos").
 5. Anotar para depois: **exportar o curso em PDF**, com as trilhas e o que a pessoa escreveu nos notebooks (M37).
 
 ## O que o importador já aceita (requisitos de entrada)
@@ -186,10 +186,27 @@ REGRAS:
 - Recomendação técnica: montar uma página de impressão no próprio app e usar "Imprimir › Salvar como PDF" do celular ou computador. Funciona sem biblioteca nova e mantém a formatação. Mapas entram como desenho.
 - Tamanho estimado: M. Depende do M36 (registro dos cursos).
 
-## Coleções na Biblioteca (M40, ideia de 18/11)
+<<<<<<< HEAD
+## Coleções na Biblioteca (M40, pronto na v0.126)
 Pedido: vários cursos são do mesmo assunto e deveriam ficar juntos na Biblioteca, em listas que recolhem e expandem e que a pessoa pode editar.
 - **Coleção** = um grupo com nome criado pela pessoa (ex.: "Desenvolvimento com IA"), que recolhe e expande. Dentro dela ficam áreas e cursos importados.
 - **Editar:** criar, renomear, mudar a ordem das coleções e dos itens, pôr e tirar itens, excluir a coleção. Excluir a coleção nunca apaga os cursos: eles voltam para "Outras áreas".
 - **Cada coisa num lugar só:** um item fica em uma coleção por vez; o que não está em nenhuma aparece em "Outras áreas".
 - A coleção lembra se está aberta ou recolhida.
 - **Prévia (18/11):** https://claude.ai/artifact/LYbXyJApv1xnVPdJ5S7bSS
+=======
+## M38 (v0.124): ações no próprio curso
+- Saíram o botão "Gerenciar (n)" e a tela "Meus cursos" (`#/estudos/cursos` agora abre a Biblioteca).
+- Biblioteca: "Meus cursos e áreas" (cursos importados e áreas da pessoa) · "Referência" (áreas do app) · "Arquivados". Cada linha: tocar entra; ícone arquivar/trazer de volta; lixeira (não aparece nas áreas do app).
+- Arquivar um curso guarda `pk-<curso>` em `archived`: os temas e trilhas dele somem das listas (`isHidden` em `estudos.ts`).
+- Excluir área, tema ou trilha da pessoa: `removeMine` em `curso.ts` (saem temas, trilhas e ciclos; notebooks ligados ficam ou vão junto, com mapas; fontes ficam). Lixeira também nos temas e trilhas da pessoa, dentro da área e do tema.
+>>>>>>> origin/main
+
+### O que foi construído (v0.126)
+- Biblioteca: seção **Coleções** (Nova, Organizar) acima de **Outras áreas** (sem coleções, a seção chama "Áreas e cursos").
+- Itens: **áreas** (`a:<id>`) e **cursos importados dentro de áreas do app** (`c:<id>`, como os de Claude, GitHub e Central Pessoal); curso com área própria entra como a área. O toque abre o curso (o tema, se for um só; senão, a área).
+- Coleção recolhida mostra os nomes do que tem dentro; o estado aberto/recolhido fica guardado.
+- ⋯: renomear, pôr ou tirar itens (marcar um item de outra coleção mostra "Sai de…" e ele muda), subir, descer, excluir (os itens voltam para "Outras áreas").
+- Organizar: setas para a ordem das coleções e dos itens; a pasta muda o item de coleção, tira de todas ou cria uma coleção nova com ele.
+- Área arquivada some da coleção, mas volta para o mesmo lugar ao ser trazida de volta.
+- Dados em `study.collections` (padrão vazio em `normalize()`; item repetido fica só na primeira coleção). Regras em `src/colecoes.ts`, 4 testes em `src/colecoes.test.ts`.

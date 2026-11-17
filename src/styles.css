@@ -13083,6 +13083,7 @@ body.no-glass .tabbar:not(.jn-gamebar) {
   }
 }
 
+<<<<<<< HEAD
 /* M40: coleções na Biblioteca */
 .st-sec {
   display: flex;
@@ -13177,4 +13178,107 @@ body.no-glass .tabbar:not(.jn-gamebar) {
   .st-col-chev {
     transition: none;
   }
+=======
+/* N11.5: tutorial de Estudos */
+.st-tut-head {
+  flex: 1;
+  min-width: 0;
+}
+.st-tut {
+  display: grid;
+  gap: 10px;
+  justify-items: start;
+}
+.st-tut h3 {
+  margin: 4px 0 0;
+  font-size: 1.15rem;
+  text-wrap: balance;
+}
+.st-tut p {
+  margin: 0;
+  line-height: 1.5;
+  color: var(--muted);
+}
+.st-tut p b {
+  color: var(--text);
+}
+.st-tut-icon {
+  width: 52px;
+  height: 52px;
+}
+.st-tut-go {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 4px;
+}
+.st-tut-dots {
+  display: flex;
+  gap: 6px;
+  justify-self: center;
+  margin-top: 8px;
+}
+.st-tut-dots span {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--border-strong);
+}
+.st-tut-dots span.on {
+  background: var(--green);
+  width: 18px;
+  border-radius: 4px;
+}
+.st-tut-nav {
+  width: 100%;
+}
+.st-tut-nav .btn {
+  flex: 1;
+}
+.st-tut-foot {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 0 4px;
+}
+.st-tut-foot .link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* ---------- E33 (correção): ícones da tela inicial de Estudos seguem o tema ---------- */
+.st-hero-icon.green {
+  --tone: #22c55e;
+}
+.st-hero-icon.blue {
+  --tone: #3b82f6;
+}
+body.icons-mono:not(.icons-flat) .st-hero-icon {
+  background: var(--raised);
+  color: var(--accent-text);
+}
+body.icons-flat .st-hero-icon,
+body.icons-flat .st-shortcut > .icon {
+  background: linear-gradient(180deg, color-mix(in srgb, var(--tone, var(--accent)) 65%, #fff), var(--tone, var(--accent)));
+  color: #fff;
+}
+body.icons-flat.icons-mono .st-hero-icon,
+body.icons-flat.icons-mono .st-shortcut > .icon {
+  background: linear-gradient(180deg, color-mix(in srgb, var(--accent) 65%, #fff), var(--accent));
+  color: var(--on-accent);
+}
+body.icons-flat .st-shortcut > .icon {
+  box-sizing: content-box;
+  width: 18px;
+  height: 18px;
+  padding: 7px;
+  border-radius: 10px;
+}
+body.icons-flat .st-shortcut {
+  gap: 10px;
+  padding: 12px;
+>>>>>>> origin/main
 }

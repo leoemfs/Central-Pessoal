@@ -1,9 +1,8 @@
 import { useRef, useState } from 'react';
 import { go } from '../../router';
-import { coursePrompt, fixRequest, LEVELS, listCourses, readCourse, removeCourse, SIZES, type CourseLevel, type CourseSize } from '../../curso';
+import { coursePrompt, fixRequest, LEVELS, listCourses, readCourse, SIZES, type CourseLevel, type CourseSize } from '../../curso';
 import { applyPack, type PackResult, type StudyPack } from '../../studyPack';
-import { Empty, Field, Icon, notify, PageHeader, Sheet } from '../../ui';
-import { formatDateTime } from '../../utils';
+import { Field, Icon, notify, PageHeader, Sheet } from '../../ui';
 import { nowISO, Path, useStudy } from './shared';
 
 const plural = (n: number, one: string, many: string) => `${n} ${n === 1 ? one : many}`;
@@ -23,9 +22,7 @@ async function copy(text: string, fallback?: HTMLTextAreaElement | null): Promis
 }
 
 /** Cartão "Deseja importar um curso?" (Estudos e Biblioteca). */
-export function CourseCta({ manage }: { manage?: boolean }) {
-  const { study } = useStudy();
-  const n = listCourses(study).length;
+export function CourseCta() {
   return (
     <section className="card st-course-cta">
       <div className="st-course-cta-text">
@@ -41,11 +38,6 @@ export function CourseCta({ manage }: { manage?: boolean }) {
         <a className="btn primary small" href="#/estudos/importar-curso">
           Importar curso
         </a>
-        {manage && n > 0 && (
-          <a className="btn soft small" href="#/estudos/cursos">
-            Gerenciar ({n})
-          </a>
-        )}
       </div>
     </section>
   );
@@ -113,8 +105,8 @@ export function ImportCoursePage() {
           )}
         </section>
         <div className="btn-row">
-          <a className="btn soft" href="#/estudos/cursos">
-            Meus cursos
+          <a className="btn soft" href="#/estudos/biblioteca">
+            Ver na Biblioteca
           </a>
           <button type="button" className="btn primary" onClick={() => done.notebookId && go(`estudos/notebook/${done.notebookId}`)}>
             Abrir o notebook
@@ -290,71 +282,12 @@ export function ImportCoursePage() {
   );
 }
 
-/** #/estudos/cursos: cursos importados, com excluir. */
-export function ManageCoursesPage() {
-  const { study, set } = useStudy();
-  const [del, setDel] = useState<string | null>(null);
-  const courses = listCourses(study);
-  const target = courses.find((c) => c.id === del);
-  return (
-    <>
-      <Path items={[{ label: 'Biblioteca', to: 'estudos/biblioteca' }, { label: 'Meus cursos' }]} />
-      <PageHeader title="Meus cursos" subtitle="Cursos importados. Excluir um curso nunca mexe nos seus outros estudos." />
-      <section className="card">
-        {courses.length ? (
-          <ul className="list">
-            {courses.map((c) => (
-              <li key={c.id} className="row">
-                <span className="tile-icon st-green">
-                  <Icon name="cap" size={18} />
-                </span>
-                <div className="row-body">
-                  <span className="row-title">{c.name}</span>
-                  <span className="row-meta">
-                    {c.tracks ? `${plural(c.tracks, 'trilha', 'trilhas')} · ${plural(c.topics, 'tópico', 'tópicos')}` : 'Fora da Biblioteca'}
-                    {c.pages > 0 && ` · ${plural(c.pages, 'página', 'páginas')}`}
-                    {c.maps > 0 && ` · ${plural(c.maps, 'mapa', 'mapas')}`}
-                    {c.importedAt && ` · ${formatDateTime(c.importedAt)}`}
-                    {c.parts > 1 && ` · ${c.parts} partes`}
-                  </span>
-                </div>
-                {c.notebookId && (
-                  <a className="icon-btn st-quiet" href={`#/estudos/notebook/${c.notebookId}`} aria-label={`Abrir o notebook de ${c.name}`} title="Abrir o notebook">
-                    <Icon name="notebook" size={18} />
-                  </a>
-                )}
-                <button type="button" className="icon-btn st-quiet" onClick={() => setDel(c.id)} aria-label={`Excluir ${c.name}`} title="Excluir">
-                  <Icon name="trash" size={18} />
-                </button>
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <Empty>Nenhum curso importado ainda.</Empty>
-        )}
-      </section>
-      <a className="btn primary block" href="#/estudos/importar-curso">
-        <Icon name="download" size={16} /> Importar um curso
-      </a>
-      {target && (
-        <DeleteCourse
-          name={target.name}
-          pages={target.pages}
-          hasLibrary={target.tracks > 0}
-          onClose={() => setDel(null)}
-          onConfirm={(tudo) => {
-            set((s) => removeCourse(s, target.id, tudo));
-            setDel(null);
-            notify(tudo ? 'Curso excluído com o notebook' : 'Curso excluído da Biblioteca', tudo ? undefined : 'O notebook e as suas anotações continuam em Meus notebooks.');
-          }}
-        />
-      )}
-    </>
-  );
-}
-
-function DeleteCourse({ name, pages, hasLibrary, onClose, onConfirm }: { name: string; pages: number; hasLibrary: boolean; onClose: () => void; onConfirm: (tudo: boolean) => void }) {
-  const [tudo, setTudo] = useState(!hasLibrary);
+/**
+ * Confirmação de excluir (M38), para curso importado ou para área, tema e trilha da pessoa.
+ * "Só …" mantém os notebooks; "Tudo" também apaga os notebooks e pede um segundo toque quando há páginas escritas.
+ */
+export function DeleteSheet({ name, what, keep, all, pages, onClose, onConfirm }: { name: string; what: string; keep: string | null; all: string | null; pages: number; onClose: () => void; onConfirm: (tudo: boolean) => void }) {
+  const [tudo, setTudo] = useState(keep === null);
   const [confirm, setConfirm] = useState(false);
   return (
     <Sheet
@@ -365,26 +298,30 @@ function DeleteCourse({ name, pages, hasLibrary, onClose, onConfirm }: { name: s
           type="button"
           className="btn danger block"
           onClick={() => {
-            if (tudo && pages > 0 && !confirm) return setConfirm(true);
+            if (tudo && all && pages > 0 && !confirm) return setConfirm(true);
             onConfirm(tudo);
           }}
         >
-          {tudo && confirm ? `Confirmar: apagar o notebook (${plural(pages, 'página', 'páginas')})` : 'Excluir'}
+          {tudo && all && confirm ? `Confirmar: apagar ${plural(pages, 'página', 'páginas')} de notebook` : 'Excluir'}
         </button>
       }
     >
-      <div className="st-choice" role="radiogroup" aria-label="O que excluir">
-        {hasLibrary && (
-          <button type="button" role="radio" aria-checked={!tudo} className={`st-choice-opt${!tudo ? ' on' : ''}`} onClick={() => (setTudo(false), setConfirm(false))}>
-            <b>Só o curso</b>
-            <span className="muted small">Sai da Biblioteca com as trilhas, os ciclos e os mapas do curso. O notebook e as suas anotações ficam.</span>
+      {all ? (
+        <div className="st-choice" role="radiogroup" aria-label="O que excluir">
+          {keep && (
+            <button type="button" role="radio" aria-checked={!tudo} className={`st-choice-opt${!tudo ? ' on' : ''}`} onClick={() => (setTudo(false), setConfirm(false))}>
+              <b>Só {what}</b>
+              <span className="muted small">{keep}</span>
+            </button>
+          )}
+          <button type="button" role="radio" aria-checked={tudo} className={`st-choice-opt${tudo ? ' on' : ''}`} onClick={() => setTudo(true)}>
+            <b>Tudo, inclusive o notebook</b>
+            <span className="muted small">{all}</span>
           </button>
-        )}
-        <button type="button" role="radio" aria-checked={tudo} className={`st-choice-opt${tudo ? ' on' : ''}`} onClick={() => setTudo(true)}>
-          <b>Tudo, inclusive o notebook</b>
-          <span className="muted small">Também apaga o notebook do curso, com o que você escreveu nele{pages ? ` (${plural(pages, 'página', 'páginas')})` : ''}. Fontes usadas em outros notebooks ficam.</span>
-        </button>
-      </div>
+        </div>
+      ) : (
+        <p className="muted">{keep}</p>
+      )}
     </Sheet>
   );
 }
