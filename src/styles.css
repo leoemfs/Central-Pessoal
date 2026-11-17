@@ -12993,4 +12993,24 @@ body.bar-labels.jn-tall {
 .st-choice-opt.on {
   border-color: var(--accent);
   background: var(--accent-soft);
+/* E36 (correção 17/11): a Jornada tem a própria faixa que encolhe ao rolar; ali o bloco preso volta ao fundo sólido,
+   sem a faixa de vidro por trás (ela não acompanhava a faixa encolhida e deixava um vão escuro). */
+.sticky-head:has(.jn-hud) {
+  background: var(--bg);
+}
+.sticky-head.stuck:has(.jn-hud) {
+  box-shadow: 0 -10px 0 16px var(--bg), 0 14px 14px -6px var(--bg);
+}
+.sticky-head:has(.jn-hud)::before {
+  display: none;
+}
+
+/* E37: vidro fosco desligado: barras com fundo sólido. */
+body.no-glass {
+  --glass: var(--bg);
+  --glass-blur: none;
+}
+body.no-glass .tabbar:not(.jn-gamebar) {
+  /* Totalmente opaca: sem o desfoque, qualquer transparência deixa ver o conteúdo nítido por trás. */
+  background: var(--surface);
 }

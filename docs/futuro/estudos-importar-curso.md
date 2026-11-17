@@ -1,6 +1,6 @@
 # Estudos: importar um curso feito por IA (M36) e exportar em PDF (M37)
 
-> Situação: **M36 pronto na v0.122 (17/11)**; M37 (PDF) é ideia para depois.
+> Situação: **M36 pronto na v0.123 (17/11)**; M37 (PDF) é ideia para depois.
 > Base que já existe: o importador de pacotes do **M31** (`src/studyPack.ts`, formato `central-pessoal/pacote-de-estudo`, v0.63), usado nos cursos M31, M32 e M33.
 
 ## O pedido
@@ -33,7 +33,7 @@
 - Uma fonte com o mesmo endereço de outra já guardada é reaproveitada.
 - O ciclo só é criado se ainda não houver ciclo daquela trilha.
 
-## O que foi construído (v0.122, M36)
+## O que foi construído (v0.123, M36)
 - **Entrada:** cartão "Deseja importar um curso?" no Estudos (pelo lápis dá para mover ou ocultar) e na Biblioteca (com "Gerenciar (n)"). O + de Estudos › "Importar um curso" leva para a mesma tela. Tela em `#/estudos/importar-curso`.
 - **Passo 1:** tema, nível (iniciante, intermediário, avançado) e tamanho (curto, médio, completo) → **Copiar prompt** (e "Ver prompt", que mostra o texto para copiar à mão se o navegador não deixar).
 - **Passo 2:** **Escolher arquivo** (.md, .txt ou .json) ou **Colar o texto** (a resposta inteira da IA, até com as crases de bloco de código).
