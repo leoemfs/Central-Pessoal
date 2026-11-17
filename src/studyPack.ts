@@ -170,7 +170,7 @@ const toMapNode = (n: PackNode, id: string): MapNode => ({
 export function applyPack(study: StudyData, pack: StudyPack, now: string): PackResult {
   const pre = slug(pack.id);
   const added = { trilhas: 0, topicos: 0, paginas: 0, fontes: 0, mapas: 0, ciclos: 0 };
-  const s: StudyData = { ...study, areas: [...study.areas], themes: [...study.themes], tracks: [...study.tracks], sources: [...study.sources], maps: [...study.maps], cycles: [...study.cycles], notebooks: [...study.notebooks], packs: [...(study.packs ?? [])] };
+  const s: StudyData = { ...study, areas: [...study.areas], themes: [...study.themes], tracks: [...study.tracks], sources: [...study.sources], maps: [...study.maps], cycles: [...study.cycles], notebooks: [...study.notebooks], packs: [...(study.packs ?? [])], collections: study.collections ?? [] };
 
   const inCatalog = pack.area.catalogo && CATALOG.some((a) => a.id === pack.area.catalogo) ? pack.area.catalogo : null;
   const areaId = inCatalog ?? `pk-${pre}`;

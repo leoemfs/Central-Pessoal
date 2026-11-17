@@ -13082,3 +13082,99 @@ body.no-glass .tabbar:not(.jn-gamebar) {
     -webkit-touch-callout: default;
   }
 }
+
+/* M40: coleções na Biblioteca */
+.st-sec {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.st-sec .section-title {
+  flex: 1;
+  margin: 0;
+}
+.st-kind {
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--blue-text);
+}
+.st-col {
+  padding: 0;
+  overflow: hidden;
+}
+.st-col-head {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 6px 6px 8px;
+}
+.st-col-toggle {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border: none;
+  background: transparent;
+  color: var(--text);
+  text-align: left;
+  padding: 10px 6px;
+  border-radius: 12px;
+}
+.st-col-toggle:disabled {
+  cursor: default;
+}
+.st-col-chev {
+  flex: none;
+  display: grid;
+  color: var(--faint);
+  transition: transform 0.18s;
+}
+.st-col.open .st-col-chev {
+  transform: rotate(90deg);
+}
+.st-col-title {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+.st-col-title b {
+  font-size: 1.02rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.st-col-title small {
+  color: var(--faint);
+  font-size: 0.8rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.st-col-body {
+  border-top: 1px solid var(--border);
+  padding: 0 16px 4px;
+}
+.st-col-body > p {
+  margin: 12px 0;
+}
+.st-menu-row {
+  gap: 12px;
+}
+.st-menu-row:disabled {
+  opacity: 0.4;
+}
+.st-menu-row.st-danger {
+  color: var(--red-text);
+}
+.row-meta.st-move {
+  color: var(--blue-text);
+}
+@media (prefers-reduced-motion: reduce) {
+  .st-col-chev {
+    transition: none;
+  }
+}

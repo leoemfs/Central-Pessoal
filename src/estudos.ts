@@ -7,6 +7,7 @@
 import type { MapNode, RichNode, SourceKind, StudyBlock, StudyCycle, StudyData, StudyMap, StudyNotebook, StudyPage, StudyStatus } from './types.ts';
 import { CATALOG, slug, type CatMap, type CatSource, type CatTopic } from './estudosCatalogo.ts';
 import { fromBranches, normalizeMapRoot } from './mapas.ts';
+import { normalizeCollections } from './colecoes.ts';
 import { uid } from './utils.ts';
 
 export const SOURCE_KINDS: { value: SourceKind; label: string; icon: string }[] = [
@@ -26,7 +27,7 @@ export const STATUS_LABEL: Record<StudyStatus, string> = { afazer: 'A estudar', 
 export const nextStatus = (s: StudyStatus): StudyStatus => (s === 'afazer' ? 'andando' : s === 'andando' ? 'feito' : 'afazer');
 
 export function emptyStudy(): StudyData {
-  return { archived: [], areas: [], themes: [], tracks: [], cycles: [], notebooks: [], sources: [], maps: [], packs: [] };
+  return { archived: [], areas: [], themes: [], tracks: [], cycles: [], notebooks: [], sources: [], maps: [], packs: [], collections: [] };
 }
 
 // ---------- Biblioteca (catálogo + pessoal) ----------
@@ -441,6 +442,7 @@ export function normalizeStudy(raw: unknown): StudyData {
       updatedAt: str(m.updatedAt, now),
     })),
     packs: recs(r.packs).map((p) => ({ id: p.id as string, name: str(p.name, 'Curso'), importedAt: str(p.importedAt), parts: typeof p.parts === 'number' && p.parts > 0 ? Math.floor(p.parts) : 1 })),
+    collections: normalizeCollections(r.collections),
   };
 }
 

@@ -662,6 +662,17 @@ export interface StudyData {
   maps: StudyMap[];
   /** Cursos importados (M36), para o "Gerenciar cursos" da Biblioteca. */
   packs: StudyPackRecord[];
+  /** Coleções da Biblioteca (M40): grupos que recolhem e expandem. */
+  collections: StudyCollection[];
+}
+
+export interface StudyCollection {
+  id: string;
+  name: string;
+  /** Aberta (expandida) ou recolhida. */
+  open: boolean;
+  /** `a:<id da área>` ou `c:<id do curso>`, na ordem escolhida. */
+  items: string[];
 }
 
 export interface StudyPackRecord {
