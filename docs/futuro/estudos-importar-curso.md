@@ -208,3 +208,32 @@ Pedido: vários cursos são do mesmo assunto e deveriam ficar juntos na Bibliote
 - Organizar: setas para a ordem das coleções e dos itens; a pasta muda o item de coleção, tira de todas ou cria uma coleção nova com ele.
 - Item arquivado some da coleção, mas volta para o mesmo lugar ao ser trazido de volta.
 - Dados em `study.collections` (padrão vazio em `normalize()`; item repetido fica só na primeira coleção). Regras em `src/colecoes.ts`, 3 testes em `src/colecoes.test.ts`.
+
+## Exportar notebook ou curso em PDF e Word (M37, ideias de 18/11)
+Pedido: exportar um notebook (ou o curso inteiro) em PDF ou Word, mantendo a formatação e a hierarquia, com capa, anexos e referências.
+
+### Estrutura do documento
+1. **Capa:** nome da pessoa (de Você; se estiver vazio, pergunta na hora), nome do curso ou notebook, descrição, data, na fonte do app.
+2. **Sumário:** trilhas, páginas e subpáginas numeradas (1, 1.1, 1.2…), com a situação de cada tópico (estudado, estudando, a estudar), se houver ciclo.
+3. **Conteúdo:**
+   - curso → título de cada **trilha**;
+   - **página** → seção;
+   - **subpágina** → subseção.
+
+   Os títulos 1, 2 e 3 do editor descem um degrau dentro da página, para não brigar com a hierarquia. Ficam mantidos negrito, itálico, sublinhado, destaque, cores, listas, checklist (☑/☐), citação, código, divisor, alternantes (sempre abertos no papel), imagens e links clicáveis.
+4. **Anexos:** os mapas mentais do notebook e das páginas, um por página.
+5. **Referências:** as fontes do notebook e das páginas, numa lista (título, tipo, endereço, observação e onde foi usada).
+
+### Mapas que não cabem
+- O app mede o mapa. Se, ao caber na largura da folha, o texto ficaria pequeno demais para ler (menor que ~7 pt), tenta a **folha deitada** (paisagem).
+- Se ainda assim não couber legível, **avisa antes de exportar**: "O mapa X é grande demais para uma folha". Oferece duas saídas: recolher ramos e exportar só até o 2º nível, ou deixar o mapa fora e baixar a imagem do mapa à parte.
+
+### Como fazer (recomendação)
+- **PDF (M37a):** o app monta uma **página de impressão** com tudo isso (papel branco, A4, numeração de páginas no rodapé, quebra de página antes de cada trilha e dos anexos) e abre o "Imprimir › Salvar como PDF" do celular ou do computador. Fica idêntico à formatação do app e os mapas saem nítidos (desenho vetorial), **sem biblioteca nova**. Testar no Android instalado e no iPhone (no iPhone o PDF sai pelo "Compartilhar").
+- **Word (M37b):** gerar o `.docx` com a biblioteca **docx** (carregada só na hora de exportar). Os títulos viram os **estilos de título do Word**, então o painel de navegação e o sumário automático do Word funcionam. Listas, negrito, destaque e links são mantidos; os mapas entram como imagem (PNG). Alternativa mais barata, não recomendada: um ".doc" feito de HTML, que o Word abre com avisos e perde parte da formatação.
+- **Ficha "Exportar"** (na capa do notebook e no ⋯ do curso na Biblioteca):
+  - formato: PDF ou Word;
+  - o que exportar: tudo, ou só uma página com as subpáginas;
+  - o que incluir: capa, sumário, situação dos tópicos, mapas, referências, páginas vazias (desligado);
+  - nome na capa.
+- **Ideias extras:** cabeçalho com o nome do curso; rodapé "página X de Y"; data de exportação nas referências; lembrar as últimas escolhas.
