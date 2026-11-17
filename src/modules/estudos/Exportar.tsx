@@ -231,8 +231,9 @@ function ExportDocView({ doc }: { doc: ExportDoc }) {
             {m.name}
             {m.page && <small> · página {m.page}</small>}
             {m.trimmed && <small> · resumido (no app tem mais ideias)</small>}
+            {m.orientation === 'paisagem' && <small> · gire a folha para ler</small>}
           </h3>
-          <MapPaper root={m.root} name={m.name} />
+          <MapPaper root={m.root} name={m.name} turned={m.orientation === 'paisagem'} />
         </section>
       ))}
       {doc.refs.length > 0 && (
@@ -262,12 +263,14 @@ function ExportDocView({ doc }: { doc: ExportDoc }) {
   );
 }
 
-function MapPaper({ root, name }: { root: ExportDoc['maps'][number]['root']; name: string }) {
+/** Mapa no papel. `turned`: mapa largo, girado 90° para caber deitado na folha em pé. */
+function MapPaper({ root, name, turned }: { root: ExportDoc['maps'][number]['root']; name: string; turned?: boolean }) {
   const layout = useMemo(() => layoutMap(root), [root]);
   const pad = 24;
-  return (
+  const svg = (
     <svg className="pr-mapsvg" viewBox={`${layout.minX - pad} ${layout.minY - pad} ${layout.maxX - layout.minX + pad * 2} ${layout.maxY - layout.minY + pad * 2}`} role="img" aria-label={`Mapa mental: ${name}`} preserveAspectRatio="xMidYMid meet">
       <MapShapes layout={layout} />
     </svg>
   );
+  return turned ? <div className="pr-turn">{svg}</div> : svg;
 }

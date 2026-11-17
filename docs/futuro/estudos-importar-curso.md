@@ -258,3 +258,5 @@ Pedido: exportar um notebook (ou o curso inteiro) em PDF ou Word, mantendo a for
   - **Deixar fora.**
 - **Por dentro:** a estrutura vem de `src/exportar.ts` (`buildExport`, `mapFit`), a mesma que o Word vai usar. 5 testes em `src/exportar.test.ts`. O texto rico é desenhado por `RichView.tsx`; a impressão mostra só o documento (`body.printing` e `.pr-host`); A4 com `@page`, mapa deitado com a página nomeada `paisagem`.
 - **Testado:** PDF gerado no Chromium a partir de um curso importado, com 7 folhas: capa, sumário, 2 trilhas, mapa em pé, mapa resumido e referências. No iPhone o PDF sai pelo Compartilhar; falta conferir num aparelho de verdade.
+
+- **v0.127.1 (C18):** a impressão do celular descartava a folha deitada (página nomeada `paisagem`), e o mapa sumia do PDF. Agora todas as folhas são em pé: o mapa largo vai girado 90° dentro da folha (`.pr-turn`, unidades `cqw`/`cqh`), com "gire a folha para ler" no título. A medida de "cabe deitado" usa a área da folha em pé girada (900 × 670 px).

@@ -74,7 +74,7 @@ test('referências: em ordem, com onde foram usadas', () => {
 
 test('mapas: cabe em pé, deitado ou não cabe (e a escolha da pessoa)', () => {
   assert.equal(mapFit(fromBranches('A', [{ label: 'b', leaves: ['c'] }])).orientation, 'retrato');
-  // Mais largo que alto (ramos compridos dos dois lados): deitado.
+  // Mais largo que alto (ramos compridos dos dois lados): deitado (girado na folha em pé).
   const wide = mapNode('Centro', [mapNode('Ideia média', [mapNode('Ideia média', [mapNode('Ideia média')])]), mapNode('Ideia média', [mapNode('Ideia média', [mapNode('Ideia média')])])]);
   assert.equal(mapFit(wide).orientation, 'paisagem');
   const huge = fromBranches('Centro', Array.from({ length: 8 }, (_, i) => ({ label: `Ramo com nome comprido ${i}`, leaves: Array.from({ length: 12 }, (_, j) => `Ideia comprida número ${i}.${j}`) })));
