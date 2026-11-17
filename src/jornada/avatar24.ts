@@ -19,6 +19,11 @@ const AV = PX.AV as {
   BOOT_WINGS_WEAR: string[];
   SWORD: string[];
   staff: (pal: Pal) => Grid;
+  ARMOR_TUNIC: string[];
+  ARMOR_PLATE: string[];
+  BOOTS: string[];
+  BOOT_WINGS_ICON: string[];
+  feather: (pal: Pal) => Grid;
 };
 
 /** Letras do corpo dobradas (cada letra vira 2×2). */
@@ -249,7 +254,7 @@ function outlineG(g: Grid): Grid {
   return g;
 }
 /** Luz no alto à esquerda e sombra embaixo à direita (desenho dobrado ganha volume). */
-function shade(g: Grid): Grid {
+export function shade(g: Grid): Grid {
   const out = g.map((r) => [...r]);
   for (let y = 0; y < g.length; y++)
     for (let x = 0; x < g[0].length; x++) {
@@ -258,7 +263,8 @@ function shade(g: Grid): Grid {
       const up = g[y - 1]?.[x];
       const down = g[y + 1]?.[x];
       const right = g[y]?.[x + 1];
-      if (!up || up === OUTLINE) out[y][x] = mix(c, '#ffffff', 0.3);
+      const left = g[y]?.[x - 1];
+      if (!up || up === OUTLINE || !left || left === OUTLINE) out[y][x] = mix(c, '#ffffff', 0.3);
       else if (!down || down === OUTLINE || !right || right === OUTLINE) out[y][x] = mix(c, '#000000', 0.18);
     }
   return out;
@@ -309,7 +315,7 @@ function bow24(pal: Pal): Grid {
     const grip = y >= 14 && y <= 19;
     g[y][wx] = grip ? pal.G : pal.W;
     if (y > 3 && y < 30) g[y][wx + 1] = grip ? mix(pal.G, '#000000', 0.2) : pal.w;
-    if (y > 9 && y < 24 && !grip) g[y][wx + 2] = pal.w;
+    if (y > 3 && y < 30 && !grip) g[y][wx + 2] = pal.w;
     if (y >= 2 && y <= 31 && wx > 2) g[y][2] = pal.S;
   }
   g[0][2] = pal.W;
@@ -386,4 +392,30 @@ export function avatar24(o: AvatarOpts): Grid {
     else paint(c, sword24(w.pal), ox + 22, oy + 4);
   }
   return thin(c);
+}
+
+// ---------- R4a: ícones do Arsenal ----------
+
+/** Arco com flecha (ícone), 32×38. */
+function bowIcon24(pal: Pal): Grid {
+  const g = blankG(32, 38);
+  paint(g, bow24(pal), 12, 2);
+  for (const y of [19, 20]) for (let x = 4; x < 27; x++) if (!g[y][x] || g[y][x] === OUTLINE || g[y][x] === pal.S) g[y][x] = y === 19 ? pal.A : mix(pal.A, '#000000', 0.25);
+  for (const [x, y] of [[27, 19], [28, 19], [29, 19], [27, 20], [28, 20], [29, 20], [27, 18], [27, 21], [28, 18], [28, 21], [30, 19], [30, 20]]) g[y][x] = pal.P;
+  for (const [x, y] of [[2, 17], [3, 17], [4, 17], [2, 18], [3, 18], [2, 21], [3, 21], [4, 22], [2, 22], [3, 22]]) g[y][x] = pal.F;
+  return outlineG(g);
+}
+
+/** Ícone de qualquer item com o dobro de pixels (mostrado do mesmo tamanho). */
+export function itemIcon24(it: { slot: string; kind?: string; pal?: Pal; icon?: [string[], Pal]; shape?: string; wings?: boolean; feather?: Pal }): Grid | null {
+  if (it.slot === 'arma' && it.pal) return it.kind === 'arco' ? bowIcon24(it.pal) : it.kind === 'cajado' ? staff24(it.pal) : sword24(it.pal);
+  let g: Grid | null = null;
+  if (it.icon) g = grid(it.icon[0], it.icon[1], 16);
+  else if (it.slot === 'armadura' && it.pal) g = grid(it.shape === 'plate' ? AV.ARMOR_PLATE : AV.ARMOR_TUNIC, it.pal, 16);
+  else if (it.slot === 'botas' && it.pal) {
+    g = grid(AV.BOOTS, it.pal, 16);
+    if (it.wings) paint(g, grid(AV.BOOT_WINGS_ICON, { W: '#ffffff' }, 16), 0, 0);
+  } else if (it.feather) g = AV.feather(it.feather);
+  if (!g) return null;
+  return shade(thin(outlineG(dbl(g))));
 }

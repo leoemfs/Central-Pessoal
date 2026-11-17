@@ -379,7 +379,7 @@ window.PX = (function () {
     mistico: { label: 'Místico', color: '#fde047', bg: 'rgba(253,224,71,0.14)' }
   };
 
-  return { grid: grid, blank: blank, paint: paint, svg: svg, src: src, TIMES: TIMES, HOMES: HOMES, tree: tree, ITEMS: ITEMS, PETS: PETS, find: find, itemIcon: itemIcon, avatar: avatar, AV: { BODY: BODY, SKINS: SKINS, HAIRS: HAIRS, HELMET_WEAR: HELMET_WEAR, HELMET_PAL: HELMET_PAL, SHOULDERS: SHOULDERS, BOOT_WINGS_WEAR: BOOT_WINGS_WEAR, SWORD: SWORD, staff: staff }, RARITY: RARITY, ATTR_COLORS: ATTR_COLORS };
+  return { grid: grid, blank: blank, paint: paint, svg: svg, src: src, TIMES: TIMES, HOMES: HOMES, tree: tree, ITEMS: ITEMS, PETS: PETS, find: find, itemIcon: itemIcon, avatar: avatar, AV: { BODY: BODY, SKINS: SKINS, HAIRS: HAIRS, HELMET_WEAR: HELMET_WEAR, HELMET_PAL: HELMET_PAL, SHOULDERS: SHOULDERS, BOOT_WINGS_WEAR: BOOT_WINGS_WEAR, SWORD: SWORD, staff: staff, ARMOR_TUNIC: ARMOR_TUNIC, ARMOR_PLATE: ARMOR_PLATE, BOOTS: BOOTS, BOOT_WINGS_ICON: BOOT_WINGS_ICON, feather: feather }, RARITY: RARITY, ATTR_COLORS: ATTR_COLORS };
 })()
 ;
 
