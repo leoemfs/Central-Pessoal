@@ -185,3 +185,11 @@ REGRAS:
 - Gerar um PDF com: capa (nome do curso e data), sumário, cada trilha com seus tópicos e situação (estudado ou não) e **o que a pessoa escreveu** nas páginas e subpáginas do notebook (com a formatação do editor), mais as fontes no fim.
 - Recomendação técnica: montar uma página de impressão no próprio app e usar "Imprimir › Salvar como PDF" do celular ou computador. Funciona sem biblioteca nova e mantém a formatação. Mapas entram como desenho.
 - Tamanho estimado: M. Depende do M36 (registro dos cursos).
+
+## Coleções na Biblioteca (M40, ideia de 18/11)
+Pedido: vários cursos são do mesmo assunto e deveriam ficar juntos na Biblioteca, em listas que recolhem e expandem e que a pessoa pode editar.
+- **Coleção** = um grupo com nome criado pela pessoa (ex.: "Desenvolvimento com IA"), que recolhe e expande. Dentro dela ficam áreas e cursos importados.
+- **Editar:** criar, renomear, mudar a ordem das coleções e dos itens, pôr e tirar itens, excluir a coleção. Excluir a coleção nunca apaga os cursos: eles voltam para "Outras áreas".
+- **Cada coisa num lugar só:** um item fica em uma coleção por vez; o que não está em nenhuma aparece em "Outras áreas".
+- A coleção lembra se está aberta ou recolhida.
+- Prévia antes de construir.
