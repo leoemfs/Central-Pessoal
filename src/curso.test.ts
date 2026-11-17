@@ -236,3 +236,9 @@ test('arquivar um curso esconde os temas e trilhas que vieram dele', () => {
   assert.equal(isHidden(['prod'], 'prod', 'qualquer'), true);
   assert.equal(isHidden([], 'prod', 'pk-excel-tr-base'), false);
 });
+
+test('tutorial de Estudos: cartão aparece por padrão e o arquivado sobrevive ao backup', () => {
+  assert.equal(normalizeStudy({}).tutorialOff, false);
+  assert.equal(normalizeStudy({ tutorialOff: true }).tutorialOff, true);
+  assert.equal(emptyStudy().tutorialOff, false);
+});

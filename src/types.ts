@@ -662,6 +662,8 @@ export interface StudyData {
   maps: StudyMap[];
   /** Cursos importados (M36), para o "Gerenciar cursos" da Biblioteca. */
   packs: StudyPackRecord[];
+  /** Cartão "Como usar Estudos" arquivado (N11.5). O passo a passo continua no fim da tela. */
+  tutorialOff: boolean;
 }
 
 export interface StudyPackRecord {
