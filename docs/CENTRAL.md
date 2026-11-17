@@ -332,6 +332,7 @@ Documentos sem código: Mapa dos módulos (08/11), módulos personalizáveis, pa
 ## Prévias visuais guardadas
 | Prévia | Link |
 |---|---|
+| Jornada: cena principal com o dobro de pixels (hoje × 24 pixels): personagem, casinha, árvore, lua, gatinho (17/11) | https://claude.ai/artifact/NFcp1wPNozPhtZ6xK91fjz |
 | Jornada: mais pixels (hoje × filtro automático × redesenhado), gatinho, cãozinho e baú (17/11) | https://claude.ai/artifact/8ix2bMWBVxK4k5XVzNE5ic |
 | App: seletores com muitas opções numa linha só, com rolagem para o lado (16/11) | https://claude.ai/artifact/7HWfnYAcgx9AN2MZcC1Xfb |
 | Jornada: pixel art × pixel com efeito adesivo × estilo anime (decidido: pixel art com mais pixels) (16/11) | https://claude.ai/artifact/7JX6ukc6P29FmWPNb1Gmp8 |
