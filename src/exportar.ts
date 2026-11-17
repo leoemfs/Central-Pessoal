@@ -40,6 +40,7 @@ export interface ExportSection {
   origin: string | null;
 }
 
+/** 'paisagem' = girado 90° dentro da folha em pé. */
 export type Orientation = 'retrato' | 'paisagem' | 'nao-cabe';
 export interface ExportMap {
   id: string;
@@ -80,9 +81,12 @@ export interface ExportDoc {
 
 // ---------- Mapas na folha ----------
 
-/** Área útil de uma folha A4 (em px de tela, 96 por polegada), descontando as margens e o título do mapa. */
-const PORTRAIT = { w: 680, h: 900 };
-const LANDSCAPE = { w: 960, h: 600 };
+/**
+ * Área útil de uma folha A4 em pé (em px de tela, 96 por polegada), descontando as margens e o título do mapa:
+ * ~178 × 238 mm. Mapa largo vai **girado na mesma folha em pé** (a impressão do celular descarta folhas deitadas).
+ */
+const PORTRAIT = { w: 670, h: 900 };
+const LANDSCAPE = { w: 900, h: 670 };
 /** Menor letra das ideias no mapa (12,5 px) não pode ficar abaixo de ~7 pt (9,3 px) no papel. */
 const MIN_SCALE = 9.3 / 12.5;
 const PAD = 24;

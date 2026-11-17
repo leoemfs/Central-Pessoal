@@ -13545,8 +13545,30 @@ body.icons-flat .st-shortcut {
   height: auto;
   max-height: 230mm;
 }
-.pr-map.paisagem .pr-mapsvg {
-  max-height: 150mm;
+.pr-map .pr-mapsvg {
+  margin: 0 auto;
+}
+/* Mapa largo: girado 90° dentro da folha em pé (a moldura tem a forma da folha; o mapa ocupa ela deitado). */
+.pr-turn {
+  position: relative;
+  width: 100%;
+  max-width: 178mm;
+  aspect-ratio: 178 / 215;
+  margin: 0 auto;
+  container-type: size;
+}
+.pr-turn > .pr-mapsvg {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 100cqh;
+  height: 100cqw;
+  max-height: none;
+  transform: translate(-50%, -50%) rotate(-90deg);
+}
+/* Título e mapa sempre na mesma folha. */
+.pr-map {
+  break-inside: avoid;
 }
 .pr-refs li {
   margin: 4px 0;
@@ -13596,9 +13618,6 @@ body.icons-flat .st-shortcut {
     content: none;
   }
 }
-@page paisagem {
-  size: A4 landscape;
-}
 @media print {
   html:has(body.printing),
   body.printing {
@@ -13610,9 +13629,6 @@ body.icons-flat .st-shortcut {
   }
   body.printing .pr-host {
     display: block;
-  }
-  .pr-map.paisagem {
-    page: paisagem;
   }
   .pr-doc {
     font-size: 11pt;
