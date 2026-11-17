@@ -37,7 +37,7 @@
 1. **"Deseja importar um curso?"**: cartão em Estudos (abaixo do bloco principal) e na Biblioteca. Abre a tela de importar, em 3 passos:
    1. **Copiar o prompt**: campo "Sobre o que é o curso?" (ex.: "Excel do básico ao avançado"), nível (iniciante, intermediário, avançado) e tamanho (curto, médio, completo). O app monta o prompt e mostra **Copiar**.
    2. **Colar a resposta**: caixa de texto grande. Aceita a resposta inteira da IA, mesmo com texto antes ou depois e com as crases de bloco de código: o app acha o JSON sozinho.
-   3. **Conferir e importar**: resumo do que vai entrar (temas, trilhas, tópicos, páginas, fontes e mapas). Se der erro, explica em português o que faltou, com o botão "Copiar pedido de correção" (manda a mensagem de erro para a IA corrigir).
+   3. **Conferir e importar** (o arquivo `.md` é o caminho principal; colar texto é a alternativa): resumo do que vai entrar (temas, trilhas, tópicos, páginas, fontes e mapas). Se der erro, explica em português o que faltou, com o botão "Copiar pedido de correção" (manda a mensagem de erro para a IA corrigir).
 
    Continuam valendo "Escolher arquivo" e "Endereço", como hoje.
 2. **Mapa ligado a uma página**: `mapas[].pagina` (opcional) = nome de uma trilha ou tópico; o mapa aparece em "Mapas desta página".
@@ -48,6 +48,72 @@
    Fontes usadas em outros notebooks nunca são apagadas.
 4. **Registro dos cursos**: `study.packs` guarda `{ id, nome, importadoEm, partes }` a cada importação, com padrão vazio em `normalize()`. Cursos importados antes disso são reconhecidos pelo notebook `pk-<id>-nb`.
 5. Testes: achar o JSON no meio do texto, erros explicados, excluir "só o curso" × "tudo", fonte compartilhada preservada, importar de novo depois de excluir.
+
+## Decidido em 17/11: a IA entrega um ARQUIVO .md (não texto para copiar)
+Pedido do Leonardo: copiar um texto longo da conversa é fácil de cortar um pedaço e quebrar o curso.
+- O prompt pede para a IA **criar um arquivo `curso.md` para baixar**. Claude, ChatGPT e Gemini conseguem gerar arquivos para baixar. Se a IA não conseguir, ela mostra o mesmo conteúdo num bloco único, que tem o botão de copiar inteiro.
+- No app: **"Escolher arquivo"** aceita `.md` (novo) e `.json` (como hoje). Colar texto continua como alternativa.
+- **Markdown em vez de JSON:** a IA escreve markdown com muito menos erro (não precisa escapar aspas nem quebras de linha), e a pessoa consegue ler e conferir o arquivo antes de importar.
+- **Arquivo cortado não passa:** o arquivo termina com a linha `<!-- fim do curso -->`. Sem ela, o app avisa "o arquivo veio incompleto, peça para a IA gerar de novo" e não importa nada pela metade.
+- Por dentro, o app converte o `.md` para o mesmo pacote do M31: o resto (importar, juntar partes, gerenciar) não muda.
+
+### Formato do arquivo `curso.md`
+```
+---
+formato: central-pessoal/curso
+versao: 1
+id: excel-basico-ao-avancado
+nome: Excel do básico ao avançado
+area: Planilhas
+area_descricao: Organizar e analisar dados
+catalogo: prod
+notebook: Excel
+parte: 1
+---
+
+# Tema: Fundamentos
+
+## Trilha: Primeiros passos
+Descrição: Conhecer a tela e fazer a primeira planilha.
+
+Texto da página de abertura da trilha (markdown).
+
+### Tópico: A tela do Excel
+Fontes: https://support.microsoft.com/excel
+
+#### Explicação
+Texto…
+
+#### Exercício
+1. …
+
+### Tópico: Fórmulas básicas
+Antes: A tela do Excel
+…
+
+# Fontes
+- [Suporte do Excel](https://support.microsoft.com/excel) | doc | Documentação oficial
+
+# Mapa: Fundamentos do Excel
+- Excel
+  - Tela
+    - Faixa de opções
+  - Fórmulas
+    - SOMA
+
+# Ciclo: Começar pelo básico | Primeiros passos
+
+<!-- fim do curso -->
+```
+**Regras do formato:**
+- `# Tema:`, `## Trilha:` e `### Tópico:` marcam a estrutura.
+- Dentro dos textos, os títulos usam `####` (vira título 2 no editor) e `#####` (vira título 3).
+- `Descrição:` (na trilha), `Fontes:` e `Antes:` (no tópico) são opcionais.
+- O mapa é uma lista com 2 espaços por nível.
+- A seção `# Fontes` usa `- [título](endereço) | tipo | nota`.
+- A seção `# Ciclo:` usa "nome | trilha".
+
+O prompt abaixo (em JSON) fica como **referência do conteúdo**; na construção, o prompt do app pede o arquivo `.md` neste formato, com as mesmas regras 1 a 9 (conteúdo didático, links reais, um mapa por tema, Parte 1/Parte 2 com o mesmo `id`).
 
 ## Prompt padrão (o app monta com o tema, o nível e o tamanho)
 ```
