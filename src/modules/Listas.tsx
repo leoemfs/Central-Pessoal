@@ -14,7 +14,7 @@ import {
 } from '../lists';
 import type { ListCategory, ListItem, ListKind, Product, ProductVariant, UserList } from '../types';
 import { formatDMY, formatMoney, todayISO, uid } from '../utils';
-import { CategoryBadge, Chips, Empty, Field, Icon, notify, PageHeader, Pill, Progress, Sheet, Toggle, useBackToClose, type IconName } from '../ui';
+import { CategoryBadge, Chips, Empty, Field, Icon, notify, PageHeader, Pill, Progress, Sheet, StickyHead, Toggle, useBackToClose, type IconName } from '../ui';
 
 const money0 = (v: number) => `R$ ${Math.round(v).toLocaleString('pt-BR')}`;
 const parseNum = (t: string) => {
@@ -237,6 +237,7 @@ function ListsHome({ onNew, initialFilter = 'todas' }: { onNew: (categoryId: str
   };
   return (
     <>
+      <StickyHead>
       <div className="chips cat-chips" role="group" aria-label="Categorias">
         <button type="button" aria-pressed={filter === 'todas'} className={`chip-btn${filter === 'todas' ? ' on' : ''}`} onClick={() => setFilter('todas')}>
           Todas <b>{data.lists.length}</b>
@@ -250,6 +251,7 @@ function ListsHome({ onNew, initialFilter = 'todas' }: { onNew: (categoryId: str
           </button>
         ))}
       </div>
+      </StickyHead>
       {data.lists.length === 0 && filter === 'todas' && (
         <section className="card">
           <Empty>Listas que se usam e reusam: mercado com preços, compras de roupa ou para a casa, receitas e checklists. Cada categoria tem o seu jeito.</Empty>

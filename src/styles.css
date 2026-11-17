@@ -12795,3 +12795,118 @@ body.bar-labels.jn-tall {
 .jn-subtabs > .jn-chipset {
   margin: 0;
 }
+
+/* ---------- E36: abas e chips num jeito só (prévia "Barra padrão do app", 17/11) ----------
+   Uma barra no estilo da de Saúde para trocar de parte ou de categoria; a escolhida na cor de destaque do sistema.
+   Barras presas (topo, bloco do título com a barra, favoritos) em vidro fosco: o que passa por trás aparece embaçado. */
+:root {
+  --glass: rgb(0 0 0 / 0.66);
+  --glass-blur: blur(24px) saturate(150%);
+  --bar-track: rgb(28 28 30 / 0.72);
+}
+:root[data-theme='light'] {
+  --glass: rgb(255 255 255 / 0.72);
+  --bar-track: rgb(238 240 243 / 0.8);
+}
+@media (prefers-color-scheme: light) {
+  :root[data-theme='system'] {
+    --glass: rgb(255 255 255 / 0.72);
+    --bar-track: rgb(238 240 243 / 0.8);
+  }
+}
+
+/* A barra: trilho que rola para o lado; poucas opções ocupam a largura. */
+.segmented,
+.chips.cat-chips,
+.chips.st-scroll-chips {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 4px;
+  padding: 5px;
+  margin: 0;
+  border-radius: 16px;
+  background: var(--bar-track);
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.segmented::-webkit-scrollbar {
+  display: none;
+}
+/* Muitas opções: a ponta esmaece para mostrar que dá para rolar. */
+.segmented.scroll,
+.chips.cat-chips,
+.chips.st-scroll-chips {
+  -webkit-mask-image: linear-gradient(90deg, #000 calc(100% - 28px), transparent);
+  mask-image: linear-gradient(90deg, #000 calc(100% - 28px), transparent);
+}
+.segmented.scroll button {
+  flex: 1 0 auto;
+  padding-inline: 14px;
+}
+.segmented button,
+.chips.cat-chips .chip-btn,
+.chips.st-scroll-chips .chip-btn {
+  flex: 1 0 auto;
+  min-height: 40px;
+  border: 0;
+  border-radius: 12px;
+  background: transparent;
+  color: var(--muted);
+  font-weight: 600;
+  white-space: nowrap;
+  justify-content: center;
+}
+.segmented button.on,
+.chips.cat-chips .chip-btn.on,
+.chips.st-scroll-chips .chip-btn.on {
+  background: var(--accent-soft);
+  color: var(--accent-text);
+  box-shadow: inset 0 0 0 1px var(--accent);
+}
+/* Contagem em letra menor dentro da opção. */
+.chips.cat-chips b {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: inherit;
+  opacity: 0.75;
+}
+
+/* Vidro fosco: barra de cima, bloco preso (título + barra) e barra de favoritos. */
+.topbar {
+  background: var(--glass);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+}
+.tabbar:not(.jn-gamebar) {
+  background: var(--glass);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+}
+.sticky-head {
+  background: transparent;
+}
+.sticky-head.stuck {
+  box-shadow: none;
+}
+/* Quando gruda, uma faixa de vidro de borda a borda fica por trás do bloco. */
+.sticky-head.stuck::before {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  inset: -10px -16px -10px;
+  background: var(--glass);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+  border-bottom: 1px solid var(--border);
+}
+@media (min-width: 900px) {
+  .sticky-head.stuck::before {
+    inset: 0 -24px -10px;
+  }
+}
+/* Telas com mês (Finanças, Agenda…): no celular, o mês fica abaixo das abas (pedido de 17/11). */
+@media (max-width: 899px) {
+  .sticky-head > .page-header:has(.month-nav) {
+    order: 2;
+  }
+}
