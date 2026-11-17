@@ -237,3 +237,24 @@ Pedido: exportar um notebook (ou o curso inteiro) em PDF ou Word, mantendo a for
   - o que incluir: capa, sumário, situação dos tópicos, mapas, referências, páginas vazias (desligado);
   - nome na capa.
 - **Ideias extras:** cabeçalho com o nome do curso; rodapé "página X de Y"; data de exportação nas referências; lembrar as últimas escolhas.
+
+### O que foi construído (v0.127, M37a PDF)
+- Botão **Exportar em PDF** na capa do notebook (vale para o notebook de um curso importado). Tela `#/estudos/exportar/<notebook>`:
+  - formato: PDF, com Word marcado "em breve";
+  - o que exportar: tudo, ou uma página com as subpáginas;
+  - nome na capa: vem de Você;
+  - liga/desliga: capa, sumário, situação, mapas, referências, páginas sem anotações;
+  - prévia "Como vai ficar" com as folhas brancas;
+  - **Salvar em PDF**: abre a impressão do aparelho, com o nome do arquivo sugerido "<título> - <data>".
+- **Documento:**
+  - **capa:** "Curso" ou "Notebook", nome, descrição, a pessoa, data;
+  - **sumário:** 1, 1.1… com a situação de cada tópico;
+  - **seções:** trilha ou página em folha nova, subpáginas logo abaixo, com a origem na Biblioteca e a situação. Os títulos do editor descem um degrau; alternantes saem abertos; checklist com ☑/☐; links clicáveis;
+  - **anexos:** um mapa por folha, de pé ou deitada;
+  - **referências:** fontes das páginas, do notebook e todas as do curso, em ordem alfabética, com "Usada em";
+  - rodapé "página X / Y", sem número na capa.
+- **Mapa grande:** se nem deitado fica legível (letra menor que ~7 pt), a tela avisa e o botão só libera depois de escolher para cada mapa:
+  - **Resumir:** até o 2º nível; se ainda não couber, só os ramos principais;
+  - **Deixar fora.**
+- **Por dentro:** a estrutura vem de `src/exportar.ts` (`buildExport`, `mapFit`), a mesma que o Word vai usar. 5 testes em `src/exportar.test.ts`. O texto rico é desenhado por `RichView.tsx`; a impressão mostra só o documento (`body.printing` e `.pr-host`); A4 com `@page`, mapa deitado com a página nomeada `paisagem`.
+- **Testado:** PDF gerado no Chromium a partir de um curso importado, com 7 folhas: capa, sumário, 2 trilhas, mapa em pé, mapa resumido e referências. No iPhone o PDF sai pelo Compartilhar; falta conferir num aparelho de verdade.
