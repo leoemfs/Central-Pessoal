@@ -1,6 +1,6 @@
 import { barFor } from './moduleBar';
-import { backStack, clean, nextStack, replaceTop, ROOT, type NavKind } from './navStack';
-import { popWasOverlay, releaseOverlays } from './ui';
+import { clean, historyMoves, nextStack, replaceTop, ROOT, type NavKind } from './navStack';
+import { notify, popWasOverlay, releaseOverlays } from './ui';
 import { useEffect, useState } from 'react';
 
 export interface Route {
@@ -30,17 +30,27 @@ export function useRoute(): Route {
   return route;
 }
 
-// ---------- Voltar que sobe um nível (E20) ----------
-// O histórico do navegador fica com no máximo 2 entradas do app: a "raiz" (Início) e a de "cima" (a tela atual),
-// mais as janelas abertas. A trilha de verdade (Início › Mais › Finanças…) fica guardada aqui, em `trail`.
+// ---------- Voltar que sobe um nível (E20, refeito no E39) ----------
+// Cada nível da trilha (Início › Estudos › Biblioteca) é uma entrada de verdade no histórico do navegador,
+// criada no toque do usuário. O voltar do celular só desce as entradas: nada é recriado durante o voltar
+// (recriar fazia o app fechar quando o voltar era apertado duas vezes bem rápido).
+// Embaixo do Início fica uma entrada de guarda ("exit"): o primeiro voltar no Início mostra
+// "Volte novamente para sair"; um segundo voltar enquanto o aviso aparece fecha o app.
+
+type NavEntry = { nav: 'cp'; d: number } | { nav: 'exit' };
 
 let trail: string[] = [ROOT];
 let pending: (() => void) | null = null;
+let armed = false; // a entrada de guarda está embaixo do Início?
+let exitTimer = 0;
 const KEY = 'cp-trilha';
+const EXIT_MS = 3000;
 
 const here = () => clean(window.location.hash);
 const homeOf = (path: string) => barFor(path)?.items[1].section ?? null;
-const navState = () => (history.state as { nav?: string } | null)?.nav;
+const navEntry = () => history.state as (NavEntry & { overlay?: string }) | null;
+const onExitEntry = () => navEntry()?.nav === 'exit';
+const fire = () => window.dispatchEvent(new HashChangeEvent('hashchange'));
 
 function remember() {
   try {
@@ -50,27 +60,37 @@ function remember() {
   }
 }
 
-/** Põe o navegador na tela de cima da trilha. Se há janelas abertas, volta antes até a tela (elas fecham). */
+/** Está na guarda (depois do primeiro voltar no Início): recoloca o Início em cima dela. */
+function rearm() {
+  window.clearTimeout(exitTimer);
+  exitTimer = 0;
+  if (!onExitEntry()) return;
+  history.pushState({ nav: 'cp', d: 0 }, '', `#/${ROOT}`);
+  armed = true;
+}
+
+/** Leva o navegador até a trilha `next`: volta as entradas que sobram (e as janelas) e cria as que faltam. */
 function apply(next: string[]) {
-  const before = trail.length;
+  rearm();
+  const from = trail.length;
   trail = next;
   remember();
   const urlBefore = window.location.hash;
   let viaBack = false;
   const write = () => {
-    // Depois de voltar pelas janelas, o navegador já avisa a troca de endereço; não avisa duas vezes.
+    // Depois de voltar, o navegador já avisa a troca de endereço; não avisa duas vezes.
     const browserWillNotify = viaBack && window.location.hash !== urlBefore;
-    const to = trail[trail.length - 1];
-    if (trail.length === 1) history.replaceState({ nav: 'root' }, '', `#/${ROOT}`);
-    else if (navState() === 'top') history.replaceState({ nav: 'top' }, '', `#/${to}`);
-    else history.pushState({ nav: 'top' }, '', `#/${to}`);
-    if (!browserWillNotify) window.dispatchEvent(new HashChangeEvent('hashchange'));
+    const top = trail.length - 1;
+    const { push } = historyMoves(from, trail.length);
+    if (push === 0) history.replaceState({ nav: 'cp', d: top }, '', `#/${trail[top]}`);
+    else for (let d = top - push + 1; d <= top; d++) history.pushState({ nav: 'cp', d }, '', `#/${trail[d]}`);
+    if (!browserWillNotify) fire();
   };
-  const steps = releaseOverlays() + (trail.length === 1 && before > 1 && navState() !== 'root' ? 1 : 0);
-  if (steps > 0) {
+  const { back } = historyMoves(from, next.length, releaseOverlays());
+  if (back > 0) {
     viaBack = true;
     pending = write;
-    history.go(-steps);
+    history.go(-back);
   } else write();
 }
 
@@ -102,6 +122,15 @@ export function cleanAddress(to: string) {
   history.replaceState(history.state, '', `#/${clean(to)}`);
 }
 
+/** Primeiro voltar no Início: avisa e espera um segundo voltar para sair. */
+function askToLeave() {
+  armed = false;
+  notify('Volte novamente para sair');
+  window.clearTimeout(exitTimer);
+  // Passou o aviso sem voltar de novo: o Início volta a ter a guarda embaixo.
+  exitTimer = window.setTimeout(rearm, EXIT_MS);
+}
+
 /** Liga o voltar que sobe um nível. Chamado uma vez, ao abrir o app. */
 export function startNavigation() {
   let saved: string[] | null = null;
@@ -111,41 +140,60 @@ export function startNavigation() {
     saved = null;
   }
   const cur = here();
-  if (navState() === 'top' && Array.isArray(saved) && saved[saved.length - 1] === cur) trail = saved;
-  else if (cur === ROOT) {
-    trail = [ROOT];
-    history.replaceState({ nav: 'root' }, '', `#/${ROOT}`);
+  const st = navEntry();
+  if (st?.nav === 'cp' && Array.isArray(saved) && st.d === saved.length - 1 && saved[saved.length - 1] === cur) {
+    // Recarregou a página: as entradas do histórico continuam lá.
+    trail = saved;
+    armed = true;
   } else {
-    // Abriu direto numa tela (link, atualização): o Início fica embaixo, para o voltar subir até ele.
-    trail = nextStack([ROOT], cur, 'switch', homeOf);
-    history.replaceState({ nav: 'root' }, '', `#/${ROOT}`);
-    history.pushState({ nav: 'top' }, '', `#/${cur}`);
+    // Abriu agora (ou direto numa tela): guarda, Início e cada nível até a tela.
+    trail = cur === ROOT ? [ROOT] : nextStack([ROOT], cur, 'switch', homeOf);
+    history.replaceState({ nav: 'exit' }, '', `#/${ROOT}`);
+    trail.forEach((to, d) => history.pushState({ nav: 'cp', d }, '', `#/${to}`));
+    armed = true;
   }
   remember();
 
   window.addEventListener('popstate', (e: PopStateEvent) => {
     const overlay = popWasOverlay();
-    if (e.state === null && !pending) {
-      // Endereço trocado "por fora" (link colado, endereço digitado): o navegador avisa como se fosse voltar,
-      // mas é uma tela nova. Abre por cima da trilha, sem subir um nível.
-      trail = nextStack(trail, here(), 'open', homeOf);
-      remember();
-      history.replaceState({ nav: trail.length > 1 ? 'top' : 'root' }, '', window.location.hash);
-      return;
-    }
     if (pending) {
       const f = pending;
       pending = null;
       f();
       return;
     }
-    if (overlay || trail.length <= 1) return;
-    // Voltar de verdade: sai da tela de cima e mostra a de baixo na trilha.
-    trail = backStack(trail);
+    if (overlay) return;
+    const st = e.state as (NavEntry & { overlay?: string }) | null;
+    if (st?.nav === 'exit') {
+      trail = [ROOT];
+      remember();
+      askToLeave();
+      return;
+    }
+    if (st?.nav === 'cp' && st.d < trail.length) {
+      // Voltar (ou avançar) de verdade: a trilha fica com os níveis até esta entrada.
+      if (st.d < trail.length - 1) trail = trail.slice(0, st.d + 1);
+      remember();
+      const want = `#/${trail[st.d]}`;
+      if (window.location.hash !== want) {
+        history.replaceState({ nav: 'cp', d: st.d }, '', want);
+        fire();
+      }
+      return;
+    }
+    // Endereço trocado "por fora" (link colado, endereço digitado) ou entrada desconhecida:
+    // abre por cima da trilha e marca a entrada com o nível dela.
+    trail = nextStack(trail, here(), 'open', homeOf);
     remember();
-    if (trail.length === 1) history.replaceState({ nav: 'root' }, '', `#/${ROOT}`);
-    else history.pushState({ nav: 'top' }, '', `#/${trail[trail.length - 1]}`);
+    history.replaceState({ nav: 'cp', d: trail.length - 1 }, '', window.location.hash);
   });
+
+  // Tocar na tela enquanto o aviso de sair aparece: fica no app (a guarda volta na hora).
+  const stay = () => {
+    if (!armed && onExitEntry()) rearm();
+  };
+  window.addEventListener('pointerdown', stay, true);
+  window.addEventListener('keydown', stay, true);
 
   // Links do app (<a href="#/...">) passam pelo mesmo caminho. data-nav="switch" na barra e no menu.
   document.addEventListener('click', (e) => {

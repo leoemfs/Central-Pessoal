@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { backStack, nextStack, replaceTop } from './navStack.ts';
+import { backStack, historyMoves, nextStack, replaceTop } from './navStack.ts';
 
 const HOMES: Record<string, string> = { financas: 'financas', orcamento: 'financas', relatorios: 'financas', diario: 'diario', humor: 'diario' };
 const homeOf = (p: string) => HOMES[p] ?? null;
@@ -69,4 +69,13 @@ test('trocar a tela de cima no lugar não deixa a mesma tela duas vezes', () => 
 
 test('no Início, voltar continua no Início (o celular decide se sai do app)', () => {
   assert.deepEqual(backStack(['inicio']), ['inicio']);
+});
+
+test('E39: entradas do histórico a voltar e a criar ao trocar de trilha', () => {
+  assert.deepEqual(historyMoves(1, 2), { back: 0, push: 1 });
+  assert.deepEqual(historyMoves(2, 4), { back: 0, push: 2 });
+  assert.deepEqual(historyMoves(3, 2), { back: 1, push: 0 });
+  assert.deepEqual(historyMoves(3, 3), { back: 0, push: 0 });
+  assert.deepEqual(historyMoves(3, 1, 2), { back: 4, push: 0 });
+  assert.deepEqual(historyMoves(2, 3, 1), { back: 1, push: 1 });
 });
