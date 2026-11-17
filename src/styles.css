@@ -11527,6 +11527,7 @@ body.bar-labels.jn-tall {
   }
   /* E38: coluna mais larga, sem rolagem para o lado, e o + no meio do vão. */
   :root {
+    --sidebar-w: 320px;
     --quick-w: 340px;
     --gap-r: max(96px, calc((100vw - var(--sidebar-w) - var(--quick-w) - var(--mid-w)) / 2));
   }
@@ -11550,6 +11551,18 @@ body.bar-labels.jn-tall {
   }
   .quick-slot {
     overflow-wrap: anywhere;
+  }
+  /* Menu lateral: cada item numa linha só. */
+  .side-scroll .nav-menu a > span:not(.nav-ic),
+  .side-scroll .nav-menu .soon > span:not(.nav-ic),
+  .side-scroll .nav-menu .soon > em {
+    white-space: nowrap;
+  }
+  .side-scroll .nav-menu a > span:not(.nav-ic),
+  .side-scroll .nav-menu .soon > span:not(.nav-ic) {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
   .quick-slot .row-title {
     display: block;
