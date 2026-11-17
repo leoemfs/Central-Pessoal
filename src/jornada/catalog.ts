@@ -6,7 +6,7 @@ import { grid, sprite, toSvg, type Grid, type Palette } from './art.ts';
 import { HAIRS, SKINS, SKY_PALETTES } from './artData.ts';
 import { PET_SPRITES } from './petsData.ts';
 import { PETS24 } from './pets24.ts';
-import { avatar24 } from './avatar24.ts';
+import { avatar24, itemIcon24 } from './avatar24.ts';
 import { PX } from './px.ts';
 import { cabana24, casinha24, castelinho24, castelo24, moon24, sun24, torre24, tree24 } from './scene24.ts';
 
@@ -150,7 +150,12 @@ export type SkyPalette = (typeof SKY_PALETTES)['manha'];
 export const skyPalette = (phase: SkyPhase): SkyPalette => SKY_PALETTES[phase];
 
 /** Ícone do item (arte da prévia). */
-export const itemIcon = (item: Item): string => PX.itemIcon(PX.find(item.id));
+export const itemIcon = (item: Item): string => {
+  // R4a: ícones com o dobro de pixels, do mesmo tamanho na tela.
+  const raw = PX.find(item.id);
+  const g = raw ? itemIcon24(raw) : null;
+  return g ? toSvg(g, 2) : PX.itemIcon(raw);
+};
 
 /** Pet com a pelagem escolhida (a primeira, se nenhuma). */
 export function petIcon(id: string, variant?: string | null): string {
