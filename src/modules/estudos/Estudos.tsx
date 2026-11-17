@@ -10,6 +10,7 @@ import { FontesPage } from './Fontes';
 import { MapaPage, MapasPage } from './Mapas';
 import { CreateMenu, DualProgress, PackSheet, useCreate, useStudy } from './shared';
 import { CourseCta, ImportCoursePage } from './Cursos';
+import { ExportPage } from './Exportar';
 import { TutorialCard, TutorialLink } from './Tutorial';
 import { cleanAddress } from '../../router';
 
@@ -65,6 +66,10 @@ export function Estudos({ route }: ViewProps) {
     case 'mapa':
       page = <MapaPage key={a} id={a} />;
       // O mapa tem os próprios botões de criar ideias, logo abaixo do desenho.
+      fab = false;
+      break;
+    case 'exportar':
+      page = <ExportPage key={a} id={a} />;
       fab = false;
       break;
     case 'importar-curso':
