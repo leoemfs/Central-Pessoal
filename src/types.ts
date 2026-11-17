@@ -662,7 +662,8 @@ export interface StudyData {
   maps: StudyMap[];
   /** Cursos importados (M36), para o "Gerenciar cursos" da Biblioteca. */
   packs: StudyPackRecord[];
-<<<<<<< HEAD
+  /** Cartão "Como usar Estudos" arquivado (N11.5). O passo a passo continua no fim da tela. */
+  tutorialOff: boolean;
   /** Coleções da Biblioteca (M40): grupos que recolhem e expandem. */
   collections: StudyCollection[];
 }
@@ -672,12 +673,8 @@ export interface StudyCollection {
   name: string;
   /** Aberta (expandida) ou recolhida. */
   open: boolean;
-  /** `a:<id da área>` ou `c:<id do curso>`, na ordem escolhida. */
+  /** Itens da Biblioteca, na ordem escolhida: id da área, ou `pk-<id>` de um curso importado. */
   items: string[];
-=======
-  /** Cartão "Como usar Estudos" arquivado (N11.5). O passo a passo continua no fim da tela. */
-  tutorialOff: boolean;
->>>>>>> origin/main
 }
 
 export interface StudyPackRecord {

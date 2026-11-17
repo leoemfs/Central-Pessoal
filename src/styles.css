@@ -13083,7 +13083,6 @@ body.no-glass .tabbar:not(.jn-gamebar) {
   }
 }
 
-<<<<<<< HEAD
 /* M40: coleções na Biblioteca */
 .st-sec {
   display: flex;
@@ -13178,7 +13177,7 @@ body.no-glass .tabbar:not(.jn-gamebar) {
   .st-col-chev {
     transition: none;
   }
-=======
+}
 /* N11.5: tutorial de Estudos */
 .st-tut-head {
   flex: 1;
@@ -13280,5 +13279,4 @@ body.icons-flat .st-shortcut > .icon {
 body.icons-flat .st-shortcut {
   gap: 10px;
   padding: 12px;
->>>>>>> origin/main
 }

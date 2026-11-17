@@ -1,54 +1,15 @@
 /**
  * M40: coleções na Biblioteca.
  * Uma coleção agrupa itens da Biblioteca do mesmo assunto e recolhe/expande.
- * Itens: `a:<id da área>` (área do app, da pessoa ou de um curso com área própria)
- *     e `c:<id do curso>` (curso importado dentro de uma área do app, ex.: o de Claude em Inteligência artificial).
- * Cada item fica em uma coleção por vez; o que não está em nenhuma aparece em "Outras áreas".
- * Excluir uma coleção nunca apaga nada: os itens só voltam para "Outras áreas".
+ * Itens: as mesmas linhas da Biblioteca (M38): o id da área, ou `pk-<id>` de um curso importado.
+ * Cada item fica em uma coleção por vez; o que não está em nenhuma continua nas listas de sempre.
+ * Excluir uma coleção nunca apaga nada: os itens só voltam para as listas.
  */
-import type { StudyCollection, StudyData } from './types.ts';
-import { listCourses } from './curso.ts';
-import type { Library } from './estudos.ts';
+import type { StudyCollection } from './types.ts';
 import { uid } from './utils.ts';
 
-export interface LibItem {
-  key: string;
-  name: string;
-  /** Ícone (nome em ui.tsx). */
-  icon: string;
-  course: boolean;
-  mine: boolean;
-  themes: number;
-  tracks: number;
-  topics: number;
-  /** Para onde o toque leva (sem o "#/"). */
-  to: string;
-}
-
-/** Tudo o que pode entrar numa coleção, na ordem da Biblioteca (áreas visíveis, depois cursos dentro de áreas do app). */
-export function libraryItems(study: StudyData, lib: Library): LibItem[] {
-  const out: LibItem[] = [];
-  const courses = listCourses(study);
-  for (const a of lib.areas) {
-    if (study.archived.includes(a.id)) continue;
-    const trs = lib.tracks.filter((t) => t.areaId === a.id);
-    const ownCourse = a.id.startsWith('pk-') && courses.some((c) => `pk-${c.id}` === a.id);
-    out.push({ key: `a:${a.id}`, name: a.name, icon: ownCourse ? 'cap' : a.icon, course: ownCourse, mine: a.mine, themes: a.themes.length, tracks: trs.length, topics: trs.reduce((s, t) => s + t.topics.length, 0), to: `estudos/area/${a.id}` });
-  }
-  for (const c of courses) {
-    const themes = study.themes.filter((t) => t.id.startsWith(`pk-${c.id}-t-`));
-    if (!themes.length) continue;
-    const areaId = themes[0].areaId;
-    // Curso com área própria já aparece como a área; arquivado some junto com a área.
-    if (areaId === `pk-${c.id}` || study.archived.includes(areaId)) continue;
-    const trs = lib.tracks.filter((t) => t.id.startsWith(`pk-${c.id}-tr-`));
-    out.push({ key: `c:${c.id}`, name: c.name, icon: 'cap', course: true, mine: true, themes: themes.length, tracks: trs.length, topics: trs.reduce((s, t) => s + t.topics.length, 0), to: themes.length === 1 ? `estudos/tema/${themes[0].id}` : `estudos/area/${areaId}` });
-  }
-  return out;
-}
-
 /** Monta a tela: cada coleção com seus itens (na ordem escolhida) e o que sobrou, em "Outras áreas". */
-export function groupLibrary(cols: StudyCollection[], items: LibItem[]): { groups: { col: StudyCollection; items: LibItem[] }[]; loose: LibItem[] } {
+export function groupLibrary<T extends { key: string }>(cols: StudyCollection[], items: T[]): { groups: { col: StudyCollection; items: T[] }[]; loose: T[] } {
   const byKey = new Map(items.map((i) => [i.key, i]));
   const used = new Set<string>();
   const groups = cols.map((col) => ({
@@ -86,7 +47,7 @@ export function placeItem(cols: StudyCollection[], key: string, to: string | nul
   });
 }
 
-const swap = <T,>(list: T[], i: number, dir: -1 | 1): T[] => {
+const swap = <T>(list: T[], i: number, dir: -1 | 1): T[] => {
   const j = i + dir;
   if (i < 0 || j < 0 || j >= list.length) return list;
   const out = [...list];
@@ -127,6 +88,6 @@ export function normalizeCollections(raw: unknown): StudyCollection[] {
       id: c.id as string,
       name: typeof c.name === 'string' && c.name.trim() ? c.name.trim() : 'Coleção',
       open: c.open !== false,
-      items: (Array.isArray(c.items) ? c.items : []).filter((k): k is string => typeof k === 'string' && /^[ac]:.+/.test(k) && !seen.has(k) && (seen.add(k), true)),
+      items: (Array.isArray(c.items) ? c.items : []).filter((k): k is string => typeof k === 'string' && k.trim().length > 0 && !seen.has(k) && (seen.add(k), true)),
     }));
 }

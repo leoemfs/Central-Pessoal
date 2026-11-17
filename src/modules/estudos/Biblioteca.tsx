@@ -1,13 +1,8 @@
 import { useState } from 'react';
 import { go } from '../../router';
-<<<<<<< HEAD
-import { addTopicsAsPages, defaultCycleName, findSource, missingBefore, moveItem, newCycle, newNotebook, remainingTopics, topicState, touch, trackPath, trackProgress, type TrackView } from '../../estudos';
-import type { StudyCollection, StudySource } from '../../types';
-import { groupLibrary, libraryItems, moveCollection, moveItem as moveColItem, newCollection, placeItem, removeCollection, renameCollection, setItems, toggleCollection, type LibItem } from '../../colecoes';
-=======
 import { addTopicsAsPages, isHidden, defaultCycleName, findSource, missingBefore, moveItem, newCycle, newNotebook, remainingTopics, topicState, touch, trackPath, trackProgress, type TrackView } from '../../estudos';
-import type { StudySource } from '../../types';
->>>>>>> origin/main
+import type { StudyCollection, StudySource } from '../../types';
+import { groupLibrary, moveCollection, moveItem as moveColItem, newCollection, placeItem, removeCollection, renameCollection, setItems, toggleCollection } from '../../colecoes';
 import { Empty, Field, Icon, notify, PageHeader, Sheet, type IconName } from '../../ui';
 import { todayISO, uid } from '../../utils';
 import { listCourses, mineReach, removeCourse, removeMine } from '../../curso';
@@ -83,70 +78,14 @@ function RowActions({ name, archived, onArchive, onDelete }: { name: string; arc
 export function BibliotecaPage() {
   const { study, lib, set } = useStudy();
   const [areas, setAreas] = useState(false);
-<<<<<<< HEAD
+  const [doomed, setDoomed] = useState<Doomed | null>(null);
   const [organizing, setOrganizing] = useState(false);
   const [sheet, setSheet] = useState<ColSheet | null>(null);
-  const archived = lib.areas.filter((a) => study.archived.includes(a.id));
-  const items = libraryItems(study, lib);
-  const { groups, loose } = groupLibrary(study.collections, items);
-  const visible = new Set(items.map((i) => i.key));
   const setCols = (fn: (c: StudyCollection[]) => StudyCollection[]) => set((s) => ({ ...s, collections: fn(s.collections) }));
-  const archive = (id: string, on: boolean) => {
-=======
-  const [doomed, setDoomed] = useState<Doomed | null>(null);
   const archive = (id: string, name: string, on: boolean) => {
->>>>>>> origin/main
     set((s) => ({ ...s, archived: on ? [...s.archived, id] : s.archived.filter((x) => x !== id) }));
     notify(on ? `${name}: arquivado` : `${name} voltou para a biblioteca`, on ? 'Nada foi apagado. Fica em "Arquivados".' : undefined);
   };
-<<<<<<< HEAD
-  const doneOf = (it: LibItem) => {
-    const trs = it.key.startsWith('a:') ? lib.tracks.filter((t) => t.areaId === it.key.slice(2)) : lib.tracks.filter((t) => t.id.startsWith(`pk-${it.key.slice(2)}-tr-`));
-    return trs.reduce((n, t) => n + trackProgress(study.cycles, t).done, 0);
-  };
-  const itemRow = (it: LibItem, col: StudyCollection | null, i: number, count: number) => {
-    const done = doneOf(it);
-    const areaId = it.key.startsWith('a:') ? it.key.slice(2) : null;
-    return (
-      <li key={it.key} className="row">
-        <a className="st-row-main" href={`#/${it.to}`}>
-          <span className={`tile-icon ${it.course ? 'st-blue' : 'st-green'}`}>
-            <Icon name={it.icon as IconName} size={20} />
-          </span>
-          <div className="row-body">
-            {it.course && <span className="st-kind">Curso</span>}
-            <span className="row-title">{it.name}</span>
-            <span className="row-meta">
-              {it.course ? `${plural(it.tracks, 'trilha', 'trilhas')} · ${plural(it.topics, 'tópico', 'tópicos')}` : `${plural(it.themes, 'tema', 'temas')} · ${plural(it.tracks, 'trilha', 'trilhas')}`}
-              {done > 0 && ` · ${plural(done, 'estudado', 'estudados')}`}
-              {it.mine && !it.course && ' · criada por você'}
-            </span>
-          </div>
-        </a>
-        {organizing ? (
-          <span className="st-order-btns">
-            {col && (
-              <>
-                <button type="button" className="icon-btn" disabled={i === 0} onClick={() => setCols((c) => moveColItem(c, col.id, it.key, -1, visible))} aria-label={`Subir ${it.name}`}>
-                  <Icon name="up" size={16} />
-                </button>
-                <button type="button" className="icon-btn" disabled={i === count - 1} onClick={() => setCols((c) => moveColItem(c, col.id, it.key, 1, visible))} aria-label={`Descer ${it.name}`}>
-                  <Icon name="down" size={16} />
-                </button>
-              </>
-            )}
-            <button type="button" className="icon-btn" onClick={() => setSheet({ kind: 'place', key: it.key })} aria-label={`Mudar ${it.name} de coleção`}>
-              <Icon name="folder" size={16} />
-            </button>
-          </span>
-        ) : (
-          areaId && (
-            <button type="button" className="icon-btn st-quiet" onClick={() => archive(areaId, true)} aria-label={`Arquivar ${it.name}`} title="Arquivar">
-              <Icon name="archive" size={18} />
-            </button>
-          )
-        )}
-=======
   type Item = { key: string; name: string; icon: IconName; meta: string; href: string | null; onDelete?: () => void };
   // Cursos importados: uma linha própria, mesmo quando os temas ficam numa área do app.
   const courses: Item[] = listCourses(study).map((c) => {
@@ -168,7 +107,7 @@ export function BibliotecaPage() {
   const mine = [...courses, ...lib.areas.filter((a) => a.mine && !a.id.startsWith('pk-')).map(areaItem)];
   const catalog = lib.areas.filter((a) => !a.mine).map(areaItem);
   const off = (i: Item) => study.archived.includes(i.key);
-  const row = (i: Item) => {
+  const row = (i: Item, col: StudyCollection | null = null, idx = 0, count = 1) => {
     const isOff = off(i);
     const body = (
       <>
@@ -190,20 +129,41 @@ export function BibliotecaPage() {
             {body}
           </a>
         )}
-        <RowActions name={i.name} archived={isOff} onArchive={() => archive(i.key, i.name, !isOff)} onDelete={i.onDelete} />
->>>>>>> origin/main
+        {organizing && !isOff ? (
+          <span className="st-order-btns">
+            {col && (
+              <>
+                <button type="button" className="icon-btn" disabled={idx === 0} onClick={() => setCols((c) => moveColItem(c, col.id, i.key, -1, visible))} aria-label={`Subir ${i.name}`}>
+                  <Icon name="up" size={16} />
+                </button>
+                <button type="button" className="icon-btn" disabled={idx === count - 1} onClick={() => setCols((c) => moveColItem(c, col.id, i.key, 1, visible))} aria-label={`Descer ${i.name}`}>
+                  <Icon name="down" size={16} />
+                </button>
+              </>
+            )}
+            <button type="button" className="icon-btn" onClick={() => setSheet({ kind: 'place', key: i.key })} aria-label={`Mudar ${i.name} de coleção`}>
+              <Icon name="folder" size={16} />
+            </button>
+          </span>
+        ) : (
+          <RowActions name={i.name} archived={isOff} onArchive={() => archive(i.key, i.name, !isOff)} onDelete={i.onDelete} />
+        )}
       </li>
     );
   };
-  const shownMine = mine.filter((i) => !off(i));
-  const shownCatalog = catalog.filter((i) => !off(i));
+  // Coleções (M40): o que está numa coleção sai das listas de baixo (cada coisa num lugar só).
+  const shown = [...mine, ...catalog].filter((i) => !off(i));
+  const visible = new Set(shown.map((i) => i.key));
+  const { groups } = groupLibrary(study.collections, shown);
+  const grouped = new Set(groups.flatMap((g) => g.items.map((i) => i.key)));
+  const shownMine = mine.filter((i) => !off(i) && !grouped.has(i.key));
+  const shownCatalog = catalog.filter((i) => !off(i) && !grouped.has(i.key));
   const archived = [...mine, ...catalog].filter(off);
   return (
     <>
       <Path items={[{ label: 'Estudos', to: 'estudos' }, { label: 'Biblioteca' }]} />
       <PageHeader title="Biblioteca" subtitle="Roteiros de referência para explorar. Escolher algo daqui não muda o catálogo." />
-<<<<<<< HEAD
-      <CourseCta manage />
+      <CourseCta />
 
       <div className="st-sec">
         <h2 className="section-title">Coleções</h2>
@@ -218,7 +178,11 @@ export function BibliotecaPage() {
           </button>
         )}
       </div>
-      {groups.length === 0 && <p className="muted small" style={{ margin: 0 }}>Junte cursos e áreas do mesmo assunto numa coleção, que recolhe e expande. Toque em "Nova".</p>}
+      {groups.length === 0 && (
+        <p className="muted small" style={{ margin: 0 }}>
+          Junte cursos e áreas do mesmo assunto numa coleção, que recolhe e expande. Toque em "Nova".
+        </p>
+      )}
       {groups.map(({ col, items: its }, ci) => {
         const open = col.open || organizing;
         return (
@@ -252,34 +216,26 @@ export function BibliotecaPage() {
             </div>
             {open && (
               <div className="st-col-body">
-                {its.length ? <ul className="list">{its.map((it, i) => itemRow(it, col, i, its.length))}</ul> : <p className="muted small">Coleção vazia. Toque em ⋯ › Pôr cursos e áreas.</p>}
+                {its.length ? <ul className="list">{its.map((it, i) => row(it, col, i, its.length))}</ul> : <p className="muted small">Coleção vazia. Toque em ⋯ › Pôr cursos e áreas.</p>}
               </div>
             )}
           </section>
         );
       })}
-
-      <div className="st-sec">
-        <h2 className="section-title">{groups.length ? 'Outras áreas' : 'Áreas e cursos'}</h2>
-        {groups.length > 0 && <span className="muted small">{plural(loose.length, 'item', 'itens')}</span>}
-      </div>
-      <section className="card">
-        {loose.length ? <ul className="list">{loose.map((it) => itemRow(it, null, 0, 1))}</ul> : <Empty>Tudo está organizado em coleções.</Empty>}
-=======
-      <CourseCta />
       {shownMine.length > 0 && (
         <>
           <h2 className="section-title">Meus cursos e áreas</h2>
           <section className="card">
-            <ul className="list">{shownMine.map(row)}</ul>
+            <ul className="list">{shownMine.map((i) => row(i))}</ul>
           </section>
         </>
       )}
-      {shownMine.length > 0 && <h2 className="section-title">Referência</h2>}
-      <section className="card">
-        <ul className="list">{shownCatalog.map(row)}</ul>
->>>>>>> origin/main
-      </section>
+      {shownMine.length > 0 && shownCatalog.length > 0 && <h2 className="section-title">Referência</h2>}
+      {shownCatalog.length > 0 && (
+        <section className="card">
+          <ul className="list">{shownCatalog.map((i) => row(i))}</ul>
+        </section>
+      )}
       {organizing && (
         <div className="st-actionbar">
           <div className="st-actionbar-text">
@@ -300,45 +256,24 @@ export function BibliotecaPage() {
             <p className="muted small">Fora da sua biblioteca, mas tudo continua guardado.</p>
           </div>
           <section className="card">
-<<<<<<< HEAD
-            <ul className="list">
-              {archived.map((a) => (
-                <li key={a.id} className="row">
-                  <div className="st-row-main dim">
-                    <span className="tile-icon">
-                      <Icon name={a.icon as IconName} size={20} />
-                    </span>
-                    <div className="row-body">
-                      <span className="row-title">{a.name}</span>
-                      <span className="row-meta">{plural(a.themes.length, 'tema', 'temas')}</span>
-                    </div>
-                  </div>
-                  <button type="button" className="icon-btn st-quiet" onClick={() => archive(a.id, false)} aria-label={`Trazer ${a.name} de volta`} title="Trazer de volta">
-                    <Icon name="restore" size={18} />
-                  </button>
-                </li>
-              ))}
-            </ul>
-=======
-            <ul className="list">{archived.map(row)}</ul>
->>>>>>> origin/main
+            <ul className="list">{archived.map((i) => row(i))}</ul>
           </section>
         </>
       )}
       {areas && <AreasSheet onClose={() => setAreas(false)} />}
-<<<<<<< HEAD
-      {sheet && <CollectionSheets sheet={sheet} setSheet={setSheet} items={items} />}
-=======
       {doomed && <DeleteDoomed item={doomed} onClose={() => setDoomed(null)} />}
->>>>>>> origin/main
+      {sheet && <CollectionSheets sheet={sheet} setSheet={setSheet} items={shown} />}
     </>
   );
 }
 
+/** Um item que pode entrar numa coleção (as mesmas linhas da Biblioteca). */
+type ColItem = { key: string; name: string; meta: string };
+
 type ColSheet = { kind: 'menu'; id: string } | { kind: 'name'; id: string | null } | { kind: 'items'; id: string } | { kind: 'delete'; id: string } | { kind: 'place'; key: string };
 
 /** As fichas das coleções: opções (⋯), nome, escolher itens, excluir e mudar um item de coleção. */
-function CollectionSheets({ sheet, setSheet, items }: { sheet: ColSheet; setSheet: (s: ColSheet | null) => void; items: LibItem[] }) {
+function CollectionSheets({ sheet, setSheet, items }: { sheet: ColSheet; setSheet: (s: ColSheet | null) => void; items: ColItem[] }) {
   const { study, set } = useStudy();
   const cols = study.collections;
   const close = () => setSheet(null);
@@ -409,7 +344,7 @@ function CollectionSheets({ sheet, setSheet, items }: { sheet: ColSheet; setShee
         }
       >
         <p className="muted" style={{ marginTop: 0 }}>
-          Só a coleção some. {n ? `${plural(n, 'item volta', 'itens voltam')} para "Outras áreas", com tudo o que você estudou.` : 'Ela está vazia.'}
+          Só a coleção some. {n ? `${plural(n, 'item volta', 'itens voltam')} para as listas da Biblioteca, com tudo o que você estudou.` : 'Ela está vazia.'}
         </p>
       </Sheet>
     );
@@ -420,7 +355,7 @@ function CollectionSheets({ sheet, setSheet, items }: { sheet: ColSheet; setShee
     if (!it) return null;
     const go = (to: string | null) => {
       setCols((c) => placeItem(c, sheet.key, to));
-      notify(to ? 'Item mudou de coleção' : 'Item voltou para "Outras áreas"');
+      notify(to ? 'Item mudou de coleção' : 'Item saiu da coleção');
       close();
     };
     return (
@@ -435,7 +370,7 @@ function CollectionSheets({ sheet, setSheet, items }: { sheet: ColSheet; setShee
           ))}
           <button type="button" className="row st-menu-row" disabled={!o} onClick={() => go(null)}>
             <Icon name="list" size={20} />
-            <span className="row-title">Nenhuma: Outras áreas</span>
+            <span className="row-title">Nenhuma: tirar da coleção</span>
           </button>
           <button
             type="button"
@@ -476,7 +411,7 @@ function NameSheet({ col, onClose, onSave }: { col?: StudyCollection; onClose: (
 }
 
 /** Marcar o que fica na coleção. Item que está em outra coleção muda para esta (um lugar só). */
-function ItemsSheet({ col, items, owner, onClose, onSave }: { col: StudyCollection; items: LibItem[]; owner: (k: string) => StudyCollection | undefined; onClose: () => void; onSave: (keys: string[]) => void }) {
+function ItemsSheet({ col, items, owner, onClose, onSave }: { col: StudyCollection; items: ColItem[]; owner: (k: string) => StudyCollection | undefined; onClose: () => void; onSave: (keys: string[]) => void }) {
   const [sel, setSel] = useState<string[]>(col.items.filter((k) => items.some((i) => i.key === k)));
   return (
     <Sheet
@@ -502,7 +437,7 @@ function ItemsSheet({ col, items, owner, onClose, onSave }: { col: StudyCollecti
                 <div className="row-body">
                   <span className="row-title">{it.name}</span>
                   <span className={`row-meta${o && o.id !== col.id && on ? ' st-move' : ''}`}>
-                    {o && o.id !== col.id ? (on ? `Sai de "${o.name}"` : `Em "${o.name}"`) : it.course ? 'Curso' : `${plural(it.tracks, 'trilha', 'trilhas')}`}
+                    {o && o.id !== col.id ? (on ? `Sai de "${o.name}"` : `Em "${o.name}"`) : it.meta}
                   </span>
                 </div>
               </button>
@@ -513,6 +448,7 @@ function ItemsSheet({ col, items, owner, onClose, onSave }: { col: StudyCollecti
     </Sheet>
   );
 }
+
 
 export function AreaPage({ id }: { id: string }) {
   const { study, lib } = useStudy();
