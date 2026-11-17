@@ -42,6 +42,7 @@ anotar → especificar → aprovar → construir → testar. A cada mudança de 
 - Antes do PR: `npm test`, `npm run build` e teste no navegador em celular com Playwright (Chromium já instalado; `vite preview`, aparelho Pixel 7, locale pt-BR), incluindo as telas principais.
 - Versão em `package.json` (uma por item).
 - Visual: preto, verde e cartões; componentes prontos em `src/ui.tsx` (Sheet, Fullscreen, MoneyInput, Segmented, Toggle, Progress, notify…).
+- **Jornada (pixel art):** todo desenho **novo** é feito com o **dobro de pixels** (24 de largura, como o gatinho `CAT_HD` em `src/jornada/bichinho.ts`) e aparece do mesmo tamanho na tela que os antigos. **Exceção:** o que vai no corpo do personagem (elmo, roupa, botas, arma, colar) segue o tamanho do boneco atual até ele ser redesenhado (combinado em 17/11).
 
 ## Git
 - Trabalhar no branch indicado na sessão. Sem force push e sem rebase.
