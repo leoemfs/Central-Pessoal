@@ -47,6 +47,7 @@
 ## Caixa de entrada
 *Ideias e problemas ainda sem classificar. Uma linha cada, com a data.*
 
+- 17/11: Jornada: **mais pixels nas artes existentes**. Dois jeitos: filtro automático (P, vale para tudo, sem detalhe novo) ou redesenhar com o dobro de pixels (G por partes: pets em lotes de 4, depois itens, casas e chefes, personagem e roupas por último). Recomendação: redesenhar os pets primeiro. Prévia: https://claude.ai/artifact/8ix2bMWBVxK4k5XVzNE5ic
 - 16/11 (**feito, v0.102**): **App todo: seletores com muitas opções** (como as categorias do Codex) numa **div com rolagem horizontal**, em vez de quebrar linhas. Filtros de liga/desliga ("Só o que falta") viram botão fixo ao lado; abas curtas (2 a 4) ficam como estão. Prévia: https://claude.ai/artifact/7HWfnYAcgx9AN2MZcC1Xfb. Tamanho P a M (ajustar o componente de chips e conferir as telas que usam).
 - 16/11: **Jornada: estilo decidido = pixel art com mais pixels** (como o gatinho da prévia 2 do bichinho). O estilo anime fica só como ideia distante.
 - 16/11: Jornada no **estilo anime de adesivo** (talvez no futuro, com investimento). Caminhos: efeito adesivo por cima do pixel (P) ou redesenhar tudo em vetor/ilustrador (G+). Prévia: https://claude.ai/artifact/7JX6ukc6P29FmWPNb1Gmp8
@@ -329,6 +330,7 @@ Documentos sem código: Mapa dos módulos (08/11), módulos personalizáveis, pa
 ## Prévias visuais guardadas
 | Prévia | Link |
 |---|---|
+| Jornada: mais pixels (hoje × filtro automático × redesenhado), gatinho, cãozinho e baú (17/11) | https://claude.ai/artifact/8ix2bMWBVxK4k5XVzNE5ic |
 | App: seletores com muitas opções numa linha só, com rolagem para o lado (16/11) | https://claude.ai/artifact/7HWfnYAcgx9AN2MZcC1Xfb |
 | Jornada: pixel art × pixel com efeito adesivo × estilo anime (decidido: pixel art com mais pixels) (16/11) | https://claude.ai/artifact/7JX6ukc6P29FmWPNb1Gmp8 |
 | Jornada: bichinho virtual v2 (cartão no Fliperama, tela cheia, Quarto/Banheiro/Lá fora/Loja, quarto pela moradia) (16/11) | https://claude.ai/artifact/Q2pKUhPZ7jXtJpxxH8UYms |
