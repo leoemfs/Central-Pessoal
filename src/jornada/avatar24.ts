@@ -147,6 +147,91 @@ export function thin(g: Grid): Grid {
   return out;
 }
 
+
+// ---------- R3b: roupas e botas ----------
+
+const SHOULDERS24 = [
+  '..OOOOOOO..............OOOOOOO..', '.OMWWMMMMO............OMMMMWWMO.', 'OMWMMMMMMMO..........OMMMMMMMWMO',
+  'OMMMMMMMMMO..........OMMMMMMMMMO', 'OmMMMMMMMO............OMMMMMMMmO', 'OmmmmmmmO..............OmmmmmmmO',
+];
+const WINGS24 = [
+  '.OO..........................OO.', 'OWWO........................OWWO', 'OWwWO......................OWwWO',
+  '.OWwWO....................OWwWO.', '..OWWO....................OWWO..', '...OO......................OO...',
+];
+const TORSO = new Set(['M', 'm', 'q', 't']);
+const h01 = (x: number, y: number) => {
+  const n = Math.sin(x * 12.9898 + y * 78.233) * 43758.5453;
+  return n - Math.floor(n);
+};
+
+/** Textura de cada roupa no tronco (as letras continuam as da paleta da roupa). */
+function dressArmor(rows: string[], id: string, shape: string): string[] {
+  const g = rows.map((r) => [...r]);
+  let top = -1;
+  let bottom = -1;
+  for (let y = 0; y < g.length; y++)
+    if (g[y].some((c) => TORSO.has(c))) {
+      if (top < 0) top = y;
+      bottom = y;
+    }
+  const set = (x: number, y: number, c: string) => {
+    if (TORSO.has(g[y]?.[x])) g[y][x] = c;
+  };
+  for (let y = top; y <= bottom; y++)
+    for (let x = 0; x < 32; x++) {
+      if (!TORSO.has(g[y][x])) continue;
+      const dy = y - top;
+      switch (id) {
+        case 'aprendiz':
+          if (dy < 5 && (x === 15 - dy || x === 16 + dy)) set(x, y, 't');
+          break;
+        case 'gibao':
+          if ((x === 15 || x === 16) && y % 2 === 0) set(x, y, 't');
+          if (dy < 2) set(x, y, 'm');
+          break;
+        case 'malha':
+          if (y % 2 === 0 ? x % 2 === 0 : x % 2 === 1) set(x, y, y % 2 === 0 ? 'W' : 'm');
+          break;
+        case 'manto':
+        case 'mantoFloresta':
+          if (x === 15 || x === 16) set(x, y, 'G');
+          if (y === bottom) set(x, y, 'G');
+          if (id === 'manto' && h01(x, y) > 0.94) set(x, y, 'W');
+          if (id === 'mantoFloresta' && h01(x, y) > 0.86) set(x, y, h01(y, x) > 0.5 ? 'W' : 't');
+          break;
+        default:
+          if (shape === 'plate') {
+            if (dy % 4 === 3) set(x, y, 't');
+            if (x === 10 || x === 11) set(x, y, 'W');
+            if (id === 'cristal' && (x + y) % 7 === 0) set(x, y, 'W');
+            if (id === 'armaduraMontanha' && (x * 3 + y * 5) % 13 === 0) set(x, y, 't');
+            if (id === 'armaduraArena' && x % 6 === 3 && dy % 4 === 1) set(x, y, 'G');
+          }
+      }
+    }
+  return g.map((r) => r.join(''));
+}
+
+/** Detalhe de cada bota (cadarço, rebites, lama; sapato fica baixo). */
+function dressBoots(rows: string[], id: string): string[] {
+  const g = rows.map((r) => [...r]);
+  const BOOT = new Set(['K', 'i', 'j']);
+  let top = -1;
+  for (let y = 0; y < g.length; y++) if (top < 0 && g[y].some((c) => BOOT.has(c))) top = y;
+  if (top < 0) return rows;
+  for (let y = top; y < g.length; y++)
+    for (let x = 0; x < 32; x++) {
+      if (!BOOT.has(g[y][x])) continue;
+      const dy = y - top;
+      if (id === 'sapatos' && dy < 2) g[y][x] = 'P';
+      else if (id === 'couro' && dy > 0 && dy < 5 && dy % 2 === 1 && (x === 9 || x === 22)) g[y][x] = 'l';
+      else if (id === 'couro' && dy === 0) g[y][x] = 'j';
+      else if (id === 'ferro' && dy === 1 && x % 3 === 0) g[y][x] = 'i';
+      else if (id === 'botasPantano' && h01(x, y) > 0.7) g[y][x] = 'j';
+    }
+  return g.map((r) => r.join(''));
+}
+
 export interface AvatarOpts {
   genero: 'homem' | 'mulher';
   pele: string;
@@ -176,6 +261,7 @@ export function avatar24(o: AvatarOpts): Grid {
     i: mix(base.K, '#ffffff', 0.25),
     j: mix(base.K, '#000000', 0.25),
     u: '#facc15',
+    l: '#e7c48a',
   };
   if (!pal.m) pal.m = mix(base.M, '#000000', 0.2);
   const c: Grid = Array.from({ length: 60 }, () => Array(64).fill(null));
@@ -183,7 +269,7 @@ export function avatar24(o: AvatarOpts): Grid {
   const oy = 12;
   const w = o.arma ? PX.find(o.arma) : null;
   if (w && w.kind === 'arco') paint(c, dbl(PX.quiverGrid(w.pal)), ox - 6, oy + 14);
-  paint(c, grid(body24(o.genero), pal, 32), ox, oy);
+  paint(c, grid(dressBoots(dressArmor(body24(o.genero), armor.id, armor.shape), boots.id), pal, 32), ox, oy);
   const nk = o.colar ? PX.find(o.colar) : null;
   if (nk && nk.neck) {
     const dot = (x: number, y: number, col: string) => paint(c, [[col, col], [col, col]], ox + x * 2, oy + y * 2);
@@ -192,8 +278,8 @@ export function avatar24(o: AvatarOpts): Grid {
     dot(7, 12, nk.neck[1]);
     dot(8, 12, nk.neck[1]);
   }
-  if (armor.shape === 'plate') paint(c, dbl(grid(AV.SHOULDERS, armor.pal, 16)), ox, oy + 20);
-  if (boots.wings) paint(c, dbl(grid(AV.BOOT_WINGS_WEAR, { W: '#ffffff' }, 16)), ox, oy + 40);
+  if (armor.shape === 'plate') paint(c, grid(SHOULDERS24, armor.pal, 32), ox, oy + 20);
+  if (boots.wings) paint(c, grid(WINGS24, { W: '#ffffff', w: '#cbd5e1' }, 32), ox, oy + 40);
   if (o.elmo && AV.HELMET_WEAR[o.elmo]) paint(c, dbl(grid(AV.HELMET_WEAR[o.elmo], AV.HELMET_PAL[o.elmo], 16)), ox, oy - 12);
   if (w) {
     if (w.kind === 'arco') paint(c, dbl(PX.bowGrid(w.pal)), ox + 26, oy + 12);
