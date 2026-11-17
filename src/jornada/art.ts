@@ -62,7 +62,8 @@ export function diagonal(fn: (p: number, q: number, r: number, c: number) => str
 }
 
 /** SVG (data URI) com um retângulo por trecho de mesma cor em cada linha. */
-export function toSvg(g: Grid): string {
+/** `scale` 2 = desenho com o dobro de pixels mostrado do mesmo tamanho (tamanho natural pela metade). */
+export function toSvg(g: Grid, scale = 1): string {
   const h = g.length;
   const w = g[0]?.length ?? 0;
   const out: string[] = [];
@@ -79,7 +80,7 @@ export function toSvg(g: Grid): string {
       out.push(`<rect x="${s}" y="${y}" width="${x - s}" height="1" fill="${c}"/>`);
     }
   }
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${w} ${h}" width="${w}" height="${h}" shape-rendering="crispEdges">${out.join('')}</svg>`;
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${w} ${h}" width="${w / scale}" height="${h / scale}" shape-rendering="crispEdges">${out.join('')}</svg>`;
   return `data:image/svg+xml,${encodeURIComponent(svg)}`;
 }
 

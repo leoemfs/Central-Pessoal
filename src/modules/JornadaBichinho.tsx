@@ -7,7 +7,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useStore } from '../store';
 import { Fullscreen, notify } from '../ui';
 import { sprite } from '../jornada/art';
-import { FICHA_ICON, homeIcon, PETS, petIcon, treeIcon } from '../jornada/catalog';
+import { FICHA_ICON, homeIcon, MOON_ICON, PETS, petIcon, sunIcon, treeIcon } from '../jornada/catalog';
 import { PET_SPRITES } from '../jornada/petsData';
 import { PX } from '../jornada/px';
 import { fichas } from '../jornada/games';
@@ -30,8 +30,8 @@ const OBJ = {
   soap: sprite(['.OOOOO.', 'OPPPPPO', 'OPWPPPO', 'OPPPPPO', '.OOOOO.'], { P: '#a78bfa', W: '#ede9fe' }, 7),
   tooth: sprite(['.OOO.', 'OWWWO', 'OWWWO', '.OPO.', '.OPO.', '.OPO.', '.OOO.'], { W: '#ffffff', P: '#60a5fa' }, 5),
   duck: sprite(['..OOO...', '.OYYYO..', '.OYEYOOO', '..OYYYOR', 'OOOYYYO.', 'OYYYYYO.', '.OOOOO..'], { Y: '#facc15', E: '#111111', R: '#f97316' }, 8),
-  sun: sprite(['..Y..Y..', 'Y.YYYY.Y', '.YYYYYY.', 'YYYYYYYY', 'YYYYYYYY', '.YYYYYY.', 'Y.YYYY.Y', '..Y..Y..'], { Y: '#fde047' }, 8),
-  moon: sprite(['..OOO..', '.OMMO..', 'OMMO...', 'OMMO...', 'OMMO...', '.OMMO..', '..OOO..'], { M: '#e0e7ff' }, 7),
+  sun: sunIcon('#fde047'),
+  moon: MOON_ICON,
   flower: sprite(['.P.P.', 'PYPYP', '.PPP.', '..G..', '.GG..', '..G..'], { P: '#f472b6', Y: '#facc15', G: '#16a34a' }, 5),
   bed2: sprite(['..OOOOOOOOOOOOOOOO..', '.OPPPPPPPPPPPPPPPPO.', 'OPLLLLWLLLLLLWLLLLPO', 'OPLLLLLLLLLLLLLLLLPO', 'OPPPPPPPPPPPPPPPPPPO', 'OYYYYYYYYYYYYYYYYYYO', '.OOOOOOOOOOOOOOOOOO.'], { P: '#a855f7', L: '#e9d5ff', W: '#ffffff', Y: '#facc15' }, 20),
   mouse: sprite(['........OO', '..OOOOOOGO', '.OGGGGGGGO', 'OGGEGGGGGO', 'OGGGGGGGO.', '.OOOOOOO..'], { G: '#a1a1aa', E: '#111111' }, 10),
@@ -139,7 +139,7 @@ export function BichinhoTelaCheia({ onClose }: { onClose: () => void }) {
   const [sleeping, setSleeping] = useState(false);
   const [busy, setBusy] = useState(false);
   const [hop, setHop] = useState(0);
-  const [fx, setFx] = useState<{ id: number; kind: 'heart' | 'bubble' | 'sun'; x: number }[]>([]);
+  const [fx, setFx] = useState<{ id: number; kind: 'heart' | 'bubble' | 'sun' | 'star'; x: number }[]>([]);
   const [toyKick, setToyKick] = useState(0);
   const seq = useRef(0);
   const timers = useRef<number[]>([]);
@@ -149,7 +149,7 @@ export function BichinhoTelaCheia({ onClose }: { onClose: () => void }) {
   const phase = hour >= 18 || hour < 6 ? 'noite' : hour >= 15 ? 'tarde' : 'manha';
   const night = phase === 'noite';
 
-  const burst = (kind: 'heart' | 'bubble' | 'sun', n: number) => {
+  const burst = (kind: 'heart' | 'bubble' | 'sun' | 'star', n: number) => {
     if (reduced()) return;
     const items = Array.from({ length: n }, (_, i) => ({ id: ++seq.current, kind, x: 40 + i * 5 }));
     setFx((f) => [...f, ...items]);
@@ -184,7 +184,7 @@ export function BichinhoTelaCheia({ onClose }: { onClose: () => void }) {
     if (a === 'petisco') burst('heart', 1);
     if (a === 'escovar' || a === 'dentes') burst('bubble', 4);
     if (a === 'brincar') setToyKick((k) => k + 1);
-    if (a === 'sol') burst('sun', 1);
+    if (a === 'sol') burst(night ? 'star' : 'sun', night ? 3 : 1);
     if (a === 'banho') {
       // No banho ele fica de costas, dentro da banheira, com bolhas.
       setBusy(true);
@@ -261,7 +261,8 @@ export function BichinhoTelaCheia({ onClose }: { onClose: () => void }) {
     fora: [
       { id: 'passear', label: 'Passear', icon: petArt(id, s.petStyle[id], 'lado').src },
       { id: 'bolinha', label: 'Bolinha', icon: OBJ.ball },
-      { id: 'sol', label: 'Tomar sol', icon: OBJ.sun },
+      // À noite, o mesmo descanso vira olhar as estrelas.
+      night ? { id: 'sol', label: 'Ver as estrelas', icon: OBJ.moon } : { id: 'sol', label: 'Tomar sol', icon: OBJ.sun },
       { id: 'flores', label: 'Flores', icon: OBJ.flower },
     ],
   };
@@ -336,7 +337,7 @@ export function BichinhoTelaCheia({ onClose }: { onClose: () => void }) {
             <span key={f.id} className="jn-vp-fx bubble" style={{ left: `${f.x}%` }} aria-hidden="true" />
           ) : (
             <span key={f.id} className="jn-vp-fx heart" style={{ left: `${f.x}%` }} aria-hidden="true">
-              {f.kind === 'sun' ? '☀' : '♥'}
+              {f.kind === 'sun' ? '☀' : f.kind === 'star' ? '✦' : '♥'}
             </span>
           ),
         )}
