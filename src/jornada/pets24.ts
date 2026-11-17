@@ -55,4 +55,42 @@ export const PETS24: Record<string, Pet24> = {
     ]),
     pal: (p) => ({ B: p.B, b: p.b, L: light(p.B, 0.3), D: dark(p.B, 0.3), W: p.W, E: p.E, H: '#ffffff', Y: p.Y, y: dark(p.Y, 0.25) }),
   },
+  beijaflor: {
+    rows: [
+    '.................O..........', '...............OOLOO........', '..............OLLGGGO.......', '.............OLLGGGGGO......',
+    '............OLLHEGGGGGO.....', '..OOOOOOOOOOOLGEEGGGGGO.....', '.OKKKKKKKKKKKGGGGGGGGGO.....', '..OOOOOOOOOOOGGGGGGGGGO.....',
+    '.............OGGGGGGGOOO....', '.........OOO.ORGGGGGGGGGO...', '.....OOOOwWWOORRRGRRGGGGGO..', '....OWwWWwWWwWWrrrrGGGGGGO..',
+    '...OWWwWWwWWwWGGGPPGGGGGggO.', '...OWWwWWwWWwWWGPPPPGGGggO..', '....OWwWWwWWwWWGPPPPGGgggO..', '.....OOOOwWWOOOOGPPGGgGggO..',
+    '.........OOO....OOOOOOGggO..', '......................OGggO.', '......................OGgggO', '.......................OOOO.',
+    ],
+    pal: (p) => ({ G: p.G, g: p.g, L: light(p.G, 0.35), R: p.R, r: dark(p.R, 0.25), W: p.W, w: dark(p.W, 0.15), P: light(p.W, 0.4), E: p.E, H: '#ffffff', K: '#1f2937' }),
+  },
+  esquilo: {
+    rows: [
+    '..........OO........OOO.....', '.........OCCO.....OOTTTOO...', '......OOOCWWCO...OTTTTTTTO..', '....OOLLCCCWCO..OTTttttTTuO.',
+    '...OLLLCCCCCCO..OTTttttTTuO.', '..OLLLCCCCCCCCOOTTttttttTuuO', '..OLLCHECCCCCCOOTTttttttTuuO', '..OLCCEECCCCCCOOTTttttttTuuO',
+    '.ONNCCCCCCCCCCOOTTttttttTuuO', '..OMWWWWCCCCCCOOTTttttttTuuO', '..OWWWWWCCCCCCOOTTttttttTuuO', '..OWWWWWCCCCCCCOTTTttttTTuuO',
+    '...OOyCCCCCCCCCDTTTttttTTuuO', '..OyyyyyCWCCCCCDDTTTTTTTTuuO', '...OYYYCWWWCCCCDDTTTTTTTTuO.', '..OYYYYDDWWWCCCDDTTTTTTTTuO.',
+    '..OYYYYYWWWWCCCDDDuuuuuuuO..', '...OYYYWWWWWCCCDDOOOuuuOO...', '....OOCWWWWWCCCDDO..OOO.....', '.....OCWWWWWCCCDDO..........',
+    '......OWWWWWCCCDO...........', '......ODDDDCCDDDDO..........', '.....ODDDDDDDDDDDDO.........', '......ODDDDOODDDDO..........',
+    ],
+    pal: (p) => ({ C: p.C, D: dark(p.C, 0.25), L: light(p.C, 0.3), T: p.T, u: dark(p.T, 0.2), t: p.t, W: p.W, E: p.E, H: '#ffffff', N: p.N, M: dark(p.C, 0.45), Y: p.Y, y: dark(p.Y, 0.35) }),
+  },
+  tartaruga: {
+    rows: [
+    '.........OOOOOOO..............', '.......OOLLLLLLSOO............', '.....OOLLLLLsLSSSSOO..........', '....OLLLLsLLSSSsSSSSO...OOOO..',
+    '...OsssssssssssssssssO.OGGGGO.', '..OsLLLLLsSSSSSsSSSSSsOGGGGHEO', '..OLLLsLSSSSsSSSSSsSSSOGGGGGGO', '.OsssssssssssssssssssssGGGGGGO',
+    '.OLLLSsSSSSSsSSSSSsSSSSGGGGGMO', 'OGLsSSSSSsSSSSSsSSSSSsSGggggO.', 'GRRRRRRRRRRRRRRRRRRRRRRRGGOO..', 'OOOGGggOOOOOOOOOOGGggOOOOO....',
+    '..OGGggO........OGGggO........', '..OGGggO........OGGggO........', '..OGGggO........OGGggO........', '...OOOO..........OOOO.........',
+    ],
+    pal: (p) => ({ S: p.S, s: p.s, L: light(p.S, 0.3), R: dark(p.s, 0.2), G: p.G, g: dark(p.G, 0.2), E: p.E, H: '#ffffff', M: dark(p.G, 0.45) }),
+  },
+  raposa: {
+    rows: mirror([
+      '.OO.........', '.OKO........', '.OKKO.......', '.OKWCO.OOOOO', '.OCWCCOCCCCC', 'OCCCCCCCCCCC', 'OCCCLLLCCCCC',
+      'OCCOOOCCCCCC', 'OCOEHEOCCCCC', 'OCOEEEOCCCCC', 'OWWOOOCCCCNN', '.OWWWWWWWWWM', '..OWWWWWWWWW', '...OOWWWWWWW',
+      '...OCCWWWWWW', '..OCCCWWWWWW', '..OCCCCWWWWC', '..OKKCCCCCCO', '..OKKKKO....', '..OOOOOO....',
+    ]),
+    pal: (p) => ({ C: p.C, K: p.K, W: p.W, E: p.E, H: '#ffffff', N: p.N, L: light(p.C, 0.25), M: dark(p.C, 0.4) }),
+  },
 };
