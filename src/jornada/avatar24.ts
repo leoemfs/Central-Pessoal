@@ -419,3 +419,21 @@ export function itemIcon24(it: { slot: string; kind?: string; pal?: Pal; icon?: 
   if (!g) return null;
   return shade(thin(outlineG(dbl(g))));
 }
+
+// ---------- R4b: baús, moedas, cristal, ficha, medalhas ----------
+
+/** Lê um desenho já pronto (SVG de retângulos) de volta para a grade. */
+export function svgToGrid(uri: string): Grid {
+  const svg = decodeURIComponent(uri.replace(/^data:image\/svg\+xml,/, ''));
+  const vb = /viewBox="0 0 (\d+) (\d+)"/.exec(svg);
+  const w = vb ? +vb[1] : 16;
+  const h = vb ? +vb[2] : 16;
+  const g = blankG(w, h);
+  for (const m of svg.matchAll(/<rect x="(\d+)" y="(\d+)" width="(\d+)" height="1" fill="([^"]+)"\/>/g)) {
+    const [x, y, len] = [+m[1], +m[2], +m[3]];
+    for (let i = 0; i < len; i++) g[y][x + i] = m[4];
+  }
+  return g;
+}
+/** Desenho antigo com o dobro de pixels: contorno fino, luz e sombra (mostrado do mesmo tamanho). */
+export const hd24 = (uri: string): Grid => shade(thin(outlineG(dbl(svgToGrid(uri)))));

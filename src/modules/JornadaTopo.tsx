@@ -9,7 +9,7 @@ import { go } from '../router';
 import { todayISO } from '../utils';
 import { notify } from '../ui';
 import { journeyStats } from '../journey';
-import { avatarIcon, chestIcon, COIN_ICON, GEM_ICON, HOMES, itemById, itemIcon, ITEMS, medalIcon, PETS, petIcon, homeIcon } from '../jornada/catalog';
+import { avatarIcon, chestIcon, COIN_ICON, GEM_ICON, HOMES, itemById, itemIcon, ITEMS, medalIcon, PETS, petIcon, homeIcon, FLAME_ICON, STAR_ICON } from '../jornada/catalog';
 import { PX } from '../jornada/px';
 import { mainBox, quaseLa, streakDays, dayNumbers } from '../jornada/home';
 import { balance, planStatus, progress } from '../boxes';
@@ -46,7 +46,7 @@ export function JornadaHud() {
         </div>
         <div className="jn-hud-purse">
           <span className="f" aria-label={`${flame} ${flame === 1 ? 'dia seguido' : 'dias seguidos'} abrindo o app`}>
-            <img alt="" src={PX.flame} />
+            <img alt="" src={FLAME_ICON} />
             <b>{flame}</b>
           </span>
           <span className="g" aria-label={`${fmt(w.gold)} de ouro`}>
@@ -75,7 +75,7 @@ export function JornadaHud() {
         <strong>{look.name || cls[look.gender]}</strong>
         <div className="jn-hud-purse">
           <span className="f">
-            <img alt="" src={PX.flame} />
+            <img alt="" src={FLAME_ICON} />
             <b>{flame}</b>
           </span>
           <span className="g">
@@ -221,7 +221,7 @@ export function QuaseLa() {
   const { data } = useStore();
   const list = quaseLa(data, data.journey, todayISO());
   const icon = (g: (typeof list)[number]['icon']) =>
-    g.kind === 'estrela' ? PX.star : g.kind === 'pote' ? PX.jar(g.pct) : g.kind === 'bau' ? chestIcon(g.chest, false) : g.kind === 'medalha' ? medalIcon(g.index, true) : itemIcon(itemById(g.id)!);
+    g.kind === 'estrela' ? STAR_ICON : g.kind === 'pote' ? PX.jar(g.pct) : g.kind === 'bau' ? chestIcon(g.chest, false) : g.kind === 'medalha' ? medalIcon(g.index, true) : itemIcon(itemById(g.id)!);
   return (
     <section className="card">
       <div className="card-head">
