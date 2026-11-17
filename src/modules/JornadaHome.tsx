@@ -10,7 +10,7 @@ import { journeyStats, unlockProgress, UNLOCK_DAYS, UNLOCK_WINDOW } from '../jou
 import { ATTRIBUTES } from '../habits';
 import { todayISO } from '../utils';
 import { notify, Segmented, Sheet, Toggle } from '../ui';
-import { avatarIcon, chestIcon, COIN_ICON, GEM_ICON, homeIcon, itemById, itemIcon, petIcon, PETS, RARITY, treeIcon, skyPalette, RING2_LEVEL, SLOT_LIST, SLOT_NAMES, type AvatarLook } from '../jornada/catalog';
+import { avatarIcon, chestIcon, COIN_ICON, GEM_ICON, homeIcon, itemById, itemIcon, petIcon, PETS, RARITY, treeIcon, skyPalette, sunIcon, MOON_ICON, RING2_LEVEL, SLOT_LIST, SLOT_NAMES, type AvatarLook } from '../jornada/catalog';
 import { HAIRS, SKINS } from '../jornada/artData';
 import { acquire, availability, equip, shopContext, wardrobeItems, type Availability, type EquipSlot } from '../jornada/rules';
 import type { Item, Slot } from '../jornada/catalog';
@@ -372,7 +372,7 @@ export function JourneyScene({ look, state, activeDays, now }: { look: AvatarLoo
         starPositions(sky.stars).map((s, i) => (
           <span key={i} className={`jn-star${s.big ? ' big' : ''}`} style={{ left: `${s.x}%`, top: `${s.y * 0.7}%`, animationDelay: `${s.delay}s` }} />
         ))}
-      {!sky.rain && <span className={`jn-sun${night ? ' moon' : ''}`} style={{ background: t.sun }} />}
+      {!sky.rain && <img className={`jn-sun${night ? ' moon' : ''}`} alt="" src={night ? MOON_ICON : sunIcon(t.sun)} />}
       {!night && (
         <>
           <i className="jn-pcloud" style={{ background: t.cloud, left: '12%', top: '14%', width: 60 }} />
@@ -381,7 +381,7 @@ export function JourneyScene({ look, state, activeDays, now }: { look: AvatarLoo
       )}
       {sky.rainbow && <span className="jn-rainbow" />}
       <div className="jn-ground" style={{ background: t.ground, borderTopColor: t.grass }} />
-      <img className="jn-home" src={homeIcon(state.equipped.morada, phase)} alt="" />
+      <img className={`jn-home${state.equipped.morada === 'torre' ? ' tall' : ''}`} src={homeIcon(state.equipped.morada, phase)} alt="" />
       <img className="jn-tree" src={treeIcon(phase)} alt="" />
       <img className="jn-avatar" src={avatarIcon(look, outfit)} alt="" />
       {state.equipped.pet && <img className="jn-pet" src={petIcon(state.equipped.pet, state.petStyle[state.equipped.pet])} alt="" />}

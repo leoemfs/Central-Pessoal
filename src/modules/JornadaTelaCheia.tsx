@@ -8,7 +8,7 @@ import { useStore } from '../store';
 import { todayISO } from '../utils';
 import { Fullscreen } from '../ui';
 import { ATTRIBUTES } from '../habits';
-import { avatarIcon, homeIcon, HOMES, itemById, itemIcon, PETS, petIcon, RARITY, skyPalette, treeIcon, type AvatarLook, type Slot } from '../jornada/catalog';
+import { avatarIcon, homeIcon, HOMES, itemById, itemIcon, PETS, petIcon, RARITY, skyPalette, treeIcon, sunIcon, MOON_ICON, type AvatarLook, type Slot } from '../jornada/catalog';
 import { classOf, equip, nextInSlot, type JourneyState } from '../jornada/rules';
 import { hash01 } from '../jornada/rules';
 import { skyAt, starPositions, starsTonight } from '../jornada/sky';
@@ -97,9 +97,9 @@ export function TelaCheia({
           starPositions(stars).map((s, i) => (
             <span key={i} className={`jn-fs-star${s.big ? ' big' : ''}`} style={{ left: `${s.x}%`, top: `${s.y * 0.55}%`, animationDelay: `${s.delay}s` }} />
           ))}
-        {night && <span className="jn-fs-moon" style={{ boxShadow: `inset -14px -8px 0 ${t.sky1}` }} />}
+        {night && <img className="jn-fs-moon" alt="" src={MOON_ICON} />}
         {night && <span className="jn-fs-shoot" />}
-        {!night && !rain && <span className="jn-fs-sun" style={{ background: t.sun, top: phase === 'tarde' ? '40%' : '33%' }} />}
+        {!night && !rain && <img className="jn-fs-sun" alt="" src={sunIcon(t.sun)} style={{ top: phase === 'tarde' ? '40%' : '33%' }} />}
         {!night && (
           <>
             <i className="jn-fs-cloud" style={{ background: t.cloud, left: '8%', top: '14%', width: 84 }} />
@@ -108,7 +108,7 @@ export function TelaCheia({
           </>
         )}
         <div className="jn-fs-hill" style={{ background: t.leafShade }} />
-        <img className="jn-fs-home" src={homeIcon(home.id, phase)} alt={home.name} />
+        <img className={`jn-fs-home${home.id === 'torre' ? ' tall' : ''}`} src={homeIcon(home.id, phase)} alt={home.name} />
         <img className="jn-fs-tree" src={treeIcon(phase)} alt="" />
         <div className="jn-fs-ground" style={{ background: t.ground, borderTopColor: t.grass }} />
         <div className="jn-fs-path" style={{ background: t.path }} />

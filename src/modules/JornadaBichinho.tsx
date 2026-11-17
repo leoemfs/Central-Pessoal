@@ -7,7 +7,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useStore } from '../store';
 import { Fullscreen, notify } from '../ui';
 import { sprite } from '../jornada/art';
-import { FICHA_ICON, homeIcon, PETS, petIcon, treeIcon } from '../jornada/catalog';
+import { FICHA_ICON, homeIcon, MOON_ICON, PETS, petIcon, sunIcon, treeIcon } from '../jornada/catalog';
 import { PET_SPRITES } from '../jornada/petsData';
 import { PX } from '../jornada/px';
 import { fichas } from '../jornada/games';
@@ -30,8 +30,8 @@ const OBJ = {
   soap: sprite(['.OOOOO.', 'OPPPPPO', 'OPWPPPO', 'OPPPPPO', '.OOOOO.'], { P: '#a78bfa', W: '#ede9fe' }, 7),
   tooth: sprite(['.OOO.', 'OWWWO', 'OWWWO', '.OPO.', '.OPO.', '.OPO.', '.OOO.'], { W: '#ffffff', P: '#60a5fa' }, 5),
   duck: sprite(['..OOO...', '.OYYYO..', '.OYEYOOO', '..OYYYOR', 'OOOYYYO.', 'OYYYYYO.', '.OOOOO..'], { Y: '#facc15', E: '#111111', R: '#f97316' }, 8),
-  sun: sprite(['..Y..Y..', 'Y.YYYY.Y', '.YYYYYY.', 'YYYYYYYY', 'YYYYYYYY', '.YYYYYY.', 'Y.YYYY.Y', '..Y..Y..'], { Y: '#fde047' }, 8),
-  moon: sprite(['..OOO..', '.OMMO..', 'OMMO...', 'OMMO...', 'OMMO...', '.OMMO..', '..OOO..'], { M: '#e0e7ff' }, 7),
+  sun: sunIcon('#fde047'),
+  moon: MOON_ICON,
   flower: sprite(['.P.P.', 'PYPYP', '.PPP.', '..G..', '.GG..', '..G..'], { P: '#f472b6', Y: '#facc15', G: '#16a34a' }, 5),
   bed2: sprite(['..OOOOOOOOOOOOOOOO..', '.OPPPPPPPPPPPPPPPPO.', 'OPLLLLWLLLLLLWLLLLPO', 'OPLLLLLLLLLLLLLLLLPO', 'OPPPPPPPPPPPPPPPPPPO', 'OYYYYYYYYYYYYYYYYYYO', '.OOOOOOOOOOOOOOOOOO.'], { P: '#a855f7', L: '#e9d5ff', W: '#ffffff', Y: '#facc15' }, 20),
   mouse: sprite(['........OO', '..OOOOOOGO', '.OGGGGGGGO', 'OGGEGGGGGO', 'OGGGGGGGO.', '.OOOOOOO..'], { G: '#a1a1aa', E: '#111111' }, 10),

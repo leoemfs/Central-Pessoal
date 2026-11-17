@@ -7386,6 +7386,9 @@ button.row:disabled {
   bottom: 34px;
   width: 92px;
 }
+.jn-home.tall {
+  width: 50px;
+}
 .jn-tree {
   right: 5%;
   bottom: 36px;
@@ -7409,14 +7412,13 @@ button.row:disabled {
   position: absolute;
   right: 12%;
   top: 14%;
-  width: 26px;
-  height: 26px;
-  box-shadow: 0 0 0 4px rgb(255 255 255 / 0.15);
+  width: 30px;
+  height: 30px;
+  image-rendering: pixelated;
 }
 .jn-sun.moon {
-  width: 18px;
-  height: 18px;
-  box-shadow: -5px 0 0 0 #0b1020 inset;
+  width: 24px;
+  height: 24px;
 }
 .jn-star {
   position: absolute;
@@ -9025,9 +9027,9 @@ body.bar-labels.bar-flat .tabbar .tb-label {
   position: absolute;
   right: 40px;
   top: 30%;
-  width: 44px;
-  height: 44px;
-  background: #fef3c7;
+  width: 48px;
+  height: 48px;
+  image-rendering: pixelated;
 }
 .jn-fs-shoot {
   position: absolute;
@@ -9054,10 +9056,10 @@ body.bar-labels.bar-flat .tabbar .tb-label {
 }
 .jn-fs-sun {
   position: absolute;
-  right: 48px;
-  width: 44px;
-  height: 44px;
-  box-shadow: 0 0 0 8px rgb(255 255 255 / 0.18);
+  right: 44px;
+  width: 52px;
+  height: 52px;
+  image-rendering: pixelated;
 }
 .jn-fs-cloud {
   position: absolute;
@@ -9110,6 +9112,10 @@ body.bar-labels.bar-flat .tabbar .tb-label {
   bottom: calc(22% - 2px);
   width: 34%;
   max-width: 170px;
+}
+.jn-fs-home.tall {
+  width: 17%;
+  max-width: 84px;
 }
 .jn-fs-tree {
   position: absolute;

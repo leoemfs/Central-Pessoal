@@ -2,10 +2,11 @@
  * Catálogo da Jornada: equipamentos, pets e moradas, com raridade, como obter e a arte de cada um.
  * Tudo aqui é dado fixo; as regras (quem pode ter o quê) ficam em rules.ts.
  */
-import { Canvas, OUTLINE, grid, sprite, toSvg, type Grid, type Palette } from './art.ts';
+import { sprite, toSvg, type Grid, type Palette } from './art.ts';
 import { HAIRS, SKINS, SKY_PALETTES } from './artData.ts';
 import { PET_SPRITES } from './petsData.ts';
 import { PX } from './px.ts';
+import { cabana24, casinha24, castelinho24, castelo24, moon24, sun24, torre24, tree24 } from './scene24.ts';
 
 export type AttrCode = 'FOR' | 'AGI' | 'INT' | 'RES' | 'SAB' | 'DIS';
 export const ATTR_CODES: AttrCode[] = ['FOR', 'AGI', 'INT', 'RES', 'SAB', 'DIS'];
@@ -158,181 +159,32 @@ export function petIcon(id: string, variant?: string | null): string {
 
 // ---------- Moradas ----------
 
-function cabana(): Grid {
-  const c = new Canvas(22, 14);
-  const cx = 10;
-  for (let j = 0; j < 12; j++)
-    for (let i = cx - j; i <= cx + 1 + j; i++) {
-      const edge = i === cx - j || i === cx + 1 + j;
-      c.set(i, j + 1, edge ? OUTLINE : (i - cx + 40) % 3 === 0 ? '#a16207' : '#d97706');
-    }
-  for (let d = 0; d < 6; d++) for (let k = cx - d / 2; k <= cx + 1 + d / 2; k++) c.set(Math.round(k), 7 + d, '#3f2a14');
-  c.set(cx, 0, '#7c4a2d');
-  c.set(cx + 1, 0, '#7c4a2d');
-  c.rect(0, 13, 22, 1, OUTLINE);
-  c.set(19, 10, '#fde047');
-  c.set(19, 11, '#f97316');
-  c.set(18, 11, '#f97316');
-  c.set(20, 11, '#dc2626');
-  c.rect(17, 12, 5, 1, '#7c4a2d');
-  return c.g;
-}
-
-const HOUSE = [
-  '..........RRRR..........',
-  '........RRRRRRRR....CC..',
-  '......RRRRRRRRRRRR..CC..',
-  '.....RRRRRRRRRRRRRR.CC..',
-  '....RRRRRRRRRRRRRRRRCC..',
-  '...RRRRRRRRRRRRRRRRRRR..',
-  '..RrrrrrrrrrrrrrrrrrrrR.',
-  '.RRRRRRRRRRRRRRRRRRRRRRR',
-  '..WWWWWWWWWWWWWWWWWWWW..',
-  '..WWWWWWWWWWWWWWWWWWWW..',
-  '..WWFFFFWWWDDDDWWFFFFW..',
-  '..WWFYYFWWWDDDDWWFYYFW..',
-  '..WWFYYFWWWDDDDWWFYYFW..',
-  '..WWFFFFWWWDDDDWWFFFFW..',
-  '..WWWWWWWWWDDDKWWWWWWW..',
-  '..WwwwwwwwwDDDDwwwwwwW..',
-  '..WWWWWWWWWDDDDWWWWWWW..',
-  '..SSSSSSSSSSSSSSSSSSSS..',
-  '..SsSsSsSsSsSsSsSsSsSs..',
-];
-
-function casinha(t: SkyPalette, stone: boolean): Grid {
-  return grid(
-    HOUSE,
-    {
-      R: stone ? t.blue : t.roof,
-      r: stone ? t.blueShade : t.roofShade,
-      C: '#57534e',
-      W: stone ? t.stone : t.wall,
-      w: stone ? t.stoneShade : t.wallShade,
-      F: '#7c4a2d',
-      Y: t.win,
-      D: '#7c4a2d',
-      K: '#facc15',
-      S: '#78716c',
-      s: '#57534e',
-    },
-    24,
-  );
-}
-
-function torre(t: SkyPalette): Grid {
-  const c = new Canvas(14, 32);
-  c.cone(7, 0, 7, t.blue, t.blueShade);
-  c.set(7, 0, '#facc15');
-  c.box(2, 8, 11, 24, t.stone);
-  c.bricks(3, 9, 9, 22, t.stone, t.stoneShade);
-  c.rect(6, 12, 3, 4, OUTLINE);
-  c.rect(7, 13, 1, 3, t.win);
-  c.rect(4, 19, 2, 3, OUTLINE);
-  c.set(4, 20, t.win);
-  c.rect(9, 19, 2, 3, OUTLINE);
-  c.set(9, 20, t.win);
-  c.rect(5, 25, 5, 6, OUTLINE);
-  c.rect(6, 26, 3, 5, '#7c4a2d');
-  return c.g;
-}
-
-function castelinho(t: SkyPalette): Grid {
-  const c = new Canvas(30, 24);
-  c.box(6, 10, 18, 14, t.stone);
-  c.bricks(7, 11, 16, 12, t.stone, t.stoneShade);
-  c.crenels(6, 8, 18, t.stone);
-  for (const x of [0, 22]) {
-    c.box(x, 5, 8, 19, t.stone);
-    c.bricks(x + 1, 6, 6, 17, t.stone, t.stoneShade);
-    c.crenels(x, 3, 8, t.stone);
-    c.rect(x + 3, 10, 2, 3, OUTLINE);
-    c.set(x + 3, 11, t.win);
-    c.set(x + 4, 11, t.win);
-    c.rect(x + 3, 0, 1, 3, '#7c4a2d');
-    c.set(x + 4, 0, '#dc2626');
-    c.set(x + 5, 0, '#dc2626');
-    c.set(x + 4, 1, '#dc2626');
-  }
-  c.rect(12, 15, 6, 9, OUTLINE);
-  c.rect(13, 16, 4, 8, '#3f2a14');
-  for (let y = 17; y < 24; y += 2) c.rect(13, y, 4, 1, '#78716c');
-  c.set(12, 15, t.stone);
-  c.set(17, 15, t.stone);
-  return c.g;
-}
-
-function castelo(t: SkyPalette): Grid {
-  const c = new Canvas(44, 36);
-  c.box(15, 12, 14, 24, t.stone);
-  c.bricks(16, 13, 12, 22, t.stone, t.stoneShade);
-  c.cone(22, 2, 10, t.blue, t.blueShade);
-  c.rect(22, 0, 1, 3, '#7c4a2d');
-  c.rect(23, 0, 3, 1, '#facc15');
-  c.set(23, 1, '#facc15');
-  c.rect(20, 17, 4, 5, OUTLINE);
-  c.rect(21, 18, 2, 4, t.win);
-  c.box(8, 22, 28, 14, t.stone);
-  c.bricks(9, 23, 26, 12, t.stone, t.stoneShade);
-  c.crenels(8, 20, 7, t.stone);
-  c.crenels(29, 20, 7, t.stone);
-  for (const x of [0, 34]) {
-    c.box(x, 14, 10, 22, t.stone);
-    c.bricks(x + 1, 15, 8, 20, t.stone, t.stoneShade);
-    c.cone(x + 4, 6, 7, t.blue, t.blueShade);
-    c.rect(x + 5, 13, 1, 1, t.blueShade);
-    c.set(x + 4, 4, '#7c4a2d');
-    c.set(x + 4, 5, '#7c4a2d');
-    c.set(x + 5, 4, '#dc2626');
-    c.set(x + 6, 4, '#dc2626');
-    c.rect(x + 4, 19, 2, 3, OUTLINE);
-    c.set(x + 4, 20, t.win);
-    c.set(x + 5, 20, t.win);
-    c.rect(x + 4, 26, 2, 3, OUTLINE);
-    c.set(x + 4, 27, t.win);
-    c.set(x + 5, 27, t.win);
-  }
-  c.rect(18, 26, 8, 10, OUTLINE);
-  c.rect(19, 27, 6, 9, '#3f2a14');
-  for (let y = 28; y < 36; y += 2) c.rect(19, y, 6, 1, '#78716c');
-  c.set(18, 26, t.stone);
-  c.set(25, 26, t.stone);
-  c.rect(11, 25, 2, 5, '#dc2626');
-  c.set(11, 30, '#dc2626');
-  c.rect(11, 25, 2, 1, '#facc15');
-  c.rect(31, 25, 2, 5, '#dc2626');
-  c.set(32, 30, '#dc2626');
-  c.rect(31, 25, 2, 1, '#facc15');
-  return c.g;
-}
-
 export function homeGrid(id: string, phase: SkyPhase): Grid {
   const t = skyPalette(phase);
   switch (id) {
     case 'cabana':
-      return cabana();
+      return cabana24();
     case 'casinha':
-      return casinha(t, false);
+      return casinha24(t, false);
     case 'pedra':
-      return casinha(t, true);
+      return casinha24(t, true);
     case 'torre':
-      return torre(t);
+      return torre24(t);
     case 'castelinho':
-      return castelinho(t);
+      return castelinho24(t);
     default:
-      return castelo(t);
+      return castelo24(t);
   }
 }
-export const homeIcon = (id: string, phase: SkyPhase = 'manha') => toSvg(homeGrid(id, phase));
+/** Desenhadas com o dobro de pixels (R1) e mostradas do mesmo tamanho de antes. */
+export const homeIcon = (id: string, phase: SkyPhase = 'manha') => toSvg(homeGrid(id, phase), 2);
 
 export function treeIcon(phase: SkyPhase): string {
-  const t = skyPalette(phase);
-  return sprite(
-    ['...LLLL...', '..LLLLLL..', '.LLLlLLLL.', 'LLLLLLLLLL', 'LLlLLLLlLL', 'LLLLLLLLLL', '.LLLLLlLL.', 'LLLlLLLLLL', '.LLLLLLLL.', '..LLLLLL..', '....TT....', '....TT....', '....TT....', '....TT....', '...TTTT...'],
-    { L: t.leaf, l: t.leafShade, T: '#6b4423' },
-    10,
-  );
+  return toSvg(tree24(skyPalette(phase)), 2);
 }
+/** Sol e lua de 24 pixels (R1). */
+export const sunIcon = (color: string) => toSvg(sun24(color), 2);
+export const MOON_ICON = toSvg(moon24(), 2);
 
 // ---------- Avatar ----------
 

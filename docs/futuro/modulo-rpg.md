@@ -963,3 +963,11 @@ Uma campanha fixa não serve para todo mundo. Por exemplo, "14 dias sem refriger
 ### B.17 Bichinho virtual e fichas (N2.18, aprovado 16/11)
 
 Prévias: v1 https://claude.ai/artifact/HVXga55DMVo9m3jyRgtKA2 e v2 (modelo) https://claude.ai/artifact/Q2pKUhPZ7jXtJpxxH8UYms. Partes: **a) fichas e limite de 30 min (feito, v0.101)**: `src/jornada/games.ts` (`fichas`, `minutesLeft`, `finishGame` com segundos jogados; `games.plays` e `games.fichasSpent` no estado; o ouro antigo de `games.prizes` continua na carteira). **b) tela cheia do bichinho (feito, v0.103)**: `src/jornada/bichinho.ts` (humor `vpet` com descida por hora e piso de 20, `petAction`, gatinho com mais pixels `CAT_HD` e paleta pela cor, quartos por moradia) e `JornadaBichinho.tsx` (cartão e tela cheia). Os outros pets usam o desenho de sempre, maior, até ganharem a versão com mais pixels. **c) banheiro e lá fora (feito, v0.104)**: ações `banho`, `dentes`, `secar`, `passear`, `bolinha`, `sol` em `petAction`; `CAT_HD_SIDE` e `CAT_HD_BACK` (a cena escolhe o ângulo). **d) loja (feito, v0.105)**: `PET_SHOP`, `buyPetItem` e `petRoom` (itens, brinquedo, caminha e roupinha em uso) em `bichinho.ts`; os itens aparecem no cenário de cada lugar. Lado e costas do pet aparecem pela cena, sem botão de girar. O bichinho nunca fica doente nem triste.
+
+
+## Redesenho com o dobro de pixels (17/11)
+
+Antes de terminar a Jornada, para ser o padrão das construções novas. Só a arte muda; as telas ficam iguais.
+
+- **R1 (feito, v0.108):** `src/jornada/scene24.ts` com moradias, árvore, sol e lua. Cada desenho tem o dobro de largura e altura do antigo e sai com `toSvg(g, 2)` (mesmo tamanho na tela). Os desenhos de regiões do mapa da Campanha (`px.ts`) ficam para a R4.
+- R2: pets em lotes de 4. R3: personagem com roupas, botas, elmos e armas. R4: ícones do Arsenal, baús, chefes, NPCs e regiões.
