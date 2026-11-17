@@ -1,8 +1,8 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { COURSE_END, coursePrompt, fixRequest, listCourses, mdCourseToPack, readCourse, removeCourse } from './curso.ts';
+import { COURSE_END, coursePrompt, fixRequest, listCourses, mdCourseToPack, readCourse, mineReach, removeCourse, removeMine } from './curso.ts';
 import { applyPack, type StudyPack } from './studyPack.ts';
-import { docText, emptyStudy, library, normalizeStudy } from './estudos.ts';
+import { docText, emptyStudy, isHidden, library, normalizeStudy } from './estudos.ts';
 
 const NOW = '2026-11-17T10:00:00.000Z';
 const md = `Aqui está o seu curso!
@@ -194,4 +194,45 @@ test('gerenciar: curso antigo (sem registro) é achado pelo notebook; área do a
   const r = removeCourse(s, c.id, true);
   assert.equal(r.themes.length, 0);
   assert.ok(library(r).area('prod'));
+});
+
+test('excluir o que a pessoa criou: área com tema, trilha, ciclo e notebook ligado', () => {
+  const s = {
+    ...emptyStudy(),
+    archived: ['minha'],
+    areas: [{ id: 'minha', name: 'Contratos', desc: '' }],
+    themes: [{ id: 'th', areaId: 'minha', name: 'Gestão' }, { id: 'th2', areaId: 'lang', name: 'Outro' }],
+    tracks: [{ id: 'tr', themeId: 'th', name: 'Base', desc: '', topics: [{ id: 'tp', name: 'Tópico' }] }, { id: 'tr2', themeId: 'th2', name: 'Fica', desc: '', topics: [] }],
+    cycles: [{ id: 'c1', trackId: 'tr' } as never, { id: 'c2', trackId: 'tr2' } as never],
+    notebooks: [
+      { id: 'nb', name: 'Notas', desc: '', trackId: 'tr', pages: [{ id: 'p', parentId: null, name: 'P', topicId: 'tp', doc: { type: 'doc', content: [] }, sourceIds: [], updatedAt: NOW }], log: [], createdAt: NOW, updatedAt: NOW },
+    ],
+    maps: [{ id: 'm', name: 'M', root: { id: 'r', text: 'R', children: [] }, notebookId: 'nb', pageId: null, createdAt: NOW, updatedAt: NOW } as never],
+    sources: [{ id: 'f', title: 'F', url: '', kind: 'site', note: '', notebookIds: ['nb'] } as never],
+  };
+  assert.deepEqual(mineReach(s, { areas: ['minha'] }), { tracks: 1, cycles: 1, notebooks: 1, pages: 1 });
+  const so = removeMine(s, { areas: ['minha'] });
+  assert.deepEqual(so.areas, []);
+  assert.deepEqual(so.archived, []);
+  assert.deepEqual(so.themes.map((t) => t.id), ['th2']);
+  assert.deepEqual(so.tracks.map((t) => t.id), ['tr2']);
+  assert.deepEqual(so.cycles.map((c) => c.id), ['c2']);
+  assert.equal(so.notebooks[0].trackId, null);
+  assert.equal(so.notebooks[0].pages[0].topicId, null);
+  assert.equal(so.maps.length, 1);
+  const tudo = removeMine(s, { areas: ['minha'] }, true);
+  assert.equal(tudo.notebooks.length, 0);
+  assert.equal(tudo.maps.length, 0);
+  assert.deepEqual(tudo.sources[0].notebookIds, []);
+  // Só uma trilha: o tema e a área ficam.
+  const tr = removeMine(s, { tracks: ['tr'] });
+  assert.deepEqual(tr.themes.length, 2);
+  assert.deepEqual(tr.tracks.map((t) => t.id), ['tr2']);
+});
+
+test('arquivar um curso esconde os temas e trilhas que vieram dele', () => {
+  assert.equal(isHidden(['pk-excel'], 'prod', 'pk-excel-tr-base'), true);
+  assert.equal(isHidden(['pk-excel'], 'prod', 'pk-excel2-tr-base'), false);
+  assert.equal(isHidden(['prod'], 'prod', 'qualquer'), true);
+  assert.equal(isHidden([], 'prod', 'pk-excel-tr-base'), false);
 });

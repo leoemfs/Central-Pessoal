@@ -363,3 +363,52 @@ export function removeCourse(study: StudyData, id: string, tudo = false): StudyD
     packs: study.packs.filter((p) => p.id !== id),
   };
 }
+
+/** O que a pessoa criou à mão e pode excluir (M38): áreas, temas ou trilhas dela, com o que estiver dentro. */
+export interface MineSelection {
+  areas?: string[];
+  themes?: string[];
+  tracks?: string[];
+}
+
+/** Quantas trilhas, ciclos e páginas de notebooks ligados uma exclusão alcança (para a confirmação). */
+export function mineReach(study: StudyData, sel: MineSelection) {
+  const r = mineIds(study, sel);
+  const nbs = study.notebooks.filter((n) => n.trackId !== null && r.tracks.has(n.trackId));
+  return { tracks: r.tracks.size, cycles: study.cycles.filter((c) => r.tracks.has(c.trackId)).length, notebooks: nbs.length, pages: nbs.reduce((s, n) => s + n.pages.length, 0) };
+}
+
+function mineIds(study: StudyData, sel: MineSelection) {
+  const areas = new Set(sel.areas ?? []);
+  const themes = new Set([...(sel.themes ?? []), ...study.themes.filter((t) => areas.has(t.areaId)).map((t) => t.id)]);
+  const tracks = new Set([...(sel.tracks ?? []), ...study.tracks.filter((t) => themes.has(t.themeId)).map((t) => t.id)]);
+  return { areas, themes, tracks };
+}
+
+/**
+ * Exclui áreas, temas ou trilhas da pessoa (M38). Saem os temas e trilhas de dentro e os ciclos dessas trilhas.
+ * - `tudo = false`: os notebooks ligados ficam (perdem só a ligação com a trilha e os tópicos).
+ * - `tudo = true`: também os notebooks ligados e os mapas deles; as fontes ficam (só perdem a ligação).
+ */
+export function removeMine(study: StudyData, sel: MineSelection, tudo = false): StudyData {
+  const { areas, themes, tracks } = mineIds(study, sel);
+  const topicIds = new Set(study.tracks.filter((t) => tracks.has(t.id)).flatMap((t) => t.topics.map((x) => x.id)));
+  const gone = new Set(tudo ? study.notebooks.filter((n) => n.trackId !== null && tracks.has(n.trackId)).map((n) => n.id) : []);
+  const notebooks = study.notebooks
+    .filter((n) => !gone.has(n.id))
+    .map((n) => {
+      const touched = (n.trackId !== null && tracks.has(n.trackId)) || n.pages.some((p) => p.topicId && topicIds.has(p.topicId));
+      return touched ? { ...n, trackId: n.trackId && tracks.has(n.trackId) ? null : n.trackId, pages: n.pages.map((p) => (p.topicId && topicIds.has(p.topicId) ? { ...p, topicId: null } : p)) } : n;
+    });
+  return {
+    ...study,
+    areas: study.areas.filter((a) => !areas.has(a.id)),
+    archived: study.archived.filter((a) => !areas.has(a)),
+    themes: study.themes.filter((t) => !themes.has(t.id)),
+    tracks: study.tracks.filter((t) => !tracks.has(t.id)),
+    cycles: study.cycles.filter((c) => !tracks.has(c.trackId)),
+    notebooks,
+    maps: gone.size ? study.maps.filter((m) => !(m.notebookId && gone.has(m.notebookId))) : study.maps,
+    sources: gone.size ? study.sources.map((f) => (f.notebookIds.some((x) => gone.has(x)) ? { ...f, notebookIds: f.notebookIds.filter((x) => !gone.has(x)) } : f)) : study.sources,
+  };
+}

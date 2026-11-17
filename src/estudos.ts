@@ -466,3 +466,9 @@ export function studyWeek(study: StudyData, start: string, last: string) {
   const cycles = activeCycles(study).map((c) => ({ id: c.id, name: c.name, ...cycleCounts(c) }));
   return { topicsDone, noteDays: noteDays.size, cycles };
 }
+
+/**
+ * Arquivado? Vale para áreas (o id está em `archived`) e para cursos importados (M38): arquivar um curso guarda
+ * `pk-<curso>` em `archived`, e tudo o que veio dele (temas `pk-<curso>-t-…`, trilhas `pk-<curso>-tr-…`) some das listas.
+ */
+export const isHidden = (archived: string[], areaId: string, id: string): boolean => archived.includes(areaId) || archived.some((a) => a.startsWith('pk-') && id.startsWith(`${a}-`));
