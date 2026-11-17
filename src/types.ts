@@ -660,6 +660,17 @@ export interface StudyData {
   notebooks: StudyNotebook[];
   sources: StudySource[];
   maps: StudyMap[];
+  /** Cursos importados (M36), para o "Gerenciar cursos" da Biblioteca. */
+  packs: StudyPackRecord[];
+}
+
+export interface StudyPackRecord {
+  /** Prefixo dos ids do curso: tudo o que veio dele começa com `pk-<id>`. */
+  id: string;
+  name: string;
+  importedAt: string;
+  /** Quantas vezes foi importado (partes 1, 2…). */
+  parts: number;
 }
 
 export interface AppData {

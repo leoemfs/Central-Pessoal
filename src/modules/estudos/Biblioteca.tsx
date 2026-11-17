@@ -4,6 +4,7 @@ import { addTopicsAsPages, defaultCycleName, findSource, missingBefore, moveItem
 import type { StudySource } from '../../types';
 import { Empty, Field, Icon, notify, PageHeader, Sheet, type IconName } from '../../ui';
 import { todayISO, uid } from '../../utils';
+import { CourseCta } from './Cursos';
 import { AreasSheet, NotebookSheet, nowISO, Path, SourceCard, StatusPill, TrackSheet, trackCrumbs, useStudy } from './shared';
 
 const plural = (n: number, one: string, many: string) => `${n} ${n === 1 ? one : many}`;
@@ -58,6 +59,7 @@ export function BibliotecaPage() {
     <>
       <Path items={[{ label: 'Estudos', to: 'estudos' }, { label: 'Biblioteca' }]} />
       <PageHeader title="Biblioteca" subtitle="Roteiros de referência para explorar. Escolher algo daqui não muda o catálogo." />
+      <CourseCta manage />
       <section className="card">
         <ul className="list">{visible.map((a) => row(a, false))}</ul>
       </section>

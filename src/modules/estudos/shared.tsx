@@ -7,7 +7,8 @@ import { library, newMap, newNotebook, SOURCE_KINDS, sourceKind, STATUS_LABEL, t
 import { Field, Icon, MultiChips, notify, Pill, Sheet, type IconName } from '../../ui';
 import { fromBranches } from '../../mapas';
 import { uid } from '../../utils';
-import { applyPack, parsePack, type PackResult, type StudyPack } from '../../studyPack';
+import { applyPack, type PackResult, type StudyPack } from '../../studyPack';
+import { readCourse } from '../../curso';
 
 /** Dados de Estudos + biblioteca montada + atalho para alterar só a parte de estudos. */
 export function useStudy() {
@@ -489,7 +490,7 @@ export function CreateMenu({ onClose, onPick, extra }: { onClose: () => void; on
         {CREATE.map((c) => tile(c.id, c.label, c.hint, c.icon, () => onPick(c.id)))}
         <hr className="st-sep" />
         {tile('areas', 'Áreas e temas', 'As categorias da sua biblioteca', 'tag', () => onPick('areas'))}
-        {tile('pacote', 'Importar pacote de estudo', 'Trilhas, notebook, fontes e mapas de um arquivo', 'download', () => onPick('pacote'))}
+        {tile('pacote', 'Importar um curso', 'Uma IA monta o curso; você importa o arquivo', 'download', () => onPick('pacote'))}
       </div>
     </Sheet>
   );
@@ -502,7 +503,8 @@ export function useCreate() {
     if (a === 'ciclo') {
       notify('Escolha uma trilha', 'Marque os tópicos e toque em "Montar ciclo".');
       go('estudos/biblioteca');
-    } else setOpen(a);
+    } else if (a === 'pacote') go('estudos/importar-curso');
+    else setOpen(a);
   };
   const sheet =
     open === 'notebook' ? (
@@ -533,7 +535,7 @@ export function PackSheet({ onClose, url: start = '' }: { onClose: () => void; u
   const [busy, setBusy] = useState(false);
   const [done, setDone] = useState<PackResult | null>(null);
   const read = (text: string) => {
-    const p = parsePack(text);
+    const p = readCourse(text);
     if (typeof p === 'string') {
       setPack(null);
       setError(p);
@@ -626,7 +628,7 @@ export function PackSheet({ onClose, url: start = '' }: { onClose: () => void; u
           Escolher arquivo
           <input
             type="file"
-            accept="application/json,.json"
+            accept=".md,.markdown,.txt,.json,text/markdown,text/plain,application/json"
             hidden
             onChange={(e) => {
               const f = e.target.files?.[0];
