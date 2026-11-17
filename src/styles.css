@@ -12928,5 +12928,6 @@ body.no-glass {
   --glass-blur: none;
 }
 body.no-glass .tabbar:not(.jn-gamebar) {
-  background: var(--tabbar-bg);
+  /* Totalmente opaca: sem o desfoque, qualquer transparência deixa ver o conteúdo nítido por trás. */
+  background: var(--surface);
 }

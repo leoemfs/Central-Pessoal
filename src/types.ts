@@ -263,8 +263,8 @@ export interface Settings {
   sideCards: string[];
   /** E35.2: atalhos (módulos) no topo da coluna "Sempre à vista". */
   sideShortcuts: string[];
-  /** E37: vidro fosco nas barras presas (ligado por padrão). */
-  glass: boolean;
+  /** E37: vidro fosco nas barras presas (desligado por padrão: fundo sólido). */
+  frostedGlass: boolean;
   /** E31: tamanho dos ícones dos módulos e da barra (o menu sempre um pouco maior que a barra). */
   iconSize: 'p' | 'm' | 'g';
   seededCategories: boolean;
