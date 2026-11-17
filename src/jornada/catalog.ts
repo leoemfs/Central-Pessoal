@@ -6,7 +6,7 @@ import { grid, sprite, toSvg, type Grid, type Palette } from './art.ts';
 import { HAIRS, SKINS, SKY_PALETTES } from './artData.ts';
 import { PET_SPRITES } from './petsData.ts';
 import { PETS24 } from './pets24.ts';
-import { avatar24, itemIcon24 } from './avatar24.ts';
+import { avatar24, hd24, itemIcon24 } from './avatar24.ts';
 import { PX } from './px.ts';
 import { cabana24, casinha24, castelinho24, castelo24, moon24, sun24, torre24, tree24 } from './scene24.ts';
 
@@ -234,11 +234,18 @@ const CHEST_PAL: Record<string, Palette> = {
   dourado: { L: '#facc15', B: '#ca8a04', b: '#a16207', M: '#fef08a', G: '#fff7ed', K: '#1a1a1f', W: '#fffbeb', Y: '#fef9c3' },
   cristal: { L: '#67e8f9', B: '#0891b2', b: '#0e7490', M: '#cffafe', G: '#f0abfc', K: '#1a1a1f', W: '#ecfeff', Y: '#f5d0fe' },
 };
-export const chestIcon = (kind: string, open: boolean) => sprite(open ? CHEST_OPEN : CHEST_CLOSED, CHEST_PAL[kind] ?? CHEST_PAL.bronze, 16);
-export const COIN_ICON = sprite(['..OOOO..', '.OYYYYO.', 'OYWYYyYO', 'OYYYYyYO', 'OYYYYyYO', 'OYyyyyYO', '.OYYYYO.', '..OOOO..'], { Y: '#facc15', y: '#ca8a04', W: '#fff7ed' }, 8);
+/** R4b: baús, moedas, cristal, ficha e medalhas com o dobro de pixels (mesmo tamanho na tela). */
+const up = (uri: string) => toSvg(hd24(uri), 2);
+const CHESTS = new Map<string, string>();
+export const chestIcon = (kind: string, open: boolean) => {
+  const k = `${kind}:${open}`;
+  if (!CHESTS.has(k)) CHESTS.set(k, up(sprite(open ? CHEST_OPEN : CHEST_CLOSED, CHEST_PAL[kind] ?? CHEST_PAL.bronze, 16)));
+  return CHESTS.get(k)!;
+};
+export const COIN_ICON = up(sprite(['..OOOO..', '.OYYYYO.', 'OYWYYyYO', 'OYYYYyYO', 'OYYYYyYO', 'OYyyyyYO', '.OYYYYO.', '..OOOO..'], { Y: '#facc15', y: '#ca8a04', W: '#fff7ed' }, 8));
 /** Ficha dos mini games (N2.18a): moeda só do bichinho virtual. */
-export const FICHA_ICON = sprite(['..OOOO..', '.OPPPPO.', 'OPWPPpPO', 'OPPHHpPO', 'OPPHHpPO', 'OPppppPO', '.OPPPPO.', '..OOOO..'], { P: '#f472b6', p: '#be185d', W: '#fff1f2', H: '#fff1f2' }, 8);
-export const GEM_ICON = sprite(['...OO...', '..OCWO..', '.OCCWcO.', 'OCCCWccO', '.OCCWcO.', '..OCcO..', '...OO...'], { C: '#67e8f9', c: '#0e7490', W: '#ecfeff' }, 8);
+export const FICHA_ICON = up(sprite(['..OOOO..', '.OPPPPO.', 'OPWPPpPO', 'OPPHHpPO', 'OPPHHpPO', 'OPppppPO', '.OPPPPO.', '..OOOO..'], { P: '#f472b6', p: '#be185d', W: '#fff1f2', H: '#fff1f2' }, 8));
+export const GEM_ICON = up(sprite(['...OO...', '..OCWO..', '.OCCWcO.', 'OCCCWccO', '.OCCWcO.', '..OCcO..', '...OO...'], { C: '#67e8f9', c: '#0e7490', W: '#ecfeff' }, 8));
 
 // ---------- Personagens da campanha (da prévia da Jornada) ----------
 
@@ -264,7 +271,7 @@ const MEDAL_TONES: [string, string, string][] = [
 /** Medalha do título (cinza enquanto não foi conquistado). */
 export function medalIcon(index: number, earned: boolean): string {
   const [r, m, d] = earned ? MEDAL_TONES[index % MEDAL_TONES.length] : ['#52525b', '#71717a', '#3f3f46'];
-  return sprite(MEDAL, { R: r, M: m, W: '#ffffff', d }, 10);
+  return up(sprite(MEDAL, { R: r, M: m, W: '#ffffff', d }, 10));
 }
 
 // ---------- Troféu das conquistas dos jogos (N2.16b; arte nova com o dobro de pixels) ----------
@@ -279,3 +286,8 @@ const TROPHY = [
 /** Troféu dourado (conquistado) ou cinza (ainda não). */
 export const trophyIcon = (earned: boolean) =>
   sprite(TROPHY, earned ? { Y: '#facc15', W: '#fef9c3', D: '#a16207', S: '#ffffff', B: '#7c4a2d', b: '#5b3410' } : { Y: '#52525b', W: '#71717a', D: '#3f3f46', S: '#71717a', B: '#3f3f46', b: '#27272a' }, 24);
+
+/** Chama, estrela e coração da Jornada com o dobro de pixels. */
+export const FLAME_ICON = up(PX.flame);
+export const STAR_ICON = up(PX.star);
+export const HEART_ICON = up(PX.heart);

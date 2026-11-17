@@ -7,9 +7,8 @@ import { useEffect, useRef, useState } from 'react';
 import { useStore } from '../store';
 import { Fullscreen, notify } from '../ui';
 import { sprite } from '../jornada/art';
-import { FICHA_ICON, homeIcon, MOON_ICON, PETS, petIcon, sunIcon, treeIcon } from '../jornada/catalog';
+import { FICHA_ICON, homeIcon, MOON_ICON, PETS, petIcon, sunIcon, treeIcon, HEART_ICON } from '../jornada/catalog';
 import { PET_SPRITES } from '../jornada/petsData';
-import { PX } from '../jornada/px';
 import { fichas } from '../jornada/games';
 import { buyPetItem, CAT_HD, CAT_HD_BACK, CAT_HD_SIDE, catHdPalette, PET_SHOP, SHOP_CATS, type ShopCat, moodNow, petAction, petWish, roomOf, SNACK_PRICE, type PetAction } from '../jornada/bichinho';
 
@@ -246,7 +245,7 @@ export function BichinhoTelaCheia({ onClose }: { onClose: () => void }) {
 
   const ACTS: Record<Exclude<Place, 'loja'>, { id: PetAction; label: string; icon: string; cost?: number }[]> = {
     quarto: [
-      { id: 'carinho', label: 'Carinho', icon: PX.heart },
+      { id: 'carinho', label: 'Carinho', icon: HEART_ICON },
       { id: 'petisco', label: 'Petisco', icon: OBJ.snack, cost: SNACK_PRICE },
       { id: 'brincar', label: 'Brincar', icon: OBJ[pr.toy as ObjKey] },
       { id: 'dormir', label: sleeping ? 'Acordar' : 'Dormir', icon: OBJ[pr.bed as ObjKey] },
