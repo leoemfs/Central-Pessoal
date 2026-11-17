@@ -164,7 +164,7 @@ export function PageHeader({ title, subtitle, actions, tabs }: { title: ReactNod
 }
 
 /** Bloco preso no topo. O fundo em volta só aparece quando ele está de fato grudado (senão cobriria o cartão de baixo). */
-function StickyHead({ children }: { children: ReactNode }) {
+export function StickyHead({ children }: { children: ReactNode }) {
   const ref = useRef<HTMLDivElement>(null);
   useEffect(() => {
     const el = ref.current;
