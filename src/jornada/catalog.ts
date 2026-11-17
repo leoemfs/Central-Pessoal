@@ -2,9 +2,10 @@
  * Catálogo da Jornada: equipamentos, pets e moradas, com raridade, como obter e a arte de cada um.
  * Tudo aqui é dado fixo; as regras (quem pode ter o quê) ficam em rules.ts.
  */
-import { sprite, toSvg, type Grid, type Palette } from './art.ts';
+import { grid, sprite, toSvg, type Grid, type Palette } from './art.ts';
 import { HAIRS, SKINS, SKY_PALETTES } from './artData.ts';
 import { PET_SPRITES } from './petsData.ts';
+import { PETS24 } from './pets24.ts';
 import { PX } from './px.ts';
 import { cabana24, casinha24, castelinho24, castelo24, moon24, sun24, torre24, tree24 } from './scene24.ts';
 
@@ -154,6 +155,9 @@ export const itemIcon = (item: Item): string => PX.itemIcon(PX.find(item.id));
 export function petIcon(id: string, variant?: string | null): string {
   const p = PET_SPRITES[id] ?? PET_SPRITES.gato;
   const v = p.variants.find((x) => x.id === variant) ?? p.variants[0];
+  // R2: pets já redesenhados com o dobro de pixels saem do mesmo tamanho.
+  const hd = PETS24[id];
+  if (hd) return toSvg(grid(hd.rows, hd.pal(v.pal), p.w * 2), 2);
   return sprite(p.rows, v.pal, p.w);
 }
 
