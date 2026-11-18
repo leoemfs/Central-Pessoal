@@ -545,7 +545,7 @@ test('N2.18a: mini games dão fichas (não ouro), só nos primeiros 30 min do di
   const old = normalizeJourney({ games: { records: {}, prizes: [{ day: '2026-11-10', game: 'corrida', gold: 14 }] } });
   assert.equal(wallet({ ...d, journey: old }, old, '2026-11-16').gold - wallet(d, d.journey, '2026-11-16').gold, 14);
   assert.equal(fichas({ ...r4.state, games: { ...r4.state.games, fichasSpent: 4 } }), 8);
-  assert.deepEqual(normalizeJourney({}).games, { records: {}, prizes: [], plays: [], fichasSpent: 0 });
+  assert.deepEqual(normalizeJourney({}).games, { records: {}, prizes: [], plays: [], fichasSpent: 0, sudokuDays: [] });
 });
 
 test('abrir todos: mesmo resultado que abrir um por um, sem abrir duas vezes', () => {
@@ -657,4 +657,38 @@ test('N2.8b: bônus de XP e ouro dos itens vestidos, desde o dia em que foram ve
   assert.equal(mysticExtras(d0, arco, TODAY).gold, 3);
   const anel = { ...(equip(st0, 'anel', 'anelAurora', 1, '2026-11-23') as typeof st0), gifts: [{ day: '2026-11-22', n: 1, gold: 10, chest: null }, { day: '2026-11-23', n: 2, gold: 15, chest: null }] };
   assert.equal(mysticExtras(d0, anel, TODAY).gold, 15);
+});
+
+test('Sudoku: desafio do dia válido, regras, +2 de INT por dia resolvido, fichas e conquistas', async () => {
+  const { makeSudoku, isSolved, conflicts, sudokuStreak, SUDOKU_LEVELS } = await import('./jornada/sudoku.ts');
+  const { attributes } = await import('./jornada/rules.ts');
+  for (const l of SUDOKU_LEVELS) {
+    const g = makeSudoku('2026-11-18', l.id);
+    assert.ok(isSolved(g.solution), `solução válida (${l.id})`);
+    assert.equal(g.puzzle.filter((v) => v === 0).length, l.holes);
+    assert.ok(g.puzzle.every((v, i) => v === 0 || v === g.solution[i]), 'as dadas vêm da solução');
+    assert.deepEqual(makeSudoku('2026-11-18', l.id), g, 'o mesmo desafio o dia todo');
+  }
+  assert.notDeepEqual(makeSudoku('2026-11-19', 'facil').solution, makeSudoku('2026-11-18', 'facil').solution, 'muda de um dia para o outro');
+  const sol = makeSudoku('2026-11-18', 'medio').solution;
+  const wrong = [...sol];
+  wrong[1] = wrong[0];
+  assert.ok(conflicts(wrong).has(1) && !isSolved(wrong));
+  assert.equal(sudokuStreak(['2026-11-16', '2026-11-17', '2026-11-18'], '2026-11-18'), 3);
+
+  // Resolver guarda o dia (uma vez), dá fichas e +2 de Inteligência por dia.
+  let st = defaultJourneyState();
+  const a = finishGame(st, 'sudoku', 20, 300, '2026-11-18', { sudoku: 20 });
+  assert.equal(a.fichas, 3);
+  st = finishGame(a.state, 'sudoku', 10, 200, '2026-11-18').state;
+  assert.deepEqual(st.games.sudokuDays, ['2026-11-18'], 'duas vezes no mesmo dia contam uma');
+  assert.equal(finishGame(st, 'sudoku', 0, 100, '2026-11-19').state.games.sudokuDays.length, 1, 'sem resolver, não conta');
+  const base = withData({});
+  assert.equal(attributes({ ...base, journey: st }, '2026-11-18').INT - attributes(base, '2026-11-18').INT, 2);
+  assert.deepEqual(normalizeJourney({ games: { sudokuDays: ['2026-11-18', 'lixo', '2026-11-18'] } }).games.sudokuDays, ['2026-11-18']);
+  assert.equal(normalizeJourney({}).games.sudokuDays.length, 0);
+  // Conquistas no Codex.
+  const e = codexEntries({ ...base, journey: st }, '2026-11-18').filter((x) => x.id.startsWith('jogo:sudoku'));
+  assert.equal(e.length, 3);
+  assert.ok(e.find((x) => x.id === 'jogo:sudoku1')?.owned);
 });

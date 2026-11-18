@@ -9,7 +9,8 @@ import { todayISO } from '../utils';
 import { Fullscreen, notify } from '../ui';
 import { recordSession } from '../practices';
 import { FICHA_ICON, ITEMS, itemById, itemIcon, petIcon } from '../jornada/catalog';
-import { sprite } from '../jornada/art';
+import { OUTLINE, sprite, toSvg, type Grid } from '../jornada/art';
+import { conflicts, isSolved, makeSudoku, SUDOKU_LEVELS, type SudokuLevel } from '../jornada/sudoku';
 import { BichinhoCard, BichinhoTelaCheia } from './JornadaBichinho';
 import { DAILY_MINUTES, fichas, finishGame, GAMES, minutesLeft, type GameId } from '../jornada/games';
 
@@ -69,12 +70,12 @@ export function Fliperama() {
         {GAMES.map((g) => (
           <button key={g.id} type="button" className={`jn-game${g.ready ? '' : ' locked'}`} onClick={() => (g.ready ? play(g.id) : notify(`${g.name}: em breve`, g.text))}>
             <span className={`jn-game-art ${g.id}`}>
-              <img alt="" src={g.id === 'memoria' ? itemIcon(itemById('espada')!) : g.id === 'pescaria' ? fishIcon('raro') : pet} />
+              <img alt="" src={g.id === 'memoria' ? itemIcon(itemById('espada')!) : g.id === 'pescaria' ? fishIcon('raro') : g.id === 'sudoku' ? SUDOKU_ICON : pet} />
             </span>
             <strong>{g.name}</strong>
             <span className="muted small">{g.text}</span>
             <span className="jn-px small" style={{ color: g.ready ? '#f472b6' : 'var(--faint)' }}>
-              {g.ready ? (state.games.records[g.id] ? `Recorde: ${fmt(state.games.records[g.id])}${g.id === 'corrida' ? ' m' : g.id === 'respira' ? ' sessões' : ''}` : 'Jogar') : 'EM BREVE'}
+              {g.ready ? (g.id === 'sudoku' ? ((state.games.sudokuDays ?? []).includes(today) ? 'Resolvido hoje ✓' : 'Desafio de hoje') : state.games.records[g.id] ? `Recorde: ${fmt(state.games.records[g.id])}${g.id === 'corrida' ? ' m' : g.id === 'respira' ? ' sessões' : ''}` : 'Jogar') : 'EM BREVE'}
             </span>
           </button>
         ))}
@@ -82,6 +83,7 @@ export function Fliperama() {
       {playing === 'corrida' && <Corrida pet={pet} record={state.games.records.corrida ?? 0} onFinish={(s) => done('corrida', s)} onClose={() => setPlaying(null)} />}
       {playing === 'memoria' && <Memoria owned={state.owned} record={state.games.records.memoria ?? 0} onFinish={(sc, marks) => done('memoria', sc, marks)} onClose={() => setPlaying(null)} />}
       {playing === 'pescaria' && <Pescaria pet={pet} record={state.games.records.pescaria ?? 0} onFinish={(sc, marks) => done('pescaria', sc, marks)} onClose={() => setPlaying(null)} />}
+      {playing === 'sudoku' && <Sudoku solvedToday={(state.games.sudokuDays ?? []).includes(today)} onFinish={(sc, marks) => done('sudoku', sc, marks)} onClose={() => setPlaying(null)} />}
       {playing === 'respira' && <Respira pet={pet} onFinish={(ok) => done('respira', ok ? (state.games.records.respira ?? 0) + 1 : 0)} onClose={() => setPlaying(null)} />}
     </>
   );
@@ -630,6 +632,132 @@ function Pescaria({ pet, record, onFinish, onClose }: { pet: string; record: num
           <Result title="FIM DA PESCARIA" lines={`${result.score} pontos${golds ? ` · ${golds} dourado${golds > 1 ? 's' : ''}` : ''}`} fichas={result.fichas} record={result.record} onClose={onClose} onAgain={again} />
         </div>
       )}
+    </Fullscreen>
+  );
+}
+
+// ---------- Sudoku (18/11): 6×6, um desafio por dia, +2 de Inteligência por dia resolvido ----------
+
+/** Ícone do Sudoku, 24 pixels (arte nova já com o dobro de pixels). */
+const SUDOKU_ICON = (() => {
+  const g: Grid = Array.from({ length: 24 }, () => Array<string | null>(24).fill(null));
+  for (let y = 2; y < 22; y++)
+    for (let x = 2; x < 22; x++) {
+      const edge = x === 2 || y === 2 || x === 21 || y === 21;
+      const thick = x === 11 || y === 8 || y === 15;
+      const thin = (x - 2) % 3 === 0 || (y - 2) % 3 === 0 || x === 20 || y === 20;
+      g[y][x] = edge ? OUTLINE : thick ? '#57534e' : thin ? '#d6d3d1' : '#fafaf9';
+    }
+  const dots: [number, number, string][] = [[3, 3, '#7c3aed'], [6, 9, '#7c3aed'], [12, 3, '#22c55e'], [15, 12, '#7c3aed'], [18, 18, '#22c55e'], [9, 16, '#7c3aed'], [3, 12, '#22c55e'], [18, 6, '#7c3aed']];
+  for (const [x, y, c] of dots) {
+    g[y][x] = c;
+    g[y][x + 1] = c;
+    g[y + 1][x] = c;
+    g[y + 1][x + 1] = c;
+  }
+  return toSvg(g, 2);
+})();
+
+function Sudoku({ solvedToday, onFinish, onClose }: { solvedToday: boolean; onFinish: (score: number, marks: Record<string, number>) => { fichas: number; record: boolean }; onClose: () => void }) {
+  const today = todayISO();
+  const [level, setLevel] = useState<SudokuLevel>('facil');
+  const [game, setGame] = useState(() => makeSudoku(today, 'facil'));
+  const [grid, setGrid] = useState<number[]>(game.puzzle);
+  const [sel, setSel] = useState<number | null>(null);
+  const [errors, setErrors] = useState(0);
+  const [phase, setPhase] = useState<'pronto' | 'jogando' | 'fim'>('pronto');
+  const [result, setResult] = useState<{ fichas: number; record: boolean; first: boolean } | null>(null);
+  const bad = conflicts(grid);
+  const start = (lv: SudokuLevel) => {
+    const g = makeSudoku(today, lv);
+    setLevel(lv);
+    setGame(g);
+    setGrid(g.puzzle);
+    setSel(null);
+    setErrors(0);
+    setResult(null);
+    setPhase('jogando');
+  };
+  const put = (v: number) => {
+    if (phase !== 'jogando' || sel === null || game.puzzle[sel]) return;
+    const next = [...grid];
+    next[sel] = v;
+    let errs = errors;
+    if (v && conflicts(next).has(sel)) errs++;
+    setErrors(errs);
+    setGrid(next);
+    if (isSolved(next)) {
+      const lv = SUDOKU_LEVELS.find((l) => l.id === level)!;
+      const r = onFinish(lv.points, { sudoku: lv.points, sudoku_limpo: level === 'dificil' && errs === 0 ? 1 : 0 });
+      setResult({ ...r, first: !solvedToday });
+      setPhase('fim');
+    }
+  };
+  const lvName = SUDOKU_LEVELS.find((l) => l.id === level)!.label;
+  return (
+    <Fullscreen label="Sudoku" className="jn-game-fs jn-sdk-fs" onClose={onClose}>
+      <div className="jn-game-top">
+        <button type="button" className="jn-fs-close" aria-label="Sair" onClick={onClose}>
+          ✕
+        </button>
+        <strong className="jn-px">SUDOKU</strong>
+        <span className="jn-px small">{phase === 'pronto' ? '6×6' : `${lvName} · ${errors} ${errors === 1 ? 'erro' : 'erros'}`}</span>
+      </div>
+      <div className="jn-sdk">
+        <div className="jn-sdk-grid" role="grid" aria-label="Tabuleiro">
+          {grid.map((v, i) => {
+            const given = !!game.puzzle[i];
+            const r = Math.floor(i / 6);
+            const c = i % 6;
+            const same = sel !== null && (Math.floor(sel / 6) === r || sel % 6 === c);
+            return (
+              <button
+                key={i}
+                type="button"
+                role="gridcell"
+                aria-label={`Linha ${r + 1}, coluna ${c + 1}${v ? `: ${v}` : ', vazia'}`}
+                className={`jn-sdk-cell${given ? ' given' : ''}${sel === i ? ' sel' : same ? ' line' : ''}${bad.has(i) && !given ? ' bad' : ''}${c === 2 ? ' br' : ''}${r === 1 || r === 3 ? ' bb' : ''}`}
+                onClick={() => setSel(i)}
+              >
+                {v || ''}
+              </button>
+            );
+          })}
+        </div>
+        <div className="jn-sdk-pad" role="group" aria-label="Números">
+          {[1, 2, 3, 4, 5, 6].map((n) => (
+            <button key={n} type="button" onClick={() => put(n)}>
+              {n}
+            </button>
+          ))}
+          <button type="button" className="erase" onClick={() => put(0)}>
+            Apagar
+          </button>
+        </div>
+        {phase === 'pronto' && (
+          <div className="jn-game-over">
+            <strong className="jn-px">SUDOKU DO DIA</strong>
+            <span>Complete o tabuleiro com os números de 1 a 6, sem repetir na linha, na coluna nem na caixa de 2×3. {solvedToday ? 'Você já resolveu hoje: o +2 de Inteligência do dia já contou; dá para jogar de novo por diversão.' : 'Resolver dá +2 de Inteligência (uma vez por dia) e fichas.'}</span>
+            <div className="btn-row">
+              {SUDOKU_LEVELS.map((l) => (
+                <button key={l.id} type="button" className={`btn${l.id === 'facil' ? ' primary' : ''}`} onClick={() => start(l.id)}>
+                  {l.label}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+        {phase === 'fim' && result && (
+          <Result
+            title="RESOLVIDO!"
+            lines={`${lvName} · ${errors} ${errors === 1 ? 'erro' : 'erros'}${result.first ? ' · +2 de Inteligência' : ' · a Inteligência de hoje já tinha contado'}`}
+            fichas={result.fichas}
+            record={false}
+            onAgain={() => setPhase('pronto')}
+            onClose={onClose}
+          />
+        )}
+      </div>
     </Fullscreen>
   );
 }
