@@ -46,6 +46,9 @@ anotar → especificar → aprovar → construir → testar. A cada mudança de 
 - Visual: preto, verde e cartões; componentes prontos em `src/ui.tsx` (Sheet, Fullscreen, MoneyInput, Segmented, Toggle, Progress, notify…).
 - **Jornada (pixel art):** todo desenho **novo** é feito com o **dobro de pixels** (24 de largura, como o gatinho `CAT_HD` em `src/jornada/bichinho.ts`) e aparece do mesmo tamanho na tela que os antigos. **Exceção:** o que vai no corpo do personagem (elmo, roupa, botas, arma, colar) segue o tamanho do boneco atual até ele ser redesenhado (combinado em 17/11).
 
+## Trabalho em pacotes (ex.: Projeto Enxuto)
+- **Uma sessão por pacote**, uma de cada vez. Ao terminar um pacote, **sempre** avisar no fim da resposta: **"Mescle agora:"** + link do PR, e **"Depois de mesclar, abra uma sessão nova"** + a mensagem pronta do próximo pacote (pedido em 18/11).
+
 ## Git
 - Trabalhar no branch indicado na sessão. Sem force push e sem rebase.
 - Se o branch já está todo no `main` (`git merge-base --is-ancestor`), avançar com `git merge --ff-only origin/main`; senão, continuar em cima dele.
