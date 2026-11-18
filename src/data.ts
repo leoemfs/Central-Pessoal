@@ -16,6 +16,7 @@ import { defaultJourneyState, normalizeJourney } from './jornada/rules.ts';
 import { emptyCareer, normalizeCareer } from './carreira.ts';
 import { emptyHealth, normalizeHealth } from './saude.ts';
 import { DEFAULT_RHYTHM, MODULES, normalizeRhythm, SETUP_AREAS } from './setup.ts';
+import { cleanNames, DEFAULT_IDEA_TAGS, DEFAULT_NOTE_CATEGORIES } from './notas.ts';
 import { fixCard, fixCategory, fixEvent, fixExpense, fixExpenseSeries, fixIncome, fixIncomeSeries, fixJournal, fixNote, fixTask, sanitizeList } from './sanitize.ts';
 
 export const COLORS = ['#22c55e', '#3b82f6', '#8b5cf6', '#f97316', '#ef4444', '#94a3b8', '#eab308', '#ec4899', '#06b6d4'];
@@ -59,7 +60,7 @@ export function emptyData(): AppData {
     incomes: [],
     incomeSeries: [],
     incomeSources: [],
-    settings: { theme: 'dark', accent: null, favorites: [...DEFAULT_FAVORITES], cards: {}, barLayout: 'fixo', tapToFavorites: true, hideOnScroll: true, moreLayout: 'lista', moreButton: false, hideBarLabels: false, drawerView: 'misto', iconColors: 'mono', iconStyle: 'classico', sideCards: [...DEFAULT_SIDE_CARDS], sideShortcuts: [...DEFAULT_SIDE_SHORTCUTS], frostedGlass: false, menuTipSeen: false, iconSize: 'm', seededCategories: false, seededIncomeSources: false, lastBackupAt: null, activeDays: [], visitDays: [], journeyUnlockedAt: null, journeyChoice: null, journeyCard: true, hiddenModules: [], setup: 'novo', tutorialSeen: false, setupAreas: [], journeyWanted: null, journalRhythm: { ...DEFAULT_RHYTHM }, journalOrder: 'recentes', journalMemoHiddenOn: '', googleCalendar: { on: false, events: true, bills: true, tasks: true, calendarId: null, tasksList: null } },
+    settings: { theme: 'dark', accent: null, favorites: [...DEFAULT_FAVORITES], cards: {}, barLayout: 'fixo', tapToFavorites: true, hideOnScroll: true, moreLayout: 'lista', moreButton: false, hideBarLabels: false, drawerView: 'misto', iconColors: 'mono', iconStyle: 'classico', sideCards: [...DEFAULT_SIDE_CARDS], sideShortcuts: [...DEFAULT_SIDE_SHORTCUTS], frostedGlass: false, menuTipSeen: false, iconSize: 'm', seededCategories: false, seededIncomeSources: false, lastBackupAt: null, activeDays: [], visitDays: [], journeyUnlockedAt: null, journeyChoice: null, journeyCard: true, hiddenModules: [], setup: 'novo', tutorialSeen: false, setupAreas: [], journeyWanted: null, journalRhythm: { ...DEFAULT_RHYTHM }, journalOrder: 'recentes', journalMemoHiddenOn: '', noteCategories: [...DEFAULT_NOTE_CATEGORIES], ideaTags: [...DEFAULT_IDEA_TAGS], googleCalendar: { on: false, events: true, bills: true, tasks: true, calendarId: null, tasksList: null } },
     profile: emptyProfile('novo'),
     boxes: [],
     moods: {},
@@ -197,6 +198,8 @@ export function normalize(raw: unknown): AppData {
       journalRhythm: normalizeRhythm(settings.journalRhythm),
       journalOrder: settings.journalOrder === 'antigos' ? 'antigos' : 'recentes',
       journalMemoHiddenOn: typeof settings.journalMemoHiddenOn === 'string' ? settings.journalMemoHiddenOn : '',
+      noteCategories: cleanNames(settings.noteCategories, DEFAULT_NOTE_CATEGORIES),
+      ideaTags: cleanNames(settings.ideaTags, DEFAULT_IDEA_TAGS),
       googleCalendar: normalizeGoogleCalendar(settings.googleCalendar),
     },
     // Quem já tinha dados (atualização ou backup) não vê a entrevista de surpresa.

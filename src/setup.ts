@@ -94,7 +94,7 @@ const SECTION_MODULE: Record<string, string> = {
   carreira: 'carreira', vagas: 'carreira', metas: 'carreira',
   objetivos: 'objetivos', grandes: 'objetivos', concluidos: 'objetivos',
   saude: 'saude', saudehoje: 'saude', saudehist: 'saude',
-  arquivo: 'arquivo', voce: 'voce', jornada: 'jornada',
+  arquivo: 'arquivo', ideias: 'arquivo', notasarq: 'arquivo', voce: 'voce', jornada: 'jornada',
 };
 export function moduleOf(path: string): string | null {
   return SECTION_MODULE[path.split('/')[0]] ?? null;

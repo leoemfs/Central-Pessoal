@@ -1891,6 +1891,94 @@ button.row {
   overflow-wrap: anywhere;
   white-space: pre-line;
 }
+.note-meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-top: 3px;
+}
+.note-item .row-title .icon,
+.note-item .row-title svg {
+  vertical-align: -2px;
+  color: var(--accent-text);
+}
+.notes-group {
+  margin: 10px 4px 2px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+}
+.notes-hint {
+  margin: 0 4px;
+}
+.idea-quick {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  padding: 4px 4px 4px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--raised);
+}
+.idea-quick input {
+  flex: 1;
+  min-width: 0;
+  border: none;
+  background: transparent;
+  outline: none;
+  padding: 8px 0;
+}
+.note-saved {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+}
+.note-cats {
+  margin: -2px 0 2px;
+}
+.note-status {
+  margin-bottom: 4px;
+}
+.chip-btn.chip-add {
+  border-style: dashed;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.cat-group + .cat-group {
+  margin-top: 18px;
+}
+.cat-group h3 {
+  font-size: 0.95rem;
+  margin: 0 0 8px;
+}
+.cat-names {
+  list-style: none;
+  margin: 0 0 8px;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.cat-names li {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+.cat-names input,
+.cat-add input {
+  flex: 1;
+  min-width: 0;
+}
+.cat-add {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
 .notes-editor {
   display: flex;
   flex-direction: column;
