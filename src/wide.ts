@@ -16,3 +16,18 @@ function subscribe(cb: () => void) {
 export function useWideScreen(): boolean {
   return useSyncExternalStore(subscribe, () => mq()?.matches ?? false, () => false);
 }
+
+/** E41: computador (barra lateral, sem a barra de cima do celular). Igual ao CSS (900 px). */
+const deskMq = () => (typeof window !== 'undefined' && window.matchMedia ? window.matchMedia('(min-width: 900px)') : null);
+export function useDesktop(): boolean {
+  return useSyncExternalStore(
+    (cb) => {
+      const m = deskMq();
+      if (!m) return () => {};
+      m.addEventListener('change', cb);
+      return () => m.removeEventListener('change', cb);
+    },
+    () => deskMq()?.matches ?? false,
+    () => false,
+  );
+}

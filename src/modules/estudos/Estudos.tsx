@@ -11,7 +11,8 @@ import { MapaPage, MapasPage } from './Mapas';
 import { CreateMenu, DualProgress, PackSheet, useCreate, useStudy } from './shared';
 import { CourseCta, ImportCoursePage } from './Cursos';
 import { ExportPage } from './Exportar';
-import { TutorialCard, TutorialLink } from './Tutorial';
+import { TutorialCard, TutorialSheet } from './Tutorial';
+import { usePageMenu } from '../../PageMenu';
 import { cleanAddress } from '../../router';
 
 /** Trilhas sugeridas para começar (uma de cada área). */
@@ -107,7 +108,13 @@ export function Estudos({ route }: ViewProps) {
 }
 
 function Home() {
-  const { study, lib } = useStudy();
+  const { study, lib, set } = useStudy();
+  const [tutorial, setTutorial] = useState(false);
+  // E41: o passo a passo (e trazer o cartão de volta) fica no menu ⋮ da barra de cima.
+  usePageMenu([
+    { id: 'tutorial', label: 'Como usar Estudos', icon: 'info', run: () => setTutorial(true) },
+    study.tutorialOff && { id: 'tutorial-card', label: 'Mostrar o cartão "Como usar"', icon: 'info', run: () => set((s) => ({ ...s, tutorialOff: false })) },
+  ]);
   const visibleAreas = lib.areas.filter((x) => !study.archived.includes(x.id));
   const trackCount = lib.tracks.filter((t) => !isHidden(study.archived, t.areaId, t.id)).length;
   const active = study.cycles.filter((c) => !c.finishedAt);
@@ -239,7 +246,7 @@ function Home() {
     <>
       <PageHeader title="Estudos" subtitle="Seu espaço para explorar, planejar e guardar o que aprende." />
       <CardScreen screen="estudos" cards={cards} />
-      <TutorialLink />
+      {tutorial && <TutorialSheet onClose={() => setTutorial(false)} />}
     </>
   );
 }

@@ -1,5 +1,6 @@
 import { lazy, Suspense, useEffect, useRef, useState } from 'react';
 import { go } from '../../router';
+import { usePageMenu } from '../../PageMenu';
 import { cycleCounts, docIsEmpty, movePage, newPage, pageTree, removePage, setPageParent, topicState, touch, trackPath } from '../../estudos';
 import type { RichNode, StudyNotebook, StudyPage } from '../../types';
 import { Empty, Field, Icon, MultiChips, notify, PageHeader, Sheet, type IconName } from '../../ui';
@@ -80,6 +81,16 @@ export function NotebookPage({ id, pageId, setExtra }: { id: string; pageId: str
     return () => setExtra(undefined);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [page?.id]);
+  const [showLog, setShowLog] = useState(false);
+  // E41: na capa do notebook, as ações secundárias ficam no menu ⋮ da barra de cima.
+  const cover = !!nb && !page;
+  usePageMenu([
+    cover && { id: 'pdf', label: 'Exportar em PDF', icon: 'download', run: () => go(`estudos/exportar/${id}`) },
+    cover && { id: 'biblioteca', label: 'Adicionar da Biblioteca', icon: 'library', run: () => go('estudos/biblioteca') },
+    cover && (nb?.pages.length ?? 0) > 1 && { id: 'organizar', label: 'Organizar páginas', icon: 'list', run: () => setSorting(true) },
+    cover && { id: 'editar', label: 'Editar notebook', icon: 'edit', run: () => setEdit({ kind: 'notebook' }) },
+    cover && (nb?.log.length ?? 0) > 0 && { id: 'historico', label: 'Histórico', icon: 'clock', run: () => setShowLog(true) },
+  ]);
   if (!nb) return <Missing what="Notebook" />;
 
   const tree = pageTree(nb);
@@ -304,23 +315,17 @@ export function NotebookPage({ id, pageId, setExtra }: { id: string; pageId: str
             </>
           ) : (
             <>Notebook livre, sem tópicos da Biblioteca.</>
-          )}{' '}
-          <a className="link" href="#/estudos/biblioteca">
-            Adicionar da Biblioteca
-          </a>
+          )}
         </span>
       </div>
-      <a className="btn soft small st-export-btn" href={`#/estudos/exportar/${nb.id}`}>
-        <Icon name="download" size={16} /> Exportar em PDF
-      </a>
 
       <section className="card">
         <div className="card-head">
           <h2>Páginas</h2>
           <span className="st-head-actions">
-            {nb.pages.length > 1 && (
-              <button type="button" className="link" onClick={() => setSorting((v) => !v)}>
-                {sorting ? 'Pronto' : 'Organizar'}
+            {sorting && (
+              <button type="button" className="btn primary small" onClick={() => setSorting(false)}>
+                Pronto
               </button>
             )}
             <button type="button" className="btn soft small" onClick={() => setEdit({ kind: 'page', page: null, parentId: null })}>
@@ -465,22 +470,18 @@ export function NotebookPage({ id, pageId, setExtra }: { id: string; pageId: str
         )}
       </section>
 
-      <section className="card">
-        <div className="card-head">
-          <h2>Histórico</h2>
-          <button type="button" className="link" onClick={() => setEdit({ kind: 'notebook' })}>
-            Editar notebook
-          </button>
-        </div>
-        <ul className="st-log">
-          {nb.log.slice(0, 8).map((l, k) => (
+      {showLog && (
+        <Sheet title="Histórico" onClose={() => setShowLog(false)}>
+          <ul className="st-log">
+          {nb.log.slice(0, 30).map((l, k) => (
             <li key={k}>
               <time>{formatDateTime(l.at)}</time>
               <span>{l.text}</span>
             </li>
           ))}
         </ul>
-      </section>
+        </Sheet>
+      )}
       {sheets}
     </>
   );

@@ -13793,3 +13793,122 @@ body.icons-flat .st-shortcut {
   border-color: #a78bfa;
   color: #e9d5ff;
 }
+
+/* ---------- E40/E41: menu ⋮ (lupa só no Início) ---------- */
+.page-menu-shade {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+}
+.page-menu {
+  position: fixed;
+  z-index: 61;
+  min-width: 220px;
+  max-width: min(320px, calc(100vw - 16px));
+  padding: 6px 0;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--surface);
+  box-shadow: 0 14px 34px rgb(0 0 0 / 0.45);
+  display: flex;
+  flex-direction: column;
+  animation: page-menu-in 0.14s ease-out;
+  transform-origin: top right;
+}
+@keyframes page-menu-in {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .page-menu {
+    animation: none;
+  }
+}
+.page-menu button {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 46px;
+  padding: 0 16px;
+  border: 0;
+  background: none;
+  color: var(--text);
+  font: inherit;
+  font-size: 0.95rem;
+  text-align: left;
+  cursor: pointer;
+}
+.page-menu button > .icon {
+  flex: none;
+  color: var(--muted);
+}
+.page-menu button + button {
+  border-top: 1px solid var(--border);
+}
+.page-menu button:hover,
+.page-menu button:focus-visible {
+  background: var(--raised);
+  outline: none;
+}
+.page-menu button.search {
+  color: var(--accent-text);
+}
+.page-menu button.search > .icon {
+  color: var(--accent-text);
+}
+.page-menu button.search:not(:first-child) {
+  border-top-width: 2px;
+}
+.page-menu-tip {
+  position: fixed;
+  z-index: 59;
+  padding: 7px 12px;
+  border-radius: 10px;
+  background: var(--accent);
+  color: var(--on-accent);
+  font-size: 0.85rem;
+  font-weight: 600;
+  box-shadow: 0 8px 20px rgb(0 0 0 / 0.35);
+  pointer-events: none;
+  animation: page-menu-in 0.2s ease-out;
+}
+.page-menu-tip::before {
+  content: '';
+  position: absolute;
+  top: -5px;
+  right: 16px;
+  width: 10px;
+  height: 10px;
+  background: inherit;
+  transform: rotate(45deg);
+}
+/* Computador: o ⋮ fica na linha do caminho, à direita. */
+.desk-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 0;
+}
+.desk-head > .crumbs {
+  flex: 1;
+  min-width: 0;
+}
+.desk-head > .page-menu-btn {
+  margin-left: auto;
+  width: 36px;
+  height: 36px;
+  color: var(--muted);
+}
+.desk-head:empty {
+  display: none;
+}
+.topbar .page-menu-btn.on,
+.desk-head .page-menu-btn.on {
+  background: var(--raised);
+  color: var(--text);
+}
+.page-menu button {
+  border-radius: 0;
+}

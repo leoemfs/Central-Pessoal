@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import type { ViewProps } from '../App';
 import { cleanAddress, useSubAction } from '../router';
 import { useStore } from '../store';
+import { usePageMenu } from '../PageMenu';
 import type { SleepEntry, SleepFeel } from '../types';
 import { addDays as addDaysISO, formatDate, relativeDay, todayISO, uid } from '../utils';
 import { go } from '../router';
@@ -1347,6 +1348,9 @@ function BodyTab({ onEdit, onCreate }: { onEdit: (e: BodyEntry) => void; onCreat
   const [field, setField] = useState(b.fields[0]?.name ?? 'Peso');
   const [newField, setNewField] = useState('');
   const [newUnit, setNewUnit] = useState('cm');
+  // E41: esconder ou mostrar fica no menu ⋮ da barra de cima.
+  // Escondido, o próprio cartão da aba tem o botão "Mostrar" (não repete no menu).
+  usePageMenu([b.show && { id: 'medidas', label: 'Esconder peso e medidas', icon: 'eyeOff', run: () => update(setBodyShow(false)) }]);
   if (!b.show) {
     return (
       <section className="card" aria-label="Peso e medidas">
@@ -1363,7 +1367,6 @@ function BodyTab({ onEdit, onCreate }: { onEdit: (e: BodyEntry) => void; onCreat
       <section className="card" aria-label="Últimas medidas">
         <div className="card-head">
           <h2><Icon name="scale" size={18} /> Medidas</h2>
-          <button type="button" className="btn soft small" onClick={() => update(setBodyShow(false))}><Icon name="eyeOff" size={14} /> Esconder</button>
         </div>
         <div className="summary three">
           {b.fields.map((x) => {
