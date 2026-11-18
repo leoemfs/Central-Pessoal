@@ -127,7 +127,7 @@ export function Ajustes({ route }: ViewProps) {
     conta: cloud ? cloudLine(cloud.status, cloud.lastSavedAt) : 'Entre para sincronizar entre aparelhos',
     aparencia: appearanceSummary(data.settings.theme, accentById(data.settings.accent)?.name ?? null),
     inicio: data.settings.hiddenModules.includes('diario') ? 'Favoritos e módulos à vista' : 'Favoritos, módulos à vista e ritmo do Diário',
-    barras: 'Botão Mais, rolagem e tela Mais',
+    barras: 'Nomes dos ícones, toque e rolagem',
     backup: backupSummary,
     armazenamento: `${persisted ? 'Protegido' : 'Proteção não garantida'} · dados e apagar tudo`,
   };
@@ -251,7 +251,7 @@ export function Ajustes({ route }: ViewProps) {
       {at === 'inicio' && (
       <section className="card">
         <h3 className="pz-title first">Favoritos do Início</h3>
-        <p className="muted small">Os ícones da barra de baixo ao lado do Início (4, ou 3 com o botão Mais ligado). Dentro de um módulo, a estrela na ponta da barra mostra os favoritos para trocar de módulo.</p>
+        <p className="muted small">Os ícones da barra de baixo ao lado do Início (4). Dentro de um módulo, a estrela na ponta da barra mostra os favoritos para trocar de módulo.</p>
         <div className="fav-row">
           {favoriteItems(data.settings.favorites).map((f) => (
             <span key={f.id} className="fav-chip">
@@ -264,7 +264,7 @@ export function Ajustes({ route }: ViewProps) {
         </div>
 
         <h3 className="pz-title">Módulos à vista</h3>
-        <p className="muted small">Desligado vai para Mais › Guardados, sem apagar nada. Pelo menos {MIN_VISIBLE} à vista.</p>
+        <p className="muted small">Desligado vai para Guardados, no menu, sem apagar nada. Pelo menos {MIN_VISIBLE} à vista.</p>
         <div className="chips" role="group" aria-label="Módulos à vista">
           {MODULES.map((m) => {
             const visible = visibleFrom(data.settings.hiddenModules);
@@ -279,7 +279,7 @@ export function Ajustes({ route }: ViewProps) {
                   const next = toggleModule(visible, m.id);
                   if (next === visible) return notify(`Pelo menos ${MIN_VISIBLE} módulos`, 'Ligue outro antes de desligar este.');
                   update((d) => ({ ...d, settings: { ...d.settings, hiddenModules: hiddenFrom(next), favorites: fitFavorites(d.settings.favorites, next), ...(m.id === 'jornada' ? { journeyWanted: !on } : {}) } }));
-                  notify(m.label, on ? 'Foi para Mais › Guardados.' : 'De volta à vista.');
+                  notify(m.label, on ? 'Foi para Guardados, no menu.' : 'De volta à vista.');
                 }}
               >
                 {m.label}
@@ -330,13 +330,6 @@ export function Ajustes({ route }: ViewProps) {
       <section className="card">
         <div className="toggle-row first">
           <div>
-            <strong>Botão Mais na barra</strong>
-            <span className="muted small">Desligado: 4 favoritos no Início, e o menu abre puxando a barra para cima. Ligado: 3 favoritos e o Mais na ponta. Puxar funciona nos dois jeitos.</span>
-          </div>
-          <Toggle checked={data.settings.moreButton} onChange={(v) => setSetting({ moreButton: v })} label="Botão Mais na barra" />
-        </div>
-        <div className="toggle-row">
-          <div>
             <strong>Esconder o nome embaixo dos ícones</strong>
             <span className="muted small">Para quem já conhece os ícones: a barra fica mais baixa, só com os desenhos. Segurar o ícone continua mostrando o nome.</span>
           </div>
@@ -356,17 +349,6 @@ export function Ajustes({ route }: ViewProps) {
           </div>
           <Toggle checked={data.settings.hideOnScroll} onChange={(v) => setSetting({ hideOnScroll: v })} label="Esconder as barras ao rolar" />
         </div>
-        <h3 className="pz-title">Tela Mais</h3>
-        <p className="muted small">Lista mostra o que tem em cada módulo; grade mostra tudo de uma vez, com ícones.</p>
-        <Segmented<'lista' | 'grade'>
-          label="Tela Mais"
-          value={data.settings.moreLayout}
-          onChange={(v) => setSetting({ moreLayout: v })}
-          options={[
-            { value: 'lista', label: 'Lista' },
-            { value: 'grade', label: 'Grade' },
-          ]}
-        />
       </section>
       )}
       {favPick && <FavoritesSheet onClose={() => setFavPick(false)} />}
