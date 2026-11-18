@@ -1,6 +1,6 @@
 # M44 Diário v2
 
-Aprovado em 18/11 ("aprovado... vamos fazer"; "pode fazer tudo"). Tamanho **M**. **Feito na v0.134.0** (as 3 partes juntas). O histórico por ano e mês virou o componente `YearMonthSheet` em `ui.tsx`, pronto para o E42.
+Aprovado em 18/11 ("aprovado... vamos fazer"; "pode fazer tudo"). Tamanho **M**. **Feito na v0.135.0** (as 3 partes juntas). O histórico por ano e mês virou o componente `YearMonthSheet` em `ui.tsx`, pronto para o E42.
 
 Prévia navegável: https://claude.ai/artifact/2oKRSzJde2ihqnMbp4hLPh
 

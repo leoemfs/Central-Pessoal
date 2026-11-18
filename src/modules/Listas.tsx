@@ -9,7 +9,7 @@ import {
   addItemFromText, addListCategory, addPrice, AISLES, bestPrice, categoryOf, deleteListCategory, finishShopping, kindOf, latestPrices, launchBought, LIST_COLORS,
   LIST_ICONS, LIST_KINDS, listEstimate, newItem, newList, perUnit, priceCheck, qtyText, removeItem, scaledQty, sendIngredients, sizeText, toggleItem, uncheckAll,
   updateItem, updateList, updateListCategory, variantLabel, itemCost, purchaseHistory, ensureProduct, findCatalog, marketEstimate, matchKey, parseItemText,
-  catalogByAisle, createListWithItems, MARKET_CAT, packLabel, priceCategories, updateProduct, deleteProduct, updatePriceEntry, deletePriceEntry,
+  catalogByAisle, createListWithItems, MARKET_CAT, packLabel, priceCategories, updateProduct, deleteProduct, updatePriceEntry, deletePriceEntry, mergeProducts,
   priceRange, productSuggestions, productsWithoutPrice, sizeOptions, packCount, payItem, paidTotal, lastPurchase,
 } from '../lists';
 import type { ListCategory, ListItem, ListKind, Product, ProductVariant, UserList } from '../types';
@@ -1914,6 +1914,8 @@ function ProductSheet({ productId, onClose }: { productId: string; onClose: () =
   );
 }
 
+const plainKey = (s: string) => s.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+
 /** M4: editar o produto (nome, categoria, corredor e unidade de comparação) ou excluir. */
 function ProductEditSheet({ p, onClose }: { p: Product; onClose: (gone?: boolean) => void }) {
   const { data, update } = useStore();
@@ -1923,7 +1925,14 @@ function ProductEditSheet({ p, onClose }: { p: Product; onClose: (gone?: boolean
   const [aisle, setAisle] = useState(p.aisle);
   const [unit, setUnit] = useState<Product['unit']>(p.unit);
   const [confirm, setConfirm] = useState(false);
+  const [other, setOther] = useState('');
+  const [mq, setMq] = useState('');
   const market = (data.listCategories.find((c) => c.id === cat)?.kind ?? 'mercado') === 'mercado';
+  const others = data.products
+    .filter((x) => x.id !== p.id && x.categoryId === p.categoryId && (!mq.trim() || plainKey(x.name).includes(plainKey(mq))))
+    .sort((a, b) => a.name.localeCompare(b.name))
+    .slice(0, 8);
+  const otherP = data.products.find((x) => x.id === other);
   const n = data.prices.filter((x) => data.variants.some((v) => v.id === x.variantId && v.productId === p.id)).length;
   return (
     <Sheet
@@ -1974,6 +1983,34 @@ function ProductEditSheet({ p, onClose }: { p: Product; onClose: (gone?: boolean
       <div className="field">
         <span className="field-label">Comparar por</span>
         <Chips label="Comparar por" value={unit} onChange={setUnit} options={[{ value: 'kg', label: 'R$/kg' }, { value: 'L', label: 'R$/litro' }, { value: 'un', label: 'R$/unidade' }]} />
+      </div>
+      <div className="field">
+        <span className="field-label">Juntar com outro produto</span>
+        <span className="field-hint">Para duplicados, como "Arroz" e "Arroz branco". O outro entra neste: marcas, preços e itens das listas vêm junto.</span>
+        <input className="input" value={mq} onChange={(e) => { setMq(e.target.value); setOther(''); }} placeholder="Buscar o duplicado" aria-label="Buscar produto para juntar" autoComplete="off" />
+        {others.length > 0 && !otherP && (
+          <div className="sugbox">
+            {others.map((x) => (
+              <button key={x.id} type="button" onClick={() => setOther(x.id)}>
+                {x.name} <small>{x.aisle}</small>
+              </button>
+            ))}
+          </div>
+        )}
+        {otherP && (
+          <button
+            type="button"
+            className="btn primary block"
+            onClick={() => {
+              update(mergeProducts(p.id, otherP.id));
+              notify('Produtos juntos', `"${otherP.name}" agora faz parte de "${p.name}".`);
+              setOther('');
+              setMq('');
+            }}
+          >
+            Juntar "{otherP.name}" em "{p.name}"
+          </button>
+        )}
       </div>
       {confirm && <p className="tip warn"><Icon name="alert" size={16} /><span>Excluir apaga {n === 1 ? 'o preço anotado' : `os ${n} preços anotados`} deste produto. Os itens das listas ficam.</span></p>}
     </Sheet>
