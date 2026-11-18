@@ -52,7 +52,7 @@ export function SearchSheet({ onClose, scope = null }: { onClose: () => void; sc
     };
     add('diario', 'Diário', () =>
       data.journal
-        .filter((e) => has(e.title, e.summary, e.content, e.tag))
+        .filter((e) => has(e.title, e.summary, e.content, e.tag, e.prompt ?? ''))
         .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
         .map((e) => ({ key: e.id, icon: 'journal', title: e.title || e.summary || e.content.slice(0, 60), meta: formatDateTime(e.createdAt), to: 'diario' })),
     );

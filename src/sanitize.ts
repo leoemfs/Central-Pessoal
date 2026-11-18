@@ -140,6 +140,7 @@ export function fixJournal(r: Rec, now: string): JournalEntry {
     summary: str(r.summary),
     content: str(r.content),
     tag: str(r.tag),
+    prompt: str(r.prompt),
     photos: Array.isArray(r.photos)
       ? r.photos
           .filter((p): p is Rec => typeof p === 'object' && p !== null && typeof (p as Rec).id === 'string' && (p as Rec).id !== '')

@@ -6,8 +6,9 @@ import { upsert } from '../actions';
 import { defaultReviewWeek, weekReview, weekStart } from '../review';
 import { studyWeek } from '../estudos';
 import type { JournalEntry } from '../types';
-import { addDays, formatDate, formatDateTime, formatMoney, todayISO, uid } from '../utils';
+import { addDays, addMonths, formatDate, formatDateTime, formatMoney, formatMonth, todayISO, uid } from '../utils';
 import { CategoryBadge, Empty, Field, Icon, MonthNav, PageHeader, Pill, Progress } from '../ui';
+import { bestStreak, currentStreak, monthWeeks, weekDays, writtenDays } from '../journal';
 import { BillRow } from './financas/Financas';
 import { useCategoryOf } from './financas/shared';
 import { entryTitle } from './Diario';
@@ -73,8 +74,13 @@ export function Revisao() {
 
   return (
     <>
-      <PageHeader title="Revisão semanal" actions={<MonthNav label={label} onPrev={() => changeWeek(addDays(start, -7))} onNext={() => changeWeek(addDays(start, 7))} onLabel={() => changeWeek(weekStart(today))} />} />
-      {inProgress && <p className="muted small center">Semana em andamento — os números vão até hoje.</p>}
+      <PageHeader title="Revisão semanal" />
+      <ReviewCalendar week={start} today={today} onPick={changeWeek} />
+      <div className="review-week-head">
+        <h2>Semana {label}</h2>
+        {start > today ? <Pill>Ainda não começou</Pill> : inProgress ? <Pill tone="green">Em andamento</Pill> : <Pill>Fechada</Pill>}
+      </div>
+      {inProgress && <p className="muted small">Os números vão até hoje.</p>}
 
       <section className="card">
         <div className="summary">
@@ -356,5 +362,69 @@ export function Revisao() {
         </div>
       </section>
     </>
+  );
+}
+
+/**
+ * M44: calendário do mês no topo da Revisão. Verde = dia com registro no Diário; cada linha é uma semana
+ * e tocar nela escolhe a semana da revisão. Embaixo, dias escritos no mês, sequência e recorde.
+ */
+function ReviewCalendar({ week, today, onPick }: { week: string; today: string; onPick: (monday: string) => void }) {
+  const { data } = useStore();
+  const [month, setMonth] = useState(() => {
+    const end = addDays(week, 6);
+    return (today >= week && today <= end ? today : week).slice(0, 7);
+  });
+  const days = useMemo(() => writtenDays(data.journal), [data.journal]);
+  const inMonth = [...days].filter((d) => d.startsWith(month)).length;
+  function changeMonth(n: number) {
+    const m = addMonths(month, n);
+    setMonth(m);
+    const weeks = monthWeeks(m);
+    onPick(m === today.slice(0, 7) ? weekStart(today) : weeks.find((w) => w.slice(0, 7) === m) ?? weeks[0]);
+  }
+  return (
+    <section className="card raised review-cal">
+      <MonthNav label={formatMonth(month)} onPrev={() => changeMonth(-1)} onNext={() => changeMonth(1)} />
+      <div className="rc-row rc-head" aria-hidden="true">
+        {'STQQSSD'.split('').map((l, i) => (
+          <span key={i}>{l}</span>
+        ))}
+      </div>
+      <div className="rc-weeks">
+        {monthWeeks(month).map((w) => (
+          <button key={w} type="button" className={`rc-row rc-week${w === week ? ' on' : ''}`} aria-pressed={w === week} aria-label={`Semana de ${formatDate(w, { day: '2-digit', month: 'short' })}`} onClick={() => onPick(w)}>
+            {weekDays(w).map((d) => {
+              const out = !d.startsWith(month);
+              const cls = out ? ' out' : `${days.has(d) ? ' wrote' : ''}${d === today ? ' today' : ''}${d > today ? ' fut' : ''}`;
+              return (
+                <span key={d} className={`rc-day${cls}`}>
+                  {Number(d.slice(8))}
+                </span>
+              );
+            })}
+          </button>
+        ))}
+      </div>
+      <div className="rc-legend">
+        <span>
+          <i className="wrote" /> Escreveu no diário
+        </span>
+        <span>
+          <i className="sel" /> Semana da revisão
+        </span>
+      </div>
+      <div className="rc-nums">
+        <span>
+          <strong>{inMonth}</strong> {inMonth === 1 ? 'dia escrito' : 'dias escritos'}
+        </span>
+        <span>
+          <strong>{currentStreak(days, today)}</strong> seguidos
+        </span>
+        <span>
+          <strong>{bestStreak(days)}</strong> recorde
+        </span>
+      </div>
+    </section>
   );
 }

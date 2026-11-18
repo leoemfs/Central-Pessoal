@@ -103,6 +103,8 @@ export interface JournalEntry {
   tag: string;
   /** Fotos do registro (N9.3). */
   photos: Photo[];
+  /** M44: pergunta do dia respondida ('' = escrito livre). */
+  prompt?: string;
   updatedAt: string;
 }
 
@@ -294,6 +296,10 @@ export interface Settings {
   journeyWanted: boolean | null;
   /** Com que frequência quer escrever no Diário (o Início só convida nesse ritmo). */
   journalRhythm: JournalRhythm;
+  /** M44: ordem do feed do Diário (no menu ⋮). */
+  journalOrder: 'recentes' | 'antigos';
+  /** M44: dia (AAAA-MM-DD) em que "Neste dia" foi fechado; volta no dia seguinte. */
+  journalMemoHiddenOn: string;
   /** N9.5: lembretes pelo Google Agenda (vale para todos os aparelhos). */
   googleCalendar: GoogleCalendarSettings;
 }

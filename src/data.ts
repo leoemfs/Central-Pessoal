@@ -59,7 +59,7 @@ export function emptyData(): AppData {
     incomes: [],
     incomeSeries: [],
     incomeSources: [],
-    settings: { theme: 'dark', accent: null, favorites: [...DEFAULT_FAVORITES], cards: {}, barLayout: 'fixo', tapToFavorites: true, hideOnScroll: true, moreLayout: 'lista', moreButton: false, hideBarLabels: false, drawerView: 'misto', iconColors: 'mono', iconStyle: 'classico', sideCards: [...DEFAULT_SIDE_CARDS], sideShortcuts: [...DEFAULT_SIDE_SHORTCUTS], frostedGlass: false, menuTipSeen: false, iconSize: 'm', seededCategories: false, seededIncomeSources: false, lastBackupAt: null, activeDays: [], visitDays: [], journeyUnlockedAt: null, journeyChoice: null, journeyCard: true, hiddenModules: [], setup: 'novo', tutorialSeen: false, setupAreas: [], journeyWanted: null, journalRhythm: { ...DEFAULT_RHYTHM }, googleCalendar: { on: false, events: true, bills: true, tasks: true, calendarId: null, tasksList: null } },
+    settings: { theme: 'dark', accent: null, favorites: [...DEFAULT_FAVORITES], cards: {}, barLayout: 'fixo', tapToFavorites: true, hideOnScroll: true, moreLayout: 'lista', moreButton: false, hideBarLabels: false, drawerView: 'misto', iconColors: 'mono', iconStyle: 'classico', sideCards: [...DEFAULT_SIDE_CARDS], sideShortcuts: [...DEFAULT_SIDE_SHORTCUTS], frostedGlass: false, menuTipSeen: false, iconSize: 'm', seededCategories: false, seededIncomeSources: false, lastBackupAt: null, activeDays: [], visitDays: [], journeyUnlockedAt: null, journeyChoice: null, journeyCard: true, hiddenModules: [], setup: 'novo', tutorialSeen: false, setupAreas: [], journeyWanted: null, journalRhythm: { ...DEFAULT_RHYTHM }, journalOrder: 'recentes', journalMemoHiddenOn: '', googleCalendar: { on: false, events: true, bills: true, tasks: true, calendarId: null, tasksList: null } },
     profile: emptyProfile('novo'),
     boxes: [],
     moods: {},
@@ -195,6 +195,8 @@ export function normalize(raw: unknown): AppData {
       setupAreas: strings(settings.setupAreas).filter((id) => SETUP_AREAS.some((a) => a.id === id)),
       journeyWanted: typeof settings.journeyWanted === 'boolean' ? settings.journeyWanted : null,
       journalRhythm: normalizeRhythm(settings.journalRhythm),
+      journalOrder: settings.journalOrder === 'antigos' ? 'antigos' : 'recentes',
+      journalMemoHiddenOn: typeof settings.journalMemoHiddenOn === 'string' ? settings.journalMemoHiddenOn : '',
       googleCalendar: normalizeGoogleCalendar(settings.googleCalendar),
     },
     // Quem já tinha dados (atualização ou backup) não vê a entrevista de surpresa.
