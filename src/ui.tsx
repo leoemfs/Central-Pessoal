@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
-import { formatMoney } from './utils';
+import { formatMoney, formatMonth } from './utils';
 import { usePageTitle } from './pageTitle';
 
 const P: Record<string, ReactNode> = {
@@ -328,6 +328,37 @@ export function useBackToClose(onClose: () => void) {
 // ---------- Sheet (janela de formulário / detalhes) ----------
 
 const openSheets: symbol[] = [];
+
+/**
+ * M44 (e E42, para outros módulos): histórico por ano e mês. Fichas com os anos e, embaixo,
+ * os meses daquele ano com a contagem. `counts`: AAAA-MM → quantidade.
+ */
+export function YearMonthSheet({ title, counts, unit, month, onPick, onClose }: { title: string; counts: Map<string, number>; unit: [string, string]; month: string; onPick: (m: string) => void; onClose: () => void }) {
+  const years = [...new Set([...counts.keys()].map((m) => m.slice(0, 4)))].sort().reverse();
+  const [year, setYear] = useState(years.includes(month.slice(0, 4)) ? month.slice(0, 4) : (years[0] ?? ''));
+  const months = [...counts.entries()].filter(([m]) => m.startsWith(year)).sort((a, b) => b[0].localeCompare(a[0]));
+  return (
+    <Sheet title={title} onClose={onClose}>
+      {years.length === 0 ? (
+        <Empty>Nada registrado ainda.</Empty>
+      ) : (
+        <>
+          {years.length > 1 && <Chips label="Ano" value={year} onChange={setYear} options={years.map((y) => ({ value: y, label: y }))} />}
+          <div className="ym-list">
+            {months.map(([m, n]) => (
+              <button key={m} type="button" className={m === month ? 'on' : ''} onClick={() => onPick(m)}>
+                <span>{formatMonth(m)}</span>
+                <span className="muted small">
+                  {n} {n === 1 ? unit[0] : unit[1]}
+                </span>
+              </button>
+            ))}
+          </div>
+        </>
+      )}
+    </Sheet>
+  );
+}
 
 export function Sheet({ title, badge, onClose, children, footer, size }: { title: ReactNode; badge?: ReactNode; onClose: () => void; children: ReactNode; footer?: ReactNode; size?: 'wide' }) {
   const close = useRef(onClose);

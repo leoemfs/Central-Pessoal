@@ -1,6 +1,6 @@
 # M44 Diário v2
 
-Aprovado em 18/11 ("aprovado... vamos fazer"). Tamanho **M**, em 3 partes.
+Aprovado em 18/11 ("aprovado... vamos fazer"; "pode fazer tudo"). Tamanho **M**. **Feito na v0.135.0** (as 3 partes juntas). O histórico por ano e mês virou o componente `YearMonthSheet` em `ui.tsx`, pronto para o E42.
 
 Prévia navegável: https://claude.ai/artifact/2oKRSzJde2ihqnMbp4hLPh
 
@@ -18,7 +18,7 @@ Prévia navegável: https://claude.ai/artifact/2oKRSzJde2ihqnMbp4hLPh
 
 ## Dados novos (com padrão em `normalize()`)
 - `journal[].prompt: string` (padrão `''`).
-- `settings.journalCards: { week: boolean, memories: boolean }` (padrão os dois `true`).
+- Esconder os cartões usa o **Personalizar cartões** de sempre (`settings.cards.diario`, tela `diario`), sem campo novo.
 - `settings.journalMemoHiddenOn: string` (data em que "Neste dia" foi fechado; padrão `''`).
 - Ordem do feed: `settings.journalOrder: 'recentes' | 'antigos'` (padrão `'recentes'`).
 
