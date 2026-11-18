@@ -18,7 +18,7 @@ import { Diario } from './modules/Diario';
 import { Agenda } from './modules/Agenda';
 import { Guardados, Mais } from './modules/Mais';
 import { Habitos } from './modules/Habitos';
-import { Notas } from './modules/Notas';
+import { ArquivadosPage, IdeiasPage, NotasPage } from './modules/Notas';
 import { Ajustes } from './modules/Ajustes';
 import { Revisao } from './modules/Revisao';
 import { Jornada } from './modules/Jornada';
@@ -71,7 +71,9 @@ export const SECTIONS: Section[] = [
   { path: 'mais', label: 'Mais', icon: 'grid', view: Mais },
   { path: 'guardados', label: 'Guardados', icon: 'archive', view: Guardados },
   { path: 'nucleo', label: 'Núcleo pessoal', icon: 'sprout', view: Habitos, fab: 'nucleo/novo' },
-  { path: 'arquivo', label: 'Notas', icon: 'note', view: Notas, fab: 'arquivo/nova' },
+  { path: 'arquivo', label: 'Notas', icon: 'note', view: NotasPage, fab: 'arquivo/menu' },
+  { path: 'ideias', label: 'Ideias', icon: 'bulb', view: IdeiasPage, fab: 'ideias/menu' },
+  { path: 'notasarq', label: 'Arquivados', icon: 'archive', view: ArquivadosPage, fab: 'notasarq/menu' },
   { path: 'ajustes', label: 'Configurações', icon: 'settings', view: Ajustes },
   { path: 'revisao', label: 'Revisão semanal', icon: 'calendarCheck', view: Revisao },
   { path: 'jornada', label: 'Jornada', icon: 'sword', view: Jornada },
@@ -103,7 +105,6 @@ export const SECTIONS: Section[] = [
 
 export const COMING_SOON: { label: string; icon: IconName; hint: string }[] = [
   { label: 'Foco', icon: 'timer', hint: 'Temporizador e sessões' },
-  { label: 'Banco de ideias', icon: 'bulb', hint: 'Guarde ideias para depois' },
 ];
 
 const QUICK: { to: string; label: string; icon: IconName; hint: string }[] = [

@@ -1,3 +1,4 @@
+import { noteSection } from './notas';
 import { useMemo, useState } from 'react';
 import { useStore } from './store';
 import { go } from './router';
@@ -104,7 +105,7 @@ export function SearchSheet({ onClose, scope = null }: { onClose: () => void; sc
       ...data.career.projects.filter((p) => has(p.name, p.area)).map((p) => ({ key: p.id, icon: 'briefcase' as IconName, title: p.name, meta: 'Projeto', to: `carreira/abrir-p-${p.id}` })),
     ]);
     add('arquivo', 'Notas', () =>
-      data.notes.filter((n) => has(n.title, n.content)).map((n) => ({ key: n.id, icon: 'note', title: n.title || 'Sem título', meta: n.content.slice(0, 60), to: 'arquivo' })),
+      data.notes.filter((n) => has(n.title, n.content, n.category)).map((n) => ({ key: n.id, icon: (n.kind === 'ideia' ? 'bulb' : 'note') as IconName, title: n.title || 'Sem título', meta: `${n.archived ? 'Arquivada · ' : n.kind === 'ideia' ? 'Ideia · ' : ''}${n.content.slice(0, 60)}`, to: `${noteSection(n)}/abrir-${n.id}` })),
     );
     return out.filter((g) => g.hits.length).map((g) => ({ ...g, hits: g.hits.slice(0, 8) }));
   }, [data, q, only]);

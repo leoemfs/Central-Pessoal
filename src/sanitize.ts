@@ -127,7 +127,18 @@ export function fixIncomeSeries(r: Rec, now: string): IncomeSeries | null {
 }
 
 export function fixNote(r: Rec, now: string): Note {
-  return { ...(r as object), id: r.id as string, title: str(r.title), content: str(r.content), pinned: r.pinned === true, updatedAt: stamp(r.updatedAt, now) } as Note;
+  return {
+    ...(r as object),
+    id: r.id as string,
+    title: str(r.title),
+    content: str(r.content),
+    pinned: r.pinned === true,
+    updatedAt: stamp(r.updatedAt, now),
+    kind: r.kind === 'ideia' ? 'ideia' : 'nota',
+    category: str(r.category).slice(0, 30),
+    status: r.status === 'pensando' || r.status === 'guardada' ? r.status : 'nova',
+    archived: r.archived === true,
+  } as Note;
 }
 
 export function fixJournal(r: Rec, now: string): JournalEntry {

@@ -114,6 +114,16 @@ export const MODULE_BARS: ModuleBar[] = [
     ],
   },
   {
+    id: 'arquivo',
+    name: 'Notas',
+    sections: ['arquivo', 'ideias', 'notasarq'],
+    items: [
+      { id: 'ideias', label: 'Ideias', icon: 'bulb', to: 'ideias', section: 'ideias' },
+      { id: 'arquivo', label: 'Notas', icon: 'note', to: 'arquivo', section: 'arquivo' },
+      { id: 'notasarq', label: 'Arquivados', icon: 'archive', to: 'notasarq', section: 'notasarq' },
+    ],
+  },
+  {
     id: 'saude',
     name: 'Saúde',
     sections: ['saude', 'saudehoje', 'saudehist'],

@@ -1,89 +1,197 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, type FormEvent } from 'react';
 import type { ViewProps } from '../App';
-import { useSubAction } from '../router';
+import { cleanAddress, go, useSubAction } from '../router';
 import { useStore } from '../store';
 import { remove, upsert } from '../actions';
-import type { Note } from '../types';
+import type { Note, NoteKind } from '../types';
 import { uid } from '../utils';
-import { Empty, Icon, IconButton, PageHeader } from '../ui';
+import { Empty, Icon, IconButton, notify, PageHeader, Pill, Segmented, Sheet } from '../ui';
+import {
+  archived as archivedOf, categoryCounts, dropCategory, IDEA_STATUSES, ideaGroups, isBlankNote, newNote, noteSection, renameCategory, switchKind, visibleNotes,
+} from '../notas';
+
+/**
+ * Notas e Banco de ideias (M17). Telas: #/arquivo (Notas, fichas de categoria) · #/ideias (situação e etiqueta)
+ * · #/notasarq (Arquivados). Endereços de ação: <tela>/menu (+), /nova, /ideia, /categorias, /abrir-<id> (busca).
+ */
+
+type Mode = 'notas' | 'ideias' | 'arquivados';
+const BASE: Record<Mode, string> = { notas: 'arquivo', ideias: 'ideias', arquivados: 'notasarq' };
 
 function formatUpdated(iso: string): string {
   return new Date(iso).toLocaleString('pt-BR', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' }).replace('.', '');
 }
 
-const isBlank = (n: Note) => !n.title.trim() && !n.content.trim();
+const nowISO = () => new Date().toISOString();
 
-export function Notas({ route }: ViewProps) {
+export const NotasPage = ({ route }: ViewProps) => <NotesScreen route={route} mode="notas" />;
+export const IdeiasPage = ({ route }: ViewProps) => <NotesScreen route={route} mode="ideias" />;
+export const ArquivadosPage = ({ route }: ViewProps) => <NotesScreen route={route} mode="arquivados" />;
+
+function NotesScreen({ route, mode }: ViewProps & { mode: Mode }) {
+  const base = BASE[mode];
   const { data, update } = useStore();
   const [selectedId, setSelectedId] = useState<string | null>(null);
-  const [query, setQuery] = useState('');
-
-  const notes = useMemo(() => {
-    const q = query.trim().toLowerCase();
-    return data.notes
-      .filter((n) => !q || n.title.toLowerCase().includes(q) || n.content.toLowerCase().includes(q))
-      .sort((a, b) => Number(b.pinned) - Number(a.pinned) || b.updatedAt.localeCompare(a.updatedAt));
-  }, [data.notes, query]);
+  const [filter, setFilter] = useState('');
+  const [menu, setMenu] = useState(false);
+  const [cats, setCats] = useState(false);
+  const [quick, setQuick] = useState('');
 
   const selected = data.notes.find((n) => n.id === selectedId) ?? null;
-  useSubAction(route, 'arquivo', { nova: () => create() });
+  const names = mode === 'ideias' ? data.settings.ideaTags : data.settings.noteCategories;
+  // A ficha escolhida pode ter sido apagada em Categorias.
+  const active = filter && names.includes(filter) ? filter : '';
+
+  useSubAction(route, base, {
+    menu: () => setMenu(true),
+    nova: () => create('nota'),
+    ideia: () => create('ideia'),
+    categorias: () => setCats(true),
+  });
+  // Vindo da busca ou de outra tela: #/<tela>/abrir-<id>.
+  useEffect(() => {
+    const m = /^abrir-(.+)$/.exec(route.sub);
+    if (!m) return;
+    setSelectedId(m[1]);
+    cleanAddress(base);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [route.n, route.sub]);
 
   /** Troca a nota aberta, descartando a anterior se ela ficou vazia. */
   function select(id: string | null) {
-    if (selected && selected.id !== id && isBlank(selected)) update(remove('notes', selected.id));
+    if (selected && selected.id !== id && isBlankNote(selected)) update(remove('notes', selected.id));
     setSelectedId(id);
   }
 
-  function create() {
-    const note: Note = { id: uid(), title: '', content: '', pinned: false, updatedAt: new Date().toISOString() };
-    if (selected && isBlank(selected)) update(remove('notes', selected.id));
+  function create(kind: NoteKind) {
+    const category = (kind === 'ideia') === (mode === 'ideias') ? active : '';
+    const note = newNote(uid(), kind, nowISO(), { category });
+    if (selected && isBlankNote(selected)) update(remove('notes', selected.id));
     update(upsert('notes', note));
-    setSelectedId(note.id);
-    setQuery('');
+    const target = noteSection(note);
+    if (target === base) setSelectedId(note.id);
+    else go(`${target}/abrir-${note.id}`);
   }
 
   function change(patch: Partial<Note>) {
     if (!selected) return;
-    update(upsert('notes', { ...selected, ...patch, updatedAt: new Date().toISOString() }));
+    update(upsert('notes', { ...selected, ...patch, updatedAt: nowISO() }));
+  }
+
+  function toggleArchive() {
+    if (!selected) return;
+    const was = selected.archived;
+    change({ archived: !was });
+    setSelectedId(null);
+    notify(was ? `Voltou para ${selected.kind === 'ideia' ? 'Ideias' : 'Notas'}` : 'Foi para Arquivados');
+  }
+
+  function toggleKind() {
+    if (!selected) return;
+    const next = switchKind(selected, nowISO());
+    update(upsert('notes', next));
+    setSelectedId(null);
+    notify(next.kind === 'ideia' ? 'Agora é uma ideia' : 'Agora é uma nota', next.archived ? undefined : next.kind === 'ideia' ? 'Está em Ideias.' : 'Está em Notas.');
   }
 
   function del() {
     if (!selected) return;
-    if (isBlank(selected) || confirm(`Excluir a nota "${selected.title || 'Sem título'}"?`)) {
+    if (isBlankNote(selected) || confirm(`Excluir "${selected.title || 'Sem título'}"?`)) {
       update(remove('notes', selected.id));
       setSelectedId(null);
     }
   }
 
+  function addQuick(e: FormEvent) {
+    e.preventDefault();
+    const title = quick.trim();
+    if (!title) return;
+    update(upsert('notes', newNote(uid(), 'ideia', nowISO(), { title, category: active })));
+    setQuick('');
+    notify('Ideia anotada');
+  }
+
+  const counts = useMemo(() => {
+    if (mode === 'notas') return categoryCounts(data.notes);
+    const out: Record<string, number> = {};
+    for (const n of data.notes) if (n.kind === 'ideia' && !n.archived && n.category) out[n.category] = (out[n.category] ?? 0) + 1;
+    return out;
+  }, [data.notes, mode]);
+
+  const sections = useMemo((): { label: string | null; items: Note[] }[] => {
+    if (mode === 'notas') return [{ label: null, items: visibleNotes(data.notes, active) }];
+    if (mode === 'ideias') return ideaGroups(data.notes, active).map((g) => ({ label: `${g.label} · ${g.items.length}`, items: g.items }));
+    const a = archivedOf(data.notes);
+    return [
+      { label: a.ideas.length ? `Ideias · ${a.ideas.length}` : null, items: a.ideas },
+      { label: a.notes.length ? `Notas · ${a.notes.length}` : null, items: a.notes },
+    ].filter((s) => s.items.length);
+  }, [data.notes, mode, active]);
+  const total = sections.reduce((s, x) => s + x.items.length, 0);
+  const kindTotal = mode === 'arquivados' ? 0 : data.notes.filter((n) => !n.archived && n.kind === (mode === 'ideias' ? 'ideia' : 'nota')).length;
+
+  const emptyText =
+    mode === 'notas'
+      ? active ? 'Nenhuma nota nessa categoria.' : 'Nenhuma nota ainda. Toque no + para criar.'
+      : mode === 'ideias'
+        ? active ? 'Nenhuma ideia com essa etiqueta.' : 'Seu banco de ideias está vazio. Anote a primeira aqui em cima.'
+        : 'Nada arquivado. Pelo botão de arquivar, dentro de uma nota ou ideia, ela vem para cá.';
+
   return (
     <>
       <PageHeader
-        title="Notas"
-        subtitle={`${data.notes.length} nota(s)`}
+        title={mode === 'notas' ? 'Notas' : mode === 'ideias' ? 'Ideias' : 'Arquivados'}
+        tabs={
+          mode === 'arquivados' ? undefined : (
+            <div className="chips" role="radiogroup" aria-label={mode === 'ideias' ? 'Etiqueta' : 'Categoria'}>
+              {['', ...names].map((c) => (
+                <button key={c || '_todas'} type="button" role="radio" aria-checked={active === c} className={`chip-btn${active === c ? ' on' : ''}`} onClick={() => setFilter(c)}>
+                  {c || 'Todas'} <span className="chip-count">{c ? counts[c] ?? 0 : kindTotal}</span>
+                </button>
+              ))}
+              <button type="button" className="chip-btn chip-add" onClick={() => setCats(true)}>
+                <Icon name="plus" size={14} /> Nova
+              </button>
+            </div>
+          )
+        }
       />
 
       <div className={`notes${selected ? ' has-selection' : ''}`}>
         <aside className="card notes-list">
-          <label className="search">
-            <Icon name="search" size={16} />
-            <input placeholder="Buscar notas" value={query} onChange={(e) => setQuery(e.target.value)} aria-label="Buscar notas" />
-          </label>
-          {notes.length === 0 ? (
-            <Empty>{data.notes.length === 0 ? 'Nenhuma nota ainda.' : 'Nenhuma nota encontrada.'}</Empty>
+          {mode === 'ideias' && (
+            <form className="idea-quick" onSubmit={addQuick}>
+              <input id="idea-quick" placeholder="Anotar uma ideia…" value={quick} onChange={(e) => setQuick(e.target.value)} aria-label="Anotar uma ideia" autoComplete="off" />
+              <button type="submit" className="btn primary small" disabled={!quick.trim()}>Anotar</button>
+            </form>
+          )}
+          {mode === 'arquivados' && total > 0 && <p className="muted small notes-hint">Aqui ficam as notas e ideias arquivadas. Abra uma para trazer de volta.</p>}
+          {total === 0 ? (
+            <Empty>{emptyText}</Empty>
           ) : (
-            <ul className="list">
-              {notes.map((n) => (
-                <li key={n.id}>
-                  <button type="button" className={`note-item${n.id === selectedId ? ' on' : ''}`} onClick={() => select(n.id)}>
-                    <span className="row-title">
-                      {n.pinned && <Icon name="pin" size={13} />} {n.title.trim() || 'Sem título'}
-                    </span>
-                    <span className="note-preview">{n.content.trim().slice(0, 90) || 'Vazia'}</span>
-                    <span className="muted small">{formatUpdated(n.updatedAt)}</span>
-                  </button>
-                </li>
-              ))}
-            </ul>
+            sections.map((s, i) => (
+              <div key={s.label ?? i}>
+                {s.label && <h3 className="notes-group">{s.label}</h3>}
+                <ul className="list">
+                  {s.items.map((n) => (
+                    <li key={n.id}>
+                      <button type="button" className={`note-item${n.id === selectedId ? ' on' : ''}`} onClick={() => select(n.id)}>
+                        <span className="row-title">
+                          {n.kind === 'ideia' && <Icon name="bulb" size={14} />}
+                          {n.pinned && <Icon name="pin" size={13} />} {n.title.trim() || 'Sem título'}
+                        </span>
+                        {n.content.trim() && <span className="note-preview">{n.content.trim().slice(0, 90)}</span>}
+                        <span className="note-meta">
+                          {n.category && <Pill tone={n.kind === 'ideia' ? 'green' : 'gray'}>{n.category}</Pill>}
+                          {n.kind === 'ideia' && mode === 'arquivados' && <Pill>{IDEA_STATUSES.find((x) => x.value === n.status)?.label}</Pill>}
+                          <span className="muted small">{formatUpdated(n.updatedAt)}</span>
+                        </span>
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))
           )}
         </aside>
 
@@ -94,20 +202,130 @@ export function Notas({ route }: ViewProps) {
                 <button type="button" className="btn ghost small back" onClick={() => select(null)}>
                   <Icon name="left" size={16} /> Voltar
                 </button>
-                <span className="muted small">Salvo automaticamente · {formatUpdated(selected.updatedAt)}</span>
+                <span className="muted small note-saved">{formatUpdated(selected.updatedAt)}</span>
                 <div className="row-actions">
                   <IconButton icon="pin" label={selected.pinned ? 'Desafixar' : 'Fixar no início'} active={selected.pinned} onClick={() => change({ pinned: !selected.pinned })} />
+                  <IconButton icon={selected.kind === 'ideia' ? 'note' : 'bulb'} label={selected.kind === 'ideia' ? 'Virar nota comum' : 'Mandar para o Banco de ideias'} onClick={toggleKind} />
+                  <IconButton icon="archive" label={selected.archived ? 'Desarquivar' : 'Arquivar'} active={selected.archived} onClick={toggleArchive} />
                   <IconButton icon="trash" label="Excluir" tone="danger" onClick={del} />
                 </div>
               </div>
-              <input className="note-title" placeholder="Título" value={selected.title} onChange={(e) => change({ title: e.target.value })} aria-label="Título da nota" autoFocus={isBlank(selected)} />
-              <textarea className="note-body" placeholder="Escreva aqui…" value={selected.content} onChange={(e) => change({ content: e.target.value })} aria-label="Conteúdo da nota" />
+              <input className="note-title" placeholder={selected.kind === 'ideia' ? 'Qual é a ideia?' : 'Título'} value={selected.title} onChange={(e) => change({ title: e.target.value })} aria-label="Título" autoFocus={isBlankNote(selected)} />
+              <CategoryPicker
+                label={selected.kind === 'ideia' ? 'Etiqueta' : 'Categoria'}
+                names={selected.kind === 'ideia' ? data.settings.ideaTags : data.settings.noteCategories}
+                value={selected.category}
+                onChange={(category) => change({ category })}
+              />
+              {selected.kind === 'ideia' && (
+                <div className="note-status">
+                  <Segmented label="Situação da ideia" options={IDEA_STATUSES.map((s) => ({ value: s.value, label: s.label }))} value={selected.status} onChange={(status) => change({ status })} />
+                </div>
+              )}
+              <textarea className="note-body" placeholder={selected.kind === 'ideia' ? 'Detalhes, por que vale a pena, primeiros passos…' : 'Escreva aqui…'} value={selected.content} onChange={(e) => change({ content: e.target.value })} aria-label="Texto" />
             </>
           ) : (
-            <Empty>Selecione uma nota ou crie uma nova.</Empty>
+            <Empty>{mode === 'ideias' ? 'Toque numa ideia para abrir.' : 'Selecione uma nota ou crie uma nova.'}</Empty>
           )}
         </section>
       </div>
+
+      {menu && (
+        <Sheet title="Criar" onClose={() => setMenu(false)}>
+          <div className="quick-list">
+            {([
+              { kind: 'nota', icon: 'note', title: 'Nova nota', hint: 'Texto livre, com categoria' },
+              { kind: 'ideia', icon: 'bulb', title: 'Nova ideia', hint: 'Vai para o Banco de ideias' },
+            ] as const).map((it) => (
+              <button key={it.kind} type="button" className="tile" onClick={() => { setMenu(false); create(it.kind); }}>
+                <span className="tile-icon"><Icon name={it.icon} /></span>
+                <span className="tile-text"><strong>{it.title}</strong><span className="muted">{it.hint}</span></span>
+                <Icon name="right" size={18} />
+              </button>
+            ))}
+          </div>
+          <div className="add-menu-sep" />
+          <button type="button" className="tile" onClick={() => { setMenu(false); setCats(true); }}>
+            <span className="tile-icon"><Icon name="tag" /></span>
+            <span className="tile-text"><strong>Categorias</strong><span className="muted">Das notas e etiquetas das ideias</span></span>
+            <Icon name="right" size={18} />
+          </button>
+        </Sheet>
+      )}
+      {cats && <CategoriesSheet onClose={() => setCats(false)} />}
     </>
+  );
+}
+
+/** Fichas para escolher a categoria (tocar de novo na escolhida tira). */
+function CategoryPicker({ label, names, value, onChange }: { label: string; names: string[]; value: string; onChange: (v: string) => void }) {
+  if (!names.length) return null;
+  return (
+    <div className="chips note-cats" role="radiogroup" aria-label={label}>
+      {names.map((c) => (
+        <button key={c} type="button" role="radio" aria-checked={value === c} className={`chip-btn${value === c ? ' on' : ''}`} onClick={() => onChange(value === c ? '' : c)}>
+          {c}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+/** Categorias das notas e etiquetas das ideias: criar, renomear e apagar. */
+function CategoriesSheet({ onClose }: { onClose: () => void }) {
+  const { data, update } = useStore();
+  const groups: { key: 'noteCategories' | 'ideaTags'; kind: NoteKind; title: string; hint: string }[] = [
+    { key: 'noteCategories', kind: 'nota', title: 'Categorias das notas', hint: 'Ex.: Inspiração, Ideia solta, Lembrete' },
+    { key: 'ideaTags', kind: 'ideia', title: 'Etiquetas das ideias', hint: 'Ex.: App, Pessoal, Casa' },
+  ];
+  const [draft, setDraft] = useState<Record<string, string>>({});
+
+  function setNames(key: 'noteCategories' | 'ideaTags', names: string[], notes?: (n: Note[]) => Note[]) {
+    update((d) => ({ ...d, notes: notes ? notes(d.notes) : d.notes, settings: { ...d.settings, [key]: names } }));
+  }
+
+  return (
+    <Sheet title="Categorias" onClose={onClose}>
+      {groups.map((g) => {
+        const names = data.settings[g.key];
+        const value = draft[g.key] ?? '';
+        const add = (e: FormEvent) => {
+          e.preventDefault();
+          const name = value.trim().slice(0, 30);
+          if (!name) return;
+          if (names.some((n) => n.toLowerCase() === name.toLowerCase())) return notify('Essa já existe');
+          setNames(g.key, [...names, name]);
+          setDraft({ ...draft, [g.key]: '' });
+        };
+        return (
+          <section key={g.key} className="cat-group">
+            <h3>{g.title}</h3>
+            <ul className="cat-names">
+              {names.map((name) => (
+                <li key={name}>
+                  <input
+                    className="input"
+                    defaultValue={name}
+                    aria-label={`Renomear ${name}`}
+                    maxLength={30}
+                    onBlur={(e) => {
+                      const to = e.target.value.trim();
+                      if (!to || to === name) { e.target.value = name; return; }
+                      if (names.some((n) => n !== name && n.toLowerCase() === to.toLowerCase())) { e.target.value = name; notify('Essa já existe'); return; }
+                      setNames(g.key, names.map((n) => (n === name ? to : n)), (ns) => renameCategory(ns, g.kind, name, to));
+                    }}
+                  />
+                  <IconButton icon="trash" label={`Apagar ${name}`} tone="danger" onClick={() => setNames(g.key, names.filter((n) => n !== name), (ns) => dropCategory(ns, g.kind, name))} />
+                </li>
+              ))}
+            </ul>
+            <form className="cat-add" onSubmit={add}>
+              <input className="input" id={`cat-add-${g.key}`} placeholder={g.hint} value={value} maxLength={30} onChange={(e) => setDraft({ ...draft, [g.key]: e.target.value })} aria-label={`Nova em ${g.title}`} />
+              <button type="submit" className="btn soft small" disabled={!value.trim()}><Icon name="plus" size={16} /> Criar</button>
+            </form>
+          </section>
+        );
+      })}
+    </Sheet>
   );
 }

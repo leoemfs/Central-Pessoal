@@ -74,12 +74,23 @@ export interface Habit {
   archivedAt: string | null;
 }
 
+export type NoteKind = 'nota' | 'ideia';
+export type IdeaStatus = 'nova' | 'pensando' | 'guardada';
+
 export interface Note {
   id: string;
   title: string;
   content: string;
   pinned: boolean;
   updatedAt: string;
+  /** M17: nota comum ou ideia (Banco de ideias). */
+  kind: NoteKind;
+  /** Categoria da nota (de settings.noteCategories) ou etiqueta da ideia (settings.ideaTags); '' = sem. */
+  category: string;
+  /** Situação da ideia (nas notas fica 'nova' e não aparece). */
+  status: IdeaStatus;
+  /** Está em Arquivados. */
+  archived: boolean;
 }
 
 /** Foto guardada à parte (N9.3): o arquivo fica no aparelho e no Drive; aqui só a referência. */
@@ -300,6 +311,10 @@ export interface Settings {
   journalOrder: 'recentes' | 'antigos';
   /** M44: dia (AAAA-MM-DD) em que "Neste dia" foi fechado; volta no dia seguinte. */
   journalMemoHiddenOn: string;
+  /** M17: categorias das notas (fichas em Notas). */
+  noteCategories: string[];
+  /** M17: etiquetas das ideias (fichas em Ideias). */
+  ideaTags: string[];
   /** N9.5: lembretes pelo Google Agenda (vale para todos os aparelhos). */
   googleCalendar: GoogleCalendarSettings;
 }

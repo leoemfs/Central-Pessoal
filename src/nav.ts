@@ -29,6 +29,7 @@ export const NAV_GROUPS: { title: string; items: NavItem[] }[] = [
       { label: 'Diário', icon: 'journal', to: 'diario', section: 'diario' },
       { label: 'Humor', icon: 'smile', to: 'humor', section: 'humor' },
       { label: 'Notas', icon: 'note', to: 'arquivo', section: 'arquivo' },
+      { label: 'Banco de ideias', icon: 'bulb', to: 'ideias', section: 'ideias' },
       { label: 'Listas', icon: 'cart', to: 'listas', section: 'listas' },
       { label: 'Compras', icon: 'receipt', to: 'compras', section: 'compras' },
       { label: 'Preços', icon: 'store', to: 'precos', section: 'precos' },
@@ -83,7 +84,6 @@ export const NAV_GROUPS: { title: string; items: NavItem[] }[] = [
       { label: 'Revisão semanal', icon: 'calendarCheck', to: 'revisao', section: 'revisao' },
       { label: 'Jornada', icon: 'sword', to: 'jornada', section: 'jornada' },
       { label: 'Foco', icon: 'timer' },
-      { label: 'Banco de ideias', icon: 'bulb' },
     ],
   },
 ];

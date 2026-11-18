@@ -28,7 +28,10 @@ test('cada tela cai na barra do seu módulo', () => {
   assert.equal(barFor('humor')?.id, 'diario');
   assert.equal(barFor('inicio'), null);
   assert.equal(barFor('mais'), null);
-  assert.equal(barFor('arquivo'), null);
+  assert.equal(barFor('arquivo')?.id, 'arquivo');
+  assert.equal(barFor('ideias')?.id, 'arquivo');
+  assert.equal(barFor('notasarq')?.id, 'arquivo');
+  assert.equal(barFor('voce'), null);
   // Nenhuma tela em dois módulos, e cada barra tem 3 itens com a casa no centro.
   const all = MODULE_BARS.flatMap((b) => b.sections);
   assert.equal(new Set(all).size, all.length);
