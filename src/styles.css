@@ -13907,6 +13907,7 @@ body.icons-flat .st-shortcut {
   position: fixed;
   inset: 0;
   z-index: 60;
+  touch-action: none;
 }
 .page-menu {
   position: fixed;
