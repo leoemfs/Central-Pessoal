@@ -246,7 +246,7 @@ export function Mais() {
                   <span className="mg-icon">
                     <Icon name={c.icon} size={22} />
                   </span>
-                  <span className="mg-name">{c.label === 'Banco de ideias' ? 'Ideias' : c.label}</span>
+                  <span className="mg-name">{c.label}</span>
                 </div>
               ))}
             </div>
