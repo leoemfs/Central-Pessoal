@@ -9,7 +9,7 @@ import {
   addItemFromText, addListCategory, addPrice, AISLES, bestPrice, categoryOf, deleteListCategory, finishShopping, kindOf, latestPrices, launchBought, LIST_COLORS,
   LIST_ICONS, LIST_KINDS, listEstimate, newItem, newList, perUnit, priceCheck, qtyText, removeItem, scaledQty, sendIngredients, sizeText, toggleItem, uncheckAll,
   updateItem, updateList, updateListCategory, variantLabel, itemCost, purchaseHistory, ensureProduct, findCatalog, marketEstimate, matchKey, parseItemText,
-  catalogByAisle, createListWithItems,
+  catalogByAisle, createListWithItems, MARKET_CAT, packLabel, priceCategories, updateProduct, deleteProduct, updatePriceEntry, deletePriceEntry,
   priceRange, productSuggestions, productsWithoutPrice, sizeOptions, packCount, payItem, paidTotal, lastPurchase,
 } from '../lists';
 import type { ListCategory, ListItem, ListKind, Product, ProductVariant, UserList } from '../types';
@@ -627,6 +627,12 @@ function ItemSheet({ l, it, onClose }: { l: UserList; it: ListItem; onClose: () 
   const [aisle, setAisle] = useState(it.aisle || 'Outros');
   const [price, setPrice] = useState(fmtNum(it.price));
   const [store, setStore] = useState(it.store);
+  const prod = data.products.find((p) => p.id === it.productId);
+  const packs = prod ? sizeOptions(data, prod) : [];
+  const [packKey, setPackKey] = useState(() => {
+    const i = packs.findIndex((x) => it.pack && x.size === it.pack.size && x.sizeUnit === it.pack.sizeUnit);
+    return i < 0 ? '' : String(i);
+  });
   return (
     <Sheet
       title="Item"
@@ -654,7 +660,7 @@ function ItemSheet({ l, it, onClose }: { l: UserList; it: ListItem; onClose: () 
                   return updateItem(l.id, it.id, { productId: r.product.id })(r.data);
                 });
               }
-              update(updateItem(l.id, it.id, { text: newText, qty: k === 'mercado' || k === 'receita' ? parseNum(qty) : it.qty, unit, aisle: k === 'mercado' ? aisle : it.aisle, price: k === 'compras' ? parseNum(price) : it.price, store }));
+              update(updateItem(l.id, it.id, { text: newText, qty: k === 'mercado' || k === 'receita' ? parseNum(qty) : it.qty, unit, aisle: k === 'mercado' ? aisle : it.aisle, price: k === 'compras' ? parseNum(price) : it.price, store, pack: k === 'mercado' && packKey !== '' ? (packs[Number(packKey)] ?? null) : null }));
               onClose();
             }}
           >
@@ -674,6 +680,15 @@ function ItemSheet({ l, it, onClose }: { l: UserList; it: ListItem; onClose: () 
           <Field label="Unidade">
             <input className="input" value={unit} onChange={(e) => setUnit(e.target.value)} placeholder={k === 'receita' ? 'xícara, colher, un' : 'kg, L, un, pacote'} />
           </Field>
+        </div>
+      )}
+      {k === 'mercado' && packs.length > 0 && (
+        <div className="field">
+          <span className="field-label">Embalagem</span>
+          <Chips label="Embalagem" value={packKey} onChange={setPackKey} options={[{ value: '', label: 'A mais barata' }, ...packs.map((x, i) => ({ value: String(i), label: packLabel(x) }))]} />
+          <span className="field-hint">
+            {packKey === '' ? 'A conta usa o pacote que sai mais barato por kg, litro ou unidade.' : packs[Number(packKey)]?.size === 1 && packs[Number(packKey)]?.sizeUnit !== 'un' ? 'A conta usa o preço do quilo (ou litro) vezes a quantidade.' : 'A conta usa o preço deste pacote; "2 kg" em pacote de 1 kg = 2 pacotes.'}
+          </span>
         </div>
       )}
       {k === 'mercado' && (
@@ -736,7 +751,7 @@ function MarketList({ l }: { l: UserList }) {
   const bought = l.items.filter((i) => i.done);
   const aisles = [...new Set(open.map((i) => i.aisle || 'Outros'))];
   const row = (it: ListItem) => {
-    const b = it.productId ? bestPrice(data, it.productId, undefined, latest) : null;
+    const b = it.productId ? bestPrice(data, it.productId, undefined, latest, it.pack) : null;
     const prod = data.products.find((p) => p.id === it.productId);
     return (
       <CheckRow
@@ -928,7 +943,7 @@ function PaySheet({ l, it, onClose, onStopAsking }: { l: UserList; it: ListItem;
       if (!storeName.trim()) return;
       sid = uid();
       const name = storeName.trim();
-      update((d) => ({ ...d, stores: [...d.stores, { id: sid, name }] }));
+      update((d) => ({ ...d, stores: [...d.stores, { id: sid, name, categoryId: MARKET_CAT }] }));
     }
     update(payItem(l.id, it.id, { storeId: sid, price: v, count: n, size: pack.size, sizeUnit: pack.sizeUnit }));
     writeDayStore(sid);
@@ -967,7 +982,7 @@ function PaySheet({ l, it, onClose, onStopAsking }: { l: UserList; it: ListItem;
               setSizeKey(k);
               setCount(fmtNum(packCount(it, p, sizes[Number(k)] ?? sizes[0])));
             }}
-            options={sizes.map((x, k) => ({ value: String(k), label: sizeText({ size: x.size, sizeUnit: x.sizeUnit } as ProductVariant) }))}
+            options={sizes.map((x, k) => ({ value: String(k), label: packLabel(x) }))}
           />
         </div>
       )}
@@ -1194,7 +1209,7 @@ function FillSheet({ productIds, storeId, onClose }: { productIds: string[]; sto
       if (!sid) {
         sid = uid();
         const name = storeName.trim();
-        update((d) => ({ ...d, stores: [...d.stores, { id: sid, name }] }));
+        update((d) => ({ ...d, stores: [...d.stores, { id: sid, name, categoryId: MARKET_CAT }] }));
         setStore(sid);
         setStoreName('');
       }
@@ -1244,7 +1259,7 @@ function FillSheet({ productIds, storeId, onClose }: { productIds: string[]; sto
           </h3>
           <div className="field">
             <span className="field-label">Tamanho ou peso da embalagem</span>
-            <Chips label="Tamanho" value={sizeKey} onChange={setSizeKey} options={[...sizes.map((x, k) => ({ value: String(k), label: sizeText({ size: x.size, sizeUnit: x.sizeUnit } as ProductVariant) })), { value: 'outro', label: 'Outro' }]} />
+            <Chips label="Tamanho" value={sizeKey} onChange={setSizeKey} options={[...sizes.map((x, k) => ({ value: String(k), label: packLabel(x) })), { value: 'outro', label: 'Outro' }]} />
           </div>
           {sizeKey === 'outro' && (
             <div className="form-row">
@@ -1667,8 +1682,30 @@ function readDayStore(): string {
   }
 }
 
+const PRICE_CAT_KEY = 'central-pessoal:precos-categoria';
+function readPriceCat(): string {
+  try {
+    return localStorage.getItem(PRICE_CAT_KEY) ?? MARKET_CAT;
+  } catch {
+    return MARKET_CAT;
+  }
+}
+
 function Prices() {
   const { data } = useStore();
+  const cats = priceCategories(data);
+  const [catState, setCatState] = useState(readPriceCat);
+  const cat = cats.some((c) => c.id === catState) ? catState : (cats[0]?.id ?? MARKET_CAT);
+  const catObj = cats.find((c) => c.id === cat);
+  const isMarket = !catObj || catObj.kind === 'mercado';
+  const setCat = (id: string) => {
+    setCatState(id);
+    try {
+      localStorage.setItem(PRICE_CAT_KEY, id);
+    } catch {
+      /* ignora */
+    }
+  };
   const [dayStore, setDayStoreState] = useState(readDayStore);
   const [entry, setEntry] = useState(false);
   const [product, setProduct] = useState<string | null>(null);
@@ -1684,20 +1721,22 @@ function Prices() {
     }
   };
   const storeName = (id: string) => data.stores.find((s) => s.id === id)?.name ?? '';
-  const products = [...data.products].sort((a, b) => a.name.localeCompare(b.name));
+  const catStores = data.stores.filter((s) => s.categoryId === cat);
+  const products = data.products.filter((p) => p.categoryId === cat).sort((a, b) => a.name.localeCompare(b.name));
   return (
     <>
+      {cats.length > 1 && <Chips label="Categoria de preços" value={cat} onChange={setCat} options={cats.map((c) => ({ value: c.id, label: c.name }))} />}
       <section className="card raised">
         <div className="card-head">
-          <h2>Mercado de hoje</h2>
+          <h2>{isMarket ? 'Mercado de hoje' : 'Loja de hoje'}</h2>
           <span className="muted small">os preços entram aqui</span>
         </div>
-        {data.stores.length > 0 && <Chips label="Mercado de hoje" value={dayStore} onChange={setDayStore} options={data.stores.map((s) => ({ value: s.id, label: s.name }))} />}
+        {catStores.length > 0 && <Chips label={isMarket ? 'Mercado de hoje' : 'Loja de hoje'} value={dayStore} onChange={setDayStore} options={catStores.map((s) => ({ value: s.id, label: s.name }))} />}
         <button type="button" className="btn primary block" style={{ marginTop: 12 }} onClick={() => setEntry(true)}>
           <Icon name="plus" size={18} /> Anotar preço
         </button>
       </section>
-      {missing.length > 0 && (
+      {isMarket && missing.length > 0 && (
         <section className="card">
           <div className="card-head">
             <h2>Sem preço</h2>
@@ -1722,7 +1761,7 @@ function Prices() {
           <span className="muted small">{products.length}</span>
         </div>
         {products.length === 0 ? (
-          <Empty>Anote preços no mercado: o app compara por kg, litro ou unidade e mostra onde e qual marca sai mais barato.</Empty>
+          <Empty>{isMarket ? 'Anote preços no mercado: o app compara por kg, litro ou unidade e mostra onde e qual marca sai mais barato.' : `Anote preços de ${catObj?.name.toLowerCase() ?? 'produtos'} em lojas diferentes: o app mostra onde sai mais barato.`}</Empty>
         ) : (
           <ul className="list">
             {products.map((p) => {
@@ -1750,7 +1789,7 @@ function Prices() {
         )}
       </section>
       <p className="muted small center">Os preços são comparados por unidade (R$/kg, R$/L, R$/un), para comparar embalagens diferentes.</p>
-      {entry && <PriceSheet dayStore={dayStore} onDayStore={setDayStore} onClose={() => setEntry(false)} />}
+      {entry && <PriceSheet categoryId={cat} dayStore={dayStore} onDayStore={setDayStore} onClose={() => setEntry(false)} />}
       {fill && (
         <FillSheet
           productIds={fill}
@@ -1769,10 +1808,17 @@ function Prices() {
 function ProductSheet({ productId, onClose }: { productId: string; onClose: () => void }) {
   const { data } = useStore();
   const [fill, setFill] = useState(false);
+  const [editing, setEditing] = useState(false);
+  const [entry, setEntry] = useState<string | null>(null);
   const p = data.products.find((x) => x.id === productId);
   const latest = useMemo(() => latestPrices(data), [data]);
   if (!p) return null;
   if (fill) return <FillSheet productIds={[p.id]} storeId={readDayStore()} onClose={() => setFill(false)} />;
+  if (editing) return <ProductEditSheet p={p} onClose={(gone) => (gone ? onClose() : setEditing(false))} />;
+  if (entry) return <PriceEditSheet entryId={entry} onClose={() => setEntry(null)} />;
+  const entries = data.prices
+    .filter((x) => data.variants.some((v) => v.id === x.variantId && v.productId === p.id))
+    .sort((a, b) => b.date.localeCompare(a.date));
   const vars = data.variants.filter((v) => v.productId === p.id);
   const stores = data.stores.filter((s) => vars.some((v) => latest.has(`${v.id}|${s.id}`)));
   const best = bestPrice(data, p.id, undefined, latest);
@@ -1837,6 +1883,176 @@ function ProductSheet({ productId, onClose }: { productId: string; onClose: () =
           </button>
         </>
       )}
+      {entries.length > 0 && (
+        <div className="field">
+          <span className="field-label">Preços anotados</span>
+          <ul className="list">
+            {entries.map((e) => {
+              const v = data.variants.find((x) => x.id === e.variantId)!;
+              return (
+                <li key={e.id}>
+                  <button type="button" className="row budget-row" onClick={() => setEntry(e.id)} aria-label={`Editar preço de ${formatDMY(e.date)}`}>
+                    <div className="row-body">
+                      <span className="row-title">{variantLabel(v)} · {data.stores.find((st) => st.id === e.storeId)?.name ?? 'Loja'}</span>
+                      <span className="row-meta">
+                        {formatMoney(e.price)} · {formatDMY(e.date)}
+                        {e.promo ? ' · promoção' : ''}
+                      </span>
+                    </div>
+                    <Icon name="pencil" size={16} />
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+      )}
+      <button type="button" className="btn block" onClick={() => setEditing(true)}>
+        <Icon name="pencil" size={18} /> Editar produto
+      </button>
+    </Sheet>
+  );
+}
+
+/** M4: editar o produto (nome, categoria, corredor e unidade de comparação) ou excluir. */
+function ProductEditSheet({ p, onClose }: { p: Product; onClose: (gone?: boolean) => void }) {
+  const { data, update } = useStore();
+  const cats = priceCategories(data);
+  const [name, setName] = useState(p.name);
+  const [cat, setCat] = useState(p.categoryId);
+  const [aisle, setAisle] = useState(p.aisle);
+  const [unit, setUnit] = useState<Product['unit']>(p.unit);
+  const [confirm, setConfirm] = useState(false);
+  const market = (data.listCategories.find((c) => c.id === cat)?.kind ?? 'mercado') === 'mercado';
+  const n = data.prices.filter((x) => data.variants.some((v) => v.id === x.variantId && v.productId === p.id)).length;
+  return (
+    <Sheet
+      title="Editar produto"
+      onClose={() => onClose()}
+      footer={
+        <div className="btn-row">
+          <button
+            type="button"
+            className="btn danger"
+            onClick={() => {
+              if (!confirm) return setConfirm(true);
+              update(deleteProduct(p.id));
+              notify('Produto excluído', p.name);
+              onClose(true);
+            }}
+          >
+            {confirm ? 'Confirmar exclusão' : 'Excluir'}
+          </button>
+          <button
+            type="button"
+            className="btn primary"
+            disabled={!name.trim()}
+            onClick={() => {
+              update(updateProduct(p.id, { name, categoryId: cat, aisle: market ? aisle : p.aisle, unit }));
+              notify('Produto salvo', name.trim());
+              onClose();
+            }}
+          >
+            Salvar
+          </button>
+        </div>
+      }
+    >
+      <Field label="Nome">
+        <input className="input" value={name} onChange={(e) => setName(e.target.value)} />
+      </Field>
+      <div className="field">
+        <span className="field-label">Categoria</span>
+        <Chips label="Categoria" value={cat} onChange={setCat} options={cats.map((c) => ({ value: c.id, label: c.name }))} />
+      </div>
+      {market && (
+        <div className="field">
+          <span className="field-label">Corredor</span>
+          <Chips label="Corredor" value={aisle} onChange={setAisle} options={AISLES.map((a) => ({ value: a, label: a }))} />
+        </div>
+      )}
+      <div className="field">
+        <span className="field-label">Comparar por</span>
+        <Chips label="Comparar por" value={unit} onChange={setUnit} options={[{ value: 'kg', label: 'R$/kg' }, { value: 'L', label: 'R$/litro' }, { value: 'un', label: 'R$/unidade' }]} />
+      </div>
+      {confirm && <p className="tip warn"><Icon name="alert" size={16} /><span>Excluir apaga {n === 1 ? 'o preço anotado' : `os ${n} preços anotados`} deste produto. Os itens das listas ficam.</span></p>}
+    </Sheet>
+  );
+}
+
+/** M4: corrigir um preço anotado (marca, loja, quantidade ou peso, valor) ou apagar. */
+function PriceEditSheet({ entryId, onClose }: { entryId: string; onClose: () => void }) {
+  const { data, update } = useStore();
+  const e = data.prices.find((x) => x.id === entryId);
+  const v = e && data.variants.find((x) => x.id === e.variantId);
+  const p = v && data.products.find((x) => x.id === v.productId);
+  const [brand, setBrand] = useState(v?.brand ?? '');
+  const [store, setStore] = useState(e?.storeId ?? '');
+  const [size, setSize] = useState(fmtNum(v?.size ?? 1));
+  const [sizeUnit, setSizeUnit] = useState<ProductVariant['sizeUnit']>(v?.sizeUnit ?? 'un');
+  const [price, setPrice] = useState(fmtNum(e?.price ?? null));
+  if (!e || !v || !p) return null;
+  const stores = data.stores.filter((s) => s.categoryId === p.categoryId || s.id === e.storeId);
+  const val = parseNum(price);
+  const sz = parseNum(size);
+  return (
+    <Sheet
+      title={`Preço · ${p.name}`}
+      onClose={onClose}
+      footer={
+        <div className="btn-row">
+          <button
+            type="button"
+            className="btn danger"
+            onClick={() => {
+              update(deletePriceEntry(e.id));
+              notify('Preço apagado');
+              onClose();
+            }}
+          >
+            Apagar preço
+          </button>
+          <button
+            type="button"
+            className="btn primary"
+            disabled={!val || !sz || !store}
+            onClick={() => {
+              update(updatePriceEntry(e.id, { brand, size: sz!, sizeUnit, storeId: store, price: val! }));
+              notify('Preço corrigido', `${p.name}: ${formatMoney(val!)}`);
+              onClose();
+            }}
+          >
+            Salvar
+          </button>
+        </div>
+      }
+    >
+      <Field label="Marca (opcional)">
+        <input className="input" value={brand} onChange={(ev) => setBrand(ev.target.value)} placeholder="Qualquer marca" />
+      </Field>
+      <div className="field">
+        <span className="field-label">Loja</span>
+        <Chips label="Loja" value={store} onChange={setStore} options={stores.map((s) => ({ value: s.id, label: s.name }))} />
+      </div>
+      <div className="form-row">
+        <Field label="Quantidade ou peso">
+          <input className="input" inputMode="decimal" value={size} onChange={(ev) => setSize(ev.target.value)} placeholder="1" />
+        </Field>
+        <Field label="Unidade">
+          <select className="input" value={sizeUnit} onChange={(ev) => setSizeUnit(ev.target.value as ProductVariant['sizeUnit'])}>
+            {(['g', 'kg', 'ml', 'L', 'un'] as const).map((u) => (
+              <option key={u} value={u}>
+                {u}
+              </option>
+            ))}
+          </select>
+        </Field>
+      </div>
+      <span className="field-hint">Ex.: 12 un (rolos), 230 g (bandeja), 1 kg (preço do quilo), 900 ml.</span>
+      <Field label="Valor">
+        <input className="input money large" inputMode="decimal" value={price} onChange={(ev) => setPrice(ev.target.value)} placeholder="0,00" />
+      </Field>
+      {val && sz ? <p className="muted small">= {formatMoney(perUnit({ id: '', productId: '', brand: '', size: sz, sizeUnit }, val))}/{p.unit}</p> : null}
     </Sheet>
   );
 }
@@ -1871,9 +2087,11 @@ function PriceRow({ v, p, stores, latest, best }: { v: ProductVariant; p: Produc
   );
 }
 
-function PriceSheet({ dayStore, onDayStore, onClose }: { dayStore: string; onDayStore: (id: string) => void; onClose: () => void }) {
+function PriceSheet({ categoryId, dayStore, onDayStore, onClose }: { categoryId: string; dayStore: string; onDayStore: (id: string) => void; onClose: () => void }) {
   const { data, update } = useStore();
-  const [store, setStore] = useState(dayStore || data.stores[0]?.id || '');
+  const isMarket = (data.listCategories.find((c) => c.id === categoryId)?.kind ?? 'mercado') === 'mercado';
+  const catStores = data.stores.filter((s) => s.categoryId === categoryId);
+  const [store, setStore] = useState(catStores.some((s) => s.id === dayStore) ? dayStore : (catStores[0]?.id ?? ''));
   const [storeName, setStoreName] = useState('');
   const [q, setQ] = useState('');
   const [prod, setProd] = useState<Product | null>(null);
@@ -1881,13 +2099,13 @@ function PriceSheet({ dayStore, onDayStore, onClose }: { dayStore: string; onDay
   const [variant, setVariant] = useState<string>('');
   const [brand, setBrand] = useState('');
   const [size, setSize] = useState('1');
-  const [sizeUnit, setSizeUnit] = useState<ProductVariant['sizeUnit']>('kg');
+  const [sizeUnit, setSizeUnit] = useState<ProductVariant['sizeUnit']>(isMarket ? 'kg' : 'un');
   const [aisle, setAisle] = useState('Mercearia');
-  const [unit, setUnit] = useState<Product['unit']>('kg');
+  const [unit, setUnit] = useState<Product['unit']>(isMarket ? 'kg' : 'un');
   const [price, setPrice] = useState('');
   const [promo, setPromo] = useState(false);
   const vars = prod ? data.variants.filter((v) => v.productId === prod.id) : [];
-  const matches = q.trim() && !prod && !isNew ? productSuggestions(data, q) : [];
+  const matches = q.trim() && !prod && !isNew ? productSuggestions({ products: data.products.filter((p) => p.categoryId === categoryId) }, q, 6, isMarket) : [];
   const v = parseNum(price);
   const check = prod && variant && v ? priceCheck(data, variant, v) : null;
   const last = prod && variant && store ? latestPrices(data).get(`${variant}|${store}`) : undefined;
@@ -1920,6 +2138,7 @@ function PriceSheet({ dayStore, onDayStore, onClose }: { dayStore: string; onDay
         sizeUnit: newVariant ? sizeUnit : undefined,
         price: v,
         promo,
+        categoryId,
       }),
     );
     if (store) onDayStore(store);
@@ -1950,9 +2169,9 @@ function PriceSheet({ dayStore, onDayStore, onClose }: { dayStore: string; onDay
       }
     >
       <div className="field">
-        <span className="field-label">Mercado</span>
-        <Chips label="Mercado" value={store} onChange={setStore} options={[...data.stores.map((s) => ({ value: s.id, label: s.name })), { value: '', label: '+ Novo' }]} />
-        {!store && <input className="input" value={storeName} onChange={(e) => setStoreName(e.target.value)} placeholder="Nome do mercado" />}
+        <span className="field-label">{isMarket ? 'Mercado' : 'Loja'}</span>
+        <Chips label={isMarket ? 'Mercado' : 'Loja'} value={store} onChange={setStore} options={[...catStores.map((s) => ({ value: s.id, label: s.name })), { value: '', label: '+ Novo' }]} />
+        {!store && <input className="input" value={storeName} onChange={(e) => setStoreName(e.target.value)} placeholder={isMarket ? 'Nome do mercado' : 'Nome da loja'} />}
       </div>
       <Field label="Produto">
         <input
@@ -2001,10 +2220,12 @@ function PriceSheet({ dayStore, onDayStore, onClose }: { dayStore: string; onDay
       )}
       {isNew && (
         <>
-          <div className="field">
-            <span className="field-label">Corredor</span>
-            <Chips label="Corredor" value={aisle} onChange={setAisle} options={AISLES.map((a) => ({ value: a, label: a }))} />
-          </div>
+          {isMarket && (
+            <div className="field">
+              <span className="field-label">Corredor</span>
+              <Chips label="Corredor" value={aisle} onChange={setAisle} options={AISLES.map((a) => ({ value: a, label: a }))} />
+            </div>
+          )}
           <div className="field">
             <span className="field-label">Comparar por</span>
             <Chips
@@ -2028,6 +2249,17 @@ function PriceSheet({ dayStore, onDayStore, onClose }: { dayStore: string; onDay
           <span className="field-label">Marca e tamanho</span>
           <Chips label="Marca e tamanho" value={variant} onChange={setVariant} options={[...vars.map((x) => ({ value: x.id, label: variantLabel(x) })), { value: '', label: '+ Outra' }]} />
         </div>
+      )}
+      {(isNew || (prod && !variant)) && unit !== 'un' && (
+        <Chips
+          label="Atalho de tamanho"
+          value={parseNum(size) === 1 && sizeUnit === unit ? 'q' : ''}
+          onChange={() => {
+            setSize('1');
+            setSizeUnit(unit);
+          }}
+          options={[{ value: 'q', label: unit === 'L' ? 'Preço do litro' : 'Preço do quilo' }]}
+        />
       )}
       {(isNew || (prod && !variant)) && (
         <div className="form-row three">

@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { emptyData, normalize, seedCategories } from './data.ts';
 import { addExpense } from './finance.ts';
 import {
-  catalogByAisle, createListWithItems,
+  catalogByAisle, createListWithItems, deletePriceEntry, deleteProduct, itemCost, packLabel, priceCategories, updatePriceEntry, updateProduct,
   lastPurchase, packCount, paidTotal, payItem,
   ensureProduct, linkMarketItems, marketEstimate, matchKey, priceRange, productSuggestions, productsWithoutPrice, sizeOptions,
   addItemFromText, addListCategory, addPrice, bestPrice, deleteListCategory, finishShopping, kindOf, launchBought, listEstimate, newItem, newList, purchaseHistory,
@@ -219,7 +219,7 @@ test('M23: nome genérico aproveita o parecido do catálogo, com o nome da pesso
   const d = withPrices();
   const { product } = ensureProduct(d, 'Café');
   assert.deepEqual([product.name, product.aisle, product.unit], ['Café', 'Mercearia', 'kg']);
-  assert.deepEqual(sizeOptions(d, product), [{ size: 250, sizeUnit: 'g' }, { size: 500, sizeUnit: 'g' }]);
+  assert.deepEqual(sizeOptions(d, product), [{ size: 250, sizeUnit: 'g' }, { size: 500, sizeUnit: 'g' }, { size: 1, sizeUnit: 'kg' }]);
   assert.equal(ensureProduct(d, 'Xampu artesanal').product.aisle, 'Outros');
 });
 
@@ -257,4 +257,61 @@ test('M24: catálogo por corredor com busca e lista criada já com os itens esco
   const items = d.lists.find((x) => x.id === l.id)!.items;
   assert.deepEqual(items.map((i) => [i.text, i.aisle, i.qty]), [['Banana', 'Hortifrúti', null], ['Arroz branco', 'Mercearia', null], ['Tomate', 'Hortifrúti', 2]]);
   assert.ok(items.every((i) => i.productId));
+});
+
+test('M4: categorias de Preços, dados antigos em Mercado, editar e apagar', () => {
+  const old = normalize({ version: 2, stores: [{ id: 's', name: 'Muffato' }], products: [{ id: 'p', name: 'Arroz', unit: 'kg' }] });
+  assert.equal(old.stores[0].categoryId, 'lc-mercado');
+  assert.equal(old.products[0].categoryId, 'lc-mercado');
+  let d = withPrices();
+  assert.deepEqual(priceCategories(d).map((c) => c.name), ['Mercado', 'Roupas', 'Casa', 'Viagem']);
+  const roupas = d.listCategories.find((c) => c.name === 'Roupas')!.id;
+  d = addPrice({ storeName: 'Renner', productName: 'Calça jeans', unit: 'un', size: 1, sizeUnit: 'un', price: 129, categoryId: roupas })(d);
+  assert.equal(d.stores.find((s) => s.name === 'Renner')!.categoryId, roupas);
+  assert.equal(d.products.find((p) => p.name === 'Calça jeans')!.categoryId, roupas);
+  const arroz = d.products.find((p) => p.name === 'Arroz branco')!;
+  d = updateProduct(arroz.id, { name: '  Arroz tipo 1 ', aisle: 'Mercearia' })(d);
+  assert.equal(d.products.find((p) => p.id === arroz.id)!.name, 'Arroz tipo 1');
+  // Corrigir o preço: Camil 5 kg vira Camil 2 kg, R$ 11,00.
+  const camil = d.variants.find((v) => v.brand === 'Camil')!;
+  const e = d.prices.find((p) => p.variantId === camil.id)!;
+  d = updatePriceEntry(e.id, { brand: 'Camil', size: 2, sizeUnit: 'kg', storeId: e.storeId, price: 11 })(d);
+  const fixed = d.prices.find((p) => p.id === e.id)!;
+  assert.equal(fixed.price, 11);
+  assert.equal(d.variants.find((v) => v.id === fixed.variantId)!.size, 2);
+  assert.equal(d.variants.some((v) => v.id === camil.id), false);
+  d = deletePriceEntry(e.id)(d);
+  assert.equal(d.prices.some((p) => p.id === e.id), false);
+  const l = { ...newList('M', 'lc-mercado'), items: [newItem({ text: 'Arroz', productId: arroz.id })] };
+  d = { ...d, lists: [l] };
+  d = deleteProduct(arroz.id)(d);
+  assert.equal(d.products.some((p) => p.id === arroz.id), false);
+  assert.equal(d.variants.some((v) => v.productId === arroz.id), false);
+  assert.equal(d.lists[0].items[0].productId, null);
+});
+
+test('M41: embalagem escolhida no item e preço do quilo', () => {
+  let d = withPrices();
+  const ata = d.stores.find((s) => s.name === 'Atacadão')!.id;
+  d = addPrice({ storeId: ata, productName: 'Arroz branco', brand: 'Prato Fino', size: 1, sizeUnit: 'kg', price: 6.5 })(d);
+  const arroz = d.products.find((p) => p.name === 'Arroz branco')!;
+  // Sem embalagem: o mais barato por kg (Camil 5 kg, 24,90).
+  assert.equal(bestPrice(d, arroz.id, ata)!.price, 24.9);
+  const pack1 = { size: 1, sizeUnit: 'kg' as const };
+  const b1 = bestPrice(d, arroz.id, ata, undefined, pack1)!;
+  assert.equal(b1.price, 6.5);
+  // "2 kg arroz" em pacote de 1 kg = 2 pacotes; sem quantidade = 1 pacote.
+  assert.equal(itemCost({ qty: 2, unit: 'kg', pack: pack1 }, b1, arroz), 13);
+  assert.equal(itemCost({ qty: null, unit: '', pack: pack1 }, b1, arroz), 6.5);
+  const b5 = bestPrice(d, arroz.id, ata, undefined, { size: 5, sizeUnit: 'kg' })!;
+  assert.equal(itemCost({ qty: 2, unit: 'kg', pack: { size: 5, sizeUnit: 'kg' } }, b5, arroz), 24.9);
+  // Carne: bandeja de 230 g ou preço do quilo comparam pelo R$/kg.
+  d = addPrice({ storeId: ata, productName: 'Carne moída', unit: 'kg', size: 230, sizeUnit: 'g', price: 9.2 })(d);
+  const carne = d.products.find((p) => p.name === 'Carne moída')!;
+  assert.equal(Math.round(bestPrice(d, carne.id)!.perUnit * 100) / 100, 40);
+  assert.equal(Math.round(itemCost({ qty: 500, unit: 'g' }, bestPrice(d, carne.id)!, carne) * 100) / 100, 20);
+  assert.equal(packLabel({ size: 1, sizeUnit: 'kg' }), 'Preço do quilo');
+  assert.ok(sizeOptions(d, carne).some((x) => x.size === 1 && x.sizeUnit === 'kg'));
+  // Item antigo sem embalagem passa pelo normalize.
+  assert.equal(normalize({ lists: [{ id: 'l', name: 'M', categoryId: 'lc-mercado', items: [{ id: 'i', text: 'Arroz' }] }] }).lists[0].items[0].pack, null);
 });

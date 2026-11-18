@@ -375,6 +375,8 @@ export interface ListItem {
   store: string;
   /** M3: quanto pagou pelo item nesta compra (mercado). */
   paid: number | null;
+  /** M41: embalagem escolhida (arroz 5 kg); null = a que sai mais barata por kg/L/un. */
+  pack: { size: number; sizeUnit: 'g' | 'kg' | 'ml' | 'L' | 'un' } | null;
   done: boolean;
   /** Já virou despesa em Finanças. */
   launched: boolean;
@@ -401,6 +403,8 @@ export interface Product {
   name: string;
   aisle: string;
   unit: 'kg' | 'L' | 'un';
+  /** M4: categoria de Preços (a mesma das Listas: Mercado, Roupas, Casa, Viagem…). */
+  categoryId: string;
 }
 
 /** Marca + tamanho (Camil 5 kg). */
@@ -415,6 +419,8 @@ export interface ProductVariant {
 export interface Store {
   id: string;
   name: string;
+  /** M4: categoria de Preços da loja. */
+  categoryId: string;
 }
 
 export interface PriceEntry {

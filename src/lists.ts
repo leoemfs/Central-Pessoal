@@ -27,6 +27,14 @@ export const LIST_COLORS = ['#f97316', '#8b5cf6', '#ec4899', '#3b82f6', '#06b6d4
 export const AISLES = ['Hortifrúti', 'Mercearia', 'Carnes', 'Laticínios', 'Padaria', 'Bebidas', 'Limpeza', 'Higiene', 'Congelados', 'Pet', 'Outros'];
 
 type Rec = Record<string, unknown>;
+/** M4: categoria padrão de Preços (dados antigos eram só de mercado). */
+export const MARKET_CAT = 'lc-mercado';
+const SIZE_UNITS = ['g', 'kg', 'ml', 'L', 'un'] as const;
+function normPack(x: unknown): ListItem['pack'] {
+  if (typeof x !== 'object' || x === null) return null;
+  const p = x as Rec;
+  return typeof p.size === 'number' && p.size > 0 && SIZE_UNITS.includes(p.sizeUnit as 'g') ? { size: p.size, sizeUnit: p.sizeUnit as ProductVariant['sizeUnit'] } : null;
+}
 const isRec = (x: unknown): x is Rec => typeof x === 'object' && x !== null && !Array.isArray(x);
 const str = (x: unknown, def = '') => (typeof x === 'string' ? x : def);
 const numOrNull = (x: unknown) => (typeof x === 'number' && Number.isFinite(x) ? x : null);
@@ -39,7 +47,7 @@ export function normalizeListData(r: Rec) {
     : DEFAULT_LIST_CATEGORIES.map((c) => ({ ...c }));
   const item = (i: Rec): ListItem => ({
     id: i.id as string, text: str(i.text, 'Item'), qty: numOrNull(i.qty), unit: str(i.unit), aisle: str(i.aisle), productId: typeof i.productId === 'string' ? i.productId : null,
-    price: numOrNull(i.price), store: str(i.store), paid: numOrNull(i.paid), done: i.done === true, launched: i.launched === true,
+    price: numOrNull(i.price), store: str(i.store), paid: numOrNull(i.paid), pack: normPack(i.pack), done: i.done === true, launched: i.launched === true,
   });
   const lists: UserList[] = recs(r.lists).map((l) => ({
     id: l.id as string, name: str(l.name, 'Lista'), categoryId: str(l.categoryId, listCategories[0]?.id ?? ''), pinned: l.pinned === true,
@@ -47,9 +55,9 @@ export function normalizeListData(r: Rec) {
     tags: Array.isArray(l.tags) ? l.tags.filter((t): t is string => typeof t === 'string') : [], steps: Array.isArray(l.steps) ? l.steps.filter((t): t is string => typeof t === 'string') : [],
     createdAt: str(l.createdAt, new Date().toISOString()),
   }));
-  const products: Product[] = recs(r.products).map((p) => ({ id: p.id as string, name: str(p.name, 'Produto'), aisle: str(p.aisle, 'Outros'), unit: p.unit === 'L' || p.unit === 'un' ? p.unit : 'kg' }));
+  const products: Product[] = recs(r.products).map((p) => ({ id: p.id as string, name: str(p.name, 'Produto'), aisle: str(p.aisle, 'Outros'), unit: p.unit === 'L' || p.unit === 'un' ? p.unit : 'kg', categoryId: str(p.categoryId, MARKET_CAT) }));
   const variants: ProductVariant[] = recs(r.variants).filter((v) => typeof v.productId === 'string').map((v) => ({ id: v.id as string, productId: v.productId as string, brand: str(v.brand), size: numOrNull(v.size) ?? 1, sizeUnit: (['g', 'kg', 'ml', 'L', 'un'] as const).includes(v.sizeUnit as 'g') ? (v.sizeUnit as ProductVariant['sizeUnit']) : 'un' }));
-  const stores: Store[] = recs(r.stores).map((s) => ({ id: s.id as string, name: str(s.name, 'Mercado') }));
+  const stores: Store[] = recs(r.stores).map((s) => ({ id: s.id as string, name: str(s.name, 'Mercado'), categoryId: str(s.categoryId, MARKET_CAT) }));
   const prices: PriceEntry[] = recs(r.prices).filter((p) => typeof p.variantId === 'string' && typeof p.storeId === 'string' && (numOrNull(p.price) ?? 0) > 0).map((p) => ({ id: p.id as string, variantId: p.variantId as string, storeId: p.storeId as string, price: p.price as number, date: str(p.date, todayISO()), promo: p.promo === true }));
   return { listCategories, lists, products, variants, stores, prices };
 }
@@ -89,9 +97,9 @@ export interface BestPrice {
 }
 
 /** Menor preço por unidade de um produto (opcionalmente só num mercado), entre os últimos preços anotados. */
-export function bestPrice(d: Pick<AppData, 'prices' | 'variants'>, productId: string, storeId?: string, latest = latestPrices(d)): BestPrice | null {
+export function bestPrice(d: Pick<AppData, 'prices' | 'variants'>, productId: string, storeId?: string, latest = latestPrices(d), pack?: ListItem['pack']): BestPrice | null {
   let best: BestPrice | null = null;
-  for (const v of d.variants.filter((x) => x.productId === productId)) {
+  for (const v of d.variants.filter((x) => x.productId === productId && (!pack || (x.size === pack.size && x.sizeUnit === pack.sizeUnit)))) {
     for (const p of latest.values()) {
       if (p.variantId !== v.id || (storeId && p.storeId !== storeId)) continue;
       const u = perUnit(v, p.price);
@@ -120,7 +128,7 @@ export function listEstimate(d: Pick<AppData, 'prices' | 'variants' | 'stores' |
       let missing = 0;
       for (const it of l.items) {
         if (onlyDone && !it.done) continue;
-        const b = it.productId ? bestPrice(d, it.productId, s.id, latest) : null;
+        const b = it.productId ? bestPrice(d, it.productId, s.id, latest, it.pack) : null;
         if (b) total += itemCost(it, b, d.products.find((x) => x.id === it.productId));
         else missing++;
       }
@@ -134,11 +142,13 @@ export function listEstimate(d: Pick<AppData, 'prices' | 'variants' | 'stores' |
  * Custo de um item com o melhor preço do mercado: por peso/volume ("2 kg", "6 L", "500 g") usa o preço por unidade;
  * por embalagem ("2 un", "1 pacote", sem quantidade) usa o preço da embalagem.
  */
-export function itemCost(it: Pick<ListItem, 'qty' | 'unit'>, b: BestPrice, product?: Product): number {
+export function itemCost(it: Pick<ListItem, 'qty' | 'unit'> & { pack?: ListItem['pack'] }, b: BestPrice, product?: Product): number {
   const q = it.qty && it.qty > 0 ? it.qty : 1;
   const u = it.unit.toLowerCase();
   const amount = u === 'g' || u === 'ml' ? q / 1000 : q;
   const measured = (u === 'kg' || u === 'g') && product?.unit === 'kg' ? true : (u === 'l' || u === 'ml') && product?.unit === 'L';
+  // M41: com embalagem escolhida, a conta é por pacote ("2 kg" em pacote de 1 kg = 2 pacotes; arredonda para cima).
+  if (it.pack && measured) return b.price * Math.max(1, Math.ceil(amount / (unitFactor(b.variant) || 1) - 1e-9));
   return measured ? b.perUnit * amount : b.price * q;
 }
 
@@ -180,8 +190,8 @@ export function ensureProduct<T extends Pick<AppData, 'products'>>(d: T, name: s
   const cat = exact ?? catalogFor(name);
   const u = unitHint.toLowerCase();
   const product: Product = cat
-    ? { id: productIdFor(exact ? cat.name : name), name: exact ? cat.name : name.trim(), aisle: cat.aisle, unit: cat.unit }
-    : { id: productIdFor(name), name: name.trim(), aisle: 'Outros', unit: u === 'kg' || u === 'g' ? 'kg' : u === 'l' || u === 'ml' ? 'L' : 'un' };
+    ? { id: productIdFor(exact ? cat.name : name), name: exact ? cat.name : name.trim(), aisle: cat.aisle, unit: cat.unit, categoryId: MARKET_CAT }
+    : { id: productIdFor(name), name: name.trim(), aisle: 'Outros', unit: u === 'kg' || u === 'g' ? 'kg' : u === 'l' || u === 'ml' ? 'L' : 'un', categoryId: MARKET_CAT };
   const clash = d.products.find((p) => p.id === product.id);
   if (clash) return { data: d, product: clash };
   return { data: { ...d, products: [...d.products, product] }, product };
@@ -213,7 +223,7 @@ export function linkMarketItems<T extends Pick<AppData, 'products' | 'lists' | '
 }
 
 /** Sugestões ao digitar na lista: os seus produtos primeiro, depois o catálogo pronto. */
-export function productSuggestions(d: Pick<AppData, 'products'>, query: string, max = 6): { name: string; aisle: string; productId: string | null }[] {
+export function productSuggestions(d: Pick<AppData, 'products'>, query: string, max = 6, withCatalog = true): { name: string; aisle: string; productId: string | null }[] {
   const q = matchKey(query);
   if (q.length < 2) return [];
   const hit = (name: string) => {
@@ -222,7 +232,7 @@ export function productSuggestions(d: Pick<AppData, 'products'>, query: string, 
   };
   const own = d.products.filter((p) => hit(p.name)).map((p) => ({ name: p.name, aisle: p.aisle, productId: p.id as string | null }));
   const keys = new Set(d.products.map((p) => matchKey(p.name)));
-  const cat = CATALOG.filter((c) => hit(c.name) && !keys.has(matchKey(c.name))).map((c) => ({ name: c.name, aisle: c.aisle, productId: null }));
+  const cat = (withCatalog ? CATALOG : []).filter((c) => hit(c.name) && !keys.has(matchKey(c.name))).map((c) => ({ name: c.name, aisle: c.aisle, productId: null }));
   const exact = (n: string) => Number(matchKey(n) !== q);
   return [...own.sort((a, b) => exact(a.name) - exact(b.name)), ...cat.sort((a, b) => exact(a.name) - exact(b.name))].slice(0, max);
 }
@@ -246,7 +256,8 @@ export function sizeOptions(d: Pick<AppData, 'variants'>, p: Product): { size: n
   };
   d.variants.filter((v) => v.productId === p.id).forEach(add);
   catalogFor(p.name)?.sizes.forEach(add);
-  if (!out.length) add({ size: 1, sizeUnit: p.unit });
+  // M41: sempre dá para anotar o preço do quilo (ou do litro), como na carne e nos frios.
+  add({ size: 1, sizeUnit: p.unit });
   return out;
 }
 
@@ -303,7 +314,7 @@ export function marketEstimate(d: Pick<AppData, 'prices' | 'variants' | 'stores'
       const byStore = new Map<string, number>();
       if (it.productId) {
         for (const s of d.stores) {
-          const b = bestPrice(d, it.productId, s.id, latest);
+          const b = bestPrice(d, it.productId, s.id, latest, it.pack);
           if (b) byStore.set(s.id, itemCost(it, b, prod));
         }
       }
@@ -364,7 +375,7 @@ export function newList(name: string, categoryId: string): UserList {
 }
 
 export function newItem(p: Partial<ListItem> & { text: string }): ListItem {
-  return { id: uid(), qty: null, unit: '', aisle: '', productId: null, price: null, store: '', paid: null, done: false, launched: false, ...p };
+  return { id: uid(), qty: null, unit: '', aisle: '', productId: null, price: null, store: '', paid: null, pack: null, done: false, launched: false, ...p };
 }
 
 /** Mercado: adiciona um item a partir do texto ("2 kg tomate"), já ligado a um produto de Preços (o seu, do catálogo ou novo) e ao corredor. */
@@ -511,7 +522,7 @@ export function addPrice(p: {
   storeId?: string; storeName?: string;
   productId?: string; productName?: string; aisle?: string; unit?: Product['unit'];
   variantId?: string; brand?: string; size?: number; sizeUnit?: ProductVariant['sizeUnit'];
-  price: number; promo?: boolean; date?: string;
+  price: number; promo?: boolean; date?: string; categoryId?: string;
 }) {
   return (d: AppData): AppData => {
     let next = d;
@@ -520,13 +531,13 @@ export function addPrice(p: {
       const name = (p.storeName ?? 'Mercado').trim();
       const ex = next.stores.find((s) => plain(s.name) === plain(name));
       storeId = ex?.id ?? uid();
-      if (!ex) next = { ...next, stores: [...next.stores, { id: storeId, name }] };
+      if (!ex) next = { ...next, stores: [...next.stores, { id: storeId, name, categoryId: p.categoryId ?? MARKET_CAT }] };
     }
     let productId = p.productId;
     if (!productId) {
       const ex = findProduct(next, p.productName ?? '');
       productId = ex?.id ?? uid();
-      if (!ex) next = { ...next, products: [...next.products, { id: productId, name: (p.productName ?? 'Produto').trim(), aisle: p.aisle ?? 'Outros', unit: p.unit ?? 'un' }] };
+      if (!ex) next = { ...next, products: [...next.products, { id: productId, name: (p.productName ?? 'Produto').trim(), aisle: p.aisle ?? 'Outros', unit: p.unit ?? 'un', categoryId: p.categoryId ?? MARKET_CAT }] };
     }
     let variantId = p.variantId;
     if (!variantId) {
@@ -550,4 +561,57 @@ export function updateListCategory(id: string, patch: Partial<ListCategory>) {
 /** Só exclui categoria vazia (nenhuma lista se perde). */
 export function deleteListCategory(id: string) {
   return (d: AppData): AppData => (d.lists.some((l) => l.categoryId === id) ? d : { ...d, listCategories: d.listCategories.filter((c) => c.id !== id) });
+}
+
+// ---------- M4: categorias de Preços e edição ----------
+
+/** Categorias de Preços: as mesmas das Listas, menos Receitas. */
+export const priceCategories = (d: Pick<AppData, 'listCategories'>) => d.listCategories.filter((c) => c.kind !== 'receita');
+
+export function updateProduct(id: string, patch: Partial<Pick<Product, 'name' | 'aisle' | 'unit' | 'categoryId'>>) {
+  return (d: AppData): AppData => ({ ...d, products: d.products.map((p) => (p.id === id ? { ...p, ...patch, name: (patch.name ?? p.name).trim() || p.name } : p)) });
+}
+
+/** Exclui o produto com as marcas e os preços dele; itens de lista ficam, só sem o vínculo. */
+export function deleteProduct(id: string) {
+  return (d: AppData): AppData => {
+    const vs = new Set(d.variants.filter((v) => v.productId === id).map((v) => v.id));
+    return {
+      ...d,
+      products: d.products.filter((p) => p.id !== id),
+      variants: d.variants.filter((v) => !vs.has(v.id)),
+      prices: d.prices.filter((p) => !vs.has(p.variantId)),
+      lists: d.lists.map((l) => (l.items.some((i) => i.productId === id) ? { ...l, items: l.items.map((i) => (i.productId === id ? { ...i, productId: null } : i)) } : l)),
+    };
+  };
+}
+
+/** Corrige um preço anotado: marca, loja, quantidade/peso e valor. Marca e tamanho novos viram outra variação. */
+export function updatePriceEntry(id: string, o: { brand: string; size: number; sizeUnit: ProductVariant['sizeUnit']; storeId: string; price: number; date?: string }) {
+  return (d: AppData): AppData => {
+    const e = d.prices.find((p) => p.id === id);
+    const v0 = e && d.variants.find((v) => v.id === e.variantId);
+    if (!e || !v0 || !(o.price > 0)) return d;
+    let next = d;
+    let v = d.variants.find((v) => v.productId === v0.productId && plain(v.brand) === plain(o.brand) && v.size === o.size && v.sizeUnit === o.sizeUnit);
+    if (!v) {
+      v = { id: uid(), productId: v0.productId, brand: o.brand.trim(), size: o.size, sizeUnit: o.sizeUnit };
+      next = { ...next, variants: [...next.variants, v] };
+    }
+    const vid = v.id;
+    next = { ...next, prices: next.prices.map((p) => (p.id === id ? { ...p, variantId: vid, storeId: o.storeId, price: o.price, date: o.date ?? p.date } : p)) };
+    // Marca/tamanho que ficou sem nenhum preço some.
+    return next.prices.some((p) => p.variantId === v0.id) ? next : { ...next, variants: next.variants.filter((x) => x.id !== v0.id) };
+  };
+}
+
+export function deletePriceEntry(id: string) {
+  return (d: AppData): AppData => ({ ...d, prices: d.prices.filter((p) => p.id !== id) });
+}
+
+/** M41: nome da embalagem nas fichas ("5 kg"; a de 1 kg/1 L vira "Preço do quilo"/"Preço do litro"). */
+export function packLabel(x: { size: number; sizeUnit: ProductVariant['sizeUnit'] }): string {
+  if (x.size === 1 && x.sizeUnit === 'kg') return 'Preço do quilo';
+  if (x.size === 1 && x.sizeUnit === 'L') return 'Preço do litro';
+  return `${x.size.toLocaleString('pt-BR')} ${x.sizeUnit}`;
 }
