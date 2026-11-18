@@ -1937,6 +1937,30 @@ button.row {
   text-overflow: ellipsis;
   min-width: 0;
 }
+.note-transform {
+  margin: 2px 0 4px;
+}
+.note-became {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 10px 12px;
+  margin: 2px 0 4px;
+  border: 1px solid var(--accent);
+  border-radius: var(--radius-sm);
+  background: var(--accent-soft);
+}
+.note-became .icon,
+.note-became svg {
+  vertical-align: -3px;
+  color: var(--accent-text);
+}
+.tr-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
 .note-cats {
   margin: -2px 0 2px;
 }
