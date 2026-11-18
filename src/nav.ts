@@ -28,6 +28,7 @@ export const NAV_GROUPS: { title: string; items: NavItem[] }[] = [
     items: [
       { label: 'Diário', icon: 'journal', to: 'diario', section: 'diario' },
       { label: 'Humor', icon: 'smile', to: 'humor', section: 'humor' },
+      { label: 'Revisão semanal', icon: 'calendarCheck', to: 'revisao', section: 'revisao' },
       { label: 'Notas', icon: 'note', to: 'arquivo', section: 'arquivo' },
       { label: 'Banco de ideias', icon: 'bulb', to: 'ideias', section: 'ideias' },
       { label: 'Listas', icon: 'cart', to: 'listas', section: 'listas' },
@@ -54,7 +55,7 @@ export const NAV_GROUPS: { title: string; items: NavItem[] }[] = [
       { label: 'Meditar e respirar', icon: 'heart', to: 'nucleo/mente' },
       { label: 'Treinos e alongamentos', icon: 'dumbbell', to: 'nucleo/corpo' },
       { label: 'Progresso', icon: 'bars', to: 'progresso', section: 'progresso' },
-      { label: 'Histórico de práticas', icon: 'clock', to: 'historico', section: 'historico' },
+      { label: 'Práticas', icon: 'clock', to: 'historico', section: 'historico' },
       { label: 'Saúde', icon: 'heartPulse', to: 'saude', section: 'saude' },
     ],
   },
@@ -81,7 +82,6 @@ export const NAV_GROUPS: { title: string; items: NavItem[] }[] = [
     title: 'Planejamento',
     items: [
       { label: 'Objetivos', icon: 'flag', to: 'objetivos', section: 'objetivos' },
-      { label: 'Revisão semanal', icon: 'calendarCheck', to: 'revisao', section: 'revisao' },
       { label: 'Jornada', icon: 'sword', to: 'jornada', section: 'jornada' },
       { label: 'Foco', icon: 'timer' },
     ],

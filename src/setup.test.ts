@@ -17,7 +17,9 @@ test('desligar módulo nunca deixa menos de 3 à vista', () => {
 });
 
 test('favoritos só entre módulos à vista, na ordem dos toques', () => {
-  assert.deepEqual(fitFavorites(['listas', 'nucleo', 'diario'], ['financas', 'diario', 'listas']), ['listas', 'diario', 'financas', 'revisao']);
+  assert.deepEqual(fitFavorites(['listas', 'nucleo', 'diario'], ['financas', 'diario', 'listas']), ['listas', 'diario', 'financas', 'agenda']);
+  // E1: Revisão não é mais favorito (mora no Diário).
+  assert.ok(!fitFavorites(['revisao'], ['financas', 'diario', 'listas']).includes('revisao'));
   assert.deepEqual(fitFavorites(['agenda'], ['financas', 'diario', 'agenda', 'listas', 'estudos']), ['agenda', 'financas', 'diario', 'listas']);
   assert.deepEqual(tapFavorite(['a', 'b', 'c', 'd'], 'e'), ['b', 'c', 'd', 'e']);
   assert.deepEqual(tapFavorite(['a', 'b'], 'a'), ['b']);

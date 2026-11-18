@@ -70,7 +70,7 @@ export const MODULE_BARS: ModuleBar[] = [
     items: [
       { id: 'progresso', label: 'Progresso', icon: 'bars', to: 'progresso', section: 'progresso' },
       { id: 'nucleo', label: 'Núcleo', icon: 'sprout', to: 'nucleo', section: 'nucleo' },
-      { id: 'historico', label: 'Histórico', icon: 'clock', to: 'historico', section: 'historico' },
+      { id: 'historico', label: 'Práticas', icon: 'clock', to: 'historico', section: 'historico' },
     ],
   },
   {
@@ -128,7 +128,7 @@ export const MODULE_BARS: ModuleBar[] = [
     name: 'Saúde',
     sections: ['saude', 'saudehoje', 'saudehist'],
     items: [
-      { id: 'saudehoje', label: 'Hoje', icon: 'sun', to: 'saudehoje', section: 'saudehoje' },
+      { id: 'saudehoje', label: 'Rotina', icon: 'sun', to: 'saudehoje', section: 'saudehoje' },
       { id: 'saude', label: 'Saúde', icon: 'heartPulse', to: 'saude', section: 'saude' },
       { id: 'saudehist', label: 'Histórico', icon: 'clock', to: 'saudehist', section: 'saudehist' },
     ],
@@ -148,7 +148,6 @@ export const FAVORITABLE: BarItem[] = [
   { id: 'saude', label: 'Saúde', icon: 'heartPulse', to: 'saude' },
   { id: 'arquivo', label: 'Notas', icon: 'note', to: 'arquivo' },
   { id: 'voce', label: 'Você', icon: 'user', to: 'voce' },
-  { id: 'revisao', label: 'Revisão', icon: 'calendarCheck', to: 'revisao' },
   { id: 'jornada', label: 'Jornada', icon: 'sword', to: 'jornada' },
 ];
 

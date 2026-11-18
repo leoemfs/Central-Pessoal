@@ -1,6 +1,6 @@
 # Projeto Enxuto: menos repetição, app mais coerente
 
-> **Status: APROVADO em 18/11/2026**, em pacotes (um por sessão). Nada construído ainda.
+> **Status: APROVADO em 18/11/2026**, em pacotes (um por sessão). **E1 feito na v0.137.0.**
 > Objetivo: limpar o app, tirar entradas repetidas e integrar o que hoje está espalhado. **Cada coisa num lugar só, com um caminho só.**
 
 ## Decisões do Leonardo (18/11)
@@ -13,7 +13,7 @@ Custo em **% do limite semanal**, estimado pela experiência das versões anteri
 
 | Pacote | O que muda | Tam. | Custo estimado |
 |---|---|---|---|
-| **E1 Nomes claros** | "Receitas" de Listas vira **Cozinha** (categoria e textos; Finanças continua com Receitas = dinheiro). Ferramenta "Hoje" da Saúde vira **Rotina**. Ferramenta "Histórico" do Núcleo vira **Práticas**. Revisão sai dos favoritos e do menu de módulos (mora no Diário). "Montar o app" fica só em Configurações | P | 1 a 2% |
+| **E1 Nomes claros** ✅ v0.137.0 | "Receitas" de Listas vira **Cozinha** (categoria e textos; Finanças continua com Receitas = dinheiro). Ferramenta "Hoje" da Saúde vira **Rotina**. Ferramenta "Histórico" do Núcleo vira **Práticas**. Revisão sai dos favoritos e do menu de módulos (mora no Diário). "Montar o app" fica só em Configurações | P | 1 a 2% |
 | **E2 Sem a tela Mais** | Some a tela Mais e a opção "Botão Mais na barra". O que só existia no Mais vai para a **gaveta**: Guardados (módulos desligados), Como usar a barra e Configurações. Endereço antigo `#/mais` abre a gaveta. Tutorial e montagem do app atualizados | M | 3 a 5% |
 | **E3 Tarefas num lugar só** | Agenda › Tarefas mostra **todas** as coisas a fazer, com o selo de origem: tarefas, combinados das reuniões, entregas de projetos (Carreira) e passos das metas (Objetivos). Marcar ali marca na origem. As checklists de Listas continuam em Listas (são listas, não tarefas) | M | 4 a 6% |
 | **E4 Uma entrevista só** | A montagem do app vira a entrevista base (já pergunta áreas e prioridades). **Você** passa a "Completar o perfil": só as perguntas que faltam (horários, dinheiro, limitações e preferências), reaproveitando as respostas. **Mestra Lume** só pergunta o que é da Jornada (ritmo e região) e usa as áreas já respondidas. Nada é criado em dobro (hábitos e caixinhas conferem antes) | M | 4 a 6% |

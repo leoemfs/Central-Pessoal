@@ -26,7 +26,7 @@ import {
 
 /**
  * Saúde (N1.1): Água e Sono. Endereços:
- * #/saudehoje (Hoje: registrar o dia) · #/saude (casa: abas Água · Sono) · #/saudehist (Histórico por semana)
+ * #/saudehoje (Rotina: registrar o dia) · #/saude (casa: abas Água · Sono) · #/saudehist (Histórico por semana)
  * #/<tela>/menu (botão +: sono ou plano de dieta) · #/<tela>/sono.
  * Dieta (N1.2): plano em uso na aba Dieta; refeições do dia no Hoje (segui · em parte · fugi).
  * Água com hábito ligado: o número mora no hábito do Núcleo (o mesmo anel).
@@ -205,7 +205,7 @@ export function SaudeHoje({ route }: ViewProps) {
   const { open, sheet, newPlan: createPlan, newMed: createMed, editAppt } = useSaudeActions(route, 'saudehoje');
   return (
     <>
-      <PageHeader title="Hoje" subtitle={relativeDay(today) === 'Hoje' ? formatDate(today, { weekday: 'long', day: 'numeric', month: 'long' }) : undefined} />
+      <PageHeader title="Rotina" subtitle={relativeDay(today) === 'Hoje' ? formatDate(today, { weekday: 'long', day: 'numeric', month: 'long' }) : undefined} />
       <LinkAsk />
       <WaterCard day={today} />
       <SleepCard day={today} onOpen={open} />

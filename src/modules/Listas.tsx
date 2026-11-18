@@ -48,7 +48,7 @@ export function Listas({ route }: ViewProps) {
   return (
     <>
       <PageHeader title="Listas" />
-      <ListsHome key={route.sub} initialFilter={route.sub === 'receitas' && recipeCat ? recipeCat : 'todas'} onNew={(c) => setNewOpen(c)} />
+      <ListsHome key={route.sub} initialFilter={(route.sub === 'cozinha' || route.sub === 'receitas') && recipeCat ? recipeCat : 'todas'} onNew={(c) => setNewOpen(c)} />
       {newOpen !== null && <NewListSheet categoryId={newOpen} onClose={() => setNewOpen(null)} />}
       {menu && (
         <Sheet title="Adicionar em Listas" onClose={() => setMenu(false)}>
@@ -88,7 +88,7 @@ export function Listas({ route }: ViewProps) {
             </span>
             <span className="tile-text">
               <strong>Categorias</strong>
-              <span className="muted">Mercado, Receitas, Roupas, Casa e as suas</span>
+              <span className="muted">Mercado, Cozinha, Roupas, Casa e as suas</span>
             </span>
             <Icon name="right" size={18} />
           </button>

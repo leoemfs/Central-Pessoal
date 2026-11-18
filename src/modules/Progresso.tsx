@@ -140,7 +140,7 @@ function sessionMeta(s: PracticeSession): string {
   return bits.join(' · ');
 }
 
-/** Núcleo › Histórico (barra de baixo): meditações, respirações, alongamentos, treinos e caminhadas feitos. */
+/** Núcleo › Práticas (barra de baixo): meditações, respirações, alongamentos, treinos e caminhadas feitos. */
 export function HistoricoPage() {
   const { data } = useStore();
   const month = todayISO().slice(0, 7);
@@ -153,7 +153,7 @@ export function HistoricoPage() {
   for (const s of sessions.slice(0, 80)) days.set(s.date, [...(days.get(s.date) ?? []), s]);
   return (
     <>
-      <PageHeader title="Histórico" subtitle="Práticas de mente e corpo" />
+      <PageHeader title="Práticas" subtitle="Mente e corpo, por semana" />
       <section className="card">
         <div className="summary">
           <div className="summary-box">

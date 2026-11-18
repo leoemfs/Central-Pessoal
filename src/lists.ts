@@ -17,7 +17,7 @@ export const LIST_KINDS: Record<ListKind, { label: string; hint: string }> = {
 
 export const DEFAULT_LIST_CATEGORIES: ListCategory[] = [
   { id: 'lc-mercado', name: 'Mercado', icon: 'cart', color: '#f97316', kind: 'mercado' },
-  { id: 'lc-receitas', name: 'Receitas', icon: 'pot', color: '#8b5cf6', kind: 'receita' },
+  { id: 'lc-receitas', name: 'Cozinha', icon: 'pot', color: '#8b5cf6', kind: 'receita' },
   { id: 'lc-roupas', name: 'Roupas', icon: 'shirt', color: '#ec4899', kind: 'compras' },
   { id: 'lc-casa', name: 'Casa', icon: 'home', color: '#3b82f6', kind: 'compras' },
   { id: 'lc-viagem', name: 'Viagem', icon: 'plane', color: '#06b6d4', kind: 'checklist' },
@@ -43,7 +43,7 @@ const KINDS = Object.keys(LIST_KINDS) as ListKind[];
 
 export function normalizeListData(r: Rec) {
   const listCategories: ListCategory[] = Array.isArray(r.listCategories)
-    ? recs(r.listCategories).map((c) => ({ id: c.id as string, name: str(c.name, 'Lista'), icon: str(c.icon, 'tasks'), color: str(c.color, '#94a3b8'), kind: KINDS.includes(c.kind as ListKind) ? (c.kind as ListKind) : 'checklist' }))
+    ? recs(r.listCategories).map((c) => ({ id: c.id as string, name: c.id === 'lc-receitas' && c.name === 'Receitas' ? 'Cozinha' : str(c.name, 'Lista'), icon: str(c.icon, 'tasks'), color: str(c.color, '#94a3b8'), kind: KINDS.includes(c.kind as ListKind) ? (c.kind as ListKind) : 'checklist' }))
     : DEFAULT_LIST_CATEGORIES.map((c) => ({ ...c }));
   const item = (i: Rec): ListItem => ({
     id: i.id as string, text: str(i.text, 'Item'), qty: numOrNull(i.qty), unit: str(i.unit), aisle: str(i.aisle), productId: typeof i.productId === 'string' ? i.productId : null,
@@ -565,7 +565,7 @@ export function deleteListCategory(id: string) {
 
 // ---------- M4: categorias de Preços e edição ----------
 
-/** Categorias de Preços: as mesmas das Listas, menos Receitas. */
+/** Categorias de Preços: as mesmas das Listas, menos Cozinha (receitas). */
 export const priceCategories = (d: Pick<AppData, 'listCategories'>) => d.listCategories.filter((c) => c.kind !== 'receita');
 
 export function updateProduct(id: string, patch: Partial<Pick<Product, 'name' | 'aisle' | 'unit' | 'categoryId'>>) {
