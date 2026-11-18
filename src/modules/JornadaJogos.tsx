@@ -70,12 +70,12 @@ export function Fliperama() {
         {GAMES.map((g) => (
           <button key={g.id} type="button" className={`jn-game${g.ready ? '' : ' locked'}`} onClick={() => (g.ready ? play(g.id) : notify(`${g.name}: em breve`, g.text))}>
             <span className={`jn-game-art ${g.id}`}>
-              <img alt="" src={g.id === 'memoria' ? itemIcon(itemById('espada')!) : g.id === 'pescaria' ? fishIcon('raro') : g.id === 'sudoku' ? SUDOKU_ICON : pet} />
+              <img alt="" src={g.id === 'memoria' ? itemIcon(itemById('espada')!) : g.id === 'pescaria' ? fishIcon('raro') : g.id === 'sudoku' ? SUDOKU_ICON : g.id === 'pulo' ? PULO_ICON : pet} />
             </span>
             <strong>{g.name}</strong>
             <span className="muted small">{g.text}</span>
             <span className="jn-px small" style={{ color: g.ready ? '#f472b6' : 'var(--faint)' }}>
-              {g.ready ? (g.id === 'sudoku' ? ((state.games.sudokuDays ?? []).includes(today) ? 'Resolvido hoje ✓' : 'Desafio de hoje') : state.games.records[g.id] ? `Recorde: ${fmt(state.games.records[g.id])}${g.id === 'corrida' ? ' m' : g.id === 'respira' ? ' sessões' : ''}` : 'Jogar') : 'EM BREVE'}
+              {g.ready ? (g.id === 'pulo' && state.games.records.pulo ? `Recorde: ${fmt(state.games.records.pulo)} m` : g.id === 'sudoku' ? ((state.games.sudokuDays ?? []).includes(today) ? 'Resolvido hoje ✓' : 'Desafio de hoje') : state.games.records[g.id] ? `Recorde: ${fmt(state.games.records[g.id])}${g.id === 'corrida' ? ' m' : g.id === 'respira' ? ' sessões' : ''}` : 'Jogar') : 'EM BREVE'}
             </span>
           </button>
         ))}
@@ -83,6 +83,7 @@ export function Fliperama() {
       {playing === 'corrida' && <Corrida pet={pet} record={state.games.records.corrida ?? 0} onFinish={(s) => done('corrida', s)} onClose={() => setPlaying(null)} />}
       {playing === 'memoria' && <Memoria owned={state.owned} record={state.games.records.memoria ?? 0} onFinish={(sc, marks) => done('memoria', sc, marks)} onClose={() => setPlaying(null)} />}
       {playing === 'pescaria' && <Pescaria pet={pet} record={state.games.records.pescaria ?? 0} onFinish={(sc, marks) => done('pescaria', sc, marks)} onClose={() => setPlaying(null)} />}
+      {playing === 'pulo' && <Pulo pet={pet} record={state.games.records.pulo ?? 0} onFinish={(sc, marks) => done('pulo', sc, marks)} onClose={() => setPlaying(null)} />}
       {playing === 'sudoku' && <Sudoku solvedToday={(state.games.sudokuDays ?? []).includes(today)} onFinish={(sc, marks) => done('sudoku', sc, marks)} onClose={() => setPlaying(null)} />}
       {playing === 'respira' && <Respira pet={pet} onFinish={(ok) => done('respira', ok ? (state.games.records.respira ?? 0) + 1 : 0)} onClose={() => setPlaying(null)} />}
     </>
@@ -757,6 +758,281 @@ function Sudoku({ solvedToday, onFinish, onClose }: { solvedToday: boolean; onFi
             onClose={onClose}
           />
         )}
+      </div>
+    </Fullscreen>
+  );
+}
+
+// ---------- Pulo nas nuvens (18/11): o pet pula sozinho; setas ← → levam para os lados ----------
+
+/** Plataforma do jogo (arte nova com o dobro de pixels): galho, pedra, nuvem ou nuvem que some. */
+type PlatKind = 'galho' | 'pedra' | 'nuvem' | 'some';
+const PLAT_PAL: Record<PlatKind, [string, string, string]> = { galho: ['#92400e', '#78350f', '#b45309'], pedra: ['#a8a29e', '#78716c', '#d6d3d1'], nuvem: ['#f1f5f9', '#cbd5e1', '#ffffff'], some: ['#f9a8d4', '#ec4899', '#fdf2f8'] };
+function platGrid(kind: PlatKind, w: number): Grid {
+  const [a, b, c] = PLAT_PAL[kind];
+  const g: Grid = Array.from({ length: 6 }, () => Array<string | null>(w).fill(null));
+  for (let y = 0; y < 6; y++)
+    for (let x = 0; x < w; x++) {
+      const corner = (y === 0 || y === 5) && (x === 0 || x === w - 1);
+      if (corner) continue;
+      const edge = y === 0 || y === 5 || x === 0 || x === w - 1;
+      g[y][x] = edge ? OUTLINE : y === 1 ? c : y === 4 ? b : a;
+    }
+  if (kind === 'galho') for (let x = 4; x < w - 3; x += 7) g[0][x] = g[0][x + 1] = '#16a34a';
+  return g;
+}
+const PULO_COIN = sprite(['..OOOO..', '.OYYYYO.', 'OYWYYyYO', 'OYYYYyYO', 'OYYYYyYO', 'OYyyyyYO', '.OYYYYO.', '..OOOO..'], { Y: '#facc15', y: '#ca8a04', W: '#fff7ed' }, 8);
+const PULO_SPRING = sprite(['.OOOOOO.', 'OSSSSSSO', '.OOOOOO.', '..OGGO..', '.OGOOGO.', '..OGGO..', '.OGOOGO.', 'OOOOOOOO'], { S: '#ef4444', G: '#cbd5e1' }, 8);
+/** Ícone do jogo: plataformas subindo e uma mola (24 pixels). */
+const PULO_ICON = (() => {
+  const g: Grid = Array.from({ length: 24 }, () => Array<string | null>(24).fill(null));
+  const put = (src: Grid, ox: number, oy: number) => src.forEach((r, y) => r.forEach((c, x) => c && (g[oy + y][ox + x] = c)));
+  put(platGrid('galho', 12), 1, 17);
+  put(platGrid('pedra', 10), 12, 10);
+  put(platGrid('nuvem', 10), 3, 3);
+  for (const [x, y] of [[15, 7], [16, 7], [17, 7], [18, 7], [16, 8], [17, 8], [15, 9], [18, 9]]) g[y][x] = y === 7 ? '#ef4444' : '#cbd5e1';
+  return toSvg(g, 2);
+})();
+
+function Pulo({ pet, record, onFinish, onClose }: { pet: string; record: number; onFinish: (score: number, marks: Record<string, number>) => { fichas: number; record: boolean }; onClose: () => void }) {
+  const cv = useRef<HTMLCanvasElement>(null);
+  const keys = useRef({ left: false, right: false });
+  const [phase, setPhase] = useState<'pronto' | 'jogando' | 'fim'>('pronto');
+  const [hud, setHud] = useState({ m: 0, coins: 0 });
+  const [result, setResult] = useState<{ m: number; coins: number; fichas: number; record: boolean } | null>(null);
+  const [held, setHeld] = useState<'' | 'l' | 'r'>('');
+  useEffect(() => {
+    if (phase !== 'jogando') return;
+    const W = 180;
+    const H = 300;
+    const canvas = cv.current!;
+    const ctx = canvas.getContext('2d')!;
+    ctx.imageSmoothingEnabled = false;
+    const img = (src: string) => Object.assign(new Image(), { src });
+    const petImg = img(pet);
+    const coinImg = img(PULO_COIN);
+    const springImg = img(PULO_SPRING);
+    const platImgs = new Map<string, HTMLImageElement>();
+    const platImg = (k: PlatKind, w: number) => {
+      const key = `${k}:${w}`;
+      if (!platImgs.has(key)) platImgs.set(key, img(toSvg(platGrid(k, w))));
+      return platImgs.get(key)!;
+    };
+    interface P { x: number; y: number; w: number; kind: PlatKind; mv: number; gone?: boolean }
+    interface It { kind: 'mola' | 'moeda'; p?: P; dx: number; x: number; y: number; taken?: boolean; used?: number }
+    const S = { x: W / 2 - 12, y: H - 60, vx: 0, vy: -5.2, cam: 0, top: 0, coins: 0, face: 1, plats: [] as P[], items: [] as It[] };
+    const addPlat = (y: number) => {
+      const alt = Math.max(0, (S.cam + H - y) / 10);
+      const hard = Math.min(1, alt / 600);
+      const kind: PlatKind = Math.random() < 0.12 + hard * 0.15 && alt > 30 ? 'some' : alt < 120 ? 'galho' : alt < 300 ? 'pedra' : 'nuvem';
+      const w = Math.max(22, 30 - Math.floor(hard * 6));
+      const p: P = { x: Math.random() * (W - w), y, w, kind, mv: alt > 200 && Math.random() < 0.2 ? (Math.random() < 0.5 ? -0.5 : 0.5) : 0 };
+      S.plats.push(p);
+      if (kind !== 'some' && Math.random() < 0.1) S.items.push({ kind: 'mola', p, dx: Math.floor(Math.random() * (w - 8)), x: 0, y: 0 });
+      else if (Math.random() < 0.28) S.items.push({ kind: 'moeda', dx: 0, x: Math.random() * (W - 8), y: y - 16 - Math.random() * 12 });
+    };
+    let y0 = H - 20;
+    S.plats.push({ x: W / 2 - 15, y: y0, w: 30, kind: 'galho', mv: 0 });
+    while (y0 > -H) {
+      y0 -= 30 + Math.random() * 12;
+      addPlat(y0);
+    }
+    const SKIES: [number, string, string][] = [[0, '#7dd3fc', '#e0f2fe'], [150, '#fb923c', '#fde68a'], [300, '#4c1d95', '#f472b6'], [450, '#0b1026', '#1e1b4b']];
+    const mixC = (a: string, b: string, k: number) => {
+      const x = parseInt(a.slice(1), 16);
+      const z = parseInt(b.slice(1), 16);
+      const c = (s: number) => Math.round(((x >> s) & 255) * (1 - k) + ((z >> s) & 255) * k);
+      return `rgb(${c(16)} ${c(8)} ${c(0)})`;
+    };
+    const sky = (alt: number) => {
+      for (let i = SKIES.length - 1; i >= 0; i--)
+        if (alt >= SKIES[i][0]) {
+          const a = SKIES[i];
+          const b = SKIES[i + 1] ?? a;
+          const k = b === a ? 0 : Math.min(1, (alt - a[0]) / (b[0] - a[0]));
+          return [mixC(a[1], b[1], k), mixC(a[2], b[2], k)];
+        }
+      return ['#7dd3fc', '#e0f2fe'];
+    };
+    const stars = Array.from({ length: 40 }, () => [Math.random() * W, Math.random() * H, Math.random() < 0.2 ? 2 : 1]);
+    let raf = 0;
+    let last = performance.now();
+    let alive = true;
+    const end = () => {
+      alive = false;
+      const r = onFinish(S.top, { pulo_moedas: S.coins });
+      setResult({ m: S.top, coins: S.coins, fichas: r.fichas, record: r.record });
+      setPhase('fim');
+    };
+    const step = (dt: number) => {
+      const k = keys.current;
+      if (k.left) {
+        S.vx = Math.max(-2.6, S.vx - 0.22);
+        S.face = -1;
+      } else if (k.right) {
+        S.vx = Math.min(2.6, S.vx + 0.22);
+        S.face = 1;
+      } else S.vx *= 0.85;
+      S.x += S.vx * dt;
+      S.vy += 0.16 * dt;
+      S.y += S.vy * dt;
+      if (S.x > W) S.x = -24;
+      if (S.x < -24) S.x = W;
+      for (const p of S.plats)
+        if (p.mv) {
+          p.x += p.mv * dt;
+          if (p.x < 0 || p.x + p.w > W) p.mv *= -1;
+        }
+      if (S.vy > 0)
+        for (const p of S.plats) {
+          if (p.gone) continue;
+          const feet = S.y + 20;
+          if (S.x + 18 > p.x && S.x + 6 < p.x + p.w && feet >= p.y && feet <= p.y + 6 + S.vy * dt) {
+            const mola = S.items.find((it) => it.kind === 'mola' && it.p === p && S.x + 14 > p.x + it.dx && S.x + 10 < p.x + it.dx + 8);
+            S.vy = mola ? -8.6 : -5.2;
+            S.y = p.y - 20;
+            if (p.kind === 'some') p.gone = true;
+            if (mola) mola.used = 6;
+            break;
+          }
+        }
+      for (const it of S.items) {
+        if (it.used) it.used--;
+        if (it.kind === 'moeda' && !it.taken && Math.abs(S.x + 12 - (it.x + 4)) < 12 && Math.abs(S.y + 10 - (it.y + 4)) < 12) {
+          it.taken = true;
+          S.coins++;
+        }
+      }
+      const line = H * 0.38;
+      if (S.y < line) {
+        const d = line - S.y;
+        S.y = line;
+        S.cam += d;
+        for (const p of S.plats) p.y += d;
+        for (const it of S.items) if (it.kind === 'moeda') it.y += d;
+        for (const st of stars) st[1] = (st[1] + d * 0.3) % H;
+      }
+      S.top = Math.max(S.top, Math.floor(S.cam / 10));
+      S.plats = S.plats.filter((p) => p.y < H + 10);
+      S.items = S.items.filter((it) => (it.kind === 'mola' ? S.plats.includes(it.p!) : it.y < H + 10 && !it.taken));
+      let minY = Math.min(...S.plats.map((p) => p.y));
+      while (minY > -20) {
+        minY -= 34 + Math.random() * (14 + Math.min(18, S.top / 25));
+        addPlat(minY);
+      }
+      if (S.y > H + 10) end();
+    };
+    const draw = () => {
+      const [c1, c2] = sky(S.top);
+      const grad = ctx.createLinearGradient(0, 0, 0, H);
+      grad.addColorStop(0, c1);
+      grad.addColorStop(1, c2);
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, 0, W, H);
+      if (S.top > 330) {
+        ctx.fillStyle = '#fef9c3';
+        ctx.globalAlpha = Math.min(1, (S.top - 330) / 120);
+        for (const [x, y, z] of stars) ctx.fillRect(Math.round(x), Math.round(y), z, z);
+        ctx.globalAlpha = 1;
+      }
+      for (const p of S.plats) if (!p.gone) ctx.drawImage(platImg(p.kind, p.w), Math.round(p.x), Math.round(p.y));
+      for (const it of S.items) {
+        if (it.kind === 'mola' && it.p) ctx.drawImage(springImg, Math.round(it.p.x + it.dx), Math.round(it.p.y - (it.used ? 10 : 7)), 8, 8);
+        else if (!it.taken) ctx.drawImage(coinImg, Math.round(it.x), Math.round(it.y), 8, 8);
+      }
+      // Pet com 24 de largura (a altura segue o desenho).
+      const ph = petImg.naturalWidth ? Math.round((24 * petImg.naturalHeight) / petImg.naturalWidth) : 20;
+      const px = Math.round(S.x);
+      const py = Math.round(S.y + 20 - ph);
+      ctx.save();
+      if (S.face < 0) {
+        ctx.translate(px + 24, py);
+        ctx.scale(-1, 1);
+        ctx.drawImage(petImg, 0, 0, 24, ph);
+      } else ctx.drawImage(petImg, px, py, 24, ph);
+      ctx.restore();
+    };
+    let lastHud = 0;
+    const loop = (t: number) => {
+      if (!alive) return;
+      const dt = Math.min(3, (t - last) / 16.67 || 1);
+      last = t;
+      step(dt);
+      if (!alive) return;
+      draw();
+      if (t - lastHud > 120) {
+        lastHud = t;
+        setHud({ m: S.top, coins: S.coins });
+      }
+      raf = requestAnimationFrame(loop);
+    };
+    raf = requestAnimationFrame(loop);
+    const kd = (e: KeyboardEvent) => {
+      if (e.key === 'ArrowLeft') keys.current.left = true;
+      if (e.key === 'ArrowRight') keys.current.right = true;
+    };
+    const ku = (e: KeyboardEvent) => {
+      if (e.key === 'ArrowLeft') keys.current.left = false;
+      if (e.key === 'ArrowRight') keys.current.right = false;
+    };
+    window.addEventListener('keydown', kd);
+    window.addEventListener('keyup', ku);
+    return () => {
+      alive = false;
+      cancelAnimationFrame(raf);
+      window.removeEventListener('keydown', kd);
+      window.removeEventListener('keyup', ku);
+    };
+  }, [phase]); // eslint-disable-line react-hooks/exhaustive-deps
+  const press = (side: 'l' | 'r', on: boolean) => {
+    keys.current = { left: on && side === 'l', right: on && side === 'r' };
+    setHeld(on ? side : '');
+  };
+  const arrow = (side: 'l' | 'r') => ({
+    onPointerDown: (e: React.PointerEvent) => {
+      e.preventDefault();
+      press(side, true);
+    },
+    onPointerUp: () => press(side, false),
+    onPointerCancel: () => press(side, false),
+    onPointerLeave: () => press(side, false),
+    onContextMenu: (e: React.MouseEvent) => e.preventDefault(),
+  });
+  return (
+    <Fullscreen label="Pulo nas nuvens" className="jn-game-fs jn-pulo-fs" onClose={onClose}>
+      <div className="jn-game-top">
+        <button type="button" className="jn-fs-close" aria-label="Sair" onClick={onClose}>
+          ✕
+        </button>
+        <strong className="jn-px">PULO NAS NUVENS</strong>
+        <span className="jn-px small">{phase === 'jogando' ? `${hud.m} m · ● ${hud.coins}` : `Recorde: ${record} m`}</span>
+      </div>
+      <div className="jn-pulo">
+        <div className="jn-pulo-stage">
+          <canvas ref={cv} width={180} height={300} aria-label="Pulo nas nuvens" />
+          {phase === 'pronto' && (
+            <div className="jn-game-over">
+              <strong className="jn-px">PULO NAS NUVENS</strong>
+              <span>O pet pula sozinho. Segure ← ou → para ir para os lados; sair por um lado volta pelo outro. A mola dá pulo alto e a nuvem rosa some depois de um pulo. A altura vira fichas.</span>
+              <div className="btn-row">
+                <button type="button" className="btn primary" onClick={() => setPhase('jogando')}>
+                  Começar
+                </button>
+              </div>
+            </div>
+          )}
+          {phase === 'fim' && result && (
+            <Result title="CAIU!" lines={`${result.m} m · ${result.coins} ${result.coins === 1 ? 'moedinha' : 'moedinhas'}`} fichas={result.fichas} record={result.record} onAgain={() => setPhase('pronto')} onClose={onClose} />
+          )}
+        </div>
+        <div className="jn-pulo-pad">
+          <button type="button" aria-label="Esquerda" className={held === 'l' ? 'on' : ''} {...arrow('l')}>
+            ←
+          </button>
+          <button type="button" aria-label="Direita" className={held === 'r' ? 'on' : ''} {...arrow('r')}>
+            →
+          </button>
+        </div>
       </div>
     </Fullscreen>
   );
