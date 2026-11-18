@@ -33,6 +33,7 @@ anotar → especificar → aprovar → construir → testar. A cada mudança de 
 - **Botão +:** tudo o que cria algo; por último, separado, **Categorias** (padrão para qualquer categoria do app; Configurações não tem atalhos para elas).
 - **Cabeçalho da tela:** mês/semana + abas formam **um bloco** preso no topo, que some e volta junto com a barra de cima (`PageHeader` com `actions`/`tabs`).
 - **Seletores com muitas opções** (chips, categorias, abas com mais de 4) ficam numa **linha só com rolagem para o lado** (`src/hscroll.ts`); filtros de liga/desliga ficam fora da fileira, como botão fixo.
+- **Tela nova com abas ou filtro de listas:** perguntar ao Leonardo como personalizar antes de construir. Padrão: **abas** = barra única (a escolhida marcada na cor de destaque); **filtro de listas** (categorias) = **fichas** (botões separados). Combinado em 18/11.
 - **Cada coisa aparece em um lugar só.** O que está na barra não aparece também como botão ou aba.
 
 ## Regras técnicas
