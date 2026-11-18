@@ -1,12 +1,13 @@
 import { useState } from 'react';
 import { go } from '../../router';
+import { usePageMenu } from '../../PageMenu';
 import { addTopicsAsPages, isHidden, shortDesc, defaultCycleName, findSource, missingBefore, moveItem, newCycle, newNotebook, remainingTopics, topicState, touch, trackPath, trackProgress, type TrackView } from '../../estudos';
 import type { StudyCollection, StudySource } from '../../types';
 import { groupLibrary, moveCollection, moveItem as moveColItem, newCollection, placeItem, removeCollection, renameCollection, setItems, toggleCollection } from '../../colecoes';
 import { Empty, Field, Icon, notify, PageHeader, Sheet, type IconName } from '../../ui';
 import { todayISO, uid } from '../../utils';
 import { listCourses, mineReach, removeCourse, removeMine } from '../../curso';
-import { CourseCta, DeleteSheet } from './Cursos';
+import { DeleteSheet } from './Cursos';
 import { AreasSheet, NotebookSheet, nowISO, Path, SourceCard, StatusPill, TrackSheet, trackCrumbs, useStudy } from './shared';
 
 const plural = (n: number, one: string, many: string) => `${n} ${n === 1 ? one : many}`;
@@ -81,6 +82,7 @@ export function BibliotecaPage() {
   const [doomed, setDoomed] = useState<Doomed | null>(null);
   const [organizing, setOrganizing] = useState(false);
   const [sheet, setSheet] = useState<ColSheet | null>(null);
+  const [showArchived, setShowArchived] = useState(false);
   const setCols = (fn: (c: StudyCollection[]) => StudyCollection[]) => set((s) => ({ ...s, collections: fn(s.collections) }));
   const archive = (id: string, name: string, on: boolean) => {
     set((s) => ({ ...s, archived: on ? [...s.archived, id] : s.archived.filter((x) => x !== id) }));
@@ -159,11 +161,15 @@ export function BibliotecaPage() {
   const shownMine = mine.filter((i) => !off(i) && !grouped.has(i.key));
   const shownCatalog = catalog.filter((i) => !off(i) && !grouped.has(i.key));
   const archived = [...mine, ...catalog].filter(off);
+  // E41: ações secundárias no menu ⋮ da barra de cima.
+  usePageMenu([
+    { id: 'importar', label: 'Importar curso', icon: 'download', run: () => go('estudos/importar-curso') },
+    archived.length > 0 && { id: 'arquivados', label: `Arquivados (${archived.length})`, icon: 'archive', run: () => setShowArchived(true) },
+  ]);
   return (
     <>
       <Path items={[{ label: 'Estudos', to: 'estudos' }, { label: 'Biblioteca' }]} />
       <PageHeader title="Biblioteca" subtitle="Roteiros de referência para explorar. Escolher algo daqui não muda o catálogo." />
-      <CourseCta />
 
       <div className="st-sec">
         <h2 className="section-title">Coleções</h2>
@@ -249,16 +255,11 @@ export function BibliotecaPage() {
       <button type="button" className="btn soft" onClick={() => setAreas(true)}>
         <Icon name="plus" size={18} /> Criar área ou tema
       </button>
-      {archived.length > 0 && (
-        <>
-          <div>
-            <h2 className="section-title">Arquivados</h2>
-            <p className="muted small">Fora da sua biblioteca, mas tudo continua guardado.</p>
-          </div>
-          <section className="card">
-            <ul className="list">{archived.map((i) => row(i))}</ul>
-          </section>
-        </>
+      {showArchived && archived.length > 0 && (
+        <Sheet title={`Arquivados (${archived.length})`} onClose={() => setShowArchived(false)}>
+          <p className="muted small">Fora da sua biblioteca, mas tudo continua guardado.</p>
+          <ul className="list">{archived.map((i) => row(i))}</ul>
+        </Sheet>
       )}
       {areas && <AreasSheet onClose={() => setAreas(false)} />}
       {doomed && <DeleteDoomed item={doomed} onClose={() => setDoomed(null)} />}

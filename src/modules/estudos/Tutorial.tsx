@@ -161,22 +161,3 @@ export function TutorialCard() {
     </section>
   );
 }
-
-/** Link discreto no fim da tela: abre o passo a passo e, se o cartão foi arquivado, traz de volta. */
-export function TutorialLink() {
-  const { study, set } = useStudy();
-  const [open, setOpen] = useState(false);
-  if (!study.tutorialOff) return null;
-  return (
-    <div className="st-tut-foot">
-      <button type="button" className="link" onClick={() => setOpen(true)}>
-        <Icon name="info" size={16} /> Como usar Estudos
-      </button>
-      <span className="muted small">·</span>
-      <button type="button" className="link" onClick={() => set((s) => ({ ...s, tutorialOff: false }))}>
-        Mostrar o cartão de novo
-      </button>
-      {open && <TutorialSheet onClose={() => setOpen(false)} />}
-    </div>
-  );
-}

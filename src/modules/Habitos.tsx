@@ -3,6 +3,7 @@ import { CardScreen } from '../Cards';
 import type { ViewProps } from '../App';
 import { useStore } from '../store';
 import { cleanAddress, useSubAction } from '../router';
+import { usePageMenu } from '../PageMenu';
 import { remove, upsert } from '../actions';
 import {
   amountOn, ATTRIBUTES, atRiskToday, bestClean, cleanDays, consistency, DEFAULT_TARGET, fmtQty, graduate, habitsOfDay, habitStreak, isQuantity,
@@ -365,7 +366,10 @@ function KeptHabits({ kinds, onOpen }: { kinds: HabitKind[]; onOpen: (id: string
   const mine = data.habits.filter((h) => kinds.includes(h.kind));
   const paused = mine.filter((h) => !isArchived(h, today) && currentPause(h, today));
   const archived = mine.filter((h) => isArchived(h, today));
-  if (!paused.length && !archived.length) return null;
+  // E41: os arquivados ficam no menu ⋮ da barra de cima (abrem numa janela).
+  const [showArchived, setShowArchived] = useState(false);
+  usePageMenu([archived.length > 0 && { id: 'arquivados', label: `Arquivados (${archived.length})`, icon: 'archive', run: () => setShowArchived(true) }]);
+  if (!paused.length && !(showArchived && archived.length)) return null;
   return (
     <>
       {paused.length > 0 && (
@@ -391,11 +395,8 @@ function KeptHabits({ kinds, onOpen }: { kinds: HabitKind[]; onOpen: (id: string
           </ul>
         </details>
       )}
-      {archived.length > 0 && (
-        <details className="card kept">
-          <summary>
-            <h2>Arquivados ({archived.length})</h2>
-          </summary>
+      {showArchived && archived.length > 0 && (
+        <Sheet title={`Arquivados (${archived.length})`} onClose={() => setShowArchived(false)}>
           <ul className="list">
             {archived.map((h) => (
               <li key={h.id} className="row">
@@ -409,7 +410,7 @@ function KeptHabits({ kinds, onOpen }: { kinds: HabitKind[]; onOpen: (id: string
               </li>
             ))}
           </ul>
-        </details>
+        </Sheet>
       )}
     </>
   );

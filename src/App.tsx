@@ -4,6 +4,9 @@ import { useStore } from './store';
 import type { Theme } from './types';
 import { canGoBack, getTrail, go, goReplace, navigate, useRoute, type Route } from './router';
 import { buildCrumbs } from './crumbs';
+import { buildMenu, MENU_EDIT, MENU_SEARCH } from './menuItems';
+import { PageMenuButton, useCurrentPageMenu } from './PageMenu';
+import { useDesktop } from './wide';
 import { useCurrentPageCrumbs, useCurrentPageParent, useCurrentPageTitle } from './pageTitle';
 import { Icon, Sheet, Toasts, type IconName } from './ui';
 import { formatLongDate, todayISO } from './utils';
@@ -338,7 +341,7 @@ function useTheme(theme: Theme, accent: string | null) {
 }
 
 export function App() {
-  const { data, saveError } = useStore();
+  const { data, saveError, update } = useStore();
   useTheme(data.settings.theme, data.settings.accent);
   const route = useRoute();
   const section = SECTIONS.find((s) => s.path === route.path) ?? SECTIONS[0];
@@ -391,6 +394,21 @@ export function App() {
   const nearLevel = where?.page ?? where?.module ?? section.title ?? section.label;
   const innerTitle = route.sub && pageTitle && pageTitle !== nearLevel && pageTitle !== section.label ? pageTitle : null;
   const innerParent = settingsSub ? section.label : (pageParent ?? nearLevel);
+  // E40/E41: lupa só no Início; nas outras telas, ações da tela no menu ⋮, com a busca do módulo por último.
+  const pageActions = useCurrentPageMenu();
+  const wide = useDesktop();
+  const isHome = section.path === 'inicio';
+  const searchLabel = section.search ? 'Buscar no diário' : moduleOf(section.path) ? `Buscar em ${where?.module ?? section.label}` : 'Buscar em tudo';
+  const menu = buildMenu(pageActions, { editable: !!editor.screen, editing: editor.editing, search: isHome ? null : searchLabel, ownSearch: !!section.search });
+  const pickMenu = (id: string) => {
+    if (id === MENU_EDIT) editor.toggle();
+    else if (id === MENU_SEARCH) {
+      if (section.search) goReplace(section.search);
+      else setSearch(true);
+    } else pageActions.find((a) => a.id === id)?.run();
+  };
+  const menuTip = !data.settings.menuTipSeen;
+  const tipSeen = () => update((d) => ({ ...d, settings: { ...d.settings, menuTipSeen: true } }));
   // E22: dentro de um tema das Configurações, o título mostra "Configurações / Aparência".
   // Tocar de novo no módulo em que você já está mostra os favoritos, para trocar de módulo sem passar pelo Início.
   const [showFavs, setShowFavs] = useState(false);
@@ -467,13 +485,19 @@ export function App() {
             (section.title ?? section.label)
           )}
         </h1>
-        <button type="button" className="icon-btn" onClick={() => (section.search ? goReplace(section.search) : setSearch(true))} aria-label={section.search ? 'Buscar no diário' : moduleOf(section.path) ? `Buscar em ${where?.module ?? section.label}` : 'Buscar em tudo'}>
-          <Icon name="search" />
-        </button>
-        {editor.screen && (
-          <button type="button" className={`icon-btn${editor.editing ? ' on' : ''}`} onClick={editor.toggle} aria-label={editor.editing ? 'Terminar de personalizar' : 'Personalizar cartões'} aria-pressed={editor.editing}>
-            <Icon name="edit" />
-          </button>
+        {isHome ? (
+          <>
+            <button type="button" className="icon-btn" onClick={() => setSearch(true)} aria-label="Buscar em tudo">
+              <Icon name="search" />
+            </button>
+            {editor.screen && (
+              <button type="button" className={`icon-btn${editor.editing ? ' on' : ''}`} onClick={editor.toggle} aria-label={editor.editing ? 'Terminar de personalizar' : 'Personalizar cartões'} aria-pressed={editor.editing}>
+                <Icon name="edit" />
+              </button>
+            )}
+          </>
+        ) : (
+          menu.length > 0 && <PageMenuButton items={menu} onPick={pickMenu} tip={menuTip && !wide} onTipSeen={tipSeen} />
         )}
       </header>
 
@@ -504,7 +528,13 @@ export function App() {
               : 'Não foi possível salvar neste aparelho. Exporte um backup em Configurações agora.'}
           </div>
         )}
-        <Crumbs />
+        <div className="desk-head desk-only">
+          <Crumbs />
+          {/* No computador a barra de cima não aparece: o ⋮ fica na linha do caminho (no Início, só Personalizar). */}
+          {(isHome ? editor.screen : menu.length > 0) && (
+            <PageMenuButton items={isHome ? buildMenu([], { editable: true, editing: editor.editing, search: null }) : menu} onPick={pickMenu} tip={menuTip && wide} onTipSeen={tipSeen} />
+          )}
+        </div>
         <ErrorBoundary scope="tela" resetKey={`${section.path}:${route.n}`}>
           <View key={section.path} route={route} />
         </ErrorBoundary>

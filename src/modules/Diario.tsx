@@ -88,9 +88,6 @@ export function Diario({ route }: ViewProps) {
         actions={
           <>
             {!searching && <MonthNav label={formatMonth(month)} onPrev={() => changeMonth(addMonths(month, -1))} onNext={() => changeMonth(addMonths(month, 1))} onLabel={() => setHistory(true)} />}
-            <span className="desktop-only">
-              <IconButton icon="search" label="Buscar no diário" onClick={() => { setSearching(true); setQuery(''); setOpen(null); }} />
-            </span>
           </>
         }
       />
