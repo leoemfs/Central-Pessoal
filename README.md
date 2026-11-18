@@ -183,6 +183,7 @@ src/
 
 ## Análises
 
+- [Estrutura do app](docs/estrutura-do-app.md): retrato de todos os módulos, telas, funcionalidades e números (18/11/2026), com o que ainda não está implementado.
 - [Análise profunda de novembro de 2026](docs/auditoria-2026-11.md): código, segurança, testes de gargalo com 1 a 10 anos de dados, limpeza e ressalvas. As correções estão na Central (C3 a C9, M18 a M20).
 
 ## Implementações futuras
