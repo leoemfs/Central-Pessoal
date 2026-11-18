@@ -14292,3 +14292,77 @@ body.icons-flat .st-shortcut {
   font-size: 1.15rem;
   font-weight: 700;
 }
+
+/* ---------- E42: teclado aberto (celular) ---------- */
+/* Digitando: a barra de baixo, a alça da gaveta e o + somem. */
+body.kb-open .tabbar:not(.jn-gamebar),
+body.kb-open .fab,
+body.kb-open .bar-pull {
+  display: none !important;
+}
+.ed-done {
+  display: none;
+}
+/* Celular: a barra de formatação só aparece editando, como uma faixa colada em cima do teclado. */
+@media (max-width: 899px) and (pointer: coarse) {
+  .ed:not(.editing) .ed-bar {
+    display: none;
+  }
+  .ed.editing .ed-bar {
+    position: fixed;
+    left: 0;
+    right: 0;
+    top: auto;
+    bottom: var(--kb, 0px);
+    z-index: 40;
+    flex-direction: column-reverse;
+    gap: 0;
+    padding: 0 0 env(safe-area-inset-bottom, 0px);
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+    transition: none;
+  }
+  .ed.editing .ed-toolbar {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    scrollbar-width: none;
+    border: 0;
+    border-radius: 0;
+    background: none;
+    padding: 6px max(8px, env(safe-area-inset-left, 0px));
+  }
+  .ed.editing .ed-toolbar::-webkit-scrollbar {
+    display: none;
+  }
+  .ed.editing .ed-toolbar > * {
+    flex: none;
+  }
+  /* Na faixa, todas as ferramentas ficam na mesma linha (rola para o lado); não precisa do "Mais". */
+  .ed.editing .ed-extra {
+    display: contents;
+  }
+  .ed.editing .ed-more {
+    display: none;
+  }
+  .ed.editing .ed-done {
+    display: grid;
+    position: sticky;
+    right: 0;
+    margin-left: auto;
+    padding: 0 12px;
+    background: var(--surface);
+    color: var(--accent-text);
+    font-weight: 700;
+    box-shadow: -10px 0 12px var(--surface);
+  }
+  .ed.editing .ed-colors {
+    border-radius: 0;
+    border: 0;
+    border-bottom: 1px solid var(--border);
+    box-shadow: none;
+  }
+  /* Espaço no fim do texto para a faixa não cobrir a última linha. */
+  .ed.editing .ed-content {
+    padding-bottom: 64px;
+  }
+}
