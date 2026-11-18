@@ -18,7 +18,7 @@
 | Versões publicadas | 133 (v0.1 a v0.133) |
 
 ## Como o app se organiza
-- **Barra de baixo:** no Início, Início + 4 favoritos. Dentro de um módulo: Início · ferramenta · **casa do módulo (centro)** · ferramenta · ⭐ Favoritos. Puxar a barra para cima abre a gaveta com todos os módulos e telas.
+- **Barra de baixo:** no Início, Início + 4 favoritos. Dentro de um módulo: Início · ferramenta · **casa do módulo (centro)** · ferramenta · ⭐ Favoritos. Puxar a barra para cima abre a gaveta (o menu) com todos os módulos e telas, e os atalhos Configurações, Como usar a barra e Guardados. Não existe tela Mais (saiu no E2, v0.139.0); o endereço antigo `#/mais` abre a gaveta.
 - **Abas no topo:** partes do mesmo conteúdo (ex.: Despesas · Receitas · Cartões · Caixinhas).
 - **Botão +:** tudo o que cria algo; por último, Categorias.
 - **Lápis:** personalizar cartões (subir, descer, ocultar) em várias telas.

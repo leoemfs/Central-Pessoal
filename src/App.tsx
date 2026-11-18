@@ -16,7 +16,7 @@ import { Dashboard } from './modules/Dashboard';
 import { Financas } from './modules/financas/Financas';
 import { Diario } from './modules/Diario';
 import { Agenda } from './modules/Agenda';
-import { Guardados, Mais } from './modules/Mais';
+import { Guardados, keptCount } from './modules/Mais';
 import { Habitos } from './modules/Habitos';
 import { ArquivadosPage, IdeiasPage, NotasPage } from './modules/Notas';
 import { Ajustes } from './modules/Ajustes';
@@ -38,7 +38,7 @@ import { CarreiraPage, VagasPage } from './modules/Carreira';
 import { SaudeHistorico, SaudeHoje, SaudePage } from './modules/Saude';
 import { CareerGoalsList, ConcluidosPage, GrandesPage, ObjetivosPage } from './modules/Objetivos';
 import { useCardEditor } from './Cards';
-import { barDrag, PullToMais } from './BarPull';
+import { barDrag, openMenu, PullToMais } from './BarPull';
 import { settingsPage } from './settingsPages';
 import { activeIndex, barFor, barItems, crumb, favoriteItems, type BarItem } from './moduleBar';
 import { GameBarItems } from './modules/JornadaBar';
@@ -68,7 +68,6 @@ export const SECTIONS: Section[] = [
   { path: 'financas', label: 'Finanças', icon: 'wallet', view: Financas, fab: 'financas/menu' },
   { path: 'diario', label: 'Diário', icon: 'journal', view: Diario, fab: 'diario/nova', title: 'Meu diário', search: 'diario/buscar' },
   { path: 'agenda', label: 'Agenda', icon: 'calendar', view: Agenda, fab: 'agenda/novo' },
-  { path: 'mais', label: 'Mais', icon: 'grid', view: Mais },
   { path: 'guardados', label: 'Guardados', icon: 'archive', view: Guardados },
   { path: 'nucleo', label: 'Núcleo pessoal', icon: 'sprout', view: Habitos, fab: 'nucleo/novo' },
   { path: 'arquivo', label: 'Notas', icon: 'note', view: NotasPage, fab: 'arquivo/menu' },
@@ -101,10 +100,6 @@ export const SECTIONS: Section[] = [
   { path: 'saude', label: 'Saúde', icon: 'heartPulse', view: SaudePage, fab: 'saude/menu' },
   { path: 'saudehoje', label: 'Rotina', icon: 'sun', view: SaudeHoje, fab: 'saudehoje/menu' },
   { path: 'saudehist', label: 'Histórico', icon: 'clock', view: SaudeHistorico, fab: 'saudehist/menu' },
-];
-
-export const COMING_SOON: { label: string; icon: IconName; hint: string }[] = [
-  { label: 'Foco', icon: 'timer', hint: 'Temporizador e sessões' },
 ];
 
 const QUICK: { to: string; label: string; icon: IconName; hint: string }[] = [
@@ -171,8 +166,9 @@ function TabLink({ to, label, icon, active, center, onTap, mod }: { to: string; 
 /** Menu agrupado: barra lateral do computador. No celular, o mesmo conteúdo fica na gaveta (puxar a barra). */
 function NavMenu({ current, onNavigate }: { current: string; onNavigate?: () => void }) {
   const { data } = useStore();
-  // Módulos guardados (desligados na montagem) não aparecem no menu; continuam no Mais.
-  const groups = NAV_GROUPS.map((g) => ({ ...g, items: g.items.filter((it) => !it.to || !isHidden(data, it.to)) })).filter((g) => g.items.some((it) => it.to));
+  // Módulos guardados (desligados na montagem) não aparecem no menu; ficam em Guardados.
+  const kept = keptCount(data);
+  const groups = NAV_GROUPS.map((g) => ({ ...g, items: g.items.filter((it) => !it.to || (it.to === 'guardados' ? kept > 0 : !isHidden(data, it.to))) })).filter((g) => g.items.some((it) => it.to));
   const item = (it: NavItem) =>
     it.to ? (
       <a
@@ -346,6 +342,12 @@ export function App() {
   useTheme(data.settings.theme, data.settings.accent);
   const route = useRoute();
   const section = SECTIONS.find((s) => s.path === route.path) ?? SECTIONS[0];
+  // E2: a tela Mais saiu. O endereço antigo #/mais abre o Início com a gaveta do menu aberta.
+  useEffect(() => {
+    if (route.path !== 'mais') return;
+    goReplace('inicio');
+    window.setTimeout(openMenu, 60);
+  }, [route.path, route.n]);
   const View = section.view;
   const [quickOpen, setQuickOpen] = useState(false);
   const [search, setSearch] = useState(false);
@@ -414,9 +416,7 @@ export function App() {
   const [showFavs, setShowFavs] = useState(false);
   useEffect(() => setShowFavs(false), [route.path, route.n]);
   const placed = bar && !showFavs ? barItems(bar, data.settings.favorites, data.settings.barLayout) : null;
-  // E21.2: com o "Botão Mais na barra" ligado, o Início mostra 3 favoritos e o Mais na ponta.
-  const moreButton = data.settings.moreButton && !placed;
-  const middle: BarItem[] = placed ? placed.items : favoriteItems(data.settings.favorites).slice(0, moreButton && !showFavs ? 3 : 4);
+  const middle: BarItem[] = placed ? placed.items : favoriteItems(data.settings.favorites).slice(0, 4);
   const tabbarRef = useRef<HTMLElement>(null);
   // N2.11: dentro da Jornada (em uso), a barra de baixo vira a barra do jogo.
   // N2.15: a barra do jogo tem duas fileiras; o conteúdo da tela abre espaço para ela.
@@ -534,7 +534,7 @@ export function App() {
         </button>
       )}
 
-      <nav ref={tabbarRef} className={`tabbar${barHidden && !gameBar ? ' hidden' : ''}${gameBar ? ` jn-gamebar${barHidden ? ' jn-compact' : ''}` : ''}`} aria-label={gameBar ? 'Barra da Jornada (puxe para cima para abrir o menu)' : 'Atalhos (puxe para cima para abrir o Mais)'}>
+      <nav ref={tabbarRef} className={`tabbar${barHidden && !gameBar ? ' hidden' : ''}${gameBar ? ` jn-gamebar${barHidden ? ' jn-compact' : ''}` : ''}`} aria-label={gameBar ? 'Barra da Jornada (puxe para cima para abrir o menu)' : 'Atalhos (puxe para cima para abrir o menu)'}>
         {gameBar ? (
           <GameBarItems current={journeyTab(route.sub)} />
         ) : (
@@ -552,7 +552,6 @@ export function App() {
             onTap={tapFor(it, i)}
           />
         ))}
-        {moreButton && !showFavs && <TabLink to="mais" label="Mais" icon="grid" active={section.path === 'mais'} />}
         {placed && (
           // E21: dentro de um módulo, a ponta é o atalho para trocar de módulo (mostra os favoritos).
           <button type="button" className="tb tb-favs" aria-label="Favoritos: trocar de módulo" onClick={() => setShowFavs(true)}>

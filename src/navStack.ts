@@ -26,7 +26,6 @@ export function nextStack(stack: string[], to: string, kind: NavKind, homeOf: (p
   if (t === ROOT) return [ROOT];
   const i = stack.indexOf(t);
   if (i >= 0) return stack.slice(0, i + 1);
-  if (t === 'mais') return [ROOT, 'mais'];
   const p = pathOf(t);
   const home = homeOf(p);
   const toolOf = home && home !== p ? home : null;

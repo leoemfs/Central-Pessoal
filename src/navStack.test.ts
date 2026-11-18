@@ -28,27 +28,14 @@ test('trocar de ferramenta não empilha: volta direto para a casa', () => {
   assert.deepEqual(s, ['inicio', 'financas', 'relatorios']);
 });
 
-test('caso do print: módulo → ferramenta → Mais → outro módulo; voltar = Mais → Início, sem ciclo', () => {
-  let s = go(['inicio'], 'financas', 'switch');
-  s = go(s, 'orcamento', 'switch');
-  s = go(s, 'mais', 'switch');
-  assert.deepEqual(s, ['inicio', 'mais']);
-  s = go(s, 'diario'); // tocou no Diário dentro do Mais
-  assert.deepEqual(backAll(s), ['mais', 'inicio']);
-});
-
-test('Mais pela barra sempre volta ao Início', () => {
-  assert.deepEqual(backAll(go(['inicio', 'diario', 'humor'], 'mais', 'switch')), ['inicio']);
-});
-
 test('abrir uma tela que já está na trilha volta até ela', () => {
-  assert.deepEqual(go(['inicio', 'mais', 'financas', 'orcamento'], 'mais'), ['inicio', 'mais']);
-  assert.deepEqual(go(['inicio', 'mais', 'financas', 'orcamento'], 'financas', 'switch'), ['inicio', 'mais', 'financas']);
+  assert.deepEqual(go(['inicio', 'guardados', 'financas', 'orcamento'], 'guardados'), ['inicio', 'guardados']);
+  assert.deepEqual(go(['inicio', 'guardados', 'financas', 'orcamento'], 'financas', 'switch'), ['inicio', 'guardados', 'financas']);
 });
 
 test('ir e voltar muitas vezes nunca passa do limite nem repete telas', () => {
   let s = ['inicio'];
-  for (let k = 0; k < 50; k++) s = go(s, k % 2 ? 'mais' : `estudos/notebook/${k}`);
+  for (let k = 0; k < 50; k++) s = go(s, k % 2 ? 'guardados' : `estudos/notebook/${k}`);
   assert.ok(s.length <= 8);
   assert.equal(new Set(s).size, s.length);
 });
@@ -58,7 +45,7 @@ test('ferramenta aberta por um link fora do módulo passa pela casa do módulo',
 });
 
 test('gaveta e barra: módulo fica logo acima do Início', () => {
-  assert.deepEqual(go(['inicio', 'mais', 'estudos/notebook/1'], 'diario', 'switch'), ['inicio', 'diario']);
+  assert.deepEqual(go(['inicio', 'guardados', 'estudos/notebook/1'], 'diario', 'switch'), ['inicio', 'diario']);
 });
 
 test('trocar a tela de cima no lugar não deixa a mesma tela duas vezes', () => {
