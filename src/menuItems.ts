@@ -1,7 +1,7 @@
 /**
  * E40/E41: menu ⋮ da barra de cima.
- * A lupa fica só no Início. Nas outras telas, as ações secundárias (as que ocupavam espaço na tela)
- * vão para o ⋮, com "Personalizar cartões" primeiro e a busca do módulo sempre por último.
+ * Padrão da barra de cima em todas as telas (18/11): ‹ voltar · caminho (até dois níveis) · ⋮ com as ações extras,
+ * "Personalizar cartões" primeiro e a busca sempre por último (no Início, "Buscar em tudo"). Sem lupa nem lápis soltos.
  * Tela sem ação nenhuma não tem ⋮ (exceto quando a busca é própria da tela, como a do Diário).
  */
 export interface MenuEntry {

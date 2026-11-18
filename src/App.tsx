@@ -394,12 +394,11 @@ export function App() {
   const nearLevel = where?.page ?? where?.module ?? section.title ?? section.label;
   const innerTitle = route.sub && pageTitle && pageTitle !== nearLevel && pageTitle !== section.label ? pageTitle : null;
   const innerParent = settingsSub ? section.label : (pageParent ?? nearLevel);
-  // E40/E41: lupa só no Início; nas outras telas, ações da tela no menu ⋮, com a busca do módulo por último.
+  // E40/E41: em todas as telas (Início e Jornada também), ações extras no menu ⋮, com a busca por último.
   const pageActions = useCurrentPageMenu();
   const wide = useDesktop();
-  const isHome = section.path === 'inicio';
   const searchLabel = section.search ? 'Buscar no diário' : moduleOf(section.path) ? `Buscar em ${where?.module ?? section.label}` : 'Buscar em tudo';
-  const menu = buildMenu(pageActions, { editable: !!editor.screen, editing: editor.editing, search: isHome ? null : searchLabel, ownSearch: !!section.search });
+  const menu = buildMenu(pageActions, { editable: !!editor.screen, editing: editor.editing, search: searchLabel, ownSearch: !!section.search });
   const pickMenu = (id: string) => {
     if (id === MENU_EDIT) editor.toggle();
     else if (id === MENU_SEARCH) {
@@ -485,20 +484,8 @@ export function App() {
             (section.title ?? section.label)
           )}
         </h1>
-        {isHome ? (
-          <>
-            <button type="button" className="icon-btn" onClick={() => setSearch(true)} aria-label="Buscar em tudo">
-              <Icon name="search" />
-            </button>
-            {editor.screen && (
-              <button type="button" className={`icon-btn${editor.editing ? ' on' : ''}`} onClick={editor.toggle} aria-label={editor.editing ? 'Terminar de personalizar' : 'Personalizar cartões'} aria-pressed={editor.editing}>
-                <Icon name="edit" />
-              </button>
-            )}
-          </>
-        ) : (
-          menu.length > 0 && <PageMenuButton items={menu} onPick={pickMenu} tip={menuTip && !wide} onTipSeen={tipSeen} />
-        )}
+        {/* Padrão de todas as telas (18/11): ‹ voltar · caminho (até dois níveis) · ⋮ quando há ações. */}
+        {menu.length > 0 && <PageMenuButton items={menu} onPick={pickMenu} tip={menuTip && !wide} onTipSeen={tipSeen} />}
       </header>
 
       <nav className="sidebar" aria-label="Seções">
@@ -530,10 +517,8 @@ export function App() {
         )}
         <div className="desk-head desk-only">
           <Crumbs />
-          {/* No computador a barra de cima não aparece: o ⋮ fica na linha do caminho (no Início, só Personalizar). */}
-          {(isHome ? editor.screen : menu.length > 0) && (
-            <PageMenuButton items={isHome ? buildMenu([], { editable: true, editing: editor.editing, search: null }) : menu} onPick={pickMenu} tip={menuTip && wide} onTipSeen={tipSeen} />
-          )}
+          {/* No computador a barra de cima não aparece: o ⋮ fica na linha do caminho. */}
+          {menu.length > 0 && <PageMenuButton items={menu} onPick={pickMenu} tip={menuTip && wide} onTipSeen={tipSeen} />}
         </div>
         <ErrorBoundary scope="tela" resetKey={`${section.path}:${route.n}`}>
           <View key={section.path} route={route} />

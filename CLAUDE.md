@@ -34,6 +34,7 @@ anotar → especificar → aprovar → construir → testar. A cada mudança de 
 - **Cabeçalho da tela:** mês/semana + abas formam **um bloco** preso no topo, que some e volta junto com a barra de cima (`PageHeader` com `actions`/`tabs`).
 - **Seletores com muitas opções** (chips, categorias, abas com mais de 4) ficam numa **linha só com rolagem para o lado** (`src/hscroll.ts`); filtros de liga/desliga ficam fora da fileira, como botão fixo.
 - **Tela nova com abas ou filtro de listas:** perguntar ao Leonardo como personalizar antes de construir. Padrão: **abas** = barra única (a escolhida marcada na cor de destaque); **filtro de listas** (categorias) = **fichas** (botões separados). Combinado em 18/11.
+- **Barra de cima, padrão definitivo (18/11), em todas as telas, Início incluído:** seta **‹** (fora do Início) · caminho com até dois níveis · **⋮** no canto direito quando a tela tem ações extras (`usePageMenu` em `src/PageMenu.tsx`): Personalizar cartões primeiro, ações da tela, e a **busca sempre por último**. Nada de lupa ou lápis soltos no topo. Ação que ocupa espaço na tela e não é essencial pode ir para o ⋮. Na Jornada, só se houver ação que precise.
 - **Cada coisa aparece em um lugar só.** O que está na barra não aparece também como botão ou aba.
 
 ## Regras técnicas
