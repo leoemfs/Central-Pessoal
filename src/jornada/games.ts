@@ -6,7 +6,7 @@
  */
 import type { JourneyState } from './rules.ts';
 
-export type GameId = 'corrida' | 'respira' | 'memoria' | 'pescaria' | 'sudoku';
+export type GameId = 'corrida' | 'respira' | 'memoria' | 'pescaria' | 'sudoku' | 'pulo';
 import { sudokuStreak } from './sudoku.ts';
 /** Minutos de jogo por dia que dão fichas. */
 export const DAILY_MINUTES = 30;
@@ -16,6 +16,7 @@ export const GAMES: { id: GameId; name: string; text: string; ready: boolean }[]
   { id: 'respira', name: 'Respira com o pet', text: 'Acompanhe o pet na respiração 4-7-8. Conta como prática de Mente.', ready: true },
   { id: 'memoria', name: 'Memória do Arsenal', text: 'Vire as cartas e ache os 8 pares de itens em 60 s.', ready: true },
   { id: 'pescaria', name: 'Pescaria', text: 'Toque quando o ponteiro estiver no verde para fisgar o peixe.', ready: true },
+  { id: 'pulo', name: 'Pulo nas nuvens', text: 'O pet pula sozinho; segure as setas para ir de plataforma em plataforma.', ready: true },
   { id: 'sudoku', name: 'Sudoku', text: 'Um desafio 6×6 por dia. Resolver dá +2 de Inteligência.', ready: true },
 ];
 
@@ -32,7 +33,7 @@ export const minutesLeft = (state: JourneyState, today: string) => Math.max(0, M
 export function fichasFor(game: GameId, score: number): number {
   if (score <= 0) return 0;
   if (game === 'respira') return 2;
-  const per = game === 'memoria' ? 25 : game === 'pescaria' ? 5 : game === 'sudoku' ? 10 : 150;
+  const per = game === 'memoria' ? 25 : game === 'pescaria' ? 5 : game === 'sudoku' ? 10 : game === 'pulo' ? 100 : 150;
   return Math.max(1, Math.min(5, 1 + Math.floor(score / per)));
 }
 
@@ -74,6 +75,9 @@ export const GAME_ACHIEVEMENTS: { id: string; name: string; rule: string; need: 
   { id: 'memoria30', name: 'Relâmpago', rule: 'Terminar a Memória com 30 s sobrando', need: 30, have: (s) => s.games.records.memoria_sobra ?? 0 },
   { id: 'pesca10', name: 'Pescador de primeira', rule: 'Fazer 10 pontos numa Pescaria', need: 10, have: (s) => s.games.records.pescaria ?? 0 },
   { id: 'dourado', name: 'Peixe dourado', rule: 'Pescar um peixe dourado', need: 1, have: (s) => s.games.records.pescaria_dourado ?? 0 },
+  { id: 'pulo100', name: 'Pé de mola', rule: 'Subir 100 m no Pulo nas nuvens', need: 100, have: (s) => s.games.records.pulo ?? 0 },
+  { id: 'pulo500', name: 'Acima das nuvens', rule: 'Subir 500 m no Pulo nas nuvens', need: 500, have: (s) => s.games.records.pulo ?? 0 },
+  { id: 'pulo10', name: 'Cofrinho voador', rule: 'Pegar 10 moedinhas numa partida do Pulo nas nuvens', need: 10, have: (s) => s.games.records.pulo_moedas ?? 0 },
   { id: 'sudoku1', name: 'Primeiro Sudoku', rule: 'Resolver um Sudoku', need: 1, have: (s) => Math.min(1, (s.games.sudokuDays ?? []).length) },
   { id: 'sudoku7', name: 'Mente afiada', rule: 'Resolver o Sudoku 7 dias seguidos', need: 7, have: (s) => s.games.records.sudoku_seq ?? 0 },
   { id: 'sudokuLimpo', name: 'Sem rasura', rule: 'Resolver um Sudoku difícil sem nenhum erro', need: 1, have: (s) => s.games.records.sudoku_limpo ?? 0 },

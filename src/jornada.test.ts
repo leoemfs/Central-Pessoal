@@ -692,3 +692,15 @@ test('Sudoku: desafio do dia válido, regras, +2 de INT por dia resolvido, ficha
   assert.equal(e.length, 3);
   assert.ok(e.find((x) => x.id === 'jogo:sudoku1')?.owned);
 });
+
+test('Pulo nas nuvens: fichas pela altura, recorde e conquistas no Codex', () => {
+  let st = defaultJourneyState();
+  const r = finishGame(st, 'pulo', 230, 90, '2026-11-18', { pulo_moedas: 12 });
+  assert.equal(r.fichas, 3, '1 + uma a cada 100 m');
+  assert.ok(r.record);
+  st = r.state;
+  assert.equal(st.games.records.pulo, 230);
+  assert.equal(st.games.records.pulo_moedas, 12);
+  const e = codexEntries({ ...withData({}), journey: st }, '2026-11-18').filter((x) => x.id.startsWith('jogo:pulo'));
+  assert.deepEqual(e.map((x) => [x.id, x.owned]), [['jogo:pulo100', true], ['jogo:pulo500', false], ['jogo:pulo10', true]]);
+});
