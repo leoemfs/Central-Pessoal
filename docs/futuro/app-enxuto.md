@@ -37,3 +37,11 @@ Uma sessão por pacote, uma de cada vez (mesclar o PR antes de abrir a próxima)
 > **Projeto Enxuto, pacote E1.** Leia `docs/futuro/app-enxuto.md` e construa só esse pacote. Hoje já usamos **X%**.
 
 Troque **E1** pelo próximo pacote (E2, E3…). Se quiser dois pacotes pequenos na mesma sessão: *"Projeto Enxuto, pacotes E1 e E2"*.
+
+## Aviso de troca e de mesclagem (pedido em 18/11)
+Ao terminar cada pacote, a resposta do Claude **sempre** termina com:
+1. **"Mescle agora:"** + o link do PR (PR com código é você quem mescla).
+2. **"Depois de mesclar, abra uma sessão nova"** + a mensagem pronta do próximo pacote, já com o nome dele (ex.: *"Projeto Enxuto, pacote E2. Leia docs/futuro/app-enxuto.md e construa só esse pacote. Hoje já usamos X%."*).
+3. Se for o último pacote (E6): avisar que o Projeto Enxuto terminou.
+
+Se o limite do dia (10%) estiver perto, o Claude avisa **antes** de começar o próximo pacote e sugere deixar para o dia seguinte.
