@@ -60,7 +60,7 @@ export function emptyData(): AppData {
     incomes: [],
     incomeSeries: [],
     incomeSources: [],
-    settings: { theme: 'dark', accent: null, favorites: [...DEFAULT_FAVORITES], cards: {}, barLayout: 'fixo', tapToFavorites: true, hideOnScroll: true, moreLayout: 'lista', moreButton: false, hideBarLabels: false, drawerView: 'misto', iconColors: 'mono', iconStyle: 'classico', sideCards: [...DEFAULT_SIDE_CARDS], sideShortcuts: [...DEFAULT_SIDE_SHORTCUTS], frostedGlass: false, menuTipSeen: false, iconSize: 'm', seededCategories: false, seededIncomeSources: false, lastBackupAt: null, activeDays: [], visitDays: [], journeyUnlockedAt: null, journeyChoice: null, journeyCard: true, hiddenModules: [], setup: 'novo', tutorialSeen: false, setupAreas: [], journeyWanted: null, journalRhythm: { ...DEFAULT_RHYTHM }, journalOrder: 'recentes', journalMemoHiddenOn: '', noteCategories: [...DEFAULT_NOTE_CATEGORIES], ideaTags: [...DEFAULT_IDEA_TAGS], googleCalendar: { on: false, events: true, bills: true, tasks: true, calendarId: null, tasksList: null } },
+    settings: { theme: 'dark', accent: null, favorites: [...DEFAULT_FAVORITES], cards: {}, barLayout: 'fixo', tapToFavorites: true, hideOnScroll: true, hideBarLabels: false, drawerView: 'misto', iconColors: 'mono', iconStyle: 'classico', sideCards: [...DEFAULT_SIDE_CARDS], sideShortcuts: [...DEFAULT_SIDE_SHORTCUTS], frostedGlass: false, menuTipSeen: false, iconSize: 'm', seededCategories: false, seededIncomeSources: false, lastBackupAt: null, activeDays: [], visitDays: [], journeyUnlockedAt: null, journeyChoice: null, journeyCard: true, hiddenModules: [], setup: 'novo', tutorialSeen: false, setupAreas: [], journeyWanted: null, journalRhythm: { ...DEFAULT_RHYTHM }, journalOrder: 'recentes', journalMemoHiddenOn: '', noteCategories: [...DEFAULT_NOTE_CATEGORIES], ideaTags: [...DEFAULT_IDEA_TAGS], googleCalendar: { on: false, events: true, bills: true, tasks: true, calendarId: null, tasksList: null } },
     profile: emptyProfile('novo'),
     boxes: [],
     moods: {},
@@ -168,8 +168,6 @@ export function normalize(raw: unknown): AppData {
       barLayout: settings.barLayout === 'lado' || settings.barLayout === 'centro' ? settings.barLayout : 'fixo',
       tapToFavorites: settings.tapToFavorites !== false,
       hideOnScroll: settings.hideOnScroll !== false,
-      moreLayout: settings.moreLayout === 'grade' ? 'grade' : 'lista',
-      moreButton: settings.moreButton === true,
       // O antigo "barLabels" (v0.60.1, desligado por padrão) é ignorado: agora o nome aparece para todos.
       hideBarLabels: settings.hideBarLabels === true,
       drawerView: settings.drawerView === 'grade' || settings.drawerView === 'lista' ? settings.drawerView : 'misto',

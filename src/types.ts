@@ -264,10 +264,6 @@ export interface Settings {
   tapToFavorites: boolean;
   /** As barras de cima e de baixo somem ao rolar a tela para baixo. */
   hideOnScroll: boolean;
-  /** Tela Mais em lista (com a descrição de cada módulo) ou em grade (ícones, 3 por linha). */
-  moreLayout: 'lista' | 'grade';
-  /** E21.2: Mais de volta na ponta da barra do Início (3 favoritos). Desligado = 4 favoritos e puxar a barra abre o Mais. */
-  moreButton: boolean;
   /** E26: esconder o nome pequeno embaixo de cada ícone da barra de baixo (o padrão é mostrar). */
   hideBarLabels: boolean;
   /** E25: jeito do menu na gaveta: Misto (grade em cima, lista por módulo embaixo), Grade ou Lista. */

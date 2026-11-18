@@ -13,6 +13,10 @@ import { useStore } from './store';
  */
 export const barDrag = { active: false, until: 0 };
 
+/** E2: abre a gaveta do menu sem arrastar (endereço antigo #/mais). */
+const OPEN_EVENT = 'cp-open-menu';
+export const openMenu = () => window.dispatchEvent(new Event(OPEN_EVENT));
+
 const OPEN_SHARE = 0.25;
 const FLICK = 0.6; // px por ms
 const HINT_KEY = 'cp-puxar-dica';
@@ -106,6 +110,14 @@ export function PullToMais({ bar, resetKey }: { bar: RefObject<HTMLElement | nul
     setClosing(true);
     window.setTimeout(() => setClosing(false), 280);
   };
+  useEffect(() => {
+    const onOpen = () => {
+      setClosing(false);
+      setOpen(true);
+    };
+    window.addEventListener(OPEN_EVENT, onOpen);
+    return () => window.removeEventListener(OPEN_EVENT, onOpen);
+  }, []);
   // Trocou de tela (escolheu um módulo na gaveta, voltou etc.): fecha.
   useEffect(() => {
     if (openRef.current && bar.current) barFall(bar.current);
@@ -294,7 +306,7 @@ export function PullToMais({ bar, resetKey }: { bar: RefObject<HTMLElement | nul
   return createPortal(
     <>
       <div className={`pull-shade${dragging ? '' : ' anim'}`} style={{ opacity: shade }} onPointerUp={() => openRef.current && close()} onClick={() => openRef.current && close()} />
-      <section ref={panel} className={`pull-drawer${dragging ? '' : ' anim'}`} style={{ transform }} role="dialog" aria-modal="true" aria-label="Mais">
+      <section ref={panel} className={`pull-drawer${dragging ? '' : ' anim'}`} style={{ transform }} role="dialog" aria-modal="true" aria-label="Menu">
         <div className="pull-head" onPointerDown={headDown} onPointerMove={headMove} onPointerUp={headUp}>
           <span className="pull-grab" aria-hidden="true" />
           <div className="pull-title">

@@ -35,7 +35,7 @@ export type SetupMode = 'novo' | 'convite';
 export const openSetup = (mode: SetupMode = 'convite') => openers.setup.forEach((f) => f(mode));
 export const openTutorial = () => openers.tutorial.forEach((f) => f());
 
-/** Fica no App: abre a montagem sozinha na primeira abertura, ou quando pedida (Início, Mais, Configurações). */
+/** Fica no App: abre a montagem sozinha na primeira abertura, ou quando pedida (Início, menu, Configurações). */
 export function SetupHost() {
   const { data } = useStore();
   const [mode, setMode] = useState<SetupMode | null>(data.settings.setup === 'novo' ? 'novo' : null);
@@ -241,7 +241,7 @@ function Montagem({ mode, onClose }: { mode: SetupMode; onClose: () => void }) {
           <p className="muted">{fresh ? 'Uns 2 minutos, só com toques. Você escolhe o que quer ver, os 4 favoritos da barra e a cor.' : 'Já está tudo preenchido com o que você usa hoje. É só ajustar.'}</p>
           <ul className="iv-points">
             <li>
-              <Icon name="lock" size={18} /> Módulo desligado fica em Mais › Guardados. Nada é apagado.
+              <Icon name="lock" size={18} /> Módulo desligado fica em Guardados, no menu (puxe a barra para cima). Nada é apagado.
             </li>
             <li>
               <Icon name="right" size={18} /> Dá para pular a qualquer momento.
@@ -282,7 +282,7 @@ function Montagem({ mode, onClose }: { mode: SetupMode; onClose: () => void }) {
             </li>
             <li className="row">
               <div className="row-body">
-                <span className="row-title">Guardados no Mais</span>
+                <span className="row-title">Guardados (no menu)</span>
                 <span className="row-meta">{hidden.length ? hidden.join(', ') : 'Nenhum: tudo à vista'}</span>
               </div>
             </li>
@@ -340,7 +340,7 @@ function Montagem({ mode, onClose }: { mode: SetupMode; onClose: () => void }) {
     );
   } else if (at === 'modulos') {
     title = 'Seus módulos';
-    sub = `Toque para ligar ou desligar (pelo menos ${MIN_VISIBLE}). Os desligados ficam guardados no Mais, sem apagar nada.`;
+    sub = `Toque para ligar ou desligar (pelo menos ${MIN_VISIBLE}). Os desligados ficam em Guardados, no menu, sem apagar nada.`;
     body = (
       <ul className="list setup-mods">
         {MODULES.filter((m) => m.id !== 'jornada').map((m) => {
@@ -363,7 +363,7 @@ function Montagem({ mode, onClose }: { mode: SetupMode; onClose: () => void }) {
                 </span>
                 <div className="row-body">
                   <span className="row-title">{m.label}</span>
-                  <span className="row-meta">{on ? m.hint : 'Vai para Mais › Guardados'}</span>
+                  <span className="row-meta">{on ? m.hint : 'Vai para Guardados, no menu'}</span>
                 </div>
                 <span className={`setup-switch${on ? ' on' : ''}`} aria-hidden="true" />
               </button>
@@ -374,7 +374,7 @@ function Montagem({ mode, onClose }: { mode: SetupMode; onClose: () => void }) {
     );
   } else if (at === 'favoritos') {
     title = 'Seus 4 favoritos';
-    sub = 'Toque na ordem em que quer ver na barra de baixo. Eles ficam no meio, entre o Início e o Mais.';
+    sub = 'Toque na ordem em que quer ver na barra de baixo. Eles ficam ao lado do Início.';
     canGo = picked.filter((f) => favChoices.some((c) => c.id === f)).length === 3;
     body = (
       <>
@@ -431,7 +431,7 @@ function Montagem({ mode, onClose }: { mode: SetupMode; onClose: () => void }) {
           </button>
           <button type="button" role="radio" aria-checked={journey === false} className={`option-card${journey === false ? ' on' : ''}`} onClick={() => setJourney(false)}>
             <strong>Agora não</strong>
-            <span className="muted small">O app fica sem jogo. A Jornada fica em Mais › Guardados e liga depois em Configurações › Início e módulos.</span>
+            <span className="muted small">O app fica sem jogo. A Jornada fica em Guardados, no menu, e liga depois em Configurações › Início e módulos.</span>
           </button>
         </div>
       </>
@@ -536,7 +536,7 @@ const TUTORIAL: { title: string; text: string; focus: string }[] = [
   { title: 'Voltar leva ao módulo', text: 'Use o voltar do celular (ou toque na casa, com contorno). Você volta para a casa do módulo, não para o começo.', focus: 'home' },
   { title: 'Trocar de módulo direto', text: 'Toque na estrela, na ponta da barra: aparecem os favoritos, e dá para pular para outro módulo sem passar pelo Início.', focus: 'favbtn' },
   { title: 'Segure para ver o nome', text: 'Não lembra o que é um ícone? Segure o dedo em cima dele por um instante.', focus: 'all' },
-  { title: 'Puxe a barra para cima', text: 'Arraste a barra de baixo para cima: abre o menu, com todos os módulos, as telas de cada um e os guardados. Fora do Início, a seta ‹ no canto de cima volta um nível. Os favoritos e a cor mudam em Configurações.', focus: 'all' },
+  { title: 'Puxe a barra para cima', text: 'Arraste a barra de baixo para cima: abre o menu, com todos os módulos, as telas de cada um e os Guardados, as Configurações e este tutorial. Fora do Início, a seta ‹ no canto de cima volta um nível.', focus: 'all' },
 ];
 
 /** Fica no App. Avança sozinho quando a pessoa faz o passo de verdade; "Próximo" sempre funciona também. */

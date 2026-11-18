@@ -1,4 +1,4 @@
-import { COMING_SOON, SECTIONS } from '../App';
+import { SECTIONS } from '../App';
 import { useStore } from '../store';
 import type { AppData } from '../types';
 import { addFavorite, FAVORITABLE } from '../moduleBar';
@@ -6,8 +6,7 @@ import { Icon, notify, PageHeader, Sheet, type IconName } from '../ui';
 import { hiddenFrom, isHidden, moduleOf, toggleModule, visibleFrom } from '../setup';
 import { NAV_GROUPS } from '../nav';
 import { openTutorial } from './Montagem';
-import { EditBar, useEditScreen } from '../Cards';
-import { arrange, moveCard, type CardLayout } from '../cardLayout';
+import { arrange, moveCard } from '../cardLayout';
 
 /** Todos os módulos. Orçamento e Relatórios ficam dentro de Finanças (na barra de baixo). */
 const LINKS: { path: string; hint: string }[] = [
@@ -96,7 +95,7 @@ function Entry({ it, grid, editing, first, last, onMove }: { it: Item; grid: boo
   );
 }
 
-/** Módulos e atalhos do Mais, na ordem escolhida no lápis (a tela Mais e a gaveta usam os mesmos). */
+/** Módulos e atalhos da gaveta (menu), na ordem escolhida no lápis. E2: a tela Mais saiu; tudo mora aqui. */
 function maisItems(data: AppData, grid: boolean) {
   const kept = LINKS.filter((l) => isHidden(data, l.path));
   const modules: Item[] = LINKS.filter((l) => l.path !== 'ajustes' && !isHidden(data, l.path)).map((l) => {
@@ -126,7 +125,7 @@ const modOf = (to?: string) => (to ? (moduleOf(to) ?? to.split('/')[0]) : undefi
 function menuGroups(data: AppData): { title: string; items: { to?: string; label: string; icon: IconName }[] }[] {
   return NAV_GROUPS.map((g) => ({
     title: g.title,
-    items: g.items.filter((it) => it.to !== 'inicio' && it.to !== 'mais' && !(it.to && isHidden(data, it.to))),
+    items: g.items.filter((it) => it.to !== 'inicio' && it.to !== 'guardados' && !(it.to && isHidden(data, it.to))),
   })).filter((g) => g.items.some((it) => it.to));
 }
 
@@ -201,82 +200,15 @@ export function MaisPanel({ editing = false }: { editing?: boolean }) {
   );
 }
 
-export function Mais() {
-  const { data, update } = useStore();
-  const editing = useEditScreen('mais');
-  const grid = data.settings.moreLayout === 'grade';
-  const { modules, shortcuts, mods, tools } = maisItems(data, grid);
-  const layouts = data.settings.cards;
-  const save = (changes: Record<string, CardLayout | null>) =>
-    update((d) => {
-      const cards = { ...d.settings.cards };
-      for (const [k, v] of Object.entries(changes)) {
-        if (v) cards[k] = v;
-        else delete cards[k];
-      }
-      return { ...d, settings: { ...d.settings, cards } };
-    });
-  const list = (items: Item[], all: Item[], key: string) =>
-    items.map((it, i) => <Entry key={it.id} it={it} grid={grid} editing={editing} first={i === 0} last={i === items.length - 1} onMove={(dir) => save({ [key]: moveCard(all, layouts[key], it.id, dir) })} />);
-
-  return (
-    <>
-      <PageHeader title="Mais" />
-      {editing && <EditBar onReset={() => save({ [KEY_MODULES]: null, [KEY_SHORTCUTS]: null })} />}
-      {grid ? (
-        <>
-          <div className="mg-grid">{list(mods, modules, KEY_MODULES)}</div>
-          <h2 className="section-title">Atalhos</h2>
-          <div className="mg-grid small">{list(tools, shortcuts, KEY_SHORTCUTS)}</div>
-        </>
-      ) : (
-        <div className="tile-grid">
-          {list(mods, modules, KEY_MODULES)}
-          {editing && <h2 className="section-title mais-sub">Atalhos</h2>}
-          {list(tools, shortcuts, KEY_SHORTCUTS)}
-        </div>
-      )}
-      {!editing && (
-        <>
-          <h2 className="section-title">Em breve</h2>
-          {grid ? (
-            <div className="mg-grid small">
-              {COMING_SOON.map((c) => (
-                <div key={c.label} className="mg-cell off" aria-disabled="true" title={c.hint}>
-                  <span className="mg-icon">
-                    <Icon name={c.icon} size={22} />
-                  </span>
-                  <span className="mg-name">{c.label}</span>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="tile-grid">
-              {COMING_SOON.map((c) => (
-                <div key={c.label} className="tile disabled" aria-disabled="true">
-                  <span className="tile-icon">
-                    <Icon name={c.icon} />
-                  </span>
-                  <span className="tile-text">
-                    <strong>{c.label}</strong>
-                    <span className="muted">{c.hint}</span>
-                  </span>
-                </div>
-              ))}
-            </div>
-          )}
-        </>
-      )}
-    </>
-  );
-}
-
 const label = (path: string) => SECTIONS.find((x) => x.path === path)?.label ?? path;
 /** "Notas", "Notas e Jornada", "Notas, Você e Jornada" */
 function keptNames(paths: string[]) {
   const names = paths.map(label);
   return names.length < 2 ? names.join('') : `${names.slice(0, -1).join(', ')} e ${names[names.length - 1]}`;
 }
+
+/** E2: quantos módulos estão guardados (a barra lateral do computador só mostra Guardados quando há algum). */
+export const keptCount = (data: AppData) => LINKS.filter((l) => isHidden(data, l.path)).length;
 
 /** Guardados (E17): os módulos desligados num lugar só, cada um com "Trazer de volta". */
 export function Guardados() {
@@ -295,7 +227,7 @@ export function Guardados() {
       </p>
       {kept.length === 0 ? (
         <section className="card">
-          <p className="muted" style={{ margin: 0 }}>Nenhum módulo guardado. Todos estão à vista no Mais.</p>
+          <p className="muted" style={{ margin: 0 }}>Nenhum módulo guardado. Todos estão à vista no menu.</p>
         </section>
       ) : (
         <section className="card">
