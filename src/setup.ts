@@ -67,9 +67,8 @@ export function toggleModule(visible: string[], id: string): string[] {
 
 /** Favoritos possíveis: só módulos à vista (Jornada também pode). Mantém a ordem dos toques. */
 export function fitFavorites(favs: string[], visible: string[]): string[] {
-  const out = favs.filter((f) => visible.includes(f) || (f === 'revisao' && visible.includes('diario')));
+  const out = favs.filter((f) => visible.includes(f));
   for (const id of [...DEFAULT_FAVORITES, ...visible]) if (out.length < FAV_COUNT && !out.includes(id) && visible.includes(id)) out.push(id);
-  if (out.length < FAV_COUNT && visible.includes('diario') && !out.includes('revisao')) out.push('revisao');
   for (const m of MODULES) if (out.length < FAV_COUNT && !out.includes(m.id)) out.push(m.id);
   return out.slice(0, FAV_COUNT);
 }

@@ -9,7 +9,7 @@ import { favoriteItems } from '../moduleBar';
 import { FavoritesSheet } from './Mais';
 import { ACCENTS, accentById } from '../theme';
 import { fitFavorites, hiddenFrom, MIN_VISIBLE, MODULES, rhythmLabel, toggleModule, visibleFrom } from '../setup';
-import { RhythmPicker } from './Montagem';
+import { RhythmPicker, openSetup } from './Montagem';
 import { GoogleCard } from './ContaGoogle';
 import { disconnect, GOOGLE_CLIENT_ID, useCloud, type CloudStatus } from '../cloud';
 import type { ViewProps } from '../App';
@@ -287,6 +287,12 @@ export function Ajustes({ route }: ViewProps) {
             );
           })}
         </div>
+
+        <h3 className="pz-title">Montar o app</h3>
+        <p className="muted small">Escolher de novo, em poucos passos, os módulos à vista e os favoritos.</p>
+        <button type="button" className="btn soft block" onClick={() => openSetup('convite')}>
+          <Icon name="grid" size={16} /> Montar o app do seu jeito
+        </button>
 
         {data.settings.journeyUnlockedAt && !data.settings.hiddenModules.includes('jornada') && (
           <>

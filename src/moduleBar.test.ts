@@ -50,7 +50,7 @@ test('item ativo e texto do topo', () => {
   assert.equal(activeIndex(ag, 'proximos'), 2);
   const nu = barFor('progresso')!;
   assert.equal(nu.id, 'nucleo');
-  assert.deepEqual(crumb(nu, activeIndex(nu, 'historico')), { module: 'Núcleo', page: 'Histórico' });
+  assert.deepEqual(crumb(nu, activeIndex(nu, 'historico')), { module: 'Núcleo', page: 'Práticas' });
   const li = barFor('precos')!;
   assert.equal(li.id, 'listas');
   assert.equal(activeIndex(li, 'compras'), 0);
@@ -78,4 +78,11 @@ test('atalhos da coluna do computador: padrão e só módulos válidos', () => {
   assert.deepEqual(normalizeShortcuts(undefined), DEFAULT_SIDE_SHORTCUTS);
   assert.deepEqual(normalizeShortcuts(['agenda', 'agenda', 'xyz', 3]), ['agenda']);
   assert.deepEqual(normalizeShortcuts([]), []);
+});
+
+test('E1: nomes claros nas ferramentas e Revisão fora dos favoritos', () => {
+  assert.equal(MODULE_BARS.find((b) => b.id === 'saude')!.items[0].label, 'Rotina');
+  assert.equal(MODULE_BARS.find((b) => b.id === 'nucleo')!.items[2].label, 'Práticas');
+  assert.ok(MODULE_BARS.find((b) => b.id === 'diario')!.items.some((i) => i.id === 'revisao'));
+  assert.ok(!normalizeFavorites(['revisao', 'financas']).includes('revisao'));
 });
