@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import { emptyData, normalize, seedCategories } from './data.ts';
 import { addExpense } from './finance.ts';
 import {
+  mergeProducts,
   catalogByAisle, createListWithItems, deletePriceEntry, deleteProduct, itemCost, packLabel, priceCategories, updatePriceEntry, updateProduct,
   lastPurchase, packCount, paidTotal, payItem,
   ensureProduct, linkMarketItems, marketEstimate, matchKey, priceRange, productSuggestions, productsWithoutPrice, sizeOptions,
@@ -314,4 +315,23 @@ test('M41: embalagem escolhida no item e preço do quilo', () => {
   assert.ok(sizeOptions(d, carne).some((x) => x.size === 1 && x.sizeUnit === 'kg'));
   // Item antigo sem embalagem passa pelo normalize.
   assert.equal(normalize({ lists: [{ id: 'l', name: 'M', categoryId: 'lc-mercado', items: [{ id: 'i', text: 'Arroz' }] }] }).lists[0].items[0].pack, null);
+});
+
+test('M42: juntar produtos duplicados', () => {
+  let d = withPrices();
+  const ata = d.stores.find((s) => s.name === 'Atacadão')!.id;
+  d = addPrice({ storeId: ata, productName: 'Arroz', unit: 'kg', brand: 'Camil', size: 5, sizeUnit: 'kg', price: 23.9 })(d);
+  d = addPrice({ storeId: ata, productName: 'Arroz', brand: 'Urbano', size: 1, sizeUnit: 'kg', price: 5.5 })(d);
+  const keep = d.products.find((p) => p.name === 'Arroz branco')!;
+  const drop = d.products.find((p) => p.name === 'Arroz')!;
+  d = { ...d, lists: [{ ...newList('M', 'lc-mercado'), items: [newItem({ text: 'Arroz', productId: drop.id })] }] };
+  const nPrices = d.prices.length;
+  d = mergeProducts(keep.id, drop.id)(d);
+  assert.equal(d.products.some((p) => p.id === drop.id), false);
+  assert.equal(d.prices.length, nPrices);
+  const vs = d.variants.filter((v) => v.productId === keep.id);
+  assert.deepEqual(vs.map((v) => v.brand).sort(), ['Camil', 'Tio João', 'Urbano']);
+  assert.equal(d.lists[0].items[0].productId, keep.id);
+  assert.equal(bestPrice(d, keep.id, ata)!.price, 23.9);
+  assert.equal(mergeProducts(keep.id, keep.id)(d), d);
 });
