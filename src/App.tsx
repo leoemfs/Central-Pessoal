@@ -82,7 +82,7 @@ export const SECTIONS: Section[] = [
   { path: 'compras', label: 'Compras', icon: 'receipt', view: ComprasPage },
   { path: 'precos', label: 'Preços', icon: 'store', view: PrecosPage },
   { path: 'progresso', label: 'Progresso', icon: 'bars', view: ProgressoPage },
-  { path: 'historico', label: 'Histórico', icon: 'clock', view: HistoricoPage },
+  { path: 'historico', label: 'Práticas', icon: 'clock', view: HistoricoPage },
   { path: 'proximos', label: 'Próximos', icon: 'list', view: ProximosPage },
   { path: 'humor', label: 'Humor', icon: 'smile', view: HumorPage },
   // O + de Estudos fica dentro do próprio módulo (muda conforme a tela: notebook, mapa…).
@@ -97,7 +97,7 @@ export const SECTIONS: Section[] = [
   { path: 'concluidos', label: 'Concluídos', icon: 'check', view: ConcluidosPage, fab: 'objetivos/menu' },
   // Saúde: o + cria (sono ou plano de dieta); água e refeições marcam com um toque nos cartões.
   { path: 'saude', label: 'Saúde', icon: 'heartPulse', view: SaudePage, fab: 'saude/menu' },
-  { path: 'saudehoje', label: 'Hoje', icon: 'sun', view: SaudeHoje, fab: 'saudehoje/menu' },
+  { path: 'saudehoje', label: 'Rotina', icon: 'sun', view: SaudeHoje, fab: 'saudehoje/menu' },
   { path: 'saudehist', label: 'Histórico', icon: 'clock', view: SaudeHistorico, fab: 'saudehist/menu' },
 ];
 

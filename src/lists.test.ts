@@ -8,7 +8,7 @@ import {
   lastPurchase, packCount, paidTotal, payItem,
   ensureProduct, linkMarketItems, marketEstimate, matchKey, priceRange, productSuggestions, productsWithoutPrice, sizeOptions,
   addItemFromText, addListCategory, addPrice, bestPrice, deleteListCategory, finishShopping, kindOf, launchBought, listEstimate, newItem, newList, purchaseHistory,
-  parseItemText, priceCheck, qtyText, scaledQty, sendIngredients, toggleItem, uncheckAll, updateListCategory,
+  normalizeListData, parseItemText, priceCheck, qtyText, scaledQty, sendIngredients, toggleItem, uncheckAll, updateListCategory,
 } from './lists.ts';
 import type { AppData, UserList } from './types.ts';
 
@@ -334,4 +334,13 @@ test('M42: juntar produtos duplicados', () => {
   assert.equal(d.lists[0].items[0].productId, keep.id);
   assert.equal(bestPrice(d, keep.id, ata)!.price, 23.9);
   assert.equal(mergeProducts(keep.id, keep.id)(d), d);
+});
+
+test('E1: a categoria Receitas de Listas vira Cozinha (nome trocado só se era o padrão)', () => {
+  const old = normalizeListData({ listCategories: [{ id: 'lc-receitas', name: 'Receitas', icon: 'pot', color: '#8b5cf6', kind: 'receita' }, { id: 'x', name: 'Receitas', kind: 'receita' }] });
+  assert.equal(old.listCategories[0].name, 'Cozinha');
+  assert.equal(old.listCategories[0].kind, 'receita');
+  assert.equal(old.listCategories[1].name, 'Receitas');
+  const renamed = normalizeListData({ listCategories: [{ id: 'lc-receitas', name: 'Minhas receitas', kind: 'receita' }] });
+  assert.equal(renamed.listCategories[0].name, 'Minhas receitas');
 });

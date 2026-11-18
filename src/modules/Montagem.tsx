@@ -227,7 +227,7 @@ function Montagem({ mode, onClose }: { mode: SetupMode; onClose: () => void }) {
       settings: { ...d.settings, setup: 'feito' },
     }));
     onClose();
-    notify('Tudo certo', 'Dá para montar o app quando quiser, em Mais › Montar o app do seu jeito.');
+    notify('Tudo certo', 'Dá para montar o app quando quiser, em Configurações › Montar o app do seu jeito.');
   }
 
   if (at === 'boas') {
@@ -477,7 +477,7 @@ export function SetupInvite() {
   const close = (tutorial: boolean) => {
     update((d) => ({ ...d, settings: { ...d.settings, setup: 'feito' } }));
     if (tutorial) openTutorial();
-    else notify('Tudo bem', 'Dá para montar quando quiser, em Mais › Montar o app do seu jeito.');
+    else notify('Tudo bem', 'Dá para montar quando quiser, em Configurações › Montar o app do seu jeito.');
   };
   return (
     <section className="card raised setup-invite">

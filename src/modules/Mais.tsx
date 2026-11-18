@@ -5,7 +5,7 @@ import { addFavorite, FAVORITABLE } from '../moduleBar';
 import { Icon, notify, PageHeader, Sheet, type IconName } from '../ui';
 import { hiddenFrom, isHidden, moduleOf, toggleModule, visibleFrom } from '../setup';
 import { NAV_GROUPS } from '../nav';
-import { openSetup, openTutorial } from './Montagem';
+import { openTutorial } from './Montagem';
 import { EditBar, useEditScreen } from '../Cards';
 import { arrange, moveCard, type CardLayout } from '../cardLayout';
 
@@ -15,14 +15,13 @@ const LINKS: { path: string; hint: string }[] = [
   { path: 'diario', hint: 'Registros, humor e revisão da semana' },
   { path: 'agenda', hint: 'Calendário, compromissos e tarefas' },
   { path: 'nucleo', hint: 'Hábitos, meditação, respiração e treinos' },
-  { path: 'listas', hint: 'Mercado com preços, compras, receitas e checklists' },
+  { path: 'listas', hint: 'Mercado com preços, compras, cozinha (receitas) e checklists' },
   { path: 'estudos', hint: 'Biblioteca, ciclos de estudo, notebooks, fontes e mapas mentais' },
   { path: 'carreira', hint: 'Trabalho atual, reuniões, projetos, currículo e vagas' },
   { path: 'objetivos', hint: 'Todas as metas do app num lugar só' },
   { path: 'saude', hint: 'Água e sono; em breve dieta, remédios e consultas' },
   { path: 'arquivo', hint: 'Anotações rápidas e informações importantes' },
   { path: 'voce', hint: 'Perfil, metas e sugestões para você' },
-  { path: 'revisao', hint: 'Resumo da semana e reflexão' },
   { path: 'jornada', hint: 'Desbloqueia com 14 dias de uso' },
   { path: 'ajustes', hint: 'Aparência, módulos, barras, conta Google, backup e dados' },
 ];
@@ -39,7 +38,7 @@ interface Item {
 }
 
 /** Nomes curtos para caber embaixo do ícone. */
-const SHORT: Record<string, string> = { nucleo: 'Núcleo', revisao: 'Revisão', ajustes: 'Ajustes' };
+const SHORT: Record<string, string> = { nucleo: 'Núcleo', ajustes: 'Ajustes' };
 /** Onde a ordem fica guardada (mesmo lugar do lápis das outras telas; entra no backup). */
 const KEY_MODULES = 'mais';
 const KEY_SHORTCUTS = 'mais-atalhos';
@@ -107,7 +106,6 @@ function maisItems(data: AppData, grid: boolean) {
   const shortcuts: Item[] = [
     { id: 'ajustes', label: 'Configurações', short: 'Ajustes', icon: 'settings', hint: 'Aparência, módulos, barras, conta Google, backup e dados', href: '#/ajustes' },
     { id: 'barra', label: 'Como usar a barra', short: 'Usar a barra', icon: 'info', hint: 'Tutorial de 1 minuto: favoritos, ferramentas do módulo, voltar e trocar de módulo', onClick: openTutorial },
-    { id: 'montar', label: 'Montar o app do seu jeito', short: 'Montar o app', icon: 'grid', hint: 'Escolher de novo os módulos à vista e os favoritos', onClick: () => openSetup('convite') },
     ...(kept.length > 0
       ? [{ id: 'guardados', label: grid ? 'Guardados' : `Guardados · ${kept.length}`, short: 'Guardados', icon: 'archive' as IconName, hint: `${keptNames(kept.map((l) => l.path))}: desligados, com tudo o que você já registrou`, href: '#/guardados', badge: kept.length }]
       : []),
