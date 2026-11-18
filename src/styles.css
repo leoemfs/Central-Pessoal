@@ -12863,7 +12863,6 @@ body.bar-labels.jn-tall {
 
 /* A barra: trilho que rola para o lado; poucas opções ocupam a largura. */
 .segmented,
-.chips.cat-chips,
 .chips.st-scroll-chips {
   display: flex;
   flex-wrap: nowrap;
@@ -12880,7 +12879,6 @@ body.bar-labels.jn-tall {
 }
 /* Muitas opções: a ponta esmaece para mostrar que dá para rolar. */
 .segmented.scroll,
-.chips.cat-chips,
 .chips.st-scroll-chips {
   -webkit-mask-image: linear-gradient(90deg, #000 calc(100% - 28px), transparent);
   mask-image: linear-gradient(90deg, #000 calc(100% - 28px), transparent);
@@ -12890,7 +12888,6 @@ body.bar-labels.jn-tall {
   padding-inline: 14px;
 }
 .segmented button,
-.chips.cat-chips .chip-btn,
 .chips.st-scroll-chips .chip-btn {
   flex: 1 0 auto;
   min-height: 40px;
@@ -12903,13 +12900,12 @@ body.bar-labels.jn-tall {
   justify-content: center;
 }
 .segmented button.on,
-.chips.cat-chips .chip-btn.on,
 .chips.st-scroll-chips .chip-btn.on {
   background: var(--accent-soft);
   color: var(--accent-text);
   box-shadow: inset 0 0 0 1px var(--accent);
 }
-/* Contagem em letra menor dentro da opção. */
+/* Filtro de categorias das Listas: fichas separadas (18/11), não barra. Contagem em letra menor. */
 .chips.cat-chips b {
   font-size: 0.75rem;
   font-weight: 500;
