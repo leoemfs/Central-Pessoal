@@ -142,6 +142,8 @@ function Btn({ icon, label, on, onClick, disabled, children, className = '' }: {
 
 export default function RichEditor({ doc, onChange, placeholder = 'Escreva aqui o que aprendeu…' }: { doc: RichNode; onChange: (doc: RichNode) => void; placeholder?: string }) {
   const [more, setMore] = useState(false);
+  // E42: no celular, a barra de formatação só aparece editando, colada em cima do teclado.
+  const [focused, setFocused] = useState(false);
   const [colors, setColors] = useState(false);
   const [link, setLink] = useState<string | null>(null);
   const file = useRef<HTMLInputElement>(null);
@@ -177,7 +179,11 @@ export default function RichEditor({ doc, onChange, placeholder = 'Escreva aqui 
       window.clearTimeout(timer.current);
       timer.current = window.setTimeout(flush, 500);
     },
-    onBlur: flush,
+    onFocus: () => setFocused(true),
+    onBlur: () => {
+      flush();
+      setFocused(false);
+    },
   });
 
   // Ao sair da página (ou fechar o app), salva o que ainda estava esperando.
@@ -210,7 +216,7 @@ export default function RichEditor({ doc, onChange, placeholder = 'Escreva aqui 
   }
 
   return (
-    <div className={`ed${more ? ' more' : ''}`}>
+    <div className={`ed${more ? ' more' : ''}${focused || colors || link !== null ? ' editing' : ''}`}>
       {/* Barra e cores juntas num bloco preso no topo: as cores acompanham a barra ao rolar. */}
       <div className="ed-bar">
       <div className="ed-toolbar" role="toolbar" aria-label="Formatação">
@@ -259,6 +265,14 @@ export default function RichEditor({ doc, onChange, placeholder = 'Escreva aqui 
         </span>
         <Btn label={more ? 'Menos ferramentas' : 'Mais ferramentas'} className="ed-more" on={more} onClick={() => setMore((v) => !v)}>
           <span className="ed-txt">{more ? 'Menos' : 'Mais'}</span>
+        </Btn>
+        {/* Só no celular, com a barra colada no teclado: fecha o teclado. */}
+        <Btn label="Pronto" className="ed-done" onClick={() => {
+          setColors(false);
+          e.commands.blur();
+          (document.activeElement as HTMLElement | null)?.blur();
+        }}>
+          <span className="ed-txt">Pronto</span>
         </Btn>
       </div>
       {colors && (

@@ -5,6 +5,7 @@ import { DataProvider } from './store';
 import { ErrorBoundary } from './ErrorScreen';
 import './styles.css';
 import { initHScroll } from './hscroll';
+import { initKeyboard } from './keyboard';
 import { startNavigation } from './router';
 
 // Voltar que sobe um nível (E20): precisa estar ligado antes da primeira tela.
@@ -30,3 +31,4 @@ if (import.meta.env.PROD && 'serviceWorker' in navigator) {
 }
 
 initHScroll();
+initKeyboard();
