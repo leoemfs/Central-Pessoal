@@ -3,11 +3,11 @@ import type { ViewProps } from '../App';
 import { cleanAddress, go, useSubAction } from '../router';
 import { useStore } from '../store';
 import { remove, upsert } from '../actions';
-import type { Note, NoteKind } from '../types';
-import { uid } from '../utils';
+import type { BecomeKind, Note, NoteKind } from '../types';
+import { todayISO, uid } from '../utils';
 import { Empty, Icon, IconButton, notify, PageHeader, Pill, Segmented, Sheet } from '../ui';
 import {
-  archived as archivedOf, categoryCounts, dropCategory, IDEA_STATUSES, ideaGroups, isBlankNote, newNote, noteSection, renameCategory, switchKind, visibleNotes,
+  archived as archivedOf, BECOME, becameRoute, categoryCounts, transformNote, dropCategory, IDEA_STATUSES, ideaGroups, isBlankNote, newNote, noteSection, renameCategory, switchKind, visibleNotes,
 } from '../notas';
 
 /**
@@ -36,6 +36,7 @@ function NotesScreen({ route, mode }: ViewProps & { mode: Mode }) {
   const [menu, setMenu] = useState(false);
   const [cats, setCats] = useState(false);
   const [quick, setQuick] = useState('');
+  const [transform, setTransform] = useState(false);
 
   const selected = data.notes.find((n) => n.id === selectedId) ?? null;
   const names = mode === 'ideias' ? data.settings.ideaTags : data.settings.noteCategories;
@@ -70,7 +71,8 @@ function NotesScreen({ route, mode }: ViewProps & { mode: Mode }) {
     update(upsert('notes', note));
     const target = noteSection(note);
     if (target === base) setSelectedId(note.id);
-    else go(`${target}/abrir-${note.id}`);
+    // Depois do useSubAction limpar o endereço desta tela.
+    else setTimeout(() => go(`${target}/abrir-${note.id}`), 0);
   }
 
   function change(patch: Partial<Note>) {
@@ -222,6 +224,13 @@ function NotesScreen({ route, mode }: ViewProps & { mode: Mode }) {
                   <Segmented label="Situação da ideia" options={IDEA_STATUSES.map((s) => ({ value: s.value, label: s.label }))} value={selected.status} onChange={(status) => change({ status })} />
                 </div>
               )}
+              {selected.became ? (
+                <BecameBanner note={selected} />
+              ) : (
+                <button type="button" className="btn soft block note-transform" onClick={() => setTransform(true)}>
+                  <Icon name="send" size={16} /> Transformar em…
+                </button>
+              )}
               <textarea className="note-body" placeholder={selected.kind === 'ideia' ? 'Detalhes, por que vale a pena, primeiros passos…' : 'Escreva aqui…'} value={selected.content} onChange={(e) => change({ content: e.target.value })} aria-label="Texto" />
             </>
           ) : (
@@ -253,7 +262,126 @@ function NotesScreen({ route, mode }: ViewProps & { mode: Mode }) {
         </Sheet>
       )}
       {cats && <CategoriesSheet onClose={() => setCats(false)} />}
+      {transform && selected && (
+        <TransformSheet
+          note={selected}
+          onClose={() => setTransform(false)}
+          onDone={(kind) => {
+            setTransform(false);
+            setSelectedId(null);
+            notify(`${BECOME[kind].done} ✓`, 'A nota foi para Arquivados, com o atalho.');
+          }}
+        />
+      )}
     </>
+  );
+}
+
+/** "✓ Virou tarefa" com o atalho para abrir (ou o aviso, se lá foi apagado). */
+function BecameBanner({ note }: { note: Note }) {
+  const { data } = useStore();
+  const b = note.became!;
+  const to = becameRoute(data, b);
+  return (
+    <div className="note-became">
+      <span>
+        <Icon name="check" size={16} /> <strong>{BECOME[b.kind].done}</strong>
+        <span className="muted small"> · {to ? BECOME[b.kind].where : `foi apagada em ${BECOME[b.kind].where}`}</span>
+      </span>
+      {to && (
+        <button type="button" className="btn primary small" onClick={() => go(to)}>
+          Abrir
+        </button>
+      )}
+    </div>
+  );
+}
+
+const TRANSFORM_OPTIONS: { kind: BecomeKind; icon: 'tasks' | 'calendar' | 'cap' | 'cart' | 'target'; hint: string }[] = [
+  { kind: 'tarefa', icon: 'tasks', hint: 'Agenda · prazo opcional, vai para o Google Tarefas' },
+  { kind: 'compromisso', icon: 'calendar', hint: 'Agenda · dia e hora, aviso pelo Google Agenda' },
+  { kind: 'notebook', icon: 'cap', hint: 'Estudos · o texto vira a primeira página' },
+  { kind: 'lista', icon: 'cart', hint: 'Listas · cada linha vira um item' },
+  { kind: 'meta', icon: 'target', hint: 'Meta de carreira · aparece em Objetivos' },
+];
+
+/** M17 parte 2: escolher no que a nota vira; tarefa, compromisso e lista pedem um detalhe antes. */
+function TransformSheet({ note, onClose, onDone }: { note: Note; onClose: () => void; onDone: (k: BecomeKind) => void }) {
+  const { data, update } = useStore();
+  const [kind, setKind] = useState<BecomeKind | null>(null);
+  const [date, setDate] = useState('');
+  const [time, setTime] = useState('');
+  const [categoryId, setCategoryId] = useState(data.listCategories.find((c) => c.kind === 'checklist')?.id ?? data.listCategories[0]?.id ?? '');
+
+  function run(k: BecomeKind) {
+    update((d) => transformNote(d, note.id, { kind: k, date: date || null, time, categoryId }, uid(), nowISO()));
+    onDone(k);
+  }
+  function pick(k: BecomeKind) {
+    if (k === 'compromisso') setDate((v) => v || todayISO());
+    if (k === 'tarefa' || k === 'compromisso' || k === 'lista') setKind(k);
+    else run(k);
+  }
+
+  if (kind) {
+    const ok = kind !== 'compromisso' || !!date;
+    return (
+      <Sheet
+        title={`Virar ${BECOME[kind].label.toLowerCase()}`}
+        onClose={onClose}
+        footer={
+          <button type="button" className="btn primary block" disabled={!ok || (kind === 'lista' && !categoryId)} onClick={() => run(kind)}>
+            Criar {BECOME[kind].label.toLowerCase()}
+          </button>
+        }
+      >
+        <p className="muted small" style={{ marginBottom: 12 }}>
+          “{note.title.trim() || 'Sem título'}”{kind === 'lista' ? ' · cada linha do texto vira um item.' : ''}
+        </p>
+        {kind === 'tarefa' && (
+          <label className="field">
+            <span className="field-label">Prazo (opcional)</span>
+            <input className="input" type="date" id="tr-date" value={date} onChange={(e) => setDate(e.target.value)} />
+          </label>
+        )}
+        {kind === 'compromisso' && (
+          <div className="tr-row">
+            <label className="field">
+              <span className="field-label">Dia</span>
+              <input className="input" type="date" id="tr-date" value={date} onChange={(e) => setDate(e.target.value)} />
+            </label>
+            <label className="field">
+              <span className="field-label">Hora (vazio = dia todo)</span>
+              <input className="input" type="time" id="tr-time" value={time} onChange={(e) => setTime(e.target.value)} />
+            </label>
+          </div>
+        )}
+        {kind === 'lista' && (
+          <div className="chips" role="radiogroup" aria-label="Categoria da lista">
+            {data.listCategories.map((c) => (
+              <button key={c.id} type="button" role="radio" aria-checked={categoryId === c.id} className={`chip-btn${categoryId === c.id ? ' on' : ''}`} onClick={() => setCategoryId(c.id)}>
+                {c.name}
+              </button>
+            ))}
+          </div>
+        )}
+      </Sheet>
+    );
+  }
+
+  return (
+    <Sheet title="Transformar em" onClose={onClose}>
+      <p className="muted small" style={{ marginBottom: 10 }}>O texto vai junto. {note.kind === 'ideia' ? 'A ideia' : 'A nota'} vai para Arquivados, com o atalho para o que virou.</p>
+      <div className="quick-list">
+        {TRANSFORM_OPTIONS.map((o) => (
+          <button key={o.kind} type="button" className="tile" onClick={() => pick(o.kind)}>
+            <span className="tile-icon"><Icon name={o.icon} /></span>
+            <span className="tile-text"><strong>{BECOME[o.kind].label}</strong><span className="muted">{o.hint}</span></span>
+            <Icon name="right" size={18} />
+          </button>
+        ))}
+      </div>
+    </Sheet>
   );
 }
 

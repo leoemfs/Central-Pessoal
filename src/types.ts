@@ -76,6 +76,8 @@ export interface Habit {
 
 export type NoteKind = 'nota' | 'ideia';
 export type IdeaStatus = 'nova' | 'pensando' | 'guardada';
+/** M17 parte 2: no que a nota ou ideia se transformou. */
+export type BecomeKind = 'tarefa' | 'compromisso' | 'notebook' | 'lista' | 'meta';
 
 export interface Note {
   id: string;
@@ -91,6 +93,8 @@ export interface Note {
   status: IdeaStatus;
   /** Está em Arquivados. */
   archived: boolean;
+  /** No que virou ("Transformar em"); null = nada. */
+  became: { kind: BecomeKind; id: string } | null;
 }
 
 /** Foto guardada à parte (N9.3): o arquivo fica no aparelho e no Drive; aqui só a referência. */

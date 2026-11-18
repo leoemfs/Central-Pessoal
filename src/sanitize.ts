@@ -126,6 +126,14 @@ export function fixIncomeSeries(r: Rec, now: string): IncomeSeries | null {
   } as IncomeSeries;
 }
 
+const BECOME_KINDS = ['tarefa', 'compromisso', 'notebook', 'lista', 'meta'];
+function fixBecame(x: unknown): Note['became'] {
+  const b = x as { kind?: unknown; id?: unknown } | null;
+  return b && typeof b === 'object' && typeof b.kind === 'string' && BECOME_KINDS.includes(b.kind) && typeof b.id === 'string' && b.id
+    ? { kind: b.kind as NonNullable<Note['became']>['kind'], id: b.id }
+    : null;
+}
+
 export function fixNote(r: Rec, now: string): Note {
   return {
     ...(r as object),
@@ -138,6 +146,7 @@ export function fixNote(r: Rec, now: string): Note {
     category: str(r.category).slice(0, 30),
     status: r.status === 'pensando' || r.status === 'guardada' ? r.status : 'nova',
     archived: r.archived === true,
+    became: fixBecame(r.became),
   } as Note;
 }
 
