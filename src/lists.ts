@@ -615,3 +615,32 @@ export function packLabel(x: { size: number; sizeUnit: ProductVariant['sizeUnit'
   if (x.size === 1 && x.sizeUnit === 'L') return 'Preço do litro';
   return `${x.size.toLocaleString('pt-BR')} ${x.sizeUnit}`;
 }
+
+/**
+ * M42: junta dois produtos (o outro entra neste). Marcas e tamanhos iguais viram um só; preços e itens das listas
+ * passam para o que fica; o outro some.
+ */
+export function mergeProducts(keepId: string, dropId: string) {
+  return (d: AppData): AppData => {
+    if (keepId === dropId || !d.products.some((p) => p.id === keepId) || !d.products.some((p) => p.id === dropId)) return d;
+    const keepVars = d.variants.filter((v) => v.productId === keepId);
+    const remap = new Map<string, string>();
+    const variants: ProductVariant[] = [];
+    for (const v of d.variants) {
+      if (v.productId !== dropId) {
+        variants.push(v);
+        continue;
+      }
+      const same = keepVars.find((k) => plain(k.brand) === plain(v.brand) && k.size === v.size && k.sizeUnit === v.sizeUnit);
+      if (same) remap.set(v.id, same.id);
+      else variants.push({ ...v, productId: keepId });
+    }
+    return {
+      ...d,
+      products: d.products.filter((p) => p.id !== dropId),
+      variants,
+      prices: d.prices.map((p) => (remap.has(p.variantId) ? { ...p, variantId: remap.get(p.variantId)! } : p)),
+      lists: d.lists.map((l) => (l.items.some((i) => i.productId === dropId) ? { ...l, items: l.items.map((i) => (i.productId === dropId ? { ...i, productId: keepId } : i)) } : l)),
+    };
+  };
+}
