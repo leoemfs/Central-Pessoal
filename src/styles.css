@@ -13912,3 +13912,11 @@ body.icons-flat .st-shortcut {
 .page-menu button {
   border-radius: 0;
 }
+/* Fileira que rola para o lado sendo arrastada com o mouse (computador). */
+.hs-drag {
+  cursor: grabbing;
+  user-select: none;
+}
+.hs-drag * {
+  pointer-events: none;
+}
