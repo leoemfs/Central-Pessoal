@@ -113,9 +113,26 @@ function MenuPop({ anchor, items, onPick, onClose }: { anchor: HTMLElement | nul
   useBackToClose(onClose);
   const first = useRef<HTMLButtonElement>(null);
   useEffect(() => first.current?.focus({ preventScroll: true }), []);
+  // Fecha ao encostar o dedo fora (inclusive começando a rolar) e ao rolar a página.
+  useEffect(() => {
+    const y0 = window.scrollY;
+    const onScroll = () => {
+      if (Math.abs(window.scrollY - y0) > 24) onClose();
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   return createPortal(
     <>
-      <div className="page-menu-shade" onClick={onClose} />
+      <div
+        className="page-menu-shade"
+        onPointerDown={(e) => {
+          e.preventDefault();
+          onClose();
+        }}
+        onClick={onClose}
+      />
       <div className="page-menu" role="menu" style={place(anchor)} onKeyDown={(e) => e.key === 'Escape' && onClose()}>
         {items.map((it, i) => (
           <button key={it.id} ref={i === 0 ? first : undefined} type="button" role="menuitem" className={it.search ? 'search' : undefined} onClick={() => onPick(it.id)}>
