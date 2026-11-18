@@ -39,6 +39,8 @@ export interface GamesState {
   prizes: { day: string; game: string; gold: number }[];
   /** N2.18a: cada partida (dia, jogo, segundos jogados, fichas ganhas). */
   plays: { day: string; game: string; seconds: number; fichas: number }[];
+  /** Dias com Sudoku resolvido (dão +2 de Inteligência por dia). */
+  sudokuDays: string[];
   /** Fichas gastas no bichinho virtual. */
   fichasSpent: number;
 }
@@ -122,7 +124,7 @@ export function defaultJourneyState(): JourneyState {
     petNames: {},
     petStyle: {},
     gifts: [],
-    games: { records: {}, prizes: [], plays: [], fichasSpent: 0 },
+    games: { records: {}, prizes: [], plays: [], fichasSpent: 0, sudokuDays: [] },
     profile: null,
   };
 }
@@ -134,7 +136,8 @@ function normalizeGames(x: unknown): GamesState {
   const prizes = Array.isArray(g.prizes) ? g.prizes.filter((p) => p && typeof p.day === 'string' && typeof p.game === 'string' && typeof p.gold === 'number').map((p) => ({ day: p.day, game: p.game, gold: Math.max(0, Math.min(20, p.gold)) })).slice(-400) : [];
   const plays = Array.isArray(g.plays) ? g.plays.filter((p) => p && typeof p.day === 'string' && typeof p.game === 'string' && typeof p.seconds === 'number' && typeof p.fichas === 'number').map((p) => ({ day: p.day, game: p.game, seconds: Math.max(0, Math.min(600, p.seconds)), fichas: Math.max(0, Math.min(10, p.fichas)) })).slice(-600) : [];
   const fichasSpent = typeof g.fichasSpent === 'number' && Number.isFinite(g.fichasSpent) && g.fichasSpent > 0 ? g.fichasSpent : 0;
-  return { records, prizes, plays, fichasSpent };
+  const sudokuDays = Array.isArray(g.sudokuDays) ? Array.from(new Set(g.sudokuDays.filter((x): x is string => typeof x === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(x)))).sort().slice(-400) : [];
+  return { records, prizes, plays, fichasSpent, sudokuDays };
 }
 
 const strMap = (x: unknown, max: number): Record<string, string> =>
@@ -229,6 +232,8 @@ export function attributes(d: AppData, to: string = todayISO(), from = '0000-01-
   const planSaves = (d.boxes ?? []).reduce((n, b) => n + b.moves.filter((m) => m.kind === 'plano' && inRange(m.date)).length, 0);
   a.DIS += 2 * billsOnTime(d, from, to) + 3 * reviews + 3 * planSaves;
   a.SAB += diaryDays;
+  // Sudoku dos mini games: +2 de Inteligência por dia com o desafio resolvido.
+  a.INT += 2 * (d.journey?.games?.sudokuDays ?? []).filter(inRange).length;
   // Saúde (N1.1): bater a meta de água vale +3 de Resistência (com hábito ligado, já conta pelo hábito).
   a.RES += 3 * waterGoalDays(d, from, to);
   // N1.3: dia com todas as doses de remédio tomadas vale +3 de Resistência (com hábito ligado, conta pelo hábito).
@@ -598,7 +603,29 @@ export function mysticExtras(d: AppData, state: JourneyState, today: string = to
   const estelar = wornSince(state, 'estelar', today);
   if (estelar)
     gold += sum(d.habits.filter((h) => h.kind !== 'abandonar' && (h.attrs ?? []).includes('INT')).map((h) => new Set(h.checks.filter((c) => c >= estelar && c <= today)).size));
-  return { crystals, gold };
+  // N2.8b: ouro dos acessórios.
+  const goldBetween = (from: string) => journeyStats(d, today).gold - journeyStats(d, addDays(from, -1)).gold;
+  for (const [id, pct] of [['polar', 0.1], ['laminaOrdem', 0.1], ['braceleteMercador', 0.05]] as const) {
+    const since = wornSince(state, id, today);
+    if (since) gold += goldBetween(since) * pct;
+  }
+  // Arco do vento: +1 ouro em cada missão de Agilidade.
+  const arco = wornSince(state, 'arcoVento', today);
+  if (arco) gold += sum(d.habits.filter((h) => h.kind !== 'abandonar' && (h.attrs ?? []).includes('AGI')).map((h) => new Set(h.checks.filter((c) => c >= arco && c <= today)).size));
+  // Colar de pérola: +10% do ouro dos hábitos nos dias com tudo feito.
+  const perola = wornSince(state, 'perola', today);
+  if (perola) {
+    const routine = d.habits.filter((h) => h.kind !== 'abandonar');
+    for (let day = perola; day <= today; day = addDays(day, 1)) {
+      const due = routine.filter((h) => isScheduled(h, day));
+      if (!due.length || !due.every((h) => h.checks.includes(day))) continue;
+      gold += sum(due.map((h) => (h.kind === 'ritual' ? 5 : 10))) * 0.1;
+    }
+  }
+  // Anel da aurora: o primeiro presente do dia vale o dobro.
+  const aurora = wornSince(state, 'anelAurora', today);
+  if (aurora) gold += sum(state.gifts.filter((g) => g.day >= aurora && g.day <= today).map((g) => g.gold));
+  return { crystals, gold: Math.floor(gold) };
 }
 
 // ---------- Carteira: ouro e cristais ----------
