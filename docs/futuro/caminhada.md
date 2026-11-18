@@ -1,6 +1,6 @@
 # Caminhada e corrida 2.0 (M35)
 
-> Situação: **especificado (17/11)**, aguardando aprovação. Pedido do Leonardo: o cronômetro começa sozinho ao tocar, falta preparar (aquecimento), escolher caminhada com trote e saber quantos km foram feitos (GPS).
+> Situação: **especificado (17/11)**, aguardando aprovação. **Prévia (18/11):** https://claude.ai/artifact/UwQgWrPi55NMAUHV5MhnV2. Pedido do Leonardo: o cronômetro começa sozinho ao tocar, falta preparar (aquecimento), escolher caminhada com trote e saber quantos km foram feitos (GPS).
 > **Afeta:** Núcleo › Corpo (tela da prática), hábitos ligados à caminhada (marcam sozinhos), Início ("Esta semana"), Revisão semanal, Jornada (Agilidade e XP), backup (campo novo da sessão).
 
 ## Como é hoje (`src/modules/Praticas.tsx`, função `Walk`)
