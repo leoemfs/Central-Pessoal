@@ -626,3 +626,35 @@ test('N2.8a: efeitos dos místicos contam desde que o item foi vestido', async (
   assert.equal(mx.crystals, 1, '+1 cristal pela revisão');
   assert.equal(wallet({ ...dd, journey: s2 }, s2, TODAY).crystalsEarned - wallet({ ...dd, journey: st }, st, TODAY).crystalsEarned, 1);
 });
+
+test('N2.8b: bônus de XP e ouro dos itens vestidos, desde o dia em que foram vestidos', async () => {
+  const { journeyStats, baseStats, itemXp } = await import('./journey.ts');
+  const { mysticExtras } = await import('./jornada/rules.ts');
+  const ag = habit({ id: 'ag', name: 'Correr', kind: 'construir', attrs: ['AGI'], days: [0, 1, 2, 3, 4, 5, 6], checks: days('2026-11-24', 10) });
+  const vicio = habit({ id: 'v', name: 'Doce', kind: 'abandonar', startDate: '2026-11-01', slips: ['2026-11-20'] });
+  const owned = [...defaultJourneyState().owned, 'pena', 'polar', 'fenix', 'arcoVento', 'braceleteMercador', 'anelAurora'];
+  const st0 = { ...defaultJourneyState(), owned };
+  const d0 = withData({ habits: [ag, vicio] });
+  assert.equal(itemXp({ ...d0, journey: st0 }, TODAY), 0, 'sem itens, sem bônus');
+
+  // Pena do vento (+10% em Agilidade) vestida em 20/11: 5 dias de 20 XP → +10 XP.
+  const pena = equip(st0, 'magico', 'pena', 1, '2026-11-20') as typeof st0;
+  assert.equal(itemXp({ ...d0, journey: pena }, TODAY), 10);
+  const s = journeyStats({ ...d0, journey: pena }, TODAY);
+  assert.equal(s.xp, baseStats(d0, TODAY).xp + 10);
+  assert.ok(s.sources.some((x) => x.id === 'itens' && x.xp === 10), 'aparece em "de onde veio"');
+
+  // Pena da fênix vestida antes da recaída de 20/11: de 20 a 24/11 (5 dias de 20 XP) vale o dobro → +100.
+  const fenix = equip(st0, 'magico', 'fenix', 1, '2026-11-19') as typeof st0;
+  assert.equal(itemXp({ ...d0, journey: fenix }, TODAY), 100);
+
+  // Estrela polar: +10% de tudo desde que vestiu.
+  const polar = equip(st0, 'magico', 'polar', 1, '2026-11-21') as typeof st0;
+  assert.equal(itemXp({ ...d0, journey: polar }, TODAY), Math.floor((baseStats(d0, TODAY).xp - baseStats(d0, '2026-11-20').xp) * 0.1));
+
+  // Arco do vento: +1 ouro por missão de Agilidade; Anel da aurora dobra o presente do dia.
+  const arco = equip(st0, 'arma', 'arcoVento', 1, '2026-11-22') as typeof st0;
+  assert.equal(mysticExtras(d0, arco, TODAY).gold, 3);
+  const anel = { ...(equip(st0, 'anel', 'anelAurora', 1, '2026-11-23') as typeof st0), gifts: [{ day: '2026-11-22', n: 1, gold: 10, chest: null }, { day: '2026-11-23', n: 2, gold: 15, chest: null }] };
+  assert.equal(mysticExtras(d0, anel, TODAY).gold, 15);
+});

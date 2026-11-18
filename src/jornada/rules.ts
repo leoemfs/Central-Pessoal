@@ -598,7 +598,29 @@ export function mysticExtras(d: AppData, state: JourneyState, today: string = to
   const estelar = wornSince(state, 'estelar', today);
   if (estelar)
     gold += sum(d.habits.filter((h) => h.kind !== 'abandonar' && (h.attrs ?? []).includes('INT')).map((h) => new Set(h.checks.filter((c) => c >= estelar && c <= today)).size));
-  return { crystals, gold };
+  // N2.8b: ouro dos acessórios.
+  const goldBetween = (from: string) => journeyStats(d, today).gold - journeyStats(d, addDays(from, -1)).gold;
+  for (const [id, pct] of [['polar', 0.1], ['laminaOrdem', 0.1], ['braceleteMercador', 0.05]] as const) {
+    const since = wornSince(state, id, today);
+    if (since) gold += goldBetween(since) * pct;
+  }
+  // Arco do vento: +1 ouro em cada missão de Agilidade.
+  const arco = wornSince(state, 'arcoVento', today);
+  if (arco) gold += sum(d.habits.filter((h) => h.kind !== 'abandonar' && (h.attrs ?? []).includes('AGI')).map((h) => new Set(h.checks.filter((c) => c >= arco && c <= today)).size));
+  // Colar de pérola: +10% do ouro dos hábitos nos dias com tudo feito.
+  const perola = wornSince(state, 'perola', today);
+  if (perola) {
+    const routine = d.habits.filter((h) => h.kind !== 'abandonar');
+    for (let day = perola; day <= today; day = addDays(day, 1)) {
+      const due = routine.filter((h) => isScheduled(h, day));
+      if (!due.length || !due.every((h) => h.checks.includes(day))) continue;
+      gold += sum(due.map((h) => (h.kind === 'ritual' ? 5 : 10))) * 0.1;
+    }
+  }
+  // Anel da aurora: o primeiro presente do dia vale o dobro.
+  const aurora = wornSince(state, 'anelAurora', today);
+  if (aurora) gold += sum(state.gifts.filter((g) => g.day >= aurora && g.day <= today).map((g) => g.gold));
+  return { crystals, gold: Math.floor(gold) };
 }
 
 // ---------- Carteira: ouro e cristais ----------

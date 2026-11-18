@@ -81,7 +81,8 @@ export function levelFromXp(xp: number) {
   return { level, xpInLevel: xp - floor, xpForNext: 100 * level };
 }
 
-export function journeyStats(d: AppData, today: string = todayISO()) {
+/** XP e ouro só do que foi feito (sem os bônus dos itens). */
+export function baseStats(d: AppData, today: string = todayISO()) {
   const count = (k: keyof typeof REWARDS, n: number): SourceStats => ({ id: k, label: REWARDS[k].label, rule: REWARDS[k].rule, count: n, xp: n * REWARDS[k].xp, gold: n * REWARDS[k].gold });
   const checks = (kind: 'ritual' | 'construir') => sum(d.habits.filter((h) => h.kind === kind).map((h) => new Set(h.checks.filter((c) => c <= today)).size));
   const cleanWeeks = sum(
@@ -126,4 +127,66 @@ export function journeyStats(d: AppData, today: string = todayISO()) {
     sources: sources.filter((s) => s.count > 0),
     ...levelFromXp(xp),
   };
+}
+
+// ---------- N2.8b: bônus de XP dos itens vestidos ----------
+
+/** Itens que dão +10% de XP nos hábitos de um atributo (artefatos, anéis, colares, Cajado do saber, Botas aladas). */
+export const XP_ATTR_ITEMS: Record<string, string> = {
+  pena: 'AGI', bracelete: 'FOR', grimorio: 'INT', gota: 'RES', lanterna: 'SAB', ampulheta: 'DIS',
+  anelFoco: 'INT', denteLobo: 'FOR', cajadoSaber: 'INT', aladas: 'AGI', lanternaCalma: 'SAB',
+};
+
+/** Desde quando o item está vestido (só se estiver vestido agora; sem registro, conta a partir de hoje). */
+export function itemSince(d: AppData, id: string, today: string = todayISO()): string | null {
+  const j = d.journey;
+  if (!j || !Object.values(j.equipped ?? {}).includes(id)) return null;
+  return j.equippedAt?.[id] ?? today;
+}
+
+/** XP ganho entre duas datas (inclusive), só pelo que foi feito. */
+export const xpBetween = (d: AppData, from: string, to: string) => baseStats(d, to).xp - baseStats(d, addDays(from, -1)).xp;
+
+/** Bônus de XP dos itens vestidos, desde o dia em que cada um foi vestido. */
+export function itemXp(d: AppData, today: string = todayISO()): number {
+  let bonus = 0;
+  // +10% nos hábitos do atributo do item (e no diário, com a Lanterna da calma).
+  for (const [id, attr] of Object.entries(XP_ATTR_ITEMS)) {
+    const since = itemSince(d, id, today);
+    if (!since) continue;
+    for (const h of d.habits) {
+      if (h.kind === 'abandonar' || !(h.attrs ?? []).includes(attr)) continue;
+      const n = new Set(h.checks.filter((c) => c >= since && c <= today)).size;
+      bonus += n * REWARDS[h.kind === 'ritual' ? 'ritual' : 'construir'].xp * 0.1;
+    }
+    if (id === 'lanternaCalma') bonus += d.journal.filter((j) => j.tag !== 'Revisão' && j.createdAt.slice(0, 10) >= since && j.createdAt.slice(0, 10) <= today).length * REWARDS.diario.xp * 0.1;
+  }
+  // Estrela polar e Lâmina da ordem: +10% de XP em tudo.
+  for (const id of ['polar', 'laminaOrdem']) {
+    const since = itemSince(d, id, today);
+    if (since) bonus += xpBetween(d, since, today) * 0.1;
+  }
+  // Pena da fênix: depois de uma recaída, os 7 dias seguintes valem XP em dobro.
+  const fenix = itemSince(d, 'fenix', today);
+  if (fenix) {
+    const starts = d.habits.filter((h) => h.kind === 'abandonar').flatMap((h) => h.slips.filter((s) => s >= fenix && s <= today)).sort();
+    let end = '';
+    for (const st of starts) {
+      const from = st > end ? st : addDays(end, 1);
+      const to = addDays(st, 6) < today ? addDays(st, 6) : today;
+      if (from <= to) bonus += xpBetween(d, from, to);
+      if (to > end) end = to;
+    }
+  }
+  return Math.floor(bonus);
+}
+
+/** XP, nível e ouro da Jornada: o que foi feito mais o bônus dos itens vestidos. */
+export function journeyStats(d: AppData, today: string = todayISO()) {
+  const base = baseStats(d, today);
+  const extra = itemXp(d, today);
+  if (!extra) return base;
+  const xp = base.xp + extra;
+  const sources = [...base.sources, { id: 'itens', label: 'Itens vestidos', rule: 'Bônus dos itens: +10% no atributo do item, Estrela polar, Pena da fênix…', count: 0, xp: extra, gold: 0 }];
+  return { ...base, xp, sources, ...levelFromXp(xp) };
 }
