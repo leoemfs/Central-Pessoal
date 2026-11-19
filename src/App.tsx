@@ -36,7 +36,7 @@ import { CiclosPage } from './modules/estudos/Ciclos';
 import { RoadmapsPage } from './modules/estudos/Roadmaps';
 import { CarreiraPage, VagasPage } from './modules/Carreira';
 import { SaudeHistorico, SaudeHoje, SaudePage } from './modules/Saude';
-import { CareerGoalsList, ConcluidosPage, GrandesPage, ObjetivosPage } from './modules/Objetivos';
+import { ConcluidosPage, GrandesPage, ObjetivosPage } from './modules/Objetivos';
 import { useCardEditor } from './Cards';
 import { barDrag, openMenu, PullToMais } from './BarPull';
 import { settingsPage } from './settingsPages';
@@ -92,7 +92,6 @@ export const SECTIONS: Section[] = [
   { path: 'roadmaps', label: 'Roadmaps', icon: 'route', view: RoadmapsPage },
   { path: 'carreira', label: 'Carreira', icon: 'briefcase', view: CarreiraPage, fab: 'carreira/menu' },
   { path: 'vagas', label: 'Vagas', icon: 'send', view: VagasPage, fab: 'vagas/nova' },
-  { path: 'metas', label: 'Metas', icon: 'target', view: CareerGoalsList, fab: 'objetivos/carreira' },
   { path: 'objetivos', label: 'Objetivos', icon: 'flag', view: ObjetivosPage, fab: 'objetivos/menu' },
   { path: 'grandes', label: 'Grandes', icon: 'target', view: GrandesPage, fab: 'objetivos/menu' },
   { path: 'concluidos', label: 'Concluídos', icon: 'check', view: ConcluidosPage, fab: 'objetivos/menu' },
@@ -344,6 +343,7 @@ export function App() {
   const section = SECTIONS.find((s) => s.path === route.path) ?? SECTIONS[0];
   // E2: a tela Mais saiu. O endereço antigo #/mais abre o Início com a gaveta do menu aberta.
   useEffect(() => {
+    if (route.path === 'metas') return goReplace('objetivos/area-carreira'); // E5: Carreira › Metas mora em Objetivos
     if (route.path !== 'mais') return;
     goReplace('inicio');
     window.setTimeout(openMenu, 60);

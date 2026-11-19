@@ -3,7 +3,7 @@ import { DEFAULT_SIDE_CARDS, normalizeSideCards } from './cardLayout.ts';
 import { DEFAULT_SIDE_SHORTCUTS, normalizeShortcuts } from './moduleBar.ts';
 import { stableId, toISO, uid } from './utils.ts';
 import { suggestAttributes } from './habits.ts';
-import { emptyProfile, normalizeProfile } from './profile.ts';
+import { emptyProfile, moveProfileGoals, normalizeProfile } from './profile.ts';
 import { normalizeBox } from './boxes.ts';
 import { normalizeMoods } from './mood.ts';
 import { normalizeVoucher } from './vouchers.ts';
@@ -222,7 +222,7 @@ export function normalize(raw: unknown): AppData {
     stamps: strMap(r.stamps),
     legacy: Object.keys(discarded).length ? { ...legacy, descartados: mergeDiscarded(legacy.descartados, discarded) } : legacy,
   };
-  d = linkMarketItems(seedCategories(d));
+  d = moveProfileGoals(linkMarketItems(seedCategories(d)));
   if (r.version !== 2 && Array.isArray(r.transactions)) d = migrateV1Transactions(d, r.transactions);
   return migrateLegacyIncomes(d);
 }

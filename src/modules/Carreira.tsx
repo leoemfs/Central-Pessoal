@@ -53,7 +53,7 @@ import {
 /**
  * Carreira (N8). Endereços:
  * #/carreira (casa: trabalho atual, reuniões, próximos passos) · #/carreira/menu · #/carreira/reuniao · #/carreira/mudanca
- * #/vagas (lista com etapas) · #/vagas/nova · #/metas (metas de carreira, que moram em Objetivos: N10.1).
+ * #/vagas (lista com etapas) · #/vagas/nova · #/metas leva a Objetivos já filtrado em Carreira (E5).
  */
 
 const STAGE_TONE: Record<JobStage, 'gray' | 'blue' | 'orange' | 'green'> = { interesse: 'gray', enviei: 'blue', entrevista: 'orange', proposta: 'green' };

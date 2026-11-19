@@ -96,9 +96,10 @@ export const MODULE_BARS: ModuleBar[] = [
   {
     id: 'carreira',
     name: 'Carreira',
-    sections: ['carreira', 'vagas', 'metas'],
+    sections: ['carreira', 'vagas'],
     items: [
-      { id: 'metas', label: 'Metas', icon: 'target', to: 'metas', section: 'metas' },
+      // E5: as metas moram em Objetivos; a ferramenta abre Objetivos já filtrado em Carreira.
+      { id: 'metas', label: 'Metas', icon: 'target', to: 'objetivos/area-carreira' },
       { id: 'carreira', label: 'Carreira', icon: 'briefcase', to: 'carreira', section: 'carreira' },
       { id: 'vagas', label: 'Vagas', icon: 'send', to: 'vagas', section: 'vagas' },
     ],

@@ -97,20 +97,42 @@ export function normalizeProfile(raw: unknown, existingUser: boolean): Profile {
   };
 }
 
-/** Quanto do perfil está preenchido (0–100). Nada é obrigatório. */
-export function completeness(p: Profile): number {
+/** E5: metas do Você (moram em Objetivos, área Você). */
+export const voceGoals = (d: Pick<AppData, 'career'>) => d.career.goals.filter((g) => g.area === 'voce');
+
+/**
+ * E5: as metas curtas e longas do Você passam a morar em Objetivos (área Você), uma vez só e sem perder nada.
+ * O id continua o mesmo (o que já foi movido não entra de novo). O prazo em texto ("até março") vai para a anotação.
+ */
+export function moveProfileGoals(d: AppData): AppData {
+  const p = d.profile;
+  if (!p.shortGoals.length && !p.longGoals.length) return d;
+  const have = new Set(d.career.goals.map((g) => g.id));
+  const moved = ([[p.shortGoals, 'Curto prazo'], [p.longGoals, 'Longo prazo']] as const).flatMap(([list, label]) =>
+    list
+      .filter((g) => g.text.trim() && !have.has(g.id) && !d.deleted[g.id])
+      .map((g) => ({
+        id: g.id, area: 'voce' as const, title: g.text.trim(), note: g.when.trim() ? `${label} · ${g.when.trim()}` : label,
+        deadline: null, steps: [], doneAt: g.doneAt ? g.doneAt.slice(0, 10) : null, createdAt: '',
+      })),
+  );
+  return { ...d, profile: { ...p, shortGoals: [], longGoals: [] }, career: { ...d.career, goals: [...d.career.goals, ...moved] } };
+}
+
+/** Quanto do perfil está preenchido (0–100). Nada é obrigatório. `goals` = quantas metas há na área Você de Objetivos. */
+export function completeness(p: Profile, goals = 0): number {
   const parts = [
-    p.name.trim(), p.day.length, p.areas.length, p.shortGoals.length, p.longGoals.length,
+    p.name.trim(), p.day.length, p.areas.length, goals > 0, goals > 1,
     p.money.challenge || p.money.saveFor, p.quits.length || p.noQuit, p.limits.length || p.noLimit, p.likes.length,
   ];
   return Math.round((parts.filter(Boolean).length / parts.length) * 100);
 }
 
 /** O cartão "Complete seu perfil" aparece no Início? */
-export function showAsk(p: Profile, today: string = todayISO()): boolean {
+export function showAsk(p: Profile, today: string = todayISO(), goals = 0): boolean {
   const o = p.onboarding;
   if (o.state === 'feito' || o.state === 'novo') return false;
-  if (completeness(p) >= 60) return false;
+  if (completeness(p, goals) >= 60) return false;
   if (o.askDismissals >= 2) return false;
   return !o.askHiddenUntil || o.askHiddenUntil <= today;
 }
@@ -186,7 +208,7 @@ function nextFirstOfMonth(today: string): string {
  * Lê o perfil (e o que já existe no app) e devolve as sugestões, da área mais importante para a menos.
  * Some o que foi dispensado ou aceito, e o que já existe com o mesmo nome ou a mesma prática ligada.
  */
-export function suggestions(d: Pick<AppData, 'profile' | 'habits' | 'boxes'>, today: string = todayISO()): Suggestion[] {
+export function suggestions(d: Pick<AppData, 'profile' | 'habits' | 'boxes' | 'career'>, today: string = todayISO()): Suggestion[] {
   const p = d.profile;
   const out: Suggestion[] = [];
   const add = (s: Suggestion) => out.push(s);
@@ -197,7 +219,8 @@ export function suggestions(d: Pick<AppData, 'profile' | 'habits' | 'boxes'>, to
     type: 'habit',
     habit: { name, kind: 'construir', days, time, period: time ? periodOf(time) : 'livre', link: '', ...extra },
   });
-  const goalsText = plain([...p.shortGoals, ...p.longGoals].map((g) => g.text).join(' | '));
+  const myGoals = voceGoals(d).filter((g) => !g.doneAt).map((g) => ({ id: g.id, text: g.title }));
+  const goalsText = plain(myGoals.map((g) => g.text).join(' | '));
 
   // Corpo e cuidados
   if (has('day', 'sentado')) add({ id: 's-ombros', kind: 'Prática', area: 'corpo', icon: 'dumbbell', title: 'Alongar pescoço e ombros às 15h', why: 'Você contou que **trabalha sentado(a)**. 5 minutos à tarde aliviam o pescoço e as costas.', act: habit('Alongar pescoço e ombros', WEEKDAYS_ONLY, '15:00', { link: 'alongamento:ombros' }) });
@@ -226,7 +249,7 @@ export function suggestions(d: Pick<AppData, 'profile' | 'habits' | 'boxes'>, to
   if (p.money.challenge === 'naosei') add({ id: 's-anotar', kind: 'Hábito', area: 'dinheiro', icon: 'coins', title: 'Anotar os gastos do dia, por 2 semanas', why: 'Você contou que **não sabe quanto entra e sai**. Duas semanas anotando em Finanças já mostram para onde o dinheiro vai.', act: habit('Anotar os gastos do dia', ALL, shiftTime(p.sleep, -90)) });
   // Caixinhas: metas de dinheiro e "quero juntar para…"
   const boxNames = new Set(d.boxes.map((b) => plain(b.name)));
-  const moneyGoal = area('dinheiro') ? [...p.shortGoals, ...p.longGoals].find((g) => /r\$|juntar|guardar|poupar|viag/i.test(g.text)) : undefined;
+  const moneyGoal = area('dinheiro') ? myGoals.find((g) => /r\$|juntar|guardar|poupar|viag/i.test(g.text)) : undefined;
   if (moneyGoal && !boxNames.has(plain(moneyGoal.text))) {
     const target = parseMoneyText(moneyGoal.text) || null;
     add({ id: `s-caixa-${moneyGoal.id}`, kind: 'Caixinha', area: 'dinheiro', icon: 'coins', title: `Criar a caixinha "${moneyGoal.text}"`, why: `É uma das suas **metas**. Com uma caixinha e um plano de R$ 100 por semana, dá para ver quanto falta${target ? ` (uns ${Math.max(1, Math.round(target / 100 / 4.33))} meses)` : ''}.`, act: { type: 'box', box: { name: moneyGoal.text, target, planAmount: 100 } } });
@@ -304,7 +327,7 @@ export function dismissSuggestion(id: string) {
 
 /** Altera o perfil (e guarda quando foi). */
 export function setProfile(fn: (p: Profile) => Profile) {
-  return (d: AppData): AppData => ({ ...d, profile: { ...fn(d.profile), updatedAt: new Date().toISOString() } });
+  return (d: AppData): AppData => moveProfileGoals({ ...d, profile: { ...fn(d.profile), updatedAt: new Date().toISOString() } });
 }
 
 /** "Agora não" no cartão do Início. */

@@ -1,7 +1,7 @@
 /**
  * Objetivos (N10.1): central de todas as metas do app.
  * Regra principal: a meta continua morando no módulo dela. Aqui só se lê e se muda a mesma informação
- * (caixinhas, hábitos, ciclos, orçamento, metas do Você). As metas de carreira moram aqui (career.goals).
+ * (caixinhas, hábitos, ciclos, orçamento). As metas próprias (áreas Carreira e Você) moram aqui (career.goals).
  */
 import type { AppData, CareerGoal } from './types.ts';
 import { balance } from './boxes.ts';
@@ -120,25 +120,12 @@ export function allGoals(d: AppData, today: string = todayISO()): GoalView[] {
     const st = careerGoalProgress(g);
     const past = !g.doneAt && !!g.deadline && g.deadline < today;
     out.push({
-      id: `carreira:${g.id}`, kind: 'carreira', refId: g.id, area: 'carreira',
-      title: g.title || 'Meta sem nome', where: 'Objetivos › Carreira',
+      id: `${g.area}:${g.id}`, kind: g.area, refId: g.id, area: g.area,
+      title: g.title || 'Meta sem nome', where: g.area === 'voce' ? 'Objetivos › Você' : 'Objetivos › Carreira',
       pct: st.pct, value: st.total ? `${st.done} de ${st.total} passos` : g.doneAt ? 'alcançada' : 'sem passos',
       deadline: g.deadline, status: g.doneAt ? 'concluida' : past ? 'atrasada' : 'andando', late: past ? 'passou do prazo' : '',
       doneAt: g.doneAt, to: 'objetivos',
     });
-  }
-
-  for (const [list, label] of [[d.profile.shortGoals, 'curto prazo'], [d.profile.longGoals, 'longo prazo']] as const) {
-    for (const g of list) {
-      if (!g.text.trim()) continue;
-      out.push({
-        id: `voce:${g.id}`, kind: 'voce', refId: g.id, area: 'voce',
-        title: g.text, where: `Você › Metas de ${label}`,
-        pct: g.doneAt ? 100 : 0, value: g.when ? g.when : label,
-        deadline: null, status: g.doneAt ? 'concluida' : 'andando', late: '',
-        doneAt: g.doneAt ? g.doneAt.slice(0, 10) : null, to: 'voce',
-      });
-    }
   }
 
   const rank: Record<GoalStatus, number> = { atrasada: 0, andando: 1, concluida: 2 };
@@ -175,8 +162,11 @@ export function careerGoalProgress(g: CareerGoal) {
   return { total, done, pct: g.doneAt ? 100 : pct(done, total) };
 }
 
-export function newCareerGoal(now: string = new Date().toISOString()): CareerGoal {
-  return { id: uid(), title: '', note: '', deadline: null, steps: [], doneAt: null, createdAt: now };
+/** Meta que mora aqui em Objetivos (áreas Carreira e Você)? */
+export const isOwnGoal = (g: GoalView) => g.kind === 'carreira' || g.kind === 'voce';
+
+export function newCareerGoal(now: string = new Date().toISOString(), area: CareerGoal['area'] = 'carreira'): CareerGoal {
+  return { id: uid(), area, title: '', note: '', deadline: null, steps: [], doneAt: null, createdAt: now };
 }
 
 export function saveCareerGoal(g: CareerGoal) {
@@ -192,14 +182,6 @@ export function removeCareerGoal(id: string) {
     career: { ...d.career, goals: d.career.goals.filter((g) => g.id !== id) },
     deleted: { ...d.deleted, [id]: new Date().toISOString() },
   });
-}
-
-/** Concluir ou reabrir uma meta do Você (curto ou longo prazo). */
-export function toggleProfileGoal(id: string, today: string = todayISO()) {
-  return (d: AppData): AppData => {
-    const flip = (list: AppData['profile']['shortGoals']) => list.map((g) => (g.id === id ? { ...g, doneAt: g.doneAt ? null : today } : g));
-    return { ...d, profile: { ...d.profile, shortGoals: flip(d.profile.shortGoals), longGoals: flip(d.profile.longGoals) } };
-  };
 }
 
 /** Editar a meta e o prazo de uma caixinha (é a mesma caixinha de Finanças). */
