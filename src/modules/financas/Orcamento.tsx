@@ -65,7 +65,7 @@ export function Orcamento() {
 
   return (
     <>
-      <PageHeader title="Orçamento" actions={<MonthNav label={formatMonth(month)} onPrev={() => setMonth(addMonths(month, -1))} onNext={() => setMonth(addMonths(month, 1))} onLabel={() => setMonth(monthKey(today))} />} />
+      <PageHeader title="Orçamento" actions={<MonthNav label={formatMonth(month)} onPrev={() => setMonth(addMonths(month, -1))} onNext={() => setMonth(addMonths(month, 1))} pick={{ month, onPick: setMonth, onToday: () => setMonth(monthKey(today)) }} />} />
       {rows.length > 0 ? (
         <section className="card raised">
           <div className="card-head">
@@ -243,7 +243,7 @@ export function Relatorios() {
 
   return (
     <>
-      <PageHeader title="Relatórios" actions={<MonthNav label={formatMonth(month)} onPrev={() => setMonth(addMonths(month, -1))} onNext={() => setMonth(addMonths(month, 1))} onLabel={() => setMonth(monthKey(today))} />} />
+      <PageHeader title="Relatórios" actions={<MonthNav label={formatMonth(month)} onPrev={() => setMonth(addMonths(month, -1))} onNext={() => setMonth(addMonths(month, 1))} pick={{ month, onPick: setMonth, onToday: () => setMonth(monthKey(today)) }} />} />
       {r.total === 0 ? (
         <section className="card">
           <Empty>Nenhum gasto em {formatMonth(month).toLowerCase()}.</Empty>

@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
-import { formatMoney, formatMonth } from './utils';
+import { formatMoney, formatMonth, monthsOfYear, shortMonth, todayISO } from './utils';
 import { usePageTitle } from './pageTitle';
 
 const P: Record<string, ReactNode> = {
@@ -204,19 +204,82 @@ export function Card({ title, action, children, className = '' }: { title?: Reac
   );
 }
 
-export function MonthNav({ label, onPrev, onNext, onLabel }: { label: string; onPrev: () => void; onNext: () => void; onLabel?: () => void }) {
+/**
+ * Mês com ‹ ›. E44 (padrão): com `pick`, tocar no nome do mês abre "Escolher mês" (ano, 12 meses e "Hoje").
+ * `badge` mostra um número embaixo de cada mês (ex.: registros do Diário).
+ */
+export function MonthNav({ label, onPrev, onNext, onLabel, pick }: { label: string; onPrev: () => void; onNext: () => void; onLabel?: () => void; pick?: MonthPick }) {
+  const [open, setOpen] = useState(false);
+  const tap = pick ? () => setOpen(true) : onLabel;
   return (
     <div className="month-nav">
       <IconButton icon="left" label="Mês anterior" onClick={onPrev} />
-      {onLabel ? (
-        <button type="button" className="month-label link-like" onClick={onLabel}>
+      {tap ? (
+        <button type="button" className="month-label link-like" onClick={tap} aria-haspopup={pick ? 'dialog' : undefined}>
           {label}
         </button>
       ) : (
         <span className="month-label">{label}</span>
       )}
       <IconButton icon="right" label="Próximo mês" onClick={onNext} />
+      {open && pick && <MonthPickSheet {...pick} onClose={() => setOpen(false)} />}
     </div>
+  );
+}
+
+export interface MonthPick {
+  /** Mês mostrado ("AAAA-MM"). */
+  month: string;
+  onPick: (month: string) => void;
+  /** "Hoje" (padrão: vai para o mês atual). */
+  onToday?: () => void;
+  /** Texto curto embaixo de cada mês (ou null). */
+  badge?: (month: string) => string | null;
+  title?: string;
+}
+
+function MonthPickSheet({ month, onPick, onToday, badge, title = 'Escolher mês', onClose }: MonthPick & { onClose: () => void }) {
+  const [year, setYear] = useState(Number(month.slice(0, 4)));
+  const now = todayISO().slice(0, 7);
+  const choose = (m: string) => {
+    onClose();
+    onPick(m);
+  };
+  return (
+    <Sheet
+      title={title}
+      onClose={onClose}
+      footer={
+        <button
+          type="button"
+          className="btn soft block"
+          onClick={() => {
+            onClose();
+            if (onToday) onToday();
+            else onPick(now);
+          }}
+        >
+          Hoje
+        </button>
+      }
+    >
+      <div className="mp-year">
+        <IconButton icon="left" label="Ano anterior" onClick={() => setYear(year - 1)} />
+        <b className="tabular">{year}</b>
+        <IconButton icon="right" label="Próximo ano" onClick={() => setYear(year + 1)} />
+      </div>
+      <div className="mp-grid">
+        {monthsOfYear(year).map((m) => {
+          const b = badge?.(m) ?? null;
+          return (
+            <button key={m} type="button" className={`mp-month${m === month ? ' on' : ''}${m === now ? ' now' : ''}`} aria-pressed={m === month} aria-label={formatMonth(m) + (b ? ` (${b})` : '')} onClick={() => choose(m)}>
+              <span>{shortMonth(m)}</span>
+              {b && <small>{b}</small>}
+            </button>
+          );
+        })}
+      </div>
+    </Sheet>
   );
 }
 
@@ -328,37 +391,6 @@ export function useBackToClose(onClose: () => void) {
 // ---------- Sheet (janela de formulário / detalhes) ----------
 
 const openSheets: symbol[] = [];
-
-/**
- * M44 (e E42, para outros módulos): histórico por ano e mês. Fichas com os anos e, embaixo,
- * os meses daquele ano com a contagem. `counts`: AAAA-MM → quantidade.
- */
-export function YearMonthSheet({ title, counts, unit, month, onPick, onClose }: { title: string; counts: Map<string, number>; unit: [string, string]; month: string; onPick: (m: string) => void; onClose: () => void }) {
-  const years = [...new Set([...counts.keys()].map((m) => m.slice(0, 4)))].sort().reverse();
-  const [year, setYear] = useState(years.includes(month.slice(0, 4)) ? month.slice(0, 4) : (years[0] ?? ''));
-  const months = [...counts.entries()].filter(([m]) => m.startsWith(year)).sort((a, b) => b[0].localeCompare(a[0]));
-  return (
-    <Sheet title={title} onClose={onClose}>
-      {years.length === 0 ? (
-        <Empty>Nada registrado ainda.</Empty>
-      ) : (
-        <>
-          {years.length > 1 && <Chips label="Ano" value={year} onChange={setYear} options={years.map((y) => ({ value: y, label: y }))} />}
-          <div className="ym-list">
-            {months.map(([m, n]) => (
-              <button key={m} type="button" className={m === month ? 'on' : ''} onClick={() => onPick(m)}>
-                <span>{formatMonth(m)}</span>
-                <span className="muted small">
-                  {n} {n === 1 ? unit[0] : unit[1]}
-                </span>
-              </button>
-            ))}
-          </div>
-        </>
-      )}
-    </Sheet>
-  );
-}
 
 export function Sheet({ title, badge, onClose, children, footer, size }: { title: ReactNode; badge?: ReactNode; onClose: () => void; children: ReactNode; footer?: ReactNode; size?: 'wide' }) {
   const close = useRef(onClose);

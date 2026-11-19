@@ -94,7 +94,7 @@ export function Financas({ route }: ViewProps) {
 
   return (
     <>
-      <PageHeader title="Finanças" actions={<MonthNav label={formatMonth(month)} onPrev={() => setMonth(addMonths(month, -1))} onNext={() => setMonth(addMonths(month, 1))} onLabel={() => setMonth(monthKey(today))} />} tabs={<Segmented label="Visão" swipe value={tab} onChange={setTab} options={[{ value: 'mes', label: 'Despesas' }, { value: 'receitas', label: 'Receitas' }, { value: 'cartoes', label: 'Cartões' }, { value: 'caixinhas', label: 'Caixinhas' }]} />} />
+      <PageHeader title="Finanças" actions={<MonthNav label={formatMonth(month)} onPrev={() => setMonth(addMonths(month, -1))} onNext={() => setMonth(addMonths(month, 1))} pick={{ month, onPick: setMonth, onToday: () => setMonth(monthKey(today)) }} />} tabs={<Segmented label="Visão" swipe value={tab} onChange={setTab} options={[{ value: 'mes', label: 'Despesas' }, { value: 'receitas', label: 'Receitas' }, { value: 'cartoes', label: 'Cartões' }, { value: 'caixinhas', label: 'Caixinhas' }]} />} />
 
       {tab === 'caixinhas' ? (
         <CaixinhasTab month={month} newOpen={boxForm} onNewClose={() => setBoxForm(false)} />

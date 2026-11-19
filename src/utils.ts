@@ -141,3 +141,14 @@ export function nowTime(): string {
 }
 
 export const sum = (xs: number[]) => Math.round(xs.reduce((a, b) => a + b, 0) * 100) / 100;
+
+/** E44: os 12 meses de um ano ("AAAA-01" a "AAAA-12"). */
+export function monthsOfYear(year: number): string[] {
+  return Array.from({ length: 12 }, (_, i) => `${year}-${pad(i + 1)}`);
+}
+
+/** E44: nome curto do mês ("jan", "fev"…) de "AAAA-MM". */
+export function shortMonth(key: string): string {
+  const [y, m] = key.split('-').map(Number);
+  return new Date(y, m - 1, 1).toLocaleDateString('pt-BR', { month: 'short' }).replace('.', '');
+}

@@ -7,7 +7,7 @@ import type { JournalEntry, Photo } from '../types';
 import { saveFile, shrinkImage } from '../files';
 import { PhotoThumb, PhotoViewer } from './Fotos';
 import { addMonths, formatDate, formatDateTime, formatDMY, formatMonth, monthKey, nowTime, pad, relativeDay, toISO, todayISO, uid } from '../utils';
-import { Chips, Empty, Field, Icon, IconButton, MonthNav, PageHeader, Pill, Sheet, YearMonthSheet } from '../ui';
+import { Chips, Empty, Field, Icon, IconButton, MonthNav, PageHeader, Pill, Sheet } from '../ui';
 import { usePageMenu } from '../PageMenu';
 import { CardScreen, type CardDef } from '../Cards';
 import { currentStreak, dailyPrompt, memories, mondayOf, weekDays, writtenDays } from '../journal';
@@ -46,7 +46,6 @@ export function Diario({ route }: ViewProps) {
   const today = todayISO();
   const [month, setMonth] = useState(monthKey(today));
   const [editing, setEditing] = useState<JournalEntry | 'new' | null>(null);
-  const [history, setHistory] = useState(false);
   const [searching, setSearching] = useState(false);
   const [query, setQuery] = useState('');
   const [open, setOpen] = useState<Set<string> | null>(null);
@@ -77,6 +76,7 @@ export function Diario({ route }: ViewProps) {
   ]);
 
   const sorted = useMemo(() => [...data.journal].sort((a, b) => b.createdAt.localeCompare(a.createdAt)), [data.journal]);
+  const counts = useMemo(() => monthCounts(data.journal), [data.journal]);
   const q = query.trim().toLowerCase();
   const pool = searching && q
     ? sorted.filter((e) => [e.title, e.summary, e.content, e.tag, e.prompt ?? ''].some((t) => t.toLowerCase().includes(q)))
@@ -129,7 +129,7 @@ export function Diario({ route }: ViewProps) {
     <>
       <PageHeader
         title="Meu diário"
-        actions={!searching && <MonthNav label={formatMonth(month)} onPrev={() => changeMonth(addMonths(month, -1))} onNext={() => changeMonth(addMonths(month, 1))} onLabel={() => setHistory(true)} />}
+        actions={!searching && <MonthNav label={formatMonth(month)} onPrev={() => changeMonth(addMonths(month, -1))} onNext={() => changeMonth(addMonths(month, 1))} pick={{ month, onPick: changeMonth, badge: (m) => { const n = counts.get(m) ?? 0; return n ? `${n} ${n === 1 ? 'registro' : 'registros'}` : null; } }} />}
         tabs={(!searching || q) && pool.length > 0 ? <Chips label="Etiqueta" value={tagFilter} onChange={(v) => { setTagFilter(v === tagFilter ? '' : v); setOpen(null); }} options={tagOptions} /> : undefined}
       />
 
@@ -206,7 +206,6 @@ export function Diario({ route }: ViewProps) {
 
       {editing && <EntryForm entry={editing === 'new' ? undefined : editing} onClose={() => setEditing(null)} onSaved={(e) => { changeMonth(monthKey(localDate(e.createdAt))); setOpen(new Set([e.id])); setSearching(false); }} />}
       {viewing && <PhotoViewer photos={viewing.photos} start={viewing.start} onClose={() => setViewing(null)} />}
-      {history && <YearMonthSheet title="Histórico" counts={monthCounts(data.journal)} unit={['registro', 'registros']} month={month} onPick={(m) => { changeMonth(m); setHistory(false); }} onClose={() => setHistory(false)} />}
     </>
   );
 }

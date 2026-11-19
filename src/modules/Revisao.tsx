@@ -378,14 +378,16 @@ function ReviewCalendar({ week, today, onPick }: { week: string; today: string; 
   const days = useMemo(() => writtenDays(data.journal), [data.journal]);
   const inMonth = [...days].filter((d) => d.startsWith(month)).length;
   function changeMonth(n: number) {
-    const m = addMonths(month, n);
+    goMonth(addMonths(month, n));
+  }
+  function goMonth(m: string) {
     setMonth(m);
     const weeks = monthWeeks(m);
     onPick(m === today.slice(0, 7) ? weekStart(today) : weeks.find((w) => w.slice(0, 7) === m) ?? weeks[0]);
   }
   return (
     <section className="card raised review-cal">
-      <MonthNav label={formatMonth(month)} onPrev={() => changeMonth(-1)} onNext={() => changeMonth(1)} />
+      <MonthNav label={formatMonth(month)} onPrev={() => changeMonth(-1)} onNext={() => changeMonth(1)} pick={{ month, onPick: goMonth, badge: (m) => { const n = [...days].filter((d) => d.startsWith(m)).length; return n ? `${n} ${n === 1 ? 'dia' : 'dias'}` : null; } }} />
       <div className="rc-row rc-head" aria-hidden="true">
         {'STQQSSD'.split('').map((l, i) => (
           <span key={i}>{l}</span>
