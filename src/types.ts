@@ -189,6 +189,8 @@ export interface Expense {
   updatedAt: string;
   /** Pago com vale (VR/VA): id do cartão de benefício. */
   voucherId?: string | null;
+  /** E6: lista de compras de onde a despesa veio (Listas › Compras). */
+  listId?: string | null;
 }
 
 /** Modelo de uma conta fixa ou compra parcelada; as ocorrências são `Expense`. */
@@ -371,6 +373,8 @@ export interface Purchase {
   items: number;
   /** M3: itens com o preço pago ("Quanto custou aqui?"). */
   lines: { productId: string | null; text: string; price: number }[];
+  /** E6: despesas que a compra criou em Finanças. */
+  expenseIds: string[];
 }
 
 export interface ListCategory {

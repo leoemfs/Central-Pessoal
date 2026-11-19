@@ -198,21 +198,75 @@ export function ensureProduct<T extends Pick<AppData, 'products'>>(d: T, name: s
 }
 
 /**
+ * M43 (E6): produto de Preços para um item de lista de compras (Roupas, Casa…), na categoria da lista.
+ * Usa o produto da mesma categoria com o mesmo nome; senão cria um (sem catálogo de mercado).
+ */
+export function ensureCategoryProduct<T extends Pick<AppData, 'products'>>(d: T, name: string, categoryId: string): { data: T; product: Product } {
+  if (categoryId === MARKET_CAT) return ensureProduct(d, name);
+  const own = findProduct({ products: d.products.filter((p) => p.categoryId === categoryId) }, name);
+  if (own) return { data: d, product: own };
+  const id = `${productIdFor(name)}--${categoryId}`;
+  const clash = d.products.find((p) => p.id === id);
+  if (clash) return { data: d, product: clash };
+  const product: Product = { id, name: name.trim(), aisle: 'Outros', unit: 'un', categoryId };
+  return { data: { ...d, products: [...d.products, product] }, product };
+}
+
+/** M43 (E6): o menor preço anotado de um produto (qualquer loja), com o nome da loja. */
+export function cheapest(d: Pick<AppData, 'prices' | 'variants' | 'stores'>, productId: string): { price: number; store: string } | null {
+  const b = bestPrice(d, productId);
+  if (!b) return null;
+  return { price: b.price, store: d.stores.find((s) => s.id === b.storeId)?.name ?? '' };
+}
+
+/**
+ * M43 (E6): item novo numa lista de compras: já vira produto em Preços (na categoria da lista).
+ * Sem valor digitado, usa o menor preço anotado (e a loja dele).
+ */
+export function addShopItem(listId: string, text: string, price: number | null) {
+  return (d: AppData): AppData => {
+    const l = d.lists.find((x) => x.id === listId);
+    if (!l || !text.trim()) return d;
+    const name = text.trim().charAt(0).toUpperCase() + text.trim().slice(1);
+    const r = ensureCategoryProduct(d, name, l.categoryId);
+    const best = price === null ? cheapest(r.data, r.product.id) : null;
+    const item = newItem({ text: name, productId: r.product.id, price: price ?? best?.price ?? null, store: best?.store ?? '' });
+    return patchList(listId, (x) => ({ ...x, items: [...x.items, item] }))(r.data);
+  };
+}
+
+/** E6: despesa criada a partir de uma lista; devolve o id para a compra apontar para ela. */
+function addListExpense(d: AppData, input: Parameters<typeof addExpense>[1], listId: string, today: string): { data: AppData; id: string | null } {
+  const before = d.expenses.length;
+  const next = addExpense(d, input, today);
+  const e = next.expenses[next.expenses.length - 1];
+  if (next.expenses.length === before || !e) return { data: next, id: null };
+  return { data: { ...next, expenses: next.expenses.map((x) => (x.id === e.id ? { ...x, listId } : x)) }, id: e.id };
+}
+
+/**
  * M2: todo item das listas de mercado fica ligado a um produto de Preços (os antigos, na primeira abertura).
  * Item que estava em "Outros" passa para o corredor do produto.
  */
 export function linkMarketItems<T extends Pick<AppData, 'products' | 'lists' | 'listCategories'>>(d: T): T {
   const market = new Set(d.listCategories.filter((c) => c.kind === 'mercado').map((c) => c.id));
+  const shop = new Set(d.listCategories.filter((c) => c.kind === 'compras').map((c) => c.id));
   let next = d;
   let changed = false;
   const lists = d.lists.map((l) => {
-    if (!market.has(l.categoryId)) return l;
+    if (!market.has(l.categoryId) && !shop.has(l.categoryId)) return l;
+    const isShop = shop.has(l.categoryId);
     let touched = false;
     const items = l.items.map((it) => {
       if (it.productId && next.products.some((p) => p.id === it.productId)) return it;
+      touched = true;
+      if (isShop) {
+        const r = ensureCategoryProduct(next, it.text, l.categoryId);
+        next = r.data;
+        return { ...it, productId: r.product.id };
+      }
       const r = ensureProduct(next, it.text, it.unit);
       next = r.data;
-      touched = true;
       return { ...it, productId: r.product.id, aisle: !it.aisle || it.aisle === 'Outros' ? r.product.aisle : it.aisle };
     });
     if (!touched) return l;
@@ -410,10 +464,13 @@ export function finishShopping(listId: string, o: { total: number; storeName: st
     const l = d.lists.find((x) => x.id === listId);
     const bought = l ? l.items.filter((i) => i.done).length : 0;
     const lines = l ? l.items.filter((i) => i.done && (i.paid ?? 0) > 0).map((i) => ({ productId: i.productId, text: i.text, price: i.paid! })) : [];
-    if (l && (o.total > 0 || bought > 0)) next = recordPurchase(next, { date: today, listId, listName: l.name, store: o.storeName, total: o.total, items: bought, lines });
+    const expenseIds: string[] = [];
     if (o.categoryId && o.total > 0) {
-      next = addExpense(next, { kind: 'avulsa', description: `Mercado · ${o.storeName}`, categoryId: o.categoryId, method: o.voucherId ? 'vale' : 'pix', cardId: null, date: today, amounts: [o.total], paidAt: today, voucherId: o.voucherId ?? null }, today);
+      const r = addListExpense(next, { kind: 'avulsa', description: `Mercado · ${o.storeName}`, categoryId: o.categoryId, method: o.voucherId ? 'vale' : 'pix', cardId: null, date: today, amounts: [o.total], paidAt: today, voucherId: o.voucherId ?? null }, listId, today);
+      next = r.data;
+      if (r.id) expenseIds.push(r.id);
     }
+    if (l && (o.total > 0 || bought > 0)) next = recordPurchase(next, { date: today, listId, listName: l.name, store: o.storeName, total: o.total, items: bought, lines, expenseIds });
     return o.reset ? uncheckAll(listId)(next) : next;
   };
 }
@@ -466,6 +523,8 @@ export interface PurchaseRow {
   store: string;
   total: number;
   items: number | null;
+  /** E6: despesas em Finanças desta compra. */
+  expenseIds: string[];
 }
 
 /**
@@ -473,27 +532,44 @@ export interface PurchaseRow {
  * Compras feitas antes deste histórico existir entram pelas despesas "Mercado · Loja".
  */
 export function purchaseHistory(d: Pick<AppData, 'purchases' | 'expenses'>): PurchaseRow[] {
-  const rows: PurchaseRow[] = d.purchases.map((p) => ({ key: p.id, date: p.date, title: p.listName, store: p.store, total: p.total, items: p.items }));
+  const alive = new Set(d.expenses.map((e) => e.id));
+  // Compras antigas (antes do E6) não guardavam a despesa: acha a do mercado pela data, loja e valor.
+  const legacy = (p: Purchase) => d.expenses.filter((e) => e.description === `Mercado · ${p.store}` && (e.paidAt ?? e.dueDate) === p.date && Math.abs(e.amount - p.total) < 0.005).slice(0, 1).map((e) => e.id);
+  const rows: PurchaseRow[] = d.purchases.map((p) => {
+    const saved = p.expenseIds ?? [];
+    const own = saved.filter((id) => alive.has(id));
+    return { key: p.id, date: p.date, title: p.listName, store: p.store, total: p.total, items: p.items, expenseIds: saved.length ? own : legacy(p) };
+  });
   const first = d.purchases.reduce<string | null>((m, p) => (m === null || p.date < m ? p.date : m), null);
   for (const e of d.expenses) {
     if (!e.description.startsWith('Mercado · ')) continue;
     if (first !== null && e.dueDate >= first) continue;
-    rows.push({ key: `e:${e.id}`, date: e.dueDate, title: 'Compra de mercado', store: e.description.slice('Mercado · '.length), total: e.amount, items: null });
+    rows.push({ key: `e:${e.id}`, date: e.dueDate, title: 'Compra de mercado', store: e.description.slice('Mercado · '.length), total: e.amount, items: null, expenseIds: [e.id] });
   }
   return rows.sort((a, b) => b.date.localeCompare(a.date) || b.key.localeCompare(a.key));
 }
 
-/** Lista de compras: cada item comprado (com valor) vira uma despesa paga hoje. */
+/**
+ * Lista de compras: cada item comprado (com valor) vira uma despesa paga hoje, marcada como "veio da lista".
+ * E6: item com loja anota o preço em Preços (na categoria da lista).
+ */
 export function launchBought(listId: string, categoryId: string, today: string = todayISO()) {
   return (d: AppData): AppData => {
     const l = d.lists.find((x) => x.id === listId);
     if (!l) return d;
     let next = d;
     const toLaunch = l.items.filter((i) => i.done && !i.launched && (i.price ?? 0) > 0);
-    if (toLaunch.length) next = recordPurchase(next, { date: today, listId, listName: l.name, store: '', total: toLaunch.reduce((a, i) => a + (i.price ?? 0), 0), items: toLaunch.length, lines: [] });
+    const expenseIds: string[] = [];
     for (const it of toLaunch) {
-      next = addExpense(next, { kind: 'avulsa', description: it.text, categoryId, method: 'pix', cardId: null, date: today, amounts: [it.price!], paidAt: today }, today);
+      const r = addListExpense(next, { kind: 'avulsa', description: it.text, categoryId, method: 'pix', cardId: null, date: today, amounts: [it.price!], paidAt: today }, listId, today);
+      next = r.data;
+      if (r.id) expenseIds.push(r.id);
+      if (it.productId && it.store.trim() && next.products.some((p) => p.id === it.productId)) {
+        next = addPrice({ storeName: it.store, productId: it.productId, price: it.price!, date: today, categoryId: l.categoryId })(next);
+      }
     }
+    const stores = [...new Set(toLaunch.map((i) => i.store.trim()).filter(Boolean))];
+    if (toLaunch.length) next = recordPurchase(next, { date: today, listId, listName: l.name, store: stores.join(', '), total: Math.round(toLaunch.reduce((a, i) => a + (i.price ?? 0), 0) * 100) / 100, items: toLaunch.length, lines: toLaunch.map((i) => ({ productId: i.productId, text: i.text, price: i.price! })), expenseIds });
     return patchList(listId, (x) => ({ ...x, items: x.items.map((i) => (i.done && (i.price ?? 0) > 0 ? { ...i, launched: true } : i)) }))(next);
   };
 }
