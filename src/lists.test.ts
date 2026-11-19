@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { emptyData, normalize, seedCategories } from './data.ts';
 import { addExpense } from './finance.ts';
 import {
-  mergeProducts,
+  mergeProducts, addShopItem, cheapest, ensureCategoryProduct,
   catalogByAisle, createListWithItems, deletePriceEntry, deleteProduct, itemCost, packLabel, priceCategories, updatePriceEntry, updateProduct,
   lastPurchase, packCount, paidTotal, payItem,
   ensureProduct, linkMarketItems, marketEstimate, matchKey, priceRange, productSuggestions, productsWithoutPrice, sizeOptions,
@@ -148,7 +148,7 @@ test('compras: as de antes do histórico vêm das despesas de mercado; backup gu
   const food = d.categories.find((c) => c.name === 'Alimentação')!.id;
   d = addExpense(d, { kind: 'avulsa', description: 'Mercado · Atacadão', categoryId: food, method: 'pix', cardId: null, date: '2026-10-02', amounts: [210], paidAt: '2026-10-02' }, '2026-10-02');
   d = addExpense(d, { kind: 'avulsa', description: 'Padaria', categoryId: food, method: 'pix', cardId: null, date: '2026-10-03', amounts: [12], paidAt: '2026-10-03' }, '2026-10-03');
-  d = { ...d, purchases: [{ id: 'p1', date: '2026-11-10', listId: 'x', listName: 'Mercado do mês', store: 'Assaí', total: 380, items: 22, lines: [] }] };
+  d = { ...d, purchases: [{ id: 'p1', date: '2026-11-10', listId: 'x', listName: 'Mercado do mês', store: 'Assaí', total: 380, items: 22, lines: [], expenseIds: [] }] };
   const h = purchaseHistory(d);
   assert.deepEqual(h.map((r) => [r.date, r.title, r.store, r.items]), [['2026-11-10', 'Mercado do mês', 'Assaí', 22], ['2026-10-02', 'Compra de mercado', 'Atacadão', null]]);
   const back = normalize(JSON.parse(JSON.stringify(d)));
@@ -343,4 +343,80 @@ test('E1: a categoria Receitas de Listas vira Cozinha (nome trocado só se era o
   assert.equal(old.listCategories[1].name, 'Receitas');
   const renamed = normalizeListData({ listCategories: [{ id: 'lc-receitas', name: 'Minhas receitas', kind: 'receita' }] });
   assert.equal(renamed.listCategories[0].name, 'Minhas receitas');
+});
+
+// ---------- E6: Listas e Preços integrados (M43) ----------
+
+test('E6: item de lista de compras vira produto na categoria da lista e usa o menor preço', () => {
+  let d = seedCategories(emptyData());
+  const l = newList('Roupas do verão', 'lc-roupas');
+  d = { ...d, lists: [l] };
+  d = addShopItem(l.id, 'camiseta', null)(d);
+  const p = d.products.find((x) => x.name === 'Camiseta');
+  assert.equal(p?.categoryId, 'lc-roupas');
+  assert.equal(d.lists[0].items[0].productId, p!.id);
+  assert.equal(d.lists[0].items[0].price, null);
+  d = addPrice({ storeName: 'Renner', productId: p!.id, price: 49.9, categoryId: 'lc-roupas' })(d);
+  d = addPrice({ storeName: 'C&A', productId: p!.id, price: 39.9, categoryId: 'lc-roupas' })(d);
+  assert.deepEqual(cheapest(d, p!.id), { price: 39.9, store: 'C&A' });
+  d = addShopItem(l.id, 'Camiseta', null)(d);
+  assert.equal(d.products.filter((x) => x.categoryId === 'lc-roupas').length, 1);
+  assert.equal(d.lists[0].items[1].price, 39.9);
+  assert.equal(d.lists[0].items[1].store, 'C&A');
+  // valor digitado vale mais que o anotado
+  d = addShopItem(l.id, 'Camiseta', 55)(d);
+  assert.equal(d.lists[0].items[2].price, 55);
+  // mesmo nome em outra categoria é outro produto
+  const r = ensureCategoryProduct(d, 'Camiseta', 'lc-casa');
+  assert.notEqual(r.product.id, p!.id);
+  assert.equal(r.product.categoryId, 'lc-casa');
+});
+
+test('E6: itens antigos de listas de compras ganham produto na primeira abertura', () => {
+  const l: UserList = { ...newList('Casa nova', 'lc-casa'), items: [newItem({ text: 'Toalha', price: 30 })] };
+  const d = normalize({ version: 2, lists: [l] });
+  const it = d.lists[0].items[0];
+  const p = d.products.find((x) => x.id === it.productId);
+  assert.equal(p?.name, 'Toalha');
+  assert.equal(p?.categoryId, 'lc-casa');
+});
+
+test('E6: lançar compras liga despesa e compra, e anota o preço da loja', () => {
+  let d = seedCategories(emptyData());
+  const l = newList('Roupas', 'lc-roupas');
+  d = { ...d, lists: [l] };
+  d = addShopItem(l.id, 'Tênis', 300)(d);
+  d = addShopItem(l.id, 'Meia', 20)(d);
+  d = { ...d, lists: d.lists.map((x) => ({ ...x, items: x.items.map((i, n) => ({ ...i, done: true, store: n === 0 ? 'Centauro' : '' })) })) };
+  const cat = d.categories[0].id;
+  d = launchBought(l.id, cat, TODAY)(d);
+  assert.equal(d.expenses.length, 2);
+  assert.ok(d.expenses.every((e) => e.listId === l.id));
+  const pur = d.purchases[0];
+  assert.deepEqual([...pur.expenseIds].sort(), d.expenses.map((e) => e.id).sort());
+  assert.equal(pur.store, 'Centauro');
+  const tenis = d.products.find((p) => p.name === 'Tênis')!;
+  assert.equal(cheapest(d, tenis.id)?.store, 'Centauro');
+  assert.equal(d.stores.find((s) => s.name === 'Centauro')?.categoryId, 'lc-roupas');
+  const row = purchaseHistory(d)[0];
+  assert.equal(row.expenseIds.length, 2);
+  // despesa excluída some do atalho
+  d = { ...d, expenses: d.expenses.slice(1) };
+  assert.equal(purchaseHistory(d)[0].expenseIds.length, 1);
+});
+
+test('E6: concluir o mercado liga a despesa; compra antiga acha a despesa pela data e valor', () => {
+  let d = seedCategories(emptyData());
+  const l = newList('Mercado', 'lc-mercado');
+  d = { ...d, lists: [l] };
+  d = addItemFromText(l.id, 'arroz')(d);
+  d = toggleItem(l.id, d.lists[0].items[0].id)(d);
+  d = finishShopping(l.id, { total: 50, storeName: 'Assaí', categoryId: d.categories[0].id, reset: false }, TODAY)(d);
+  assert.equal(d.expenses[0].listId, l.id);
+  assert.deepEqual(d.purchases[0].expenseIds, [d.expenses[0].id]);
+  // compra salva antes do E6 (sem expenseIds)
+  const old = normalize({ ...d, purchases: d.purchases.map(({ expenseIds: _x, ...p }) => p) });
+  assert.deepEqual(old.purchases[0].expenseIds, []);
+  assert.deepEqual(purchaseHistory(old)[0].expenseIds, [d.expenses[0].id]);
+  assert.equal(normalize({ ...d }).expenses[0].listId, l.id);
 });

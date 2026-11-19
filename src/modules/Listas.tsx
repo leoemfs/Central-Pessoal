@@ -5,12 +5,13 @@ import { useStore } from '../store';
 import { go, goReplace, useSubAction } from '../router';
 import { usePageTitle } from '../pageTitle';
 import { remove, upsert } from '../actions';
+import { ExpenseDetail } from './financas/ExpenseDetail';
 import {
   addItemFromText, addListCategory, addPrice, AISLES, bestPrice, categoryOf, deleteListCategory, finishShopping, kindOf, latestPrices, launchBought, LIST_COLORS,
   LIST_ICONS, LIST_KINDS, listEstimate, newItem, newList, perUnit, priceCheck, qtyText, removeItem, scaledQty, sendIngredients, sizeText, toggleItem, uncheckAll,
   updateItem, updateList, updateListCategory, variantLabel, itemCost, purchaseHistory, ensureProduct, findCatalog, marketEstimate, matchKey, parseItemText,
   catalogByAisle, createListWithItems, MARKET_CAT, packLabel, priceCategories, updateProduct, deleteProduct, updatePriceEntry, deletePriceEntry, mergeProducts,
-  priceRange, productSuggestions, productsWithoutPrice, sizeOptions, packCount, payItem, paidTotal, lastPurchase,
+  priceRange, productSuggestions, addShopItem, cheapest, ensureCategoryProduct, productsWithoutPrice, sizeOptions, packCount, payItem, paidTotal, lastPurchase,
 } from '../lists';
 import type { ListCategory, ListItem, ListKind, Product, ProductVariant, UserList } from '../types';
 import { formatDMY, formatMoney, todayISO, uid } from '../utils';
@@ -116,6 +117,13 @@ export function ComprasPage() {
   const month = todayISO().slice(0, 7);
   const monthRows = rows.filter((r) => r.date.startsWith(month));
   const monthTotal = monthRows.reduce((a, r) => a + r.total, 0);
+  const [pick, setPick] = useState<string[] | null>(null);
+  const [open, setOpen] = useState<string | null>(null);
+  function tap(ids: string[]) {
+    if (ids.length === 1) setOpen(ids[0]);
+    else if (ids.length > 1) setPick(ids);
+    else notify('Sem despesa em Finanças', 'Esta compra foi concluída sem lançar em Finanças.');
+  }
   return (
     <>
       <PageHeader title="Compras" subtitle="O que você comprou pelas listas" />
@@ -137,28 +145,50 @@ export function ComprasPage() {
           <span className="muted small">{rows.length}</span>
         </div>
         {rows.length === 0 ? (
-          <Empty>Quando você concluir uma compra numa lista de mercado (ou lançar os itens de uma lista de compras), ela aparece aqui, com o total e a loja.</Empty>
+          <Empty>Quando você concluir uma compra numa lista de mercado (ou lançar os itens de uma lista de compras), ela aparece aqui, com o total e a loja. Toque numa compra para abrir a despesa em Finanças.</Empty>
         ) : (
           <ul className="list">
             {rows.slice(0, 60).map((r) => (
-              <li key={r.key} className="row">
-                <span className="tile-icon">
-                  <Icon name="receipt" size={18} />
-                </span>
-                <div className="row-body">
-                  <span className="row-title">{r.title}</span>
-                  <span className="row-meta">
-                    {formatDMY(r.date)}
-                    {r.store ? ` · ${r.store}` : ''}
-                    {r.items !== null ? ` · ${r.items} ${r.items === 1 ? 'item' : 'itens'}` : ''}
+              <li key={r.key}>
+                <button type="button" className="row" onClick={() => tap(r.expenseIds)}>
+                  <span className="tile-icon">
+                    <Icon name="receipt" size={18} />
                   </span>
-                </div>
-                <strong className="tabular">{formatMoney(r.total)}</strong>
+                  <div className="row-body">
+                    <span className="row-title">{r.title}</span>
+                    <span className="row-meta">
+                      {formatDMY(r.date)}
+                      {r.store ? ` · ${r.store}` : ''}
+                      {r.items !== null ? ` · ${r.items} ${r.items === 1 ? 'item' : 'itens'}` : ''}
+                    </span>
+                  </div>
+                  <strong className="tabular">{formatMoney(r.total)}</strong>
+                </button>
               </li>
             ))}
           </ul>
         )}
       </section>
+      {pick && (
+        <Sheet title="Despesas desta compra" onClose={() => setPick(null)}>
+          <ul className="list">
+            {pick.map((id) => {
+              const e = data.expenses.find((x) => x.id === id);
+              return e ? (
+                <li key={id}>
+                  <button type="button" className="row" onClick={() => setOpen(id)}>
+                    <div className="row-body">
+                      <span className="row-title">{e.description}</span>
+                    </div>
+                    <strong className="tabular">{formatMoney(e.amount)}</strong>
+                  </button>
+                </li>
+              ) : null;
+            })}
+          </ul>
+        </Sheet>
+      )}
+      {open && <ExpenseDetail id={open} onClose={() => setOpen(null)} />}
     </>
   );
 }
@@ -629,6 +659,7 @@ function ItemSheet({ l, it, onClose }: { l: UserList; it: ListItem; onClose: () 
   const [store, setStore] = useState(it.store);
   const prod = data.products.find((p) => p.id === it.productId);
   const packs = prod ? sizeOptions(data, prod) : [];
+  const best = k === 'compras' && it.productId ? cheapest(data, it.productId) : null;
   const [packKey, setPackKey] = useState(() => {
     const i = packs.findIndex((x) => it.pack && x.size === it.pack.size && x.sizeUnit === it.pack.sizeUnit);
     return i < 0 ? '' : String(i);
@@ -654,9 +685,9 @@ function ItemSheet({ l, it, onClose }: { l: UserList; it: ListItem; onClose: () 
             className="btn primary"
             onClick={() => {
               const newText = text.trim() || it.text;
-              if (k === 'mercado' && matchKey(newText) !== matchKey(it.text)) {
+              if ((k === 'mercado' || k === 'compras') && (matchKey(newText) !== matchKey(it.text) || !it.productId)) {
                 update((d) => {
-                  const r = ensureProduct(d, newText, unit);
+                  const r = k === 'compras' ? ensureCategoryProduct(d, newText, l.categoryId) : ensureProduct(d, newText, unit);
                   return updateItem(l.id, it.id, { productId: r.product.id })(r.data);
                 });
               }
@@ -695,6 +726,24 @@ function ItemSheet({ l, it, onClose }: { l: UserList; it: ListItem; onClose: () 
         <div className="field">
           <span className="field-label">Corredor</span>
           <Chips label="Corredor" value={aisle} onChange={setAisle} options={AISLES.map((a) => ({ value: a, label: a }))} />
+        </div>
+      )}
+      {k === 'compras' && best && (
+        <div className="field">
+          <span className="field-hint">
+            Menor preço anotado: <strong>{formatMoney(best.price)}</strong>
+            {best.store ? ` em ${best.store}` : ''}.{' '}
+            <button
+              type="button"
+              className="link"
+              onClick={() => {
+                setPrice(fmtNum(best.price));
+                if (best.store) setStore(best.store);
+              }}
+            >
+              Usar
+            </button>
+          </span>
         </div>
       )}
       {k === 'compras' && (
@@ -1413,7 +1462,7 @@ function ShoppingList({ l }: { l: UserList }) {
           </ul>
         )}
       </section>
-      <AddRow placeholder="Ex.: tênis de corrida" withValue onAdd={(t, v) => update(upsert('lists', { ...l, items: [...l.items, newItem({ text: t.charAt(0).toUpperCase() + t.slice(1), price: v })] }))} />
+      <AddRow placeholder="Ex.: tênis de corrida" withValue onAdd={(t, v) => update(addShopItem(l.id, t, v))} />
       <ListFooter l={l}>
         {pending.length > 0 && (
           <button type="button" className="btn primary" onClick={() => setLaunch(true)}>

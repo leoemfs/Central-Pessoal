@@ -56,6 +56,20 @@ export function ExpenseDetail({ id, onClose, onOpenInvoice }: { id: string; onCl
               </dd>
             </div>
           )}
+          {e.listId && (
+            <div>
+              <dt>Origem</dt>
+              <dd>
+                {data.lists.some((l) => l.id === e.listId) ? (
+                  <a className="link" href={`#/listas/${e.listId}`} onClick={onClose}>
+                    Veio da lista {data.lists.find((l) => l.id === e.listId)!.name}
+                  </a>
+                ) : (
+                  'Veio de uma lista'
+                )}
+              </dd>
+            </div>
+          )}
           <div>
             <dt>Valor</dt>
             <dd>{formatMoney(e.amount)}</dd>

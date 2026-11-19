@@ -50,6 +50,7 @@ export function fixExpense(r: Rec, now: string): Expense | null {
     createdAt: stamp(r.createdAt, now),
     updatedAt: stamp(r.updatedAt, now),
     voucherId: method === 'vale' ? voucherId : null,
+    ...(r.listId !== undefined ? { listId: strOrNull(r.listId) } : {}),
   } as Expense;
 }
 
