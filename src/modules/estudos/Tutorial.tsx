@@ -1,4 +1,6 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { useStore } from '../../store';
+import { markSeen } from '../../guias';
 import { go } from '../../router';
 import { Icon, notify, Sheet, type IconName } from '../../ui';
 import { useStudy } from './shared';
@@ -76,6 +78,12 @@ function Rich({ text }: { text: string }) {
 /** Passo a passo do tutorial, numa janela com Voltar e Próximo. */
 export function TutorialSheet({ onClose }: { onClose: () => void }) {
   const [i, setI] = useState(0);
+  // E43: abriu o guia, ele aparece como "Visto" em Como usar o app.
+  const { update } = useStore();
+  useEffect(() => {
+    update((d) => (d.settings.guidesSeen.includes('estudos') ? d : { ...d, settings: { ...d.settings, guidesSeen: markSeen(d.settings.guidesSeen, 'estudos') } }));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   const step = STEPS[i];
   const last = i === STEPS.length - 1;
   return (
@@ -146,7 +154,7 @@ export function TutorialCard() {
           title="Arquivar"
           onClick={() => {
             set((s) => ({ ...s, tutorialOff: true }));
-            notify('Tutorial arquivado', 'O passo a passo continua no fim da tela de Estudos.');
+            notify('Tutorial arquivado', 'O passo a passo fica no ⋮ de Estudos e em Como usar o app.');
           }}
         >
           <Icon name="archive" size={18} />

@@ -17,6 +17,7 @@ import { Financas } from './modules/financas/Financas';
 import { Diario } from './modules/Diario';
 import { Agenda } from './modules/Agenda';
 import { Guardados, keptCount } from './modules/Mais';
+import { AjudaPage } from './modules/Ajuda';
 import { Habitos } from './modules/Habitos';
 import { ArquivadosPage, IdeiasPage, NotasPage } from './modules/Notas';
 import { Ajustes } from './modules/Ajustes';
@@ -69,6 +70,7 @@ export const SECTIONS: Section[] = [
   { path: 'diario', label: 'Diário', icon: 'journal', view: Diario, fab: 'diario/nova', title: 'Meu diário', search: 'diario/buscar' },
   { path: 'agenda', label: 'Agenda', icon: 'calendar', view: Agenda, fab: 'agenda/novo' },
   { path: 'guardados', label: 'Guardados', icon: 'archive', view: Guardados },
+  { path: 'ajuda', label: 'Como usar o app', icon: 'info', view: AjudaPage },
   { path: 'nucleo', label: 'Núcleo pessoal', icon: 'sprout', view: Habitos, fab: 'nucleo/novo' },
   { path: 'arquivo', label: 'Notas', icon: 'note', view: NotasPage, fab: 'arquivo/menu' },
   { path: 'ideias', label: 'Ideias', icon: 'bulb', view: IdeiasPage, fab: 'ideias/menu' },
