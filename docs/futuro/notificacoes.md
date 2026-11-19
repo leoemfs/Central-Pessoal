@@ -46,13 +46,11 @@ interface NotificationSettings {
 ```
 Fica em `AppData.settings.notifications`. Os avisos agendados não são guardados: são recalculados a partir dos dados.
 
-## Lembretes na Agenda (decidido em 19/11/2026)
-- **Sem módulo novo.** Na barra de baixo da Agenda, **Lembretes** ocupa o lugar do atalho **Dia**: Lembretes · **Agenda** (centro) · Próximos. O dia continua abrindo ao tocar nele no calendário; o tutorial da Agenda ensina isso.
-- **Tela Lembretes:** lista o que tem **🔔 me lembrar** ligado, por data: tarefas, compromissos, contas e reuniões. Tocar abre a coisa de origem.
-- **Todo lembrete é ligado a algo.** Não existe lembrete solto: o que for solto vai para Notas. Assim nada fica repetido nem espalhado.
-- **"Me lembrar"** aparece ao criar ou editar tarefa, compromisso, conta e reunião.
-- **O aviso** vai para a Agenda e para o **Google Agenda** (N9.5), que avisa no celular. Aviso pelo próprio app só quando houver o app Android.
-- Sai do menu o "Lembretes (em breve)".
+## Lembretes na Agenda (decidido em 19/11/2026, revisto)
+- **Sem módulo nem tela de lembretes.** Barra de baixo da Agenda: **Tarefas · Agenda (centro) · Próximos**. Tarefas sai de dentro da Agenda e vira atalho (a aba some da Agenda). O atalho **Dia** sai: o dia abre tocando nele no calendário, e o tutorial da Agenda ensina isso.
+- **Lembrete = interruptor 🔔 "Me lembrar"**, igual em tarefa, compromisso, conta e reunião. Tarefa (algo a fazer) e lembrete (aviso na hora) são coisas diferentes, por isso o sino vale para tudo que tem data.
+- **Todo lembrete é ligado a algo.** O solto vai para Notas, para nada ficar repetido nem espalhado.
+- **Com o sino ligado:** vai para a Agenda e para o **Google Agenda** com aviso (N9.5), que avisa no celular, e aparece com 🔔 no **Próximos**. Aviso pelo próprio app só no app Android.
 
 ## Níveis de frequência (pedido em 10/11/2026)
 Em **Configurações › Notificações**, a pessoa escolhe um nível. Cada nível é um conjunto pronto das regras abaixo; em **Personalizado**, cada tipo liga e desliga à parte.
