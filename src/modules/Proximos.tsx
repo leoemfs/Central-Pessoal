@@ -14,7 +14,8 @@ function Row({ i }: { i: UpcomingItem }) {
   return (
     <li>
       <a className="row" href={k.href}>
-        <span className="tile-icon">
+        {/* Cor do módulo de onde veio (conta = Finanças, reunião = Carreira…). */}
+        <span className="tile-icon" data-mod={i.module}>
           <Icon name={k.icon} size={18} />
         </span>
         <div className="row-body">

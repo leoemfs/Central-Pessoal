@@ -30,3 +30,23 @@ test('próximos: compromissos, tarefas e contas por dia; atrasados à parte', ()
   assert.equal(u.days[0].items[2].amount, 180);
   assert.equal(u.total, 4);
 });
+
+test('próximos: cada item sabe de que módulo veio (para a cor do ícone)', () => {
+  let d = seedCategories(emptyData());
+  const cat = d.categories[0].id;
+  d = {
+    ...d,
+    events: [
+      { id: 'e1', title: 'Dentista', date: '2026-11-19', time: '15:00', location: '', description: '' },
+      { id: 'e2', title: 'Alinhamento', date: '2026-11-19', time: '14:00', location: '', description: '', origin: 'carreira/abrir-m-1' },
+    ],
+    tasks: [{ id: 't1', title: 'Renovar CNH', notes: '', due: '2026-11-20', priority: 'media', tag: '', done: false, createdAt: '', doneAt: null }],
+  } as typeof d;
+  d = addExpense(d, { kind: 'avulsa', description: 'Luz', categoryId: cat, method: 'pix', cardId: null, date: '2026-11-19', amounts: [180], paidAt: null }, TODAY);
+  const all = upcoming(d, TODAY).days.flatMap((x) => x.items);
+  const mod = (t: string) => all.find((i) => i.title === t)?.module;
+  assert.equal(mod('Dentista'), 'agenda');
+  assert.equal(mod('Alinhamento'), 'carreira');
+  assert.equal(mod('Renovar CNH'), 'agenda');
+  assert.equal(mod('Luz'), 'financas');
+});
