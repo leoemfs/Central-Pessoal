@@ -50,3 +50,24 @@ test('próximos: cada item sabe de que módulo veio (para a cor do ícone)', () 
   assert.equal(mod('Renovar CNH'), 'agenda');
   assert.equal(mod('Luz'), 'financas');
 });
+
+test('N3 🔔: tocar no sino do Próximos liga na tarefa e, na reunião, muda a própria reunião', async () => {
+  const { toggleRemind } = await import('./upcoming.ts');
+  const { emptyData } = await import('./data.ts');
+  const base = emptyData();
+  const d = {
+    ...base,
+    tasks: [{ id: 't1', title: 'CNH', notes: '', due: '2026-11-20', priority: 'media', tag: '', done: false, createdAt: '', doneAt: null }],
+    events: [{ id: 'car-m-1', title: 'Reunião', date: '2026-11-20', time: '10:00', location: '', description: '', origin: 'carreira/abrir-m-1' }],
+    career: { ...base.career, meetings: [{ id: '1', remind: true } as never] },
+  } as typeof base;
+  const u = upcoming(d, '2026-11-19');
+  const task = u.days[0].items.find((i) => i.kind === 'tarefa')!;
+  assert.equal(task.remind, false);
+  assert.equal(toggleRemind(d, task)!.tasks[0].remind, true);
+  const meet = u.days[0].items.find((i) => i.kind === 'evento')!;
+  assert.equal(meet.remind, true);
+  const after = toggleRemind(d, meet)!;
+  assert.equal((after.career.meetings[0] as { remind: boolean }).remind, false);
+  assert.equal(after.events[0].remind, false);
+});

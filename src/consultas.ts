@@ -106,7 +106,7 @@ export function syncHealthEvents(d: AppData, today: string): AppData {
     byId.delete(e.id);
     if (e.title === w.title && e.date === w.date && e.time === w.time && e.location === w.location && e.description === w.description && e.origin === w.origin) return [e];
     changed = true;
-    return [w];
+    return [e.remind === undefined ? w : { ...w, remind: e.remind }];
   });
   if (byId.size) changed = true;
   return changed ? { ...d, events: [...kept, ...byId.values()] } : d;

@@ -14472,3 +14472,32 @@ button.set-row {
 button.set-row + button.set-row {
   border-top: 1px solid var(--border);
 }
+
+/* N3: sino do Próximos (liga/desliga o aviso no Google Agenda). */
+.row-link {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: inherit;
+  text-decoration: none;
+}
+.bell-btn {
+  flex: none;
+  width: 44px;
+  height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  border-radius: 12px;
+  background: transparent;
+  color: var(--muted, #888);
+  opacity: 0.55;
+}
+.bell-btn.on {
+  color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 14%, transparent);
+  opacity: 1;
+}

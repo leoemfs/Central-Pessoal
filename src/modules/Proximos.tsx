@@ -1,7 +1,7 @@
 import { useStore } from '../store';
-import { upcoming, type UpcomingItem } from '../upcoming';
+import { toggleRemind, upcoming, type UpcomingItem } from '../upcoming';
 import { formatMoney, relativeDay, todayISO } from '../utils';
-import { Empty, Icon, PageHeader, Pill, type IconName } from '../ui';
+import { Empty, Icon, notify, PageHeader, Pill, type IconName } from '../ui';
 
 const KIND: Record<UpcomingItem['kind'], { label: string; icon: IconName; href: string }> = {
   evento: { label: 'Compromisso', icon: 'calendar', href: '#/agenda' },
@@ -10,24 +10,42 @@ const KIND: Record<UpcomingItem['kind'], { label: string; icon: IconName; href: 
 };
 
 function Row({ i }: { i: UpcomingItem }) {
+  const { update } = useStore();
   const k = KIND[i.kind];
+  function bell() {
+    if (i.kind === 'conta') {
+      notify('Aviso das contas', 'As contas avisam todas juntas, pela opção do Google Agenda em Configurações.');
+      return;
+    }
+    let ok = true;
+    update((d) => {
+      const next = toggleRemind(d, i);
+      if (!next) ok = false;
+      return next ?? d;
+    });
+    if (ok) notify(i.remind ? 'Lembrete desligado' : '🔔 Lembrete ligado', i.remind ? i.title : `${i.title}: o aviso vai para o Google Agenda.`);
+  }
   return (
     <li>
-      <a className="row" href={k.href}>
-        {/* Cor do módulo de onde veio (conta = Finanças, reunião = Carreira…). */}
-        <span className="tile-icon" data-mod={i.module}>
-          <Icon name={k.icon} size={18} />
-        </span>
-        <div className="row-body">
-          <span className="row-title">{i.title}</span>
-          <span className="row-meta">
-            {k.label}
-            {i.time ? ` · ${i.time}` : ''}
-            {i.remind && <span aria-label="Com lembrete"> · 🔔</span>}
+      <div className="row">
+        <a className="row-link" href={k.href}>
+          {/* Cor do módulo de onde veio (conta = Finanças, reunião = Carreira…). */}
+          <span className="tile-icon" data-mod={i.module}>
+            <Icon name={k.icon} size={18} />
           </span>
-        </div>
-        {i.amount !== null && <strong className="tabular">{formatMoney(i.amount)}</strong>}
-      </a>
+          <div className="row-body">
+            <span className="row-title">{i.title}</span>
+            <span className="row-meta">
+              {k.label}
+              {i.time ? ` · ${i.time}` : ''}
+            </span>
+          </div>
+          {i.amount !== null && <strong className="tabular">{formatMoney(i.amount)}</strong>}
+        </a>
+        <button type="button" className={`bell-btn${i.remind ? ' on' : ''}`} aria-pressed={i.remind} aria-label={i.remind ? `Desligar lembrete de "${i.title}"` : `Me lembrar de "${i.title}"`} onClick={bell}>
+          <Icon name="bell" size={20} />
+        </button>
+      </div>
     </li>
   );
 }
@@ -38,7 +56,7 @@ export function ProximosPage() {
   const u = upcoming(data, todayISO());
   return (
     <>
-      <PageHeader title="Próximos" subtitle="Compromissos, tarefas e contas dos próximos 30 dias" />
+      <PageHeader title="Próximos" subtitle="Próximos 30 dias. Toque no 🔔 para ligar ou desligar o aviso." />
       {u.overdue.length > 0 && (
         <section className="card">
           <div className="card-head">
