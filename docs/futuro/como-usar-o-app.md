@@ -16,6 +16,7 @@ O atalho da gaveta "Como usar a barra" virou **"Como usar o app"** (`#/ajuda`), 
 - `settings.guidesSeen: string[]` (padrão `[]` em `normalize()`): guias já abertos ("Visto").
 - Estudos já tem tudo: guia (6 passos), cartão da 1ª vez (`TutorialCard`, com arquivar em `study.tutorialOff`) e "Como usar Estudos" no ⋮. Abrir o guia marca "Visto".
 - Gaveta: atalho id `barra` em `src/modules/Mais.tsx` (o id ficou igual para não bagunçar a ordem salva).
+- **⋮ do Início** (v0.148.1): "Como usar o app", para quem ainda não usa a gaveta.
 
 ## Parte 2: Finanças (v0.147.0)
 - **Guia comum** `src/modules/Guia.tsx`: `GuideSheet` (id, label, steps) e `GuideCard` (cartão da 1ª vez com arquivar). Passo sem `go` não mostra atalho. Estudos passou a usar os dois (o arquivar dele continua em `study.tutorialOff`).

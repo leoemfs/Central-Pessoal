@@ -1,5 +1,6 @@
 import { CardScreen, type CardDef } from '../Cards';
 import { go } from '../router';
+import { usePageMenu } from '../PageMenu';
 import { useMemo, useState, type ReactNode } from 'react';
 import { useWideScreen } from '../wide';
 import { useStore } from '../store';
@@ -396,6 +397,8 @@ export function Dashboard() {
   const p = data.profile;
   const today = todayISO();
   const { cards, extra } = useHomeCards();
+  // ⋮ do Início: ajuda a um toque, para quem ainda não se acostumou a puxar a barra (19/11).
+  usePageMenu([{ id: 'ajuda', label: 'Como usar o app', icon: 'info', run: () => go('ajuda') }]);
   // E35.2: no computador largo, os cartões postos na coluna da direita saem do Início (voltam quando a coluna some).
   const wide = useWideScreen();
   const inColumn = new Set(wide ? data.settings.sideCards : []);
