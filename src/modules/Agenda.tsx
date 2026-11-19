@@ -9,6 +9,8 @@ import { addDays, addMonths, daysInMonth, formatLongDate, formatMonth, fromISO, 
 import { Empty, Field, Icon, MonthNav, PageHeader, Pill, Segmented, Sheet } from '../ui';
 import { TaskForm, TasksPanel } from './Tarefas';
 import { DaySheet } from './DaySheet';
+import { usePageMenu } from '../PageMenu';
+import { AgendaGuideCard, AgendaGuideSheet } from './AgendaGuia';
 
 export function sortEvents(a: CalendarEvent, b: CalendarEvent): number {
   return a.date.localeCompare(b.date) || (a.time || '00:00').localeCompare(b.time || '00:00');
@@ -63,8 +65,10 @@ function useBillsByDay(): Map<string, DayBill[]> {
 type Tab = 'calendario' | 'tarefas';
 
 export function Agenda({ route }: ViewProps) {
-  const { data } = useStore();
+  const { data, update } = useStore();
   const today = todayISO();
+  const [guide, setGuide] = useState(false);
+  const guideOff = data.settings.guidesOff.includes('agenda');
   const [tab, setTab] = useState<Tab>('calendario');
   const [month, setMonth] = useState(monthKey(today));
   const [selected, setSelected] = useState(today);
@@ -89,6 +93,11 @@ export function Agenda({ route }: ViewProps) {
     },
     'novo-compromisso': () => setEventForm('new'),
   });
+
+  usePageMenu([
+    { id: 'guia', label: 'Como usar Agenda', icon: 'info', run: () => setGuide(true) },
+    guideOff && { id: 'guia-card', label: 'Mostrar o cartão "Como usar"', icon: 'info', run: () => update((d) => ({ ...d, settings: { ...d.settings, guidesOff: d.settings.guidesOff.filter((x) => x !== 'agenda'), guidesSeen: d.settings.guidesSeen.filter((x) => x !== 'agenda') } })) },
+  ]);
 
   const eventsByDay = useMemo(() => {
     const m = new Map<string, CalendarEvent[]>();
@@ -123,6 +132,8 @@ export function Agenda({ route }: ViewProps) {
         actions={<MonthNav label={formatMonth(month)} onPrev={() => setMonth(addMonths(month, -1))} onNext={() => setMonth(addMonths(month, 1))} pick={{ month, onPick: setMonth, onToday: () => pick(today) }} />}
         tabs={<Segmented label="Visão" swipe value={tab} onChange={setTab} options={[{ value: 'calendario', label: 'Calendário' }, { value: 'tarefas', label: 'Tarefas' }]} />}
       />
+
+      <AgendaGuideCard />
 
       {tab === 'tarefas' ? (
         <>
@@ -178,6 +189,7 @@ export function Agenda({ route }: ViewProps) {
         </div>
       )}
 
+      {guide && <AgendaGuideSheet onClose={() => setGuide(false)} />}
       {dayOpen && (
         <DaySheet
           day={selected}
