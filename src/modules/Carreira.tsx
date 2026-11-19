@@ -5,7 +5,7 @@ import { cleanAddress, go, useSubAction } from '../router';
 import { useStore } from '../store';
 import type { AppData, CareerChange, CareerChangeKind, JobApp, JobStage, Meeting, ProjectStatus, WorkProject } from '../types';
 import { addDays, formatDate, formatMoney, relativeDay, todayISO, uid } from '../utils';
-import { Chips, Empty, Field, Icon, MoneyInput, MultiChips, notify, PageHeader, Pill, Progress, Segmented, Sheet, Toggle, type IconName } from '../ui';
+import { Chips, Empty, Field, Icon, MoneyInput, MultiChips, notify, PageHeader, Pill, Progress, RemindToggle, Segmented, Sheet, Toggle, type IconName } from '../ui';
 import { cyclesToResume, removeResume, RESUME_KINDS, resumeOf, upsertResume } from '../carreira';
 import type { ResumeItem, ResumeKind } from '../types';
 import {
@@ -619,6 +619,7 @@ function MeetingSheet({ id, onClose, onOpen, onOpenProject }: { id: string; onCl
             </button>
           </div>
         )}
+        <RemindToggle checked={m.remind} onChange={(remind) => set({ remind })} google={data.settings.googleCalendar.on} hint={m.time ? '30 min antes' : 'às 9h do dia'} />
         <Group label="Repete">
           <Chips label="Repete" options={REPEAT_OPTIONS.map((r) => ({ value: String(r.days), label: r.label }))} value={String(m.repeatDays)} onChange={(v) => set({ repeatDays: Number(v) })} />
         </Group>

@@ -31,6 +31,7 @@ import { Orcamento, Relatorios } from './modules/financas/Orcamento';
 import { ComprasPage, Listas, PrecosPage } from './modules/Listas';
 import { HistoricoPage, ProgressoPage } from './modules/Progresso';
 import { ProximosPage } from './modules/Proximos';
+import { TarefasPage } from './modules/Tarefas';
 import { HumorPage } from './modules/Humor';
 import { Estudos } from './modules/estudos/Estudos';
 import { CiclosPage } from './modules/estudos/Ciclos';
@@ -86,6 +87,7 @@ export const SECTIONS: Section[] = [
   { path: 'precos', label: 'Preços', icon: 'store', view: PrecosPage },
   { path: 'progresso', label: 'Progresso', icon: 'bars', view: ProgressoPage },
   { path: 'historico', label: 'Práticas', icon: 'clock', view: HistoricoPage },
+  { path: 'tarefas', label: 'Tarefas', icon: 'tasks', view: TarefasPage, fab: 'tarefas/nova' },
   { path: 'proximos', label: 'Próximos', icon: 'list', view: ProximosPage },
   { path: 'humor', label: 'Humor', icon: 'smile', view: HumorPage },
   // O + de Estudos fica dentro do próprio módulo (muda conforme a tela: notebook, mapa…).
@@ -107,7 +109,7 @@ const QUICK: { to: string; label: string; icon: IconName; hint: string }[] = [
   { to: 'financas/nova', label: 'Despesa', icon: 'wallet', hint: 'Conta, compra ou parcela' },
   { to: 'financas/nova-receita', label: 'Receita', icon: 'coins', hint: 'Salário, freelance, bônus…' },
   { to: 'diario/nova', label: 'Atualização no diário', icon: 'journal', hint: 'Acontecimento ou pensamento' },
-  { to: 'agenda/nova-tarefa', label: 'Tarefa', icon: 'tasks', hint: 'Algo para fazer' },
+  { to: 'tarefas/nova', label: 'Tarefa', icon: 'tasks', hint: 'Algo para fazer' },
   { to: 'agenda/novo-compromisso', label: 'Compromisso', icon: 'calendar', hint: 'Evento com data e hora' },
   { to: 'arquivo/nova', label: 'Nota', icon: 'note', hint: 'Guardar uma informação' },
 ];

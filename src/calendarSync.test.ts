@@ -67,3 +67,18 @@ test('diferença: cria o novo, muda o alterado, restaura o excluído no Google, 
   assert.deepEqual(p.remove, ['esaiu']);
   assert.equal(p.insert.length, w.length - 3);
 });
+
+test('N3 🔔: compromisso com o sino desligado vai sem aviso; tarefa com sino ganha aviso às 9h do prazo', () => {
+  const d = base();
+  d.events = d.events.map((e) => (e.id === 'ev1' ? { ...e, remind: false } : e));
+  d.tasks = d.tasks.map((t) => (t.id === 't1' ? { ...t, remind: true, notes: 'Levar foto' } : t));
+  const w = wantedEvents(d, TODAY);
+  assert.equal(w.find((x) => x.id === eventId('e', 'ev1'))!.reminder, null);
+  assert.equal(w.find((x) => x.id === eventId('e', 'ev3'))!.reminder, 30);
+  const t = w.find((x) => x.id === eventId('t', 't1'))!;
+  assert.equal(t.summary, '✅ Renovar CNH');
+  assert.equal(t.start, '2026-11-20T09:00:00');
+  assert.equal(t.reminder, 0);
+  assert.match(t.description, /Levar foto/);
+  assert.ok(!w.some((x) => x.id === eventId('t', 't2')));
+});

@@ -118,7 +118,7 @@ export function useHomeCards(): { cards: CardDef[]; extra: ReactNode } {
     { to: 'agenda', icon: 'calendar', title: 'Agenda', text: eventsToday ? `${plural(eventsToday, 'compromisso', 'compromissos')} hoje` : 'Nenhum compromisso hoje' },
     { to: 'financas', icon: 'wallet', title: 'Finanças', text: dueSoon.length ? `${plural(dueSoon.length, 'conta próxima', 'contas próximas')} do vencimento` : 'Nenhuma conta vencendo nos próximos dias' },
     { to: 'diario', icon: 'book', title: 'Diário', text: lastEntryLabel ? `Último registro: ${lastEntryLabel}` : 'Nenhum registro ainda' },
-    { to: 'agenda/tarefas', icon: 'tasks', title: 'Tarefas', text: pendingTasks ? plural(pendingTasks, 'tarefa pendente', 'tarefas pendentes') : 'Nenhuma tarefa pendente' },
+    { to: 'tarefas', icon: 'tasks', title: 'Tarefas', text: pendingTasks ? plural(pendingTasks, 'tarefa pendente', 'tarefas pendentes') : 'Nenhuma tarefa pendente' },
     {
       to: 'jornada',
       icon: journey.unlocked ? 'sword' : 'lock',
@@ -321,7 +321,7 @@ export function useHomeCards(): { cards: CardDef[]; extra: ReactNode } {
       <section className="card">
         <div className="card-head">
           <h2>Tarefas</h2>
-          <SeeAll href="#/agenda/tarefas" />
+          <SeeAll href="#/tarefas" />
         </div>
         {tasks.length === 0 ? (
           <Empty>{otherPending > 0 ? `Nada para hoje. ${otherPending} pendente(s) sem urgência.` : 'Tudo em dia!'}</Empty>

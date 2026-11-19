@@ -304,6 +304,19 @@ export function Toggle({ checked, onChange, label }: { checked: boolean; onChang
   );
 }
 
+/** 🔔 Me lembrar (N3): o aviso vai para o Google Agenda; `hint` diz quando. */
+export function RemindToggle({ checked, onChange, google, hint, disabled }: { checked: boolean; onChange: (v: boolean) => void; google: boolean; hint: string; disabled?: string }) {
+  return (
+    <div className="toggle-row">
+      <span>
+        <strong>🔔 Me lembrar</strong>
+        <span className="muted small"> {disabled ?? (google ? `(${hint}, pelo Google Agenda)` : '(ligue a conta Google em Configurações para receber o aviso)')}</span>
+      </span>
+      <Toggle label="Me lembrar" checked={checked && !disabled} onChange={(v) => !disabled && onChange(v)} />
+    </div>
+  );
+}
+
 /** Campo de valor em reais: os dígitos entram pela direita (6 → 7 → 1 vira R$ 6,71). */
 export function MoneyInput({ cents, onChange, large, label, autoFocus }: { cents: number; onChange: (cents: number) => void; large?: boolean; label: string; autoFocus?: boolean }) {
   return (

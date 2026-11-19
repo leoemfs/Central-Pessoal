@@ -14,6 +14,8 @@ export interface Task {
   done: boolean;
   createdAt: string;
   doneAt: string | null;
+  /** 🔔 Me lembrar (N3): aviso no Google Agenda às 9h do prazo. Ausente = desligado. */
+  remind?: boolean;
 }
 
 export interface CalendarEvent {
@@ -24,6 +26,8 @@ export interface CalendarEvent {
   time: string;
   location: string;
   description: string;
+  /** 🔔 Me lembrar (N3): com aviso no Google Agenda (30 min antes; sem hora, às 9h). Ausente = ligado. */
+  remind?: boolean;
   /** Criado por outro módulo e mantido por ele (ex.: "carreira/abrir-m-<id>"): tocar abre a origem. */
   origin?: string;
 }
@@ -1017,6 +1021,8 @@ export interface Meeting {
   /** Adiada: a data em que estava marcada (o dia fixo da série). null = não adiada. */
   originalDate: string | null;
   eventId: string | null;
+  /** 🔔 Me lembrar (N3): aviso da reunião no Google Agenda. */
+  remind: boolean;
 }
 
 export type ProjectStatus = 'andando' | 'parado' | 'concluido';

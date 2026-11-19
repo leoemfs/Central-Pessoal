@@ -4,56 +4,56 @@ import { GuideCard, GuideSheet, type GuideStep } from './Guia';
 export const AGENDA_STEPS: GuideStep[] = [
   {
     icon: 'calendar',
-    title: 'Calendário e Tarefas',
+    title: 'O calendário',
     text: [
-      'As duas abas no topo: **Calendário** mostra o mês; **Tarefas** mostra a lista do que fazer.',
-      'O mês fica abaixo do título: use as setas ou toque nele para escolher outro.',
+      'A casa da Agenda mostra o mês. Use as setas ou toque no nome do mês para escolher outro.',
+      'Os pontinhos mostram o que há no dia: **compromisso**, **tarefa** e **conta a pagar** (de Finanças).',
     ],
+  },
+  {
+    icon: 'calendarCheck',
+    title: 'Toque num dia para ver o dia',
+    text: [
+      'Tocando no dia, você vê tudo dele junto e pode criar um compromisso ou uma tarefa já naquela data.',
+      'Para ver hoje, é só tocar no dia de hoje (ele vem marcado).',
+    ],
+    to: 'Ver o dia de hoje',
+    go: 'agenda/hoje',
   },
   {
     icon: 'plus',
     title: 'Crie pelo botão +',
     text: [
-      'No Calendário, o + marca um **compromisso** (data e hora). Na aba Tarefas, cria uma **tarefa**.',
+      'Na Agenda, o + marca um **compromisso** (data e hora). Em Tarefas, cria uma **tarefa**.',
       'Pelo + do Início também dá para escolher Tarefa ou Compromisso.',
     ],
     to: 'Marcar um compromisso',
     go: 'agenda/novo-compromisso',
   },
   {
-    icon: 'calendarCheck',
-    title: 'Toque num dia',
-    text: [
-      'Os pontinhos mostram o que há no dia: **compromisso**, **tarefa** e **conta a pagar** (de Finanças).',
-      'Tocando no dia, você vê tudo junto e pode criar um compromisso ou uma tarefa já naquela data.',
-    ],
-  },
-  {
     icon: 'tasks',
     title: 'Tarefas',
     text: [
+      'Na barra de baixo, à esquerda da casa da Agenda.',
       'Filtre por **Pendentes**, **Hoje e atrasadas** ou **Concluídas**. Toque no círculo para concluir.',
-      'Cada tarefa pode ter data, prioridade e etiqueta.',
     ],
     to: 'Abrir as tarefas',
-    go: 'agenda/tarefas',
+    go: 'tarefas',
   },
   {
-    icon: 'sun',
-    title: 'Hoje',
+    icon: 'bell',
+    title: '🔔 Me lembrar',
     text: [
-      'Na barra de baixo, à esquerda da casa da Agenda.',
-      'Abre o dia de hoje direto: compromissos, tarefas e contas.',
+      'Tarefas, compromissos e reuniões têm o interruptor **Me lembrar**. Ligado, o aviso vai para o **Google Agenda**, que avisa no celular.',
+      'Compromisso: 30 min antes (sem hora, às 9h). Tarefa: às 9h do prazo. Contas avisam pelas Configurações do Google Agenda.',
     ],
-    to: 'Ver o dia de hoje',
-    go: 'agenda/hoje',
   },
   {
     icon: 'list',
     title: 'Próximos',
     text: [
       'Na barra de baixo, à direita da casa da Agenda.',
-      'Junta compromissos, tarefas e contas dos **próximos 30 dias**, em ordem.',
+      'Junta compromissos, tarefas e contas dos **próximos 30 dias**, em ordem. O que tem aviso aparece com 🔔.',
     ],
     to: 'Abrir os Próximos',
     go: 'proximos',
@@ -66,5 +66,5 @@ export function AgendaGuideSheet({ onClose }: { onClose: () => void }) {
 
 /** Cartão da 1ª vez na Agenda (arquivado em `settings.guidesOff`). */
 export function AgendaGuideCard() {
-  return <GuideCard id="agenda" label="Agenda" summary="Seis passos rápidos: abas, botão +, dias, tarefas, Hoje e Próximos." steps={AGENDA_STEPS} />;
+  return <GuideCard id="agenda" label="Agenda" summary="Seis passos rápidos: calendário, dia, botão +, tarefas, Me lembrar e Próximos." steps={AGENDA_STEPS} />;
 }

@@ -66,6 +66,7 @@ function normalizeMeeting(m: Record<string, unknown>): Meeting {
     nextCreated: m.nextCreated === true,
     originalDate: isDate(m.originalDate) && m.originalDate !== m.date ? m.originalDate : null,
     eventId: typeof m.eventId === 'string' ? m.eventId : null,
+    remind: m.remind !== false,
   };
 }
 
@@ -320,7 +321,7 @@ export const REPEAT_OPTIONS: { days: number; label: string }[] = [
 ];
 
 export function newMeeting(id: string, date: string): Meeting {
-  return { id, kind: 'reuniao', title: '', with: '', date, time: '', notes: '', todos: [], link: '', repeatDays: 0, projectIds: [], nextCreated: false, originalDate: null, eventId: null };
+  return { id, kind: 'reuniao', title: '', with: '', date, time: '', notes: '', todos: [], link: '', repeatDays: 0, projectIds: [], nextCreated: false, originalDate: null, eventId: null, remind: true };
 }
 
 export const meetingTitle = (m: Meeting) => m.title.trim() || meetingKindLabel(m.kind) + (m.with.trim() ? ` com ${m.with.trim()}` : '');
@@ -398,9 +399,9 @@ export function sortProjects(ps: WorkProject[]) {
  */
 export function careerEvents(c: CareerData): CalendarEvent[] {
   const out: CalendarEvent[] = [];
-  const ev = (id: string, title: string, date: string, time: string, origin: string, description: string) =>
-    out.push({ id, title, date, time, location: '', description, origin: `carreira/${origin}` });
-  for (const m of c.meetings) ev(m.eventId ?? `car-m-${m.id}`, meetingTitle(m), m.date, m.time, `abrir-m-${m.id}`, 'Reunião de Carreira');
+  const ev = (id: string, title: string, date: string, time: string, origin: string, description: string, remind = true) =>
+    out.push({ id, title, date, time, location: '', description, remind, origin: `carreira/${origin}` });
+  for (const m of c.meetings) ev(m.eventId ?? `car-m-${m.id}`, meetingTitle(m), m.date, m.time, `abrir-m-${m.id}`, 'Reunião de Carreira', m.remind);
   for (const j of c.jobs) if (isOpen(j) && j.nextDate) ev(j.eventId ?? `car-j-${j.id}`, jobEventTitle(j), j.nextDate, j.nextTime, `abrir-j-${j.id}`, 'Vaga de Carreira');
   for (const p of c.projects) {
     if (p.status === 'concluido') continue;

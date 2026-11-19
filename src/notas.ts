@@ -154,7 +154,7 @@ export function transformNote(d: AppData, noteId: string, o: BecomeOptions, id: 
 export function becameRoute(d: AppData, b: NonNullable<Note['became']>): string | null {
   switch (b.kind) {
     case 'tarefa':
-      return d.tasks.some((t) => t.id === b.id) ? 'agenda/tarefas' : null;
+      return d.tasks.some((t) => t.id === b.id) ? 'tarefas' : null;
     case 'compromisso':
       return d.events.some((e) => e.id === b.id) ? 'agenda' : null;
     case 'notebook':
