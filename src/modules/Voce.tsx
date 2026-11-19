@@ -3,7 +3,7 @@ import { go } from '../router';
 import type { ViewProps } from '../App';
 import { useStore } from '../store';
 import {
-  acceptSuggestion, AREAS, completeness, DAY, dismissSuggestion, EX_LONG, EX_SHORT, FREE, INTERVIEW_STEPS, LIKES, LIMITS, MONEY, QUITS, SAVE,
+  acceptSuggestion, AREAS, completeness, DAY, dismissSuggestion, EX_LONG, EX_SHORT, FREE, interviewQuestions, LIKES, questionsLeft, LIMITS, MONEY, QUITS, SAVE,
   setProfile, showAsk, snoozeAsk, suggestions, type Suggestion,
 } from '../profile';
 import type { AppData, Goal, Profile } from '../types';
@@ -96,22 +96,22 @@ export function ForYou() {
   );
 }
 
-/** Início: "Conte um pouco sobre você", para quem pulou a entrevista. */
+/** Início: "Complete seu perfil", para quem ainda não respondeu (E4: só o que a montagem não perguntou). */
 export function AskCard({ onAnswer }: { onAnswer: () => void }) {
   const { data, update } = useStore();
   const p = data.profile;
   if (!showAsk(p)) return null;
   const pc = completeness(p);
-  const left = INTERVIEW_STEPS - p.onboarding.step;
+  const left = questionsLeft(p);
   const resume = p.onboarding.step > 0;
   return (
     <section className="card raised ask-card">
       <div className="profile-head">
         <Ring pct={pc} />
         <div>
-          <strong>Conte um pouco sobre você</strong>
+          <strong>Complete seu perfil</strong>
           <span className="muted small">
-            {resume ? `Faltam ${left} ${left === 1 ? 'pergunta' : 'perguntas'}. Continue de onde parou.` : `${INTERVIEW_STEPS} perguntas, uns 2 minutos. Com elas, o app sugere hábitos, práticas e metas do seu jeito.`}
+            {resume ? `Faltam ${left} ${left === 1 ? 'pergunta' : 'perguntas'}. Continue de onde parou.` : `Faltam ${left} perguntas rápidas: horários, metas, dinheiro e o que levar em conta. Com elas, o app sugere hábitos e práticas do seu jeito.`}
           </span>
         </div>
       </div>
@@ -160,13 +160,19 @@ const parseAmount = (s: string) => {
 };
 
 /**
- * Entrevista "Vamos nos conhecer?": na primeira abertura (com boas-vindas) ou pela página Você.
- * Cada resposta é salva na hora; "Terminar depois" guarda até onde foi.
+ * "Completar o perfil" (E4): complementa a montagem do app, sem repetir o que ela já perguntou
+ * (o nome, se já veio, e as áreas). Cada resposta é salva na hora; "Terminar depois" guarda até onde foi.
+ * `i` é o número da pergunta (ver `interviewQuestions`); -1 = boas-vindas; além da última = pronto.
  */
 export function Interview({ start, onClose }: { start: number; onClose: () => void }) {
   const { data, update } = useStore();
   const p = data.profile;
-  const [i, setI] = useState(start);
+  // A lista fica fixa enquanto a entrevista está aberta (mexer nas respostas não muda as perguntas).
+  const [plan] = useState(() => interviewQuestions(p));
+  const total = plan.length;
+  const [i, setI] = useState(() => (start < 0 ? start : (plan.find((q) => q >= start) ?? plan[0])));
+  const pos = plan.indexOf(i);
+  const [askName] = useState(() => !p.name.trim());
   const [name, setName] = useState(p.name);
   const [shortText, setShortText] = useState('');
   const [longText, setLongText] = useState('');
@@ -176,13 +182,15 @@ export function Interview({ start, onClose }: { start: number; onClose: () => vo
   const set = (fn: (p: Profile) => Profile) => update(setProfile(fn));
   /** Guarda os campos de texto da pergunta atual. */
   function keep(q: Profile): Profile {
-    if (i === 0) return { ...q, name: name.trim() };
+    if (i === 0) return askName ? { ...q, name: name.trim() } : q;
     if (i === 3) return { ...q, shortGoals: addGoal(q.shortGoals, shortText), longGoals: addGoal(q.longGoals, longText) };
     if (i === 4) return { ...q, money: { ...q.money, amount: q.money.saveFor && q.money.saveFor !== 'nada' ? parseAmount(amount) : null } };
     if (i === 5) return { ...q, noQuit: q.quits.length === 0 };
     if (i === 6) return { ...q, noLimit: q.limits.length === 0 };
     return q;
   }
+  /** Anda pela lista de perguntas: +1 próxima, -1 anterior. */
+  const step = (dir: 1 | -1) => (pos + dir >= total ? 99 : pos + dir < 0 ? -1 : plan[pos + dir]);
   function goTo(n: number, save: boolean) {
     if (i === 3) {
       setShortText('');
@@ -190,7 +198,7 @@ export function Interview({ start, onClose }: { start: number; onClose: () => vo
     }
     set((q) => {
       const next = save ? keep(q) : q;
-      if (n >= INTERVIEW_STEPS) return { ...next, onboarding: { ...next.onboarding, state: 'feito', step: 0 } };
+      if (n > plan[total - 1]) return { ...next, onboarding: { ...next.onboarding, state: 'feito', step: 0 } };
       return { ...next, onboarding: { ...next.onboarding, step: Math.max(0, n) } };
     });
     setI(n);
@@ -204,10 +212,10 @@ export function Interview({ start, onClose }: { start: number; onClose: () => vo
   let body: ReactNode;
   const foot: ReactNode = (
     <>
-      <button type="button" className="btn ghost" onClick={() => goTo(i + 1, false)}>
+      <button type="button" className="btn ghost" onClick={() => goTo(step(1), false)}>
         Pular
       </button>
-      <button type="button" className="btn primary" onClick={() => goTo(i + 1, true)}>
+      <button type="button" className="btn primary" onClick={() => goTo(step(1), true)}>
         Continuar
       </button>
     </>
@@ -215,7 +223,7 @@ export function Interview({ start, onClose }: { start: number; onClose: () => vo
   const q = (title: string, sub: string, content: ReactNode) => (
     <>
       <span className="iv-step">
-        {i + 1} de {INTERVIEW_STEPS}
+        {pos + 1} de {total}
       </span>
       <h2>{title}</h2>
       <p className="muted">{sub}</p>
@@ -225,13 +233,13 @@ export function Interview({ start, onClose }: { start: number; onClose: () => vo
 
   if (i < 0) {
     return (
-      <Fullscreen onClose={later} label="Vamos nos conhecer?" className="iv">
+      <Fullscreen onClose={later} label="Complete seu perfil" className="iv">
         <div className="iv-center">
           <span className="iv-logo">
             <Icon name="user" size={32} />
           </span>
-          <h2>Vamos nos conhecer?</h2>
-          <p className="muted">São {INTERVIEW_STEPS} perguntas rápidas, uns 2 minutos. Com elas, o app sugere hábitos, práticas e metas do seu jeito.</p>
+          <h2>Complete seu perfil</h2>
+          <p className="muted">São {total} perguntas rápidas, uns 2 minutos. O que você já contou na montagem do app não é perguntado de novo.</p>
           <ul className="iv-points">
             <li>
               <Icon name="lock" size={18} /> Tudo fica só neste aparelho.
@@ -245,7 +253,7 @@ export function Interview({ start, onClose }: { start: number; onClose: () => vo
           </ul>
         </div>
         <div className="iv-foot col">
-          <button type="button" className="btn primary" onClick={() => setI(0)}>
+          <button type="button" className="btn primary" onClick={() => setI(plan[0])}>
             Começar
           </button>
           <button type="button" className="btn ghost" onClick={later}>
@@ -256,7 +264,7 @@ export function Interview({ start, onClose }: { start: number; onClose: () => vo
     );
   }
 
-  if (i >= INTERVIEW_STEPS) {
+  if (i > plan[total - 1]) {
     const list = suggestions(data);
     return (
       <Fullscreen onClose={onClose} label="Pronto" className="iv">
@@ -307,10 +315,10 @@ export function Interview({ start, onClose }: { start: number; onClose: () => vo
 
   if (i === 0)
     body = q(
-      'Como quer ser chamado(a)?',
-      'E em que horário costuma acordar e dormir.',
+      askName ? 'Como quer ser chamado(a)?' : 'Que horas você acorda e dorme?',
+      askName ? 'E em que horário costuma acordar e dormir.' : 'Ajuda o app a sugerir os horários certos para hábitos e práticas.',
       <>
-        <input className="input" value={name} onChange={(e) => setName(e.target.value)} placeholder="Seu nome" maxLength={30} autoComplete="given-name" aria-label="Seu nome" />
+        {askName && <input className="input" value={name} onChange={(e) => setName(e.target.value)} placeholder="Seu nome" maxLength={30} autoComplete="given-name" aria-label="Seu nome" />}
         <div className="form-row">
           <label className="field">
             <span className="field-label">Acordo</span>
@@ -403,11 +411,11 @@ export function Interview({ start, onClose }: { start: number; onClose: () => vo
   return (
     <Fullscreen onClose={later} label="Conhecer você" className="iv">
       <div className="iv-top">
-        <button type="button" className="icon-btn" aria-label="Voltar" onClick={() => (i === 0 && !firstTime ? later() : goTo(i - 1, true))}>
+        <button type="button" className="icon-btn" aria-label="Voltar" onClick={() => (pos === 0 && !firstTime ? later() : goTo(step(-1), true))}>
           <Icon name="left" />
         </button>
-        <div className="progress" role="progressbar" aria-valuenow={i + 1} aria-valuemin={1} aria-valuemax={INTERVIEW_STEPS}>
-          <div className="green" style={{ width: `${((i + 1) / INTERVIEW_STEPS) * 100}%` }} />
+        <div className="progress" role="progressbar" aria-valuenow={pos + 1} aria-valuemin={1} aria-valuemax={total}>
+          <div className="green" style={{ width: `${((pos + 1) / total) * 100}%` }} />
         </div>
         <button type="button" className="btn ghost small" onClick={later}>
           Terminar depois
@@ -476,7 +484,7 @@ export function Voce({ route }: ViewProps) {
   useEffect(() => {
     if (route.sub === 'sugestoes') requestAnimationFrame(() => sugRef.current?.scrollIntoView({ block: 'start' }));
   }, [route.n, route.sub]);
-  const ivLabel = st.state === 'feito' ? 'Refazer a entrevista' : st.step > 0 ? `Continuar a entrevista (faltam ${INTERVIEW_STEPS - st.step})` : 'Responder a entrevista (2 min)';
+  const ivLabel = st.state === 'feito' ? 'Rever o perfil' : st.step > 0 ? `Completar o perfil (faltam ${questionsLeft(p)})` : 'Completar o perfil (2 min)';
 
   return (
     <>

@@ -1,14 +1,47 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { emptyData, normalize, normalizeHabit } from './data.ts';
-import { campaignRegions, defaultProfile, normalizeProfile, steps, type Profile } from './jornada/interview.ts';
+import { campaignRegions, defaultProfile, normalizeProfile, prefill, steps, type Profile } from './jornada/interview.ts';
+import { emptyProfile, interviewQuestions, questionsLeft } from './profile.ts';
 import { applyInterview, interviewPlan } from './jornada/interviewApply.ts';
 
 const DAY = '2026-11-16';
 const prof = (p: Partial<Profile>): Profile => ({ ...defaultProfile(DAY), ...p });
 
-test('passos: uma pergunta por área escolhida, na ordem', () => {
-  assert.deepEqual(steps(prof({ areas: ['dinheiro', 'corpo'] })), ['areas', 'dinheiro', 'corpo', 'horario', 'ritmo', 'resumo']);
+test('passos: uma pergunta por área (região), na ordem; com áreas já respondidas, começa pela rota', () => {
+  assert.deepEqual(steps(prof({ areas: ['dinheiro', 'corpo'] })), ['areas', 'dinheiro', 'corpo', 'ritmo', 'resumo']);
+  assert.deepEqual(steps(prof({ areas: ['mente'] }), false), ['rota', 'mente', 'ritmo', 'resumo']);
+});
+
+test('E4: a Mestra Lume reaproveita as áreas, o hábito a largar e o dinheiro do Você', () => {
+  const v = { ...emptyProfile(), areas: ['largar', 'rotina', 'xyz', 'dinheiro', 'corpo'], quits: ['refri'], money: { challenge: 'naosei' as const, saveFor: 'casa', amount: 20000 } };
+  const p = prefill(null, v, DAY);
+  assert.deepEqual(p.areas, ['largar', 'rotina', 'dinheiro']);
+  assert.deepEqual(p.largar, { habit: 'refrigerante', custom: '' });
+  assert.equal(p.dinheiro.issue, 'entrada');
+  assert.equal(p.dinheiro.goal, 'outro');
+  assert.equal(p.dinheiro.custom, 'Casa');
+  assert.equal(p.dinheiro.meta, 20000);
+  assert.deepEqual(prefill(null, { ...v, quits: ['unha'] }, DAY).largar, { habit: 'outro', custom: 'Roer unha' });
+  // Refazer: as respostas da Jornada ficam; só completa as áreas se estiverem vazias.
+  const old = prof({ areas: ['corpo'], largar: { habit: 'doce', custom: '' } });
+  assert.deepEqual(prefill(old, v, DAY).areas, ['corpo']);
+  assert.equal(prefill(old, v, DAY).largar.habit, 'doce');
+  assert.deepEqual(prefill(prof({ areas: [] }), v, DAY).areas, ['largar', 'rotina', 'dinheiro']);
+});
+
+test('E4: aplicar a entrevista da Jornada junta as áreas no Você (sem repetir)', () => {
+  const d = { ...emptyData(), profile: { ...emptyProfile(), areas: ['rotina', 'mente'] } };
+  const out = applyInterview(d, prof({ areas: ['corpo', 'rotina'] }), DAY);
+  assert.deepEqual(out.profile.areas, ['corpo', 'rotina', 'mente']);
+});
+
+test('E4: Completar o perfil não pergunta as áreas que a montagem já respondeu', () => {
+  assert.deepEqual(interviewQuestions({ areas: [] }), [0, 1, 2, 3, 4, 5, 6]);
+  assert.deepEqual(interviewQuestions({ areas: ['dinheiro'] }), [0, 1, 3, 4, 5, 6]);
+  const p = { ...emptyProfile('pulou'), areas: ['dinheiro'] };
+  assert.equal(questionsLeft(p), 6);
+  assert.equal(questionsLeft({ ...p, onboarding: { ...p.onboarding, step: 4 } }), 3);
 });
 
 test('campanha: Vila no começo, áreas na ordem, Montanha e Castelo no fim; com 1 área entra a Floresta', () => {

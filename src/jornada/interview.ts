@@ -4,7 +4,7 @@
  * hábitos no Núcleo (com nome, dias e horário respondidos) e, se a pessoa quiser juntar para
  * algo, uma caixinha em Finanças. O que já existe com o mesmo nome não é duplicado.
  */
-import type { Habit } from '../types.ts';
+import type { Habit, Profile as VoceProfile } from '../types.ts';
 
 export type Area = 'corpo' | 'rotina' | 'mente' | 'dinheiro' | 'largar' | 'bemestar';
 
@@ -44,6 +44,7 @@ export const FREQ_DAYS: Record<number, number[]> = { 2: [2, 4], 3: [1, 3, 5], 4:
 const ALL_DAYS = [0, 1, 2, 3, 4, 5, 6];
 
 export const LUME_LINES: Record<string, string> = {
+  rota: 'Você já me contou o que quer melhorar. É por essas regiões que a sua jornada vai passar.',
   areas: 'Antes de partir, quero te conhecer. O que você mais quer melhorar agora? Escolha até 3, na ordem de importância.',
   corpo: 'Corpo forte, cabeça leve! Me conta como você quer se mexer.',
   rotina: 'Rotina boa começa pequena. Qual ritual você quer firmar?',
@@ -51,7 +52,6 @@ export const LUME_LINES: Record<string, string> = {
   dinheiro: 'Dinheiro em ordem é paz. Qual é o seu maior desafio? E tem alguma coisa pela qual você quer juntar?',
   largar: 'Largar um hábito é o caminho mais difícil, e o que mais vale. Qual você quer deixar?',
   bemestar: 'Cuidar da cabeça também é treino. O que te ajuda a ficar bem?',
-  horario: 'Qual é o seu melhor horário para os rituais?',
   ritmo: 'E o ritmo? Não tem resposta certa, e dá para mudar depois.',
   resumo: 'Pronto! Montei a sua jornada com o que você me contou. Confira antes de começar.',
 };
@@ -71,8 +71,40 @@ export function defaultProfile(today: string): Profile {
   };
 }
 
-/** Passos da entrevista: áreas, uma pergunta por área escolhida (na ordem), horário, ritmo e resumo. */
-export const steps = (p: Profile): string[] => ['areas', ...p.areas, 'horario', 'ritmo', 'resumo'];
+/**
+ * Passos da entrevista (E4): a Mestra Lume só pergunta o que é da Jornada.
+ * Com as áreas já respondidas (montagem do app ou Você), começa pela rota das regiões; sem elas, pergunta as áreas.
+ * Depois, uma pergunta por região (área), o ritmo e o resumo (o horário dos rituais fica no resumo).
+ */
+export const steps = (p: Profile, askAreas = true): string[] => [askAreas ? 'areas' : 'rota', ...p.areas, 'ritmo', 'resumo'];
+
+const QUIT_FROM: Record<string, Profile['largar']['habit']> = { redes: 'redes', doce: 'doce', cigarro: 'cigarro', refri: 'refrigerante' };
+const QUIT_TEXT: Record<string, string> = { procrastinar: 'Procrastinar', unha: 'Roer unha' };
+const ISSUE_FROM: Record<string, Profile['dinheiro']['issue']> = { atraso: 'atraso', gasto: 'gasto', naosei: 'entrada' };
+const GOAL_FROM: Record<string, Profile['dinheiro']['goal']> = { viagem: 'viagem', reserva: 'reserva', carro: 'carro', nada: 'nenhum' };
+const GOAL_TEXT: Record<string, string> = { casa: 'Casa', estudo: 'Estudo' };
+
+/**
+ * Reaproveita o que a pessoa já contou (E4): as áreas (montagem do app e Você, até 3, na ordem)
+ * e, na primeira vez, o hábito a largar e o dinheiro respondidos no Você. Nada é perguntado duas vezes.
+ */
+export function prefill(j: Profile | null, v: Pick<VoceProfile, 'areas' | 'quits' | 'money'>, today: string): Profile {
+  const base = j ?? defaultProfile(today);
+  const known = v.areas.filter((a): a is Area => (AREA_IDS as string[]).includes(a));
+  const areas = base.areas.length ? base.areas : Array.from(new Set(known)).slice(0, 3);
+  if (j) return { ...base, areas };
+  const out: Profile = { ...base, areas };
+  const q = v.quits[0];
+  if (q) out.largar = QUIT_FROM[q] ? { habit: QUIT_FROM[q], custom: '' } : { habit: 'outro', custom: (QUIT_TEXT[q] ?? q).slice(0, 24) };
+  const m = v.money;
+  if (ISSUE_FROM[m.challenge]) out.dinheiro = { ...out.dinheiro, issue: ISSUE_FROM[m.challenge] };
+  if (m.saveFor) {
+    const goal = GOAL_FROM[m.saveFor] ?? 'outro';
+    const meta = m.amount ?? (goal === 'nenhum' ? out.dinheiro.meta : GOALS[goal][1]);
+    out.dinheiro = { ...out.dinheiro, goal, meta, custom: goal === 'outro' ? (GOAL_TEXT[m.saveFor] ?? m.saveFor).slice(0, 24) : '' };
+  }
+  return out;
+}
 
 export const quitName = (p: Profile) => (p.largar.habit === 'outro' ? p.largar.custom.trim() || 'o hábito' : QUIT[p.largar.habit][0]);
 export const goalName = (p: Profile) => (p.dinheiro.goal === 'outro' ? p.dinheiro.custom.trim() || 'Meu objetivo' : p.dinheiro.goal === 'nenhum' ? '' : GOALS[p.dinheiro.goal][0]);
