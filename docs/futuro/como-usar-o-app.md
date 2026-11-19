@@ -23,6 +23,9 @@ O atalho da gaveta "Como usar a barra" virou **"Como usar o app"** (`#/ajuda`), 
 - Finanças: passos em `src/modules/financas/Guia.tsx`; cartão no topo da casa (todas as abas); ⋮ com "Como usar Finanças" e, se arquivado, "Mostrar o cartão \"Como usar\"".
 - **Para o próximo módulo:** criar `src/modules/<módulo>/Guia.tsx` com os passos, pôr `GuideCard` na casa, o item no ⋮ (`usePageMenu`), a linha em `GUIDES` e o `open === '<id>'` em `Ajuda.tsx`.
 
+## Parte 3: Diário (v0.148.0)
+- Passos em `src/modules/DiarioGuia.tsx` (o Diário não tem pasta própria). Cartão no topo do feed (some durante a busca); ⋮: ordem, "Como usar Diário", "Mostrar o cartão" (se arquivado) e a busca por último.
+
 ## O que falta (uma parte por vez, tamanho P cada)
 Para cada módulo:
 1. **Guia** com os passos (texto curto, em português simples), num componente genérico reaproveitável. Ao fazer Finanças, transformar o `TutorialSheet` de Estudos num `GuideSheet` comum que recebe os passos.
@@ -30,7 +33,7 @@ Para cada módulo:
 3. **"Como usar <módulo>"** no ⋮ da casa do módulo (antes da busca).
 4. Entrar em `GUIDES` (`src/guias.ts`) para aparecer na central.
 
-Ordem combinada: ~~Finanças~~ (feito), depois Diário, Agenda, Listas, Núcleo, Carreira, Objetivos, Saúde, Notas, Você.
+Ordem combinada: ~~Finanças~~, ~~Diário~~ (feitos), depois Agenda, Listas, Núcleo, Carreira, Objetivos, Saúde, Notas, Você.
 
 ### Passos sugeridos para Finanças (6)
 1. **As quatro abas:** Despesas, Receitas, Cartões e Caixinhas; o mês fica logo abaixo (tocar no mês abre "Escolher mês").
