@@ -14458,3 +14458,17 @@ body.kb-open .bar-pull {
 .mood-all { display: flex; flex-wrap: wrap; gap: 8px; }
 .mood-all .mood-pin, .mood-all .mood-x { background: none; border: 0; color: inherit; font: inherit; padding: 0; cursor: pointer; }
 .mood-all .mood-x { color: var(--danger, #ff8a8a); font-weight: 700; padding-left: 4px; }
+
+/* Linha de lista (formato das Configurações) feita com botão: Como usar o app. */
+button.set-row {
+  width: 100%;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+button.set-row + button.set-row {
+  border-top: 1px solid var(--border);
+}
