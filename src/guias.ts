@@ -11,6 +11,7 @@ export interface GuideInfo {
 
 export const GUIDES: GuideInfo[] = [
   { id: 'financas', label: 'Finanças', steps: 6 },
+  { id: 'diario', label: 'Diário', steps: 6 },
   { id: 'estudos', label: 'Estudos', steps: 6 },
 ];
 

@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { emptyData, normalize } from './data.ts';
-import { clearMood, moodInsights, setMood, setMoodNote, toggleMoodTag, weekMood } from './mood.ts';
+import { addMoodTag, clearMood, MOOD_TAGS, moodInsights, quickMoodTags, removeMoodTag, setMood, setMoodNote, toggleMoodPin, toggleMoodTag, weekMood } from './mood.ts';
 import { recordSession } from './practices.ts';
 import type { AppData } from './types.ts';
 
@@ -66,4 +66,31 @@ test('humor sobrevive ao backup e ignora lixo', () => {
   d = { ...d, moods: { ...d.moods, 'xx': { v: 3, tags: [], note: '', journalId: null }, '2026-11-01': { v: 9 as 3, tags: [], note: '', journalId: null } } };
   const back = normalize(JSON.parse(JSON.stringify(d)));
   assert.deepEqual(Object.keys(back.moods), [TODAY]);
+});
+
+test('M46: opções próprias, fixadas e a fileira do cartão', () => {
+  let d = setMood(4, TODAY)(emptyData());
+  assert.deepEqual(d.settings.moodPinned, MOOD_TAGS, 'quem não mexeu vê as 8 de antes');
+  d = addMoodTag('  Pet ', TODAY)(d);
+  assert.deepEqual(d.settings.moodTags, ['Pet']);
+  assert.ok(d.moods[TODAY].tags.includes('Pet'), 'a nova já vem marcada');
+  d = addMoodTag('sono', TODAY)(d);
+  assert.deepEqual(d.settings.moodTags, ['Pet'], 'nome que já existe não duplica');
+  assert.ok(d.moods[TODAY].tags.includes('Sono'));
+  // usadas nos outros dias sobem para a fileira; o dia de hoje não reordena
+  d = toggleMoodTag('Ansiedade', '2026-11-01')(setMood(2, '2026-11-01')(d));
+  const q = quickMoodTags(d, TODAY);
+  assert.deepEqual(q.slice(0, 9), [...MOOD_TAGS, 'Pet']);
+  assert.ok(q.includes('Ansiedade'));
+  d = toggleMoodPin('Trabalho')(d);
+  assert.ok(!d.settings.moodPinned.includes('Trabalho'));
+  d = toggleMoodPin('Trabalho')(d);
+  assert.equal(d.settings.moodPinned.at(-1), 'Trabalho');
+  d = removeMoodTag('Pet')(d);
+  assert.deepEqual(d.settings.moodTags, []);
+  assert.ok(d.moods[TODAY].tags.includes('Pet'), 'o dia mantém o nome');
+  assert.ok(quickMoodTags(d, TODAY).includes('Pet'), 'marcada no dia continua visível');
+  const back = normalize(JSON.parse(JSON.stringify({ ...d, settings: { ...d.settings, moodTags: ['Pet', 'pet', 3], moodPinned: undefined } })));
+  assert.deepEqual(back.settings.moodTags, ['Pet']);
+  assert.deepEqual(back.settings.moodPinned, MOOD_TAGS);
 });

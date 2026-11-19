@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
 import { useStore } from '../store';
-import { clearMood, moodInfo, moodInsights, MOOD_TAGS, MOODS, setMood, setMoodNote, toggleMoodTag, weekMood } from '../mood';
+import { addMoodTag, clearMood, MOOD_GROUPS, moodInfo, moodInsights, MOODS, quickMoodTags, removeMoodTag, setMood, setMoodNote, toggleMoodPin, toggleMoodTag, weekMood } from '../mood';
 import { todayISO, WEEKDAYS, fromISO } from '../utils';
-import { Icon, notify, PageHeader, Pill } from '../ui';
+import { Icon, notify, PageHeader, Pill, Sheet } from '../ui';
 import { weekStart } from '../review';
 
 /** Início: "Como você está hoje?" Um toque; depois, opcionalmente, o que pesou ou ajudou e uma anotação. */
@@ -11,6 +11,8 @@ export function MoodCard() {
   const today = todayISO();
   const m = data.moods[today];
   const [editing, setEditing] = useState(false);
+  const [adding, setAdding] = useState(false);
+  const [all, setAll] = useState(false);
   const [note, setNote] = useState(m?.note ?? '');
   useEffect(() => setNote(m?.note ?? ''), [m?.note]);
 
@@ -90,13 +92,21 @@ export function MoodCard() {
           O que mais pesou ou ajudou? <span className="muted">(opcional)</span>
         </span>
         <div className="chips" role="group" aria-label="O que pesou ou ajudou">
-          {MOOD_TAGS.map((t) => (
+          {quickMoodTags(data, today).map((t) => (
             <button key={t} type="button" aria-pressed={m.tags.includes(t)} className={`chip-btn${m.tags.includes(t) ? ' on' : ''}`} onClick={() => update(toggleMoodTag(t, today))}>
               {t}
             </button>
           ))}
+          <button type="button" className="chip-btn chip-add" onClick={() => setAdding(true)}>
+            + Nova
+          </button>
+          <button type="button" className="chip-btn" onClick={() => setAll(true)}>
+            Ver todas ›
+          </button>
         </div>
+        {adding && <NewMoodTag day={today} onDone={() => setAdding(false)} />}
       </div>
+      {all && <AllMoodTags day={today} onClose={() => setAll(false)} />}
       <label className="field">
         <span className="field-label">
           Quer anotar algo? <span className="muted">(vai para o Diário)</span>
@@ -114,6 +124,90 @@ export function MoodCard() {
         Pronto
       </button>
     </section>
+  );
+}
+
+/** M46: "+ Nova" — cria uma opção sua (ou marca a que já existe com esse nome). */
+function NewMoodTag({ day, onDone }: { day: string; onDone: () => void }) {
+  const { update } = useStore();
+  const [name, setName] = useState('');
+  const create = () => {
+    if (name.trim()) {
+      update(addMoodTag(name, day));
+      notify('Opção marcada', name.trim());
+    }
+    onDone();
+  };
+  return (
+    <div className="mood-new">
+      <input
+        className="input"
+        autoFocus
+        maxLength={30}
+        value={name}
+        onChange={(e) => setName(e.target.value)}
+        onKeyDown={(e) => e.key === 'Enter' && create()}
+        placeholder="Ex.: Pet, Terapia, Igreja"
+        aria-label="Nome da nova opção"
+      />
+      <button type="button" className="btn primary" onClick={create}>
+        Criar
+      </button>
+    </div>
+  );
+}
+
+/** M46: gaveta com todas as opções por grupo; em Editar, ★ fixa na fileira e ✕ apaga as suas. */
+function AllMoodTags({ day, onClose }: { day: string; onClose: () => void }) {
+  const { data, update } = useStore();
+  const [edit, setEdit] = useState(false);
+  const [adding, setAdding] = useState(false);
+  const tags = data.moods[day]?.tags ?? [];
+  const pinned = data.settings.moodPinned;
+  const groups = [...MOOD_GROUPS, { title: 'Minhas', tags: data.settings.moodTags }];
+  return (
+    <Sheet
+      title="Todas as opções"
+      onClose={onClose}
+      badge={
+        <button type="button" className="btn small" onClick={() => setEdit(!edit)}>
+          {edit ? 'Pronto' : 'Editar'}
+        </button>
+      }
+    >
+      <p className="muted small">{edit ? '★ deixa a opção sempre na fileira do cartão. ✕ apaga uma opção sua (os dias antigos continuam com o nome).' : 'As fixadas (★) e as que você mais usa aparecem no cartão.'}</p>
+      {groups.map((g) => (
+        <div key={g.title} className="mood-group">
+          <h3>{g.title}</h3>
+          <div className="mood-all">
+            {g.tags.map((t) =>
+              edit ? (
+                <span key={t} className={`chip-btn${pinned.includes(t) ? ' on' : ''}`}>
+                  <button type="button" className="mood-pin" aria-label={pinned.includes(t) ? `Soltar ${t} da fileira` : `Fixar ${t} na fileira`} onClick={() => update(toggleMoodPin(t))}>
+                    {pinned.includes(t) ? '★' : '☆'} {t}
+                  </button>
+                  {g.title === 'Minhas' && (
+                    <button type="button" className="mood-x" aria-label={`Apagar ${t}`} onClick={() => update(removeMoodTag(t))}>
+                      ✕
+                    </button>
+                  )}
+                </span>
+              ) : (
+                <button key={t} type="button" aria-pressed={tags.includes(t)} className={`chip-btn${tags.includes(t) ? ' on' : ''}`} onClick={() => update(toggleMoodTag(t, day))}>
+                  {t}
+                </button>
+              ),
+            )}
+            {g.title === 'Minhas' && !edit && (
+              <button type="button" className="chip-btn chip-add" onClick={() => setAdding(true)}>
+                + Nova
+              </button>
+            )}
+          </div>
+          {g.title === 'Minhas' && adding && <NewMoodTag day={day} onDone={() => setAdding(false)} />}
+        </div>
+      ))}
+    </Sheet>
   );
 }
 

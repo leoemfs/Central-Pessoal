@@ -12,7 +12,67 @@ export const MOODS: { v: MoodEntry['v']; emoji: string; label: string }[] = [
   { v: 4, emoji: '🙂', label: 'Bem' },
   { v: 5, emoji: '😄', label: 'Ótimo' },
 ];
+/** As 8 opções de antes: viram as fixadas (★) de quem ainda não mexeu. */
 export const MOOD_TAGS = ['Trabalho', 'Sono', 'Família', 'Exercício', 'Dinheiro', 'Saúde', 'Amigos', 'Tempo livre'];
+
+/** M46: todas as opções prontas, por grupo (gaveta "Todas as opções"). */
+export const MOOD_GROUPS: { title: string; tags: string[] }[] = [
+  { title: 'Pessoas', tags: ['Família', 'Amigos', 'Relacionamento', 'Filhos', 'Solidão'] },
+  { title: 'Corpo', tags: ['Sono', 'Exercício', 'Saúde', 'Alimentação', 'Dor', 'Cansaço'] },
+  { title: 'Rotina', tags: ['Trabalho', 'Estudos', 'Casa', 'Trânsito', 'Clima'] },
+  { title: 'Mente', tags: ['Ansiedade', 'Estresse', 'Conquista', 'Descanso', 'Tempo livre', 'Lazer', 'Natureza'] },
+  { title: 'Dinheiro', tags: ['Dinheiro', 'Compras', 'Contas'] },
+];
+const BUILT_IN = MOOD_GROUPS.flatMap((g) => g.tags);
+const same = (a: string, b: string) => a.toLowerCase() === b.toLowerCase();
+
+/** Fileira do cartão: fixadas (★), depois as suas, depois as mais usadas nos últimos 60 dias, e por fim as marcadas no dia. */
+export function quickMoodTags(d: AppData, day: string = todayISO(), max = 14): string[] {
+  const { moodPinned: pinned, moodTags: mine } = d.settings;
+  const count = new Map<string, number>();
+  const from = addDays(day, -60);
+  for (const [k, m] of Object.entries(d.moods)) {
+    if (k === day || k < from) continue; // o dia de hoje não conta, para a fileira não pular ao tocar
+    for (const t of m.tags) count.set(t, (count.get(t) ?? 0) + 1);
+  }
+  const used = [...count].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0])).map(([t]) => t);
+  const out: string[] = [];
+  const add = (t: string) => !out.includes(t) && out.push(t);
+  pinned.forEach(add);
+  mine.forEach(add);
+  for (const t of used) if (out.length < max) add(t);
+  (d.moods[day]?.tags ?? []).forEach(add);
+  return out;
+}
+
+/** Cria uma opção sua e já marca no dia. Se o nome já existe (pronta ou sua), só marca a que existe. */
+export function addMoodTag(name: string, day: string = todayISO()) {
+  return (d: AppData): AppData => {
+    const clean = name.trim().slice(0, 30);
+    if (!clean) return d;
+    const found = [...BUILT_IN, ...d.settings.moodTags].find((t) => same(t, clean));
+    const tag = found ?? clean;
+    const next = found ? d : { ...d, settings: { ...d.settings, moodTags: [...d.settings.moodTags, clean] } };
+    const m = next.moods[day];
+    return m && !m.tags.includes(tag) ? toggleMoodTag(tag, day)(next) : next;
+  };
+}
+
+/** ★: fixa ou solta uma opção da fileira do cartão. */
+export function toggleMoodPin(tag: string) {
+  return (d: AppData): AppData => {
+    const p = d.settings.moodPinned;
+    return { ...d, settings: { ...d.settings, moodPinned: p.includes(tag) ? p.filter((t) => t !== tag) : [...p, tag] } };
+  };
+}
+
+/** ✕: apaga uma opção sua. Os dias antigos continuam com o nome. */
+export function removeMoodTag(tag: string) {
+  return (d: AppData): AppData => ({
+    ...d,
+    settings: { ...d.settings, moodTags: d.settings.moodTags.filter((t) => t !== tag), moodPinned: d.settings.moodPinned.filter((t) => t !== tag) },
+  });
+}
 export const moodInfo = (v: number) => MOODS[Math.min(5, Math.max(1, v)) - 1];
 
 type Rec = Record<string, unknown>;

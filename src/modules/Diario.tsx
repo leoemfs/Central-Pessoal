@@ -9,6 +9,7 @@ import { PhotoThumb, PhotoViewer } from './Fotos';
 import { addMonths, formatDate, formatDateTime, formatDMY, formatMonth, monthKey, nowTime, pad, relativeDay, toISO, todayISO, uid } from '../utils';
 import { Chips, Empty, Field, Icon, IconButton, MonthNav, PageHeader, Pill, Sheet } from '../ui';
 import { usePageMenu } from '../PageMenu';
+import { DiarioGuideCard, DiarioGuideSheet } from './DiarioGuia';
 import { CardScreen, type CardDef } from '../Cards';
 import { currentStreak, dailyPrompt, memories, mondayOf, weekDays, writtenDays } from '../journal';
 
@@ -52,6 +53,9 @@ export function Diario({ route }: ViewProps) {
   const [tagFilter, setTagFilter] = useState('');
   // M44: a ordem fica no menu ⋮ e é lembrada.
   const order = data.settings.journalOrder;
+  const [guide, setGuide] = useState(false);
+  // E43: o guia fica no ⋮ (antes da busca); com o cartão arquivado, dá para trazê-lo de volta.
+  const guideOff = data.settings.guidesOff.includes('diario');
 
   useSubAction(route, 'diario', {
     nova: () => setEditing('new'),
@@ -73,6 +77,8 @@ export function Diario({ route }: ViewProps) {
         setOpen(null);
       },
     },
+    { id: 'guia', label: 'Como usar Diário', icon: 'info', run: () => setGuide(true) },
+    guideOff && { id: 'guia-card', label: 'Mostrar o cartão "Como usar"', icon: 'info', run: () => update((d) => ({ ...d, settings: { ...d.settings, guidesOff: d.settings.guidesOff.filter((x) => x !== 'diario'), guidesSeen: d.settings.guidesSeen.filter((x) => x !== 'diario') } })) },
   ]);
 
   const sorted = useMemo(() => [...data.journal].sort((a, b) => b.createdAt.localeCompare(a.createdAt)), [data.journal]);
@@ -153,6 +159,9 @@ export function Diario({ route }: ViewProps) {
           </button>
         </label>
       )}
+
+      {!searching && <DiarioGuideCard />}
+      {guide && <DiarioGuideSheet onClose={() => setGuide(false)} />}
 
       {cards.length > 0 && <CardScreen screen="diario" cards={cards} />}
 
