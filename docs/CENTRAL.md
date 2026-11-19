@@ -242,6 +242,7 @@
 ## Feito
 | Versão | O que entrou | PR |
 |---|---|---|
+| v0.150.1 | N3 ajustes (20/11): em Tarefas, as abas Pendentes · Hoje e atrasadas · Concluídas ficam **presas no topo** com a barra de cima e **deslizam** (regra do app); no **Próximos**, cada item tem o **sino para tocar** e ligar/desligar o aviso (reunião muda na própria reunião; conta explica que o aviso é geral); o 🔔 escolhido não se perde quando Carreira ou Saúde atualizam a Agenda | #266 |
 | v0.150.0 | N3 **Agenda com Tarefas e 🔔 Me lembrar** (20/11): barra da Agenda **Tarefas · Agenda · Próximos** (Tarefas vira tela própria e sai a aba de dentro da Agenda; sai o atalho Hoje, o dia abre tocando nele); interruptor **🔔 Me lembrar** em tarefa (aviso às 9h do prazo, precisa de prazo), compromisso (30 min antes; ligado por padrão, como já era) e reunião de Carreira; o aviso vai para o Google Agenda; 🔔 aparece nas tarefas e no Próximos; tutorial da Agenda refeito | #265 |
 | v0.149.4 | Limpeza do menu (20/11): saem os itens "em breve" que já tinham destino: **Metas e objetivos** (é o módulo Objetivos), **Lembretes** (vai para a Agenda, N3) e **Foco** (Núcleo › Mente, M16) | #265 |
 | v0.149.3 | Agenda › Próximos (20/11): o ícone de cada item tem a **cor do módulo de onde veio**: contas de Finanças, compromissos e tarefas da Agenda, reuniões e prazos da Carreira (e de outros módulos que criem compromissos) | — |

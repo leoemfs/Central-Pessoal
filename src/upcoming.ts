@@ -49,3 +49,19 @@ export function upcoming(d: AppData, today: string = todayISO(), horizon = 30): 
   for (const i of items.filter((x) => x.day >= today)) byDay.set(i.day, [...(byDay.get(i.day) ?? []), i]);
   return { overdue, days: [...byDay].map(([day, its]) => ({ day, items: its })), total: items.length };
 }
+
+/**
+ * N3: liga/desliga o 🔔 de um item do Próximos. Reunião de Carreira muda na própria reunião;
+ * os outros compromissos e as tarefas mudam neles mesmos. Conta não muda aqui (null): o aviso das contas é geral.
+ */
+export function toggleRemind(d: AppData, it: UpcomingItem): AppData | null {
+  const on = !it.remind;
+  if (it.kind === 'tarefa') return { ...d, tasks: d.tasks.map((t) => (t.id === it.ref ? { ...t, remind: on } : t)) };
+  if (it.kind !== 'evento') return null;
+  const ev = d.events.find((e) => e.id === it.ref);
+  if (!ev) return null;
+  const meetingId = ev.origin?.match(/^carreira\/abrir-m-(.+)$/)?.[1];
+  const events = d.events.map((e) => (e.id === it.ref ? { ...e, remind: on } : e));
+  if (meetingId) return { ...d, events, career: { ...d.career, meetings: d.career.meetings.map((m) => (m.id === meetingId ? { ...m, remind: on } : m)) } };
+  return { ...d, events };
+}

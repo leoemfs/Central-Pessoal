@@ -41,9 +41,8 @@ export function TaskItem({ task, onToggle, onEdit }: { task: Task; onToggle: () 
   );
 }
 
-export function TasksPanel({ onEdit }: { onEdit: (t: Task) => void }) {
+export function TasksPanel({ filter, onEdit }: { filter: TodoFilter; onEdit: (t: Task) => void }) {
   const { data, update } = useStore();
-  const [filter, setFilter] = useState<TodoFilter>('pendentes');
   const today = todayISO();
   const all = useMemo(() => allTodos(data), [data]);
   const visible = useMemo(() => filterTodos(all, filter, today), [all, filter, today]);
@@ -51,16 +50,6 @@ export function TasksPanel({ onEdit }: { onEdit: (t: Task) => void }) {
 
   return (
     <>
-      <Segmented
-        label="Filtro"
-        value={filter}
-        onChange={setFilter}
-        options={[
-          { value: 'pendentes', label: 'Pendentes' },
-          { value: 'hoje', label: 'Hoje e atrasadas' },
-          { value: 'concluidas', label: 'Concluídas' },
-        ]}
-      />
       <section className="card">
         {visible.length === 0 ? (
           <Empty>{all.length === 0 ? 'Nenhuma tarefa ainda.' : 'Nada por aqui.'}</Empty>
@@ -181,11 +170,28 @@ export function TaskForm({ task, defaultDue, onClose }: { task?: Task; defaultDu
 /** Agenda › Tarefas (barra de baixo, à esquerda da Agenda; N3): a lista do que fazer. */
 export function TarefasPage({ route }: ViewProps) {
   const [form, setForm] = useState<Task | 'new' | null>(null);
+  const [filter, setFilter] = useState<TodoFilter>('pendentes');
   useSubAction(route, 'tarefas', { nova: () => setForm('new') });
   return (
     <>
-      <PageHeader title="Tarefas" />
-      <TasksPanel onEdit={(t) => setForm(t)} />
+      {/* Abas presas no topo com a barra de cima e deslizando entre elas (regra do app). */}
+      <PageHeader
+        title="Tarefas"
+        tabs={
+          <Segmented
+            label="Filtro"
+            swipe
+            value={filter}
+            onChange={setFilter}
+            options={[
+              { value: 'pendentes', label: 'Pendentes' },
+              { value: 'hoje', label: 'Hoje e atrasadas' },
+              { value: 'concluidas', label: 'Concluídas' },
+            ]}
+          />
+        }
+      />
+      <TasksPanel filter={filter} onEdit={(t) => setForm(t)} />
       {form && <TaskForm task={form === 'new' ? undefined : form} onClose={() => setForm(null)} />}
     </>
   );

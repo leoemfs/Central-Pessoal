@@ -399,8 +399,8 @@ export function sortProjects(ps: WorkProject[]) {
  */
 export function careerEvents(c: CareerData): CalendarEvent[] {
   const out: CalendarEvent[] = [];
-  const ev = (id: string, title: string, date: string, time: string, origin: string, description: string, remind = true) =>
-    out.push({ id, title, date, time, location: '', description, remind, origin: `carreira/${origin}` });
+  const ev = (id: string, title: string, date: string, time: string, origin: string, description: string, remind?: boolean) =>
+    out.push({ id, title, date, time, location: '', description, ...(remind === undefined ? {} : { remind }), origin: `carreira/${origin}` });
   for (const m of c.meetings) ev(m.eventId ?? `car-m-${m.id}`, meetingTitle(m), m.date, m.time, `abrir-m-${m.id}`, 'Reunião de Carreira', m.remind);
   for (const j of c.jobs) if (isOpen(j) && j.nextDate) ev(j.eventId ?? `car-j-${j.id}`, jobEventTitle(j), j.nextDate, j.nextTime, `abrir-j-${j.id}`, 'Vaga de Carreira');
   for (const p of c.projects) {
@@ -430,8 +430,10 @@ export function syncCareerEvents(d: AppData): AppData {
       return [e];
     }
     byId.delete(e.id);
-    const next = { ...w, location: e.location };
-    if (e.title === next.title && e.date === next.date && e.time === next.time && e.origin === next.origin && e.description === next.description) return [e];
+    // 🔔: a reunião manda no sino; nos outros (vagas, projetos) vale o que foi escolhido na Agenda.
+    const remind = w.remind ?? e.remind;
+    const next = { ...w, location: e.location, ...(remind === undefined ? {} : { remind }) };
+    if (e.title === next.title && e.date === next.date && e.time === next.time && e.origin === next.origin && e.description === next.description && e.remind === next.remind) return [e];
     changed = true;
     return [next];
   });
