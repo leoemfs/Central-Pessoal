@@ -14366,3 +14366,19 @@ body.kb-open .bar-pull {
     padding-bottom: 64px;
   }
 }
+
+/* Projeto Enxuto E3: combinados, entregas e passos na lista de tarefas */
+.todo-open {
+  background: none;
+  border: 0;
+  padding: 0;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.todo-go {
+  color: var(--muted, #888);
+  display: inline-flex;
+  align-self: center;
+}
