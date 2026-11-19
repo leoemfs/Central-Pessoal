@@ -14382,3 +14382,54 @@ body.kb-open .bar-pull {
   display: inline-flex;
   align-self: center;
 }
+
+/* ---------- E44: escolher mês (tocar no nome do mês) ---------- */
+.mp-year {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+.mp-year b {
+  font-size: 1.15rem;
+}
+.mp-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+.mp-month {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  min-height: 60px;
+  padding: 8px 4px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--raised);
+  color: var(--text);
+  font: inherit;
+  font-weight: 600;
+  text-transform: capitalize;
+  cursor: pointer;
+}
+.mp-month small {
+  font-size: 0.72rem;
+  font-weight: 500;
+  color: var(--muted);
+  text-transform: none;
+}
+.mp-month.now {
+  border-color: var(--accent);
+}
+.mp-month.on {
+  background: var(--accent-soft);
+  border-color: var(--accent);
+  color: var(--accent-text);
+}
+.mp-month.on small {
+  color: var(--accent-text);
+}
