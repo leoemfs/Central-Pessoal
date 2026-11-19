@@ -1,6 +1,7 @@
 /**
  * Jornada (N2.9b): entrevista da Mestra Lume, seguindo a "Prévia da Jornada".
- * Áreas (até 3, na ordem do toque) → uma pergunta por área → horário → ritmo → resumo.
+ * E4: as áreas vêm da montagem do app e do Você (rota das regiões, com "Trocar as áreas");
+ * depois, uma pergunta por região → ritmo → resumo (com o horário dos rituais).
  * No fim, cria no app os hábitos e a caixinha que faltam e guarda as respostas.
  */
 import { useState } from 'react';
@@ -8,7 +9,7 @@ import { useStore } from '../store';
 import { todayISO } from '../utils';
 import { Icon, notify, type IconName } from '../ui';
 import { npcIcon } from '../jornada/catalog';
-import { AREAS, defaultProfile, GOALS, LUME_LINES, PLANS, planLabel, goalName, steps, type Area, type PlanKey, type Profile } from '../jornada/interview';
+import { AREAS, campaignRegions, GOALS, LUME_LINES, PLANS, planLabel, goalName, prefill, steps, type Area, type PlanKey, type Profile } from '../jornada/interview';
 import { applyInterview, interviewPlan } from '../jornada/interviewApply';
 
 const AREA_ICONS: Record<Area, IconName> = { corpo: 'dumbbell', rotina: 'sun', mente: 'book', dinheiro: 'coins', largar: 'shield', bemestar: 'heart' };
@@ -32,10 +33,11 @@ function Chips<T extends string | number>({ label, options, value, onChange }: {
 export function Entrevista({ onDone, onCancel }: { onDone: () => void; onCancel: () => void }) {
   const { data, update } = useStore();
   const today = todayISO();
-  const [p, setP] = useState<Profile>(() => data.journey.profile ?? defaultProfile(today));
+  const [p, setP] = useState<Profile>(() => prefill(data.journey.profile, data.profile, today));
+  const [askAreas, setAskAreas] = useState(() => p.areas.length === 0);
   const [i, setI] = useState(0);
   const [warn, setWarn] = useState(false);
-  const list = steps(p);
+  const list = steps(p, askAreas);
   const st = list[Math.min(i, list.length - 1)];
   const set = <K extends keyof Profile>(k: K, v: Partial<Profile[K]>) => setP((x) => ({ ...x, [k]: typeof v === 'object' && !Array.isArray(v) ? { ...(x[k] as object), ...v } : v }));
   const move = (n: number) => {
@@ -77,6 +79,19 @@ export function Entrevista({ onDone, onCancel }: { onDone: () => void; onCancel:
         </div>
       </div>
 
+      {st === 'rota' && (
+        <>
+          <ol className="jn-route">
+            {campaignRegions(p).map((r) => (
+              <li key={r}>{r}</li>
+            ))}
+          </ol>
+          <p className="muted small">Prioridade: {p.areas.map((a) => AREAS.find((x) => x.id === a)!.name).join(' → ')}</p>
+          <button type="button" className="btn ghost small" onClick={() => setAskAreas(true)}>
+            Trocar as áreas
+          </button>
+        </>
+      )}
       {st === 'areas' && (
         <>
           <div className="jn-areas">
@@ -160,22 +175,6 @@ export function Entrevista({ onDone, onCancel }: { onDone: () => void; onCancel:
         </>
       )}
       {st === 'bemestar' && <Chips label="O que te ajuda?" options={[['meditar', 'Meditar 10 min'], ['respirar', 'Respirar 5 min'], ['gratidao', 'Escrever 3 gratidões'], ['terapia', 'Terapia semanal']]} value={p.bemestar.what} onChange={(what) => set('bemestar', { what })} />}
-      {st === 'horario' && (
-        <div className="jn-bigopts" role="group" aria-label="Melhor horário">
-          {(
-            [
-              ['manha', 'Manhã', 'sun'],
-              ['tarde', 'Tarde', 'clock'],
-              ['noite', 'Noite', 'moon'],
-            ] as const
-          ).map(([v, l, ic]) => (
-            <button key={v} type="button" aria-pressed={p.period === v} onClick={() => setP({ ...p, period: v })}>
-              <Icon name={ic} size={26} />
-              <strong>{l}</strong>
-            </button>
-          ))}
-        </div>
-      )}
       {st === 'ritmo' && (
         <div className="jn-paces" role="group" aria-label="Ritmo">
           {(
@@ -243,6 +242,16 @@ export function Entrevista({ onDone, onCancel }: { onDone: () => void; onCancel:
               ))}
             </ol>
           </section>
+          <Chips
+            label="Melhor horário para os rituais"
+            options={[
+              ['manha', 'Manhã'],
+              ['tarde', 'Tarde'],
+              ['noite', 'Noite'],
+            ]}
+            value={p.period}
+            onChange={(period) => setP({ ...p, period })}
+          />
           <p className="muted small">
             Ritmo {p.pace} · rituais {{ manha: 'de manhã', tarde: 'à tarde', noite: 'à noite' }[p.period]}. Dá para refazer a entrevista quando a vida mudar: os hábitos criados ficam, e nada é duplicado.
           </p>

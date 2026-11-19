@@ -46,7 +46,7 @@ export const SETUP_AREAS: { id: string; label: string; icon: string; modules: st
 ];
 
 /** Áreas da entrevista do Você que correspondem às escolhas daqui (para não perguntar duas vezes). */
-export const PROFILE_AREA: Record<string, string> = { dinheiro: 'dinheiro', rotina: 'rotina', mente: 'corpo', estudos: 'mente' };
+export const PROFILE_AREA: Record<string, string> = { dinheiro: 'dinheiro', rotina: 'rotina', mente: 'corpo', estudos: 'mente', saude: 'corpo' };
 
 /** Módulos marcados pelas áreas, sempre com Notas e Você (leves). Completa até 3 com os padrões. */
 export function modulesFromAreas(areas: string[]): string[] {

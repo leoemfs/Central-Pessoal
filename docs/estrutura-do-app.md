@@ -39,7 +39,7 @@
 | **Saúde** | Rotina · **Saúde** · Histórico | Dia · Dieta · Remédios · Consultas · Medidas | Água (ligável ao hábito), sono, **dieta** com planos e receitas ligadas, compras da semana, **remédios** com doses e aviso no Google Agenda, **consultas** e check-ups (vão para a Agenda), medidas |
 | **Notas** | — | — | Anotações rápidas e fixadas |
 | **Jornada** (opcional) | Jornada · Arsenal · Baús · Ficha | Ficha · Títulos · Forja · Classes | Desbloqueia com 14 dias de uso; personagem e pet em pixel art, céu pela hora, XP, nível, ouro, cristais, baús, arsenal (49 itens), missões do dia e da semana, entrevista da Mestra Lume, mini game, animação de entrada |
-| **Você** | — | — | Entrevista de 7 perguntas, perfil e **sugestões** de hábitos e práticas |
+| **Você** | — | — | "Completar o perfil" (só o que a montagem não perguntou), perfil e **sugestões** de hábitos e práticas |
 | **Revisão semanal** | (no Diário) | — | Rotina, gastos, contas, agenda, autocuidado, caixinhas, vales, estudos e reflexão |
 | **Configurações** | — | Lista de temas | Conta Google, Aparência (tema, 8 cores, vidro fosco), Início e módulos, Barras e navegação, Backup, Armazenamento |
 

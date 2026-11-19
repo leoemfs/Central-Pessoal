@@ -22,6 +22,18 @@ export const EX_LONG = ['Juntar R$ 10 mil', 'Viajar para fora', 'Trocar de empre
 
 /** Quantas perguntas a entrevista tem (as telas ficam em Voce.tsx). */
 export const INTERVIEW_STEPS = 7;
+/**
+ * Perguntas da entrevista do Você, pelo número (E4, "Completar o perfil"):
+ * 0 horários (e nome, se faltar) · 1 dia a dia · 2 áreas · 3 metas · 4 dinheiro · 5 largar · 6 limitações e preferências.
+ * As áreas vêm da montagem do app: só são perguntadas aqui se ainda estiverem vazias.
+ */
+export function interviewQuestions(p: Pick<Profile, 'areas'>): number[] {
+  return [0, 1, ...(p.areas.length ? [] : [2]), 3, 4, 5, 6];
+}
+/** Quantas perguntas faltam, a partir de onde a pessoa parou. */
+export function questionsLeft(p: Pick<Profile, 'areas' | 'onboarding'>): number {
+  return interviewQuestions(p).filter((q) => q >= p.onboarding.step).length;
+}
 /** "Agora não" no cartão do Início esconde por estes dias; depois de 2 vezes, só pela página Você. */
 export const ASK_SNOOZE_DAYS = 7;
 
@@ -94,7 +106,7 @@ export function completeness(p: Profile): number {
   return Math.round((parts.filter(Boolean).length / parts.length) * 100);
 }
 
-/** O cartão "Conte um pouco sobre você" aparece no Início? */
+/** O cartão "Complete seu perfil" aparece no Início? */
 export function showAsk(p: Profile, today: string = todayISO()): boolean {
   const o = p.onboarding;
   if (o.state === 'feito' || o.state === 'novo') return false;
