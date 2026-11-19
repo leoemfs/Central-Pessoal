@@ -5,7 +5,7 @@ import { Empty, Icon, PageHeader, Pill, type IconName } from '../ui';
 
 const KIND: Record<UpcomingItem['kind'], { label: string; icon: IconName; href: string }> = {
   evento: { label: 'Compromisso', icon: 'calendar', href: '#/agenda' },
-  tarefa: { label: 'Tarefa', icon: 'tasks', href: '#/agenda/tarefas' },
+  tarefa: { label: 'Tarefa', icon: 'tasks', href: '#/tarefas' },
   conta: { label: 'Conta', icon: 'wallet', href: '#/financas' },
 };
 
@@ -23,6 +23,7 @@ function Row({ i }: { i: UpcomingItem }) {
           <span className="row-meta">
             {k.label}
             {i.time ? ` · ${i.time}` : ''}
+            {i.remind && <span aria-label="Com lembrete"> · 🔔</span>}
           </span>
         </div>
         {i.amount !== null && <strong className="tabular">{formatMoney(i.amount)}</strong>}

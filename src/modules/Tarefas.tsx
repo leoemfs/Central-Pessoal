@@ -4,8 +4,9 @@ import { remove, upsert } from '../actions';
 import type { Priority, Task } from '../types';
 import { relativeDay, todayISO, uid } from '../utils';
 import { allTodos, filterTodos, SOURCE_LABEL, toggleTodo, type TodoFilter, type TodoItem } from '../afazeres';
-import { go } from '../router';
-import { Chips, Empty, Field, Icon, IconButton, Pill, Segmented, Sheet } from '../ui';
+import { go, useSubAction } from '../router';
+import type { ViewProps } from '../App';
+import { Chips, Empty, Field, Icon, IconButton, PageHeader, Pill, RemindToggle, Segmented, Sheet } from '../ui';
 
 const PRIORITY_LABEL: Record<Priority, string> = { alta: 'Alta', media: 'Média', baixa: 'Baixa' };
 const PRIORITY_ORDER: Record<Priority, number> = { alta: 0, media: 1, baixa: 2 };
@@ -30,6 +31,7 @@ export function TaskItem({ task, onToggle, onEdit }: { task: Task; onToggle: () 
         <span className="row-title">{task.title}</span>
         <span className="row-meta">
           {task.due && <Pill tone={overdue ? 'red' : task.due === today ? 'orange' : 'gray'}>{relativeDay(task.due)}</Pill>}
+          {task.remind && task.due && !task.done && <span aria-label="Com lembrete">🔔</span>}
           {task.priority === 'alta' && <Pill tone="red">Alta</Pill>}
           {task.tag && <span>#{task.tag}</span>}
         </span>
@@ -111,8 +113,9 @@ function TodoRow({ item, onToggle }: { item: TodoItem; onToggle: () => void }) {
 }
 
 export function TaskForm({ task, defaultDue, onClose }: { task?: Task; defaultDue?: string; onClose: () => void }) {
-  const { update } = useStore();
+  const { data, update } = useStore();
   const [title, setTitle] = useState(task?.title ?? '');
+  const [remind, setRemind] = useState(task?.remind === true);
   const [due, setDue] = useState(task?.due ?? defaultDue ?? '');
   const [priority, setPriority] = useState<Priority>(task?.priority ?? 'media');
   const [tag, setTag] = useState(task?.tag ?? '');
@@ -131,6 +134,7 @@ export function TaskForm({ task, defaultDue, onClose }: { task?: Task; defaultDu
         done: task?.done ?? false,
         doneAt: task?.doneAt ?? null,
         createdAt: task?.createdAt ?? new Date().toISOString(),
+        remind: remind && Boolean(due),
       }),
     );
     onClose();
@@ -159,6 +163,7 @@ export function TaskForm({ task, defaultDue, onClose }: { task?: Task; defaultDu
       <Field label="Prazo" hint="Tarefas com prazo aparecem na agenda e no Início.">
         <input type="date" className="input" value={due} onChange={(e) => setDue(e.target.value)} />
       </Field>
+      <RemindToggle checked={remind} onChange={setRemind} google={data.settings.googleCalendar.on} hint="às 9h do prazo" disabled={due ? undefined : '(escolha um prazo para ligar)'} />
       <div className="field">
         <span className="field-label">Prioridade</span>
         <Chips label="Prioridade" value={priority} onChange={setPriority} options={(['alta', 'media', 'baixa'] as Priority[]).map((p) => ({ value: p, label: PRIORITY_LABEL[p] }))} />
@@ -170,5 +175,18 @@ export function TaskForm({ task, defaultDue, onClose }: { task?: Task; defaultDu
         <textarea className="input" rows={3} value={notes} onChange={(e) => setNotes(e.target.value)} />
       </Field>
     </Sheet>
+  );
+}
+
+/** Agenda › Tarefas (barra de baixo, à esquerda da Agenda; N3): a lista do que fazer. */
+export function TarefasPage({ route }: ViewProps) {
+  const [form, setForm] = useState<Task | 'new' | null>(null);
+  useSubAction(route, 'tarefas', { nova: () => setForm('new') });
+  return (
+    <>
+      <PageHeader title="Tarefas" />
+      <TasksPanel onEdit={(t) => setForm(t)} />
+      {form && <TaskForm task={form === 'new' ? undefined : form} onClose={() => setForm(null)} />}
+    </>
   );
 }

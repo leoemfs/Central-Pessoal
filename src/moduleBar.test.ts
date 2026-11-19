@@ -70,7 +70,7 @@ test('E21: dentro do módulo, a casa fica sempre no centro (o jeito antigo da ba
   const ids = (x: { items: { id: string }[]; home: number }) => [x.items.map((i) => i.id), x.home];
   assert.deepEqual(ids(barItems(barFor('financas')!, favs)), [['orcamento', 'financas', 'relatorios'], 1]);
   assert.deepEqual(ids(barItems(barFor('relatorios')!, favs, 'fixo')), [['orcamento', 'financas', 'relatorios'], 1]);
-  assert.deepEqual(ids(barItems(barFor('agenda')!, favs, 'lado')), [['hoje', 'agenda', 'proximos'], 1]);
+  assert.deepEqual(ids(barItems(barFor('agenda')!, favs, 'lado')), [['tarefas', 'agenda', 'proximos'], 1]);
   assert.deepEqual(ids(barItems(barFor('listas')!, favs)), [['compras', 'listas', 'precos'], 1]);
 });
 

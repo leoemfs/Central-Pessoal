@@ -183,6 +183,7 @@ export function fixTask(r: Rec, now: string): Task {
     done: r.done === true,
     createdAt: stamp(r.createdAt, now),
     doneAt: strOrNull(r.doneAt),
+    remind: r.remind === true,
   } as Task;
 }
 
@@ -196,6 +197,7 @@ export function fixEvent(r: Rec): CalendarEvent | null {
     time: typeof r.time === 'string' && /^\d{2}:\d{2}$/.test(r.time) ? r.time : '',
     location: str(r.location),
     description: str(r.description),
+    remind: r.remind !== false,
   } as CalendarEvent;
 }
 

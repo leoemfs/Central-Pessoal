@@ -56,9 +56,9 @@ export const MODULE_BARS: ModuleBar[] = [
   {
     id: 'agenda',
     name: 'Agenda',
-    sections: ['agenda', 'proximos'],
+    sections: ['agenda', 'tarefas', 'proximos'],
     items: [
-      { id: 'hoje', label: 'Hoje', icon: 'sun', to: 'agenda/hoje' },
+      { id: 'tarefas', label: 'Tarefas', icon: 'tasks', to: 'tarefas', section: 'tarefas' },
       { id: 'agenda', label: 'Agenda', icon: 'calendar', to: 'agenda', section: 'agenda' },
       { id: 'proximos', label: 'Próximos', icon: 'list', to: 'proximos', section: 'proximos' },
     ],

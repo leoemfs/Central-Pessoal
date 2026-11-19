@@ -88,7 +88,7 @@ test('virar tarefa: cria na Agenda com prazo e manda a nota para Arquivados com 
   assert.equal(t.due, '2026-11-20');
   assert.match(t.notes, /Separar ferramentas/);
   assert.deepEqual([d.notes[0].archived, d.notes[0].became], [true, { kind: 'tarefa', id: 't1' }]);
-  assert.equal(becameRoute(d, d.notes[0].became!), 'agenda/tarefas');
+  assert.equal(becameRoute(d, d.notes[0].became!), 'tarefas');
   // De novo não faz nada (já virou).
   assert.equal(transformNote(d, 'n1', { kind: 'tarefa' }, 't2', T), d);
 });

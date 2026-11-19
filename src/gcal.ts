@@ -72,7 +72,7 @@ function eventBody(w: WantedEvent, timeZone: string) {
     description: w.description,
     start: { dateTime: w.start, timeZone },
     end: { dateTime: w.end, timeZone },
-    reminders: { useDefault: false, overrides: [{ method: 'popup', minutes: w.reminder }] },
+    reminders: { useDefault: false, overrides: w.reminder === null ? [] : [{ method: 'popup', minutes: w.reminder }] },
     extendedProperties: { private: { sig: w.sig, app: 'central-pessoal' } },
   };
 }

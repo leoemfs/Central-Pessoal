@@ -6,8 +6,8 @@ import { remove, upsert } from '../actions';
 import { getInvoice, invoiceMonths } from '../finance';
 import type { CalendarEvent, Task } from '../types';
 import { addDays, addMonths, daysInMonth, formatLongDate, formatMonth, fromISO, monthKey, relativeDay, todayISO, uid, WEEKDAYS } from '../utils';
-import { Empty, Field, Icon, MonthNav, PageHeader, Pill, Segmented, Sheet } from '../ui';
-import { TaskForm, TasksPanel } from './Tarefas';
+import { Empty, Field, Icon, MonthNav, PageHeader, Pill, RemindToggle, Sheet } from '../ui';
+import { TaskForm } from './Tarefas';
 import { DaySheet } from './DaySheet';
 import { usePageMenu } from '../PageMenu';
 import { AgendaGuideCard, AgendaGuideSheet } from './AgendaGuia';
@@ -62,14 +62,11 @@ function useBillsByDay(): Map<string, DayBill[]> {
   }, [data]);
 }
 
-type Tab = 'calendario' | 'tarefas';
-
 export function Agenda({ route }: ViewProps) {
   const { data, update } = useStore();
   const today = todayISO();
   const [guide, setGuide] = useState(false);
   const guideOff = data.settings.guidesOff.includes('agenda');
-  const [tab, setTab] = useState<Tab>('calendario');
   const [month, setMonth] = useState(monthKey(today));
   const [selected, setSelected] = useState(today);
   const [dayOpen, setDayOpen] = useState(false);
@@ -78,19 +75,15 @@ export function Agenda({ route }: ViewProps) {
   const billsByDay = useBillsByDay();
 
   useSubAction(route, 'agenda', {
-    tarefas: () => setTab('tarefas'),
-    calendario: () => setTab('calendario'),
+    // Endereços antigos: as tarefas ganharam tela própria na barra (N3).
+    tarefas: () => setTimeout(() => go('tarefas'), 0),
     hoje: () => {
-      setTab('calendario');
       setSelected(today);
       setMonth(monthKey(today));
       setDayOpen(true);
     },
-    novo: () => (tab === 'tarefas' ? setTaskForm('new') : setEventForm('new')),
-    'nova-tarefa': () => {
-      setTab('tarefas');
-      setTaskForm('new');
-    },
+    novo: () => setEventForm('new'),
+    'nova-tarefa': () => go('tarefas/nova'),
     'novo-compromisso': () => setEventForm('new'),
   });
 
@@ -130,16 +123,10 @@ export function Agenda({ route }: ViewProps) {
       <PageHeader
         title="Agenda"
         actions={<MonthNav label={formatMonth(month)} onPrev={() => setMonth(addMonths(month, -1))} onNext={() => setMonth(addMonths(month, 1))} pick={{ month, onPick: setMonth, onToday: () => pick(today) }} />}
-        tabs={<Segmented label="Visão" swipe value={tab} onChange={setTab} options={[{ value: 'calendario', label: 'Calendário' }, { value: 'tarefas', label: 'Tarefas' }]} />}
       />
 
       <AgendaGuideCard />
 
-      {tab === 'tarefas' ? (
-        <>
-          <TasksPanel onEdit={(t) => setTaskForm(t)} />
-        </>
-      ) : (
         <div className="grid-2">
           <section className="card">
             <div className="calendar" role="grid" aria-label={formatMonth(month)}>
@@ -187,7 +174,6 @@ export function Agenda({ route }: ViewProps) {
             )}
           </section>
         </div>
-      )}
 
       {guide && <AgendaGuideSheet onClose={() => setGuide(false)} />}
       {dayOpen && (
@@ -201,13 +187,14 @@ export function Agenda({ route }: ViewProps) {
         />
       )}
       {eventForm && <EventForm event={eventForm === 'new' ? undefined : eventForm} defaultDate={selected} onClose={() => setEventForm(null)} onSaved={pick} />}
-      {taskForm && <TaskForm task={taskForm === 'new' ? undefined : taskForm} defaultDue={tab === 'calendario' ? selected : undefined} onClose={() => setTaskForm(null)} />}
+      {taskForm && <TaskForm task={taskForm === 'new' ? undefined : taskForm} defaultDue={selected} onClose={() => setTaskForm(null)} />}
     </>
   );
 }
 
 function EventForm({ event, defaultDate, onClose, onSaved }: { event?: CalendarEvent; defaultDate: string; onClose: () => void; onSaved: (date: string) => void }) {
-  const { update } = useStore();
+  const { data, update } = useStore();
+  const [remind, setRemind] = useState(event?.remind !== false);
   const [title, setTitle] = useState(event?.title ?? '');
   const [date, setDate] = useState(event?.date ?? defaultDate);
   const [time, setTime] = useState(event?.time ?? '');
@@ -216,7 +203,7 @@ function EventForm({ event, defaultDate, onClose, onSaved }: { event?: CalendarE
 
   function save() {
     if (!title.trim() || !date) return;
-    update(upsert('events', { id: event?.id ?? uid(), title: title.trim(), date, time, location: location.trim(), description: description.trim() }));
+    update(upsert('events', { id: event?.id ?? uid(), title: title.trim(), date, time, location: location.trim(), description: description.trim(), remind }));
     onSaved(date);
     onClose();
   }
@@ -249,6 +236,7 @@ function EventForm({ event, defaultDate, onClose, onSaved }: { event?: CalendarE
           <input type="time" className="input" value={time} onChange={(e) => setTime(e.target.value)} />
         </Field>
       </div>
+      <RemindToggle checked={remind} onChange={setRemind} google={data.settings.googleCalendar.on} hint={time ? '30 min antes' : 'às 9h do dia'} />
       <Field label="Local (opcional)">
         <input className="input" value={location} onChange={(e) => setLocation(e.target.value)} />
       </Field>

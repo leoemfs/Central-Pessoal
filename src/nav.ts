@@ -19,7 +19,7 @@ export const NAV_GROUPS: { title: string; items: NavItem[] }[] = [
       { label: 'Guardados', icon: 'archive', to: 'guardados', section: 'guardados' },
       { label: 'Você', icon: 'user', to: 'voce', section: 'voce' },
       { label: 'Calendário', icon: 'calendar', to: 'agenda', section: 'agenda' },
-      { label: 'Tarefas', icon: 'tasks', to: 'agenda/tarefas' },
+      { label: 'Tarefas', icon: 'tasks', to: 'tarefas', section: 'tarefas' },
       { label: 'Próximos', icon: 'list', to: 'proximos', section: 'proximos' },
     ],
   },

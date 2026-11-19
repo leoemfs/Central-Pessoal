@@ -74,7 +74,7 @@ export function SearchSheet({ onClose, scope = null }: { onClose: () => void; sc
     ]);
     add('agenda', 'Agenda', () => [
       ...data.events.filter((e) => has(e.title, e.location, e.description)).map((e) => ({ key: e.id, icon: 'calendar' as IconName, title: e.title, meta: formatDMY(e.date), to: e.origin ?? 'agenda' })),
-      ...data.tasks.filter((t) => has(t.title, t.notes, t.tag)).map((t) => ({ key: t.id, icon: 'tasks' as IconName, title: t.title, meta: t.done ? 'Concluída' : t.due ? `Prazo ${formatDMY(t.due)}` : 'Tarefa', to: 'agenda/tarefas' })),
+      ...data.tasks.filter((t) => has(t.title, t.notes, t.tag)).map((t) => ({ key: t.id, icon: 'tasks' as IconName, title: t.title, meta: t.done ? 'Concluída' : t.due ? `Prazo ${formatDMY(t.due)}` : 'Tarefa', to: 'tarefas' })),
     ]);
     add('nucleo', 'Núcleo', () =>
       data.habits.filter((h) => has(h.name, h.cue)).map((h) => ({ key: h.id, icon: 'sprout' as IconName, title: h.name, meta: h.archivedAt ? 'Arquivado' : h.kind === 'abandonar' ? 'Hábito a abandonar' : h.kind === 'ritual' ? 'Ritual' : 'Hábito', to: 'nucleo' })),

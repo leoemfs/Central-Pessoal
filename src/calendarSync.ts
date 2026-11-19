@@ -24,8 +24,8 @@ export interface WantedEvent {
   /** Data e hora local (AAAA-MM-DDTHH:MM:00). */
   start: string;
   end: string;
-  /** Minutos antes do início. */
-  reminder: number;
+  /** Minutos antes do início; null = sem aviso (🔔 desligado). */
+  reminder: number | null;
   /** Resumo do conteúdo: muda quando algo do evento muda (evita mandar de novo à toa). */
   sig: string;
 }
@@ -53,18 +53,19 @@ export function wantedEvents(d: AppData, today: string = todayISO()): WantedEven
   const { days } = upcoming(d, today, CALENDAR_DAYS);
   for (const { items } of days) {
     for (const it of items) {
-      // Tarefas vão para o Google Tarefas (N9.6), não para a agenda.
-      if ((it.kind === 'evento' && !g.events) || it.kind === 'tarefa' || (it.kind === 'conta' && !g.bills)) continue;
+      // Tarefas vão para o Google Tarefas (N9.6); só as com 🔔 ganham também um aviso na agenda (N3).
+      if ((it.kind === 'evento' && !g.events) || (it.kind === 'tarefa' && !it.remind) || (it.kind === 'conta' && !g.bills)) continue;
       const timed = it.kind === 'evento' && it.time !== '';
       const time = timed ? it.time : DAY_REMINDER_TIME;
       const summary =
-        it.kind === 'conta' ? `💸 Pagar: ${it.title}${it.amount !== null ? ` · ${formatMoney(it.amount)}` : ''}` : it.title;
-      const ev = d.events.find((x) => x.id === it.ref);
-      const description = [ev?.location && `Local: ${ev.location}`, ev?.description, FOOTER].filter(Boolean).join('\n\n');
+        it.kind === 'conta' ? `💸 Pagar: ${it.title}${it.amount !== null ? ` · ${formatMoney(it.amount)}` : ''}` : it.kind === 'tarefa' ? `✅ ${it.title}` : it.title;
+      const ev = it.kind === 'evento' ? d.events.find((x) => x.id === it.ref) : undefined;
+      const task = it.kind === 'tarefa' ? d.tasks.find((x) => x.id === it.ref) : undefined;
+      const description = [ev?.location && `Local: ${ev.location}`, ev?.description, task?.notes, FOOTER].filter(Boolean).join('\n\n');
       const start = plusMinutes(it.day, time, 0);
       const end = plusMinutes(it.day, time, timed ? 60 : 15);
-      const reminder = timed ? EVENT_REMINDER : 0;
-      const kind = it.kind === 'evento' ? 'e' : 'c';
+      const reminder = !it.remind ? null : timed ? EVENT_REMINDER : 0;
+      const kind = it.kind === 'evento' ? 'e' : it.kind === 'tarefa' ? 't' : 'c';
       out.push({ id: eventId(kind, it.ref), summary, description, start, end, reminder, sig: JSON.stringify([summary, description, start, end, reminder]) });
     }
   }
