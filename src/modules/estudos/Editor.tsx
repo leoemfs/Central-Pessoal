@@ -140,6 +140,26 @@ function Btn({ icon, label, on, onClick, disabled, children, className = '' }: {
   );
 }
 
+/**
+ * E42: no celular, a faixa de formatação fica colada em cima do teclado. Se a linha do cursor ficar
+ * atrás dela (ou do teclado), a página rola o suficiente para o cursor aparecer logo acima da faixa.
+ */
+function keepCaretVisible(e: Editor) {
+  requestAnimationFrame(() => {
+    const bar = e.view.dom.closest('.ed')?.querySelector('.ed-bar') as HTMLElement | null;
+    if (!bar || getComputedStyle(bar).position !== 'fixed') return;
+    let caret: { top: number; bottom: number };
+    try {
+      caret = e.view.coordsAtPos(e.state.selection.head);
+    } catch {
+      return;
+    }
+    const limit = bar.getBoundingClientRect().top - 16;
+    if (caret.bottom > limit) window.scrollBy({ top: caret.bottom - limit, behavior: 'auto' });
+    else if (caret.top < 70) window.scrollBy({ top: caret.top - 70, behavior: 'auto' });
+  });
+}
+
 export default function RichEditor({ doc, onChange, placeholder = 'Escreva aqui o que aprendeu…' }: { doc: RichNode; onChange: (doc: RichNode) => void; placeholder?: string }) {
   const [more, setMore] = useState(false);
   // E42: no celular, a barra de formatação só aparece editando, colada em cima do teclado.
@@ -179,7 +199,12 @@ export default function RichEditor({ doc, onChange, placeholder = 'Escreva aqui 
       window.clearTimeout(timer.current);
       timer.current = window.setTimeout(flush, 500);
     },
-    onFocus: () => setFocused(true),
+    onFocus: ({ editor: e }) => {
+      setFocused(true);
+      // O teclado leva um instante para abrir: confere de novo depois.
+      window.setTimeout(() => keepCaretVisible(e), 350);
+    },
+    onSelectionUpdate: ({ editor: e }) => keepCaretVisible(e),
     onBlur: () => {
       flush();
       setFocused(false);
