@@ -8,6 +8,7 @@ import { openTutorial } from './Montagem';
 import { TutorialSheet } from './estudos/Tutorial';
 import { FinGuideSheet } from './financas/Guia';
 import { DiarioGuideSheet } from './DiarioGuia';
+import { AgendaGuideSheet } from './AgendaGuia';
 
 /**
  * E43: "Como usar o app" (atalho da gaveta). No topo, o tutorial da barra; embaixo, um guia por módulo à vista,
@@ -59,6 +60,7 @@ export function AjudaPage() {
       </section>
       {open === 'financas' && <FinGuideSheet onClose={() => setOpen(null)} />}
       {open === 'diario' && <DiarioGuideSheet onClose={() => setOpen(null)} />}
+      {open === 'agenda' && <AgendaGuideSheet onClose={() => setOpen(null)} />}
       {open === 'estudos' && <TutorialSheet onClose={() => setOpen(null)} />}
     </>
   );

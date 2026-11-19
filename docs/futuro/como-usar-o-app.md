@@ -16,7 +16,7 @@ O atalho da gaveta "Como usar a barra" virou **"Como usar o app"** (`#/ajuda`), 
 - `settings.guidesSeen: string[]` (padrão `[]` em `normalize()`): guias já abertos ("Visto").
 - Estudos já tem tudo: guia (6 passos), cartão da 1ª vez (`TutorialCard`, com arquivar em `study.tutorialOff`) e "Como usar Estudos" no ⋮. Abrir o guia marca "Visto".
 - Gaveta: atalho id `barra` em `src/modules/Mais.tsx` (o id ficou igual para não bagunçar a ordem salva).
-- **⋮ do Início** (v0.148.1): "Como usar o app", para quem ainda não usa a gaveta.
+- **⋮ do Início** (v0.149.1): "Como usar o app", para quem ainda não usa a gaveta.
 
 ## Parte 2: Finanças (v0.147.0)
 - **Guia comum** `src/modules/Guia.tsx`: `GuideSheet` (id, label, steps) e `GuideCard` (cartão da 1ª vez com arquivar). Passo sem `go` não mostra atalho. Estudos passou a usar os dois (o arquivar dele continua em `study.tutorialOff`).
@@ -27,6 +27,9 @@ O atalho da gaveta "Como usar a barra" virou **"Como usar o app"** (`#/ajuda`), 
 ## Parte 3: Diário (v0.148.0)
 - Passos em `src/modules/DiarioGuia.tsx` (o Diário não tem pasta própria). Cartão no topo do feed (some durante a busca); ⋮: ordem, "Como usar Diário", "Mostrar o cartão" (se arquivado) e a busca por último.
 
+## Parte 4: Agenda (v0.149.0)
+- Passos em `src/modules/AgendaGuia.tsx`. Cartão logo abaixo do cabeçalho (nas duas abas); ⋮: "Como usar Agenda", "Mostrar o cartão" (se arquivado) e a busca por último. Os atalhos do guia abrem compromisso novo, Tarefas, Hoje e Próximos.
+
 ## O que falta (uma parte por vez, tamanho P cada)
 Para cada módulo:
 1. **Guia** com os passos (texto curto, em português simples), num componente genérico reaproveitável. Ao fazer Finanças, transformar o `TutorialSheet` de Estudos num `GuideSheet` comum que recebe os passos.
@@ -34,7 +37,7 @@ Para cada módulo:
 3. **"Como usar <módulo>"** no ⋮ da casa do módulo (antes da busca).
 4. Entrar em `GUIDES` (`src/guias.ts`) para aparecer na central.
 
-Ordem combinada: ~~Finanças~~, ~~Diário~~ (feitos), depois Agenda, Listas, Núcleo, Carreira, Objetivos, Saúde, Notas, Você.
+Ordem combinada: ~~Finanças~~, ~~Diário~~, ~~Agenda~~ (feitos), depois Listas, Núcleo, Carreira, Objetivos, Saúde, Notas, Você.
 
 ### Passos sugeridos para Finanças (6)
 1. **As quatro abas:** Despesas, Receitas, Cartões e Caixinhas; o mês fica logo abaixo (tocar no mês abre "Escolher mês").
