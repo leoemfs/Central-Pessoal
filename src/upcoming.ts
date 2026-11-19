@@ -16,6 +16,8 @@ export interface UpcomingItem {
   amount: number | null;
   /** id do compromisso ou da tarefa; na conta, a chave da conta. */
   ref: string;
+  /** Módulo de onde veio (para a cor do ícone): conta = Finanças; compromisso criado por outro módulo = esse módulo. */
+  module: string;
 }
 
 export interface Upcoming {
@@ -30,13 +32,13 @@ export function upcoming(d: AppData, today: string = todayISO(), horizon = 30): 
   const until = addDays(today, horizon);
   const items: UpcomingItem[] = [];
   for (const e of d.events) {
-    if (e.date >= today && e.date <= until) items.push({ key: `e:${e.id}`, kind: 'evento', title: e.title, day: e.date, time: e.time, amount: null, ref: e.id });
+    if (e.date >= today && e.date <= until) items.push({ key: `e:${e.id}`, kind: 'evento', title: e.title, day: e.date, time: e.time, amount: null, ref: e.id, module: e.origin ? e.origin.split('/')[0] || 'agenda' : 'agenda' });
   }
   for (const t of d.tasks) {
-    if (!t.done && t.due && t.due <= until) items.push({ key: `t:${t.id}`, kind: 'tarefa', title: t.title, day: t.due, time: '', amount: null, ref: t.id });
+    if (!t.done && t.due && t.due <= until) items.push({ key: `t:${t.id}`, kind: 'tarefa', title: t.title, day: t.due, time: '', amount: null, ref: t.id, module: 'agenda' });
   }
   for (const b of openBills(d, until, today)) {
-    items.push({ key: `b:${b.key}`, kind: 'conta', title: b.title, day: b.dueDate, time: '', amount: b.amount, ref: b.key });
+    items.push({ key: `b:${b.key}`, kind: 'conta', title: b.title, day: b.dueDate, time: '', amount: b.amount, ref: b.key, module: 'financas' });
   }
   const sort = (a: UpcomingItem, b: UpcomingItem) => a.day.localeCompare(b.day) || ORDER[a.kind] - ORDER[b.kind] || (a.time || '99').localeCompare(b.time || '99') || a.title.localeCompare(b.title);
   items.sort(sort);
