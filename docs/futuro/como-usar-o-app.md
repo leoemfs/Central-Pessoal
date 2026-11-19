@@ -17,6 +17,12 @@ O atalho da gaveta "Como usar a barra" virou **"Como usar o app"** (`#/ajuda`), 
 - Estudos já tem tudo: guia (6 passos), cartão da 1ª vez (`TutorialCard`, com arquivar em `study.tutorialOff`) e "Como usar Estudos" no ⋮. Abrir o guia marca "Visto".
 - Gaveta: atalho id `barra` em `src/modules/Mais.tsx` (o id ficou igual para não bagunçar a ordem salva).
 
+## Parte 2: Finanças (v0.147.0)
+- **Guia comum** `src/modules/Guia.tsx`: `GuideSheet` (id, label, steps) e `GuideCard` (cartão da 1ª vez com arquivar). Passo sem `go` não mostra atalho. Estudos passou a usar os dois (o arquivar dele continua em `study.tutorialOff`).
+- `settings.guidesOff: string[]` (padrão `[]` em `normalize()`): cartões arquivados. `showGuideCard()` e `archiveGuide()` em `src/guias.ts`.
+- Finanças: passos em `src/modules/financas/Guia.tsx`; cartão no topo da casa (todas as abas); ⋮ com "Como usar Finanças" e, se arquivado, "Mostrar o cartão \"Como usar\"".
+- **Para o próximo módulo:** criar `src/modules/<módulo>/Guia.tsx` com os passos, pôr `GuideCard` na casa, o item no ⋮ (`usePageMenu`), a linha em `GUIDES` e o `open === '<id>'` em `Ajuda.tsx`.
+
 ## O que falta (uma parte por vez, tamanho P cada)
 Para cada módulo:
 1. **Guia** com os passos (texto curto, em português simples), num componente genérico reaproveitável. Ao fazer Finanças, transformar o `TutorialSheet` de Estudos num `GuideSheet` comum que recebe os passos.
@@ -24,7 +30,7 @@ Para cada módulo:
 3. **"Como usar <módulo>"** no ⋮ da casa do módulo (antes da busca).
 4. Entrar em `GUIDES` (`src/guias.ts`) para aparecer na central.
 
-Ordem combinada: **Finanças** primeiro, depois Diário, Agenda, Listas, Núcleo, Carreira, Objetivos, Saúde, Notas, Você.
+Ordem combinada: ~~Finanças~~ (feito), depois Diário, Agenda, Listas, Núcleo, Carreira, Objetivos, Saúde, Notas, Você.
 
 ### Passos sugeridos para Finanças (6)
 1. **As quatro abas:** Despesas, Receitas, Cartões e Caixinhas; o mês fica logo abaixo (tocar no mês abre "Escolher mês").
