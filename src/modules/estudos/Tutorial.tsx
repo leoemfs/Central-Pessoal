@@ -1,12 +1,8 @@
-import { useEffect, useState } from 'react';
-import { useStore } from '../../store';
-import { markSeen } from '../../guias';
-import { go } from '../../router';
-import { Icon, notify, Sheet, type IconName } from '../../ui';
+import { GuideCard, GuideSheet, type GuideStep } from '../Guia';
 import { useStudy } from './shared';
 
 /** Os passos do tutorial de Estudos (N11.5): o que é, como fazer e onde tocar para ver na prática. */
-const STEPS: { icon: IconName; title: string; text: string[]; to: string; go: string }[] = [
+export const STUDY_STEPS: GuideStep[] = [
   {
     icon: 'library',
     title: 'Escolha um assunto na Biblioteca',
@@ -70,102 +66,22 @@ const STEPS: { icon: IconName; title: string; text: string[]; to: string; go: st
   },
 ];
 
-/** Texto com **negrito**, sem marcação nenhuma além disso. */
-function Rich({ text }: { text: string }) {
-  return <>{text.split(/\*\*(.+?)\*\*/g).map((part, i) => (i % 2 ? <b key={i}>{part}</b> : part))}</>;
-}
-
-/** Passo a passo do tutorial, numa janela com Voltar e Próximo. */
+/** Passo a passo de Estudos (guia comum, E43). */
 export function TutorialSheet({ onClose }: { onClose: () => void }) {
-  const [i, setI] = useState(0);
-  // E43: abriu o guia, ele aparece como "Visto" em Como usar o app.
-  const { update } = useStore();
-  useEffect(() => {
-    update((d) => (d.settings.guidesSeen.includes('estudos') ? d : { ...d, settings: { ...d.settings, guidesSeen: markSeen(d.settings.guidesSeen, 'estudos') } }));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-  const step = STEPS[i];
-  const last = i === STEPS.length - 1;
-  return (
-    <Sheet
-      title="Como usar Estudos"
-      badge={<span className="muted small tabular">{i + 1} de {STEPS.length}</span>}
-      onClose={onClose}
-      footer={
-        <div className="btn-row st-tut-nav">
-          <button type="button" className="btn soft" disabled={i === 0} onClick={() => setI(i - 1)}>
-            Voltar
-          </button>
-          <button type="button" className="btn primary" onClick={() => (last ? onClose() : setI(i + 1))}>
-            {last ? 'Pronto' : 'Próximo'}
-          </button>
-        </div>
-      }
-    >
-      <div className="st-tut">
-        <span className="tile-icon st-green st-tut-icon">
-          <Icon name={step.icon} size={26} />
-        </span>
-        <h3>{step.title}</h3>
-        {step.text.map((t) => (
-          <p key={t}>
-            <Rich text={t} />
-          </p>
-        ))}
-        <button
-          type="button"
-          className="link st-tut-go"
-          onClick={() => {
-            onClose();
-            go(step.go);
-          }}
-        >
-          {step.to} <Icon name="right" size={16} />
-        </button>
-        <div className="st-tut-dots" aria-hidden="true">
-          {STEPS.map((s, k) => (
-            <span key={s.title} className={k === i ? 'on' : undefined} />
-          ))}
-        </div>
-      </div>
-    </Sheet>
-  );
+  return <GuideSheet id="estudos" label="Estudos" steps={STUDY_STEPS} onClose={onClose} />;
 }
 
-/** Cartão "Como usar Estudos" (antes de "Estudando agora"), com Arquivar. */
+/** Cartão "Como usar Estudos" (antes de "Estudando agora"), com Arquivar (guardado em `study.tutorialOff`). */
 export function TutorialCard() {
   const { study, set } = useStudy();
-  const [open, setOpen] = useState(false);
-  if (study.tutorialOff) return null;
   return (
-    <section className="card st-course-cta">
-      <div className="st-course-cta-text">
-        <span className="tile-icon st-green">
-          <Icon name="info" />
-        </span>
-        <div className="st-tut-head">
-          <h2>Como usar Estudos</h2>
-          <p className="muted small">Seis passos rápidos: Biblioteca, ciclo, tópicos, notebook, fontes e mapas, e cursos prontos.</p>
-        </div>
-        <button
-          type="button"
-          className="icon-btn st-quiet"
-          aria-label="Arquivar o tutorial"
-          title="Arquivar"
-          onClick={() => {
-            set((s) => ({ ...s, tutorialOff: true }));
-            notify('Tutorial arquivado', 'O passo a passo fica no ⋮ de Estudos e em Como usar o app.');
-          }}
-        >
-          <Icon name="archive" size={18} />
-        </button>
-      </div>
-      <div className="btn-row">
-        <button type="button" className="btn primary small" onClick={() => setOpen(true)}>
-          Ver o passo a passo
-        </button>
-      </div>
-      {open && <TutorialSheet onClose={() => setOpen(false)} />}
-    </section>
+    <GuideCard
+      id="estudos"
+      label="Estudos"
+      summary="Seis passos rápidos: Biblioteca, ciclo, tópicos, notebook, fontes e mapas, e cursos prontos."
+      steps={STUDY_STEPS}
+      off={study.tutorialOff}
+      onArchive={() => set((s) => ({ ...s, tutorialOff: true }))}
+    />
   );
 }

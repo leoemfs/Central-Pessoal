@@ -87,6 +87,8 @@ test('E29: ícones começam monocromáticos (valores estranhos também)', () => 
   assert.equal(normalize({ version: 2, settings: { frostedGlass: true } }).settings.frostedGlass, true);
   assert.equal(normalize(undefined).settings.menuTipSeen, false);
   assert.deepEqual(normalize(undefined).settings.guidesSeen, []);
+  assert.deepEqual(normalize(undefined).settings.guidesOff, []);
+  assert.deepEqual(normalize({ version: 2, settings: { guidesOff: ['financas', 1] } }).settings.guidesOff, ['financas']);
   assert.deepEqual(normalize({ version: 2, settings: { guidesSeen: ['estudos', 3] } }).settings.guidesSeen, ['estudos']);
   assert.equal(normalize({ version: 2, settings: { menuTipSeen: true } }).settings.menuTipSeen, true);
   assert.equal(normalize({ version: 2, settings: { iconStyle: 'flat', iconColors: 'mono' } }).settings.iconColors, 'mono');

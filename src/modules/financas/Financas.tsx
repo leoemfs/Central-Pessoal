@@ -17,6 +17,8 @@ import { IncomeForm, ReceitasTab } from './Receitas';
 import { CaixinhasTab } from './Caixinhas';
 import { VoucherDetail, VoucherForm, VoucherTile } from './Vale';
 import type { VoucherCard } from '../../types';
+import { FinGuideCard, FinGuideSheet } from './Guia';
+import { usePageMenu } from '../../PageMenu';
 import { BillStatusPill, CreditCardVisual, InvoiceStatusPill, useCategoryOf } from './shared';
 
 type Tab = 'mes' | 'receitas' | 'cartoes' | 'caixinhas';
@@ -41,6 +43,13 @@ export function Financas({ route }: ViewProps) {
   const [catsOpen, setCatsOpen] = useState(false);
   const [filter, setFilter] = useState<BillFilter>('todas');
   const listRef = useRef<HTMLElement>(null);
+  const [guide, setGuide] = useState(false);
+  // E43: o guia fica no ⋮ (antes da busca); com o cartão arquivado, dá para trazê-lo de volta.
+  const guideOff = data.settings.guidesOff.includes('financas');
+  usePageMenu([
+    { id: 'guia', label: 'Como usar Finanças', icon: 'info', run: () => setGuide(true) },
+    guideOff && { id: 'guia-card', label: 'Mostrar o cartão "Como usar"', icon: 'info', run: () => update((d) => ({ ...d, settings: { ...d.settings, guidesOff: d.settings.guidesOff.filter((x) => x !== 'financas'), guidesSeen: d.settings.guidesSeen.filter((x) => x !== 'financas') } })) },
+  ]);
 
   const ADD: { id: string; label: string; hint: string; icon: IconName; run: () => void }[] = [
     { id: 'despesa', label: 'Nova despesa', hint: 'Conta, compra ou parcela', icon: 'wallet', run: () => { setTab('mes'); setFormOpen(true); } },
@@ -95,6 +104,9 @@ export function Financas({ route }: ViewProps) {
   return (
     <>
       <PageHeader title="Finanças" actions={<MonthNav label={formatMonth(month)} onPrev={() => setMonth(addMonths(month, -1))} onNext={() => setMonth(addMonths(month, 1))} pick={{ month, onPick: setMonth, onToday: () => setMonth(monthKey(today)) }} />} tabs={<Segmented label="Visão" swipe value={tab} onChange={setTab} options={[{ value: 'mes', label: 'Despesas' }, { value: 'receitas', label: 'Receitas' }, { value: 'cartoes', label: 'Cartões' }, { value: 'caixinhas', label: 'Caixinhas' }]} />} />
+
+      <FinGuideCard />
+      {guide && <FinGuideSheet onClose={() => setGuide(false)} />}
 
       {tab === 'caixinhas' ? (
         <CaixinhasTab month={month} newOpen={boxForm} onNewClose={() => setBoxForm(false)} />

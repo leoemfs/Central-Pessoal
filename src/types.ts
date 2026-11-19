@@ -284,6 +284,8 @@ export interface Settings {
   menuTipSeen: boolean;
   /** E43: guias de módulo já abertos (Como usar o app: "Visto"). */
   guidesSeen: string[];
+  /** E43: módulos com o cartão "Como usar" da 1ª vez arquivado. */
+  guidesOff: string[];
   /** E31: tamanho dos ícones dos módulos e da barra (o menu sempre um pouco maior que a barra). */
   iconSize: 'p' | 'm' | 'g';
   seededCategories: boolean;

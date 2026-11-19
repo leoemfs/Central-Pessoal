@@ -6,6 +6,7 @@ import { visibleGuides } from '../guias';
 import { Icon, PageHeader, Pill } from '../ui';
 import { openTutorial } from './Montagem';
 import { TutorialSheet } from './estudos/Tutorial';
+import { FinGuideSheet } from './financas/Guia';
 
 /**
  * E43: "Como usar o app" (atalho da gaveta). No topo, o tutorial da barra; embaixo, um guia por módulo à vista,
@@ -55,6 +56,7 @@ export function AjudaPage() {
           Os guias dos outros módulos chegam aos poucos.
         </p>
       </section>
+      {open === 'financas' && <FinGuideSheet onClose={() => setOpen(null)} />}
       {open === 'estudos' && <TutorialSheet onClose={() => setOpen(null)} />}
     </>
   );
