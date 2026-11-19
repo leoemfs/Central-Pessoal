@@ -32,6 +32,8 @@ export function applyInterview(d: AppData, p: Profile, today: string): AppData {
   const boxes: SavingsBox[] = plan.box
     ? [normalizeBox({ id: uid(), name: plan.box.name, target: plan.box.meta, plan: { amount: PLANS[plan.box.plan][0], every: PLANS[plan.box.plan][1], startDate: today }, createdAt: now })]
     : [];
-  return { ...d, habits: [...d.habits, ...habits], boxes: [...d.boxes, ...boxes], journey: { ...d.journey, profile: { ...p, at: today } } };
+  // E4: as áreas da Jornada são as mesmas do Você (a prioridade da Jornada vem primeiro).
+  const areas = Array.from(new Set([...p.areas, ...d.profile.areas]));
+  return { ...d, profile: { ...d.profile, areas }, habits: [...d.habits, ...habits], boxes: [...d.boxes, ...boxes], journey: { ...d.journey, profile: { ...p, at: today } } };
 }
 
