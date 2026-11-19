@@ -30,34 +30,27 @@ export function AjudaPage() {
           Ver o tutorial da barra
         </button>
       </section>
-      <section className="card">
-        <div className="card-head">
-          <h2>Guia de cada módulo</h2>
-        </div>
-        <ul className="list">
-          {guides.map((g) => {
-            const seen = data.settings.guidesSeen.includes(g.id);
-            return (
-              <li key={g.id}>
-                <button type="button" className="row link-row help-row" onClick={() => setOpen(g.id)}>
-                  <span className="mg-icon" data-mod={g.id}>
-                    <Icon name={SECTIONS.find((x) => x.path === g.id)?.icon ?? 'info'} size={18} />
-                  </span>
-                  <span className="row-body">
-                    <span className="row-title">{g.label}</span>
-                    <span className="row-meta">{g.steps} passos</span>
-                  </span>
-                  <Pill tone={seen ? 'gray' : 'blue'}>{seen ? 'Visto' : 'Novo'}</Pill>
-                  <Icon name="right" size={18} />
-                </button>
-              </li>
-            );
-          })}
-        </ul>
-        <p className="muted small" style={{ marginTop: 8 }}>
-          Os guias dos outros módulos chegam aos poucos.
-        </p>
-      </section>
+      {/* Mesmo formato da lista das Configurações: linhas com divisor (pedido de 20/11). */}
+      <h2 className="section-title">Guia de cada módulo</h2>
+      <div className="set-group">
+        {guides.map((g) => {
+          const seen = data.settings.guidesSeen.includes(g.id);
+          return (
+            <button key={g.id} type="button" className="set-row help-row" onClick={() => setOpen(g.id)}>
+              <span className="set-icon" data-mod={g.id}>
+                <Icon name={SECTIONS.find((x) => x.path === g.id)?.icon ?? 'info'} />
+              </span>
+              <span className="set-text">
+                <strong>{g.label}</strong>
+                <span>{g.steps} passos</span>
+              </span>
+              <Pill tone={seen ? 'gray' : 'blue'}>{seen ? 'Visto' : 'Novo'}</Pill>
+              <Icon name="right" size={18} />
+            </button>
+          );
+        })}
+      </div>
+      <p className="muted small">Os guias dos outros módulos chegam aos poucos.</p>
       {open === 'financas' && <FinGuideSheet onClose={() => setOpen(null)} />}
       {open === 'diario' && <DiarioGuideSheet onClose={() => setOpen(null)} />}
       {open === 'agenda' && <AgendaGuideSheet onClose={() => setOpen(null)} />}
