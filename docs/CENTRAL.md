@@ -242,6 +242,7 @@
 ## Feito
 | Versão | O que entrou | PR |
 |---|---|---|
+| v0.149.4 | Limpeza do menu (20/11): saem os itens "em breve" que já tinham destino: **Metas e objetivos** (é o módulo Objetivos), **Lembretes** (vai para a Agenda, N3) e **Foco** (Núcleo › Mente, M16) | (PR) |
 | v0.149.3 | Agenda › Próximos (20/11): o ícone de cada item tem a **cor do módulo de onde veio**: contas de Finanças, compromissos e tarefas da Agenda, reuniões e prazos da Carreira (e de outros módulos que criem compromissos) | — |
 | v0.148.0 | M46 **Humor com mais opções** (19/11): ~25 opções em grupos, **+ Nova** para criar as suas, fileira com fixadas ★ e mais usadas, gaveta "Todas as opções" com Editar (★ fixa, ✕ apaga as suas) | #259 |
 | v0.139.0 | Projeto Enxuto **E2 Sem a tela Mais** (18/11): a tela Mais e as opções "Botão Mais na barra" e "Tela Mais" (lista ou grade) saíram; o menu fica só na **gaveta** (puxar a barra), que já tinha Guardados, Como usar a barra e Configurações. O endereço antigo `#/mais` abre o Início com a gaveta aberta. No computador, "Mais (todos os módulos)" na barra lateral virou **Guardados** (só aparece com módulo desligado). Textos da montagem do app e o último passo do tutorial falam do menu | — |

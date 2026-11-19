@@ -34,8 +34,6 @@ export const NAV_GROUPS: { title: string; items: NavItem[] }[] = [
       { label: 'Listas', icon: 'cart', to: 'listas', section: 'listas' },
       { label: 'Compras', icon: 'receipt', to: 'compras', section: 'compras' },
       { label: 'Preços', icon: 'store', to: 'precos', section: 'precos' },
-      { label: 'Lembretes', icon: 'bell' },
-      { label: 'Metas e objetivos', icon: 'target' },
     ],
   },
   {
@@ -83,7 +81,6 @@ export const NAV_GROUPS: { title: string; items: NavItem[] }[] = [
     items: [
       { label: 'Objetivos', icon: 'flag', to: 'objetivos', section: 'objetivos' },
       { label: 'Jornada', icon: 'sword', to: 'jornada', section: 'jornada' },
-      { label: 'Foco', icon: 'timer' },
     ],
   },
 ];
