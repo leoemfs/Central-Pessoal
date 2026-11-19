@@ -14433,3 +14433,19 @@ body.kb-open .bar-pull {
 .mp-month.on small {
   color: var(--accent-text);
 }
+
+/* ---------- Toque: o fundo de "mouse por cima" não fica preso no botão depois do toque (19/11) ---------- */
+@media (hover: none) {
+  .icon-btn:hover:not(.on):not(:active),
+  .icon-btn.danger:hover:not(:active) {
+    background: transparent;
+    color: var(--muted);
+  }
+  .icon-btn.st-quiet:hover:not(:active) {
+    background: transparent;
+    color: var(--faint);
+  }
+  .icon-btn:active {
+    background: var(--raised);
+  }
+}
