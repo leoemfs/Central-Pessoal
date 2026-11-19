@@ -5,7 +5,6 @@ import { addFavorite, FAVORITABLE } from '../moduleBar';
 import { Icon, notify, PageHeader, Sheet, type IconName } from '../ui';
 import { hiddenFrom, isHidden, moduleOf, toggleModule, visibleFrom } from '../setup';
 import { NAV_GROUPS } from '../nav';
-import { openTutorial } from './Montagem';
 import { arrange, moveCard } from '../cardLayout';
 
 /** Todos os módulos. Orçamento e Relatórios ficam dentro de Finanças (na barra de baixo). */
@@ -104,7 +103,7 @@ function maisItems(data: AppData, grid: boolean) {
   });
   const shortcuts: Item[] = [
     { id: 'ajustes', label: 'Configurações', short: 'Ajustes', icon: 'settings', hint: 'Aparência, módulos, barras, conta Google, backup e dados', href: '#/ajustes' },
-    { id: 'barra', label: 'Como usar a barra', short: 'Usar a barra', icon: 'info', hint: 'Tutorial de 1 minuto: favoritos, ferramentas do módulo, voltar e trocar de módulo', onClick: openTutorial },
+    { id: 'barra', label: 'Como usar o app', short: 'Como usar', icon: 'info', hint: 'Tutorial da barra e um guia rápido de cada módulo', href: '#/ajuda' },
     ...(kept.length > 0
       ? [{ id: 'guardados', label: grid ? 'Guardados' : `Guardados · ${kept.length}`, short: 'Guardados', icon: 'archive' as IconName, hint: `${keptNames(kept.map((l) => l.path))}: desligados, com tudo o que você já registrou`, href: '#/guardados', badge: kept.length }]
       : []),
