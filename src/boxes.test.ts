@@ -2,7 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { emptyData, normalize } from './data.ts';
 import { balance, deposit, newBox, newMarks, pendingBoxes, planPeriod, planStatus, plannedInMonth, progress, savedInMonth, timeToGoal, withdraw } from './boxes.ts';
-import { acceptSuggestion, emptyProfile, suggestions } from './profile.ts';
+import { acceptSuggestion, emptyProfile, moveProfileGoals, suggestions } from './profile.ts';
 import type { AppData, SavingsBox } from './types.ts';
 
 // 2026-11-04 é uma quarta-feira.
@@ -80,7 +80,7 @@ test('caixinhas sobrevivem ao backup', () => {
 });
 
 test('sugestão de caixinha pelo "quero juntar para" e pelas metas, sem repetir', () => {
-  let d: AppData = { ...emptyData(), profile: { ...emptyProfile('feito'), areas: ['dinheiro'], longGoals: [{ id: 'g', text: 'Juntar R$ 10 mil', when: '', doneAt: null }], money: { challenge: '', saveFor: 'reserva', amount: 6000 } } };
+  let d: AppData = moveProfileGoals({ ...emptyData(), profile: { ...emptyProfile('feito'), areas: ['dinheiro'], longGoals: [{ id: 'g', text: 'Juntar R$ 10 mil', when: '', doneAt: null }], money: { challenge: '', saveFor: 'reserva', amount: 6000 } } });
   const ids = suggestions(d, TODAY).map((s) => s.id);
   assert.deepEqual(ids, ['s-caixa-g', 's-caixa-juntar']);
   const s = suggestions(d, TODAY)[1];

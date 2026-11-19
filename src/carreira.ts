@@ -96,7 +96,7 @@ export function normalizeCareerGoal(r: Record<string, unknown>): CareerGoal {
   const steps = (Array.isArray(r.steps) ? r.steps : [])
     .filter((s): s is Record<string, unknown> => typeof s === 'object' && s !== null && typeof (s as Record<string, unknown>).id === 'string')
     .map((s) => ({ id: s.id as string, text: str(s.text), done: s.done === true }));
-  return { id: r.id as string, title: str(r.title), note: str(r.note), deadline: date(r.deadline), steps, doneAt: date(r.doneAt), createdAt: str(r.createdAt) };
+  return { id: r.id as string, area: r.area === 'voce' ? 'voce' : 'carreira', title: str(r.title), note: str(r.note), deadline: date(r.deadline), steps, doneAt: date(r.doneAt), createdAt: str(r.createdAt) };
 }
 
 export function normalizeCareer(raw: unknown): CareerData {

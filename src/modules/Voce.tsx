@@ -4,7 +4,7 @@ import type { ViewProps } from '../App';
 import { useStore } from '../store';
 import {
   acceptSuggestion, AREAS, completeness, DAY, dismissSuggestion, EX_LONG, EX_SHORT, FREE, interviewQuestions, LIKES, questionsLeft, LIMITS, MONEY, QUITS, SAVE,
-  setProfile, showAsk, snoozeAsk, suggestions, type Suggestion,
+  setProfile, showAsk, snoozeAsk, suggestions, voceGoals, type Suggestion,
 } from '../profile';
 import type { AppData, Goal, Profile } from '../types';
 import { formatMoney, uid } from '../utils';
@@ -100,8 +100,9 @@ export function ForYou() {
 export function AskCard({ onAnswer }: { onAnswer: () => void }) {
   const { data, update } = useStore();
   const p = data.profile;
-  if (!showAsk(p)) return null;
-  const pc = completeness(p);
+  const nGoals = voceGoals(data).length;
+  if (!showAsk(p, undefined, nGoals)) return null;
+  const pc = completeness(p, nGoals);
   const left = questionsLeft(p);
   const resume = p.onboarding.step > 0;
   return (
@@ -136,7 +137,7 @@ export function AskCard({ onAnswer }: { onAnswer: () => void }) {
 
 // ---------- Entrevista ----------
 
-function GoalTags({ goals }: { goals: Goal[] }) {
+function GoalTags({ goals }: { goals: { id: string; text: string }[] }) {
   if (!goals.length) return null;
   return (
     <div className="chips">
@@ -348,11 +349,11 @@ export function Interview({ start, onClose }: { start: number; onClose: () => vo
   else if (i === 3)
     body = q(
       'Tem alguma meta?',
-      'Uma para os próximos meses e outra maior, para daqui a um ano ou mais. Pode tocar num exemplo.',
+      'Uma para os próximos meses e outra maior, para daqui a um ano ou mais. Pode tocar num exemplo. Elas ficam em Objetivos.',
       <>
+        <GoalTags goals={voceGoals(data).map((g) => ({ id: g.id, text: g.title }))} />
         <div className="field">
           <span className="field-label">Nos próximos meses</span>
-          <GoalTags goals={p.shortGoals} />
           <input className="input" value={shortText} onChange={(e) => setShortText(e.target.value)} placeholder="Ex.: correr 5 km" aria-label="Meta para os próximos meses" />
           <div className="chips ex">
             {EX_SHORT.map((t) => (
@@ -364,7 +365,6 @@ export function Interview({ start, onClose }: { start: number; onClose: () => vo
         </div>
         <div className="field">
           <span className="field-label">Daqui a um ano ou mais</span>
-          <GoalTags goals={p.longGoals} />
           <input className="input" value={longText} onChange={(e) => setLongText(e.target.value)} placeholder="Ex.: juntar R$ 10 mil" aria-label="Meta para daqui a um ano ou mais" />
           <div className="chips ex">
             {EX_LONG.map((t) => (
@@ -431,42 +431,19 @@ export function Interview({ start, onClose }: { start: number; onClose: () => vo
 
 // ---------- Página Você ----------
 
-function GoalList({ kind, placeholder }: { kind: 'shortGoals' | 'longGoals'; placeholder: string }) {
-  const { data, update } = useStore();
-  const [text, setText] = useState('');
-  const goals = data.profile[kind];
-  const add = () => {
-    if (!text.trim()) return;
-    update(setProfile((p) => ({ ...p, [kind]: addGoal(p[kind], text) })));
-    setText('');
-  };
+/** E5: as metas do Você moram em Objetivos (área Você). Aqui só um atalho, sem repetir a lista. */
+function GoalsLink() {
+  const { data } = useStore();
+  const n = voceGoals(data).filter((g) => !g.doneAt).length;
   return (
-    <>
-      {goals.length > 0 && (
-        <ul className="list">
-          {goals.map((g) => (
-            <li key={g.id} className="row">
-              <span className="sug-icon" style={{ color: kind === 'longGoals' ? 'var(--blue-text)' : 'var(--accent-text)' }}>
-                <Icon name="target" size={16} />
-              </span>
-              <div className="row-body">
-                <span className="row-title">{g.text}</span>
-                {g.when && <span className="row-meta">{g.when}</span>}
-              </div>
-              <button type="button" className="icon-btn" aria-label={`Remover "${g.text}"`} onClick={() => update(setProfile((p) => ({ ...p, [kind]: p[kind].filter((x) => x.id !== g.id) })))}>
-                <Icon name="x" size={16} />
-              </button>
-            </li>
-          ))}
-        </ul>
-      )}
-      <div className="add-row">
-        <input className="input" value={text} onChange={(e) => setText(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && add()} placeholder={placeholder} aria-label={placeholder} />
-        <button type="button" className="btn" onClick={add} aria-label="Adicionar meta">
-          <Icon name="plus" size={18} />
-        </button>
-      </div>
-    </>
+    <a className="row" href="#/objetivos/area-voce">
+      <span className="sug-icon" style={{ color: 'var(--accent-text)' }}><Icon name="target" size={16} /></span>
+      <span className="row-body">
+        <span className="row-title">{n ? `${n} ${n === 1 ? 'meta andando' : 'metas andando'}` : 'Criar uma meta'}</span>
+        <span className="row-meta">Suas metas ficam em Objetivos, com prazo e passos</span>
+      </span>
+      <Icon name="right" size={18} />
+    </a>
   );
 }
 
@@ -475,7 +452,7 @@ export function Voce({ route }: ViewProps) {
   const p = data.profile;
   const [iv, setIv] = useState<number | null>(null);
   const list = suggestions(data);
-  const pc = completeness(p);
+  const pc = completeness(p, voceGoals(data).length);
   const set = (fn: (p: Profile) => Profile) => update(setProfile(fn));
   const [notes, setNotes] = useState(p.notes);
   const [amount, setAmount] = useState(p.money.amount ? String(p.money.amount) : '');
@@ -549,18 +526,10 @@ export function Voce({ route }: ViewProps) {
 
       <section className="card">
         <div className="card-head">
-          <h2>Metas de curto prazo</h2>
-          <span className="muted small">até 3 meses</span>
+          <h2>Metas</h2>
+          <span className="muted small">em Objetivos</span>
         </div>
-        <GoalList kind="shortGoals" placeholder="Ex.: correr 5 km sem parar" />
-      </section>
-
-      <section className="card">
-        <div className="card-head">
-          <h2>Metas de longo prazo</h2>
-          <span className="muted small">1 ano ou mais</span>
-        </div>
-        <GoalList kind="longGoals" placeholder="Ex.: juntar R$ 10 mil" />
+        <GoalsLink />
       </section>
 
       <section className="card">

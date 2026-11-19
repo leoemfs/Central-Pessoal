@@ -1,12 +1,12 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { emptyData, normalize, normalizeHabit } from './data.ts';
-import { acceptSuggestion, completeness, dismissSuggestion, emptyProfile, parseMoneyText, shiftTime, showAsk, snoozeAsk, suggestions } from './profile.ts';
+import { acceptSuggestion, completeness, dismissSuggestion, emptyProfile, moveProfileGoals, parseMoneyText, shiftTime, showAsk, snoozeAsk, suggestions } from './profile.ts';
 import type { AppData, Profile } from './types.ts';
 
 // 2026-11-04 é uma quarta-feira.
 const TODAY = '2026-11-04';
-const withProfile = (p: Partial<Profile>, extra: Partial<AppData> = {}): AppData => ({ ...emptyData(), profile: { ...emptyProfile('feito'), ...p }, ...extra });
+const withProfile = (p: Partial<Profile>, extra: Partial<AppData> = {}): AppData => moveProfileGoals({ ...emptyData(), profile: { ...emptyProfile('feito'), ...p }, ...extra });
 const ids = (d: AppData) => suggestions(d, TODAY).map((s) => s.id);
 
 test('quem começa do zero vê a entrevista; quem já tinha dados, não', () => {

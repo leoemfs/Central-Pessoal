@@ -1,6 +1,7 @@
 # Módulo Carreira (N8)
 
 > Situação: **N8.1 Vagas (v0.22), N8.2 Trabalho e Reuniões (v0.23), N8.5 Agenda automática e N8.6 Projetos (v0.24) prontas (08/11)**; faltam N8.3 e N8.4, pedido do Leonardo: um módulo **próprio**, separado de Estudos.
+> **E5 (v0.143.0):** Carreira › Metas não é mais tela própria; a ferramenta abre Objetivos já filtrado em Carreira (as metas moram em Objetivos).
 > **Prévia N8.0 (08/11):** https://claude.ai/artifact/3DxpiHU7f6merD3dk6Hqmp
 > Partes escolhidas: vagas e candidaturas, metas de carreira, currículo e conquistas, trabalho atual.
 

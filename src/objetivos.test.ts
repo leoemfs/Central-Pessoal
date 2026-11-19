@@ -4,7 +4,8 @@ import { emptyData, normalize, normalizeHabit, seedCategories } from './data.ts'
 import { addExpense } from './finance.ts';
 import { setBudget } from './budget.ts';
 import { deposit, newBox } from './boxes.ts';
-import { allGoals, goalSummary, goalsToWatch, newCareerGoal, removeCareerGoal, saveCareerGoal, setBoxGoal, setHabitGoal, toggleProfileGoal } from './objetivos.ts';
+import { allGoals, goalSummary, goalsToWatch, newCareerGoal, removeCareerGoal, saveCareerGoal, setBoxGoal, setHabitGoal } from './objetivos.ts';
+import { moveProfileGoals, setProfile, suggestions } from './profile.ts';
 import type { AppData } from './types.ts';
 
 const TODAY = '2026-11-15';
@@ -74,12 +75,38 @@ test('carreira: salvar, concluir, excluir; ordem atrasadas → andando → concl
   assert.ok(d.deleted[a.id]);
 });
 
-test('metas do Você: concluir e reabrir', () => {
-  let d = emptyData();
-  d = { ...d, profile: { ...d.profile, shortGoals: [{ id: 'v', text: 'Correr 5 km', when: 'até março', doneAt: null }] } };
-  assert.equal(allGoals(d, TODAY)[0].status, 'andando');
-  d = toggleProfileGoal('v', TODAY)(d);
-  assert.equal(allGoals(d, TODAY)[0].status, 'concluida');
-  d = toggleProfileGoal('v', TODAY)(d);
-  assert.equal(d.profile.shortGoals[0].doneAt, null);
+test('E5: metas curtas e longas do Você vão para Objetivos uma vez, sem perder nada', () => {
+  const raw = {
+    version: 2,
+    profile: {
+      shortGoals: [{ id: 'v', text: 'Correr 5 km', when: 'até março', doneAt: null }],
+      longGoals: [{ id: 'w', text: 'Juntar R$ 10 mil', when: '', doneAt: '2026-05-02T10:00:00Z' }, { id: 'x', text: '  ', when: '', doneAt: null }],
+    },
+    career: { goals: [{ id: 'c', title: 'Promoção' }] },
+  };
+  const d = normalize(raw);
+  assert.deepEqual(d.profile.shortGoals, []);
+  assert.deepEqual(d.profile.longGoals, []);
+  assert.deepEqual(d.career.goals.map((g) => [g.id, g.area, g.title, g.note, g.doneAt]), [
+    ['c', 'carreira', 'Promoção', '', null],
+    ['v', 'voce', 'Correr 5 km', 'Curto prazo · até março', null],
+    ['w', 'voce', 'Juntar R$ 10 mil', 'Longo prazo', '2026-05-02'],
+  ]);
+  // De novo (backup antigo importado outra vez): nada entra em dobro.
+  const again = moveProfileGoals({ ...d, profile: { ...d.profile, shortGoals: raw.profile.shortGoals } });
+  assert.equal(again.career.goals.length, 3);
+  // Em Objetivos, aparecem na área Você e mudam ali mesmo.
+  const gs = allGoals(d, TODAY);
+  assert.deepEqual(gs.filter((g) => g.area === 'voce').map((g) => [g.title, g.status, g.where]), [
+    ['Correr 5 km', 'andando', 'Objetivos › Você'],
+    ['Juntar R$ 10 mil', 'concluida', 'Objetivos › Você'],
+  ]);
+  // A entrevista do Você continua salvando metas, que vão direto para Objetivos.
+  const e = setProfile((p) => ({ ...p, shortGoals: [{ id: 'n', text: 'Ler 1 livro', when: '', doneAt: null }] }))(emptyData());
+  assert.equal(e.profile.shortGoals.length, 0);
+  assert.deepEqual(e.career.goals.map((g) => [g.area, g.title]), [['voce', 'Ler 1 livro']]);
+  // Excluída antes? Não volta.
+  const del = moveProfileGoals({ ...emptyData(), deleted: { v: '2026-01-01' }, profile: { ...emptyData().profile, shortGoals: raw.profile.shortGoals } });
+  assert.equal(del.career.goals.length, 0);
+  assert.ok(Array.isArray(suggestions(d)));
 });
