@@ -321,6 +321,10 @@ export interface Settings {
   noteCategories: string[];
   /** M17: etiquetas das ideias (fichas em Ideias). */
   ideaTags: string[];
+  /** M46: opções do humor criadas pela pessoa ("+ Nova"). */
+  moodTags: string[];
+  /** M46: opções do humor fixadas (★) na fileira do cartão. */
+  moodPinned: string[];
   /** N9.5: lembretes pelo Google Agenda (vale para todos os aparelhos). */
   googleCalendar: GoogleCalendarSettings;
 }

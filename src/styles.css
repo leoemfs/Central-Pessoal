@@ -14449,3 +14449,12 @@ body.kb-open .bar-pull {
     background: var(--raised);
   }
 }
+
+/* ---------- M46: opções do humor (+ Nova, gaveta "Todas as opções") ---------- */
+.mood-new { display: flex; gap: 8px; margin-top: 8px; }
+.mood-new .input { flex: 1; min-width: 0; }
+.mood-group { display: flex; flex-direction: column; gap: 8px; margin-top: 14px; }
+.mood-group h3 { margin: 0; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--faint); }
+.mood-all { display: flex; flex-wrap: wrap; gap: 8px; }
+.mood-all .mood-pin, .mood-all .mood-x { background: none; border: 0; color: inherit; font: inherit; padding: 0; cursor: pointer; }
+.mood-all .mood-x { color: var(--danger, #ff8a8a); font-weight: 700; padding-left: 4px; }
