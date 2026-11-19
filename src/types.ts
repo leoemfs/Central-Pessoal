@@ -518,6 +518,7 @@ export interface Profile {
   likes: string[];
   /** Áreas a melhorar, em ordem de prioridade. */
   areas: string[];
+  /** E5: só leitura de dados antigos. As metas moram em Objetivos (área Você); `normalize` as move uma vez. */
   shortGoals: Goal[];
   longGoals: Goal[];
   quits: string[];
@@ -1052,9 +1053,12 @@ export interface CareerData {
   goals: CareerGoal[];
 }
 
-/** Meta de carreira: onde quer chegar, com prazo opcional e passos. */
+/** Meta própria de Objetivos: onde quer chegar, com prazo opcional e passos.
+ * E5: mora em Objetivos, na área Carreira ou Você (as metas curtas e longas do Você vieram para cá). */
 export interface CareerGoal {
   id: string;
+  /** Área em Objetivos. Padrão: carreira. */
+  area: 'carreira' | 'voce';
   title: string;
   note: string;
   /** AAAA-MM-DD */

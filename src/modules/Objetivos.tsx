@@ -4,18 +4,19 @@ import { go, useSubAction } from '../router';
 import { useStore } from '../store';
 import type { CareerGoal } from '../types';
 import { formatDate, todayISO, uid } from '../utils';
-import { Chips, Empty, Field, Icon, MoneyInput, notify, PageHeader, Pill, Progress, Sheet, type IconName } from '../ui';
+import { Chips, Empty, Field, Icon, MoneyInput, notify, PageHeader, Pill, Progress, Segmented, Sheet, type IconName } from '../ui';
 import { setBudget } from '../budget';
 import { toggleCheck } from '../habits';
 import {
-  allGoals, AREAS, careerGoalProgress, goalSummary, goalsToWatch, newCareerGoal, removeCareerGoal, saveCareerGoal, setBoxGoal, setHabitGoal, toggleProfileGoal,
+  allGoals, AREAS, careerGoalProgress, goalSummary, goalsToWatch, isOwnGoal, newCareerGoal, removeCareerGoal, saveCareerGoal, setBoxGoal, setHabitGoal,
   type GoalArea, type GoalView,
 } from '../objetivos';
 import { MoveSheet } from './financas/Caixinhas';
 
 /**
  * Objetivos (N10.1): central de todas as metas do app. Endereços:
- * #/objetivos (casa: todas as metas) · #/objetivos/menu (+) · #/objetivos/carreira (nova meta de carreira)
+ * #/objetivos (casa: todas as metas) · #/objetivos/menu (+) · #/objetivos/carreira e /voce (nova meta)
+ * #/objetivos/area-carreira e /area-voce (já filtrado na área; E5: a ferramenta Metas da Carreira abre assim)
  * #/grandes (objetivos grandes, N10.2) · #/concluidos (histórico).
  * A meta continua morando no módulo dela: editar aqui muda lá.
  */
@@ -64,15 +65,18 @@ export function ObjetivosPage({ route }: ViewProps) {
   useSubAction(route, 'objetivos', {
     menu: () => setMenu(true),
     carreira: () => setCareer(newCareerGoal()),
+    voce: () => setCareer(newCareerGoal(undefined, 'voce')),
+    'area-carreira': () => setArea('carreira'),
+    'area-voce': () => setArea('voce'),
   });
 
   const current = goals.filter((g) => g.status !== 'concluida');
   const sum = goalSummary(goals);
   const shown = current.filter((g) => (area === 'todas' || g.area === area) && (sit === 'tudo' || g.status === sit));
-  const areas = AREAS.filter((a) => a.id === 'carreira' || goals.some((g) => g.area === a.id));
+  const areas = AREAS.filter((a) => a.id === 'carreira' || a.id === 'voce' || goals.some((g) => g.area === a.id));
 
   const openGoal = (g: GoalView) => {
-    if (g.kind === 'carreira') setCareer(data.career.goals.find((x) => x.id === g.refId) ?? null);
+    if (isOwnGoal(g)) setCareer(data.career.goals.find((x) => x.id === g.refId) ?? null);
     else setOpen(g);
   };
 
@@ -114,26 +118,27 @@ export function ObjetivosPage({ route }: ViewProps) {
           <Empty>
             {current.length
               ? 'Nenhuma meta com esse filtro.'
-              : 'Aqui aparecem todas as suas metas: caixinhas, hábitos, ciclos de estudo, limites do orçamento, metas de carreira e as do Você. Toque no + para criar a primeira.'}
+              : 'Aqui aparecem todas as suas metas: caixinhas, hábitos, ciclos de estudo, limites do orçamento, metas de carreira e as suas metas pessoais (Você). Toque no + para criar a primeira.'}
           </Empty>
         )}
-        {area === 'carreira' && (
-          <button type="button" className="btn soft block" style={{ marginTop: 12 }} onClick={() => setCareer(newCareerGoal())}>
-            <Icon name="plusCircle" size={18} /> Nova meta de carreira
+        {(area === 'carreira' || area === 'voce') && (
+          <button type="button" className="btn soft block" style={{ marginTop: 12 }} onClick={() => setCareer(newCareerGoal(undefined, area))}>
+            <Icon name="plusCircle" size={18} /> {area === 'voce' ? 'Nova meta pessoal' : 'Nova meta de carreira'}
           </button>
         )}
       </section>
 
-      {menu && <NewMenu onClose={() => setMenu(false)} onCareer={() => { setMenu(false); setCareer(newCareerGoal()); }} />}
+      {menu && <NewMenu onClose={() => setMenu(false)} onOwn={(a) => { setMenu(false); setCareer(newCareerGoal(undefined, a)); }} />}
       {open && <GoalSheet g={open} onClose={() => setOpen(null)} />}
       {career && <CareerGoalSheet goal={career} onClose={() => setCareer(null)} />}
     </>
   );
 }
 
-function NewMenu({ onClose, onCareer }: { onClose: () => void; onCareer: () => void }) {
+function NewMenu({ onClose, onOwn }: { onClose: () => void; onOwn: (a: CareerGoal['area']) => void }) {
   const items: { icon: IconName; title: string; hint: string; run: () => void }[] = [
-    { icon: 'briefcase', title: 'Meta de carreira', hint: 'Cargo, área ou salário, com prazo e passos', run: onCareer },
+    { icon: 'user', title: 'Meta pessoal', hint: 'Algo que você quer para você (ex.: correr 5 km), com prazo e passos', run: () => onOwn('voce') },
+    { icon: 'briefcase', title: 'Meta de carreira', hint: 'Cargo, área ou salário, com prazo e passos', run: () => onOwn('carreira') },
     { icon: 'piggy', title: 'Caixinha', hint: 'Juntar dinheiro para algo (mora em Finanças)', run: () => go('financas/nova-caixinha') },
     { icon: 'sprout', title: 'Hábito', hint: 'Criar um hábito novo (mora no Núcleo)', run: () => go('nucleo/novo') },
     { icon: 'cap', title: 'Ciclo de estudo', hint: 'Escolher tópicos para estudar (mora em Estudos)', run: () => go('ciclos') },
@@ -200,11 +205,6 @@ function GoalSheet({ g, onClose }: { g: GoalView; onClose: () => void }) {
             {doneToday ? 'Feito hoje ✓' : 'Marcar hoje'}
           </button>
         )}
-        {g.kind === 'voce' && (
-          <button type="button" className="btn primary" onClick={() => { update(toggleProfileGoal(g.refId, today)); onClose(); }}>
-            {g.status === 'concluida' ? 'Reabrir' : 'Concluir'}
-          </button>
-        )}
         <button type="button" className="btn soft" onClick={() => { onClose(); go(g.to); }}>
           {g.kind === 'ciclo' ? 'Abrir ciclo' : `Abrir em ${g.where.split(' › ')[0]}`}
         </button>
@@ -241,7 +241,7 @@ function GoalSheet({ g, onClose }: { g: GoalView; onClose: () => void }) {
   );
 }
 
-/** Meta de carreira: mora aqui em Objetivos (área Carreira). */
+/** Meta própria: mora aqui em Objetivos (área Carreira ou Você). */
 function CareerGoalSheet({ goal, onClose }: { goal: CareerGoal; onClose: () => void }) {
   const { data, update } = useStore();
   const isNew = !data.career.goals.some((g) => g.id === goal.id);
@@ -256,19 +256,27 @@ function CareerGoalSheet({ goal, onClose }: { goal: CareerGoal; onClose: () => v
     setStep('');
   };
   function save(next: CareerGoal = g) {
-    if (!next.title.trim()) return notify('Dê um nome à meta', 'Ex.: "Ser coordenador até 2027".');
+    if (!next.title.trim()) return notify('Dê um nome à meta', next.area === 'voce' ? 'Ex.: "Correr 5 km".' : 'Ex.: "Ser coordenador até 2027".');
     update(saveCareerGoal({ ...next, title: next.title.trim() }));
     onClose();
   }
 
   return (
     <Sheet
-      title={isNew ? 'Nova meta de carreira' : 'Meta de carreira'}
+      title={isNew ? 'Nova meta' : g.area === 'voce' ? 'Meta pessoal' : 'Meta de carreira'}
       onClose={onClose}
       footer={<button type="button" className="btn primary block" onClick={() => save()}>Salvar</button>}
     >
+      <Field label="Área">
+        <Segmented<CareerGoal['area']>
+          label="Área"
+          value={g.area}
+          onChange={(area) => setG({ ...g, area })}
+          options={[{ value: 'voce', label: 'Você' }, { value: 'carreira', label: 'Carreira' }]}
+        />
+      </Field>
       <Field label="Onde quer chegar">
-        <input className="input" value={g.title} placeholder="Ex.: Ser coordenador, ganhar R$ 8.000" onChange={(e) => setG({ ...g, title: e.target.value })} autoFocus={isNew} />
+        <input className="input" value={g.title} placeholder={g.area === 'voce' ? 'Ex.: Correr 5 km, juntar R$ 10 mil' : 'Ex.: Ser coordenador, ganhar R$ 8.000'} onChange={(e) => setG({ ...g, title: e.target.value })} autoFocus={isNew} />
       </Field>
       <Field label="Prazo (opcional)">
         <input className="input" type="date" value={g.deadline ?? ''} onChange={(e) => setG({ ...g, deadline: e.target.value || null })} />
@@ -343,7 +351,7 @@ export function ConcluidosPage() {
           <div className="card-head"><h2>{year}</h2><span className="muted small">{list.length}</span></div>
           <ul className="list">
             {list.map((g) => (
-              <GoalRow key={g.id} g={g} onOpen={(x) => (x.kind === 'carreira' ? setCareer(data.career.goals.find((c) => c.id === x.refId) ?? null) : setOpen(x))} />
+              <GoalRow key={g.id} g={g} onOpen={(x) => (isOwnGoal(x) ? setCareer(data.career.goals.find((c) => c.id === x.refId) ?? null) : setOpen(x))} />
             ))}
           </ul>
         </section>
@@ -368,29 +376,6 @@ export function GrandesPage() {
   );
 }
 
-/** Metas de carreira dentro do módulo Carreira: a mesma lista da área Carreira de Objetivos. */
-export function CareerGoalsList() {
-  const goals = useGoals().filter((g) => g.kind === 'carreira');
-  const { data } = useStore();
-  const [career, setCareer] = useState<CareerGoal | null>(null);
-  return (
-    <>
-      <PageHeader title="Metas" />
-      <section className="card">
-        {goals.length ? (
-          <ul className="list">{goals.map((g) => <GoalRow key={g.id} g={g} onOpen={() => setCareer(data.career.goals.find((c) => c.id === g.refId) ?? null)} />)}</ul>
-        ) : (
-          <Empty>Onde você quer chegar: cargo, área ou salário, com prazo e passos. As metas de carreira aparecem também em Objetivos.</Empty>
-        )}
-        <button type="button" className="btn soft block" style={{ marginTop: 12 }} onClick={() => setCareer(newCareerGoal())}>
-          <Icon name="plusCircle" size={18} /> Nova meta de carreira
-        </button>
-      </section>
-      {career && <CareerGoalSheet goal={career} onClose={() => setCareer(null)} />}
-    </>
-  );
-}
-
 /** Cartão do Início: metas atrasadas e prazos dos próximos 30 dias. Some quando não há nada. */
 export function GoalsCard() {
   const goals = useGoals();
@@ -405,7 +390,7 @@ export function GoalsCard() {
       <ul className="list">
         {watch.map((g) => (
           <li key={g.id}>
-            <a className="row" href={`#/${g.kind === 'carreira' ? 'objetivos' : g.to}`}>
+            <a className="row" href={`#/${isOwnGoal(g) ? 'objetivos' : g.to}`}>
               <span className="row-body">
                 <span className="row-title">{g.title}</span>
                 <Progress pct={g.pct} tone={g.status === 'atrasada' ? 'red' : 'green'} />

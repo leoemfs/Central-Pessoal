@@ -75,7 +75,7 @@ export const NAV_GROUPS: { title: string; items: NavItem[] }[] = [
     items: [
       { label: 'Carreira', icon: 'briefcase', to: 'carreira', section: 'carreira' },
       { label: 'Vagas', icon: 'send', to: 'vagas', section: 'vagas' },
-      { label: 'Metas de carreira', icon: 'target', to: 'metas', section: 'metas' },
+      { label: 'Metas de carreira', icon: 'target', to: 'objetivos/area-carreira' },
     ],
   },
   {

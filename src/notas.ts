@@ -162,6 +162,6 @@ export function becameRoute(d: AppData, b: NonNullable<Note['became']>): string 
     case 'lista':
       return d.lists.some((l) => l.id === b.id) ? `listas/${b.id}` : null;
     case 'meta':
-      return d.career.goals.some((g) => g.id === b.id) ? 'metas' : null;
+      return d.career.goals.some((g) => g.id === b.id) ? 'objetivos' : null;
   }
 }
