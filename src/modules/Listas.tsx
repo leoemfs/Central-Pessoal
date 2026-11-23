@@ -4,6 +4,8 @@ import type { ViewProps } from '../App';
 import { useStore } from '../store';
 import { go, goReplace, useSubAction } from '../router';
 import { usePageTitle } from '../pageTitle';
+import { usePageMenu } from '../PageMenu';
+import { ListasGuideCard, ListasGuideSheet } from './ListasGuia';
 import { remove, upsert } from '../actions';
 import { ExpenseDetail } from './financas/ExpenseDetail';
 import {
@@ -26,10 +28,12 @@ const fmtNum = (n: number | null) => (n === null ? '' : n.toLocaleString('pt-BR'
 const DAY_STORE_KEY = 'central-pessoal:mercado-de-hoje';
 
 export function Listas({ route }: ViewProps) {
-  const { data } = useStore();
+  const { data, update } = useStore();
   const [newOpen, setNewOpen] = useState<string | null>(null);
   const [menu, setMenu] = useState(false);
   const [cats, setCats] = useState(false);
+  const [guide, setGuide] = useState(false);
+  const guideOff = data.settings.guidesOff.includes('listas');
   const recipeCat = data.listCategories.find((c) => c.kind === 'receita')?.id ?? null;
   useSubAction(route, 'listas', {
     nova: () => setNewOpen(''),
@@ -41,6 +45,15 @@ export function Listas({ route }: ViewProps) {
     if (route.sub === 'precos') goReplace('precos');
   }, [route.n, route.sub]);
   const list = data.lists.find((l) => l.id === route.sub);
+  // E43: o guia fica no ⋮ da casa de Listas (antes da busca), não dentro de uma lista.
+  usePageMenu(
+    list
+      ? []
+      : [
+          { id: 'guia', label: 'Como usar Listas', icon: 'info', run: () => setGuide(true) },
+          guideOff && { id: 'guia-card', label: 'Mostrar o cartão "Como usar"', icon: 'info', run: () => update((d) => ({ ...d, settings: { ...d.settings, guidesOff: d.settings.guidesOff.filter((x) => x !== 'listas'), guidesSeen: d.settings.guidesSeen.filter((x) => x !== 'listas') } })) },
+        ],
+  );
   if (list) return <ListPage list={list} />;
   const ADD = [
     { id: 'lista', label: 'Nova lista', hint: 'Mercado, compras, checklist…', icon: 'cart' as IconName, run: () => setNewOpen('') },
@@ -96,6 +109,7 @@ export function Listas({ route }: ViewProps) {
         </Sheet>
       )}
       {cats && <CategoriesSheet onClose={() => setCats(false)} />}
+      {guide && <ListasGuideSheet onClose={() => setGuide(false)} />}
     </>
   );
 }
@@ -282,6 +296,7 @@ function ListsHome({ onNew, initialFilter = 'todas' }: { onNew: (categoryId: str
         ))}
       </div>
       </StickyHead>
+      <ListasGuideCard />
       {data.lists.length === 0 && filter === 'todas' && (
         <section className="card">
           <Empty>Listas que se usam e reusam: mercado com preços, compras de roupa ou para a casa, receitas e checklists. Cada categoria tem o seu jeito.</Empty>

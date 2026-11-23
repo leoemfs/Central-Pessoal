@@ -30,6 +30,9 @@ O atalho da gaveta "Como usar a barra" virou **"Como usar o app"** (`#/ajuda`), 
 ## Parte 4: Agenda (v0.149.0)
 - Passos em `src/modules/AgendaGuia.tsx`. Cartão logo abaixo do cabeçalho (nas duas abas); ⋮: "Como usar Agenda", "Mostrar o cartão" (se arquivado) e a busca por último. Os atalhos do guia abrem compromisso novo, Tarefas, Hoje e Próximos.
 
+## Parte 5: Listas (v0.151.0)
+- Passos em `src/modules/ListasGuia.tsx`. Cartão logo abaixo das fichas de categoria; ⋮ da casa (não dentro de uma lista): Personalizar cartões, "Como usar Listas", "Mostrar o cartão" (se arquivado) e a busca por último. Os atalhos do guia abrem lista nova, receitas (Cozinha), Compras e Preços.
+
 ## O que falta (uma parte por vez, tamanho P cada)
 Para cada módulo:
 1. **Guia** com os passos (texto curto, em português simples), num componente genérico reaproveitável. Ao fazer Finanças, transformar o `TutorialSheet` de Estudos num `GuideSheet` comum que recebe os passos.
@@ -37,7 +40,7 @@ Para cada módulo:
 3. **"Como usar <módulo>"** no ⋮ da casa do módulo (antes da busca).
 4. Entrar em `GUIDES` (`src/guias.ts`) para aparecer na central.
 
-Ordem combinada: ~~Finanças~~, ~~Diário~~, ~~Agenda~~ (feitos), depois Listas, Núcleo, Carreira, Objetivos, Saúde, Notas, Você.
+Ordem combinada: ~~Finanças~~, ~~Diário~~, ~~Agenda~~, ~~Listas~~ (feitos), depois Núcleo, Carreira, Objetivos, Saúde, Notas, Você.
 
 ### Passos sugeridos para Finanças (6)
 1. **As quatro abas:** Despesas, Receitas, Cartões e Caixinhas; o mês fica logo abaixo (tocar no mês abre "Escolher mês").
