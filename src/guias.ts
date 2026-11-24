@@ -14,6 +14,7 @@ export const GUIDES: GuideInfo[] = [
   { id: 'diario', label: 'Diário', steps: 6 },
   { id: 'agenda', label: 'Agenda', steps: 6 },
   { id: 'listas', label: 'Listas', steps: 6 },
+  { id: 'nucleo', label: 'Núcleo', steps: 6 },
   { id: 'estudos', label: 'Estudos', steps: 6 },
 ];
 

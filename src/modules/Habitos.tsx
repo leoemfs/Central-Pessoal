@@ -4,6 +4,7 @@ import type { ViewProps } from '../App';
 import { useStore } from '../store';
 import { cleanAddress, useSubAction } from '../router';
 import { usePageMenu } from '../PageMenu';
+import { NucleoGuideCard, NucleoGuideSheet } from './NucleoGuia';
 import { remove, upsert } from '../actions';
 import {
   amountOn, ATTRIBUTES, atRiskToday, bestClean, cleanDays, consistency, DEFAULT_TARGET, fmtQty, graduate, habitsOfDay, habitStreak, isQuantity,
@@ -144,6 +145,13 @@ export function Habitos({ route }: ViewProps) {
   const [detailId, setDetailId] = useState<string | null>(null);
   const [practice, setPractice] = useState<Practice | null>(null);
   const gratRef = useRef<HTMLInputElement>(null);
+  const [guide, setGuide] = useState(false);
+  const guideOff = data.settings.guidesOff.includes('nucleo');
+  // E43: "Como usar Núcleo" no ⋮ (a busca entra por último sozinha).
+  usePageMenu([
+    { id: 'guia', label: 'Como usar Núcleo', icon: 'info', run: () => setGuide(true) },
+    guideOff && { id: 'guia-card', label: 'Mostrar o cartão "Como usar"', icon: 'info', run: () => update((d) => ({ ...d, settings: { ...d.settings, guidesOff: d.settings.guidesOff.filter((x) => x !== 'nucleo'), guidesSeen: d.settings.guidesSeen.filter((x) => x !== 'nucleo') } })) },
+  ]);
 
   useSubAction(route, 'nucleo', {
     rituais: () => setTab('rituais'),
@@ -201,6 +209,7 @@ export function Habitos({ route }: ViewProps) {
           />
         }
       />
+      <NucleoGuideCard />
 
       {tab === 'mente' ? (
         <MindTab open={setPractice} gratRef={gratRef} />
@@ -354,6 +363,7 @@ export function Habitos({ route }: ViewProps) {
 
       {form && <HabitForm kind={form.kind} habit={form.habit} onClose={() => setForm(null)} />}
       {practice && <PracticeScreen p={practice} onClose={() => setPractice(null)} />}
+      {guide && <NucleoGuideSheet onClose={() => setGuide(false)} />}
       {detailId && <HabitDetail id={detailId} onClose={() => setDetailId(null)} onEdit={(h) => setForm({ kind: h.kind, habit: h })} />}
     </>
   );
