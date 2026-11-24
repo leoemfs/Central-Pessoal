@@ -4,7 +4,7 @@ import { archiveGuide, GUIDES, markSeen, showGuideCard, visibleGuides } from './
 
 test('E43: guia de módulo guardado não aparece na central', () => {
   assert.deepEqual(visibleGuides(() => false).map((g) => g.id), GUIDES.map((g) => g.id));
-  assert.deepEqual(visibleGuides((m) => m === 'estudos').map((g) => g.id), ['financas', 'diario', 'agenda', 'listas']);
+  assert.deepEqual(visibleGuides((m) => m === 'estudos').map((g) => g.id), ['financas', 'diario', 'agenda', 'listas', 'nucleo']);
 });
 
 test('E43: marcar como visto não repete', () => {
@@ -33,4 +33,8 @@ test('E43: Agenda está na central, com 6 passos', () => {
 
 test('E43: Listas está na central, com 6 passos', () => {
   assert.equal(GUIDES.find((g) => g.id === 'listas')?.steps, 6);
+});
+
+test('E43: Núcleo está na central, com 6 passos', () => {
+  assert.equal(GUIDES.find((g) => g.id === 'nucleo')?.steps, 6);
 });
